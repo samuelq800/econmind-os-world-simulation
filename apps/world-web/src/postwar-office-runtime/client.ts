@@ -6,6 +6,7 @@ import {
   row,
   uuid,
   validConfig,
+  version,
   type ProductionReadConfig,
   type ServerReadAuthority,
 } from '../production-read/contract.js';
@@ -15,13 +16,19 @@ export const POSTWAR_RUNTIME_PATH = '/v1/postwar-office-runtime';
 export const officeDatasets: Readonly<Record<string, readonly string[]>> =
   Object.freeze({
     SOCIAL: ['positions', 'service-pools', 'offers', 'minimum-wage'],
-    FINANCE: ['currency-fx', 'opening-financial-legs'],
+    FINANCE: [
+      'currency-fx',
+      'opening-financial-legs',
+      'ledger-balances',
+      'treasury-capacity',
+    ],
     CENTRAL_BANK: [
       'currency-fx',
       'cb-categories',
       'cb-holdings',
       'bank-loans',
       'opening-financial-legs',
+      'ledger-balances',
     ],
     INDUSTRY: ['opening-inventory-entries', 'regional-source-capacity'],
     TRADE: ['opening-inventory-entries'],
@@ -50,6 +57,113 @@ export type RuntimeResult =
       readonly status: 'NOT_CONNECTED' | 'STALE' | 'DENIED' | 'UNAVAILABLE';
       readonly code: string;
     };
+
+/** A coverage document describes the server-verified complete prefix. It does
+ * not promote the originating materialization to a different World version. */
+function coversCurrentPrefix(
+  source: Record<string, unknown>,
+  binding: Record<string, unknown>,
+  country: string,
+): boolean {
+  if (source.currentPrefixCoverage === undefined)
+    return (
+      binding.sourceStateWorldVersion === source.worldVersion &&
+      binding.sourceEventSequence === source.eventSequence
+    );
+  const coverage = row(source.currentPrefixCoverage);
+  const fields = [
+    'schemaVersion',
+    'coverageRef',
+    'countryId',
+    'globalWorldVersion',
+    'globalEventSequence',
+    'originWorldVersion',
+    'originEventSequence',
+    'prefixFingerprint',
+    'knownEffectsFingerprint',
+    'coveredThroughEventId',
+    'coveredThroughEventFingerprint',
+    'reducerVersion',
+  ];
+  return (
+    !!coverage &&
+    Object.keys(coverage).length === fields.length &&
+    fields.every((key) => Object.hasOwn(coverage, key)) &&
+    coverage.schemaVersion === 'postwar-social-current-prefix-coverage-v2' &&
+    coverage.reducerVersion === 'POSTWAR_SOCIAL_COMPLETE_PREFIX_SCOPE_V2' &&
+    coverage.countryId === country &&
+    canonicalId(coverage.coverageRef) &&
+    canonicalId(coverage.coveredThroughEventId) &&
+    [
+      'prefixFingerprint',
+      'knownEffectsFingerprint',
+      'coveredThroughEventFingerprint',
+    ].every((key) => hash(coverage[key])) &&
+    coverage.globalWorldVersion === source.worldVersion &&
+    coverage.globalEventSequence === source.eventSequence &&
+    coverage.originWorldVersion === binding.sourceStateWorldVersion &&
+    coverage.originEventSequence === binding.sourceEventSequence &&
+    version(coverage.originWorldVersion) &&
+    version(coverage.originEventSequence) &&
+    version(coverage.globalWorldVersion) &&
+    version(coverage.globalEventSequence) &&
+    coverage.originWorldVersion !== '0' &&
+    coverage.originEventSequence !== '0' &&
+    BigInt(coverage.originWorldVersion) <=
+      BigInt(coverage.globalWorldVersion) &&
+    BigInt(coverage.originEventSequence) <= BigInt(coverage.globalEventSequence)
+  );
+}
+function observedHeadMatches(
+  source: Record<string, unknown>,
+  authority: ServerReadAuthority,
+): boolean {
+  const observed = row(source.observedHead);
+  return (
+    !!observed &&
+    Object.keys(observed).length === 2 &&
+    observed.worldVersion === authority.readback.worldVersion &&
+    observed.eventSequence === authority.readback.eventSequence
+  );
+}
+function financialCoverageMatches(
+  source: Record<string, unknown>,
+  authority: ServerReadAuthority,
+): boolean {
+  const coverage = row(source.currentFinancialCoverage);
+  const fields = [
+    'schemaVersion',
+    'reducerVersion',
+    'coverageRef',
+    'prefixFingerprint',
+    'knownEffectsFingerprint',
+    'globalWorldVersion',
+    'globalEventSequence',
+    'coveredThroughEventId',
+    'coveredThroughEventFingerprint',
+    'noFinancialPostings',
+    'noInventoryPostings',
+  ];
+  return (
+    !!coverage &&
+    Object.keys(coverage).length === fields.length &&
+    fields.every((key) => Object.hasOwn(coverage, key)) &&
+    coverage.schemaVersion === 'postwar-financial-current-prefix-coverage-v1' &&
+    coverage.reducerVersion ===
+      'POSTWAR_FINANCIAL_COMPLETE_NO_POSTING_PREFIX_V1' &&
+    canonicalId(coverage.coverageRef) &&
+    canonicalId(coverage.coveredThroughEventId) &&
+    [
+      'prefixFingerprint',
+      'knownEffectsFingerprint',
+      'coveredThroughEventFingerprint',
+    ].every((key) => hash(coverage[key])) &&
+    coverage.globalWorldVersion === authority.readback.worldVersion &&
+    coverage.globalEventSequence === authority.readback.eventSequence &&
+    coverage.noFinancialPostings === true &&
+    coverage.noInventoryPostings === true
+  );
+}
 export function createPostwarRuntimeClient(
   supplied: ProductionReadConfig | null,
   options: { fetcher?: typeof fetch; timeoutMs?: number } = {},
@@ -260,6 +374,8 @@ export function createPostwarRuntimeClient(
           !['AVAILABLE', 'EMPTY'].includes(String(body.status))
         )
           throw Error('INVALID_RESPONSE');
+        const historical =
+          source.dataNature === 'ADMITTED_IMMUTABLE_OPENING_FACTS';
         for (const [key, value] of Object.entries({
           worldId: c.identity.worldId,
           countryId: c.identity.countryId,
@@ -271,8 +387,8 @@ export function createPostwarRuntimeClient(
           seedRef: c.world.seedRef,
           contentHash: c.world.contentHash,
           admissionRef: c.world.admissionRef,
-          worldVersion: authority.readback.worldVersion,
-          eventSequence: authority.readback.eventSequence,
+          worldVersion: historical ? '0' : authority.readback.worldVersion,
+          eventSequence: historical ? '0' : authority.readback.eventSequence,
         }))
           if (source[key] !== value) throw Error('SOURCE_SCOPE_MISMATCH');
         const opening =
@@ -287,8 +403,35 @@ export function createPostwarRuntimeClient(
           ['positions', 'service-pools'].includes(dataset) &&
           source.dataNature ===
             'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
-        if (!opening && !currentSocial)
+        const financialOffice = ['FINANCE', 'CENTRAL_BANK'].includes(
+          c.identity.officeId,
+        );
+        const financialCurrent =
+          source.dataNature ===
+            'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX' &&
+          financialOffice &&
+          ['ledger-balances', 'treasury-capacity'].includes(dataset) &&
+          source.worldVersion !== '0' &&
+          source.eventSequence !== '0';
+        const historicalFacts =
+          historical &&
+          c.identity.officeId !== 'SOCIAL' &&
+          !['ledger-balances', 'treasury-capacity'].includes(dataset);
+        if (!opening && !currentSocial && !financialCurrent && !historicalFacts)
           throw Error('UNPROVEN_CURRENT_DATA_KIND');
+        if (financialCurrent || historicalFacts) {
+          if (
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            !observedHeadMatches(source, authority) ||
+            (financialCurrent &&
+              !financialCoverageMatches(source, authority)) ||
+            (source.currentFinancialCoverage !== undefined &&
+              (!financialOffice ||
+                !financialCoverageMatches(source, authority)))
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        }
         if (currentSocial) {
           const binding = row(source.currentStateBinding);
           const fields = [
@@ -315,20 +458,29 @@ export function createPostwarRuntimeClient(
             ].every((key) => hash(binding[key])) ||
             typeof binding.canonicalMaterializationSha256 !== 'string' ||
             !/^[a-f0-9]{64}$/u.test(binding.canonicalMaterializationSha256) ||
-            binding.sourceStateWorldVersion !== source.worldVersion ||
-            binding.sourceEventSequence !== source.eventSequence ||
+            !coversCurrentPrefix(source, binding, c.identity.countryId) ||
             ![
               `SOCIAL_POSITION_LIFECYCLE_${c.identity.countryId}`,
               `SOCIAL_EMPLOYMENT_SERVICE_${c.identity.countryId}`,
             ].includes(String(binding.materializationKey))
           )
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
-        } else if (source.currentStateBinding !== undefined) {
+        } else if (
+          source.currentStateBinding !== undefined ||
+          source.currentPrefixCoverage !== undefined
+        ) {
           throw Error('CURRENT_STATE_BINDING_MISMATCH');
         }
         if (
           !hash(source.sourceVersion) ||
           !hash(source.bindingVersion) ||
+          !['pageHash', 'returnedRowsHash'].every(
+            (key) =>
+              typeof source[key] === 'string' &&
+              /^[a-f0-9]{64}$/u.test(source[key]),
+          ) ||
+          source.hashAlgorithm !== 'POSTGRES_JSONB_TEXT_UTF8_SHA256' ||
+          !row(source.sourcePointer) ||
           (previous &&
             (previous.source.sourceVersion !== source.sourceVersion ||
               previous.source.bindingVersion !== source.bindingVersion))

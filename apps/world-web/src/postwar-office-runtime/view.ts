@@ -126,9 +126,14 @@ export function createPostwarRuntimeView(
           text(
             'p',
             page.source.dataNature ===
-              'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION'
-              ? `Committed current state · World version ${page.source.worldVersion}`
-              : 'Admitted opening snapshot · World version 0',
+              'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX'
+              ? `Current ledger claims and reserved capacity · World version ${page.source.worldVersion}`
+              : page.source.dataNature === 'ADMITTED_IMMUTABLE_OPENING_FACTS'
+                ? `Opening facts (historical) · Checked at World version ${page.authority.readback.worldVersion}`
+                : page.source.dataNature ===
+                    'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION'
+                  ? `Committed current state · World version ${page.source.worldVersion}`
+                  : 'Admitted opening snapshot · World version 0',
           ),
           text(
             'p',
@@ -177,6 +182,19 @@ export function createPostwarRuntimeView(
               'validUntilDayIndex',
             ],
             'currency-fx': ['countryId', 'localCurrency', 'openingFx'],
+            'treasury-capacity': [
+              'countryId',
+              'currency',
+              'treasuryLedgerClaimBalance',
+              'openingReservedCapacity',
+              'budgetEnvelopeCapacity',
+              'additionalPayrollReservedCapacity',
+              'totalReservedCapacity',
+              'availableCapacity',
+              'reservationNature',
+              'balanceNature',
+            ],
+            'ledger-balances': ['account', 'netDebitBalance'],
             'public-service-summary': [
               'regionId',
               'kind',

@@ -88,6 +88,20 @@ export interface PostwarOfficeProjectionScope {
   readonly scopeKey: string;
   readonly seatRef: string;
 }
+export interface PostwarSocialCurrentPrefixCoverage {
+  readonly schemaVersion: 'postwar-social-current-prefix-coverage-v2';
+  readonly reducerVersion: 'POSTWAR_SOCIAL_COMPLETE_PREFIX_SCOPE_V2';
+  readonly coverageRef: string;
+  readonly countryId: string;
+  readonly globalWorldVersion: string;
+  readonly globalEventSequence: string;
+  readonly originWorldVersion: string;
+  readonly originEventSequence: string;
+  readonly prefixFingerprint: string;
+  readonly knownEffectsFingerprint: string;
+  readonly coveredThroughEventId: string;
+  readonly coveredThroughEventFingerprint: string;
+}
 export interface PostwarOfficeProjectionSource {
   readonly sourceVersion: string;
   readonly sourceRevision: string;
@@ -107,6 +121,7 @@ export interface PostwarOfficeProjectionSource {
   readonly dataNature:
     | 'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY'
     | 'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
+  readonly currentPrefixCoverage?: PostwarSocialCurrentPrefixCoverage;
   readonly currentStateBinding?: Readonly<{
     sourceCommandId: string;
     commandFingerprint: string;
@@ -193,7 +208,8 @@ function validSourceHead(
     return (
       version === '0' &&
       sequence === '0' &&
-      source.currentStateBinding === undefined
+      source.currentStateBinding === undefined &&
+      source.currentPrefixCoverage === undefined
     );
   if (
     source.dataNature !==
@@ -216,8 +232,66 @@ function validSourceHead(
       'SOCIAL_POSITION_LIFECYCLE_' + country,
       'SOCIAL_EMPLOYMENT_SERVICE_' + country,
     ].includes(text(b.materializationKey)) &&
-    integer(b.sourceStateWorldVersion) === version &&
-    integer(b.sourceEventSequence) === sequence
+    validPrefixCoverage(
+      source.currentPrefixCoverage,
+      country,
+      version,
+      sequence,
+      integer(b.sourceStateWorldVersion),
+      integer(b.sourceEventSequence),
+    )
+  );
+}
+function validPrefixCoverage(
+  value: unknown,
+  country: string,
+  worldVersion: string,
+  eventSequence: string,
+  originVersion: string,
+  originSequence: string,
+): boolean {
+  if (value === undefined)
+    return originVersion === worldVersion && originSequence === eventSequence;
+  const c = obj(value);
+  if (
+    Object.keys(c).sort().join(',') !==
+    [
+      'schemaVersion',
+      'reducerVersion',
+      'coverageRef',
+      'countryId',
+      'globalWorldVersion',
+      'globalEventSequence',
+      'originWorldVersion',
+      'originEventSequence',
+      'prefixFingerprint',
+      'knownEffectsFingerprint',
+      'coveredThroughEventId',
+      'coveredThroughEventFingerprint',
+    ]
+      .sort()
+      .join(',')
+  )
+    return false;
+  return (
+    c.schemaVersion === 'postwar-social-current-prefix-coverage-v2' &&
+    c.reducerVersion === 'POSTWAR_SOCIAL_COMPLETE_PREFIX_SCOPE_V2' &&
+    c.countryId === country &&
+    /^POSTWAR_SOCIAL_COVERAGE_[0-9A-F]{64}$/u.test(text(c.coverageRef)) &&
+    integer(c.globalWorldVersion) === worldVersion &&
+    integer(c.globalEventSequence) === eventSequence &&
+    integer(c.originWorldVersion) === originVersion &&
+    integer(c.originEventSequence) === originSequence &&
+    BigInt(originVersion) > 0n &&
+    BigInt(originSequence) > 0n &&
+    BigInt(originVersion) <= BigInt(worldVersion) &&
+    BigInt(originSequence) <= BigInt(eventSequence) &&
+    [
+      'prefixFingerprint',
+      'knownEffectsFingerprint',
+      'coveredThroughEventFingerprint',
+    ].every((k) => /^sha256:[0-9a-f]{64}$/u.test(text(c[k]))) &&
+    /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/u.test(text(c.coveredThroughEventId))
   );
 }
 /** No pool, credentials, JWT, admission write, source authority or full JSON load. */

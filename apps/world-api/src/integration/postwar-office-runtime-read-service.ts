@@ -15,6 +15,12 @@ import {
   type PostwarProjectionOffice,
 } from '@econmind/world-worker/postwar-office-runtime';
 import {
+  createPostwarFinancialCurrentProjectionStore,
+  POSTWAR_FINANCIAL_CURRENT_DATASETS,
+  type PostwarFinancialCurrentSource,
+} from '@econmind/world-worker/postwar-financial-current-read';
+import { createPostwarPhysicalOpeningHeadReader } from '@econmind/world-worker/postwar-physical-opening-facts-read';
+import {
   explicitReadConfig,
   matchesReadPins,
   type ExplicitReadPreparationConfig,
@@ -42,10 +48,29 @@ export const POSTWAR_OFFICE_RUNTIME_OPERATION =
   'READ_CURRENT_SOCIAL_OPENING' as const;
 export const POSTWAR_CURRENT_OFFICE_RUNTIME_OPERATION =
   'READ_CURRENT_OFFICE_OPENING' as const;
-type SuccessPage = Extract<
+type OriginalSuccessPage = Extract<
   PostwarOfficeProjectionPage,
   { status: 'PAGE' | 'EMPTY' }
 >;
+type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
+  readonly source: Omit<OriginalSuccessPage['source'], 'dataNature'> & {
+    readonly dataNature:
+      | OriginalSuccessPage['source']['dataNature']
+      | PostwarFinancialCurrentSource['dataNature']
+      | 'ADMITTED_IMMUTABLE_OPENING_FACTS';
+    readonly currentFinancialCoverage?: PostwarFinancialCurrentSource['currentFinancialCoverage'];
+    readonly originWorldVersion?: string;
+    readonly originEventSequence?: string;
+    readonly observedHead?: Readonly<{
+      worldVersion: string;
+      eventSequence: string;
+    }>;
+  };
+};
+const OFFICE_RUNTIME_DATASETS = Object.freeze({
+  ...POSTWAR_PROJECTION_DATASETS,
+  ...POSTWAR_FINANCIAL_CURRENT_DATASETS,
+});
 export type PostwarOfficeRuntimeServiceResponse = Readonly<{
   httpStatus: number;
   body: Readonly<{
@@ -60,8 +85,11 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
           authority: ServerVerifiedReadBinding;
           source: Readonly<{
             dataNature:
-              | 'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY'
-              | 'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
+              | Exclude<
+                  SuccessPage['source']['dataNature'],
+                  'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY'
+                >
+              | 'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY';
             sourceVersion: string;
             bindingVersion: string;
             sourceRevision: string;
@@ -80,7 +108,16 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             pageHash: string;
             returnedRowsHash: string;
             hashAlgorithm: string;
+            sourcePointer: SuccessPage['source']['sourcePointer'];
             currentStateBinding?: SuccessPage['source']['currentStateBinding'];
+            currentPrefixCoverage?: SuccessPage['source']['currentPrefixCoverage'];
+            currentFinancialCoverage?: SuccessPage['source']['currentFinancialCoverage'];
+            originWorldVersion?: string;
+            originEventSequence?: string;
+            observedHead?: Readonly<{
+              worldVersion: string;
+              eventSequence: string;
+            }>;
           }>;
           page: SuccessPage['page'];
           rows: readonly unknown[];
@@ -102,7 +139,7 @@ function parseRequest(value: unknown) {
     request.schemaVersion !== POSTWAR_OFFICE_RUNTIME_SCHEMA ||
     !uuid(request.requestId) ||
     typeof office !== 'string' ||
-    !Object.hasOwn(POSTWAR_PROJECTION_DATASETS, office) ||
+    !Object.hasOwn(OFFICE_RUNTIME_DATASETS, office) ||
     (request.operation !== POSTWAR_CURRENT_OFFICE_RUNTIME_OPERATION &&
       !(
         request.operation === POSTWAR_OFFICE_RUNTIME_OPERATION &&
@@ -110,7 +147,7 @@ function parseRequest(value: unknown) {
       )) ||
     typeof request.dataset !== 'string' ||
     !(
-      POSTWAR_PROJECTION_DATASETS[
+      OFFICE_RUNTIME_DATASETS[
         office as PostwarProjectionOffice
       ] as readonly string[]
     ).includes(request.dataset)
@@ -157,10 +194,11 @@ function parseRequest(value: unknown) {
 /** These bindings are actual SQL header reads, never `{}` projection payloads.
  * New projectionVersion requires a real bounded-page readback before UI connect. */
 function authority(
-  header: PostwarOfficeProjectionSeatHeader,
+  header: PostwarOfficeProjectionSeatHeader | SuccessPage,
 ): ServerVerifiedReadBinding {
   const scope = header.scope,
     source = header.source;
+  const observed = 'observedHead' in source ? source.observedHead : undefined;
   const seed = {
     worldId: scope.worldId,
     seedRef: source.seedId,
@@ -186,8 +224,8 @@ function authority(
     seed,
     readback: {
       ...seed,
-      worldVersion: source.worldVersion,
-      eventSequence: source.eventSequence,
+      worldVersion: observed?.worldVersion ?? source.worldVersion,
+      eventSequence: observed?.eventSequence ?? source.eventSequence,
       readbackRef: source.admissionRef,
     },
   };
@@ -256,9 +294,25 @@ function pageBody(
         pageHash: page.source.pageHash,
         returnedRowsHash: page.source.returnedRowsHash,
         hashAlgorithm: page.source.hashAlgorithm,
+        sourcePointer: page.source.sourcePointer,
         ...(page.source.currentStateBinding === undefined
           ? {}
           : { currentStateBinding: page.source.currentStateBinding }),
+        ...(page.source.currentPrefixCoverage === undefined
+          ? {}
+          : { currentPrefixCoverage: page.source.currentPrefixCoverage }),
+        ...(page.source.currentFinancialCoverage === undefined
+          ? {}
+          : { currentFinancialCoverage: page.source.currentFinancialCoverage }),
+        ...(page.source.observedHead === undefined
+          ? {}
+          : { observedHead: page.source.observedHead }),
+        ...(page.source.originWorldVersion === undefined
+          ? {}
+          : { originWorldVersion: page.source.originWorldVersion }),
+        ...(page.source.originEventSequence === undefined
+          ? {}
+          : { originEventSequence: page.source.originEventSequence }),
       },
       page: page.page,
       rows: page.rows,
@@ -280,6 +334,19 @@ export function createPostwarOfficeRuntimeReadService(
     ? createPostwarOfficeProjectionStore({
         runtimeReaderRole: c.readerRole,
         authorizationPublisherRole: c.authorizationPublisherRole,
+      })
+    : null;
+  const financialStore = c
+    ? createPostwarFinancialCurrentProjectionStore({
+        runtimeReaderRole: c.readerRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+      })
+    : null;
+  const physicalStore = c
+    ? createPostwarPhysicalOpeningHeadReader({
+        runtimeReaderRole: c.readerRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+        expectedSeedFingerprint: c.admittedWorldPins.contentHash,
       })
     : null;
   const claimsFor = (authorization: unknown, signal: AbortSignal) => {
@@ -386,16 +453,39 @@ export function createPostwarOfficeRuntimeReadService(
                 );
                 if (selected.length !== 1)
                   return fail(403, 'CURRENT_OFFICE_SEAT_REQUIRED');
-                const page = await store.readPageFrom(read, {
+                const pageRequest = {
                   worldId: c.admittedWorldPins.worldId,
-                  officeId: request.office,
                   dataset: request.dataset,
                   offset: request.offset,
                   limit: request.limit,
                   ...(request.expectedVersion
                     ? { expectedVersion: request.expectedVersion }
                     : {}),
-                });
+                };
+                const head = selected[0]!.source;
+                const page =
+                  (request.office === 'FINANCE' ||
+                    request.office === 'CENTRAL_BANK') &&
+                  (head.worldVersion !== '0' ||
+                    ['ledger-balances', 'treasury-capacity'].includes(
+                      request.dataset,
+                    ))
+                    ? await financialStore!.readPageFrom(read, {
+                        ...pageRequest,
+                        officeId: request.office,
+                      })
+                    : (request.office === 'INDUSTRY' ||
+                          request.office === 'TRADE' ||
+                          request.office === 'CAPTAIN') &&
+                        head.worldVersion !== '0'
+                      ? await physicalStore!.readPageFrom(read, {
+                          ...pageRequest,
+                          officeId: request.office,
+                        })
+                      : await store.readPageFrom(read, {
+                          ...pageRequest,
+                          officeId: request.office,
+                        });
                 if (!('scope' in page))
                   return fail(
                     page.status === 'DENIED'

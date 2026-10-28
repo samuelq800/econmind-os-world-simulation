@@ -76,6 +76,10 @@ function fixture() {
       sourceVersion: hash,
       bindingVersion: hash,
       sourceRevision: 'TEST_REVISION',
+      pageHash: 'a'.repeat(64),
+      returnedRowsHash: 'a'.repeat(64),
+      hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
+      sourcePointer: { classification: 'TEST_ONLY_WIRE_METADATA' },
       worldId: config.identity.worldId,
       countryId: config.identity.countryId,
       officeId: 'SOCIAL',
@@ -132,6 +136,206 @@ afterEach(() => {
   vi.useRealTimers();
 });
 describe('bounded postwar office client', () => {
+  it.each(['pageHash', 'returnedRowsHash', 'hashAlgorithm', 'sourcePointer'])(
+    'rejects missing page provenance metadata (%s)',
+    async (field) => {
+      const f = fixture(),
+        wire = f.body();
+      Reflect.deleteProperty(wire.source, field);
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      expect((await client.readPage('positions', requestId)).status).toBe(
+        'UNAVAILABLE',
+      );
+      client.disconnect();
+    },
+  );
+  it.each([
+    ['INDUSTRY', 'opening-inventory-entries'],
+    ['TRADE', 'opening-inventory-entries'],
+    ['CAPTAIN', 'public-service-summary'],
+    ['FINANCE', 'currency-fx'],
+    ['CENTRAL_BANK', 'cb-holdings'],
+  ])(
+    'keeps %s opening facts historical after the World advances',
+    async (office, dataset) => {
+      const f = fixture();
+      f.config.identity.officeId = office;
+      const wire = f.body(dataset, 0, 1);
+      wire.source.officeId = office;
+      wire.authority.readback.worldVersion = '6';
+      wire.authority.readback.eventSequence = '10';
+      Object.assign(wire.source, {
+        dataNature: 'ADMITTED_IMMUTABLE_OPENING_FACTS',
+        originWorldVersion: '0',
+        originEventSequence: '0',
+        observedHead: { worldVersion: '6', eventSequence: '10' },
+      });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      const result = await client.readPage(dataset, requestId);
+      expect(result.status).toBe('PAGE');
+      if ('source' in result) {
+        expect(result.source.worldVersion).toBe('0');
+        expect(result.authority.readback.worldVersion).toBe('6');
+      }
+      client.disconnect();
+    },
+  );
+  it.each([
+    'valid',
+    'missing-coverage',
+    'wrong-head',
+    'posting',
+    'wrong-origin',
+    'unknown-reducer',
+    'historical-ledger',
+  ])(
+    'checks the complete financial prefix without promoting opening claims to cash (%s)',
+    async (fault) => {
+      const f = fixture();
+      f.config.identity.officeId = 'FINANCE';
+      const wire = f.body('treasury-capacity', 0, 1);
+      wire.source.officeId = 'FINANCE';
+      wire.authority.readback.worldVersion = '6';
+      wire.authority.readback.eventSequence = '10';
+      Object.assign(wire.source, {
+        dataNature: 'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX',
+        worldVersion: '6',
+        eventSequence: '10',
+        originWorldVersion: fault === 'wrong-origin' ? '1' : '0',
+        originEventSequence: '0',
+        observedHead: { worldVersion: '6', eventSequence: '10' },
+      });
+      if (fault !== 'missing-coverage')
+        Object.assign(wire.source, {
+          currentFinancialCoverage: {
+            schemaVersion: 'postwar-financial-current-prefix-coverage-v1',
+            reducerVersion:
+              fault === 'unknown-reducer'
+                ? 'UNKNOWN'
+                : 'POSTWAR_FINANCIAL_COMPLETE_NO_POSTING_PREFIX_V1',
+            coverageRef: 'FINANCIAL_COVERAGE_TEST_ONLY',
+            prefixFingerprint: hash,
+            knownEffectsFingerprint: hash,
+            globalWorldVersion: fault === 'wrong-head' ? '7' : '6',
+            globalEventSequence: '10',
+            coveredThroughEventId: 'EVENT_TEST_ONLY',
+            coveredThroughEventFingerprint: hash,
+            noFinancialPostings: fault !== 'posting',
+            noInventoryPostings: true,
+          },
+        });
+      if (fault === 'historical-ledger')
+        Object.assign(wire.source, {
+          dataNature: 'ADMITTED_IMMUTABLE_OPENING_FACTS',
+          worldVersion: '0',
+          eventSequence: '0',
+        });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      expect(
+        (await client.readPage('treasury-capacity', requestId)).status,
+      ).toBe(fault === 'valid' ? 'PAGE' : 'UNAVAILABLE');
+      client.disconnect();
+    },
+  );
+  it.each(['origin', 'observed-head', 'current-label'])(
+    'rejects altered historical fact provenance (%s)',
+    async (fault) => {
+      const f = fixture();
+      f.config.identity.officeId = 'INDUSTRY';
+      const wire = f.body('opening-inventory-entries', 0, 1);
+      wire.source.officeId = 'INDUSTRY';
+      wire.authority.readback.worldVersion = '6';
+      wire.authority.readback.eventSequence = '10';
+      Object.assign(wire.source, {
+        dataNature:
+          fault === 'current-label'
+            ? 'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX'
+            : 'ADMITTED_IMMUTABLE_OPENING_FACTS',
+        originWorldVersion: fault === 'origin' ? '1' : '0',
+        originEventSequence: '0',
+        observedHead: {
+          worldVersion: fault === 'observed-head' ? '5' : '6',
+          eventSequence: '10',
+        },
+      });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      expect(
+        (await client.readPage('opening-inventory-entries', requestId)).status,
+      ).toBe('UNAVAILABLE');
+      client.disconnect();
+    },
+  );
+  it.each([
+    'valid',
+    'missing',
+    'foreign-country',
+    'wrong-origin',
+    'wrong-head',
+    'unknown-reducer',
+  ])(
+    'checks complete-prefix coverage for a prior-country materialization (%s)',
+    async (fault) => {
+      const f = fixture(),
+        wire = f.body();
+      wire.authority.readback.worldVersion = '3';
+      wire.authority.readback.eventSequence = '3';
+      Object.assign(wire.source, {
+        worldVersion: '3',
+        eventSequence: '3',
+        dataNature:
+          'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION',
+        currentStateBinding: {
+          sourceCommandId: 'COMMAND_TEST_ONLY',
+          commandFingerprint: hash,
+          sourceEventId: 'EVENT_TEST_ONLY',
+          eventFingerprint: hash,
+          materializationKey: `SOCIAL_EMPLOYMENT_SERVICE_${f.config.identity.countryId}`,
+          materializationHash: hash,
+          canonicalMaterializationSha256: 'a'.repeat(64),
+          sourceStateWorldVersion: '2',
+          sourceEventSequence: '2',
+        },
+      });
+      if (fault !== 'missing')
+        Object.assign(wire.source, {
+          currentPrefixCoverage: {
+            schemaVersion: 'postwar-social-current-prefix-coverage-v2',
+            coverageRef: 'COVERAGE_TEST_ONLY',
+            countryId:
+              fault === 'foreign-country'
+                ? 'COUNTRY_OTHER'
+                : f.config.identity.countryId,
+            globalWorldVersion: fault === 'wrong-head' ? '4' : '3',
+            globalEventSequence: '3',
+            originWorldVersion: fault === 'wrong-origin' ? '1' : '2',
+            originEventSequence: '2',
+            prefixFingerprint: hash,
+            knownEffectsFingerprint: hash,
+            coveredThroughEventId: 'EVENT_LATEST_TEST_ONLY',
+            coveredThroughEventFingerprint: hash,
+            reducerVersion:
+              fault === 'unknown-reducer'
+                ? 'OTHER_REDUCER'
+                : 'POSTWAR_SOCIAL_COMPLETE_PREFIX_SCOPE_V2',
+          },
+        });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      expect((await client.readPage('positions', requestId)).status).toBe(
+        fault === 'valid' ? 'PAGE' : 'UNAVAILABLE',
+      );
+      client.disconnect();
+    },
+  );
   it.each([
     [
       'positions',
