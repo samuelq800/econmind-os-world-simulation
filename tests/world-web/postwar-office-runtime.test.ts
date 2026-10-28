@@ -132,6 +132,100 @@ afterEach(() => {
   vi.useRealTimers();
 });
 describe('bounded postwar office client', () => {
+  it.each([
+    [
+      'positions',
+      '2',
+      'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION',
+      'PAGE',
+    ],
+    [
+      'positions',
+      '2',
+      'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY',
+      'UNAVAILABLE',
+    ],
+    [
+      'positions',
+      '0',
+      'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION',
+      'UNAVAILABLE',
+    ],
+    [
+      'offers',
+      '2',
+      'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION',
+      'UNAVAILABLE',
+    ],
+  ])(
+    'requires the committed-state data kind and supported dataset at head %s/%s',
+    async (dataset, version, nature, expected) => {
+      const f = fixture();
+      const wire = f.body(dataset);
+      wire.authority.readback.worldVersion = version;
+      wire.authority.readback.eventSequence = version;
+      wire.source.worldVersion = version;
+      wire.source.eventSequence = version;
+      wire.source.dataNature = nature;
+      if (version !== '0' && nature.startsWith('ADMITTED_CURRENT_'))
+        Object.assign(wire.source, {
+          currentStateBinding: {
+            sourceCommandId: 'COMMAND_TEST_ONLY',
+            commandFingerprint: hash,
+            sourceEventId: 'EVENT_TEST_ONLY',
+            eventFingerprint: hash,
+            materializationKey: `SOCIAL_EMPLOYMENT_SERVICE_${f.config.identity.countryId}`,
+            materializationHash: hash,
+            canonicalMaterializationSha256: 'a'.repeat(64),
+            sourceStateWorldVersion: version,
+            sourceEventSequence: version,
+          },
+        });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      expect((await client.readPage(dataset, requestId)).status).toBe(expected);
+      client.disconnect();
+    },
+  );
+  it.each(['missing', 'foreign-country', 'wrong-head'])(
+    'rejects a current page with a %s event materialization binding',
+    async (fault) => {
+      const f = fixture(),
+        wire = f.body();
+      wire.authority.readback.worldVersion = '2';
+      wire.authority.readback.eventSequence = '2';
+      wire.source.worldVersion = '2';
+      wire.source.eventSequence = '2';
+      wire.source.dataNature =
+        'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
+      if (fault !== 'missing')
+        Object.assign(wire.source, {
+          currentStateBinding: {
+            sourceCommandId: 'COMMAND_TEST_ONLY',
+            commandFingerprint: hash,
+            sourceEventId: 'EVENT_TEST_ONLY',
+            eventFingerprint: hash,
+            materializationKey:
+              fault === 'foreign-country'
+                ? 'SOCIAL_EMPLOYMENT_SERVICE_COUNTRY_OTHER'
+                : `SOCIAL_EMPLOYMENT_SERVICE_${f.config.identity.countryId}`,
+            materializationHash: hash,
+            canonicalMaterializationSha256: 'a'.repeat(64),
+            sourceStateWorldVersion: fault === 'wrong-head' ? '1' : '2',
+            sourceEventSequence: '2',
+          },
+        });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      expect(await client.readPage('positions', requestId)).toMatchObject({
+        status: 'UNAVAILABLE',
+        code: 'CURRENT_STATE_BINDING_MISMATCH',
+      });
+      client.disconnect();
+    },
+  );
   it('defaults closed without token/network work', async () => {
     const fetcher = vi.fn();
     const c = createPostwarRuntimeClient(null, { fetcher });

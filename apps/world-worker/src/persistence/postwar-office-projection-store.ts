@@ -61,6 +61,11 @@ function obj(v: unknown): Row {
     invalid('INVALID_PROJECTION_METADATA');
   return v as Row;
 }
+function integer(v: unknown): string {
+  const s = text(v);
+  if (!/^(?:0|[1-9]\d*)$/u.test(s)) invalid('INVALID_PROJECTION_HEAD');
+  return s;
+}
 function count(v: unknown): number {
   if (!Number.isSafeInteger(v) || Number(v) < 0)
     invalid('INVALID_PROJECTION_METADATA');
@@ -93,13 +98,26 @@ export interface PostwarOfficeProjectionSource {
   readonly replayBinding: string;
   readonly sourceBundleSha256: string;
   readonly canonicalSeedSha256: string;
-  readonly worldVersion: '0';
-  readonly eventSequence: '0';
+  readonly worldVersion: string;
+  readonly eventSequence: string;
   readonly pageHash: string;
   readonly returnedRowsHash: string;
   readonly hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256';
   readonly sourcePointer: Row;
-  readonly dataNature: 'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY';
+  readonly dataNature:
+    | 'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY'
+    | 'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
+  readonly currentStateBinding?: Readonly<{
+    sourceCommandId: string;
+    commandFingerprint: string;
+    sourceEventId: string;
+    eventFingerprint: string;
+    materializationKey: string;
+    materializationHash: string;
+    canonicalMaterializationSha256: string;
+    sourceStateWorldVersion: string;
+    sourceEventSequence: string;
+  }>;
 }
 export interface PostwarOfficeProjectionSeatHeader {
   readonly scope: PostwarOfficeProjectionScope;
@@ -162,6 +180,45 @@ function scope(
     invalid('PROJECTION_SCOPE_MISMATCH');
   countryId(value.countryId);
   return freeze(value);
+}
+function validSourceHead(
+  source: Row,
+  o: PostwarProjectionOffice,
+  d: string,
+  country: string,
+): boolean {
+  const version = integer(source.worldVersion),
+    sequence = integer(source.eventSequence);
+  if (source.dataNature === 'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY')
+    return (
+      version === '0' &&
+      sequence === '0' &&
+      source.currentStateBinding === undefined
+    );
+  if (
+    source.dataNature !==
+      'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
+    o !== 'SOCIAL' ||
+    !['positions', 'service-pools'].includes(d) ||
+    version === '0' ||
+    sequence === '0'
+  )
+    return false;
+  const b = obj(source.currentStateBinding);
+  return (
+    text(b.sourceCommandId).length > 0 &&
+    text(b.sourceEventId).length > 0 &&
+    ['commandFingerprint', 'eventFingerprint', 'materializationHash'].every(
+      (k) => /^sha256:[0-9a-f]{64}$/u.test(text(b[k])),
+    ) &&
+    /^[0-9a-f]{64}$/u.test(text(b.canonicalMaterializationSha256)) &&
+    [
+      'SOCIAL_POSITION_LIFECYCLE_' + country,
+      'SOCIAL_EMPLOYMENT_SERVICE_' + country,
+    ].includes(text(b.materializationKey)) &&
+    integer(b.sourceStateWorldVersion) === version &&
+    integer(b.sourceEventSequence) === sequence
+  );
 }
 /** No pool, credentials, JWT, admission write, source authority or full JSON load. */
 export function createPostwarOfficeProjectionStore(configuration: {
@@ -236,8 +293,8 @@ export function createPostwarOfficeProjectionStore(configuration: {
           modelVersion: text(row.model_version),
           replayBinding: text(row.replay_binding, 8192),
           sourceBundleSha256: text(row.source_bundle_sha256),
-          worldVersion: text(row.world_version),
-          eventSequence: text(row.event_sequence),
+          worldVersion: integer(row.world_version),
+          eventSequence: integer(row.event_sequence),
         },
       }));
       if (
@@ -327,9 +384,7 @@ export function createPostwarOfficeProjectionStore(configuration: {
         Buffer.byteLength(raw) > POSTWAR_PROJECTION_ROWS_TEXT_MAX ||
         source.hashAlgorithm !== 'POSTGRES_JSONB_TEXT_UTF8_SHA256' ||
         source.returnedRowsHash !== sha(raw) ||
-        source.worldVersion !== '0' ||
-        source.eventSequence !== '0' ||
-        source.dataNature !== 'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY' ||
+        !validSourceHead(source, o, d, actual.countryId) ||
         (input.expectedVersion &&
           source.sourceVersion !== input.expectedVersion)
       )

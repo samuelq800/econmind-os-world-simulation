@@ -1,6 +1,7 @@
 import { sameAuthorizedIdentity } from '../prototype/authorized-read-adapter.js';
 import {
   hash,
+  canonicalId,
   parseAuthority,
   row,
   uuid,
@@ -270,14 +271,62 @@ export function createPostwarRuntimeClient(
           seedRef: c.world.seedRef,
           contentHash: c.world.contentHash,
           admissionRef: c.world.admissionRef,
-          worldVersion: '0',
-          eventSequence: '0',
-          dataNature: 'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY',
+          worldVersion: authority.readback.worldVersion,
+          eventSequence: authority.readback.eventSequence,
         }))
           if (source[key] !== value) throw Error('SOURCE_SCOPE_MISMATCH');
+        const opening =
+          source.worldVersion === '0' &&
+          source.eventSequence === '0' &&
+          source.dataNature ===
+            'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY';
+        const currentSocial =
+          source.worldVersion !== '0' &&
+          source.eventSequence !== '0' &&
+          c.identity.officeId === 'SOCIAL' &&
+          ['positions', 'service-pools'].includes(dataset) &&
+          source.dataNature ===
+            'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
+        if (!opening && !currentSocial)
+          throw Error('UNPROVEN_CURRENT_DATA_KIND');
+        if (currentSocial) {
+          const binding = row(source.currentStateBinding);
+          const fields = [
+            'sourceCommandId',
+            'commandFingerprint',
+            'sourceEventId',
+            'eventFingerprint',
+            'materializationKey',
+            'materializationHash',
+            'canonicalMaterializationSha256',
+            'sourceStateWorldVersion',
+            'sourceEventSequence',
+          ];
+          if (
+            !binding ||
+            Object.keys(binding).length !== fields.length ||
+            !fields.every((key) => Object.hasOwn(binding, key)) ||
+            !canonicalId(binding.sourceCommandId) ||
+            !canonicalId(binding.sourceEventId) ||
+            ![
+              'commandFingerprint',
+              'eventFingerprint',
+              'materializationHash',
+            ].every((key) => hash(binding[key])) ||
+            typeof binding.canonicalMaterializationSha256 !== 'string' ||
+            !/^[a-f0-9]{64}$/u.test(binding.canonicalMaterializationSha256) ||
+            binding.sourceStateWorldVersion !== source.worldVersion ||
+            binding.sourceEventSequence !== source.eventSequence ||
+            ![
+              `SOCIAL_POSITION_LIFECYCLE_${c.identity.countryId}`,
+              `SOCIAL_EMPLOYMENT_SERVICE_${c.identity.countryId}`,
+            ].includes(String(binding.materializationKey))
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentStateBinding !== undefined) {
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        }
         if (
-          authority.readback.worldVersion !== '0' ||
-          authority.readback.eventSequence !== '0' ||
           !hash(source.sourceVersion) ||
           !hash(source.bindingVersion) ||
           (previous &&
@@ -319,9 +368,11 @@ export function createPostwarRuntimeClient(
           abort.signal.aborted
             ? 'CANCELLED_OR_TIMEOUT'
             : error instanceof Error &&
-                ['STALE_SOURCE_SCOPE', 'SOURCE_SCOPE_MISMATCH'].includes(
-                  error.message,
-                )
+                [
+                  'STALE_SOURCE_SCOPE',
+                  'SOURCE_SCOPE_MISMATCH',
+                  'CURRENT_STATE_BINDING_MISMATCH',
+                ].includes(error.message)
               ? error.message
               : 'FETCH_FAILED',
         );

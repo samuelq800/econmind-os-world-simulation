@@ -78,14 +78,14 @@ export function createPostwarRuntimeView(
         return el;
       };
       section.append(
-        text('h3', `${config.identity.officeId} · Admitted opening data`),
+        text('h3', `${config.identity.officeId} · Verified office data`),
         text(
           'p',
           `${state().status}${state().code ? ' · ' + state().code : ''}`,
         ),
         text(
           'p',
-          'H0 derived data · No post-opening replay. Opening financial legs are not current spendable balances.',
+          'Opening snapshots and committed current state have distinct source versions. Opening financial legs are not current spendable balances.',
         ),
       );
       const select = document.createElement('select');
@@ -123,6 +123,13 @@ export function createPostwarRuntimeView(
       if (result && 'page' in result) {
         const page: RuntimePage = result;
         section.append(
+          text(
+            'p',
+            page.source.dataNature ===
+              'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION'
+              ? `Committed current state · World version ${page.source.worldVersion}`
+              : 'Admitted opening snapshot · World version 0',
+          ),
           text(
             'p',
             `Rows ${page.page.offset + (page.rows.length ? 1 : 0)}–${page.page.offset + page.rows.length} / ${page.page.total} · Source ${page.source.sourceVersion}`,

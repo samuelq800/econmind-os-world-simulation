@@ -96,7 +96,7 @@ describe('three manual Office families / shipped clients / OFFLINE TEST_ONLY', (
     },
   );
   it.each(['INDUSTRY', 'FINANCE', 'TRADE'])(
-    'keeps %s explicitly unsupported',
+    'rejects unsupported %s or a mismatch between the read identity and selected Office view',
     async (officeId) => {
       const f = officeCommandFixture('industry');
       const read = {

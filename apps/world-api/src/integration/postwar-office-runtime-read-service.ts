@@ -59,7 +59,9 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
           dataset: string;
           authority: ServerVerifiedReadBinding;
           source: Readonly<{
-            dataNature: 'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY';
+            dataNature:
+              | 'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY'
+              | 'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
             sourceVersion: string;
             bindingVersion: string;
             sourceRevision: string;
@@ -73,11 +75,12 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             seedRef: string;
             contentHash: string;
             admissionRef: string;
-            worldVersion: '0';
-            eventSequence: '0';
+            worldVersion: string;
+            eventSequence: string;
             pageHash: string;
             returnedRowsHash: string;
             hashAlgorithm: string;
+            currentStateBinding?: SuccessPage['source']['currentStateBinding'];
           }>;
           page: SuccessPage['page'];
           rows: readonly unknown[];
@@ -230,7 +233,11 @@ function pageBody(
       dataset: request.dataset,
       authority: authority(page),
       source: {
-        dataNature: 'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY',
+        dataNature:
+          page.source.dataNature ===
+          'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY'
+            ? 'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY'
+            : page.source.dataNature,
         sourceVersion: page.source.sourceVersion,
         bindingVersion,
         sourceRevision: page.source.sourceRevision,
@@ -244,11 +251,14 @@ function pageBody(
         seedRef: page.source.seedId,
         contentHash: page.source.seedFingerprint,
         admissionRef: page.source.admissionRef,
-        worldVersion: '0',
-        eventSequence: '0',
+        worldVersion: page.source.worldVersion,
+        eventSequence: page.source.eventSequence,
         pageHash: page.source.pageHash,
         returnedRowsHash: page.source.returnedRowsHash,
         hashAlgorithm: page.source.hashAlgorithm,
+        ...(page.source.currentStateBinding === undefined
+          ? {}
+          : { currentStateBinding: page.source.currentStateBinding }),
       },
       page: page.page,
       rows: page.rows,
@@ -376,11 +386,6 @@ export function createPostwarOfficeRuntimeReadService(
                 );
                 if (selected.length !== 1)
                   return fail(403, 'CURRENT_OFFICE_SEAT_REQUIRED');
-                if (
-                  selected[0]!.source.worldVersion !== '0' ||
-                  selected[0]!.source.eventSequence !== '0'
-                )
-                  return fail(503, 'REPLAY_UNAVAILABLE');
                 const page = await store.readPageFrom(read, {
                   worldId: c.admittedWorldPins.worldId,
                   officeId: request.office,

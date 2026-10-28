@@ -64,34 +64,41 @@ function envelope(officeId: string, commandType: string) {
   };
 }
 
-describe('browser manual Office support stays explicitly three-family', () => {
-  it('retains exact readonly map types and all three exhaustive keys, not the server Office union', () => {
+describe('browser manual Office transport permits only the five registered manual families', () => {
+  it('retains exact readonly family types without enabling any automatic family', () => {
     expectTypeOf(officeFamilies).toEqualTypeOf<{
-      readonly CAPTAIN: 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1';
-      readonly CENTRAL_BANK: 'CORE_CENTRAL_BANK_OMO_V1';
-      readonly SOCIAL: 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1';
+      readonly CAPTAIN: readonly ['CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'];
+      readonly CENTRAL_BANK: readonly ['CORE_CENTRAL_BANK_OMO_V1'];
+      readonly SOCIAL: readonly [
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
+        'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
+      ];
+      readonly FINANCE: readonly ['CORE_FINANCE_BUDGET_APPROPRIATION_V1'];
     }>();
     expect(Object.keys(officeFamilies).sort()).toEqual([
       'CAPTAIN',
       'CENTRAL_BANK',
+      'FINANCE',
       'SOCIAL',
     ]);
   });
-  it.each(['CAPTAIN', 'CENTRAL_BANK', 'SOCIAL'] as const)(
+  it.each(['CAPTAIN', 'CENTRAL_BANK', 'SOCIAL', 'FINANCE'] as const)(
     'still parses the existing %s transport',
     (office) => {
-      const value = envelope(office, officeFamilies[office]);
+      const value = envelope(office, officeFamilies[office][0]);
       expect(parseOfficeIntent(value, config(office))).toEqual(value);
     },
   );
-  it('rejects Finance budget even when its transport DTO exists and the read identity is FINANCE', () => {
+  it('permits funded Social position transport only for the authenticated Social identity', () => {
+    const value = envelope('SOCIAL', officeFamilies.SOCIAL[1]);
+    expect(parseOfficeIntent(value, config('SOCIAL'))).toEqual(value);
+    expect(parseOfficeIntent(value, config('FINANCE'))).toBeNull();
     expect(
       parseOfficeIntent(
-        envelope('FINANCE', FINANCE_BUDGET_APPROPRIATION_COMMAND),
-        config('FINANCE'),
+        envelope('SOCIAL', 'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1'),
+        config('SOCIAL'),
       ),
     ).toBeNull();
-    expect(Object.hasOwn(officeFamilies, 'FINANCE')).toBe(false);
   });
   it.each(['CAPTAIN', 'CENTRAL_BANK', 'SOCIAL'] as const)(
     'does not route budget or a mismatched family through %s',
@@ -103,7 +110,9 @@ describe('browser manual Office support stays explicitly three-family', () => {
         ),
       ).toBeNull();
       const other =
-        office === 'CAPTAIN' ? officeFamilies.SOCIAL : officeFamilies.CAPTAIN;
+        office === 'CAPTAIN'
+          ? officeFamilies.SOCIAL[0]
+          : officeFamilies.CAPTAIN[0];
       expect(
         parseOfficeIntent(envelope(office, other), config(office)),
       ).toBeNull();
