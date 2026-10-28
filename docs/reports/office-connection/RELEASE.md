@@ -2,13 +2,36 @@
 
 Status: **IMPLEMENTED_UNVERIFIED / production execution CLOSED**. The user has authorized continued all-office connection and release engineering. Missing implementation, authoritative bindings and release evidence remain concrete work; old HOLD/V09.1 records are context, not a request for the user to repeat that authorization. This document grants no independent P0 approval.
 
-## Current second-batch checkpoint
+## Current immutable baseline and successor
 
-The successor working tree is `/tmp/econmind-office-runtime-next`, based on `751dccb7e4908a5a82d9ce9c4cf3fcb6079f7d1e`, with the isolated-cleanup/workflow follow-up at `cbbb3f608b4bf9265011ee42a835633fb974e011`. Second-batch implementation is still under QA and is not an immutable released candidate.
+Baseline branch `codex/office-runtime-bindings-20261028` at
+`3979b5146788d59b834f5cf009f54604b551c415` passed the complete `pnpm check`
+(exit0): main suite 6,761 passed, zero failed, 299 skipped; all later release
+checks and builds passed. The skipped cases remain skipped. The additional
+exact-head Trade native test passed separately with 11 check categories.
+Neither result admits source data or proves production connection.
 
-Root recorded **25 changed files, nine focused suites, 141 PASS**, and successful **Core, Worker and API builds** for the initial combined second-batch implementation. Those results precede subsequent QA edits. Bridge cancellation/drain handling and Captain first-submission preflight have focused regression coverage. Trade has an explicit opt-in Fetch route and mux; the tracked HTTP suite passed 15 cases. Its added real-PostgreSQL TEST_ONLY query/role/pagination/restart test passed one test with 11 check categories; formally admitted service success is still NOT_RUN. The late-cleanup failure latch is implemented and passed the seven-case bridge suite; final combined checks still must bind the immutable candidate. Final combined checks and independent review must bind the completed candidate. This documentation update does not rerun or extend those results.
+This successor branch `codex/office-selected-source-bindings-20261028` adds:
 
-Current implementation and the six-Office matrix are in [RUNTIME_BINDINGS.md](RUNTIME_BINDINGS.md). Earlier first-batch evidence retains its original scope in [README.md](README.md), [NATIVE.md](NATIVE.md) and [FRONTEND.md](FRONTEND.md).
+- executable Social source bindings and derived public readback; 2,844 known
+  or derived references, including 488 newly wired references; original 1,066
+  composite source groups remain unresolved, with zero new raw source facts;
+- corrected ordinary-housing title handling, preserving 122 unknown titles
+  rather than assigning GOV from a generic project catalog;
+- a proposed controlled admission SQL entry, pinned V2 server composition and
+  separate source read transaction; no production installation or grants;
+- explicit new-world initialization choices in
+  [GENESIS_INITIALIZATION_CHOICES.md](GENESIS_INITIALIZATION_CHOICES.md).
+
+The source/publication group passed 117 focused tests before the final cleanup
+fix; its 12-case targeted regression then passed, including five new cases.
+Real PG16.15 controlled-publication SQL passed one TEST_ONLY test with 13
+check categories; the generated artifact was read through actual Edge Fetch
+and loopback HTTP. The actual signed 70-country Service positive remains
+NOT_RUN. Final checks must bind the completed immutable successor.
+
+Current implementation and the six-Office matrix are in
+[RUNTIME_BINDINGS.md](RUNTIME_BINDINGS.md).
 
 ## Host and Finance corrections
 

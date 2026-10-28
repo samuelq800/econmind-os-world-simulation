@@ -212,14 +212,20 @@ export function buildOfficialPhysicalOpeningAdoption(input: {
         throw new Error(`${id}: unknown source construction state`);
       // The fixed source has no separately approved foreign/title/risk records.
       // Do not turn the source's proposal ownerId=GOV into blanket nationalization.
-      // Fixed MASTER catalog PROJECT-36 is Public Housing; PROJECT-37 Worker
-      // Housing/ordinary household stock is deliberately not included.
-      const publicAsset = [
-        'PROJECT-31',
-        'PROJECT-34',
-        'PROJECT-35',
-        'PROJECT-36',
-      ].includes(String(source.projectId));
+      // The selected generator also labels each region's TOTAL housing stock
+      // PROJECT-36: "住房区域服务群" exactly aliases population-services
+      // housingUnits, not a separately identified public-housing portfolio.
+      // Owner §5.1 explicitly excludes ordinary housing from default GOV title.
+      // Only a source explicitly identifying a public housing facility can use
+      // that public-asset category; a catalog ID/GOV proposal is insufficient.
+      const explicitPublicHousing =
+        source.projectId === 'PROJECT-36' &&
+        source.name === '公共住房' &&
+        source.aggregateFacility !== true;
+      const publicAsset =
+        ['PROJECT-31', 'PROJECT-34', 'PROJECT-35'].includes(
+          String(source.projectId),
+        ) || explicitPublicHousing;
       const commercial =
         /^PROJECT-(?:0[1-6]|1[013-8]|2[1356])$/u.test(
           String(source.projectId),
@@ -239,7 +245,9 @@ export function buildOfficialPhysicalOpeningAdoption(input: {
             id,
             'titleHolderId/riskBearerId',
             'FacilityOpening',
-            'No approved ownership category; ordinary housing is not default GOV',
+            source.projectId === 'PROJECT-36'
+              ? 'Regional total housing has no source-supported public/private title or tenure split; PROJECT-36 and the GOV owner proposal do not establish title, risk or operating authority'
+              : 'No approved ownership category; ordinary housing is not default GOV',
           ),
         );
       return {

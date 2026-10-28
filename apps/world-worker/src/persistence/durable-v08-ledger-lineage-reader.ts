@@ -500,6 +500,56 @@ export class DurableV08LedgerLineageReader {
   ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
     const canonicalWorldId = worldId(requestedWorldId);
     const head = await this.#readHead(transaction, canonicalWorldId);
+    return this.#rebuildAtHead(transaction, canonicalWorldId, head);
+  }
+
+  /** Derived replay only. The caller must already hold its required writer
+   * fence on a different connection to this same primary database. This method
+   * issues no authority/proof and deliberately takes no conflicting head lock.
+   * The existing writer-facing rebuildFrom keeps its FOR SHARE semantics. */
+  async rebuildReadOnlyFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+  ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
+    if (this.#social !== null)
+      invalid('Read-only canonical replay does not accept Social simulation');
+    const mode = await transaction.query<{
+      readonly read_only: unknown;
+      readonly isolation: unknown;
+    }>(`select current_setting('transaction_read_only') as read_only,
+        current_setting('transaction_isolation') as isolation`);
+    const row = mode.rows[0];
+    if (
+      mode.rows.length !== 1 ||
+      row?.read_only !== 'on' ||
+      (row.isolation !== 'repeatable read' && row.isolation !== 'serializable')
+    )
+      invalid(
+        'Read-only canonical replay requires a stable READ ONLY transaction',
+      );
+    const canonicalWorldId = worldId(requestedWorldId);
+    const result = await transaction.query<HeadRow>(
+      `select world_version, event_sequence from world_v2.world_head
+        where world_id = $1`,
+      [canonicalWorldId],
+    );
+    if (result.rows.length !== 1 || !result.rows[0])
+      invalid('Durable World head is absent or duplicated');
+    const head = Object.freeze({
+      worldVersion: integer(result.rows[0].world_version, 'World head version'),
+      eventSequence: integer(
+        result.rows[0].event_sequence,
+        'World head Event sequence',
+      ),
+    });
+    return this.#rebuildAtHead(transaction, canonicalWorldId, head);
+  }
+
+  async #rebuildAtHead(
+    transaction: SqlExecutor,
+    canonicalWorldId: string,
+    head: Readonly<{ worldVersion: string; eventSequence: string }>,
+  ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
     const seed = await this.#openingSeeds.loadFrom(
       transaction,
       canonicalWorldId,

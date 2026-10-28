@@ -1,6 +1,6 @@
 # Runtime binding checkpoint
 
-Status: **P0 IMPLEMENTED_UNVERIFIED**. This second batch adds executable server adapters and source/read contracts; production execution remains closed. Root's initial combined result was **nine suites / 141 PASS plus Core, Worker and API builds**, across 25 changed files. Later bridge-cleanup edits and Trade native-PostgreSQL additions require their own final results; Trade native verification is **RUNNING**. See [RELEASE.md](RELEASE.md) for candidate/release limits and [README.md](README.md) for the full catalog denominator.
+Status: **P0 IMPLEMENTED_UNVERIFIED**; production execution remains closed. Baseline `3979b5146788d59b834f5cf009f54604b551c415` passed the complete check with 6,761 main-suite tests passed and 299 skipped. Its exact-head Trade native test passed separately. This successor adds Social source readback, ordinary-housing title correction and a controlled admission candidate. It passed 117 focused cases before the final cleanup fix, then its 12-case targeted regression passed. Actual signed 70-country Service acceptance and deployment remain NOT_RUN. See [RELEASE.md](RELEASE.md) for evidence scope and [README.md](README.md) for the full catalog denominator.
 
 ## Actual shared connections
 
@@ -56,3 +56,34 @@ pnpm --filter @econmind/world-api build
 ```
 
 Run serially. The expected counts may change with QA additions; preserve actual output and failures rather than forcing 141. These commands do not deploy or start World/Clock. Embedded SQL/protocol positives, wire candidates and read-only preflight are mechanism evidence; native locks/recovery, real source admission, installed consumers, final browser flows and target deployment need their respective actual checks. Final readiness must attach to the completed immutable candidate.
+
+## Current source and publication entry points
+
+`createOfficialSocialStaffingTargets` supplies source-bound teacher demand;
+`createOfficialSocialOperatingSourceBindings` and
+`requireOfficialSocialOperatingSourceValue` expose exact known/derived values
+and reject missing/conflicting inputs. These are selected-source bindings, not
+actual employment, service delivery or an admitted World.
+
+```bash
+node tools/office-connection/social-source-bindings.mjs --summary
+node tools/office-connection/social-source-bindings.mjs --check
+```
+
+The first command generates the current summary. The second intentionally exits2
+while whole source groups remain unresolved. Build Worker first; stale compiled
+source is rejected. The fixed public derived read path is
+`GET /v1/world-data/social-source-bindings`, with an independent artifact
+fingerprint, explicit source/Core IDs and bounded version-pinned pagination.
+The Edge host must receive the validated publication snapshot explicitly;
+missing installation returns503. No production factory or provider was changed.
+
+`createOfficialOpeningServerPublicationComposition` now binds the existing
+pinned V2 loader, trusted Owner keys, SQL registry and separate publisher/source
+databases. The publisher retains the exact-permit/head lock while the source
+uses a same-primary READ ONLY REPEATABLE READ snapshot and existing complete
+Core replay. Unknown commit/rollback outcomes stop with
+`OPENING_PUBLICATION_COMMIT_UNCONFIRMED`. The SQL proposal is outside the
+migration manifest and grants no external runtime memberships. Actual source
+connections, accepted genesis material, signed authorization and the controlled
+release remain required. Neither this entry nor its tests start World/Clock.
