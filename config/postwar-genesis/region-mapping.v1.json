@@ -1,0 +1,617 @@
+{
+  "classification": "EXACT_PROJECTION_OF_PINNED_SOURCE_NOT_NEW_REGION_AUTHORITY",
+  "fullMappingSha256": "d2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253",
+  "mappings": [
+    {
+      "coreCountryId": "COUNTRY_01",
+      "normalizedRegionId": "REGION_01_E1",
+      "sourceRegionId": "visual-territory-01-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_02",
+      "normalizedRegionId": "REGION_02_E1",
+      "sourceRegionId": "visual-territory-02-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_03",
+      "normalizedRegionId": "REGION_03_E1",
+      "sourceRegionId": "visual-territory-03-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_03",
+      "normalizedRegionId": "REGION_03_E2",
+      "sourceRegionId": "visual-territory-03-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_04",
+      "normalizedRegionId": "REGION_04_E1",
+      "sourceRegionId": "visual-territory-04-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_04",
+      "normalizedRegionId": "REGION_04_E2",
+      "sourceRegionId": "visual-territory-04-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_05",
+      "normalizedRegionId": "REGION_05_E1",
+      "sourceRegionId": "visual-territory-05-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_05",
+      "normalizedRegionId": "REGION_05_E2",
+      "sourceRegionId": "visual-territory-05-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_06",
+      "normalizedRegionId": "REGION_06_E1",
+      "sourceRegionId": "visual-territory-06-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_06",
+      "normalizedRegionId": "REGION_06_E2",
+      "sourceRegionId": "visual-territory-06-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_07",
+      "normalizedRegionId": "REGION_07_E1",
+      "sourceRegionId": "visual-territory-07-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_07",
+      "normalizedRegionId": "REGION_07_E2",
+      "sourceRegionId": "visual-territory-07-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_08",
+      "normalizedRegionId": "REGION_08_E1",
+      "sourceRegionId": "visual-territory-08-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_08",
+      "normalizedRegionId": "REGION_08_E2",
+      "sourceRegionId": "visual-territory-08-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_09",
+      "normalizedRegionId": "REGION_09_E1",
+      "sourceRegionId": "visual-territory-09-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_09",
+      "normalizedRegionId": "REGION_09_E2",
+      "sourceRegionId": "visual-territory-09-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_10",
+      "normalizedRegionId": "REGION_10_E1",
+      "sourceRegionId": "visual-territory-10-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_10",
+      "normalizedRegionId": "REGION_10_E2",
+      "sourceRegionId": "visual-territory-10-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_11",
+      "normalizedRegionId": "REGION_11_E1",
+      "sourceRegionId": "visual-territory-11-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_12",
+      "normalizedRegionId": "REGION_12_E1",
+      "sourceRegionId": "visual-territory-12-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_12",
+      "normalizedRegionId": "REGION_12_E2",
+      "sourceRegionId": "visual-territory-12-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_13",
+      "normalizedRegionId": "REGION_13_E1",
+      "sourceRegionId": "visual-territory-13-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_13",
+      "normalizedRegionId": "REGION_13_E2",
+      "sourceRegionId": "visual-territory-13-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_14",
+      "normalizedRegionId": "REGION_14_E1",
+      "sourceRegionId": "visual-territory-14-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_14",
+      "normalizedRegionId": "REGION_14_E2",
+      "sourceRegionId": "visual-territory-14-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_15",
+      "normalizedRegionId": "REGION_15_E1",
+      "sourceRegionId": "visual-territory-15-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_15",
+      "normalizedRegionId": "REGION_15_E2",
+      "sourceRegionId": "visual-territory-15-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_16",
+      "normalizedRegionId": "REGION_16_E1",
+      "sourceRegionId": "visual-territory-16-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_16",
+      "normalizedRegionId": "REGION_16_E2",
+      "sourceRegionId": "visual-territory-16-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_17",
+      "normalizedRegionId": "REGION_17_E1",
+      "sourceRegionId": "visual-territory-17-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_18",
+      "normalizedRegionId": "REGION_18_E1",
+      "sourceRegionId": "visual-territory-18-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_19",
+      "normalizedRegionId": "REGION_19_E1",
+      "sourceRegionId": "visual-territory-19-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_20",
+      "normalizedRegionId": "REGION_20_E1",
+      "sourceRegionId": "visual-territory-20-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_20",
+      "normalizedRegionId": "REGION_20_E2",
+      "sourceRegionId": "visual-territory-20-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_21",
+      "normalizedRegionId": "REGION_21_E1",
+      "sourceRegionId": "visual-territory-21-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_21",
+      "normalizedRegionId": "REGION_21_E2",
+      "sourceRegionId": "visual-territory-21-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_22",
+      "normalizedRegionId": "REGION_22_E1",
+      "sourceRegionId": "visual-territory-22-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_23",
+      "normalizedRegionId": "REGION_23_E1",
+      "sourceRegionId": "visual-territory-23-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_23",
+      "normalizedRegionId": "REGION_23_E2",
+      "sourceRegionId": "visual-territory-23-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_24",
+      "normalizedRegionId": "REGION_24_E1",
+      "sourceRegionId": "visual-territory-24-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_24",
+      "normalizedRegionId": "REGION_24_E2",
+      "sourceRegionId": "visual-territory-24-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_25",
+      "normalizedRegionId": "REGION_25_E1",
+      "sourceRegionId": "visual-territory-25-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_26",
+      "normalizedRegionId": "REGION_26_E1",
+      "sourceRegionId": "visual-territory-26-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_26",
+      "normalizedRegionId": "REGION_26_E2",
+      "sourceRegionId": "visual-territory-26-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_27",
+      "normalizedRegionId": "REGION_27_E1",
+      "sourceRegionId": "visual-territory-27-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_27",
+      "normalizedRegionId": "REGION_27_E2",
+      "sourceRegionId": "visual-territory-27-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_28",
+      "normalizedRegionId": "REGION_28_E1",
+      "sourceRegionId": "visual-territory-28-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_28",
+      "normalizedRegionId": "REGION_28_E2",
+      "sourceRegionId": "visual-territory-28-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_29",
+      "normalizedRegionId": "REGION_29_E1",
+      "sourceRegionId": "visual-territory-29-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_29",
+      "normalizedRegionId": "REGION_29_E2",
+      "sourceRegionId": "visual-territory-29-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_30",
+      "normalizedRegionId": "REGION_30_E1",
+      "sourceRegionId": "visual-territory-30-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_30",
+      "normalizedRegionId": "REGION_30_E2",
+      "sourceRegionId": "visual-territory-30-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_31",
+      "normalizedRegionId": "REGION_31_E1",
+      "sourceRegionId": "visual-territory-31-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_31",
+      "normalizedRegionId": "REGION_31_E2",
+      "sourceRegionId": "visual-territory-31-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_32",
+      "normalizedRegionId": "REGION_32_E1",
+      "sourceRegionId": "visual-territory-32-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_32",
+      "normalizedRegionId": "REGION_32_E2",
+      "sourceRegionId": "visual-territory-32-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_33",
+      "normalizedRegionId": "REGION_33_E1",
+      "sourceRegionId": "visual-territory-33-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_33",
+      "normalizedRegionId": "REGION_33_E2",
+      "sourceRegionId": "visual-territory-33-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_34",
+      "normalizedRegionId": "REGION_34_E1",
+      "sourceRegionId": "visual-territory-34-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_34",
+      "normalizedRegionId": "REGION_34_E2",
+      "sourceRegionId": "visual-territory-34-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_35",
+      "normalizedRegionId": "REGION_35_E1",
+      "sourceRegionId": "visual-territory-35-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_35",
+      "normalizedRegionId": "REGION_35_E2",
+      "sourceRegionId": "visual-territory-35-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_36",
+      "normalizedRegionId": "REGION_36_E1",
+      "sourceRegionId": "visual-territory-36-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_37",
+      "normalizedRegionId": "REGION_37_E1",
+      "sourceRegionId": "visual-territory-37-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_38",
+      "normalizedRegionId": "REGION_38_E1",
+      "sourceRegionId": "visual-territory-38-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_38",
+      "normalizedRegionId": "REGION_38_E2",
+      "sourceRegionId": "visual-territory-38-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_39",
+      "normalizedRegionId": "REGION_39_E1",
+      "sourceRegionId": "visual-territory-39-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_39",
+      "normalizedRegionId": "REGION_39_E2",
+      "sourceRegionId": "visual-territory-39-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_40",
+      "normalizedRegionId": "REGION_40_E1",
+      "sourceRegionId": "visual-territory-40-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_40",
+      "normalizedRegionId": "REGION_40_E2",
+      "sourceRegionId": "visual-territory-40-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_41",
+      "normalizedRegionId": "REGION_41_E1",
+      "sourceRegionId": "visual-territory-41-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_41",
+      "normalizedRegionId": "REGION_41_E2",
+      "sourceRegionId": "visual-territory-41-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_42",
+      "normalizedRegionId": "REGION_42_E1",
+      "sourceRegionId": "visual-territory-42-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_43",
+      "normalizedRegionId": "REGION_43_E1",
+      "sourceRegionId": "visual-territory-43-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_44",
+      "normalizedRegionId": "REGION_44_E1",
+      "sourceRegionId": "visual-territory-44-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_44",
+      "normalizedRegionId": "REGION_44_E2",
+      "sourceRegionId": "visual-territory-44-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_45",
+      "normalizedRegionId": "REGION_45_E1",
+      "sourceRegionId": "visual-territory-45-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_45",
+      "normalizedRegionId": "REGION_45_E2",
+      "sourceRegionId": "visual-territory-45-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_46",
+      "normalizedRegionId": "REGION_46_E1",
+      "sourceRegionId": "visual-territory-46-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_46",
+      "normalizedRegionId": "REGION_46_E2",
+      "sourceRegionId": "visual-territory-46-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_47",
+      "normalizedRegionId": "REGION_47_E1",
+      "sourceRegionId": "visual-territory-47-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_47",
+      "normalizedRegionId": "REGION_47_E2",
+      "sourceRegionId": "visual-territory-47-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_48",
+      "normalizedRegionId": "REGION_48_E1",
+      "sourceRegionId": "visual-territory-48-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_49",
+      "normalizedRegionId": "REGION_49_E1",
+      "sourceRegionId": "visual-territory-49-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_49",
+      "normalizedRegionId": "REGION_49_E2",
+      "sourceRegionId": "visual-territory-49-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_50",
+      "normalizedRegionId": "REGION_50_E1",
+      "sourceRegionId": "visual-territory-50-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_50",
+      "normalizedRegionId": "REGION_50_E2",
+      "sourceRegionId": "visual-territory-50-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_51",
+      "normalizedRegionId": "REGION_51_E1",
+      "sourceRegionId": "visual-territory-51-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_51",
+      "normalizedRegionId": "REGION_51_E2",
+      "sourceRegionId": "visual-territory-51-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_52",
+      "normalizedRegionId": "REGION_52_E1",
+      "sourceRegionId": "visual-territory-52-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_53",
+      "normalizedRegionId": "REGION_53_E1",
+      "sourceRegionId": "visual-territory-53-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_53",
+      "normalizedRegionId": "REGION_53_E2",
+      "sourceRegionId": "visual-territory-53-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_54",
+      "normalizedRegionId": "REGION_54_E1",
+      "sourceRegionId": "visual-territory-54-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_54",
+      "normalizedRegionId": "REGION_54_E2",
+      "sourceRegionId": "visual-territory-54-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_55",
+      "normalizedRegionId": "REGION_55_E1",
+      "sourceRegionId": "visual-territory-55-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_56",
+      "normalizedRegionId": "REGION_56_E1",
+      "sourceRegionId": "visual-territory-56-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_56",
+      "normalizedRegionId": "REGION_56_E2",
+      "sourceRegionId": "visual-territory-56-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_57",
+      "normalizedRegionId": "REGION_57_E1",
+      "sourceRegionId": "visual-territory-57-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_57",
+      "normalizedRegionId": "REGION_57_E2",
+      "sourceRegionId": "visual-territory-57-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_58",
+      "normalizedRegionId": "REGION_58_E1",
+      "sourceRegionId": "visual-territory-58-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_58",
+      "normalizedRegionId": "REGION_58_E2",
+      "sourceRegionId": "visual-territory-58-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_59",
+      "normalizedRegionId": "REGION_59_E1",
+      "sourceRegionId": "visual-territory-59-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_60",
+      "normalizedRegionId": "REGION_60_E1",
+      "sourceRegionId": "visual-territory-60-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_60",
+      "normalizedRegionId": "REGION_60_E2",
+      "sourceRegionId": "visual-territory-60-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_61",
+      "normalizedRegionId": "REGION_61_E1",
+      "sourceRegionId": "visual-territory-61-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_61",
+      "normalizedRegionId": "REGION_61_E2",
+      "sourceRegionId": "visual-territory-61-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_62",
+      "normalizedRegionId": "REGION_62_E1",
+      "sourceRegionId": "visual-territory-62-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_62",
+      "normalizedRegionId": "REGION_62_E2",
+      "sourceRegionId": "visual-territory-62-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_63",
+      "normalizedRegionId": "REGION_63_E1",
+      "sourceRegionId": "visual-territory-63-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_63",
+      "normalizedRegionId": "REGION_63_E2",
+      "sourceRegionId": "visual-territory-63-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_64",
+      "normalizedRegionId": "REGION_64_E1",
+      "sourceRegionId": "visual-territory-64-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_64",
+      "normalizedRegionId": "REGION_64_E2",
+      "sourceRegionId": "visual-territory-64-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_65",
+      "normalizedRegionId": "REGION_65_E1",
+      "sourceRegionId": "visual-territory-65-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_65",
+      "normalizedRegionId": "REGION_65_E2",
+      "sourceRegionId": "visual-territory-65-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_66",
+      "normalizedRegionId": "REGION_66_E1",
+      "sourceRegionId": "visual-territory-66-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_66",
+      "normalizedRegionId": "REGION_66_E2",
+      "sourceRegionId": "visual-territory-66-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_67",
+      "normalizedRegionId": "REGION_67_E1",
+      "sourceRegionId": "visual-territory-67-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_67",
+      "normalizedRegionId": "REGION_67_E2",
+      "sourceRegionId": "visual-territory-67-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_68",
+      "normalizedRegionId": "REGION_68_E1",
+      "sourceRegionId": "visual-territory-68-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_68",
+      "normalizedRegionId": "REGION_68_E2",
+      "sourceRegionId": "visual-territory-68-E2"
+    },
+    {
+      "coreCountryId": "COUNTRY_69",
+      "normalizedRegionId": "REGION_69_E1",
+      "sourceRegionId": "visual-territory-69-E1"
+    },
+    {
+      "coreCountryId": "COUNTRY_70",
+      "normalizedRegionId": "REGION_70_E1",
+      "sourceRegionId": "visual-territory-70-E1"
+    }
+  ],
+  "schemaVersion": "postwar-pinned-region-mapping-v1"
+}

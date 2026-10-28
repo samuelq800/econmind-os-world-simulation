@@ -27,6 +27,10 @@
     "./social-office-demo": {
       "types": "./dist/social-office-demo/consumer.d.ts",
       "default": "./dist/social-office-demo/consumer.js"
+    },
+    "./postwar-office-runtime": {
+      "types": "./dist/runtime-preparation/postwar-office-runtime-exports.d.ts",
+      "default": "./dist/runtime-preparation/postwar-office-runtime-exports.js"
     }
   },
   "scripts": {
