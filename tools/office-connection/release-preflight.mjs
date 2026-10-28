@@ -10,8 +10,13 @@ import { HOLD_RELEASE } from '../../scripts/world-runtime-actions.mjs';
 const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
 const files = Object.freeze({
   host: 'apps/world-worker/src/runtime-preparation/production-world-command-host.ts',
+  executor:
+    'apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts',
   api: 'apps/world-api/cloudflare/runtime-api.mjs',
   finance: 'apps/world-worker/src/intake/manual-office-intake-runtime.ts',
+  financeSource:
+    'apps/world-worker/src/persistence/finance-budget-runtime-source.ts',
+  financeWire: 'packages/core/src/commands/finance-budget-event-wire.ts',
   browser: 'apps/world-web/src/office-command/contract.ts',
   fields: 'apps/world-web/src/office-projection/model.ts',
   gate: 'status/progress.json',
@@ -64,9 +69,12 @@ export async function planOfficeRelease({
       category: 'CODE_IMPLEMENTATION_GAP',
       resolutionOwner: 'IMPLEMENTATION_AGENT',
       nextAction:
-        'Implement reviewed server-owned source, actor and Clock constructors with request-lifetime identity; preserve closed binding until actual composition exists.',
+        'Complete the formal sole-consumer and source/actor/Clock bindings behind the opaque server composition; read-only preflight and request identities do not enable execution.',
       evidence: files.host,
-      observation: observed('host', /ServerCommandHostBinding\s*=\s*never/u),
+      observation: observed(
+        'host',
+        /ServerCommandHostBinding\s*=\s*never|FORMAL_CONSUMER_NOT_STARTED/u,
+      ),
     },
     {
       code: 'CLOUD_RUNTIME_HOLD',
@@ -132,6 +140,26 @@ export async function planOfficeRelease({
     executionSupported: false,
     worldStarted: false,
     clockStarted: false,
+    implementationObservations: {
+      evidenceClass: 'OFFLINE_SOURCE_PATTERNS_NOT_RUNTIME_VERIFICATION',
+      opaqueHostRegistration:
+        source.host === null
+          ? 'UNAVAILABLE'
+          : /export function createServerCommandHostBinding/u.test(source.host),
+      readOnlyPreflight:
+        source.executor === null
+          ? 'UNAVAILABLE'
+          : /preflightOnly/u.test(source.executor) &&
+            /commandExecutionEnabled: false/u.test(source.executor),
+      conditionalBudgetSource:
+        source.financeSource === null
+          ? 'UNAVAILABLE'
+          : /withFinanceBudgetRuntimeSourceFrom/u.test(source.financeSource),
+      budgetEventWire:
+        source.financeWire === null
+          ? 'UNAVAILABLE'
+          : /wireOnly: true/u.test(source.financeWire),
+    },
     gate,
     authorization: {
       userRequestedOutcome: 'ALL_OFFICE_DATA_CONNECTION_AND_CLOUD_RELEASE',
@@ -259,7 +287,7 @@ export async function planOfficeRelease({
           'SIGN_BUYER_FINANCE',
           'BIND_REFERENCE',
         ],
-        budgetIntent: 'SCHEMA_ONLY_RUNTIME_REJECTED',
+        budgetIntent: 'CONDITIONAL_WIRE_PRODUCTION_INTAKE_REJECTED',
         browserBudgetIntent: 'NOT_CONNECTED',
         missingProjectedFields: [
           'Available treasury balance',

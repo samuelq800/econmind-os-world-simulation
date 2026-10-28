@@ -12,6 +12,13 @@ describe('offline office release preflight', () => {
     const report = await planOfficeRelease({ env: {} });
     expect(report.status).toBe('BLOCKED');
     expect(report.productionReady).toBe(false);
+    expect(report.implementationObservations).toEqual({
+      evidenceClass: 'OFFLINE_SOURCE_PATTERNS_NOT_RUNTIME_VERIFICATION',
+      opaqueHostRegistration: true,
+      readOnlyPreflight: true,
+      conditionalBudgetSource: true,
+      budgetEventWire: true,
+    });
     expect(
       report.blockers.find((b) => b.code === 'FORMAL_RUNTIME_HOST_UNAVAILABLE')
         ?.observation,
@@ -25,7 +32,7 @@ describe('offline office release preflight', () => {
       'NOT_REGISTERED',
     );
     expect(report.offices.finance.budgetIntent).toBe(
-      'SCHEMA_ONLY_RUNTIME_REJECTED',
+      'CONDITIONAL_WIRE_PRODUCTION_INTAKE_REJECTED',
     );
   });
 

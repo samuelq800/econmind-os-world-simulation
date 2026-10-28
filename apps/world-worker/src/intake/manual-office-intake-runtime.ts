@@ -65,29 +65,49 @@ export function createManualOfficeIntakeRuntime(
   };
   const captain = input.readers.captain,
     centralBank = input.readers.centralBank;
+  const guardedCaptainRead = async (
+    read: () => ReturnType<
+      NonNullable<ManualOfficeRuntimeReaders['captain']>['read']
+    >,
+  ) => {
+    const before = await head();
+    const result = await read();
+    if (result.kind === 'READ') {
+      const after = await head();
+      if (
+        result.snapshot.worldVersion !== before.world_version ||
+        result.snapshot.lastEventSequence !== before.event_sequence ||
+        after.world_version !== before.world_version ||
+        after.event_sequence !== before.event_sequence
+      )
+        throw new DomainError(
+          DOMAIN_ERROR_CODES.VERSION_MISMATCH,
+          'Captain source must bind actual stable head/sequence',
+        );
+    }
+    return result;
+  };
   const readers: ManualOfficeRuntimeReaders = {
     ...input.readers,
     ...(captain
       ? {
           captain: {
             async read(request) {
-              const before = await head();
-              const read = await captain.read(request);
-              if (read.kind === 'READ') {
-                const after = await head();
-                if (
-                  read.snapshot.worldVersion !== before.world_version ||
-                  read.snapshot.lastEventSequence !== before.event_sequence ||
-                  after.world_version !== before.world_version ||
-                  after.event_sequence !== before.event_sequence
-                )
-                  throw new DomainError(
-                    DOMAIN_ERROR_CODES.VERSION_MISMATCH,
-                    'Captain source must bind actual stable head/sequence',
-                  );
-              }
-              return read;
+              return guardedCaptainRead(() => captain.read(request));
             },
+            ...(captain.readCanonical === undefined
+              ? {}
+              : {
+                  readCanonical: (
+                    request: Parameters<
+                      NonNullable<ManualOfficeRuntimeReaders['captain']>['read']
+                    >[0],
+                    command: CanonicalCommand,
+                  ) =>
+                    guardedCaptainRead(() =>
+                      captain.readCanonical!(request, command),
+                    ),
+                }),
           },
         }
       : {}),

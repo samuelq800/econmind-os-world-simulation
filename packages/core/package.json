@@ -16,6 +16,14 @@
       "types": "./dist/commands/authenticated-office-command-contract.d.ts",
       "default": "./dist/commands/authenticated-office-command-contract.js"
     },
+    "./finance-budget-conditional-contract": {
+      "types": "./dist/commands/finance-budget-conditional-contract.d.ts",
+      "default": "./dist/commands/finance-budget-conditional-contract.js"
+    },
+    "./finance-budget-event-wire-contract": {
+      "types": "./dist/commands/finance-budget-event-wire-contract.d.ts",
+      "default": "./dist/commands/finance-budget-event-wire-contract.js"
+    },
     "./economic-read-visibility-contract": {
       "types": "./dist/authorization/economic-read-visibility-contract.d.ts",
       "default": "./dist/authorization/economic-read-visibility-contract.js"
