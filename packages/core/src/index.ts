@@ -180,5 +180,38 @@ export {
 // Preserve the original production guard value exports; extend only the joint writer type.
 export type { InventoryLedgerPosting } from './inventory/inventory-ledger.js';
 
-export * from './finance/beneficial-housing-rent.js';
-export * from './commands/social-employment-position-lifecycle.js';
+export {
+  BENEFICIAL_HOUSING_RENT_COMMAND,
+  BENEFICIAL_HOUSING_RENT_EVENT,
+  reclassifyBeneficialHousingSeed,
+  verifyBeneficialHousingReclassification,
+  aggregateBeneficialHousingLiquidClaim,
+  createBeneficialHousingRentState,
+  synchronizeBeneficialHousingRentState,
+  prepareBeneficialHousingRent,
+  settleBeneficialHousingRent,
+  replayBeneficialHousingRent,
+  type BeneficialHousingGroup,
+  type BeneficialHousingRegion,
+  type BeneficialHousingPool,
+  type BeneficialHousingLease,
+  type BeneficialHousingReclassificationInput,
+  type BeneficialHousingReclassificationReceipt,
+  type BeneficialRentPaidReceipt,
+  type BeneficialHousingRentState,
+  type BeneficialHousingRentDraft,
+} from './finance/beneficial-housing-rent.js';
+export {
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATED_EVENT,
+  SOCIAL_POSITION_OFFER_POLICY,
+  parseSocialPositionOfferCreateIntent,
+  createSocialPositionOfferLifecycleState,
+  prepareAuthorizedSocialPositionOfferCreate,
+  reduceSocialPositionOfferCreatedEvent,
+  type SocialPositionOfferCreateIntent,
+  type SocialPositionPayrollReservation,
+  type SocialPositionOfferLifecycleState,
+  type SocialPositionOfferReadFacts,
+  type SocialPositionOfferPreparedOperation,
+} from './commands/social-employment-position-lifecycle.js';
