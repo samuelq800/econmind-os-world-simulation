@@ -1,10 +1,13 @@
-/** Server-only request-scoped reads. No browser entry, World/Clock startup,
- * command admission, signer or generic runtime-ready callback. */
+/** Server-only bounded page/header reads. Offline source hydration and
+ * projection publication are excluded from this API entrypoint. */
 export {
-  createPostwarSocialRuntimeConsumer,
-  type PostwarSocialRuntimeConsumer,
-  type PostwarSocialRuntimeCountryRead,
-} from '../persistence/postwar-social-runtime-consumer.js';
+  createPostwarOfficeProjectionStore,
+  PostwarOfficeProjectionStoreError,
+  POSTWAR_PROJECTION_DATASETS,
+  type PostwarProjectionOffice,
+  type PostwarOfficeProjectionScope,
+  type PostwarOfficeProjectionSource,
+  type PostwarOfficeProjectionSeatHeader,
+  type PostwarOfficeProjectionPage,
+} from '../persistence/postwar-office-projection-store.js';
 export type { SqlExecutor } from '../persistence/sql-database.js';
-
-export { PostwarOperatingRuntimeSourceError } from '../persistence/postwar-operating-runtime-source.js';
