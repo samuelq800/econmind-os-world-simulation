@@ -1,0 +1,70 @@
+# Postwar 办公室连接复跑流程
+
+这是云端隔离验收流程，不是生产准入、迁移批准或 World/Clock 启动命令。
+固定 Node 24.20.0、pnpm 12.3.4、冻结锁文件；先保存待验收的完整 commit SHA。
+不要将 Mac 路径、生产 DSN 或聊天中的密钥用于本流程。
+
+## 1. 清单和普通检查
+
+```bash
+pnpm connections:plan
+pnpm check
+```
+
+清单分母是 120 模块、1126 输入、158 读出；抽屉或新正文的若干字段不能算全部接通。
+普通检查中未启用的 native suites 会跳过。单独记录其 `NOT_RUN`，不能计作数据库验收通过。
+
+## 2. 离线开局与隔离 PostgreSQL
+
+`pnpm genesis:prepare --world WORLD_ID --seed SEED_ID --value-date YYYY-MM-DD --out NEW_DIRECTORY`
+只生成版本化准备文件；使用记录的开局参数、原件和 policy。不得覆盖已有目录或重置生产。
+当前实际 c427 reference 的 world/seed 分别为
+`WORLD_PREPARATION_POSTWAR_CLI_V1` / `SEED_PREPARATION_POSTWAR_CLI_V1`。
+fixture 仍严格检查完整 seed fingerprint；其他场景须单独审阅其预期，不能删掉 pin。
+
+隔离 bootstrap 已实现在 `tests/support/postwar-native-reference-db.ts`，使用固定镜像、
+私有 Unix socket、具 ownership nonce 的 Docker named volume，以及临时 TEST_ONLY 签名。
+只在明确需要新隔离参考库时执行：
+
+```bash
+ECONMIND_POSTWAR_REFERENCE_BOOTSTRAP=1 \
+ECONMIND_POSTWAR_REFERENCE_SEED_FILE=/absolute/path/to/final-seed.json \
+ECONMIND_POSTWAR_REFERENCE_EVIDENCE_DIRECTORY=/workspace/.cloud-setup/evidence/NEW_RUN \
+pnpm exec vitest run tests/world-core/postwar-native-reference-db.test.ts
+```
+
+已封存参考库应加载 marker 并克隆；不得伪写 descriptor、回退 head、重建已有 reference，
+或把 TEST_ONLY key/role 当生产权限。完整种子只在离线校验/发布阶段读取；在线接口使用有界小源。
+
+## 3. 分层验收
+
+| 层         | 必须保存的证据                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| 原件与开局 | source/policy SHA、完整 seed fingerprint、人口/资金/容量不变量；正式值、生成值、缺值分开         |
+| 命令与提交 | 实际 canonical command、events、receipt、同事务账本/状态；旧 FINAL 优先恢复、重复不重复发钱/分配 |
+| 权限       | 实际 PG 低权角色；错用户、国家、办公室、撤权、原始表拒绝；不以 BYPASSRLS 修错                    |
+| 重启与读取 | 新进程恢复、同 head 来源和分页版本；未知前缀/未更新投影返回不可用，不能展示旧值为当前            |
+| 浏览器     | 实际 JWT/HTTP/PG 后的 Chromium；切国/切办公室/撤权清除私有 DOM；组件与 full-app 证据分列         |
+| 发布       | 最终不可变 SHA 的适用完整检查、迁移目录及角色依赖、独立审查、provider 版本/回滚读回              |
+
+现有可选 suites 的输入通过环境变量给出**实际生成的**封存 descriptor：
+
+| 验收                   | 变量                                                                                           | 测试                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| H6→H7 mixed 小源与重启 | `ECONMIND_POSTWAR_MIXED_H6_CHECKPOINT`                                                         | `postwar-finance-budget-mixed-capacity-native.test.ts` |
+| 两国 Social 当前读     | `ECONMIND_SOCIAL_PREFIX_HTTP_CHECKPOINT`，浏览器另置 `ECONMIND_SOCIAL_PREFIX_BROWSER_VERIFY=1` | `postwar-social-current-prefix-http-browser.test.ts`   |
+| 库存 V2 直接来源       | `ECONMIND_POSTWAR_PHYSICAL_HTTP_PREPARED_V2_TEMPLATE`                                          | `postwar-physical-opening-http-browser.test.ts`        |
+| Finance 主字段         | `ECONMIND_MAIN_FIELDS_HTTP_TEMPLATE`                                                           | `main-office-finance-fields-http-browser.test.ts`      |
+
+以上文件位于 `tests/world-api/`。使用 `pnpm exec vitest run <file>`，检查实际 case 数、零跳过和 cleanup；
+保留失败原件，修复后另存新结果。每次封存源码 SHA、执行命令、退出码和报告 hash。
+重测试错峰；来源准备成功后复用 sealed 小源，不为重试在线错误反复初始化世界。
+
+## 当前边界
+
+Finance 已有受控预算写链与重启验收，Social 已有 POSITION/PLAN/MATCH 和跨国当前读取；
+其余办公室已有受控历史/账本读取样本。它们不代表 120 模块全部完成或生产已发布。
+Finance 主页面新增覆盖是 HUD 1 项和只读正文 10 项，不包含政策输入提交。
+工资支付仍需真实 completed-day recognition；生产仍需实际用水交付及合格运行成本等原件。
+GCU 新初态未获批准，不能从 B/R 拆分或自行生成。库存旧指针仅为采用上下文，V2 才区分金融直接来源。
+最终发布仍须现有生产发布链、具体最小角色和 provider 配置，不使用开发服务代替正式上线。

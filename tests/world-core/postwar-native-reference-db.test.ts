@@ -18,7 +18,9 @@ gated('isolated shared PG16.15 reference', () => {
       evidenceDirectory:
         process.env.ECONMIND_POSTWAR_REFERENCE_EVIDENCE_DIRECTORY ??
         '/workspace/.cloud-setup/evidence/postwar-reference-persistent-20261028',
-      seedFile: '/tmp/econmind-postwar-cli-20261028T1602/final-seed.json',
+      seedFile:
+        process.env.ECONMIND_POSTWAR_REFERENCE_SEED_FILE ??
+        '/tmp/econmind-postwar-cli-20261028T1602/final-seed.json',
     });
     expect(marker.baselineSealed).toBe(true);
     expect(marker.pgDataStorage.kind).toBe('DOCKER_NAMED_VOLUME');
