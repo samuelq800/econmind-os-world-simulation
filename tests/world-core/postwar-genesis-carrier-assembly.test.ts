@@ -29,6 +29,7 @@ let prepared: Awaited<ReturnType<typeof preparePostwarWorldGenesis>>;
 let assembled: Awaited<ReturnType<typeof assemblePostwarGenesisCarrier>>;
 let newWorldScope: Awaited<ReturnType<typeof readPostwarNewWorldScopeFrom>>;
 beforeAll(async () => {
+  const preparationStarted = performance.now();
   prepared = await preparePostwarWorldGenesis({
     repositoryRoot: root,
     worldId: world,
@@ -36,6 +37,7 @@ beforeAll(async () => {
     genesisVersion: 'POSTWAR_OPERATING_20261028_V1',
     valueDate: '2026-10-28',
   });
+  const preparationMs = performance.now() - preparationStarted;
   await db.exec(
     'create schema world_v2;create table world_v2.world_head(world_id text primary key);create table world_v2.opening_seed(world_id text primary key)',
   );
@@ -56,7 +58,16 @@ beforeAll(async () => {
   } finally {
     await db.exec('rollback');
   }
+  const assemblyStarted = performance.now();
   assembled = await assemblePostwarGenesisCarrier({ prepared, newWorldScope });
+  console.info(
+    'POSTWAR_CARRIER_SETUP_TIMING',
+    JSON.stringify({
+      preparationMs,
+      assemblyMs: performance.now() - assemblyStarted,
+      totalMs: performance.now() - preparationStarted,
+    }),
+  );
 }, 120_000);
 afterAll(async () => {
   await db.close();
@@ -75,6 +86,7 @@ describe('actual postwar operating canonical carrier assembly', () => {
     expect(assembled.readback.facts.regions).toHaveLength(122);
     expect(assembled.readback.socialEmployment?.countries).toHaveLength(70);
     const current = readPostwarOperatingGenesisFromSeed(assembled.finalSeed);
+    expect(current.socialEmployment).toBe(assembled.socialEmployment);
     expect(current.seedFingerprint).toBe(assembled.finalSeed.fingerprint);
     expect(current.socialEmployment?.inputs.seedId).toBe(seed);
     expect(

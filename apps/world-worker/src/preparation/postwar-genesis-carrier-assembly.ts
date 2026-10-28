@@ -7,7 +7,6 @@ import {
   canonicalSerialize,
   canonicalDecimal,
   Money,
-  parseOpeningSeed,
   type OpeningSeed,
 } from '@econmind/core';
 import type { preparePostwarWorldGenesis } from './postwar-world-genesis.js';
@@ -16,6 +15,7 @@ import {
   POSTWAR_SELECTED_SOURCE_PINS,
   adoptPostwarOperatingGenesis,
   readPostwarOperatingGenesisFromSeed,
+  requirePostwarSha256OpeningSeed,
   type PostwarOperatingGenesisCarrier,
   type PostwarOperatingGenesisFacts,
   type PostwarGenesisSourceDocument,
@@ -127,10 +127,7 @@ export async function assemblePostwarGenesisCarrier(
   );
   consumePostwarUtilityInputs(p.utilities);
   consumePostwarUtilityAllocation(p.utilityAllocations);
-  const supplySeed = parseOpeningSeed(
-    JSON.parse(canonicalSerialize(p.supplySeed)),
-    sha,
-  );
+  const supplySeed = requirePostwarSha256OpeningSeed(p.supplySeed);
   same(
     supplySeed,
     appendPostwarOperatingSupplies(p.financial.baselineSeed, p.supplies),

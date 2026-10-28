@@ -3,9 +3,12 @@
 import { createHash } from 'node:crypto';
 import {
   canonicalSerialize,
+  canonicalHashInput,
+  CANONICAL_HASH_ALGORITHM,
   createOpeningSource,
   createOpeningSeed,
   parseOpeningSeed,
+  isValidatedOpeningSeed,
   rebuildV08LedgersFromLineage,
   OPENING_SOURCE_SCHEMA_VERSION,
   OPENING_SEED_SCHEMA_VERSION,
@@ -272,9 +275,10 @@ export type PostwarOperatingGenesisView = Readonly<{
   facts: PostwarOperatingGenesisFacts;
   socialEmployment: PostwarSocialEmploymentStateDocument | null;
   physicalServiceReceiptDocumentId: string | null;
+  financialOfficeOriginalsDocument: PostwarGenesisSourceDocument | null;
 }>;
 // Immutable source interpretation only. Every lookup is preceded by genuine
-// Core parsing/content-hash verification; no actor, admission or current head
+// immutable Core seed identity or full parsing/content-hash verification; no actor, admission or current head
 // is cached. Bounds cover actual canonical UTF-8 bytes, not just entry count.
 const derivedViews = new Map<
   string,
@@ -403,7 +407,17 @@ function sourceCount(value: unknown, field: string): bigint {
   return BigInt(value);
 }
 function validateCarrier(input: unknown, base: OpeningSeed) {
-  const carrier = clone(input) as PostwarOperatingGenesisCarrier;
+  need(
+    input && typeof input === 'object' && !Array.isArray(input),
+    'GENESIS_SCHEMA_INVALID',
+    'carrier',
+  );
+  // Isolate mutable caller facts, while allowing the E03 validator to recognize
+  // its own immutable document identity. Serialized/copied documents still take
+  // its complete Core/policy re-derivation below; no caller flag is accepted.
+  const { socialEmployment: employmentInput, ...carrierInput } =
+    input as PostwarOperatingGenesisCarrier;
+  const carrier = clone(carrierInput) as PostwarOperatingGenesisCarrier;
   need(
     carrier &&
       carrier.schemaVersion === 'postwar-operating-genesis-v1' &&
@@ -1164,10 +1178,9 @@ function validateCarrier(input: unknown, base: OpeningSeed) {
     'OBLIGATION_INITIAL_EVENT_MISSING',
     'events',
   );
-  if (carrier.socialEmployment !== undefined) {
-    const employment = validatePostwarSocialEmploymentStateDocument(
-      carrier.socialEmployment,
-    );
+  if (employmentInput !== undefined) {
+    const employment =
+      validatePostwarSocialEmploymentStateDocument(employmentInput);
     // Preserve the validator's immutable checked document in the derived
     // view. Its canonical bytes were compared exactly; returning the original
     // structural copy would force country selectors to rebuild all 70 again.
@@ -1233,6 +1246,38 @@ function validateCarrier(input: unknown, base: OpeningSeed) {
   };
 }
 
+/** Immutable data reuse only. Core identity cannot authenticate a DI digest:
+ * verify the real outer and every nested source SHA before reusing a seed.
+ * DTOs retain the complete canonical parser path. No authority/head is cached. */
+export function requirePostwarSha256OpeningSeed(input: unknown): OpeningSeed {
+  if (
+    !input ||
+    typeof input !== 'object' ||
+    !isValidatedOpeningSeed(input) ||
+    !Object.isFrozen(input)
+  )
+    return parseOpeningSeed(clone(input), sha);
+  for (const source of input.sources) {
+    const payloadHash = createHash('sha256')
+      .update(`${CANONICAL_HASH_ALGORITHM}\n{"payload":`)
+      .update(source.canonicalPayload)
+      .update('}')
+      .digest('hex');
+    need(
+      source.payloadHash === `sha256:${payloadHash}`,
+      'CORE_SOURCE_HASH_BINDING_MISMATCH',
+      source.sourceId,
+    );
+  }
+  const { fingerprint, ...intent } = input;
+  need(
+    fingerprint === `sha256:${sha(canonicalHashInput(intent))}`,
+    'CORE_SEED_HASH_BINDING_MISMATCH',
+    'seed.fingerprint',
+  );
+  return input;
+}
+
 function blocked(error: unknown): PostwarOperatingGenesisAdoption {
   const known = error instanceof InvalidGenesis;
   return freeze({
@@ -1265,7 +1310,7 @@ export function adoptPostwarOperatingGenesis(input: {
   readonly newWorldScope: PostwarNewWorldScope;
 }): PostwarOperatingGenesisAdoption {
   try {
-    const baseline = parseOpeningSeed(clone(input.baselineSeed), sha);
+    const baseline = requirePostwarSha256OpeningSeed(input.baselineSeed);
     need(
       newWorldScopes.has(input.newWorldScope) &&
         input.newWorldScope.worldId === baseline.worldId,
@@ -1305,28 +1350,24 @@ export function adoptPostwarOperatingGenesis(input: {
       },
       sha,
     );
-    const seed = parseOpeningSeed(
-      clone(
-        createOpeningSeed(
-          {
-            schemaVersion: OPENING_SEED_SCHEMA_VERSION,
-            seedId: openingSeedId(baseline.seedId),
-            worldId: worldId(baseline.worldId),
-            openingWorldVersion: '0',
-            replayBinding: baseline.replayBinding,
-            sources: [...baseline.sources, source],
-            inventoryEntries: baseline.inventoryEntries,
-            financialBatches: baseline.financialBatches,
-          },
-          sha,
-        ),
-      ),
+    const seed = createOpeningSeed(
+      {
+        schemaVersion: OPENING_SEED_SCHEMA_VERSION,
+        seedId: openingSeedId(baseline.seedId),
+        worldId: worldId(baseline.worldId),
+        openingWorldVersion: '0',
+        replayBinding: baseline.replayBinding,
+        sources: [...baseline.sources, source],
+        inventoryEntries: baseline.inventoryEntries,
+        financialBatches: baseline.financialBatches,
+      },
       sha,
     );
     rebuildV08LedgersFromLineage({ seed, sha256Hex: sha });
-    // Full validation preceded construction, and genuine Core parse/rebuild
-    // now binds those exact bytes. Retain that immutable interpretation rather
-    // than re-deriving all 70 again; the fixed reader still parses/re-hashes.
+    // Full validation preceded the genuine Core constructor with our fixed
+    // SHA-256 implementation, followed by the unchanged Core ledger rebuild.
+    // Re-parsing a JSON clone would repeat the same checks and discard all
+    // immutable identities; the fixed reader still checks actual source hashes.
     rememberDerivedView(
       freeze({
         schemaVersion: 'postwar-operating-genesis-derived-view-v1',
@@ -1339,6 +1380,11 @@ export function adoptPostwarOperatingGenesis(input: {
         socialEmployment: verified.carrier.socialEmployment ?? null,
         physicalServiceReceiptDocumentId:
           verified.carrier.physicalServiceReceiptDocumentId ?? null,
+        financialOfficeOriginalsDocument:
+          verified.carrier.documents.find(
+            (document) =>
+              document.documentId === POSTWAR_FINANCIAL_OFFICE_ORIGINALS_ID,
+          ) ?? null,
       }),
     );
     readPostwarOperatingGenesisFromSeed(seed);
@@ -1386,7 +1432,44 @@ export function preparePostwarOperatingGenesisFromFinancialSupplement(input: {
 export function readPostwarOperatingGenesisFromSeed(
   input: unknown,
 ): PostwarOperatingGenesisView {
-  const seed = parseOpeningSeed(clone(input), sha);
+  // Core constructors/parsers own the WeakSet identity and freeze the seed,
+  // sources and ledger inputs. Reuse only that exact immutable object; copied
+  // DTOs/proxies still take full canonical parsing and fingerprint verification
+  // before a derived-view cache lookup. This is data reuse, never admission,
+  // current-head, transaction or authorization reuse.
+  const seed =
+    input !== null &&
+    typeof input === 'object' &&
+    isValidatedOpeningSeed(input) &&
+    Object.isFrozen(input)
+      ? input
+      : parseOpeningSeed(clone(input), sha);
+  // Core constructors deliberately accept an injected digest implementation.
+  // Identity proves immutable structure, not that that injected implementation
+  // was SHA-256. Verify the actual intent hash before looking up by fingerprint;
+  // this still avoids cloning and reparsing the entire immutable seed.
+  if (seed === input) {
+    for (const source of seed.sources) {
+      // A genuine source already owns canonical immutable payload bytes. Hash
+      // the same one-key canonical envelope without parsing those bytes again.
+      const payloadHash = createHash('sha256')
+        .update(`${CANONICAL_HASH_ALGORITHM}\n{"payload":`)
+        .update(source.canonicalPayload)
+        .update('}')
+        .digest('hex');
+      need(
+        source.payloadHash === `sha256:${payloadHash}`,
+        'CORE_SOURCE_HASH_BINDING_MISMATCH',
+        source.sourceId,
+      );
+    }
+    const { fingerprint, ...intent } = seed;
+    need(
+      fingerprint === `sha256:${sha(canonicalHashInput(intent))}`,
+      'CORE_SEED_HASH_BINDING_MISMATCH',
+      'seed.fingerprint',
+    );
+  }
   const cached = derivedViews.get(seed.fingerprint);
   if (cached) {
     derivedViews.delete(seed.fingerprint);
@@ -1458,6 +1541,11 @@ export function readPostwarOperatingGenesisFromSeed(
     socialEmployment: verified.carrier.socialEmployment ?? null,
     physicalServiceReceiptDocumentId:
       verified.carrier.physicalServiceReceiptDocumentId ?? null,
+    financialOfficeOriginalsDocument:
+      verified.carrier.documents.find(
+        (document) =>
+          document.documentId === POSTWAR_FINANCIAL_OFFICE_ORIGINALS_ID,
+      ) ?? null,
   });
   rememberDerivedView(view);
   return view;

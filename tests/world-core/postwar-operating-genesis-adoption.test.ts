@@ -22,6 +22,7 @@ import {
   financialOpeningLegId,
   Money,
   rebuildV08LedgersFromLineage,
+  isValidatedOpeningSeed,
   type FinancialOpeningBatch,
 } from '@econmind/core';
 import {
@@ -32,6 +33,7 @@ import {
   readPostwarOperatingGenesisFromSeed,
   isPostwarOperatingGenesisAdoption,
   preparePostwarOperatingGenesisFromFinancialSupplement,
+  requirePostwarSha256OpeningSeed,
   type PostwarOperatingGenesisCarrier,
   type PostwarOperatingGenesisFacts,
   type PostwarNewWorldScope,
@@ -687,5 +689,96 @@ describe('versioned postwar operating source adoption and canonical seed consume
     expect(duplicate.blockers[0]?.code).toBe(
       'OPERATING_SOURCE_ALREADY_ATTACHED',
     );
+  });
+  it('reuses only genuine immutable Core seeds and still verifies copied, frozen-DTO and proxy inputs before a cache hit', () => {
+    const seed = adopt().seed!;
+    expect(isValidatedOpeningSeed(seed)).toBe(true);
+    expect(Object.isFrozen(seed)).toBe(true);
+    const view = readPostwarOperatingGenesisFromSeed(seed);
+    expect(Reflect.set(seed, 'worldId', 'WORLD_FORGED')).toBe(false);
+    expect(Reflect.set(seed.sources[0]!, 'canonicalPayload', '{}')).toBe(false);
+    expect(readPostwarOperatingGenesisFromSeed(seed)).toBe(view);
+    const dto = copy(seed);
+    expect(isValidatedOpeningSeed(dto)).toBe(false);
+    expect(readPostwarOperatingGenesisFromSeed(dto)).toEqual(view);
+    expect(
+      readPostwarOperatingGenesisFromSeed(Object.freeze(copy(seed))),
+    ).toEqual(view);
+    const proxy = new Proxy(seed, {});
+    expect(isValidatedOpeningSeed(proxy)).toBe(false);
+    expect(() => readPostwarOperatingGenesisFromSeed(proxy)).toThrow('Proxy');
+    const altered = copy(seed);
+    Object.assign(altered.sources[0]!, { canonicalPayload: '{}' });
+    expect(() =>
+      readPostwarOperatingGenesisFromSeed(Object.freeze(altered)),
+    ).toThrow();
+    expect(() =>
+      readPostwarOperatingGenesisFromSeed({
+        ...seed,
+        fingerprint: 'sha256:' + '0'.repeat(64),
+      }),
+    ).toThrow();
+    const wrongDigestSeed = createOpeningSeed(
+      { ...seed, seedId: openingSeedId('SEED_WRONG_INJECTED_DIGEST') },
+      () => seed.fingerprint.slice('sha256:'.length),
+    );
+    expect(isValidatedOpeningSeed(wrongDigestSeed)).toBe(true);
+    expect(() => readPostwarOperatingGenesisFromSeed(wrongDigestSeed)).toThrow(
+      'CORE_SEED_HASH_BINDING_MISMATCH',
+    );
+    const originalSource = seed.sources[0]!;
+    const wrongSourceDigest = createOpeningSource(
+      {
+        schemaVersion: originalSource.schemaVersion,
+        sourceId: originalSource.sourceId,
+        sourceKind: originalSource.sourceKind,
+        locator: originalSource.locator,
+        sourceVersion: originalSource.sourceVersion,
+        payload: JSON.parse(originalSource.canonicalPayload),
+      },
+      () => '0'.repeat(64),
+    );
+    const nestedWrongDigestSeed = createOpeningSeed(
+      {
+        ...seed,
+        sources: [wrongSourceDigest, ...seed.sources.slice(1)],
+      },
+      sha,
+    );
+    expect(isValidatedOpeningSeed(nestedWrongDigestSeed)).toBe(true);
+    expect(() =>
+      readPostwarOperatingGenesisFromSeed(nestedWrongDigestSeed),
+    ).toThrow('CORE_SOURCE_HASH_BINDING_MISMATCH');
+  });
+  it('reuses assembly seeds only after real outer/source SHA checks and fully parses detached DTOs', () => {
+    const seed = fixture.baselineSeed;
+    expect(requirePostwarSha256OpeningSeed(seed)).toBe(seed);
+    const copied = requirePostwarSha256OpeningSeed(copy(seed));
+    expect(copied).toEqual(seed);
+    expect(copied).not.toBe(seed);
+    const wrongOuter = createOpeningSeed(
+      { ...seed, seedId: openingSeedId('SEED_BAD_ASSEMBLY_DIGEST') },
+      () => seed.fingerprint.slice(7),
+    );
+    expect(() => requirePostwarSha256OpeningSeed(wrongOuter)).toThrow(
+      'CORE_SEED_HASH_BINDING_MISMATCH',
+    );
+    const original = seed.sources[0]!;
+    const wrongSource = createOpeningSource(
+      { ...original, payload: JSON.parse(original.canonicalPayload) },
+      () => '0'.repeat(64),
+    );
+    const nested = createOpeningSeed(
+      { ...seed, sources: [wrongSource, ...seed.sources.slice(1)] },
+      sha,
+    );
+    expect(() => requirePostwarSha256OpeningSeed(nested)).toThrow(
+      'CORE_SOURCE_HASH_BINDING_MISMATCH',
+    );
+    const detached = copy(seed);
+    Object.assign(detached.sources[0]!, { canonicalPayload: '{}' });
+    expect(() =>
+      requirePostwarSha256OpeningSeed(Object.freeze(detached)),
+    ).toThrow();
   });
 });
