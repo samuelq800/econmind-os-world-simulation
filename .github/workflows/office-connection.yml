@@ -42,6 +42,11 @@ jobs:
           node-version: 24.20.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Build declared workspace contracts before focused tests
+        run: >-
+          pnpm --filter @econmind/core build &&
+          pnpm --filter @econmind/world-worker build &&
+          pnpm --filter @econmind/world-api build
       - name: Enumerate every required connection without claiming live readiness
         run: node tools/office-connection/run.mjs --plan --out node_modules/.cache/office-connection/plan.json
       - name: Execute contract, evidence and shipped client regressions

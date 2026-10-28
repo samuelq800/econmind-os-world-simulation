@@ -9,6 +9,16 @@ import {
 } from '../../scripts/migration-policy.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
+const frozenHistory = [
+  {
+    commit: 'ea492a2d76daf2eab600a58c866d7f600a53112f',
+    path: 'database/migrations/manifest.json',
+  },
+  {
+    commit: 'ff8ecb931389d53e7fe70897c5d0c06183cf0e09',
+    path: 'tests/world-core/world-writer-lease-renewal-postgres.test.ts',
+  },
+];
 export function migrationSourceCommits(manifest) {
   if (!Array.isArray(manifest?.migrations) || manifest.migrations.length === 0)
     throw Error('MIGRATION_MANIFEST_INVALID');
@@ -27,7 +37,12 @@ export async function checkMigrationSources({ fetchMissing = false } = {}) {
       'utf8',
     ),
   );
-  const commits = migrationSourceCommits(manifest);
+  const commits = [
+    ...new Set([
+      ...migrationSourceCommits(manifest),
+      ...frozenHistory.map((item) => item.commit),
+    ]),
+  ];
   const git = (args) =>
     spawnSync('git', args, {
       cwd: root,
@@ -75,6 +90,11 @@ export async function checkMigrationSources({ fetchMissing = false } = {}) {
     missing: commits.filter((commit) => !present(commit)),
     fetched,
     validation,
+    frozenHistory: frozenHistory.map((item) => ({
+      ...item,
+      present:
+        git(['cat-file', '-e', `${item.commit}:${item.path}`]).status === 0,
+    })),
     productionMutation: false,
     headChanged: false,
   };
@@ -98,7 +118,9 @@ if (
       .then((result) => {
         process.stdout.write(JSON.stringify(result, null, 2) + '\n');
         process.exitCode =
-          result.missing.length === 0 && result.validation.status === 'PASS'
+          result.missing.length === 0 &&
+          result.validation.status === 'PASS' &&
+          result.frozenHistory.every((item) => item.present)
             ? 0
             : 2;
       })

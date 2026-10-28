@@ -32,6 +32,8 @@ interface ServiceDefinition {
 
 interface ManagedPublicCommand {
   readonly child: ChildProcess;
+  /** Spawned detached leader: this PID also owns the POSIX session. */
+  readonly ownedRootPid: number | undefined;
   readonly exited: Promise<{
     code: number | null;
     signal: NodeJS.Signals | null;
@@ -71,15 +73,23 @@ function startPublicCommand(
   port: number,
   environment: NodeJS.ProcessEnv = {},
 ): ManagedPublicCommand {
-  const child = spawn('pnpm', [service.command], {
+  return startManagedCommand('pnpm', [service.command], {
+    ...process.env,
+    ECONMIND_ENV: 'local',
+    [service.environmentPort]: String(port),
+    ...environment,
+  });
+}
+
+function startManagedCommand(
+  command: string,
+  args: readonly string[],
+  environment: NodeJS.ProcessEnv,
+): ManagedPublicCommand {
+  const child = spawn(command, [...args], {
     cwd: repositoryRoot,
     detached: process.platform !== 'win32',
-    env: {
-      ...process.env,
-      ECONMIND_ENV: 'local',
-      [service.environmentPort]: String(port),
-      ...environment,
-    },
+    env: environment,
     shell: false,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -97,7 +107,7 @@ function startPublicCommand(
     child.once('error', reject);
     child.once('exit', (code, signal) => resolve({ code, signal }));
   });
-  return { child, exited, output: () => output };
+  return { child, ownedRootPid: child.pid, exited, output: () => output };
 }
 
 function signalOwnedGroup(
@@ -231,10 +241,43 @@ function descendants(rows: readonly ProcessRow[], rootPid: number) {
 
 async function liveCapturedRows(captured: readonly ProcessRow[]) {
   const rows = await readProcessTable();
-  const capturedPids = new Set(captured.map((row) => row.pid));
   return rows.filter(
-    (row) => capturedPids.has(row.pid) && !row.state.startsWith('Z'),
+    (row) =>
+      !row.state.startsWith('Z') &&
+      captured.some(
+        (owned) =>
+          row.pid === owned.pid &&
+          row.pgid === owned.pgid &&
+          row.session === owned.session,
+      ),
   );
+}
+
+/** Readiness can fail before the caller captures descendants. Start from the
+ * detached root recorded at spawn, validate its session, and refresh only its
+ * own descendants/session. Never discover unrelated pnpm/runtime processes by
+ * command name. Session matching also retains children after the leader exits.
+ */
+async function cleanupManagedCommand(
+  managed: ManagedPublicCommand,
+  captured: readonly ProcessRow[] = [],
+) {
+  const pid = managed.ownedRootPid;
+  if (pid === undefined) return;
+  const rows = await readProcessTable();
+  const root = rows.find((row) => row.pid === pid);
+  if (root && (root.session !== pid || root.pgid !== pid))
+    throw new Error(
+      'Owned public root session identity changed; refusing cleanup',
+    );
+  const fresh = rows.filter((row) => row.session === pid);
+  const descendantsNow = root ? descendants(rows, pid) : [];
+  const owned = [
+    ...new Map(
+      [...captured, ...fresh, ...descendantsNow].map((row) => [row.pid, row]),
+    ).values(),
+  ];
+  await cleanupCapturedProcesses(owned);
 }
 
 async function cleanupCapturedProcesses(captured: readonly ProcessRow[]) {
@@ -263,6 +306,11 @@ async function cleanupCapturedProcesses(captured: readonly ProcessRow[]) {
       // The process exited between observation and cleanup.
     }
   }
+  await waitUntil(
+    async () => (await liveCapturedRows(captured)).length === 0,
+    1_000,
+    'forced owned test cleanup',
+  );
 }
 
 async function publicBoundaryAttack(
@@ -322,7 +370,7 @@ async function publicBoundaryAttack(
     };
   } finally {
     if (observed === undefined || observed.survivors.length > 0) {
-      await cleanupCapturedProcesses(captured);
+      await cleanupManagedCommand(managed, captured);
     }
   }
   return observed;
@@ -388,7 +436,7 @@ async function repeatedSignalAttack(
     };
   } finally {
     socket?.destroy();
-    await cleanupCapturedProcesses(captured);
+    await cleanupManagedCommand(managed, captured);
   }
 }
 
@@ -429,7 +477,7 @@ async function startupWindowAttack(service: ServiceDefinition) {
       survivors: await liveCapturedRows(captured),
     };
   } finally {
-    await cleanupCapturedProcesses(captured);
+    await cleanupManagedCommand(managed, captured);
   }
 }
 
@@ -440,17 +488,21 @@ async function failedBuildAttack(service: ServiceDefinition) {
     port,
     preloadEnvironment(failedBuildPreload),
   );
-  const exit = await Promise.race([
-    managed.exited,
-    new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Failed build did not exit')), 5_000);
-    }),
-  ]);
-  return {
-    endpointReachable: await endpointIsReachable(port),
-    exit,
-    rebound: await canRebind(port),
-  };
+  try {
+    const exit = await Promise.race([
+      managed.exited,
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Failed build did not exit')), 5_000);
+      }),
+    ]);
+    return {
+      endpointReachable: await endpointIsReachable(port),
+      exit,
+      rebound: await canRebind(port),
+    };
+  } finally {
+    await cleanupManagedCommand(managed);
+  }
 }
 
 async function unexpectedRuntimeSignalAttack() {
@@ -474,23 +526,83 @@ async function unexpectedRuntimeSignalAttack() {
     );
     return { exit, rebound: await canRebind(port) };
   } finally {
-    await cleanupCapturedProcesses(captured);
+    await cleanupManagedCommand(managed, captured);
   }
 }
+
+describe.skipIf(process.platform === 'win32')(
+  'owned early-readiness failure cleanup',
+  () => {
+    it('cleans its root and descendant before any ready capture while preserving an unrelated owned fixture', async () => {
+      const own = startManagedCommand(
+        process.execPath,
+        [
+          '-e',
+          "const {spawn}=require('node:child_process'); const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'}); process.stdout.write('CHILD:'+child.pid+'\\n'); setInterval(()=>{},1000);",
+        ],
+        process.env,
+      );
+      const unrelated = startManagedCommand(
+        process.execPath,
+        [
+          '-e',
+          "process.stdout.write('CONTROL_READY\\n');setInterval(()=>{},1000);",
+        ],
+        process.env,
+      );
+      let expected: ProcessRow[] = [];
+      try {
+        await waitUntil(
+          () =>
+            own.output().includes('CHILD:') &&
+            unrelated.output().includes('CONTROL_READY'),
+          2_000,
+          'owned Node fixtures',
+        );
+        expected = descendants(await readProcessTable(), own.ownedRootPid!);
+        expect(expected.length).toBeGreaterThanOrEqual(2);
+        // The actual attack helpers have not yet assigned captured when readiness
+        // rejects. Preserve that exact empty-capture failure state in this test.
+        await expect(
+          (async () => {
+            try {
+              throw new Error('SIMULATED_READINESS_FAILURE');
+            } finally {
+              await cleanupManagedCommand(own, []);
+            }
+          })(),
+        ).rejects.toThrow('SIMULATED_READINESS_FAILURE');
+        expect(await liveCapturedRows(expected)).toEqual([]);
+        expect(
+          (await readProcessTable()).some(
+            (row) =>
+              row.pid === unrelated.ownedRootPid && !row.state.startsWith('Z'),
+          ),
+        ).toBe(true);
+      } finally {
+        await cleanupManagedCommand(own, expected);
+        await cleanupManagedCommand(unrelated);
+        await Promise.all([own.exited, unrelated.exited]);
+      }
+    });
+  },
+);
 
 describe.skipIf(process.platform === 'win32')(
   'V00.2 public runtime lifecycle boundary',
   () => {
     it.each(
       services.flatMap((service) =>
-        (['SIGINT', 'SIGTERM'] as const).map(
-          (signal) => [service, signal] as const,
-        ),
+        (['SIGINT', 'SIGTERM'] as const).map((signal) => ({
+          service,
+          command: service.command,
+          signal,
+        })),
       ),
     )(
-      'stops every descendant and releases the listener for $0.command $1',
+      'stops every descendant and releases the listener for $command $signal',
       { timeout: 30_000 },
-      async (service, signal) => {
+      async ({ service, signal }) => {
         const observed = await publicBoundaryAttack(service, signal);
         expect(observed.captured.length).toBeGreaterThanOrEqual(3);
         // pnpm can translate SIGINT to the conventional 128 + signal exit code.
@@ -521,12 +633,17 @@ describe.skipIf(process.platform === 'win32')(
               ['SIGINT', 'SIGTERM'],
               ['SIGTERM', 'SIGINT'],
             ] as const
-          ).map((signals) => [service, signals] as const),
+          ).map((signals) => ({
+            service,
+            command: service.command,
+            signals,
+            signalLabel: signals.join(' then '),
+          })),
         ),
     )(
-      'keeps $0.command shutdown idempotent for $1',
+      'keeps $command shutdown idempotent for $signalLabel',
       { timeout: 30_000 },
-      async (service, signals) => {
+      async ({ service, signals }) => {
         const observed = await repeatedSignalAttack(service, signals);
         expect(observed.survivedRepeat).toBe(true);
         expect(observed.launcherExit).toEqual({ code: 0, signal: null });
