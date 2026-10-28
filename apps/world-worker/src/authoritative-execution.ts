@@ -17,8 +17,16 @@ import {
   type AtomicTransitionCandidateFactory,
 } from './persistence/atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './persistence/sql-database.js';
+import {
+  WORKER_CURRENT_AUTHORIZATION_LOCK_QUERY,
+  WORKER_REVOKED_AUTHORIZATION_LOCK_QUERY,
+} from './persistence/worker-authorization-sql.js';
 import type { AtomicNarrowTransferApprovalGuard } from './persistence/narrow-transfer-approval-store.js';
 import type { SourceCommitProtectionPort } from './projections/governing-source-commit-boundary-contract.js';
+import type { SocialPositionSourceCommitProtectionPort } from './persistence/postwar-social-position-runtime.js';
+import type { FinanceBudgetNativeCommitGuard } from './persistence/postgres-finance-budget-custody.js';
+import type { SocialMatchSourceCommitProtectionPort } from './persistence/postwar-social-match-runtime.js';
+import type { CaptainSourceCommitProtectionPort } from './persistence/postwar-captain-runtime.js';
 
 interface CurrentCommitAuthorization {
   readonly authSubject: string;
@@ -59,21 +67,7 @@ class SqlServerHeldCommitAuthorizationSource {
     }>,
   ): Promise<Readonly<CurrentCommitAuthorization> | null> {
     const result = await transaction.query<CurrentCommitAuthorizationRow>(
-      `select auth_subject::text as auth_subject,
-              world_id,
-              country_id,
-              office_id,
-              capability,
-              team_id,
-              authorization_version
-         from world_v2.current_commit_authorization
-        where world_id = $1
-          and auth_subject = $2::uuid
-          and country_id = $3
-          and office_id = $4
-          and capability = $5
-          and active
-        for key share`,
+      WORKER_CURRENT_AUTHORIZATION_LOCK_QUERY,
       [
         input.command.worldId,
         input.proof.authSubject,
@@ -116,14 +110,7 @@ class SqlServerHeldCommitAuthorizationSource {
     }>,
   ): Promise<void> {
     const result = await transaction.query(
-      `select 1
-         from world_v2.current_commit_authorization
-        where world_id = $1
-          and auth_subject = $2::uuid
-          and country_id = $3
-          and office_id is not distinct from $4
-          and active
-        for key share`,
+      WORKER_REVOKED_AUTHORIZATION_LOCK_QUERY,
       [
         input.command.worldId,
         input.command.authSubject,
@@ -235,18 +222,46 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
   /** Fixed server source guard; current authorization is still independently held. */
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
+  readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
+  readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
+  readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
+  readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
 }): Readonly<AuthoritativeWorkerExecution> {
   const repository = new AtomicTransitionRepository({
     database: input.database,
     authorizationGuard: createTransactionCutoffAuthorizationGuard(),
     workerId: input.workerId,
     sha256Hex: input.sha256Hex,
+    ...(input.captainSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          captainSourceCommitProtectionPort:
+            input.captainSourceCommitProtectionPort,
+        }),
     ...(input.narrowTransferApprovalGuard === undefined
       ? {}
       : { narrowTransferApprovalGuard: input.narrowTransferApprovalGuard }),
     ...(input.sourceCommitProtectionPort === undefined
       ? {}
       : { sourceCommitProtectionPort: input.sourceCommitProtectionPort }),
+    ...(input.socialPositionSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          socialPositionSourceCommitProtectionPort:
+            input.socialPositionSourceCommitProtectionPort,
+        }),
+    ...(input.financeBudgetSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          financeBudgetSourceCommitProtectionPort:
+            input.financeBudgetSourceCommitProtectionPort,
+        }),
+    ...(input.socialMatchSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          socialMatchSourceCommitProtectionPort:
+            input.socialMatchSourceCommitProtectionPort,
+        }),
   });
   return Object.freeze({
     repository,

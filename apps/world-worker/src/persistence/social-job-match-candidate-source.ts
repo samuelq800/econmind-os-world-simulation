@@ -428,7 +428,10 @@ export function prepareSocialJobMatchAtomicDraft(input: {
       }),
     ]),
     currentMaterializations: Object.freeze([
-      { key: 'SOCIAL_EMPLOYMENT_SERVICE', payload: operation.state },
+      {
+        key: `SOCIAL_EMPLOYMENT_SERVICE_${p.command.countryId}`,
+        payload: operation.state,
+      },
     ]),
     authorityKind:
       parsed.kind === 'PLAN' ? 'DISCRETIONARY_USER' : 'VERSIONED_AUTOMATIC',

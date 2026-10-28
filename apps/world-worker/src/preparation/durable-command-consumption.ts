@@ -2,6 +2,7 @@ import {
   DOMAIN_ERROR_CODES,
   DomainError,
   SimTime,
+  SOCIAL_JOB_MATCH_DUE_COMMAND,
   canonicalSerialize,
   parseWorldWriterLease,
   workerId,
@@ -28,7 +29,9 @@ import {
 } from './manual-office-command-composition.js';
 import type { AuthorizedOfficeContext } from '@econmind/core';
 import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import { isFinanceBudgetNativeCommitGuard } from '../persistence/postgres-finance-budget-custody.js';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
+import { isPostwarSocialMatchSourceCommitProtectionPort } from '../persistence/postwar-social-match-runtime.js';
 
 export const DURABLE_COMMAND_CONSUMPTION_STATUS =
   'PREPARATION_ONLY_NOT_RUNTIME_ACCEPTANCE' as const;
@@ -240,13 +243,21 @@ export function createDurableCommandConsumptionPreparation(input: {
   ) {
     if (
       command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
-      command.commandType !== 'CORE_GOODS_DELIVERY_V1'
+      command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
+      !(
+        command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND &&
+        isPostwarSocialMatchSourceCommitProtectionPort(
+          officeReaders.socialMatch?.sourceCommitProtectionPort,
+        )
+      )
     )
-      invalid('Only the fixed Shipment or Delivery may use this claim path');
+      invalid('Only a fixed automatic source may use this claim path');
     const label =
       command.commandType === 'CORE_GOODS_SHIPMENT_V1'
         ? 'Shipment'
-        : 'Delivery';
+        : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
+          ? 'Social MATCH'
+          : 'Delivery';
     await input.database.transaction(async (transaction) => {
       // Follow atomic/intake submission-before-lease/head lock order. Never
       // take the queue lock in the selector and then wait for a submission.
@@ -261,7 +272,30 @@ export function createDurableCommandConsumptionPreparation(input: {
       );
       if (canonicalSerialize(durable) !== canonicalSerialize(command))
         invalid(`${label} differs from durable canonical Command`);
-      const lease = await checkSource(transaction, durable, at);
+      // MATCH's fixed source runtime validates the complete prefix before
+      // claim and again under held source guards at Atomic's commit cutoff.
+      // Its queue writer reads lease/head metadata only; it has no raw seed
+      // access. Goods retain their existing lineage source protocol.
+      const isMatch = command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND;
+      const lease = isMatch
+        ? await leaseFrom(transaction, at)
+        : await checkSource(transaction, durable, at);
+      if (isMatch) {
+        const head = await transaction.query<{ world_version: string }>(
+          'select world_version::text from world_v2.world_head where world_id=$1 for share',
+          [world],
+        );
+        if (
+          lease.worldId !== world ||
+          lease.holderId !== holder ||
+          lease.expiresAtReal <= at ||
+          head.rows.length !== 1 ||
+          head.rows[0]?.world_version !== command.expectedWorldVersion
+        )
+          invalid(
+            'Social MATCH claim requires its exact active lease and current head',
+          );
+      }
       const queue = await transaction.query<QueueRow>(
         `select command_id, authority_kind, queue_state, available_at_sim_time::text,
                 claimed_by, claim_fencing_token::text
@@ -426,10 +460,18 @@ export function createDurableCommandConsumptionPreparation(input: {
       if (selected === null) return Object.freeze({ status: 'IDLE' });
       const { command, row } = selected;
       const manualCapability = manualOfficeCapability(command);
+      const matchRuntime = officeReaders.socialMatch;
+      const socialMatch =
+        command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND &&
+        !!matchRuntime &&
+        isPostwarSocialMatchSourceCommitProtectionPort(
+          matchRuntime.sourceCommitProtectionPort,
+        );
       if (
         command.commandType !== 'CORE_GOODS_TRANSFER_V1' &&
         command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
         command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
+        !socialMatch &&
         manualCapability === null
       )
         return blocked('UNSUPPORTED_COMMAND', command.commandId);
@@ -449,7 +491,47 @@ export function createDurableCommandConsumptionPreparation(input: {
         return blocked('COMMAND_NOT_DUE', command.commandId);
       if (row.queue_state === 'CLAIMED' && row.claimed_by !== holder)
         return blocked('CLAIM_REQUIRES_REVIEWED_RECOVERY', command.commandId);
-      if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND) {
+      if (socialMatch) {
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: matchRuntime.candidateFactory,
+          socialMatchSourceCommitProtectionPort:
+            matchRuntime.sourceCommitProtectionPort,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        await matchRuntime.assertSourceBeforeClaim({
+          command,
+          observedAtReal: at,
+        });
+        await claimAutomatic(command, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'VERSIONED_AUTOMATIC',
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
+      if (
+        command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+        !isFinanceBudgetNativeCommitGuard(
+          officeReaders.financeBudget?.commitGuard,
+        )
+      ) {
         validateManualOfficeCommandIntent(command);
         return blocked('SOURCE_RUNTIME_UNAVAILABLE', command.commandId);
       }
@@ -468,6 +550,24 @@ export function createDurableCommandConsumptionPreparation(input: {
           workerId: holder,
           sha256Hex: input.sha256Hex,
           candidateFactory: composition.factory,
+          ...(composition.captainSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                captainSourceCommitProtectionPort:
+                  composition.captainSourceCommitProtectionPort,
+              }),
+          ...(composition.socialPositionSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                socialPositionSourceCommitProtectionPort:
+                  composition.socialPositionSourceCommitProtectionPort,
+              }),
+          ...(composition.financeBudgetSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                financeBudgetSourceCommitProtectionPort:
+                  composition.financeBudgetSourceCommitProtectionPort,
+              }),
           ...(composition.sourceCommitProtectionPort === undefined
             ? {}
             : {

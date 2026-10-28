@@ -3,11 +3,14 @@ import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticat
 import {
   DomainError,
   DOMAIN_ERROR_CODES,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   type CanonicalCommand,
   type Sha256Hex,
 } from '@econmind/core';
 import { PostgresTransactionError } from '../persistence/postgres-sql-database.js';
 import type { SqlDatabase } from '../persistence/sql-database.js';
+import { isFinanceBudgetNativeCommitGuard } from '../persistence/postgres-finance-budget-custody.js';
+import { isPostwarSocialPositionSourceCommitProtectionPort } from '../persistence/postwar-social-position-runtime.js';
 import {
   boundProductionManualIntakeRuntime,
   isProductionManualIntakeRuntime,
@@ -182,9 +185,7 @@ export async function preflightManualOfficeIntakeRuntime(
   command: CanonicalCommand,
   observedAtReal: string,
 ): Promise<boolean> {
-  // A parser-positive intent is not a budget runtime/source. This early veto
-  // also prevents unrelated readers/candidate factories from being consulted.
-  if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+  if (!manualOfficeIntakeRuntimeSupportsFamily(runtime, command.commandType))
     return false;
   // 3A installs no formal source constructor and cannot pass this branch.
   if (isProductionManualIntakeRuntime(runtime)) return false;
@@ -222,4 +223,37 @@ export async function preflightManualOfficeIntakeRuntime(
       return false;
     throw error;
   }
+}
+
+/** Constructor identity and the actual family port are both required. An
+ * unrelated runtime cannot enable Finance, including an existing-ID retry. */
+export function manualOfficeIntakeRuntimeSupportsFamily(
+  runtime:
+    | ManualOfficeIntakeRuntime
+    | ProductionManualIntakeRuntime
+    | null
+    | undefined,
+  commandType: string,
+): boolean {
+  if (!runtime) return false;
+  if (
+    commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+    commandType !== SOCIAL_POSITION_OFFER_CREATE_COMMAND
+  )
+    return true;
+  if (isProductionManualIntakeRuntime(runtime)) return false;
+  const construction = constructions.get(runtime as ManualOfficeIntakeRuntime);
+  if (commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)
+    return (
+      !!construction &&
+      isPostwarSocialPositionSourceCommitProtectionPort(
+        construction.readers.socialPosition?.sourceCommitProtectionPort,
+      )
+    );
+  return (
+    !!construction &&
+    isFinanceBudgetNativeCommitGuard(
+      construction.readers.financeBudget?.commitGuard,
+    )
+  );
 }

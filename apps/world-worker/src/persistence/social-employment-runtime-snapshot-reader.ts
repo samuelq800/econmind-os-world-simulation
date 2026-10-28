@@ -12,6 +12,7 @@ import {
   createReplaySeed,
   createSocialEmploymentServiceReplayReducers,
   SOCIAL_SERVICE_PLAN_EVENT,
+  SOCIAL_POSITION_OFFER_CREATED_EVENT,
   parseCanonicalCommand,
   parseIndustryPersistenceSchemaBoundaryContext,
   PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
@@ -48,6 +49,13 @@ import {
 } from './social-employment-source-input.js';
 import { assertSocialPhysicalAttemptEnvelope } from './social-physical-attempt-envelope.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
+import { createPostwarSocialSourceRoleScope } from './postwar-social-position-runtime.js';
+import { createPostgresSocialOperatingLineageExecutor } from './postgres-social-operating-custody.js';
+import {
+  replayPostwarSocialEmploymentLineage,
+  assertSocialPositionOfferEventOriginal,
+} from './postwar-social-employment-lineage.js';
+import { readPostwarOperatingGenesisFromSeed } from '../preparation/postwar-operating-genesis-adoption.js';
 import {
   readValidatedCanonicalLineageFrom,
   withValidatedCanonicalLineageFrom,
@@ -348,10 +356,38 @@ function assertOriginalOrigin(
   const proof = original.originProof as Row;
   if (!proof || typeof proof !== 'object')
     invalid('original origin proof required');
-  if (proof.kind === 'COMMITTED_EVENT_PAYLOAD')
-    invalid(
-      'No Social source-publication event semantic is registered in this version',
-    );
+  if (proof.kind === 'COMMITTED_EVENT_PAYLOAD') {
+    const p = row(proof, ['kind', 'eventId', 'pointer', 'payloadHash']);
+    if (
+      original.role !== 'CURRENT_EFFECTIVE' ||
+      canonicalSerialize(original.fieldPaths) !==
+        canonicalSerialize(['/currentReadFacts/offer'])
+    )
+      invalid(
+        'only the registered canonical offer event can supply current offer facts',
+      );
+    const event = assertSocialPositionOfferEventOriginal({
+      lineage: bound.lineage,
+      eventId: ref(p.eventId),
+      payloadHash: fp(p.payloadHash),
+      pointer: text(p.pointer),
+      value: original.value,
+      countryId: bound.command.countryId!,
+    });
+    const effective = original.effectivity as Row;
+    if (
+      canonicalSerialize(effective.fromHead) !==
+        canonicalSerialize({
+          worldVersion: event.worldVersion,
+          eventSequence: event.sequence,
+        }) ||
+      effective.fromSimTime !== event.simTime.toCanonicalValue()
+    )
+      invalid(
+        'committed offer effectivity precedes or differs from its real publication',
+      );
+    return;
+  }
   const p = row(proof, ['kind', 'sourceId', 'pointer', 'payloadHash']);
   if (p.kind !== 'ADMITTED_OPENING_SOURCE')
     invalid('unsupported source origin');
@@ -914,10 +950,50 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
   readFactsHash: CanonicalSha256;
 }> {
   const { data, lineage, command } = verified.bound;
-  if (data.historyCoverage.taxonomyRevision !== TAXONOMY)
+  const hasPositionEvents = lineage.transitions.some((entry) =>
+    entry.transition.events.some(
+      (event) => event.eventType === SOCIAL_POSITION_OFFER_CREATED_EVENT,
+    ),
+  );
+  if (
+    data.historyCoverage.taxonomyRevision !==
+    (hasPositionEvents ? 'SOCIAL_SOURCE_EFFECTS_V2' : TAXONOMY)
+  )
     invalid('unsupported domain effect taxonomy');
   const productionIds = productionEventIds(lineage);
+  const currentLifecycle = hasPositionEvents
+    ? (() => {
+        const original = readPostwarOperatingGenesisFromSeed(
+          lineage.seed,
+        ).socialEmployment;
+        if (!original)
+          invalid(
+            'actual admitted full E03 is required for position lifecycle replay',
+          );
+        return replayPostwarSocialEmploymentLineage({
+          document: original,
+          lineage,
+        });
+      })()
+    : undefined;
   const reducers = { ...createSocialEmploymentServiceReplayReducers(digest) };
+  if (currentLifecycle)
+    reducers[SOCIAL_POSITION_OFFER_CREATED_EVENT] = ({ state, event }) => {
+      const checkpoint = currentLifecycle.checkpoints.find(
+        (c) => c.eventId === event.eventId,
+      );
+      if (!checkpoint)
+        invalid('canonical position event was not strictly replayed');
+      if (checkpoint.countryId !== data.scope.countryId) return state;
+      if (
+        canonicalSerialize(state) !==
+        canonicalSerialize(checkpoint.beforeEmployment)
+      )
+        invalid(
+          'local employment differs from full-prefix lifecycle predecessor',
+        );
+      return checkpoint.afterEmployment;
+    };
   reducers[PRODUCTION_SETTLED_EVENT_TYPE] = ({ state, event }) => {
     if (!productionIds.has(event.eventId))
       invalid('unpaired production source event');
@@ -1001,6 +1077,17 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
     replay.lastSequence !== lineage.headEventSequence
   )
     invalid('full Social replay head mismatch');
+  if (currentLifecycle) {
+    const current = currentLifecycle.countries.find(
+      (c) => c.countryId === data.scope.countryId,
+    );
+    if (
+      !current ||
+      canonicalSerialize(replay.state) !==
+        canonicalSerialize(current.lifecycle.employment)
+    )
+      invalid('country replay differs from actual complete lifecycle prefix');
+  }
   const readFacts = JSON.parse(
     canonicalSerialize(data.currentReadFacts),
   ) as SocialEmploymentReadFacts;
@@ -1144,7 +1231,7 @@ function governingBindingData(
       completePrefixFingerprint:
         bound.data.historyCoverage.completePrefixBinding,
       receiptSetFingerprint: hash(lineage.transitions.map((v) => v.receipt)),
-      taxonomyRevision: TAXONOMY,
+      taxonomyRevision: bound.data.historyCoverage.taxonomyRevision,
     },
     sourceAuthorityBinding: {
       issuerId: authority.issuerId,
@@ -1188,6 +1275,10 @@ export interface SocialEmploymentRuntimeSnapshotReaderConstruction {
   readonly mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
   readonly database: SqlDatabase;
   readonly sha256Hex: Sha256Hex;
+  /** Fixed PostgreSQL host identity only; source read temporarily delegates to
+   * the actual fixed SQL reader and restores this verified writer in the same
+   * transaction. No membership or economic permission is granted here. */
+  readonly postgresWorkerRole?: string;
   /** Actual trusted server custodian/guard adapter requires independent evidence.
    * No implementation or registration is supplied by this module. */
   readonly custody: SocialOperatingCustodyPort;
@@ -1268,7 +1359,9 @@ export function createSocialEmploymentRuntimeSnapshotReader(
     custody = input.custody,
     withSnapshot = custody.withSnapshotFrom;
   const issued = new WeakMap<object, Readonly<GoverningSourceReadBindingV1>>();
-  const resolve = async (supplied: ReadInput): Promise<ResolvedSource> => {
+  const resolveUnscoped = async (
+    supplied: ReadInput,
+  ): Promise<ResolvedSource> => {
     // Capture the validated canonical command before the first await.
     canonicalSerialize(supplied.command);
     const command = validateCanonicalCommand(supplied.command, digest),
@@ -1394,6 +1487,28 @@ export function createSocialEmploymentRuntimeSnapshotReader(
       },
     );
   };
+  const roleScope =
+    input.postgresWorkerRole === undefined
+      ? undefined
+      : createPostwarSocialSourceRoleScope({
+          workerRole: input.postgresWorkerRole,
+        });
+  const resolve =
+    roleScope === undefined
+      ? resolveUnscoped
+      : (request: ReadInput) =>
+          roleScope.withSourceReaderFrom(request.transaction, () =>
+            resolveUnscoped({
+              ...request,
+              transaction: createPostgresSocialOperatingLineageExecutor(
+                request.transaction,
+                {
+                  worldId: request.command.worldId,
+                  countryId: request.command.countryId!,
+                },
+              ),
+            }),
+          );
   const reader: SocialEmploymentRuntimeSnapshotReader = Object.freeze({
     async readFrom(request: ReadInput): Promise<SnapshotResult> {
       try {

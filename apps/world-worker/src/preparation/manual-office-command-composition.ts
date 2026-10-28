@@ -4,6 +4,7 @@ import {
   CENTRAL_BANK_OMO_COMMAND,
   CENTRAL_BANK_OMO_CAPABILITY,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DOMAIN_ERROR_CODES,
   DomainError,
@@ -46,10 +47,39 @@ import { createSocialEmploymentCommitSourceGuard } from '../persistence/social-e
 import type { SourceCommitProtectionPort } from '../projections/governing-source-commit-boundary-contract.js';
 import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
+import {
+  isFinanceBudgetNativeCommitGuard,
+  type createPostgresFinanceBudgetNativeRuntime,
+  type FinanceBudgetNativeCommitGuard,
+} from '../persistence/postgres-finance-budget-custody.js';
+import {
+  isPostwarSocialPositionSourceCommitProtectionPort,
+  type createPostwarSocialPositionRuntime,
+  type SocialPositionSourceCommitProtectionPort,
+} from '../persistence/postwar-social-position-runtime.js';
+import {
+  isPostwarCaptainSourceCommitProtectionPort,
+  type createPostwarCaptainRuntime,
+  type CaptainSourceCommitProtectionPort,
+} from '../persistence/postwar-captain-runtime.js';
+import type { createPostwarSocialMatchRuntime } from '../persistence/postwar-social-match-runtime.js';
 
 /** Server constructor dependencies only. No request snapshot, prebuilt draft,
  * caller candidateFactory, readiness registry or automatic publisher port. */
 export interface ManualOfficeRuntimeReaders {
+  /** Automatic source is a separate fixed publisher path, never a browser intent. */
+  readonly socialMatch?: ReturnType<
+    typeof createPostwarSocialMatchRuntime
+  > | null;
+  readonly captainNative?: ReturnType<
+    typeof createPostwarCaptainRuntime
+  > | null;
+  readonly socialPosition?: ReturnType<
+    typeof createPostwarSocialPositionRuntime
+  > | null;
+  readonly financeBudget?: ReturnType<
+    typeof createPostgresFinanceBudgetNativeRuntime
+  > | null;
   readonly captain?: CaptainPoliticalCapitalRuntimeReader | null;
   readonly centralBank?: CentralBankOmoReader | null;
   readonly social?: Pick<
@@ -72,6 +102,8 @@ export function manualOfficeCapability(command: CanonicalCommand) {
       return command.officeId === 'SOCIAL'
         ? SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY
         : null;
+    case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
+      return command.officeId === 'SOCIAL' ? ('SOCIAL_LABOUR' as const) : null;
     case FINANCE_BUDGET_APPROPRIATION_COMMAND:
       return command.officeId === 'FINANCE'
         ? ('FINANCE_BUDGET' as const)
@@ -174,6 +206,9 @@ export function createManualOfficeCommandComposition(input: {
 }): {
   readonly factory: AtomicTransitionCandidateFactory;
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
+  readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
+  readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
+  readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
   assertSourceBeforeClaim(observedAtReal: string): Promise<void>;
 } | null {
   const command = input.command,
@@ -181,12 +216,53 @@ export function createManualOfficeCommandComposition(input: {
   const cap = manualOfficeCapability(command);
   if (cap === null) invalid('Manual factory requires a supported family');
   switch (command.commandType) {
-    case FINANCE_BUDGET_APPROPRIATION_COMMAND:
+    case SOCIAL_POSITION_OFFER_CREATE_COMMAND: {
       validateManualOfficeCommandIntent(command);
-      // Deliberately no budget reader/factory/guard port or positive source.
-      return null;
+      const runtime = input.readers.socialPosition;
+      if (
+        !runtime ||
+        !isPostwarSocialPositionSourceCommitProtectionPort(
+          runtime.sourceCommitProtectionPort,
+        )
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        socialPositionSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.assertSourceBeforeClaim({ command, observedAtReal }),
+      };
+    }
+    case FINANCE_BUDGET_APPROPRIATION_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.financeBudget;
+      if (!runtime || !isFinanceBudgetNativeCommitGuard(runtime.commitGuard))
+        return null;
+      return {
+        factory: runtime.factory,
+        financeBudgetSourceCommitProtectionPort: runtime.commitGuard,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.assertSourceBeforeClaim({ command, observedAtReal }),
+      };
+    }
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND: {
       parseCaptainPoliticalCapitalAllocation(command, digest);
+      if (input.readers.captainNative) {
+        const runtime = input.readers.captainNative;
+        if (
+          !isPostwarCaptainSourceCommitProtectionPort(
+            runtime.sourceCommitProtectionPort,
+          )
+        )
+          return null;
+        return {
+          factory: runtime.factory,
+          captainSourceCommitProtectionPort: runtime.sourceCommitProtectionPort,
+          assertSourceBeforeClaim: (observedAtReal) =>
+            runtime.assertSourceBeforeClaim({ command, observedAtReal }),
+        };
+      }
       if (!input.readers.captain) return null;
       const source = createCaptainPoliticalCapitalRuntimeSource({
         reader: input.readers.captain,

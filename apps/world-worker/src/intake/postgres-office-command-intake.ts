@@ -39,6 +39,7 @@ import {
 
 import {
   boundManualOfficeIntakeRuntime,
+  manualOfficeIntakeRuntimeSupportsFamily,
   preflightManualOfficeIntakeRuntime,
   type ManualOfficeIntakeRuntime,
 } from './manual-office-intake-runtime.js';
@@ -227,10 +228,10 @@ export class PostgresOfficeCommandIntake {
     const request = parseManualOfficeCommandRequest(input.request);
     const b = input.binding;
     const runtime = this.config.runtime;
-    // No budget source/guard/consumer is installed. A runtime for another
-    // family cannot enable budget registration, including an existing-ID retry.
+    // A runtime for another family cannot enable budget registration,
+    // including an existing-ID retry. Source currentness is checked separately.
     const positive =
-      request.commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+      manualOfficeIntakeRuntimeSupportsFamily(runtime, request.commandType) &&
       boundManualOfficeIntakeRuntime(runtime, {
         pool: this.config.pool,
         clock: this.config.clock,
