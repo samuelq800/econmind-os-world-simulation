@@ -1,0 +1,65 @@
+name: Office connection contracts and client regressions
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/office-connection.yml
+      - tools/office-connection/**
+      - config/office-connection/**
+      - tests/world-web/office-connection-*.test.ts
+      - tests/world-api/office-connection-*.test.ts
+      - tests/world-api/office-release-preflight.test.ts
+      - tests/world-core/social-connection-workflow.test.ts
+      - tests/world-core/office-native-evidence.test.ts
+      - tests/world-core/office-industry-source-readiness.test.ts
+      - apps/world-worker/src/projections/office-industry-source-readiness.ts
+      - apps/world-web/src/country-runtime/staged-reservation-client.ts
+      - apps/world-web/public/season1-immersive/country-context.js
+      - apps/world-web/public/season1-immersive/country-game.js
+
+permissions:
+  contents: read
+
+jobs:
+  contracts-and-clients:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      ECONMIND_ENV: ci
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+          run_install: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Enumerate every required connection without claiming live readiness
+        run: node tools/office-connection/run.mjs --plan --out node_modules/.cache/office-connection/plan.json
+      - name: Execute contract, evidence and shipped client regressions
+        run: >-
+          pnpm exec vitest run
+          tests/world-web/office-connection-catalog.test.ts
+          tests/world-web/office-connection-status.test.ts
+          tests/world-web/office-connection-workflow.test.ts
+          tests/world-api/office-connection-acceptance.test.ts
+          tests/world-api/office-release-preflight.test.ts
+          tests/world-core/social-connection-workflow.test.ts
+          tests/world-core/office-industry-source-readiness.test.ts
+          tests/world-core/office-native-evidence.test.ts
+          tests/world-web/official-full-data-page-read.test.ts
+          tests/world-web/trusted-country-runtime.test.ts
+      - name: Retain offline plan with its explicit evidence boundary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: office-connection-offline-plan
+          path: node_modules/.cache/office-connection/plan.json
+          if-no-files-found: error

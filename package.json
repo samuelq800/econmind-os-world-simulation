@@ -14,6 +14,8 @@
     "dev:web": "node scripts/run-development-service.mjs web",
     "dev:api": "node scripts/run-development-service.mjs api",
     "dev:worker": "node scripts/run-development-service.mjs worker",
+    "connections:plan": "node tools/office-connection/run.mjs --plan",
+    "connections:check": "node tools/office-connection/run.mjs --check",
     "pretest": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build && pnpm --filter @econmind/world-api build",
     "lint": "eslint .",
     "format": "prettier --write .",
