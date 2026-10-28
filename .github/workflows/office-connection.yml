@@ -10,6 +10,7 @@ on:
       - tests/world-web/office-connection-*.test.ts
       - tests/world-api/office-connection-*.test.ts
       - tests/world-api/office-release-preflight.test.ts
+      - tests/world-api/office-native-cleanup.test.ts
       - tests/world-core/social-connection-workflow.test.ts
       - tests/world-core/office-native-evidence.test.ts
       - tests/world-core/office-industry-source-readiness.test.ts
@@ -51,6 +52,7 @@ jobs:
           tests/world-web/office-connection-workflow.test.ts
           tests/world-api/office-connection-acceptance.test.ts
           tests/world-api/office-release-preflight.test.ts
+          tests/world-api/office-native-cleanup.test.ts
           tests/world-core/social-connection-workflow.test.ts
           tests/world-core/office-industry-source-readiness.test.ts
           tests/world-core/office-native-evidence.test.ts

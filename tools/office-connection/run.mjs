@@ -86,6 +86,8 @@ export async function planAllOfficeConnections() {
       blockers: release.blockers,
       context: release.context ?? null,
       userActions: release.userActions ?? [],
+      authoritativeSourceRequirements: release.authoritativeSourceRequirements,
+      authorization: release.authorization,
       executionSupported: release.executionSupported,
     },
     social: {

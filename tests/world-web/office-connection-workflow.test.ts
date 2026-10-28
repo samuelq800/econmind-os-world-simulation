@@ -66,6 +66,11 @@ describe('all-office connection workflow evidence boundary', () => {
     const report = JSON.parse(result.stdout);
     expect(report.mode).toBe('OFFLINE_READ_ONLY_NO_RUNTIME_REQUESTS');
     expect(report.productionReady).toBe(false);
+    expect(
+      report.release.authoritativeSourceRequirements.financeBudget
+        .missingRuntimeBinding.length,
+    ).toBeGreaterThan(0);
+    expect(report.release.authorization.implementationMayContinue).toBe(true);
     expect(report.worldStarted).toBe(false);
     expect(report.clockStarted).toBe(false);
   });

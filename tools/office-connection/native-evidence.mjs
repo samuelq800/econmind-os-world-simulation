@@ -14,6 +14,30 @@ const nodeSHA256 =
   '2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2';
 const runtimePath =
   '/tmp/node-v24.20.0-linux-x64/bin:/tmp/pnpm/node_modules/.bin:/usr/bin:/bin';
+
+/** Evidence IO failure must never prevent removal of our own attempted container. */
+export function finalizeOwnedContainer({ attempted, collect, remove }) {
+  if (!attempted) return null;
+  let preservationError = null;
+  let cleanupError = null;
+  let result = null;
+  try {
+    collect();
+  } catch (error) {
+    preservationError = String(error);
+  }
+  try {
+    result = remove();
+  } catch (error) {
+    cleanupError = String(error);
+  }
+  return {
+    preservationError,
+    cleanupError,
+    exitCode: result?.status ?? null,
+    removed: result?.status === 0,
+  };
+}
 export function nativeEvidencePlan() {
   return {
     schemaVersion: 'OFFICE_NATIVE_EVIDENCE_PLAN_V1',
@@ -88,9 +112,8 @@ export async function runNativeEvidence(commit) {
   const snapshot = path.join(directory, 'snapshot');
   const name = 'econmind-office-native-' + randomUUID();
   const commands = [];
-  let created = false;
+  let createAttempted = false;
   let failed = false;
-  let cleanup = null;
   const execute = (command, args, mustPass = true) => {
     const startedAt = new Date().toISOString();
     const result = spawnSync(command, args, {
@@ -196,6 +219,8 @@ export async function runNativeEvidence(commit) {
       assert(original.length > 0, 'MIGRATION_SOURCE_BLOB_REQUIRED');
     }
     docker(['pull', image]);
+    // Record the attempt before the side effect; logging may throw after success.
+    createAttempted = true;
     docker([
       'run',
       '--detach',
@@ -208,7 +233,6 @@ export async function runNativeEvidence(commit) {
       image,
       'infinity',
     ]);
-    created = true;
     docker([
       'cp',
       '/etc/ssl/certs/ca-certificates.crt',
@@ -341,58 +365,75 @@ export async function runNativeEvidence(commit) {
     }
   } catch (error) {
     failed = true;
-    fs.writeFileSync(path.join(directory, 'error.txt'), String(error) + '\n');
-  } finally {
-    if (created) {
-      // Preserve original owned markers/checkpoints before destroying this container.
-      docker(
-        [
-          'exec',
-          name,
-          'bash',
-          '-lc',
-          'mkdir -p /tmp/office-evidence/owned; for p in /tmp/econmind-f-social-demo-*; do if test -d "$p"; then find "$p" -maxdepth 2 -type f -name "*.json" -exec cp --parents {} /tmp/office-evidence/owned/ \\;; fi; done',
-        ],
-        false,
-      );
-      docker(
-        [
-          'cp',
-          name + ':/tmp/office-evidence',
-          path.join(directory, 'final-native'),
-        ],
-        false,
-      );
-      const result = docker(['rm', '--force', '--volumes', name], false);
-      cleanup = {
-        container: name,
-        exitCode: result.status,
-        removed: result.status === 0,
-      };
-      if (!cleanup.removed) failed = true;
+    try {
+      fs.writeFileSync(path.join(directory, 'error.txt'), String(error) + '\n');
+    } catch {
+      /* Cleanup cannot depend on writable evidence storage. */
     }
-    fs.writeFileSync(
-      path.join(directory, 'receipt.json'),
-      JSON.stringify(
-        {
-          schemaVersion: 'OFFICE_NATIVE_EVIDENCE_RECEIPT_V1',
-          status: failed ? 'INCOMPLETE' : 'ISOLATED_NATIVE_ASSERTIONS_PASSED',
-          commit,
-          image,
-          nodeSHA256,
-          sourceClass: 'SIMULATED_OPENING',
-          sourceAdmitted: false,
-          productionAdmission: false,
-          WorldClock: false,
-          historicalMacRecovery: 'NOT_RUN_FIXED_FOREIGN_CUSTODY',
-          dPrivateMarkerSuites: 'NOT_RUN_NO_PROVENANCE',
-          commands,
-          cleanup,
-        },
-        null,
-        2,
-      ) + '\n',
-    );
+  } finally {
+    const cleanup = finalizeOwnedContainer({
+      attempted: createAttempted,
+      collect() {
+        // Preserve original owned markers/checkpoints before destroying this container.
+        docker(
+          [
+            'exec',
+            name,
+            'bash',
+            '-lc',
+            'mkdir -p /tmp/office-evidence/owned; for p in /tmp/econmind-f-social-demo-*; do if test -d "$p"; then find "$p" -maxdepth 2 -type f -name "*.json" -exec cp --parents {} /tmp/office-evidence/owned/ \\;; fi; done',
+          ],
+          false,
+        );
+        docker(
+          [
+            'cp',
+            name + ':/tmp/office-evidence',
+            path.join(directory, 'final-native'),
+          ],
+          false,
+        );
+      },
+      remove() {
+        // Deliberately bypass execute/logging: ENOSPC must not leak a container.
+        return spawnSync('docker', ['rm', '--force', '--volumes', name], {
+          encoding: 'utf8',
+          timeout: 30_000,
+          maxBuffer: 1024 * 1024,
+        });
+      },
+    });
+    if (
+      cleanup &&
+      (!cleanup.removed || cleanup.preservationError || cleanup.cleanupError)
+    )
+      failed = true;
+    try {
+      fs.writeFileSync(
+        path.join(directory, 'receipt.json'),
+        JSON.stringify(
+          {
+            schemaVersion: 'OFFICE_NATIVE_EVIDENCE_RECEIPT_V1',
+            status: failed ? 'INCOMPLETE' : 'ISOLATED_NATIVE_ASSERTIONS_PASSED',
+            commit,
+            image,
+            nodeSHA256,
+            sourceClass: 'SIMULATED_OPENING',
+            sourceAdmitted: false,
+            productionAdmission: false,
+            WorldClock: false,
+            historicalMacRecovery: 'NOT_RUN_FIXED_FOREIGN_CUSTODY',
+            dPrivateMarkerSuites: 'NOT_RUN_NO_PROVENANCE',
+            commands,
+            cleanup: cleanup ? { container: name, ...cleanup } : null,
+          },
+          null,
+          2,
+        ) + '\n',
+      );
+    } catch {
+      failed = true;
+    }
   }
   return {
     status: failed ? 'INCOMPLETE' : 'ISOLATED_NATIVE_ASSERTIONS_PASSED',
