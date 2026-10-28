@@ -3,8 +3,12 @@
 This work continues the user's all-office connection request from actual main
 `14595f81caec2ed5ce7cec564d7db9609b693718`. Existing source-only and simulated
 implementations are usable engineering inputs, not operational acceptance. No
-old Social stop instruction blocks implementation. No source adoption,
-production mutation, World/Clock start, or PR approval is implied.
+old Social stop instruction blocks implementation. The user's 2026-10-28
+14:27:54 UTC instruction explicitly authorizes adopting the generated opening
+wage, student/medical demand, housing and policing rules after population,
+funding and capacity validation. That project adoption does not supply a
+production signature/admission, production SQL/grants, World/Clock start or PR
+approval.
 
 ## Executable workflow
 
@@ -87,14 +91,20 @@ fixes missing checkout history without rewriting migration hashes or tests.
 
 ## Remaining critical path
 
-| Office       | Concrete source/runtime gap                                                                                                                                     |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Captain      | Trusted political-capital genesis and reason originals, issuer/admission and same-cutoff commit-currentness protection; existing DTO/manual glue already exists |
-| Finance      | Adopted envelope/line/revision/approval history and positive budget source/consumer; staged financial signing is a different path                               |
-| Central Bank | Authoritative ledger/account/holdings/quote binding for OMO; other central-bank families remain unconnected                                                     |
-| Industry     | Production governing custody adapter and current adoption/authority/manifest originals, protected input causes and native positive consumer acceptance          |
-| Trade        | Real contract/rights/settlement source, supported command family, route/persistence and FINAL receipt/ledger readback                                           |
-| Social       | Admitted operating genesis/current wages/jobs/availability/physical attempt, formal custody and automatic authority; college/clinic formal consumers            |
+Production office acceptance remains **0/6**. The independent Trade/Captain
+recheck covers **7 source/test/SQL files**, with **6 tests PASS, 0 skipped**;
+it is a scoped dirty-worktree result with retained raw hashes, not seven
+production checks or whole-candidate approval. Evidence:
+`/tmp/postwar-trade-captain-837b1f1f-recheck.{vitest,provenance}.json`.
+
+| Office       | Concrete source/runtime gap                                                                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Captain      | Custody candidate has three TEST_ONLY boundary tests; actual political-capital/reason originals and Atomic source-guard threading remain missing                       |
+| Finance      | Isolated TEST_ONLY native SET/LINE intake and consumers passed; authoritative production policy publication, deployed bindings and other families remain separate      |
+| Central Bank | Authoritative ledger/account/holdings/quote binding for OMO; other central-bank families remain unconnected                                                            |
+| Industry     | Source/custody candidate has 11 PGlite tests plus one native original/read/revocation test; twelve actual operating-input gaps still block authority                   |
+| Trade        | Actual c427 tests retain typed MISSING when OP CASH/GCU is zero despite positive GRAIN; no synthetic money/rights, command, queue or FINAL is inferred                 |
+| Social       | Isolated POSITION/PLAN/MATCH H3 evidence exists; current-prefix publication and UI/consumer integration still require separate verification, not production acceptance |
 
 These include actual code integration gaps as well as source/infrastructure
 requirements; historical gate text is context, not a permanent stop order.
@@ -103,8 +113,9 @@ existing entry points and owner input contracts. Do not fill unavailable facts
 with proposals, synthetic defaults or first-event snapshots.
 
 Git read access works. GitHub REST CONNECT to `api.github.com:443` returns 403
-before token authorization can be evaluated; network approval is pending. After
-access works, inspect existing publisher configuration by names/status before
+before token authorization can be evaluated. Network access has been approved,
+but environment draft revision 6 has not been applied; the observed CONNECT 403
+remains unresolved. After access works, inspect existing publisher configuration by names/status before
 requesting anything new. Secrets belong in the owning environment/GitHub settings,
 never chat or browser variables. The companion repository remains the controlled
 production schema publisher. A draft PR is reviewable work, not PR approval.
