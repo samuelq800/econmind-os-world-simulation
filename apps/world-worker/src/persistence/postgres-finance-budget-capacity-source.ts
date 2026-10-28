@@ -1,5 +1,6 @@
 /** Fixed Workers-compatible source adapter. Reconstruction reads one sealed
- * small row plus the complete bounded zero-posting Budget prefix. No whole
+ * small row plus the complete bounded zero-posting Budget prefix (or the
+ * explicit supported Budget/Social mixed mode). No whole
  * opening payload, process-local H0 preparation, Ready flag or new authority. */
 import { createHash } from 'node:crypto';
 import {
@@ -16,6 +17,7 @@ import {
 } from '@econmind/core/finance-budget-capacity-data';
 import type { FinanceNativeBudgetPolicy } from '@econmind/core/finance-budget-native';
 import { readBoundedFinanceBudgetHistoryFrom } from './bounded-finance-budget-history.js';
+import { readBoundedMixedOfficeHistoryFrom } from './bounded-mixed-office-history.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 declare const capacitySource: unique symbol;
 export interface PostgresFinanceBudgetCapacitySource {
@@ -23,7 +25,12 @@ export interface PostgresFinanceBudgetCapacitySource {
 }
 const sources = new WeakMap<
   PostgresFinanceBudgetCapacitySource,
-  { worldId: string; countryId: string; expectedRawSourceSHA256: string | null }
+  {
+    worldId: string;
+    countryId: string;
+    expectedRawSourceSHA256: string | null;
+    historyMode: 'BUDGET_ONLY' | 'BUDGET_SOCIAL';
+  }
 >();
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
@@ -37,10 +44,15 @@ export function createPostgresFinanceBudgetCapacitySource(config: {
   readonly worldId: string;
   readonly countryId: string;
   readonly expectedRawSourceSHA256?: string;
+  /** Explicit server configuration; the original Budget-only mode stays default. */
+  readonly historyMode?: 'BUDGET_ONLY' | 'BUDGET_SOCIAL';
 }): PostgresFinanceBudgetCapacitySource {
   if (
     !config.worldId ||
     !config.countryId ||
+    (config.historyMode !== undefined &&
+      config.historyMode !== 'BUDGET_ONLY' &&
+      config.historyMode !== 'BUDGET_SOCIAL') ||
     (config.expectedRawSourceSHA256 !== undefined &&
       !/^[a-f0-9]{64}$/u.test(config.expectedRawSourceSHA256))
   )
@@ -50,6 +62,7 @@ export function createPostgresFinanceBudgetCapacitySource(config: {
     worldId: config.worldId,
     countryId: config.countryId,
     expectedRawSourceSHA256: config.expectedRawSourceSHA256 ?? null,
+    historyMode: config.historyMode ?? 'BUDGET_ONLY',
   });
   return port;
 }
@@ -126,12 +139,69 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
     p.canonicalSeedSha256 !== 'sha256:' + row.canonical_seed_sha256
   )
     invalid('sealed source differs from actual admitted policy');
-  const prefix = await readBoundedFinanceBudgetHistoryFrom({
-    executor: tx,
-    database: input.database,
-    worldId: c.worldId,
-    expectedWorldVersion: c.expectedWorldVersion,
-  });
+  const mixed =
+    config.historyMode === 'BUDGET_SOCIAL'
+      ? await readBoundedMixedOfficeHistoryFrom({
+          executor: tx,
+          database: input.database,
+          worldId: c.worldId,
+          countryId: c.countryId,
+          expectedWorldVersion: c.expectedWorldVersion,
+          workerId: input.workerId,
+          observedAtReal: input.observedAtReal,
+          envelopeRef: input.policy.envelopeRef,
+          effectivePeriodRef: input.policy.effectivePeriodRef,
+          sourcePins: {
+            seedId: p.seedId,
+            seedFingerprint: p.seedFingerprint,
+            admissionRef: p.admissionRef,
+            canonicalSeedSha256: p.canonicalSeedSha256,
+          },
+        })
+      : null;
+  if (mixed !== null) {
+    const accounts = mixed.fundingAccounts.filter(
+      (a) =>
+        a.countryId === c.countryId ||
+        a.accountRef === p.treasury.assetAccount.accountId,
+    );
+    if (accounts.length !== 1)
+      invalid('unique target actual GOV treasury source required');
+    const a = accounts[0]!;
+    if (
+      a.countryId !== c.countryId ||
+      a.accountRef !== p.treasury.assetAccount.accountId ||
+      a.claimId !== p.treasury.assetAccount.claimId ||
+      a.payerEntityId !== p.governmentEntityId ||
+      a.issuerEntityId !== p.centralBankEntityId ||
+      a.payerRole !== 'GOV' ||
+      a.currency !== p.treasury.assetAccount.currency ||
+      a.availableAmount !== p.treasury.assetAmount ||
+      a.reservedAmount !== p.openingFunding.totalAmount
+    )
+      invalid('mixed original differs from sealed treasury/funding capacity');
+  }
+  const prefix =
+    mixed ??
+    (await readBoundedFinanceBudgetHistoryFrom({
+      executor: tx,
+      database: input.database,
+      worldId: c.worldId,
+      expectedWorldVersion: c.expectedWorldVersion,
+    }));
+  const reservations = (mixed?.socialReservations ?? []).filter(
+    (r) =>
+      r.countryId === c.countryId ||
+      r.accountId === p.treasury.assetAccount.accountId,
+  );
+  for (const r of reservations)
+    if (
+      r.countryId !== c.countryId ||
+      r.accountId !== p.treasury.assetAccount.accountId ||
+      r.employerId !== p.governmentEntityId ||
+      r.currency !== p.treasury.assetAccount.currency
+    )
+      invalid('mixed reservation differs from exact treasury scope');
   const openingEncumbrances = Object.freeze([
     Object.freeze({
       reference:
@@ -141,10 +211,21 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
       amount: p.openingFunding.totalAmount,
       currency: p.treasury.assetAccount.currency,
     }),
+    ...reservations.map((r) =>
+      Object.freeze({
+        reference: r.reservationId,
+        accountId: r.accountId,
+        amount: r.amount,
+        currency: r.currency,
+      }),
+    ),
   ]);
   return Object.freeze({
     policy: input.policy,
     capacityData: data,
+    ...(mixed === null
+      ? {}
+      : { mixedPrefixEvidence: mixed.mixedPrefixEvidence }),
     binding: Object.freeze({
       seedRef: p.seedId,
       seedFingerprint: p.seedFingerprint,
@@ -156,6 +237,9 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
       treasuryClaimId: p.treasury.assetAccount.claimId!,
       openingEncumbranceHash: hash(openingEncumbrances),
       capacityProjectionFingerprint: hash(p),
+      ...(mixed === null
+        ? {}
+        : { mixedSourceBindingsFingerprint: hash(mixed.sourceBindings) }),
     }),
     openingEncumbrances,
     frames: prefix.frames,

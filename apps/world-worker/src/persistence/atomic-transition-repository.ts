@@ -19,6 +19,7 @@ import {
   assertInventoryPersistenceSchemaAdmitted,
   classifyInventoryPersistenceSchemaPair,
   PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
+  PRODUCTION_SETTLED_EVENT_TYPE,
   eventId,
   idempotencyKey,
   isCommitAuthorizationProof,
@@ -41,6 +42,12 @@ import {
   type WorldWriterCommitAssertion,
 } from '@econmind/core';
 import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import {
+  PRODUCTION_WATER_CONSUMED_EVENT,
+  assertProductionWaterConsumptionCommitBinding,
+  type ProductionWaterConsumptionCommitBinding,
+} from '@econmind/core/production-water-consumption';
+import { isPostwarIndustryProductionSourceGuard } from './postwar-industry-production-source.js';
 
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type {
@@ -101,6 +108,7 @@ export interface PreparedCurrentMaterialization {
 }
 
 export interface AtomicTransitionDraft {
+  readonly productionWaterCommitBinding?: ProductionWaterConsumptionCommitBinding;
   readonly transition: AuthoritativeTransition;
   readonly inventoryPostings: readonly InventoryLedgerPosting[];
   readonly financialPostingBatches: readonly FinancialPostingBatch[];
@@ -126,6 +134,7 @@ type LegacyInventoryLedgerPosting = Exclude<
 >;
 
 export interface PrivateAtomicTransitionCandidate {
+  readonly deferredProductionWaterCommitBinding: unknown;
   readonly [privateAtomicCandidate]: true;
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
@@ -143,6 +152,23 @@ export interface PrivateAtomicTransitionCandidate {
 }
 
 const privateCandidates = new WeakSet<object>();
+
+/** Preserve an issued calculation token without running a caller getter or
+ * checking fresh-source semantics before exact FINAL recovery. */
+function captureProductionWaterCommitBinding(draft: object): unknown {
+  try {
+    if (nodeTypes.isProxy(draft)) return null;
+    const property = Object.getOwnPropertyDescriptor(
+      draft,
+      'productionWaterCommitBinding',
+    );
+    return property && Object.hasOwn(property, 'value')
+      ? (property.value ?? null)
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 /** Bounded inert capture only. C semantic/source checks belong AFTER receipt
  * recovery. Malformed optional metadata must not obstruct an exact old receipt.
@@ -533,6 +559,9 @@ export function prepareAtomicTransitionCandidate(input: {
   );
 
   const candidate = Object.freeze({
+    deferredProductionWaterCommitBinding: captureProductionWaterCommitBinding(
+      input.draft,
+    ),
     command,
     transition,
     inventoryPostings: Object.freeze(inventoryPostings),
@@ -1248,17 +1277,57 @@ export class AtomicTransitionRepository {
     head: Readonly<{ worldVersion: string; eventSequence: string }>,
   ): Promise<void> {
     const posting = candidate.inventoryPostings[0];
+    const events = candidate.transition.events;
+    const withWater =
+      events.length === 2 &&
+      events[0]!.eventType === PRODUCTION_SETTLED_EVENT_TYPE &&
+      events[1]!.eventType === PRODUCTION_WATER_CONSUMED_EVENT &&
+      BigInt(events[1]!.sequence) === BigInt(events[0]!.sequence) + 1n;
     if (
       this.#industryProductionCutoffGuard === null ||
       candidate.inventoryPostings.length !== 1 ||
       candidate.financialPostingBatches.length !== 0 ||
-      candidate.transition.events.length !== 1 ||
+      (events.length !== 1 && !withWater) ||
       posting?.schemaVersion !== PRODUCTION_CONSUMPTION_SCHEMA_VERSION ||
       posting.operation !== 'PRODUCE_AND_CONSUME'
     )
       invalid(
         'New Industry production requires the fixed source guard and the complete supported prior-funded candidate',
       );
+    if (withWater) {
+      if (
+        !isPostwarIndustryProductionSourceGuard(
+          this.#industryProductionCutoffGuard,
+        )
+      )
+        invalid(
+          'Water-bearing production requires the issued postwar original-source guard',
+        );
+      const water =
+        candidate.deferredProductionWaterCommitBinding as ProductionWaterConsumptionCommitBinding;
+      assertProductionWaterConsumptionCommitBinding(water);
+      const binding = bindAuthoritativeTransition(
+        { command: candidate.command, transition: candidate.transition },
+        this.#sha256Hex,
+      );
+      const materials = candidate.currentMaterializations.filter(
+        (m) => m.key === water.materialization.key,
+      );
+      if (
+        water.commandFingerprint !== candidate.command.fingerprint ||
+        water.postingId !== posting.postingId ||
+        water.postingFingerprint !== posting.fingerprint ||
+        canonicalSerialize(water.transitionBinding) !==
+          canonicalSerialize(binding) ||
+        water.waterEventId !== events[1]!.eventId ||
+        water.waterEventFingerprint !== events[1]!.fingerprint ||
+        materials.length !== 1 ||
+        materials[0]!.payloadHash !== water.afterStateHash
+      )
+        invalid(
+          'The issued water calculation must bind the exact production transition, posting and materialization',
+        );
+    }
     const op = posting.evidence.operating.payload;
     const request = Object.freeze({
       command: candidate.command,
@@ -1268,6 +1337,7 @@ export class AtomicTransitionRepository {
       fundingBatchId: op.fundingBatchId,
       fundingFingerprint: op.fundingFingerprint,
       costLegId: op.costLegId,
+      currentMaterializations: candidate.currentMaterializations,
     });
     const observed =
       await this.#industryProductionCutoffGuard.assertCurrentFrom(

@@ -104,6 +104,7 @@ export interface FinanceNativeBudgetBinding {
   readonly treasuryClaimId: string;
   readonly openingEncumbranceHash: string;
   readonly capacityProjectionFingerprint?: string;
+  readonly mixedSourceBindingsFingerprint?: string;
 }
 export interface FinanceNativeBudgetLine {
   readonly lineRef: string;
@@ -384,7 +385,9 @@ function checkedPolicy(
       binding.seedFingerprint,
       binding.originalsSHA256,
       binding.openingEncumbranceHash,
-    ].every(digest)
+    ].every(digest) ||
+    (binding.mixedSourceBindingsFingerprint !== undefined &&
+      !digest(binding.mixedSourceBindingsFingerprint))
   )
     invalid('PROTECTED_SOURCE_BINDING_MISMATCH');
 }
@@ -826,13 +829,19 @@ export function evaluateFinanceNativeBudgetSource(input: {
     before.eventSequence !== source.eventSequence
   )
     invalid('ACTUAL_CANONICAL_SOURCE_HEAD_REQUIRED');
+  const mixed =
+    source.mixedPrefixEvidence === undefined
+      ? undefined
+      : readFinanceNativeBudgetMixedPrefix(
+          source.mixedPrefixEvidence,
+          command.worldId,
+          source.frames,
+          sha,
+        );
   let treasury: FinancialPosition | undefined;
   if (source.capacityData !== undefined) {
-    if (
-      source.financialState !== undefined ||
-      source.mixedPrefixEvidence !== undefined
-    )
-      invalid('CAPACITY_DATA_REQUIRES_COMPLETE_ZERO_POSTING_BUDGET_PREFIX');
+    if (source.financialState !== undefined)
+      invalid('CAPACITY_DATA_DOES_NOT_ISSUE_FINANCIAL_LEDGER_AUTHORITY');
     const capacity = readFinanceBudgetCapacityData(source.capacityData);
     if (
       capacity.worldId !== command.worldId ||
@@ -843,12 +852,27 @@ export function evaluateFinanceNativeBudgetSource(input: {
       capacity.governmentEntityId !== source.policy.governmentEntityId ||
       capacity.financialSourceId !== source.binding.financialSourceId ||
       capacity.financialOriginalsSha256 !== source.binding.originalsSHA256 ||
-      hash(capacity, sha) !== source.binding.capacityProjectionFingerprint
+      hash(capacity, sha) !== source.binding.capacityProjectionFingerprint ||
+      (mixed !== undefined &&
+        !digest(source.binding.mixedSourceBindingsFingerprint ?? ''))
     )
       invalid('CAPACITY_DATA_PROTECTED_SOURCE_MISMATCH');
     const reference =
       'OPENING_FUNDING_TOTAL_' +
       capacity.openingFunding.recordsSha256.slice(7).toUpperCase();
+    const reservations = (mixed?.socialReservations ?? []).filter(
+      (r) =>
+        r.countryId === command.countryId ||
+        r.accountId === capacity.treasury.assetAccount.accountId,
+    );
+    for (const r of reservations)
+      if (
+        r.countryId !== command.countryId ||
+        r.accountId !== capacity.treasury.assetAccount.accountId ||
+        r.employerId !== source.policy.governmentEntityId ||
+        r.currency !== capacity.treasury.assetAccount.currency
+      )
+        invalid('CAPACITY_MIXED_RESERVATION_SCOPE_MISMATCH');
     if (
       !same(source.openingEncumbrances, [
         {
@@ -857,9 +881,15 @@ export function evaluateFinanceNativeBudgetSource(input: {
           amount: capacity.openingFunding.totalAmount,
           currency: capacity.treasury.assetAccount.currency,
         },
+        ...reservations.map((r) => ({
+          reference: r.reservationId,
+          accountId: r.accountId,
+          amount: r.amount,
+          currency: r.currency,
+        })),
       ])
     )
-      invalid('COMPLETE_PUBLISHED_OPENING_FUNDING_REQUIRED');
+      invalid('COMPLETE_PUBLISHED_OPENING_AND_MIXED_RESERVATIONS_REQUIRED');
     treasury = {
       account: capacity.treasury.assetAccount,
       netDebitBalance: Money.from(
@@ -895,13 +925,7 @@ export function evaluateFinanceNativeBudgetSource(input: {
       source.openingEncumbrances.length
   )
     invalid('EXACT_OPENING_ENCUMBRANCE_COVERAGE_REQUIRED');
-  if (source.mixedPrefixEvidence !== undefined) {
-    const mixed = readFinanceNativeBudgetMixedPrefix(
-      source.mixedPrefixEvidence,
-      command.worldId,
-      source.frames,
-      sha,
-    );
+  if (mixed !== undefined) {
     for (const r of mixed.socialReservations)
       if (
         r.countryId === command.countryId &&

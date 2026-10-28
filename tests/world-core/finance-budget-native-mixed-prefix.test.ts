@@ -14,6 +14,10 @@ import {
   type FinanceNativeBudgetPolicy,
   type FinanceNativeBudgetSource,
 } from '../../packages/core/src/commands/finance-budget-native.js';
+import {
+  parseFinanceBudgetCapacityData,
+  readFinanceBudgetCapacityData,
+} from '../../packages/core/src/commands/finance-budget-capacity-data.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const at = '2026-10-28T00:00:00.000Z',
   world = C.worldId('WORLD_TEST_ONLY_NATIVE_BUDGET'),
@@ -203,7 +207,7 @@ async function run(
     },
     worldId: world,
     requestedCountryId: country,
-    requestedOfficeId: 'FINANCE',
+    requestedOfficeId: C.officeId('FINANCE'),
     capability: 'FINANCE_BUDGET',
   });
   await C.processQueuedCommand({
@@ -425,10 +429,14 @@ function socialFrame(
     state: prepared.state,
   };
 }
+type TestCanonicalFrame = FinanceNativeBudgetCanonicalFrame & {
+  readonly inventoryPostings: readonly [];
+  readonly financialPostingBatches: readonly [];
+};
 const canonicalBudgetFrame = (
   command: C.CanonicalCommand,
   value: Awaited<ReturnType<typeof run>>,
-): FinanceNativeBudgetCanonicalFrame => ({
+): TestCanonicalFrame => ({
   command,
   events: value.result.transition.events,
   transition: value.result.transition,
@@ -484,7 +492,7 @@ describe('whole Finance/Social known-family prefix replay, TEST_ONLY Core semant
               countryId: country,
               teamId: C.teamId('TEAM_TEST_ONLY'),
               authorizationVersion: 'REV_TEST_ONLY',
-              officeAssignments: ['SOCIAL', 'FINANCE'],
+              officeAssignments: [C.officeId('SOCIAL'), C.officeId('FINANCE')],
               active: true,
               suspended: false,
               isWorldAdmin: false,
@@ -494,7 +502,7 @@ describe('whole Finance/Social known-family prefix replay, TEST_ONLY Core semant
         },
         worldId: world,
         requestedCountryId: country,
-        requestedOfficeId: office,
+        requestedOfficeId: C.officeId(office),
         capability,
       });
     const intent = {
@@ -602,7 +610,7 @@ describe('whole Finance/Social known-family prefix replay, TEST_ONLY Core semant
       worldVersionAfter: '2',
       events: [event],
     });
-    const socialFrame: FinanceNativeBudgetCanonicalFrame = {
+    const socialFrame: TestCanonicalFrame = {
       command,
       events: [event],
       transition,
@@ -673,6 +681,94 @@ describe('whole Finance/Social known-family prefix replay, TEST_ONLY Core semant
         sha256Hex: sha,
       }).after.envelopes[0]?.lines,
     ).toHaveLength(1);
+    // DATA_ONLY keeps the same genuine Core mixed replay, without minting a
+    // FinancialLedgerState from a parsed capacity row. SQL authority is tested
+    // separately in the native custody suite.
+    const capacityData = parseFinanceBudgetCapacityData({
+      schemaVersion: 'finance-budget-capacity-source-v1',
+      worldId: world,
+      countryId: country,
+      seedId: f.seed.seedId,
+      seedFingerprint: f.seed.fingerprint,
+      admissionRef: f.source.binding.admissionRef,
+      modelVersion: C.WORLD_MODEL_VERSION,
+      openingWorldVersion: '0',
+      governmentEntityId: f.source.policy.governmentEntityId,
+      centralBankEntityId: 'CB_TEST_ONLY',
+      financialSourceId: f.source.binding.financialSourceId,
+      canonicalSeedSha256: 'sha256:' + 'd'.repeat(64),
+      financialOriginalsSha256: f.source.binding.originalsSHA256,
+      treasury: {
+        assetAccount: f.seed.financialBatches[0]!.legs[0]!.account,
+        liabilityAccount: f.seed.financialBatches[0]!.legs[1]!.account,
+        assetLegId: f.seed.financialBatches[0]!.legs[0]!.legId,
+        liabilityLegId: f.seed.financialBatches[0]!.legs[1]!.legId,
+        assetAmount: '1000',
+        liabilityAmount: '1000',
+      },
+      openingFunding: {
+        totalAmount: '0',
+        recordCount: '0',
+        recordsSha256: 'sha256:' + 'e'.repeat(64),
+      },
+    });
+    const capacity = readFinanceBudgetCapacityData(capacityData),
+      expectedEncumbrances = [
+        {
+          reference:
+            'OPENING_FUNDING_TOTAL_' +
+            capacity.openingFunding.recordsSha256.slice(7).toUpperCase(),
+          accountId: capacity.treasury.assetAccount.accountId,
+          amount: '0',
+          currency: 'GBP',
+        },
+        ...encumbrances,
+      ];
+    const { financialState: unusedLedger, ...dataSource } = protectedSource;
+    void unusedLedger;
+    const withCapacity = (
+      items = expectedEncumbrances,
+    ): FinanceNativeBudgetSource => ({
+      ...dataSource,
+      capacityData,
+      openingEncumbrances: items,
+      binding: {
+        ...dataSource.binding,
+        mixedSourceBindingsFingerprint: 'sha256:' + 'f'.repeat(64),
+        capacityProjectionFingerprint: C.canonicalSha256(
+          C.canonicalHashInput(capacity),
+          sha,
+        ),
+        openingEncumbranceHash: C.canonicalSha256(
+          C.canonicalHashInput(items),
+          sha,
+        ),
+      },
+    });
+    expect(
+      evaluateFinanceNativeBudgetSource({
+        command: line,
+        source: withCapacity(),
+        sha256Hex: sha,
+      }).after.envelopes[0]?.lines,
+    ).toHaveLength(1);
+    for (const incomplete of [
+      expectedEncumbrances.slice(0, 1),
+      [...expectedEncumbrances, encumbrances[0]!],
+      [
+        ...expectedEncumbrances,
+        { ...encumbrances[0]!, reference: 'UNPROVEN_EXTRA_RESERVATION' },
+      ],
+      [expectedEncumbrances[0]!, { ...encumbrances[0]!, amount: '9' }],
+      [expectedEncumbrances[0]!, { ...encumbrances[0]!, currency: 'USD' }],
+    ])
+      expect(() =>
+        evaluateFinanceNativeBudgetSource({
+          command: line,
+          source: withCapacity(incomplete),
+          sha256Hex: sha,
+        }),
+      ).toThrow('COMPLETE_PUBLISHED_OPENING_AND_MIXED_RESERVATIONS_REQUIRED');
     const missingPrior = {
       ...facts,
       funding: { ...facts.funding, priorReservations: [] },

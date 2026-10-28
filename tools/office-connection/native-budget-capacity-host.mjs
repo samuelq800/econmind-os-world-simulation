@@ -55,7 +55,10 @@ async function start(c) {
     !/^budget_test_worker_[a-f0-9]{8}$/u.test(c.workerRole) ||
     !/^budget_test_intake_[a-f0-9]{8}$/u.test(c.intakeRole) ||
     c.readerRole !== 'fixture_postwar_bounded_reader' ||
-    !/^WORKER_NATIVE_BUDGET_[A-F0-9]+$/u.test(c.workerId)
+    !/^WORKER_NATIVE_BUDGET_[A-F0-9]+$/u.test(c.workerId) ||
+    (c.historyMode !== undefined &&
+      c.historyMode !== 'BUDGET_ONLY' &&
+      c.historyMode !== 'BUDGET_SOCIAL')
   )
     throw Error('OWNED_FIXTURE_CONFIGURATION_REQUIRED');
   const pool = (role) => {
@@ -77,27 +80,50 @@ async function start(c) {
   const worker = pool(c.workerRole),
     rawIntake = pool(c.intakeRole),
     readPool = pool(c.readerRole);
-  const queries = [];
+  const queries = [],
+    queryMetrics = [],
+    failures = [];
+  const failed = (error) => {
+    const chain = [];
+    let e = error;
+    while (e instanceof Error && chain.length < 8) {
+      chain.push({ name: e.name, message: e.message, code: e.code ?? null });
+      e = e.cause;
+    }
+    failures.push(chain);
+  };
+  const observed = async (executor, sql, args) => {
+    queries.push(sql);
+    const result = await executor.query(sql, args);
+    queryMetrics.push({
+      sql,
+      rows: result.rows.length,
+      bytes: Buffer.byteLength(
+        JSON.stringify(result.rows, (_key, v) =>
+          typeof v === 'bigint' ? String(v) : v,
+        ),
+      ),
+    });
+    return result;
+  };
   const raw = new W.PostgresSqlDatabase(worker),
     database = W.createFinanceBudgetAuthorizationDatabase({
-      query: async (sql, args) => {
-        queries.push(sql);
-        return raw.query(sql, args);
+      query: (sql, args) => observed(raw, sql, args),
+      transaction: async (work) => {
+        try {
+          return await raw.transaction((tx) =>
+            work({ query: (sql, args) => observed(tx, sql, args) }),
+          );
+        } catch (error) {
+          failed(error);
+          throw error;
+        }
       },
-      transaction: (work) =>
-        raw.transaction((tx) =>
-          work({
-            query: async (sql, args) => {
-              queries.push(sql);
-              return tx.query(sql, args);
-            },
-          }),
-        ),
     });
   const intakePool = W.createFinanceBudgetIntakeAuthorizationPool(rawIntake),
     clock = {
       nowReal: () => new Date().toISOString(),
-      simTime: async () => '0',
+      simTime: async () => (c.historyMode === 'BUDGET_SOCIAL' ? '3000' : '0'),
     };
   const started = performance.now(),
     heap = process.memoryUsage().heapUsed;
@@ -105,6 +131,7 @@ async function start(c) {
     worldId: c.pins.worldId,
     countryId: c.countryId,
     expectedRawSourceSHA256: c.sourceSHA256,
+    historyMode: c.historyMode ?? 'BUDGET_ONLY',
   });
   const { runtime } = W.createBoundedFinanceBudgetIntakeRuntime({
     capacitySource,
@@ -223,6 +250,8 @@ async function start(c) {
     pools: [worker, rawIntake, readPool],
     metrics,
     queries,
+    queryMetrics,
+    failures,
   };
   send({
     type: 'LISTENING_TEST_ONLY',
@@ -253,6 +282,8 @@ const receiveMessage = (message) => {
           rss: process.memoryUsage().rss,
           metrics: state.metrics,
           queries: state.queries,
+          queryMetrics: state.queryMetrics,
+          failures: state.failures,
         },
       });
     else if (message.operation === 'close') await close();

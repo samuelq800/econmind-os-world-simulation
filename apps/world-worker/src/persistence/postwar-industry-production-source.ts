@@ -6,10 +6,19 @@ import {
   canonicalDecimal,
   WorldDecimal,
   assertWorldDecimalResult,
+  canonicalSerialize,
+  bindAuthoritativeTransition,
+  worldId,
+  type AuthoritativeTransition,
   validateCanonicalCommand,
   type CanonicalCommand,
   type ExactUnitRate,
 } from '@econmind/core';
+import {
+  PRODUCTION_WATER_CONSUMED_EVENT,
+  assertProductionWaterConsumptionCommitBinding,
+  type ProductionWaterConsumptionCommitBinding,
+} from '@econmind/core/production-water-consumption';
 import {
   isVerifiedOfficialOpeningDecisionSource,
   inspectOfficialOpeningDecisionSource,
@@ -23,6 +32,11 @@ import {
   type IndustryProductionCutoffObservation,
 } from './industry-production-source-cutoff.js';
 import type { SqlExecutor } from './sql-database.js';
+import type { AtomicTransitionDraft } from './atomic-transition-repository.js';
+import {
+  assertCurrentMaterializationObservation,
+  type CurrentMaterializationObservation,
+} from './current-materialization-observation.js';
 export const POSTWAR_INDUSTRY_SOURCE_ROLES = Object.freeze({
   publisher: 'world_v2_industry_source_publisher',
   reader: 'world_v2_industry_source_reader',
@@ -41,6 +55,16 @@ export const POSTWAR_INDUSTRY_SOURCE_LOCK =
   'select * from world_v2.lock_postwar_industry_original($1,$2,$3,$4,$5)';
 export const POSTWAR_INDUSTRY_SOURCE_SESSION = `select current_user as role_name,r.rolsuper,r.rolbypassrls,r.rolcreaterole,r.rolcreatedb,r.rolreplication,current_setting('transaction_isolation')as isolation,current_setting('transaction_read_only')as read_only,pg_has_role(current_user,'world_v2_industry_source_publisher','MEMBER')as publisher_member,pg_has_role(current_user,'world_v2_industry_source_owner','MEMBER')as owner_member,pg_has_role(current_user,'world_v2_industry_source_reader','MEMBER')as reader_member from pg_roles r where r.rolname=current_user`;
 const sha = (bytes: string) => createHash('sha256').update(bytes).digest('hex');
+const industrySourceGuards = new WeakSet<object>();
+export function isPostwarIndustryProductionSourceGuard(
+  value: unknown,
+): value is IndustryProductionCutoffGuard {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    industrySourceGuards.has(value)
+  );
+}
 type RecordData = Readonly<Record<string, unknown>>;
 function invalid(code: string): never {
   throw Error('POSTWAR_INDUSTRY_SOURCE:' + code);
@@ -359,6 +383,151 @@ export class PostwarIndustrySourceMissingError extends Error {
     );
   }
 }
+
+/** Mandatory selected-source transition seam. Canonical event presence alone
+ * never establishes actual water delivery/currentness; readForCommandFrom and
+ * the original delivery custody still have to remain held through commit. */
+export function assertPostwarIndustryWaterEventPresent(
+  inspection: PostwarIndustryOriginalInspection,
+  transition: AuthoritativeTransition,
+): void {
+  if (new WorldDecimal(inspection.recipe.waterPerOutput.amount).isZero())
+    return;
+  if (
+    transition.events.filter(
+      (e) => e.eventType === PRODUCTION_WATER_CONSUMED_EVENT,
+    ).length !== 1
+  )
+    throw new PostwarIndustrySourceMissingError(
+      [
+        {
+          code: 'CORE_WATER_DEBIT_BINDING_MISSING',
+          field: 'waterConsumption',
+          sourcePointer: 'recipe.waterM3PerUnit',
+          detail:
+            'Positive source water requirement needs one same-transition conserved delivered-water debit; a quota or separate future side write is insufficient.',
+        },
+      ],
+      inspection.recipe.sourceId,
+    );
+}
+
+/** This mandatory shape/cache seam is deliberately NOT delivery authority.
+ * Actual source custody and Core recomputation must additionally pass. */
+export function assertPostwarIndustryWaterAtomicMaterialization(
+  inspection: PostwarIndustryOriginalInspection,
+  transition: AuthoritativeTransition,
+  materials:
+    | readonly {
+        readonly key: string;
+        readonly payloadHash: `sha256:${string}`;
+      }[]
+    | undefined,
+): void {
+  if (new WorldDecimal(inspection.recipe.waterPerOutput.amount).isZero())
+    return;
+  assertPostwarIndustryWaterEventPresent(inspection, transition);
+  const event = transition.events.find(
+    (e) => e.eventType === PRODUCTION_WATER_CONSUMED_EVENT,
+  )!;
+  const payload = record(JSON.parse(event.canonicalPayload));
+  if (
+    payload.schemaVersion !== 'production-water-consumption-event-v1' ||
+    typeof payload.materializationKey !== 'string' ||
+    typeof payload.afterStateHash !== 'string' ||
+    !/^sha256:[a-f0-9]{64}$/u.test(payload.afterStateHash) ||
+    !materials ||
+    materials.filter(
+      (m) =>
+        m.key === payload.materializationKey &&
+        m.payloadHash === payload.afterStateHash,
+    ).length !== 1 ||
+    materials.filter((m) => m.key === payload.materializationKey).length !== 1
+  )
+    throw new PostwarIndustrySourceMissingError(
+      [
+        {
+          code: 'CORE_WATER_DEBIT_BINDING_MISSING',
+          field: 'waterConsumptionMaterialization',
+          sourcePointer: 'recipe.waterM3PerUnit',
+          detail:
+            'The water event must atomically persist its one exact after-state materialization; an event without its conserved debit is incomplete.',
+        },
+      ],
+      inspection.recipe.sourceId,
+    );
+}
+
+/** Fixed atomic composition over a genuine Core calculation and a genuine
+ * same-head database cache observation. This never supplies delivery authority
+ * or erases the source's missing actual-water/paid-cost requirements. The sole
+ * Atomic repository persists this materialization with the original inventory
+ * posting and the two events, or rolls the whole draft back. */
+export function composePostwarIndustryProductionWaterDraft(input: {
+  readonly draft: AtomicTransitionDraft;
+  readonly command: CanonicalCommand;
+  readonly inspection: PostwarIndustryOriginalInspection;
+  readonly water: ProductionWaterConsumptionCommitBinding;
+  readonly observation: CurrentMaterializationObservation;
+}): AtomicTransitionDraft {
+  const { draft, command, inspection, water, observation } = input;
+  assertProductionWaterConsumptionCommitBinding(water);
+  assertPostwarIndustryWaterEventPresent(inspection, draft.transition);
+  const actual = bindAuthoritativeTransition(
+    { command, transition: draft.transition },
+    sha,
+  );
+  if (
+    canonicalSerialize(actual) !==
+      canonicalSerialize(water.transitionBinding) ||
+    water.commandFingerprint !== command.fingerprint ||
+    inspection.scope.worldId !== command.worldId ||
+    inspection.scope.countryId !== command.countryId ||
+    water.waterAccount.countryRef !== inspection.scope.countryId ||
+    water.waterAccount.regionRef !== inspection.scope.locationId ||
+    water.waterAccount.holderRef !== inspection.scope.operatorId ||
+    water.waterRecipe.facilityRef !== inspection.scope.facilityId ||
+    water.waterRecipe.sourceRecipeRef !== inspection.recipe.sourceId ||
+    water.waterRecipe.countryRef !== inspection.scope.countryId ||
+    water.waterRecipe.regionRef !== inspection.scope.locationId ||
+    canonicalSerialize(water.waterRecipe.perOutput) !==
+      canonicalSerialize(inspection.recipe.waterPerOutput)
+  )
+    invalid('EXACT_SOURCE_WATER_RECIPE_AND_RIGHT_BINDING_REQUIRED');
+  if (
+    draft.inventoryPostings.filter(
+      (p) =>
+        p.postingId === water.postingId &&
+        p.fingerprint === water.postingFingerprint,
+    ).length !== 1 ||
+    draft.currentMaterializations.some(
+      (m) => m.key === water.materialization.key,
+    )
+  )
+    invalid('SAME_ATOMIC_PRODUCTION_POSTING_AND_SINGLE_WATER_DEBIT_REQUIRED');
+  assertCurrentMaterializationObservation({
+    observation,
+    worldId: worldId(command.worldId),
+    key: water.materialization.key,
+    expectedWorldVersion: actual.worldVersionBefore,
+  });
+  if (
+    observation.canonicalPayload === null
+      ? water.beforeState.uses.length !== 0
+      : observation.canonicalPayload !==
+          canonicalSerialize(water.beforeState) ||
+        observation.payloadHash !== water.beforeStateHash
+  )
+    invalid('WATER_MATERIALIZATION_DIFFERS_FROM_HELD_CANONICAL_REPLAY');
+  return Object.freeze({
+    ...draft,
+    productionWaterCommitBinding: water,
+    currentMaterializations: Object.freeze([
+      ...draft.currentMaterializations,
+      Object.freeze({ ...water.materialization, observation }),
+    ]),
+  });
+}
 export interface PostwarIndustrySourceObservation {
   readonly registrationRef: string;
   readonly documentSha256: string;
@@ -500,7 +669,7 @@ export function createPostwarIndustryProductionSource(input: {
         !(delegate instanceof ProtectedIndustryProductionGuard)
       )
         invalid('FIXED_PROTECTED_CUTOFF_GUARD_REQUIRED');
-      return Object.freeze({
+      const guard = Object.freeze({
         async assertCurrentFrom(
           tx: SqlExecutor,
           request: Readonly<IndustryProductionCutoffRequest>,
@@ -510,6 +679,11 @@ export function createPostwarIndustryProductionSource(input: {
             facilityId: request.posting.evidence.operating.payload.facilityRef,
             eventSequence: request.expectedHead.eventSequence,
           });
+          assertPostwarIndustryWaterAtomicMaterialization(
+            source.inspected,
+            request.transition,
+            request.currentMaterializations,
+          );
           if (source.inspected.missing.length)
             throw new PostwarIndustrySourceMissingError(
               source.inspected.missing,
@@ -534,6 +708,8 @@ export function createPostwarIndustryProductionSource(input: {
           return delegate.assertCurrentFrom(tx, request);
         },
       });
+      industrySourceGuards.add(guard);
+      return guard;
     },
   });
 }

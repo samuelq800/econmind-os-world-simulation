@@ -17,7 +17,9 @@ import {
   type IndustryPersistenceSchemaReadContextV1,
   type IndustryPersistenceSchemaCommitContextV1,
   type IndustryPersistenceSchemaPostingIdentityV1,
+  PRODUCTION_SETTLED_EVENT_TYPE,
 } from '@econmind/core';
+import { PRODUCTION_WATER_CONSUMED_EVENT } from '@econmind/core/production-water-consumption';
 import {
   readValidatedCanonicalLineageFrom,
   type ValidatedCanonicalLineageView,
@@ -287,7 +289,14 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
     transition.worldVersionBefore !== data.headWorldVersion ||
     transition.worldVersionAfter !==
       (BigInt(data.headWorldVersion) + 1n).toString() ||
-    transition.events.length !== 1 ||
+    !(
+      transition.events.length === 1 ||
+      (transition.events.length === 2 &&
+        transition.events[0]!.eventType === PRODUCTION_SETTLED_EVENT_TYPE &&
+        transition.events[1]!.eventType === PRODUCTION_WATER_CONSUMED_EVENT &&
+        BigInt(transition.events[1]!.sequence) ===
+          BigInt(transition.events[0]!.sequence) + 1n)
+    ) ||
     transition.events[0]!.sequence !==
       (BigInt(data.headEventSequence) + 1n).toString()
   )
@@ -482,6 +491,10 @@ export interface IndustryProductionCutoffRequest {
   readonly fundingBatchId: string;
   readonly fundingFingerprint: string;
   readonly costLegId: string;
+  readonly currentMaterializations?: readonly Readonly<{
+    key: string;
+    payloadHash: `sha256:${string}`;
+  }>[];
 }
 export interface IndustryProductionCutoffObservation {
   readonly schemaVersion: 'industry-production-cutoff-observation-v1';

@@ -39,6 +39,14 @@
     "./finance-budget-capacity-data": {
       "types": "./dist/commands/finance-budget-capacity-data.d.ts",
       "default": "./dist/commands/finance-budget-capacity-data.js"
+    },
+    "./postwar-opening-payroll": {
+      "types": "./dist/commands/postwar-opening-payroll.d.ts",
+      "default": "./dist/commands/postwar-opening-payroll.js"
+    },
+    "./production-water-consumption": {
+      "types": "./dist/inventory/production-water-consumption.d.ts",
+      "default": "./dist/inventory/production-water-consumption.js"
     }
   },
   "scripts": {
