@@ -400,4 +400,42 @@ describe('V10.6 durable V08 ledger lineage reader', () => {
       'Durable Event hashes differ',
     );
   });
+
+  it('returns the actual checked seed and complete replay with one immutable seed read in stable READ ONLY mode', async () => {
+    const values = fixture();
+    const backing = database({ values });
+    const statements: string[] = [];
+    const executor: SqlExecutor = {
+      async query<Row extends object>(
+        statement: string,
+        parameters: readonly unknown[] = [],
+      ) {
+        statements.push(statement);
+        if (statement.includes("current_setting('transaction_read_only')"))
+          return {
+            rows: [
+              { read_only: 'on', isolation: 'repeatable read' },
+            ] as unknown as Row[],
+            rowCount: 1,
+          };
+        return backing.query<Row>(statement, parameters);
+      },
+    };
+    const reader = new DurableV08LedgerLineageReader({
+      database: backing,
+      sha256Hex,
+    });
+    const snapshot = await reader.readOnlySnapshotWithSeedFrom(executor, WORLD);
+    expect(snapshot.seed).toEqual(values.opening);
+    expect(snapshot.ledgers.seedFingerprint).toBe(snapshot.seed.fingerprint);
+    expect(snapshot.headWorldVersion).toBe('1');
+    expect(snapshot.headEventSequence).toBe('1');
+    expect(
+      statements.filter((sql) => sql.includes('from world_v2.opening_seed')),
+    ).toHaveLength(1);
+    expect(statements.some((sql) => /for\s+share/iu.test(sql))).toBe(false);
+    const previous = await reader.rebuildReadOnlyFrom(executor, WORLD);
+    expect(previous).not.toHaveProperty('seed');
+    expect(previous.ledgers).toEqual(snapshot.ledgers);
+  });
 });

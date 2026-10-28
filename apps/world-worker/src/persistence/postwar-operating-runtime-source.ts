@@ -14,6 +14,7 @@ import {
 } from '@econmind/core';
 import {
   readPostwarOperatingGenesisFromSeed,
+  readPostwarOperatingGenesisFromValidatedSnapshotFrom,
   type PostwarOperatingGenesisFacts,
 } from '../preparation/postwar-operating-genesis-adoption.js';
 import {
@@ -21,11 +22,7 @@ import {
   type PostwarSocialEmploymentCountrySource,
 } from '../preparation/postwar-social-employment-state.js';
 import { officePrivateReadProjectionScopeKey } from '../projections/current-authorization-entitlement-publisher.js';
-import {
-  DurableV08LedgerLineageReader,
-  type DurableV08LedgerLineageSnapshot,
-} from './durable-v08-ledger-lineage-reader.js';
-import { WorldOpeningSeedStore } from './opening-seed-store.js';
+import { type DurableV08LedgerLineageSnapshot } from './durable-v08-ledger-lineage-reader.js';
 import {
   RuntimeReadBindingStore,
   RuntimeReadBindingStoreError,
@@ -33,6 +30,10 @@ import {
   type ImmutableOpeningAdmissionReference,
 } from './runtime-read-binding-store.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import {
+  withValidatedReadOnlyOpeningSnapshotFrom,
+  readValidatedReadOnlyOpeningSnapshotFrom,
+} from './validated-read-only-opening-snapshot.js';
 
 export const POSTWAR_RUNTIME_SOURCE_MODE_QUERY =
   `select current_setting('transaction_read_only') as read_only,
@@ -252,14 +253,6 @@ export function createAuthorizedAdmittedOpeningSource(input: {
     authorizationPublisherRole: input.authorizationPublisherRole,
     runtimeReaderRole: input.runtimeReaderRole,
   });
-  const opening = new WorldOpeningSeedStore({
-    database: isolatedDatabase,
-    sha256Hex: sha,
-  });
-  const lineage = new DurableV08LedgerLineageReader({
-    database: isolatedDatabase,
-    sha256Hex: sha,
-  });
   const assertScope = (authorization: AuthorizedOfficeContext) => {
     if (
       authorization.worldId !== scope.worldId ||
@@ -335,20 +328,15 @@ export function createAuthorizedAdmittedOpeningSource(input: {
           entitlement.rows[0]?.team_id !== authorization.teamId
         )
           failure('AUTHORIZATION_DENIED');
-        const admission = await references.readImmutableAdmissionFrom({
-          executor,
-          verifiedSubject: authorization.authSubject,
-          worldId: scope.worldId,
-        });
-        if (!admission) failure('SOURCE_NOT_ADMITTED');
-        const seed = await opening.loadFrom(executor, scope.worldId);
-        if (
-          seed.seedId !== admission.seedRef ||
-          seed.fingerprint !== admission.contentHash ||
-          canonicalSerialize(seed.replayBinding) !== admission.replayBinding ||
-          seed.replayBinding.modelVersion !== admission.modelVersion
-        )
-          failure('SOURCE_NOT_ADMITTED');
+        // Denial-only shortcut; admission is fully re-read and bound to the
+        // actual validated seed below. Presence alone never admits a source.
+        const admissionPresence = await executor.query<{
+          admission_ref: unknown;
+        }>(
+          'select admission_ref from world_v2.runtime_opening_admission where world_id=$1 limit 2',
+          [scope.worldId],
+        );
+        if (admissionPresence.rows.length !== 1) failure('SOURCE_NOT_ADMITTED');
         const heads = await executor.query<{
           world_version: unknown;
           event_sequence: unknown;
@@ -367,122 +355,150 @@ export function createAuthorizedAdmittedOpeningSource(input: {
         // Deny before exposing any H0 facts at a subsequent World head.
         if (head.world_version !== '0') failure('REPLAY_UNAVAILABLE');
         if (head.event_sequence !== '0') failure('SOURCE_UNAVAILABLE');
-        const replayed = await lineage.rebuildReadOnlyFrom(
-          executor,
-          scope.worldId,
+        // One actual seed load/Core validation/replay shared lexically with
+        // the admission check, never retained as current authority across txs.
+        return await withValidatedReadOnlyOpeningSnapshotFrom(
+          { executor, worldId: scope.worldId },
+          async (snapshot) => {
+            const replayed = await readValidatedReadOnlyOpeningSnapshotFrom(
+              executor,
+              snapshot,
+            );
+            const admission =
+              await references.readImmutableAdmissionWithSnapshotFrom({
+                executor,
+                verifiedSubject: authorization.authSubject,
+                worldId: scope.worldId,
+                snapshot,
+              });
+            if (!admission) failure('SOURCE_NOT_ADMITTED');
+            const seed = replayed.seed;
+            if (
+              seed.seedId !== admission.seedRef ||
+              seed.fingerprint !== admission.contentHash ||
+              canonicalSerialize(seed.replayBinding) !==
+                admission.replayBinding ||
+              seed.replayBinding.modelVersion !== admission.modelVersion
+            )
+              failure('SOURCE_NOT_ADMITTED');
+            if (
+              replayed.headWorldVersion !== '0' ||
+              replayed.headEventSequence !== '0' ||
+              replayed.ledgers.seedFingerprint !== seed.fingerprint
+            )
+              failure('SOURCE_UNAVAILABLE');
+            let view: ReturnType<typeof readPostwarOperatingGenesisFromSeed>;
+            try {
+              view = await readPostwarOperatingGenesisFromValidatedSnapshotFrom(
+                executor,
+                snapshot,
+              );
+            } catch {
+              return failure('OPERATING_SOURCE_UNAVAILABLE');
+            }
+            if (
+              view.worldId !== scope.worldId ||
+              view.seedFingerprint !== seed.fingerprint
+            )
+              failure('SOURCE_UNAVAILABLE');
+            const boundScope = {
+              ...scope,
+              authSubject: authorization.authSubject,
+              teamId: authorization.teamId,
+              authorizationVersion: authorization.authorizationVersion,
+              scopeKey,
+              seatRef: seat.seatRef,
+            };
+            const boundary = {
+              seedId: seed.seedId,
+              seedFingerprint: seed.fingerprint,
+              admissionRef: admission.admissionRef,
+              modelVersion: admission.modelVersion,
+              replayBinding: admission.replayBinding,
+              headWorldVersion: '0' as const,
+              headEventSequence: '0' as const,
+              carrierSHA256: view.carrierSha256,
+              policySHA256: view.policySha256,
+              outputSHA256: view.outputSha256,
+            };
+            const completeBoundary = {
+              ...boundary,
+              bindingFingerprint: `sha256:${sha(canonicalSerialize({ scope: boundScope, boundary }))}`,
+            };
+            const source: AuthorizedAdmittedOpeningSource = freeze({
+              schemaVersion: 'authorized-admitted-opening-source-v1',
+              classification:
+                'SERVER_ONLY_ORIGINALS_REQUIRE_EXACT_OFFICE_COUNTRY_MAPPER',
+              scope: boundScope,
+              boundary: completeBoundary,
+              authorization,
+              seat,
+              admission,
+              seed,
+              replayed,
+              heldHead: { worldVersion: '0', eventSequence: '0' },
+              operating: view,
+            });
+            lease = { executor, active: true };
+            sources.set(source, lease);
+            let result: Result;
+            try {
+              result = await consume(source);
+            } catch (error) {
+              throw new SourceConsumerFailure(error);
+            }
+            // Do not return a result after an identity/seat/role switch during the
+            // consumer. The next transaction always independently reloads facts.
+            let current: AuthorizedOfficeContext;
+            try {
+              current = await reauthorizeOfficeCapability(original);
+            } catch {
+              return failure('AUTHORIZATION_DENIED');
+            }
+            assertScope(current);
+            if (
+              current.authSubject !== authorization.authSubject ||
+              current.teamId !== authorization.teamId ||
+              current.authorizationVersion !==
+                authorization.authorizationVersion
+            )
+              failure('AUTHORIZATION_DENIED');
+            const heldSeat = await references.readCurrentSeatFrom({
+              executor,
+              verifiedSubject: current.authSubject,
+              worldId: scope.worldId,
+              countryId: scope.countryId,
+              officeId: scope.officeId,
+            });
+            if (
+              !heldSeat ||
+              heldSeat.seatRef !== seat.seatRef ||
+              heldSeat.authorizationRevision !== seat.authorizationRevision
+            )
+              failure('AUTHORIZATION_DENIED');
+            const currentEntitlement = await executor.query<{
+              authorization_version: unknown;
+              team_id: unknown;
+            }>(POSTWAR_RUNTIME_SOURCE_AUTHORIZATION_QUERY, [
+              scope.worldId,
+              current.authSubject,
+              scope.countryId,
+              scope.officeId,
+              current.teamId,
+              current.authorizationVersion,
+              current.capability,
+              scopeKey,
+            ]);
+            if (
+              currentEntitlement.rows.length !== 1 ||
+              currentEntitlement.rows[0]?.authorization_version !==
+                current.authorizationVersion ||
+              currentEntitlement.rows[0]?.team_id !== current.teamId
+            )
+              failure('AUTHORIZATION_DENIED');
+            return result;
+          },
         );
-        if (
-          replayed.headWorldVersion !== '0' ||
-          replayed.headEventSequence !== '0' ||
-          replayed.ledgers.seedFingerprint !== seed.fingerprint
-        )
-          failure('SOURCE_UNAVAILABLE');
-        let view: ReturnType<typeof readPostwarOperatingGenesisFromSeed>;
-        try {
-          view = readPostwarOperatingGenesisFromSeed(seed);
-        } catch {
-          return failure('OPERATING_SOURCE_UNAVAILABLE');
-        }
-        if (
-          view.worldId !== scope.worldId ||
-          view.seedFingerprint !== seed.fingerprint
-        )
-          failure('SOURCE_UNAVAILABLE');
-        const boundScope = {
-          ...scope,
-          authSubject: authorization.authSubject,
-          teamId: authorization.teamId,
-          authorizationVersion: authorization.authorizationVersion,
-          scopeKey,
-          seatRef: seat.seatRef,
-        };
-        const boundary = {
-          seedId: seed.seedId,
-          seedFingerprint: seed.fingerprint,
-          admissionRef: admission.admissionRef,
-          modelVersion: admission.modelVersion,
-          replayBinding: admission.replayBinding,
-          headWorldVersion: '0' as const,
-          headEventSequence: '0' as const,
-          carrierSHA256: view.carrierSha256,
-          policySHA256: view.policySha256,
-          outputSHA256: view.outputSha256,
-        };
-        const completeBoundary = {
-          ...boundary,
-          bindingFingerprint: `sha256:${sha(canonicalSerialize({ scope: boundScope, boundary }))}`,
-        };
-        const source: AuthorizedAdmittedOpeningSource = freeze({
-          schemaVersion: 'authorized-admitted-opening-source-v1',
-          classification:
-            'SERVER_ONLY_ORIGINALS_REQUIRE_EXACT_OFFICE_COUNTRY_MAPPER',
-          scope: boundScope,
-          boundary: completeBoundary,
-          authorization,
-          seat,
-          admission,
-          seed,
-          replayed,
-          heldHead: { worldVersion: '0', eventSequence: '0' },
-          operating: view,
-        });
-        lease = { executor, active: true };
-        sources.set(source, lease);
-        let result: Result;
-        try {
-          result = await consume(source);
-        } catch (error) {
-          throw new SourceConsumerFailure(error);
-        }
-        // Do not return a result after an identity/seat/role switch during the
-        // consumer. The next transaction always independently reloads facts.
-        let current: AuthorizedOfficeContext;
-        try {
-          current = await reauthorizeOfficeCapability(original);
-        } catch {
-          return failure('AUTHORIZATION_DENIED');
-        }
-        assertScope(current);
-        if (
-          current.authSubject !== authorization.authSubject ||
-          current.teamId !== authorization.teamId ||
-          current.authorizationVersion !== authorization.authorizationVersion
-        )
-          failure('AUTHORIZATION_DENIED');
-        const heldSeat = await references.readCurrentSeatFrom({
-          executor,
-          verifiedSubject: current.authSubject,
-          worldId: scope.worldId,
-          countryId: scope.countryId,
-          officeId: scope.officeId,
-        });
-        if (
-          !heldSeat ||
-          heldSeat.seatRef !== seat.seatRef ||
-          heldSeat.authorizationRevision !== seat.authorizationRevision
-        )
-          failure('AUTHORIZATION_DENIED');
-        const currentEntitlement = await executor.query<{
-          authorization_version: unknown;
-          team_id: unknown;
-        }>(POSTWAR_RUNTIME_SOURCE_AUTHORIZATION_QUERY, [
-          scope.worldId,
-          current.authSubject,
-          scope.countryId,
-          scope.officeId,
-          current.teamId,
-          current.authorizationVersion,
-          current.capability,
-          scopeKey,
-        ]);
-        if (
-          currentEntitlement.rows.length !== 1 ||
-          currentEntitlement.rows[0]?.authorization_version !==
-            current.authorizationVersion ||
-          currentEntitlement.rows[0]?.team_id !== current.teamId
-        )
-          failure('AUTHORIZATION_DENIED');
-        return result;
       } catch (error) {
         if (error instanceof SourceConsumerFailure) throw error.cause;
         if (error instanceof PostwarOperatingRuntimeSourceError) throw error;

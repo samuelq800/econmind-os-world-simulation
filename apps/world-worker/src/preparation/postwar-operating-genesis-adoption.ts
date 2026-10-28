@@ -26,6 +26,10 @@ import {
 import type { FinancialSupplementAdoption } from './owner-non-host-source-adoption.js';
 import type { FormalFinancialCandidate } from './formal-financial-opening-producer.js';
 import type { SqlExecutor } from '../persistence/sql-database.js';
+import {
+  readValidatedReadOnlyOpeningSnapshotFrom,
+  type ValidatedReadOnlyOpeningSnapshotScope,
+} from '../persistence/validated-read-only-opening-snapshot.js';
 import { readPostwarLiquidFundingAccountsFromSeed } from './postwar-financial-genesis.js';
 import {
   validatePostwarSocialEmploymentStateDocument,
@@ -1470,6 +1474,27 @@ export function readPostwarOperatingGenesisFromSeed(
       'seed.fingerprint',
     );
   }
+  return interpretValidatedPostwarOperatingSeed(seed);
+}
+
+/** Data-only lexical reuse of a seed just parsed by the fixed real SHA-256
+ * readonly lineage implementation. The opaque lease rechecks the actual
+ * backend/virtual transaction and executor; ordinary inputs still use the
+ * complete parser/hash path above. This grants no admission or authority. */
+export async function readPostwarOperatingGenesisFromValidatedSnapshotFrom(
+  executor: SqlExecutor,
+  scope: ValidatedReadOnlyOpeningSnapshotScope,
+): Promise<PostwarOperatingGenesisView> {
+  const snapshot = await readValidatedReadOnlyOpeningSnapshotFrom(
+    executor,
+    scope,
+  );
+  return interpretValidatedPostwarOperatingSeed(snapshot.seed);
+}
+
+function interpretValidatedPostwarOperatingSeed(
+  seed: OpeningSeed,
+): PostwarOperatingGenesisView {
   const cached = derivedViews.get(seed.fingerprint);
   if (cached) {
     derivedViews.delete(seed.fingerprint);

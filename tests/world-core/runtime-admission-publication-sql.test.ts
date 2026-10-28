@@ -26,8 +26,17 @@ import {
 } from '../../apps/world-worker/src/admission/official-opening-admission-publication.js';
 import { PostgresTransactionError } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
 import { createOfficialOpeningServerPublicationComposition } from '../../apps/world-worker/src/admission/official-opening-server-publication-composition.js';
-import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
+import type {
+  SqlDatabase,
+  SqlExecutor,
+} from '../../apps/world-worker/src/persistence/sql-database.js';
 import { DurableV08LedgerLineageReader } from '../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.js';
+import { RuntimeReadBindingStore } from '../../apps/world-worker/src/persistence/runtime-read-binding-store.js';
+import {
+  withValidatedReadOnlyOpeningSnapshotFrom,
+  readValidatedReadOnlyOpeningSnapshotFrom,
+  type ValidatedReadOnlyOpeningSnapshotScope,
+} from '../../apps/world-worker/src/persistence/validated-read-only-opening-snapshot.js';
 
 const sha = (bytes: string) => createHash('sha256').update(bytes).digest('hex');
 const pub = 'world_v2_opening_admission_test';
@@ -561,5 +570,203 @@ describe('exact permit SQL entry candidate under low-privilege sessions', () => 
       }
     }
     expect(tableReads).toBe(0);
+  });
+  it('shares one actual validated seed with fresh low-privilege admission reads and expires copied/escaped scopes', async () => {
+    const s = await setup();
+    await s.register();
+    await s.caller();
+    await s.db.query(
+      'select world_v2.publish_runtime_admission_publication($1,$2,$3)',
+      s.args,
+    );
+    await s.admin();
+    const readerRole = 'fixture_snapshot_runtime_reader',
+      authorizationPublisherRole = 'fixture_snapshot_auth_publisher';
+    const subject = '11111111-1111-4111-8111-111111111111';
+    await s.db
+      .exec(`create role ${readerRole} nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;
+      create role ${authorizationPublisherRole} nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;
+      create role world_v2_postwar_offline_seed_reader nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;
+      grant world_v2_postwar_offline_seed_reader to ${readerRole};
+      grant usage on schema world_v2 to ${readerRole};
+      grant select on world_v2.world_head,world_v2.opening_seed,world_v2.current_commit_authorization,world_v2.runtime_read_seat,world_v2.runtime_opening_admission,world_v2.projection_entitlement,world_v2.authoritative_event,world_v2.command_submission,world_v2.inventory_posting,world_v2.financial_posting_batch to ${readerRole}`);
+    await s.db.query(
+      "insert into world_v2.current_commit_authorization(world_id,auth_subject,country_id,office_id,capability,team_id,authorization_version,active,refreshed_at_real)values($1,$2::uuid,'COUNTRY_01','FINANCE','FINANCE_BUDGET','TEAM_TEST_ONLY_SNAPSHOT','REV_1',true,now())",
+      [world, subject],
+    );
+    await s.db.query(
+      "insert into world_v2.runtime_read_seat(world_id,auth_subject,country_id,office_id,team_id,authorization_revision)values($1,$2::uuid,'COUNTRY_01','FINANCE','TEAM_TEST_ONLY_SNAPSHOT','REV_1')",
+      [world, subject],
+    );
+    await s.db.query(
+      "insert into world_v2.projection_entitlement(world_id,auth_subject,classification,scope_key,authorization_version,active,granted_at)values($1,$2::uuid,'OFFICE_PRIVATE','OFFICE_'||upper(encode(convert_to('COUNTRY_01','UTF8'),'hex'))||'_'||upper(encode(convert_to('FINANCE','UTF8'),'hex')),'REV_1',true,now())",
+      [world, subject],
+    );
+    await s.db.exec(
+      await read('database/proposals/postwar-runtime-source-read-policy.sql'),
+    );
+    const statements: string[] = [];
+    const executor: SqlExecutor = {
+      async query<Row extends object>(
+        sql: string,
+        args: readonly unknown[] = [],
+      ) {
+        statements.push(sql);
+        const r = await s.db.query(sql, [...args]);
+        return { rows: r.rows as Row[], rowCount: r.rows.length };
+      },
+    };
+    const database: SqlDatabase = {
+      query: executor.query,
+      async transaction() {
+        throw Error('ACTUAL_HELD_EXECUTOR_REQUIRED');
+      },
+    };
+    const store = new RuntimeReadBindingStore({
+      database,
+      authorizationPublisherRole,
+      runtimeReaderRole: readerRole,
+    });
+    let escaped: ValidatedReadOnlyOpeningSnapshotScope | undefined;
+    await s.db.exec(
+      `set session authorization ${readerRole};begin isolation level repeatable read read only`,
+    );
+    try {
+      await s.db.query("select set_config('request.jwt.claim.sub',$1,true)", [
+        subject,
+      ]);
+      await withValidatedReadOnlyOpeningSnapshotFrom(
+        { executor, worldId: world },
+        async (snapshot) => {
+          escaped = snapshot;
+          for (let i = 0; i < 2; i++)
+            expect(
+              await store.readImmutableAdmissionWithSnapshotFrom({
+                executor,
+                verifiedSubject: subject,
+                worldId: world,
+                snapshot,
+              }),
+            ).toMatchObject({
+              contentHash: s.seed.fingerprint,
+              seedRef: s.seed.seedId,
+            });
+          expect(
+            statements.filter((sql) =>
+              sql.includes('from world_v2.opening_seed'),
+            ),
+          ).toHaveLength(1);
+          expect(
+            statements.filter((sql) =>
+              sql.includes('from world_v2.runtime_opening_admission'),
+            ),
+          ).toHaveLength(2);
+          const corruptExecutor: SqlExecutor = {
+            async query<Row extends object>(
+              sql: string,
+              args: readonly unknown[] = [],
+            ) {
+              const result = await executor.query<Row>(sql, args);
+              return sql.includes('from world_v2.opening_seed')
+                ? {
+                    ...result,
+                    rows: result.rows.map((row) => ({
+                      ...row,
+                      seed_fingerprint: `sha256:${'0'.repeat(64)}`,
+                    })),
+                  }
+                : result;
+            },
+          };
+          // A caller-controlled digest/reader cannot make altered row evidence
+          // pass: the issuer owns the actual SHA-256 implementation.
+          await expect(
+            withValidatedReadOnlyOpeningSnapshotFrom(
+              { executor: corruptExecutor, worldId: world },
+              async () => 'MUST_NOT_ISSUE_FOR_WRONG_FINGERPRINT',
+            ),
+          ).rejects.toThrow();
+          await expect(
+            readValidatedReadOnlyOpeningSnapshotFrom({ ...executor }, snapshot),
+          ).rejects.toThrow('FOREIGN_TRANSACTION');
+          await expect(
+            readValidatedReadOnlyOpeningSnapshotFrom(executor, { ...snapshot }),
+          ).rejects.toThrow('FOREIGN_TRANSACTION');
+          await expect(
+            store.readImmutableAdmissionWithSnapshotFrom({
+              executor,
+              verifiedSubject: '22222222-2222-4222-8222-222222222222',
+              worldId: world,
+              snapshot,
+            }),
+          ).rejects.toMatchObject({
+            code: 'RUNTIME_BINDING_ROLE_OR_SUBJECT_DENIED',
+          });
+        },
+      );
+      await expect(
+        readValidatedReadOnlyOpeningSnapshotFrom(executor, escaped!),
+      ).rejects.toThrow('EXPIRED');
+      await expect(
+        store.readImmutableAdmissionWithSnapshotFrom({
+          executor,
+          verifiedSubject: subject,
+          worldId: world,
+          snapshot: escaped!,
+        }),
+      ).rejects.toMatchObject({ code: 'RUNTIME_READ_BINDING_UNAVAILABLE' });
+    } finally {
+      await s.db.exec('rollback');
+      await s.admin();
+    }
+  });
+  it('rejects actual COMMIT+BEGIN reuse on the same executor and expires a throwing consumer', async () => {
+    const s = await setup();
+    const executor: SqlExecutor = {
+      async query<Row extends object>(
+        sql: string,
+        args: readonly unknown[] = [],
+      ) {
+        const r = await s.db.query(sql, [...args]);
+        return { rows: r.rows as Row[], rowCount: r.rows.length };
+      },
+    };
+    await s.db.exec('begin isolation level repeatable read read only');
+    try {
+      await expect(
+        withValidatedReadOnlyOpeningSnapshotFrom(
+          { executor, worldId: world },
+          async (snapshot) => {
+            await s.db.exec(
+              'commit;begin isolation level repeatable read read only',
+            );
+            await expect(
+              readValidatedReadOnlyOpeningSnapshotFrom(executor, snapshot),
+            ).rejects.toThrow('FOREIGN_TRANSACTION');
+            return 'MUST_NOT_ESCAPE_NEW_TRANSACTION';
+          },
+        ),
+      ).rejects.toThrow('FOREIGN_TRANSACTION');
+    } finally {
+      await s.db.exec('rollback');
+    }
+    let escaped: ValidatedReadOnlyOpeningSnapshotScope | undefined;
+    await s.db.exec('begin isolation level repeatable read read only');
+    try {
+      await expect(
+        withValidatedReadOnlyOpeningSnapshotFrom(
+          { executor, worldId: world },
+          async (snapshot) => {
+            escaped = snapshot;
+            throw Error('ORIGINAL_CONSUMER_FAILURE');
+          },
+        ),
+      ).rejects.toThrow('ORIGINAL_CONSUMER_FAILURE');
+      await expect(
+        readValidatedReadOnlyOpeningSnapshotFrom(executor, escaped!),
+      ).rejects.toThrow('EXPIRED');
+    } finally {
+      await s.db.exec('rollback');
+    }
   });
 });

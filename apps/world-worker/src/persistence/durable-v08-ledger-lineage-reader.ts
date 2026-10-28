@@ -32,6 +32,7 @@ import {
   type IndustryPersistenceSchemaReadContextV1,
   type DecisionResultHead,
   type RebuiltV08Ledgers,
+  type OpeningSeed,
   type Sha256Hex,
   type V08AuthoritativeLedgerTransition,
 } from '@econmind/core';
@@ -450,6 +451,12 @@ export interface DurableV08LedgerLineageSnapshot {
   readonly ledgers: Readonly<RebuiltV08Ledgers>;
 }
 
+/** Actual immutable seed read and replayed in the same held SQL snapshot.
+ * Data only: this grants neither admission nor authorization. */
+export interface DurableV08ReadOnlySnapshotWithSeed extends DurableV08LedgerLineageSnapshot {
+  readonly seed: Readonly<OpeningSeed>;
+}
+
 /**
  * Server-only read boundary for V08 ledger state. It replays the immutable
  * opening seed and durable Command/Event/Posting facts; it accepts neither a
@@ -511,6 +518,18 @@ export class DurableV08LedgerLineageReader {
     transaction: SqlExecutor,
     requestedWorldId: string,
   ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
+    const { seed: _seed, ...snapshot } =
+      await this.readOnlySnapshotWithSeedFrom(transaction, requestedWorldId);
+    void _seed;
+    return Object.freeze(snapshot);
+  }
+
+  /** Reuses this reader's real seed validation/replay; never accepts a supplied
+   * seed, Ready object or alternate loader. Existing read-only semantics hold. */
+  async readOnlySnapshotWithSeedFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+  ): Promise<Readonly<DurableV08ReadOnlySnapshotWithSeed>> {
     if (this.#social !== null)
       invalid('Read-only canonical replay does not accept Social simulation');
     const mode = await transaction.query<{
@@ -542,7 +561,7 @@ export class DurableV08LedgerLineageReader {
         'World head Event sequence',
       ),
     });
-    return this.#rebuildAtHead(transaction, canonicalWorldId, head);
+    return this.#rebuildAtHeadWithSeed(transaction, canonicalWorldId, head);
   }
 
   async #rebuildAtHead(
@@ -550,6 +569,20 @@ export class DurableV08LedgerLineageReader {
     canonicalWorldId: string,
     head: Readonly<{ worldVersion: string; eventSequence: string }>,
   ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
+    const { seed: _seed, ...snapshot } = await this.#rebuildAtHeadWithSeed(
+      transaction,
+      canonicalWorldId,
+      head,
+    );
+    void _seed;
+    return Object.freeze(snapshot);
+  }
+
+  async #rebuildAtHeadWithSeed(
+    transaction: SqlExecutor,
+    canonicalWorldId: string,
+    head: Readonly<{ worldVersion: string; eventSequence: string }>,
+  ): Promise<Readonly<DurableV08ReadOnlySnapshotWithSeed>> {
     const seed = await this.#openingSeeds.loadFrom(
       transaction,
       canonicalWorldId,
@@ -572,6 +605,7 @@ export class DurableV08LedgerLineageReader {
       invalid('Replayed ledger WorldVersion does not match durable World head');
     }
     return Object.freeze({
+      seed,
       headEventSequence: head.eventSequence,
       headWorldVersion: head.worldVersion,
       ledgers: rebuilt,

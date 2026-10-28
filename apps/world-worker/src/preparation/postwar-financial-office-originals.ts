@@ -38,18 +38,18 @@ function freeze<T>(value: T): T {
   }
   return value;
 }
-function financialSource(seed: OpeningSeed) {
+function financialSource(seed: OpeningSeed, sourceId: string) {
   const candidates = seed.sources
+    .filter((source) => source.sourceId === sourceId)
     .map((source) => ({
       source,
       payload: row(JSON.parse(source.canonicalPayload)),
-    }))
-    .filter(
-      (s) => s.payload.schemaVersion === 'adopted-financial-opening-source-v2',
-    );
+    }));
   if (
     candidates.length !== 1 ||
-    candidates[0]!.source.sourceKind !== 'AUTHORITATIVE_DATASET'
+    candidates[0]!.source.sourceKind !== 'AUTHORITATIVE_DATASET' ||
+    candidates[0]!.payload.schemaVersion !==
+      'adopted-financial-opening-source-v2'
   )
     invalid('unique canonical financial source required');
   return candidates[0]!;
@@ -62,7 +62,10 @@ export function createPostwarFinancialOfficeOriginalDocument(
     !isParsedFormalFinancialOpeningContract(financial.contract)
   )
     invalid('actual parsed/adopted financial constructor required');
-  const { source } = financialSource(financial.baselineSeed);
+  const { source } = financialSource(
+    financial.baselineSeed,
+    financial.contract.sourceId,
+  );
   const value: PostwarFinancialOfficeOriginals = {
     schemaVersion: 'postwar-financial-office-originals-v1',
     provenanceKind: 'GENERATED_POLICY',
@@ -123,7 +126,7 @@ export function validatePostwarFinancialOfficeOriginalDocument(
     value.seedId !== seed.seedId
   )
     invalid('original scope/schema mismatch');
-  const { source, payload } = financialSource(seed);
+  const { source, payload } = financialSource(seed, value.financialSourceId);
   const assembly = row(payload.assembly),
     record = row(payload.record);
   if (

@@ -31,6 +31,7 @@ import {
   adoptPostwarOperatingGenesis,
   readPostwarNewWorldScopeFrom,
   readPostwarOperatingGenesisFromSeed,
+  readPostwarOperatingGenesisFromValidatedSnapshotFrom,
   isPostwarOperatingGenesisAdoption,
   preparePostwarOperatingGenesisFromFinancialSupplement,
   requirePostwarSha256OpeningSeed,
@@ -63,6 +64,16 @@ const executor: SqlExecutor = {
     return { rows: result.rows as Row[], rowCount: result.rows.length };
   },
 };
+it('requires a genuine live readonly snapshot scope for lexical parse reuse', async () => {
+  await expect(
+    readPostwarOperatingGenesisFromValidatedSnapshotFrom(
+      executor,
+      {} as Parameters<
+        typeof readPostwarOperatingGenesisFromValidatedSnapshotFrom
+      >[1],
+    ),
+  ).rejects.toThrow('EXPIRED_OR_FOREIGN_TRANSACTION');
+});
 let scope: PostwarNewWorldScope;
 let fixture: Awaited<ReturnType<typeof buildFixture>>;
 async function observe(id = wid) {
