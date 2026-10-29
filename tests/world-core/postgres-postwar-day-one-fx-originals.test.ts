@@ -3,6 +3,7 @@
 import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { describe, expect, it } from 'vitest';
+import type { Pool } from 'pg';
 
 const base = `
 create schema world_v2;
@@ -17,6 +18,86 @@ create table world_v2.projection_entitlement(world_id text,auth_subject uuid,cla
 create function world_v2.reject_authoritative_history_mutation()returns trigger language plpgsql as $$begin raise exception 'TEST_METADATA_APPEND_ONLY';end;$$;
 `;
 describe('first-day FX bounded custody SQL candidate', () => {
+  it('routes the actual initial binding read and final cutoff through one fixed definer on the same client, retaining other permission failures', async () => {
+    const [
+      { createPostwarDayOneFxIntakeAuthorizationPool },
+      { OFFICE_COMMAND_CURRENT_BINDING_QUERY },
+    ] = await Promise.all([
+      import('../../apps/world-worker/src/persistence/postgres-postwar-day-one-fx-originals.js'),
+      import('../../apps/world-worker/src/intake/postgres-office-command-intake.js'),
+    ]);
+    const lock =
+      'select * from world_v2.lock_postwar_day_one_fx_intake_binding($1,$2::uuid,$3,$4,$5,$6,$7,$8)';
+    const calls: { sql: string; parameters: unknown[] | undefined }[] = [];
+    const denied = Object.assign(
+      new Error('permission denied for table opening_seed'),
+      { code: '42501' },
+    );
+    let connects = 0,
+      releases = 0;
+    const client = {
+      async query(sql: string, parameters?: unknown[]) {
+        calls.push({ sql, parameters });
+        if (sql !== lock) throw denied;
+        return { rows: [], rowCount: 0 };
+      },
+      release() {
+        releases++;
+      },
+    };
+    const raw = {
+      async connect() {
+        connects++;
+        return client;
+      },
+    } as unknown as Pick<Pool, 'connect'>;
+    const pool = createPostwarDayOneFxIntakeAuthorizationPool(raw);
+    expect(createPostwarDayOneFxIntakeAuthorizationPool(raw)).toBe(pool);
+    expect(createPostwarDayOneFxIntakeAuthorizationPool(pool)).toBe(pool);
+    const held = await pool.connect();
+    const parameters = [
+      'WORLD_POSTWAR_GCU_OPENING_20261029_V1',
+      '11111111-1111-4111-8111-111111111111',
+      'COUNTRY_01',
+      'FINANCE',
+      'SEAT_ACTUAL',
+      'REV_1',
+      'FINANCE_TREASURY',
+      'OFFICE_SCOPE',
+    ];
+    try {
+      await held.query(OFFICE_COMMAND_CURRENT_BINDING_QUERY, parameters);
+      await held.query(
+        OFFICE_COMMAND_CURRENT_BINDING_QUERY +
+          ' for share of authz,entitlement',
+        parameters,
+      );
+      expect(calls.slice(0, 2)).toEqual([
+        { sql: lock, parameters },
+        { sql: lock, parameters },
+      ]);
+      // Near matches and another capability remain the original statement;
+      // the adapter cannot authorize them or hide the real permission denial.
+      for (const [sql, args] of [
+        [OFFICE_COMMAND_CURRENT_BINDING_QUERY + ' ', parameters],
+        [
+          OFFICE_COMMAND_CURRENT_BINDING_QUERY,
+          [...parameters.slice(0, 6), 'FINANCE_BUDGET', parameters[7]],
+        ],
+        [OFFICE_COMMAND_CURRENT_BINDING_QUERY, parameters.slice(0, 7)],
+      ] as const)
+        await expect(held.query(sql, [...args])).rejects.toBe(denied);
+      expect(calls.slice(2).map((call) => call.sql)).toEqual([
+        OFFICE_COMMAND_CURRENT_BINDING_QUERY + ' ',
+        OFFICE_COMMAND_CURRENT_BINDING_QUERY,
+        OFFICE_COMMAND_CURRENT_BINDING_QUERY,
+      ]);
+    } finally {
+      held.release();
+    }
+    expect(connects).toBe(1);
+    expect(releases).toBe(1);
+  });
   it('installs isolated fixed no-login roles, inaccessible immutable tables and finite functions without caller memberships', async () => {
     const db = new PGlite();
     try {

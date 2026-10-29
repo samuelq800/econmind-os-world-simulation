@@ -239,7 +239,7 @@ export function createPostwarDayOneFxAuthorizationDatabase(
 
 const intakeWrappers = new WeakMap<object, Pick<Pool, 'connect'>>();
 const issuedIntakeWrappers = new WeakSet<object>();
-/** One exact cutoff on the already-held intake transaction. The caller must
+/** Two exact reads on the already-held intake transaction. The caller must
  * reuse this same wrapper for HTTP and the privately bound manual runtime. */
 export function createPostwarDayOneFxIntakeAuthorizationPool(
   pool: Pick<Pool, 'connect'>,
@@ -255,9 +255,10 @@ export function createPostwarDayOneFxIntakeAuthorizationPool(
           if (key === 'query')
             return (statement: string, parameters?: readonly unknown[]) => {
               if (
-                statement ===
-                  OFFICE_COMMAND_CURRENT_BINDING_QUERY +
-                    ' for share of authz,entitlement' &&
+                (statement === OFFICE_COMMAND_CURRENT_BINDING_QUERY ||
+                  statement ===
+                    OFFICE_COMMAND_CURRENT_BINDING_QUERY +
+                      ' for share of authz,entitlement') &&
                 parameters?.length === 8 &&
                 parameters[3] === 'FINANCE' &&
                 parameters[6] === 'FINANCE_TREASURY'

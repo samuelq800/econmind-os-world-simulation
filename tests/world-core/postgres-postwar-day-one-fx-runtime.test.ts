@@ -69,6 +69,7 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
             'utf8',
           ),
         ]);
+        summary.stage = 'PUBLISHING_ACTUAL_70_QUOTES';
         const publication = await publishPostwarDayOneFxOriginals({
           database: publisher,
           seed,
@@ -106,7 +107,9 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
           .map((l) => l.account.accountId);
         expect(treasuryAccounts).toHaveLength(1);
         const treasuryAccountId = treasuryAccounts[0]!;
+        summary.stage = 'PREPARING_VERIFIED_SMALL_SOURCE';
         await connection.prepare({ seed, policyBytes, userReceiptBytes });
+        summary.stage = 'INTAKING_FIRST_COMMAND';
         seed = undefined;
         const ports = readPostwarTreasuryFxRuntimeBinding(connection);
         const source = ports.readers.treasuryFx;
@@ -196,7 +199,16 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
         const request = makeRequest('COMMIT', '0');
         expect((await submit(request)).status).toBe('QUEUED');
         connection.startPreparation();
+        summary.stage = 'CONSUMING_FIRST_COMMAND';
         const committed = await connection.consumeOnce();
+        summary.firstConsumption =
+          committed.status === 'PROCESSED'
+            ? {
+                status: committed.status,
+                source: committed.source,
+                outcome: committed.receipt.outcome,
+              }
+            : committed;
         expect(committed.status).toBe('PROCESSED');
         if (committed.status !== 'PROCESSED')
           throw Error(JSON.stringify(committed));
@@ -324,9 +336,17 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
             requiredCapability: 'FINANCE_TREASURY',
             intakeAuthorization: fixture.authorization,
           });
+        summary.stage =
+          mode === 'TAMPER'
+            ? 'ACTUAL_BATCH_TAMPER_CUTOFF'
+            : 'QUOTE_REVOKE_CUTOFF';
         await expect(execute()).rejects.toThrow();
         expect(await counts()).toEqual(before);
         mode = 'REVOKE';
+        summary.stage =
+          mode === 'TAMPER'
+            ? 'ACTUAL_BATCH_TAMPER_CUTOFF'
+            : 'QUOTE_REVOKE_CUTOFF';
         await expect(execute()).rejects.toThrow();
         expect(await counts()).toEqual(before);
         const oldCommand = await ports.workerDatabase.transaction((tx) =>
@@ -365,6 +385,24 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
       } catch (error) {
         summary.status = 'FAILED';
         summary.error = String(error);
+        summary.failureCounts = (
+          await clone.installer.query(
+            'select (select count(*)::text from world_v2.command_submission where world_id=$1)commands,(select count(*)::text from world_v2.authoritative_event where world_id=$1)events,(select count(*)::text from world_v2.financial_posting_batch where world_id=$1)batches,(select world_version::text from world_v2.world_head where world_id=$1)version',
+            [marker.worldId],
+          )
+        ).rows[0];
+        const chain: unknown[] = [];
+        let cause: unknown = error;
+        while (cause instanceof Error && chain.length < 8) {
+          chain.push({
+            name: cause.name,
+            message: cause.message,
+            code: (cause as Error & { code?: unknown }).code,
+            stack: cause.stack,
+          });
+          cause = cause.cause;
+        }
+        summary.errorChain = chain;
         throw error;
       } finally {
         await writeFile(
