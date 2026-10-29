@@ -16,6 +16,11 @@ import {
   type AuthorizedAdmittedOpeningSource,
 } from './postwar-operating-runtime-source.js';
 import { validatePostwarFinancialOfficeOriginalDocument } from '../preparation/postwar-financial-office-originals.js';
+import {
+  hasPostwarGcuBankOpeningCandidate,
+  readPostwarGcuBankOpeningFromSeed,
+  type PostwarGcuBankOpeningFamily,
+} from '../preparation/postwar-gcu-bank-opening.js';
 import type {
   PostwarGenesisSourceDocument,
   PostwarOperatingGenesisFacts,
@@ -62,9 +67,83 @@ interface FinancialDerivationInput {
   readonly operatingFacts?: PostwarOperatingGenesisFacts;
   readonly scope: Scope;
 }
+function cropGcuBankOpening(
+  family: PostwarGcuBankOpeningFamily | null,
+  ledger: FinancialLedgerState,
+  countryId: string,
+) {
+  if (family === null) return null;
+  if (ledger.worldId !== family.seed.worldId || ledger.worldVersion !== '0')
+    invalid('GCU opening ledger scope mismatch');
+  const accounts = family.accounts.filter((a) => a.countryId === countryId);
+  if (accounts.length !== 1) invalid('exact GCU opening country required');
+  const expected = accounts[0]!;
+  const cash = ledger.positions.find(
+      (p) => p.account.accountId === expected.cashAccountId,
+    ),
+    equity = ledger.positions.find(
+      (p) => p.account.accountId === expected.equityAccountId,
+    );
+  if (
+    !cash ||
+    !equity ||
+    cash.account.accountClass !== 'CASH' ||
+    equity.account.accountClass !== 'EQUITY' ||
+    [cash, equity].some(
+      (p) =>
+        p.account.countryId !== countryId ||
+        p.account.ownerId !== expected.bankId ||
+        p.account.currency !== 'GCU' ||
+        p.account.claimId !== null ||
+        p.account.counterpartyEntityId !== null,
+    ) ||
+    !cash.netDebitBalance.amount.equals(expected.amount) ||
+    !equity.netDebitBalance.amount.negated().equals(expected.amount)
+  )
+    invalid('exact BANK GCU cash and initial equity required');
+  return freeze({
+    classification: 'CANONICAL_BANK_GCU_OPENING_NOT_EXECUTABLE_QUOTE' as const,
+    worldId: family.seed.worldId,
+    countryId,
+    bankEntityId: expected.bankId,
+    seedFingerprint: family.seed.fingerprint,
+    sourceId: family.source.sourceId,
+    sourcePayloadHash: family.source.payloadHash,
+    policyVersion: family.plan.policyVersion,
+    planFingerprint: family.plan.fingerprint,
+    cash: {
+      accountId: cash.account.accountId,
+      accountClass: 'CASH' as const,
+      currency: 'GCU' as const,
+      availableOpeningAmount: expected.amount,
+    },
+    initialEquity: {
+      accountId: equity.account.accountId,
+      creditAmount: expected.amount,
+      currency: 'GCU' as const,
+    },
+    executableQuote: null,
+  });
+}
+/** Pure country crop of the independently validated fourth source and actual
+ * Core opening ledger. Not a treasury/OP balance or admission/FX capability. */
+export function derivePostwarGcuBankOpeningCashFacts(input: {
+  seed: OpeningSeed;
+  countryId: string;
+}) {
+  const family = readPostwarGcuBankOpeningFromSeed(input.seed);
+  if (family === null) return null;
+  return cropGcuBankOpening(
+    family,
+    rebuildV08LedgersFromLineage({ seed: family.seed, sha256Hex: sha })
+      .financial,
+    input.countryId,
+  );
+}
 function deriveWithCanonicalLedger(
   input: FinancialDerivationInput,
   ledger: FinancialLedgerState,
+  gcu: PostwarGcuBankOpeningFamily | null,
 ) {
   const { seed, scope } = input;
   if (
@@ -291,6 +370,9 @@ function deriveWithCanonicalLedger(
     invalid('security absence/register conflict');
   if (declared.disposition === 'DECLARED' && !governmentSecurities.length)
     invalid('declared security originals absent');
+  const gcuBankOpening = cropGcuBankOpening(gcu, ledger, scope.countryId);
+  if (gcuBankOpening !== null && gcuBankOpening.bankEntityId !== roster.bank)
+    invalid('GCU opening holder differs from actual domestic bank');
   return freeze({
     ...common,
     officeId: 'CENTRAL_BANK' as const,
@@ -300,6 +382,7 @@ function deriveWithCanonicalLedger(
     centralBankRegister: country.cbRegister,
     bankLoans: country.bankLoans,
     sourceReferences,
+    ...(gcuBankOpening === null ? {} : { gcuBankOpening }),
     omoInventory: {
       status: governmentSecurities.length
         ? ('REQUIRES_INSTRUMENT_TERMS_AND_ACTUAL_QUOTE' as const)
@@ -317,6 +400,9 @@ export function derivePostwarFinancialOfficeReadFacts(
     input,
     rebuildV08LedgersFromLineage({ seed: input.seed, sha256Hex: sha })
       .financial,
+    hasPostwarGcuBankOpeningCandidate(input.seed)
+      ? readPostwarGcuBankOpeningFromSeed(input.seed)
+      : null,
   );
 }
 /** One source replay for a complete offline publication batch. Runtime role,
@@ -332,6 +418,9 @@ export function derivePostwarFinancialOfficeReadFactsBatch(
     input.originalsDocument,
     input.seed,
   );
+  const gcu = hasPostwarGcuBankOpeningCandidate(input.seed)
+    ? readPostwarGcuBankOpeningFromSeed(input.seed)
+    : null;
   return freeze(
     originals.contract.countries.flatMap((country) =>
       (['FINANCE', 'CENTRAL_BANK'] as const).map((officeId) =>
@@ -345,6 +434,7 @@ export function derivePostwarFinancialOfficeReadFactsBatch(
             },
           },
           ledger,
+          gcu,
         ),
       ),
     ),
@@ -416,6 +506,9 @@ export function createPostwarFinancialOfficeRuntimeSource(input: {
             originalsDocument,
           },
           held.replayed.ledgers.financial,
+          hasPostwarGcuBankOpeningCandidate(held.seed)
+            ? readPostwarGcuBankOpeningFromSeed(held.seed)
+            : null,
         );
         const source: PostwarFinancialOfficeRuntimeSource = freeze({
           schemaVersion: 'postwar-financial-office-runtime-source-v1',

@@ -39,6 +39,11 @@ import {
   POSTWAR_FINANCIAL_OFFICE_ORIGINALS_ID,
   validatePostwarFinancialOfficeOriginalDocument,
 } from './postwar-financial-office-originals.js';
+import {
+  hasPostwarGcuBankOpeningCandidate,
+  readPostwarGcuBankOpeningFromSeed,
+  type PostwarGcuBankOpeningFamily,
+} from './postwar-gcu-bank-opening.js';
 
 export const POSTWAR_OPERATING_USER_RECEIPT = Object.freeze({
   reference: 'Sentinel_a619bdbe25588191aa05709db76c7567',
@@ -280,6 +285,18 @@ export type PostwarOperatingGenesisView = Readonly<{
   socialEmployment: PostwarSocialEmploymentStateDocument | null;
   physicalServiceReceiptDocumentId: string | null;
   financialOfficeOriginalsDocument: PostwarGenesisSourceDocument | null;
+  /** Separate authorized initial BANK endowment, never an old source grant,
+   * treasury/OP cash balance, executable FX quote or runtime admission. */
+  gcuBankOpening?: Readonly<{
+    schemaVersion: 'postwar-gcu-bank-opening-derived-view-v1';
+    parentSeedFingerprint: string;
+    sourceId: string;
+    sourcePayloadHash: string;
+    policyVersion: string;
+    planFingerprint: string;
+    totalGcu: string;
+    accounts: PostwarGcuBankOpeningFamily['accounts'];
+  }>;
 }>;
 // Immutable source interpretation only. Every lookup is preceded by genuine
 // immutable Core seed identity or full parsing/content-hash verification; no actor, admission or current head
@@ -1500,6 +1517,32 @@ function interpretValidatedPostwarOperatingSeed(
     derivedViews.delete(seed.fingerprint);
     derivedViews.set(seed.fingerprint, cached);
     return cached.view;
+  }
+  const gcu = hasPostwarGcuBankOpeningCandidate(seed)
+    ? readPostwarGcuBankOpeningFromSeed(seed)
+    : null;
+  if (gcu !== null) {
+    // The new policy's own verifier re-derives all amounts/owners and removes
+    // only its exact delta. The old adopted carrier retains its original
+    // parent fingerprint and original receipt; neither is rewritten/reused as
+    // approval of this fourth source. This view is pinned to the NEW seed.
+    const parent = interpretValidatedPostwarOperatingSeed(gcu.parentSeed);
+    const view: PostwarOperatingGenesisView = freeze({
+      ...parent,
+      seedFingerprint: seed.fingerprint,
+      gcuBankOpening: {
+        schemaVersion: 'postwar-gcu-bank-opening-derived-view-v1',
+        parentSeedFingerprint: gcu.parentSeed.fingerprint,
+        sourceId: gcu.source.sourceId,
+        sourcePayloadHash: gcu.source.payloadHash,
+        policyVersion: gcu.plan.policyVersion,
+        planFingerprint: gcu.plan.fingerprint,
+        totalGcu: gcu.plan.totalGcu,
+        accounts: gcu.accounts,
+      },
+    });
+    rememberDerivedView(view);
+    return view;
   }
   const sources = seed.sources.filter((s) => {
     const payload = JSON.parse(s.canonicalPayload) as {
