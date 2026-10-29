@@ -35,6 +35,8 @@ import {
   handleOfficialPublicCors,
   readOfficialPublicCorsOrigins,
 } from './integration/official-public-cors.js';
+import { createPostwarFinanceNodeRoute } from './runtime/postwar-finance-node-route.js';
+import type { PostwarFinanceConnection } from './runtime/postwar-finance-connection.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
@@ -141,11 +143,29 @@ function createApiServer(
   config: ApiRuntimeConfig,
   requestFetch?: typeof fetch,
   officialCountryPool?: ManagedOfficialCountryPool,
+  postwarFinanceConnection?: PostwarFinanceConnection,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
   let allDataVerifiedAt = 0;
   let allDataProbe: Promise<boolean> | undefined;
+  const financeRoute =
+    postwarFinanceConnection === undefined
+      ? undefined
+      : createPostwarFinanceNodeRoute(postwarFinanceConnection);
+  const financeHealth = () =>
+    financeRoute === undefined
+      ? {}
+      : {
+          postwarFinance: {
+            routeInstalled: true,
+            configured:
+              postwarFinanceConnection?.status ===
+              'EXPLICIT_MANUAL_FINANCE_CONNECTION',
+            productionReady: false,
+            manualConsumptionOnly: true,
+          },
+        };
   const officialCountries =
     officialCountryPool === undefined
       ? undefined
@@ -215,6 +235,16 @@ function createApiServer(
           ...(requestFetch === undefined ? {} : { fetch: requestFetch }),
         });
   const server = createServer((request, response) => {
+    if (financeRoute?.matches(request)) {
+      void financeRoute.handle(request, response).catch(() => {
+        if (!response.headersSent && !response.destroyed)
+          sendJson(request, response, 503, {
+            ok: false,
+            error: { code: 'UPSTREAM_UNAVAILABLE' },
+          });
+      });
+      return;
+    }
     const path = request.url?.split('?', 1)[0];
     if (
       officialMapAssets !== undefined &&
@@ -300,6 +330,7 @@ function createApiServer(
         ready: ready && databaseReady,
         role: 'command-query-boundary',
         authoritativeMutationEnabled: false,
+        ...financeHealth(),
       });
       return;
     }
@@ -313,6 +344,7 @@ function createApiServer(
           ready: isReady,
           role: 'command-query-boundary',
           authoritativeMutationEnabled: false,
+          ...financeHealth(),
           ...(officialCountryPool === undefined
             ? {}
             : {
@@ -346,7 +378,9 @@ function createApiServer(
     ready: () => ready && databaseReady,
     stopReadiness: () => {
       ready = false;
+      financeRoute?.stopAccepting();
     },
+    drainFinance: () => financeRoute?.drain(),
   };
 }
 
@@ -370,6 +404,7 @@ export async function startApiRuntime(
   dependencies: {
     readonly season1Fetch?: typeof fetch;
     readonly officialCountryPool?: ManagedOfficialCountryPool;
+    readonly postwarFinanceConnection?: PostwarFinanceConnection;
   } = {},
 ): Promise<RunningApiRuntime> {
   const officialCountryPool =
@@ -381,6 +416,7 @@ export async function startApiRuntime(
     config,
     dependencies.season1Fetch,
     officialCountryPool,
+    dependencies.postwarFinanceConnection,
   );
   try {
     await new Promise<void>((resolve, reject) => {
@@ -395,12 +431,16 @@ export async function startApiRuntime(
       });
     });
   } catch (error) {
+    lifecycle.stopReadiness();
+    await lifecycle.drainFinance();
     await officialCountryPool?.end();
     throw error;
   }
   const address = lifecycle.server.address();
   if (address === null || typeof address === 'string') {
+    lifecycle.stopReadiness();
     await closeServer(lifecycle.server, config.shutdownGraceMs);
+    await lifecycle.drainFinance();
     await officialCountryPool?.end();
     throw new Error('world-api did not acquire a TCP address');
   }
@@ -415,8 +455,15 @@ export async function startApiRuntime(
     shutdown: () => {
       lifecycle.stopReadiness();
       shutdownPromise ??= (async () => {
-        await closeServer(lifecycle.server, config.shutdownGraceMs);
-        await officialCountryPool?.end();
+        try {
+          await closeServer(lifecycle.server, config.shutdownGraceMs);
+        } finally {
+          try {
+            await lifecycle.drainFinance();
+          } finally {
+            await officialCountryPool?.end();
+          }
+        }
       })();
       return shutdownPromise;
     },
