@@ -2,6 +2,7 @@
  * flag. A lost process-local immutable preparation stays disconnected. */
 import {
   createManualOfficeIntakeRuntime,
+  createRegisteredFinanceManualOfficeIntakeRuntime,
   type ManualOfficeIntakeRuntime,
 } from './manual-office-intake-runtime.js';
 import { createPostgresFinanceBudgetNativeRuntime } from '../persistence/postgres-finance-budget-custody.js';
@@ -13,6 +14,7 @@ import {
   isPostgresFinanceBudgetCapacitySource,
   type PostgresFinanceBudgetCapacitySource,
 } from '../persistence/postgres-finance-budget-capacity-source.js';
+import type { ServerCommandHostBinding } from '../runtime-preparation/production-world-command-host.js';
 const instances = new WeakSet<object>();
 export function isBoundedFinanceBudgetIntakeRuntime(
   value: unknown,
@@ -44,6 +46,16 @@ export function createBoundedFinanceBudgetIntakeRuntime(
   });
   instances.add(runtime);
   return Object.freeze({ runtime, budget });
+}
+/** Formal server dependency installation, not Clock/consumer activation. */
+export function createProductionBoundedFinanceBudgetIntakeRuntime(input: {
+  readonly binding: ServerCommandHostBinding;
+}) {
+  const result = createRegisteredFinanceManualOfficeIntakeRuntime(
+    input.binding,
+  );
+  instances.add(result.runtime);
+  return result;
 }
 export function createPreparedFinanceBudgetIntakeRuntime(
   config: Omit<

@@ -12,6 +12,13 @@ import {
 } from '../preparation/manual-office-command-composition.js';
 import { CommandRequestIdentityRegistry } from './private-command-request-registry.js';
 
+import { createPostwarOfficeProjectionStore } from '../persistence/postwar-office-projection-store.js';
+import { createPostgresFinanceBudgetNativeRuntime } from '../persistence/postgres-finance-budget-custody.js';
+import {
+  isPostgresFinanceBudgetCapacitySource,
+  type PostgresFinanceBudgetCapacitySource,
+} from '../persistence/postgres-finance-budget-capacity-source.js';
+
 declare const serverBindingBrand: unique symbol;
 /** Opaque server dependency registration, never an admission/activation permit. */
 export interface ServerCommandHostBinding {
@@ -32,6 +39,7 @@ export interface ServerCommandHostDependencies {
   readonly clock: DurableConsumptionClock;
   readonly resolveActorId: (subject: string) => Promise<string | null>;
   readonly readers: ManualOfficeRuntimeReaders;
+  readonly financeCapacitySource?: PostgresFinanceBudgetCapacitySource;
 }
 const registrations = new WeakMap<
   object,
@@ -65,11 +73,20 @@ export function createServerCommandHostBinding(
     typeof input.clock?.simTime !== 'function' ||
     typeof input.resolveActorId !== 'function' ||
     !input.readers ||
-    ![
+    (input.financeCapacitySource !== undefined &&
+      !isPostgresFinanceBudgetCapacitySource(
+        input.financeCapacitySource,
+        input.worldId,
+      )) ||
+    (![
       input.readers.captain,
       input.readers.centralBank,
       input.readers.social,
-    ].some(Boolean)
+    ].some(Boolean) &&
+      !isPostgresFinanceBudgetCapacitySource(
+        input.financeCapacitySource,
+        input.worldId,
+      ))
   )
     throw new Error('SERVER_COMMAND_DEPENDENCIES_REQUIRED');
   // Reuse the existing reader/publisher role separation validation. No writes.
@@ -81,10 +98,63 @@ export function createServerCommandHostBinding(
   const binding = Object.freeze({}) as ServerCommandHostBinding;
   registrations.set(
     binding,
-    Object.freeze({ ...input, readers: Object.freeze({ ...input.readers }) }),
+    Object.freeze({
+      ...input,
+      readers: Object.freeze({
+        ...input.readers,
+        ...(input.financeCapacitySource
+          ? {
+              financeBudget: createPostgresFinanceBudgetNativeRuntime({
+                database: input.workerDatabase,
+                workerId: input.workerId,
+                sha256Hex: (bytes) =>
+                  createHash('sha256').update(bytes).digest('hex'),
+                capacitySource: input.financeCapacitySource,
+              }),
+            }
+          : {}),
+      }),
+    }),
   );
   return binding;
 }
+/** Dependency data only; never grants Clock/source admission or execution.
+ * No caller-provided facts, candidate factory or readiness callback is accepted. */
+export function registeredFinanceCommandHostDependencies(binding: unknown) {
+  const d =
+    binding && typeof binding === 'object'
+      ? registrations.get(binding)
+      : undefined;
+  if (
+    !d ||
+    !isPostgresFinanceBudgetCapacitySource(
+      d.financeCapacitySource,
+      d.worldId,
+    ) ||
+    !d.readers.financeBudget
+  )
+    throw Error('REGISTERED_FIXED_FINANCE_SERVER_BINDING_REQUIRED');
+  return d as Readonly<
+    ServerCommandHostDependencies & {
+      financeCapacitySource: PostgresFinanceBudgetCapacitySource;
+    }
+  >;
+}
+export function productionFinanceCommandExecutionBlocker(
+  binding: unknown,
+): string | null {
+  try {
+    registeredFinanceCommandHostDependencies(binding);
+  } catch {
+    return 'REGISTERED_FIXED_FINANCE_SERVER_BINDING_REQUIRED';
+  }
+  // world_head has no Clock state/control reference. The only durable Clock
+  // implementation with a positive path is explicitly TEST_ONLY. A frozen
+  // nowReal/simTime callback registers dependencies, NOT a formal Clock original.
+  // No environment label, user boolean or structural callback can change this.
+  return 'FORMAL_CLOCK_SOURCE_CONTROL_AND_SOLE_CONSUMER_NOT_REGISTERED';
+}
+
 declare const productionRuntimeBrand: unique symbol;
 export interface ProductionManualIntakeRuntime {
   readonly [productionRuntimeBrand]: true;
@@ -103,6 +173,7 @@ export interface ProductionWorldCommandHost {
 const registry = new CommandRequestIdentityRegistry();
 type HostState = {
   dependencies: Readonly<ServerCommandHostDependencies> | null;
+  binding: ServerCommandHostBinding | null;
   stopped: boolean;
   requests: Set<object>;
 };
@@ -126,6 +197,7 @@ export function createProductionWorldCommandHost(
   const dependencies = (binding && registrations.get(binding)) || null;
   const state: HostState = {
     dependencies,
+    binding,
     stopped: false,
     requests: new Set(),
   };
@@ -265,6 +337,47 @@ async function readCurrentBinding(
     await executor.query("select set_config('request.jwt.claim.sub',$1,true)", [
       command.authSubject,
     ]);
+    if (d.financeCapacitySource && command.officeId === 'FINANCE') {
+      const store = createPostwarOfficeProjectionStore({
+        runtimeReaderRole: d.readerRole,
+        authorizationPublisherRole: d.authorizationPublisherRole,
+      });
+      const headers = await store.readCurrentSeatHeadersFrom(executor, {
+        worldId: d.worldId,
+      });
+      const matches = headers.filter(
+        (h) =>
+          h.scope.officeId === 'FINANCE' &&
+          h.scope.countryId === command.countryId &&
+          h.scope.authSubject === command.authSubject,
+      );
+      const h = matches[0];
+      if (
+        matches.length !== 1 ||
+        !h ||
+        h.source.seedId !== d.seedRef ||
+        h.source.seedFingerprint !== d.contentHash ||
+        h.source.admissionRef !== d.admissionRef ||
+        h.source.modelVersion !== d.modelVersion ||
+        h.source.worldVersion !== command.expectedWorldVersion
+      )
+        throw Error('CURRENT_ADMISSION_AND_SEAT_REQUIRED');
+      await executor.query('commit');
+      open = false;
+      return Object.freeze({
+        seat: { authorizationRevision: h.scope.authorizationVersion },
+        admission: {
+          seedRef: h.source.seedId,
+          contentHash: h.source.seedFingerprint,
+          admissionRef: h.source.admissionRef,
+          modelVersion: h.source.modelVersion,
+        },
+        head: {
+          world_version: h.source.worldVersion,
+          event_sequence: h.source.eventSequence,
+        },
+      });
+    }
     const store = new RuntimeReadBindingStore({
       database: d.workerDatabase,
       runtimeReaderRole: d.readerRole,
@@ -310,6 +423,7 @@ async function readCurrentBinding(
         open = false;
       } catch {
         release(true);
+        activeCompletion.getStore()?.recordCleanupFailure();
         throw new Error('COMMAND_HOST_READ_CLEANUP_UNCONFIRMED');
       }
     }
@@ -345,6 +459,11 @@ export async function preflightProductionManualIntakeRuntime(
       clock: d.clock,
       worldId: d.worldId,
     })
+  )
+    return false;
+  if (
+    command.officeId === 'FINANCE' &&
+    productionFinanceCommandExecutionBlocker(state!.binding) !== null
   )
     return false;
   const live = () =>

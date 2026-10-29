@@ -12,7 +12,14 @@ export { PostgresSqlDatabase } from '../persistence/postgres-sql-database.js';
 export {
   createPreparedFinanceBudgetIntakeRuntime,
   createBoundedFinanceBudgetIntakeRuntime,
+  createProductionBoundedFinanceBudgetIntakeRuntime,
   isBoundedFinanceBudgetIntakeRuntime,
 } from '../intake/prepared-finance-budget-intake-runtime.js';
 
 export { createPostgresFinanceBudgetCapacitySource } from '../persistence/postgres-finance-budget-capacity-source.js';
+
+export {
+  createServerCommandHostBinding,
+  type ServerCommandHostBinding,
+  type ServerCommandHostDependencies,
+} from './production-world-command-host.js';

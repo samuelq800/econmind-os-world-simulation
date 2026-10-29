@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
 import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
 import {
@@ -16,9 +17,16 @@ import {
   isProductionManualIntakeRuntime,
   trackWorkerRequestCompletion,
   type ProductionManualIntakeRuntime,
+  type ServerCommandHostBinding,
+  registeredFinanceCommandHostDependencies,
+  productionFinanceCommandExecutionBlocker,
+  createProductionWorldCommandHost,
+  preflightProductionManualIntakeRuntime,
+  WorkerRequestCompletion,
 } from '../runtime-preparation/production-world-command-host.js';
 import {
   createDurableCommandConsumptionPreparation,
+  createProductionFinanceCommandConsumption,
   type DurableConsumptionClock,
 } from '../preparation/durable-command-consumption.js';
 import {
@@ -43,6 +51,8 @@ type Construction = {
   readonly sha256Hex: Sha256Hex;
   readonly environment: NodeJS.ProcessEnv;
   readonly readers: ManualOfficeRuntimeReaders;
+  readonly productionBinding?: ServerCommandHostBinding;
+  readonly productionHost?: ReturnType<typeof createProductionWorldCommandHost>;
 };
 const constructions = new WeakMap<ManualOfficeIntakeRuntime, Construction>();
 
@@ -155,6 +165,65 @@ export function createManualOfficeIntakeRuntime(
   constructions.set(runtime, construction);
   return runtime;
 }
+const formalWorldOwners = new Map<string, object>();
+/** Fixed server binding only; the process-local reservation is not a global
+ * activation/Clock permit. Formal source/control absence still rejects intake. */
+export interface RegisteredFinanceManualOfficeRuntimeComposition {
+  readonly runtime: ManualOfficeIntakeRuntime;
+  readonly budget: NonNullable<ManualOfficeRuntimeReaders['financeBudget']>;
+  diagnostics(): Readonly<{
+    status: 'REGISTERED_FINITE_FINANCE_NOT_ACTIVATION';
+    blocker: string | null;
+    worldId: string;
+    commandExecutionEnabled: false;
+  }>;
+}
+export function createRegisteredFinanceManualOfficeIntakeRuntime(
+  binding: ServerCommandHostBinding,
+): RegisteredFinanceManualOfficeRuntimeComposition {
+  const d = registeredFinanceCommandHostDependencies(binding);
+  if (formalWorldOwners.has(d.worldId))
+    throw Error('SERVER_WORLD_FINITE_CONSUMER_ALREADY_BOUND');
+  const host = createProductionWorldCommandHost(binding),
+    engine = createProductionFinanceCommandConsumption(binding);
+  const consumer = Object.freeze({
+    ...engine,
+    async stop() {
+      await host.stop();
+      await engine.stop();
+      if (formalWorldOwners.get(d.worldId) === runtime)
+        formalWorldOwners.delete(d.worldId);
+    },
+  });
+  const runtime: ManualOfficeIntakeRuntime = Object.freeze({ consumer });
+  constructions.set(
+    runtime,
+    Object.freeze({
+      intakePool: d.intakePool,
+      workerDatabase: d.workerDatabase,
+      worldId: d.worldId,
+      workerId: d.workerId,
+      clock: d.clock,
+      sha256Hex: (bytes) => createHash('sha256').update(bytes).digest('hex'),
+      environment: Object.freeze({}),
+      readers: Object.freeze({ financeBudget: d.readers.financeBudget! }),
+      productionBinding: binding,
+      productionHost: host,
+    }),
+  );
+  formalWorldOwners.set(d.worldId, runtime);
+  return Object.freeze({
+    runtime,
+    budget: d.readers.financeBudget!,
+    diagnostics: () =>
+      Object.freeze({
+        status: 'REGISTERED_FINITE_FINANCE_NOT_ACTIVATION' as const,
+        blocker: productionFinanceCommandExecutionBlocker(binding),
+        worldId: d.worldId,
+        commandExecutionEnabled: false as const,
+      }),
+  });
+}
 export function boundManualOfficeIntakeRuntime(
   runtime:
     | ManualOfficeIntakeRuntime
@@ -197,6 +266,45 @@ export async function preflightManualOfficeIntakeRuntime(
     !['PREPARED', 'READY'].includes(localRuntime.consumer.state())
   )
     return false;
+  if (construction.productionBinding) {
+    if (
+      productionFinanceCommandExecutionBlocker(
+        construction.productionBinding,
+      ) !== null ||
+      !construction.productionHost
+    )
+      return false;
+    const controller = new AbortController(),
+      request = construction.productionHost.openIntakeRequest({
+        route: '/v1/office-command',
+        signal: controller.signal,
+      });
+    if (!request) return false;
+    const completion = new WorkerRequestCompletion();
+    let outcome: { ok: true; result: boolean } | { ok: false; error: unknown };
+    try {
+      outcome = {
+        ok: true,
+        result: await completion.run(() =>
+          preflightProductionManualIntakeRuntime(
+            request,
+            command,
+            observedAtReal,
+          ),
+        ),
+      };
+    } catch (error) {
+      outcome = { ok: false, error };
+    } finally {
+      await completion.drain();
+      construction.productionHost.retireIntakeRequest(request);
+      completion.retire();
+    }
+    if (completion.cleanupFailed())
+      throw Error('FORMAL_FINANCE_PREFLIGHT_CLEANUP_UNCONFIRMED');
+    if (!outcome.ok) throw outcome.error;
+    return outcome.result;
+  }
   const composition = createManualOfficeCommandComposition({
     command,
     database: construction.workerDatabase,
@@ -243,13 +351,23 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
   commandType: string,
 ): boolean {
   if (!runtime) return false;
+  const construction = constructions.get(runtime as ManualOfficeIntakeRuntime);
+  if (construction?.productionBinding)
+    return (
+      commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+      productionFinanceCommandExecutionBlocker(
+        construction.productionBinding,
+      ) === null &&
+      isFinanceBudgetNativeCommitGuard(
+        construction.readers.financeBudget?.commitGuard,
+      )
+    );
   if (
     commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND &&
     commandType !== SOCIAL_POSITION_OFFER_CREATE_COMMAND
   )
     return true;
   if (isProductionManualIntakeRuntime(runtime)) return false;
-  const construction = constructions.get(runtime as ManualOfficeIntakeRuntime);
   if (commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)
     return (
       !!construction &&
