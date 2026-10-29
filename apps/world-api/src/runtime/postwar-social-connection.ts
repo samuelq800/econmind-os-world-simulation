@@ -3,6 +3,10 @@
  * publisher, listener, lease, consumer start or World/Clock activation. */
 import type { Pool } from 'pg';
 import {
+  readPostwarFinanceSocialRuntimeBinding,
+  type PostwarFinanceSocialRuntimeConnection,
+} from '@econmind/world-worker/finance-social-runtime-connection';
+import {
   canonicalSerialize,
   AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   type AuthenticatedCommandRecoveryResponseDto,
@@ -159,6 +163,7 @@ const manualFamilies: ReadonlySet<string> = new Set([
 
 export function createPostwarSocialConnection(
   configuration: PostwarSocialConnectionConfiguration,
+  sharedConnection?: Readonly<PostwarFinanceSocialRuntimeConnection>,
 ): Readonly<PostwarSocialConnection> {
   const c = Object.freeze({
     ...configuration,
@@ -212,16 +217,32 @@ export function createPostwarSocialConnection(
     typeof c.resolveActorId !== 'function'
   )
     throw Error('SOCIAL_CONNECTION_SERVER_IDENTITY_CLOCK_REQUIRED');
-  const sources = createPostwarSocialRuntimeConnection({
-    worldId: c.admittedWorldPins.worldId,
-    workerId: c.workerId,
-    workerPool: c.workerPool,
-    workerRole: c.workerRole,
-    openingAdoption: c.openingAdoption,
-  });
+  const shared = sharedConnection
+    ? readPostwarFinanceSocialRuntimeBinding(sharedConnection)
+    : null;
+  if (
+    shared &&
+    (shared.worldId !== c.admittedWorldPins.worldId ||
+      shared.workerId !== c.workerId ||
+      shared.clock !== c.clock ||
+      shared.environment !== c.environment ||
+      shared.rawIntakePool !== c.intakePool ||
+      shared.workerPool !== c.workerPool)
+  )
+    throw Error('SOCIAL_CONNECTION_SHARED_BINDING_MISMATCH');
+  const sources =
+    shared?.socialConnection ??
+    createPostwarSocialRuntimeConnection({
+      worldId: c.admittedWorldPins.worldId,
+      workerId: c.workerId,
+      workerPool: c.workerPool,
+      workerRole: c.workerRole,
+      openingAdoption: c.openingAdoption,
+    });
   // Same fixed wrapper object is used by runtime construction and HTTP.
   // Its private identity must not differ merely due to two adapter instances.
-  const intakePool = createSocialIntakeAuthorizationPool(c.intakePool);
+  const intakePool =
+    shared?.intakePool ?? createSocialIntakeAuthorizationPool(c.intakePool);
   const binding = createServerCommandHostBinding({
     worldId: c.admittedWorldPins.worldId,
     workerId: c.workerId,
@@ -233,7 +254,7 @@ export function createPostwarSocialConnection(
     sourcePool: c.sourcePool,
     readerRole: c.sourceReaderRole,
     authorizationPublisherRole: c.authorizationPublisherRole,
-    workerDatabase: sources.database,
+    workerDatabase: shared?.database ?? sources.database,
     clock: c.clock,
     resolveActorId: c.resolveActorId,
     readers: sources.readers,
@@ -245,13 +266,15 @@ export function createPostwarSocialConnection(
   });
   const preflight = createSourceOwnedExecutorComposition(binding);
   const local = c.environment === 'local' || c.environment === 'ci';
-  const runtime = local
-    ? sources.createPreparedIntake({
-        environment: c.environment === 'ci' ? 'ci' : 'local',
-        intakePool,
-        clock: c.clock,
-      })
-    : null;
+  const runtime =
+    shared?.runtime ??
+    (local
+      ? sources.createPreparedIntake({
+          environment: c.environment === 'ci' ? 'ci' : 'local',
+          intakePool,
+          clock: c.clock,
+        })
+      : null);
   const composition: AuthenticatedOfficeCommandServiceConfig = {
     readPool: c.boundedReadPool,
     writerPool: intakePool,
@@ -324,13 +347,13 @@ export function createPostwarSocialConnection(
       ? ('LOCAL_CI_PREPARED_INTAKE' as const)
       : ('PRODUCTION_SOURCE_PREFLIGHT_ONLY' as const),
     get preparedRuntime() {
-      return sourcePrepared ? runtime : null;
+      return sourcePrepared && !shared ? runtime : null;
     },
     prepare(): Promise<void> {
       if (phase !== 'OPEN')
         return Promise.reject(Error('SOCIAL_CONNECTION_RETIRED'));
       preparing ??= run(undefined, async () => {
-        await sources.prepare({
+        await (sharedConnection ?? sources).prepare({
           observedAtReal: c.clock.nowReal(),
           admittedWorldPins: c.admittedWorldPins,
           modelVersion: c.modelVersion,
@@ -454,13 +477,15 @@ export function createPostwarSocialConnection(
         } catch (e) {
           errors.push(e);
         }
-        try {
-          await sources.close();
-        } catch (e) {
-          errors.push(e);
+        if (!shared) {
+          try {
+            await sources.close();
+          } catch (e) {
+            errors.push(e);
+          }
         }
         const results = await Promise.allSettled(
-          pools.map((p) => Promise.resolve().then(() => p.end())),
+          shared ? [] : pools.map((p) => Promise.resolve().then(() => p.end())),
         );
         for (const r of results)
           if (r.status === 'rejected') errors.push(r.reason);

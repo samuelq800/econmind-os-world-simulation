@@ -1,4 +1,8 @@
 import {
+  readFinanceSocialSourceBinding,
+  type FinanceSocialSourceBinding,
+} from './finance-social-runtime-connection.js';
+import {
   createPostwarSocialSourcePreparation,
   isPreparedPostwarSocialSource,
   retirePreparedPostwarSocialSource,
@@ -109,6 +113,9 @@ export function createPostwarSocialRuntimeConnection(
   const base = new PostgresSqlDatabase(workerPool);
   const pending = new Set<Promise<unknown>>();
   const runtimes = new Set<ManualOfficeIntakeRuntime>();
+  const ownership: { shared: FinanceSocialSourceBinding | null } = {
+    shared: null,
+  };
   let closed = false,
     closing: Promise<void> | null = null;
   function track<T>(operation: () => Promise<T>): Promise<T> {
@@ -189,6 +196,8 @@ export function createPostwarSocialRuntimeConnection(
       configuration: PostwarSocialPreparedIntakeInput,
     ): ManualOfficeIntakeRuntime {
       if (closed || closing) throw Error('SOCIAL_CONNECTION_RETIRED');
+      if (ownership.shared)
+        throw Error('SOCIAL_CONNECTION_SHARED_CONSUMER_ALREADY_BOUND');
       if (!['local', 'ci'].includes(configuration.environment))
         throw Error('SOCIAL_PRODUCTION_CONSUMER_NOT_INSTALLED');
       if (
@@ -214,6 +223,10 @@ export function createPostwarSocialRuntimeConnection(
     },
     close(): Promise<void> {
       if (closing) return closing;
+      if (ownership.shared)
+        return Promise.reject(
+          Error('SOCIAL_SHARED_CONSUMER_OWNER_MUST_STOP_FIRST'),
+        );
       // Stop consumers before rejecting DB work needed to finish their active
       // step. No pending promise is mistaken for a completed rollback/commit.
       closing = (async () => {
@@ -226,12 +239,26 @@ export function createPostwarSocialRuntimeConnection(
       return closing;
     },
   });
-  issuedConnections.set(connection, { source: preparedSource, world });
+  issuedConnections.set(connection, {
+    source: preparedSource,
+    world,
+    workerPool,
+    runtimes,
+    ownership,
+    countryIds: Object.freeze([...openingScope.countryIds]),
+  });
   return connection;
 }
 const issuedConnections = new WeakMap<
   object,
-  { source: PreparedPostwarSocialSource; world: string }
+  {
+    source: PreparedPostwarSocialSource;
+    world: string;
+    workerPool: Pool;
+    runtimes: Set<ManualOfficeIntakeRuntime>;
+    ownership: { shared: FinanceSocialSourceBinding | null };
+    countryIds: readonly string[];
+  }
 >();
 /** Only this fixed instance's actual completed DATA preparation is recognized.
  * A copy/wrapper, same-shaped object or caller flag cannot replace the instance;
@@ -256,6 +283,47 @@ export function isPostwarSocialRuntimeConnection(
   return (
     value !== null &&
     typeof value === 'object' &&
-    issuedConnections.get(value)?.world === world
+    issuedConnections.has(value) &&
+    issuedConnections.get(value)!.world === world
   );
+}
+
+/** Server-only transport ownership metadata, not credentials or source facts. */
+export function readPostwarSocialRuntimeConnectionResources(
+  value: Readonly<PostwarSocialRuntimeConnection>,
+): Readonly<{ workerPool: Pool; countryIds: readonly string[] }> {
+  const data = issuedConnections.get(value);
+  if (!data) throw Error('GENUINE_SOCIAL_RUNTIME_CONNECTION_REQUIRED');
+  return Object.freeze({
+    workerPool: data.workerPool,
+    countryIds: data.countryIds,
+  });
+}
+export function reservePostwarSocialRuntimeForSharedConsumer(
+  value: Readonly<PostwarSocialRuntimeConnection>,
+  binding: FinanceSocialSourceBinding,
+): void {
+  const data = issuedConnections.get(value),
+    deps = readFinanceSocialSourceBinding(binding);
+  if (
+    !data ||
+    deps.socialConnection !== value ||
+    deps.worldId !== data.world ||
+    deps.workerId !== value.workerId ||
+    deps.workerPool !== data.workerPool ||
+    deps.rawIntakePool === data.workerPool
+  )
+    throw Error('EXACT_SHARED_SOCIAL_SOURCE_SCOPE_REQUIRED');
+  if (data.runtimes.size || data.ownership.shared)
+    throw Error('SOCIAL_SOURCE_CONSUMER_ALREADY_BOUND');
+  data.ownership.shared = binding;
+}
+export function releasePostwarSocialRuntimeForSharedConsumer(
+  value: Readonly<PostwarSocialRuntimeConnection>,
+  binding: FinanceSocialSourceBinding,
+): void {
+  const data = issuedConnections.get(value);
+  if (!data || data.ownership.shared !== binding)
+    throw Error('EXACT_SHARED_SOCIAL_OWNER_REQUIRED');
+  data.ownership.shared = null;
 }

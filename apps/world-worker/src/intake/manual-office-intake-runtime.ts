@@ -1,3 +1,7 @@
+import {
+  readFinanceSocialSourceBinding,
+  type FinanceSocialSourceBinding,
+} from '../runtime-preparation/finance-social-runtime-connection.js';
 import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
 import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
@@ -26,6 +30,7 @@ import {
 } from '../runtime-preparation/production-world-command-host.js';
 import {
   createDurableCommandConsumptionPreparation,
+  createFinanceSocialCommandConsumptionPreparation,
   createProductionFinanceCommandConsumption,
   type DurableConsumptionClock,
 } from '../preparation/durable-command-consumption.js';
@@ -60,6 +65,22 @@ const constructions = new WeakMap<ManualOfficeIntakeRuntime, Construction>();
  * caller candidate, readiness predicate, boolean READY or executable callback. */
 export function createManualOfficeIntakeRuntime(
   input: Construction,
+): ManualOfficeIntakeRuntime {
+  return constructManualOfficeIntakeRuntime(input);
+}
+/** Fixed paired source issuer only; no public consumer mode/reader callback. */
+export function createFinanceSocialManualOfficeIntakeRuntime(
+  binding: FinanceSocialSourceBinding,
+): ManualOfficeIntakeRuntime {
+  const fixed = readFinanceSocialSourceBinding(binding);
+  return constructManualOfficeIntakeRuntime(
+    { ...fixed, workerDatabase: fixed.database },
+    binding,
+  );
+}
+function constructManualOfficeIntakeRuntime(
+  input: Construction,
+  financeSocialBinding?: FinanceSocialSourceBinding,
 ): ManualOfficeIntakeRuntime {
   const head = async () => {
     const r = await input.workerDatabase.query<{
@@ -152,15 +173,17 @@ export function createManualOfficeIntakeRuntime(
     ...input,
     readers: Object.freeze(readers),
   });
-  const consumer = createDurableCommandConsumptionPreparation({
-    database: construction.workerDatabase,
-    workerId: construction.workerId,
-    worldId: construction.worldId,
-    clock: construction.clock,
-    sha256Hex: construction.sha256Hex,
-    environment: construction.environment,
-    officeReaders: construction.readers,
-  });
+  const consumer = financeSocialBinding
+    ? createFinanceSocialCommandConsumptionPreparation(financeSocialBinding)
+    : createDurableCommandConsumptionPreparation({
+        database: construction.workerDatabase,
+        workerId: construction.workerId,
+        worldId: construction.worldId,
+        clock: construction.clock,
+        sha256Hex: construction.sha256Hex,
+        environment: construction.environment,
+        officeReaders: construction.readers,
+      });
   const runtime = Object.freeze({ consumer });
   constructions.set(runtime, construction);
   return runtime;

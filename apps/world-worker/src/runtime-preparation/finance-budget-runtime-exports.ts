@@ -16,7 +16,10 @@ export {
   isBoundedFinanceBudgetIntakeRuntime,
 } from '../intake/prepared-finance-budget-intake-runtime.js';
 
-export { createPostgresFinanceBudgetCapacitySource } from '../persistence/postgres-finance-budget-capacity-source.js';
+export {
+  createPostgresFinanceBudgetCapacitySource,
+  createPostgresFinanceBudgetWorldCapacitySource,
+} from '../persistence/postgres-finance-budget-capacity-source.js';
 
 export {
   createServerCommandHostBinding,

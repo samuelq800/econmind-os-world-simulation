@@ -5,10 +5,12 @@
  * this installer never spoofs that environment to activate a formal host. */
 import { createHash } from 'node:crypto';
 import {
+  AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   AUTHENTICATED_COMMAND_RECOVERY_PATH,
   type AuthenticatedCommandRecoveryResponseDto,
 } from '@econmind/core';
 import {
+  AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
   AUTHENTICATED_OFFICE_COMMAND_PATH,
   type AuthenticatedOfficeCommandResponseDto,
 } from '@econmind/core/authenticated-office-command-contract';
@@ -18,6 +20,11 @@ import {
   createFinanceBudgetAuthorizationDatabase,
   createFinanceBudgetIntakeAuthorizationPool,
 } from '@econmind/world-worker/finance-budget-runtime';
+import {
+  readPostwarFinanceSocialRuntimeBinding,
+  type PostwarFinanceSocialRuntimeConnection,
+} from '@econmind/world-worker/finance-social-runtime-connection';
+import { isPreparedPostwarSocialRuntimeConnection } from '@econmind/world-worker/social-runtime-connection';
 import { createBoundedOfficeCommandFetchHandler } from '../integration/bounded-office-command-fetch-handler.js';
 import { createBoundedAuthenticatedOfficeCommandService } from '../integration/bounded-authenticated-office-command-service.js';
 import { createBoundedOfficeCommandRecoveryService } from '../integration/bounded-office-command-recovery-service.js';
@@ -104,6 +111,7 @@ function clockPort(clock: Clock): void {
  * stop() drains in-flight work. It must not install competing World consumers. */
 export function createPostwarFinanceConnection(
   config: PostwarFinanceConnectionConfig | null = null,
+  sharedConnection?: Readonly<PostwarFinanceSocialRuntimeConnection>,
 ): Readonly<PostwarFinanceConnection> {
   if (
     config &&
@@ -116,6 +124,22 @@ export function createPostwarFinanceConnection(
   )
     throw new TypeError('POSTWAR_FINANCE_EXACT_SERVER_DEPENDENCIES_REQUIRED');
   if (config) clockPort(config.clock);
+  const shared = sharedConnection
+    ? readPostwarFinanceSocialRuntimeBinding(sharedConnection)
+    : null;
+  if (
+    shared &&
+    (!config ||
+      config.worldId !== shared.worldId ||
+      config.workerId !== shared.workerId ||
+      config.clock !== shared.clock ||
+      config.intakePool !== shared.rawIntakePool ||
+      config.workerDatabase !== shared.database ||
+      config.environment.ECONMIND_ENV !== shared.environment ||
+      !shared.financeCountryIds.includes(config.countryId) ||
+      config.expectedCapacitySourceSHA256 !== undefined)
+  )
+    throw Error('POSTWAR_FINANCE_SHARED_BINDING_MISMATCH');
   const c = config
     ? Object.freeze({
         ...config,
@@ -128,11 +152,12 @@ export function createPostwarFinanceConnection(
   // Identity is part of the Worker intake binding. Reuse ONE authorization
   // pool wrapper in construction and HTTP, rather than independently wrapping
   // the borrowed pool and losing the private runtime/pool identity check.
-  const intakePool = c
-    ? createFinanceBudgetIntakeAuthorizationPool(c.intakePool)
-    : null;
+  const intakePool =
+    shared?.intakePool ??
+    (c ? createFinanceBudgetIntakeAuthorizationPool(c.intakePool) : null);
   const owned =
-    c && intakePool
+    shared ??
+    (c && intakePool
       ? createBoundedFinanceBudgetIntakeRuntime({
           worldId: c.worldId,
           workerId: c.workerId,
@@ -152,7 +177,7 @@ export function createPostwarFinanceConnection(
             historyMode: 'BUDGET_SOCIAL',
           }),
         })
-      : null;
+      : null);
   const composition: HttpConfig | null =
     c && owned && intakePool
       ? {
@@ -187,6 +212,23 @@ export function createPostwarFinanceConnection(
   return Object.freeze({
     transportOrigins: c?.allowedOrigins ?? Object.freeze([]),
     handleCommand(input: PostwarFinanceStructuredRequest) {
+      if (
+        shared &&
+        !stopped &&
+        !isPreparedPostwarSocialRuntimeConnection(
+          shared.socialConnection,
+          shared.worldId,
+        )
+      )
+        return Promise.resolve({
+          httpStatus: 503,
+          body: {
+            schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
+            requestId: '00000000-0000-4000-8000-000000000000',
+            ok: false as const,
+            error: { code: 'SOURCE_NOT_PREPARED', retryable: false },
+          },
+        });
       return track(
         (stopped
           ? createBoundedAuthenticatedOfficeCommandService(null)
@@ -195,6 +237,23 @@ export function createPostwarFinanceConnection(
       );
     },
     recover(input: PostwarFinanceStructuredRequest) {
+      if (
+        shared &&
+        !stopped &&
+        !isPreparedPostwarSocialRuntimeConnection(
+          shared.socialConnection,
+          shared.worldId,
+        )
+      )
+        return Promise.resolve({
+          httpStatus: 503,
+          body: {
+            schemaVersion: AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+            requestId: '00000000-0000-4000-8000-000000000000',
+            ok: false as const,
+            error: { code: 'SOURCE_NOT_PREPARED', retryable: false },
+          },
+        });
       return track(
         (stopped
           ? createBoundedOfficeCommandRecoveryService(null)
@@ -207,8 +266,8 @@ export function createPostwarFinanceConnection(
       : ('NOT_CONNECTED' as const),
     /** Genuine standard ports for the owner of the shared World dispatcher.
      * These are not readiness/admission/production-deployment attestations. */
-    runtime: owned?.runtime ?? null,
-    budget: owned?.budget ?? null,
+    runtime: shared ? null : (owned?.runtime ?? null),
+    budget: shared ? null : (owned?.budget ?? null),
     handle(request: Request): Promise<Response | null> {
       if (!paths.has(new URL(request.url).pathname))
         return Promise.resolve(null);
@@ -216,12 +275,12 @@ export function createPostwarFinanceConnection(
       return track(handler(request));
     },
     prepareManualConsumption(): void {
-      if (!owned || stopped)
+      if (!owned || stopped || shared)
         throw Error('POSTWAR_FINANCE_CONNECTION_UNAVAILABLE');
       owned.runtime.consumer.startPreparation();
     },
     consumeOnce() {
-      if (!owned || stopped)
+      if (!owned || stopped || shared)
         return Promise.resolve(
           Object.freeze({
             status: 'BLOCKED' as const,
@@ -234,7 +293,7 @@ export function createPostwarFinanceConnection(
       stopped = true;
       stopping ??= (async () => {
         while (pending.size) await Promise.allSettled([...pending]);
-        await owned?.runtime.consumer.stop();
+        if (!shared) await owned?.runtime.consumer.stop();
       })();
       return stopping;
     },

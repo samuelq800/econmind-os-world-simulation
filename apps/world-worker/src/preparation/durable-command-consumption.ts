@@ -4,6 +4,8 @@ import {
   DomainError,
   SimTime,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   canonicalSerialize,
   parseWorldWriterLease,
   workerId,
@@ -39,6 +41,10 @@ import {
   productionFinanceCommandExecutionBlocker,
   type ServerCommandHostBinding,
 } from '../runtime-preparation/production-world-command-host.js';
+import {
+  readFinanceSocialSourceBinding,
+  type FinanceSocialSourceBinding,
+} from '../runtime-preparation/finance-social-runtime-connection.js';
 
 export const DURABLE_COMMAND_CONSUMPTION_STATUS =
   'PREPARATION_ONLY_NOT_RUNTIME_ACCEPTANCE' as const;
@@ -144,25 +150,54 @@ type DurableConsumptionInput = {
   /** Trusted server constructors only; absent sources never enable a family. */
   readonly officeReaders?: ManualOfficeRuntimeReaders;
 };
-export function createDurableCommandConsumptionPreparation(
-  input: DurableConsumptionInput,
-) {
-  if (!['local', 'ci'].includes(input.environment.ECONMIND_ENV ?? '')) {
+const FINANCE_SOCIAL_COMMAND_FAMILIES: ReadonlySet<string> = new Set([
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_JOB_MATCH_DUE_COMMAND,
+]);
+function assertLocalPreparationEnvironment(environment: NodeJS.ProcessEnv) {
+  if (!['local', 'ci'].includes(environment.ECONMIND_ENV ?? ''))
     invalid('Durable command preparation is local/CI only');
-  }
-  for (const [name, value] of Object.entries(input.environment)) {
+  for (const [name, value] of Object.entries(environment)) {
     if (
       value &&
       (/^(?:VITE_)?SUPABASE_/u.test(name) ||
         name === 'WORLD_DATABASE_URL' ||
         name === 'DATABASE_URL')
-    ) {
+    )
       invalid(
         'Production connection configuration is forbidden in preparation',
       );
-    }
   }
+}
+export function createDurableCommandConsumptionPreparation(
+  input: DurableConsumptionInput,
+) {
+  assertLocalPreparationEnvironment(input.environment);
   return createDurableCommandConsumer(input, null);
+}
+/** Fixed finite local/CI composition only. No caller readers, allowlist,
+ * candidate callback, role grant, Clock startup or new consumer authority.
+ * The private combined issuer owns exact DB/pool/world/worker identities. */
+export function createFinanceSocialCommandConsumptionPreparation(
+  binding: FinanceSocialSourceBinding,
+) {
+  const d = readFinanceSocialSourceBinding(binding);
+  assertLocalPreparationEnvironment(d.environment);
+  return createDurableCommandConsumer(
+    {
+      database: d.database,
+      workerId: d.workerId,
+      worldId: d.worldId,
+      clock: d.clock,
+      sha256Hex: d.sha256Hex,
+      environment: d.environment,
+      officeReaders: d.readers,
+    },
+    null,
+    'FINANCE_SOCIAL',
+  );
 }
 /** Explicit finite server composition. No environment substitution, loop,
  * lease acquisition or Clock construction. Missing formal originals deny first. */
@@ -186,38 +221,43 @@ export function createProductionFinanceCommandConsumption(
 function createDurableCommandConsumer(
   input: DurableConsumptionInput,
   serverBinding: ServerCommandHostBinding | null,
+  familyBoundary: 'LEGACY_GENERIC' | 'FINANCE_SOCIAL' = 'LEGACY_GENERIC',
 ) {
   const world = worldId(input.worldId);
   const holder = workerId(input.workerId);
   const clock = input.clock;
   const officeReaders = Object.freeze({ ...input.officeReaders });
   const lineage = new DurableV08LedgerLineageReader(input);
-  const delivery = serverBinding
-    ? null
-    : createAuthoritativeWorkerExecution({
-        database: input.database,
-        workerId: holder,
-        sha256Hex: input.sha256Hex,
-        candidateFactory: createSqlNarrowTreasuryGcuDeliveryCandidateFactory({
+  const delivery =
+    serverBinding || familyBoundary === 'FINANCE_SOCIAL'
+      ? null
+      : createAuthoritativeWorkerExecution({
           database: input.database,
           workerId: holder,
           sha256Hex: input.sha256Hex,
-        }),
-      });
-  const shipment = serverBinding
-    ? null
-    : createAuthoritativeWorkerExecution({
-        database: input.database,
-        workerId: holder,
-        sha256Hex: input.sha256Hex,
-        candidateFactory: createSqlNarrowTreasuryGcuShipmentCandidateFactory({
+          candidateFactory: createSqlNarrowTreasuryGcuDeliveryCandidateFactory({
+            database: input.database,
+            workerId: holder,
+            sha256Hex: input.sha256Hex,
+          }),
+        });
+  const shipment =
+    serverBinding || familyBoundary === 'FINANCE_SOCIAL'
+      ? null
+      : createAuthoritativeWorkerExecution({
           database: input.database,
           workerId: holder,
           sha256Hex: input.sha256Hex,
-        }),
-      });
+          candidateFactory: createSqlNarrowTreasuryGcuShipmentCandidateFactory({
+            database: input.database,
+            workerId: holder,
+            sha256Hex: input.sha256Hex,
+          }),
+        });
   const reservation =
-    clock === null || serverBinding !== null
+    clock === null ||
+    serverBinding !== null ||
+    familyBoundary === 'FINANCE_SOCIAL'
       ? null
       : createLocalNarrowReservationWorker({
           ...input,
@@ -503,6 +543,17 @@ function createDurableCommandConsumer(
       });
       if (selected === null) return Object.freeze({ status: 'IDLE' });
       const { command, row } = selected;
+      // Keep the real global queue head. Never add an Office WHERE clause,
+      // skip an unsupported head, alter its expected version, or invoke a
+      // source/claim/legacy goods branch for an uninstalled family.
+      if (
+        familyBoundary === 'FINANCE_SOCIAL' &&
+        !FINANCE_SOCIAL_COMMAND_FAMILIES.has(command.commandType)
+      )
+        return blocked(
+          'FINANCE_SOCIAL_FAMILY_NOT_INSTALLED',
+          command.commandId,
+        );
       if (
         serverBinding &&
         (command.commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND ||

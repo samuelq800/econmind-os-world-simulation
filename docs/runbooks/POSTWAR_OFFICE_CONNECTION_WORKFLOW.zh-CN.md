@@ -86,8 +86,16 @@ Node 可显式配置 `postwarFinanceConnection` 与 `postwarSocialConnection`：
 完整当前前缀及来源、席位和撤销状态。未准备的 HTTP 入口保持关闭，不在请求期重读完整种子。
 准备不授予执行权限，也不启动 consumer。当前真实验收使用 Node 进程，不能套用为 Workers 内存验收。
 写请求交给服务后若传输中断、提交结果不明，必须先恢复回执，不得自动重发。
-HTTP 分派不等于共享执行调度：两个本地 consumer 都读取全 World 队首，不能同时启动，
-也不能用轮流尝试消费作为全办公室调度器。正式执行门保持关闭。
+HTTP 分派不等于共享执行调度：独立 Finance/Social consumer 都读取全 World 队首，不能同时启动。
+共同执行使用 `createPostwarFinanceSocialRuntimeConnection` 和
+`createPostwarFinanceSocialApiConnection`，通过 `startApiRuntime` 的
+`postwarFinanceSocialConnection` 显式安装。两套 HTTP 入口共用唯一 Worker runtime、
+intake 包装和 consumer；启动 Node 只完成 prepare，不自动开始消费或推进 Clock。
+此固定入口只执行 Budget、Social POSITION/PLAN/MATCH 四类命令，保留全 World FIFO；
+未知或过期队首原位阻断，不能过滤、跳过、轮流试另一执行器或自动变更 expected head。
+国家路由必须明确登记实际来源；不能用 C01 作为其他国家的默认来源。
+共同 owner 负责排空两套 HTTP、停止 Worker，再关闭原四个池；借用入口不独立停止共享资源。
+正式执行门保持关闭。
 
 Social 标准 Node 路径的隔离验收为 `tests/world-api/postwar-social-node-native.test.ts`：
 `ECONMIND_SOCIAL_NODE_H3_CHECKPOINT` 指向真实封存 H3，
@@ -96,6 +104,14 @@ Social 标准 Node 路径的隔离验收为 `tests/world-api/postwar-social-node
 必须记录实际运行结果；未启用 descriptor 的 skip 不代表成功。
 `social-intake-authorization.sql` 只提供精确的身份/席位锁读取，专用角色的成员关系须由
 已有发布链单独核对，不能给 intake 增加修改权限元数据的权力。
+
+共同 consumer 的隔离原生验收为 `tests/world-api/postwar-shared-consumer-native.test.ts`：
+设置 `ECONMIND_SHARED_CONSUMER_NATIVE=1`，并分别用
+`ECONMIND_SHARED_CONSUMER_SOURCE_CHECKPOINT`、
+`ECONMIND_SHARED_CONSUMER_SCOPE_CHECKPOINT` 指向同种子的真实封存 H6 小来源与 H4 locator。
+`ECONMIND_SHARED_CONSUMER_EVIDENCE_DIR` 每次选择新目录，保留失败尝试。
+测试克隆封存库，使用隔离角色和身份，实际启动独立 Node 进程、发送 HTTP、单步消费和重启；
+退出后清理自己创建的资源，不修改模板。未实际执行或失败的尝试不能记录为成功。
 
 SQL 审查包生成器为 `tools/office-connection/postwar-schema-delta.mjs`。使用
 `--source-root <clean-world-checkout> --candidate-sha <full-SHA> --companion-root <companion-checkout> --output-directory <fresh-directory>`，
