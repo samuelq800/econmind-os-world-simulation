@@ -4,6 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./postwar-budget-current-readback": {
+      "types": "./dist/outbox/postwar-budget-current-readback-consumer.d.ts",
+      "default": "./dist/outbox/postwar-budget-current-readback-consumer.js"
+    },
+    "./social-runtime-connection": {
+      "types": "./dist/runtime-preparation/social-runtime-connection.d.ts",
+      "default": "./dist/runtime-preparation/social-runtime-connection.js"
+    },
     "./runtime-command-host": {
       "types": "./dist/runtime-preparation/production-world-command-host-exports.d.ts",
       "default": "./dist/runtime-preparation/production-world-command-host-exports.js"
