@@ -6,6 +6,7 @@ import { createHash, generateKeyPairSync, sign, verify } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
 import { beforeAll, afterAll, afterEach, describe, it, expect } from 'vitest';
 import * as C from '@econmind/core';
+import { PRODUCTION_WATER_CONSUMED_EVENT } from '@econmind/core/production-water-consumption';
 import { loadPostwarSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
 import { OPENING_PUBLICATION_SIGNATURE_DOMAIN } from '../../apps/world-worker/src/admission/private-opening-admission-authority.js';
 import {
@@ -639,20 +640,137 @@ describe('actual pinned Industry source custody, incomplete operations remain ty
       ]),
     );
   });
-  it('the actual atomic cutoff adapter throws typed missing facts before producing any positive observation', async () => {
-    await reader();
-    const guard = source.createCutoffGuard(null);
-    const request = {
-      command: command(),
-      expectedHead: { worldVersion: '0', eventSequence: '0' },
-      posting: {
-        evidence: { operating: { payload: { facilityRef: 'OPEN-01-GRAIN' } } },
-      },
-    } as unknown as import('../../apps/world-worker/src/persistence/industry-production-source-cutoff.js').IndustryProductionCutoffRequest;
-    await expect(
-      guard.assertCurrentFrom(executor, request),
-    ).rejects.toBeInstanceOf(PostwarIndustrySourceMissingError);
-  });
+  it.each([
+    ['missing water event', false, false, 'waterConsumption'],
+    [
+      'missing water materialization',
+      true,
+      false,
+      'waterConsumptionMaterialization',
+    ],
+    [
+      'canonical water JSON cannot replace actual operating facts',
+      true,
+      true,
+      'deliveredWater',
+    ],
+  ] as const)(
+    'the actual atomic cutoff adapter throws typed missing facts before producing any positive observation: %s',
+    async (_case, withWater, withMaterialization, missingField) => {
+      await reader();
+      const guard = source.createCutoffGuard(null);
+      const actualCommand = command();
+      const probe = C.parseAuthoritativeEvent(
+        {
+          schemaVersion: C.EVENT_SCHEMA_VERSION,
+          eventId: 'EVENT_TEST_ONLY_SOURCE_PROBE',
+          eventType: 'TEST_ONLY_INDUSTRY_SOURCE_PROBE',
+          worldId: actualCommand.worldId,
+          causationCommandId: actualCommand.commandId,
+          correlationId: actualCommand.correlationId,
+          worldVersion: '1',
+          sequence: '1',
+          simTime: actualCommand.simTime.toCanonicalValue(),
+          recordedAtReal: actualCommand.submittedAtReal,
+          correctsEventId: null,
+          payload: { TEST_ONLY: true },
+        },
+        sha,
+      );
+      const waterKey = 'TEST_ONLY_WATER_CONSUMPTION',
+        afterStateHash = ('sha256:' + '0'.repeat(64)) as `sha256:${string}`;
+      // Structurally canonical envelopes only, not a funded production posting
+      // or genuine Core water calculation. Even matching event/cache JSON must
+      // leave the actual delivery/paid-cost originals missing, never manufacture
+      // a positive cutoff observation. Full Atomic proof checks are separate.
+      const events = withWater
+        ? [
+            probe,
+            C.parseAuthoritativeEvent(
+              {
+                schemaVersion: C.EVENT_SCHEMA_VERSION,
+                eventId: 'EVENT_TEST_ONLY_WATER_PROBE',
+                eventType: PRODUCTION_WATER_CONSUMED_EVENT,
+                worldId: actualCommand.worldId,
+                causationCommandId: actualCommand.commandId,
+                correlationId: actualCommand.correlationId,
+                worldVersion: '1',
+                sequence: '2',
+                simTime: actualCommand.simTime.toCanonicalValue(),
+                recordedAtReal: actualCommand.submittedAtReal,
+                correctsEventId: null,
+                payload: {
+                  schemaVersion: 'production-water-consumption-event-v1',
+                  materializationKey: waterKey,
+                  afterStateHash,
+                },
+              },
+              sha,
+            ),
+          ]
+        : [probe];
+      const request = {
+        command: actualCommand,
+        transition: C.createAuthoritativeTransition({
+          command: actualCommand,
+          worldVersionBefore: '0',
+          worldVersionAfter: '1',
+          events,
+        }),
+        expectedHead: { worldVersion: '0', eventSequence: '0' },
+        posting: {
+          evidence: {
+            operating: { payload: { facilityRef: 'OPEN-01-GRAIN' } },
+          },
+        } as unknown as C.InventoryProductionPosting,
+        fundingBatchId: 'BATCH_TEST_ONLY_ABSENT',
+        fundingFingerprint: afterStateHash,
+        costLegId: 'LEG_TEST_ONLY_ABSENT',
+        currentMaterializations: withMaterialization
+          ? [{ key: waterKey, payloadHash: afterStateHash }]
+          : [],
+      } satisfies import('../../apps/world-worker/src/persistence/industry-production-source-cutoff.js').IndustryProductionCutoffRequest;
+      const statements: string[] = [];
+      const observedExecutor: SqlExecutor = {
+        query<Row extends object>(
+          statement: string,
+          args?: readonly unknown[],
+        ) {
+          statements.push(statement);
+          return executor.query<Row>(statement, args);
+        },
+      };
+      let failure: unknown;
+      const attempted = guard
+        .assertCurrentFrom(observedExecutor, request)
+        .catch((error) => {
+          failure = error;
+          throw error;
+        });
+      await expect(attempted).rejects.toBeInstanceOf(
+        PostwarIndustrySourceMissingError,
+      );
+      expect(failure).toMatchObject({
+        code: 'POSTWAR_INDUSTRY_SOURCE_MISSING',
+        missing: expect.arrayContaining([
+          expect.objectContaining({ field: missingField }),
+        ]),
+      });
+      if (withMaterialization)
+        expect(failure).toMatchObject({
+          missing: expect.arrayContaining([
+            expect.objectContaining({ code: 'ACTUAL_WATER_DELIVERY_MISSING' }),
+            expect.objectContaining({
+              code: 'PAID_COST_PURPOSE_ORIGINAL_MISSING',
+            }),
+          ]),
+        });
+      expect(statements.length).toBeGreaterThan(0);
+      expect(
+        statements.every((statement) => /^\s*select\b/iu.test(statement)),
+      ).toBe(true);
+    },
+  );
   it('rejects raw original drift, arbitrary Ready JSON and wrong-country source registration without partial writes', async () => {
     await publisher();
     await expect(
