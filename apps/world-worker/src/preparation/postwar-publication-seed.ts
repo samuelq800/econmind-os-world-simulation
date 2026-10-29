@@ -20,6 +20,10 @@ import {
 } from './postwar-operating-supplies.js';
 import { validatePostwarPhysicalServiceReceiptFromSeed } from './postwar-physical-service-receipt.js';
 import { readPostwarOperatingGenesisFromSeed } from './postwar-operating-genesis-adoption.js';
+import {
+  hasPostwarGcuBankOpeningCandidate,
+  readPostwarGcuBankOpeningFromSeed,
+} from './postwar-gcu-bank-opening.js';
 
 const sha = (bytes: string) => createHash('sha256').update(bytes).digest('hex');
 export function validatePostwarOpeningPublicationSeed(input: {
@@ -45,7 +49,14 @@ export function validatePostwarOpeningPublicationSeed(input: {
   )
     throw Error('POSTWAR_PUBLICATION_WORLD_OR_REPLAY_BINDING_MISMATCH');
   readPostwarOperatingGenesisFromSeed(seed);
-  const operating = seed.sources.filter(
+  // A fourth-source endowment is independently re-derived first. Compare the
+  // original financial/supplies/operating chain to its unchanged parent, while
+  // returning the new complete seed to the existing publication protocol.
+  const gcu = hasPostwarGcuBankOpeningCandidate(seed)
+    ? readPostwarGcuBankOpeningFromSeed(seed)
+    : null;
+  const operatingSeed = gcu?.parentSeed ?? seed;
+  const operating = operatingSeed.sources.filter(
     (source) =>
       (JSON.parse(source.canonicalPayload) as { schemaVersion?: unknown })
         .schemaVersion === 'postwar-operating-genesis-seed-source-v1',
@@ -84,14 +95,16 @@ export function validatePostwarOpeningPublicationSeed(input: {
   const expected = appendPostwarOperatingSupplies(financial, supplies);
   const actual = createOpeningSeed(
     {
-      schemaVersion: seed.schemaVersion,
-      seedId: seed.seedId,
-      worldId: seed.worldId,
-      openingWorldVersion: seed.openingWorldVersion,
-      replayBinding: seed.replayBinding,
-      sources: seed.sources.filter((source) => source !== operating[0]),
-      inventoryEntries: seed.inventoryEntries,
-      financialBatches: seed.financialBatches,
+      schemaVersion: operatingSeed.schemaVersion,
+      seedId: operatingSeed.seedId,
+      worldId: operatingSeed.worldId,
+      openingWorldVersion: operatingSeed.openingWorldVersion,
+      replayBinding: operatingSeed.replayBinding,
+      sources: operatingSeed.sources.filter(
+        (source) => source !== operating[0],
+      ),
+      inventoryEntries: operatingSeed.inventoryEntries,
+      financialBatches: operatingSeed.financialBatches,
     },
     sha,
   );
