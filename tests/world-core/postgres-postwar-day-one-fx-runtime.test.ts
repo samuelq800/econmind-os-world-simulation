@@ -18,7 +18,10 @@ import { createAuthoritativeWorkerExecution } from '../../apps/world-worker/src/
 import { createPostwarDayOneFxNativeFixture } from '../support/postwar-day-one-fx-native-fixture.js';
 import type { FinancialIntakeBindingDto } from '@econmind/core/authenticated-financial-intake-contract';
 import type { ManualOfficeCommandRequestDto } from '@econmind/core/authenticated-office-command-contract';
-import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
+import type {
+  SqlDatabase,
+  SqlExecutor,
+} from '../../apps/world-worker/src/persistence/sql-database.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const enabled = process.env.ECONMIND_POSTWAR_DAY_ONE_FX_NATIVE === '1';
 const evidence = '/workspace/.cloud-setup/evidence/fx-cfc-runtime-20261029';
@@ -40,6 +43,51 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
         classification: 'TEST_ONLY_ISOLATED_CFC_NATIVE_NOT_PRODUCTION',
         seedFingerprint: marker.seedFingerprint,
       };
+      const databaseErrors: unknown[] = [];
+      function recordDatabaseError(error: unknown, statement: string): void {
+        const causes: unknown[] = [];
+        let current: unknown = error;
+        while (current instanceof Error && causes.length < 8) {
+          causes.push({
+            name: current.name,
+            message: current.message,
+            code: (current as Error & { code?: unknown }).code,
+            stack: current.stack,
+          });
+          current = current.cause;
+        }
+        databaseErrors.push({ statement, causes });
+      }
+      function observe(executor: SqlExecutor): SqlExecutor {
+        return {
+          async query<Row extends object>(
+            statement: string,
+            parameters?: readonly unknown[],
+          ) {
+            try {
+              return await executor.query<Row>(statement, parameters);
+            } catch (error) {
+              recordDatabaseError(error, statement);
+              throw error;
+            }
+          },
+        };
+      }
+      const observedDatabase: SqlDatabase = {
+        query: observe(fixture.database).query,
+        async transaction<T>(
+          consume: (tx: SqlExecutor) => Promise<T>,
+        ): Promise<T> {
+          try {
+            return await fixture.database.transaction((tx) =>
+              consume(observe(tx)),
+            );
+          } catch (error) {
+            recordDatabaseError(error, 'TEST_ONLY_ACTUAL_TRANSACTION_CAUSE');
+            throw error;
+          }
+        },
+      };
       const administrator = new PostgresSqlDatabase(clone.installer);
       const publisher: SqlDatabase = {
         query: administrator.query.bind(administrator),
@@ -52,6 +100,15 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
           }),
       };
       try {
+        const decimalProposal = await readFile(
+          path.join(
+            root,
+            'database/proposals/financial-posting-decimal-validation.sql',
+          ),
+          'utf8',
+        );
+        await clone.installer.query(decimalProposal);
+        summary.decimalValidatorProposalSHA256 = sha(decimalProposal);
         let seed: C.OpeningSeed | undefined = C.parseOpeningSeed(
           JSON.parse(await readFile(fixture.artifacts.seedFile, 'utf8')),
           sha,
@@ -85,7 +142,7 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
           worldId: marker.worldId,
           workerId: fixture.workerId,
           workerRole: fixture.workerRole,
-          workerDatabase: fixture.database,
+          workerDatabase: observedDatabase,
           intakePool: fixture.intakePool,
           clock,
           environment: 'ci',
@@ -201,6 +258,7 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
         connection.startPreparation();
         summary.stage = 'CONSUMING_FIRST_COMMAND';
         const committed = await connection.consumeOnce();
+        summary.databaseErrors = databaseErrors;
         summary.firstConsumption =
           committed.status === 'PROCESSED'
             ? {
@@ -385,6 +443,7 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
       } catch (error) {
         summary.status = 'FAILED';
         summary.error = String(error);
+        summary.databaseErrors = databaseErrors;
         summary.failureCounts = (
           await clone.installer.query(
             'select (select count(*)::text from world_v2.command_submission where world_id=$1)commands,(select count(*)::text from world_v2.authoritative_event where world_id=$1)events,(select count(*)::text from world_v2.financial_posting_batch where world_id=$1)batches,(select world_version::text from world_v2.world_head where world_id=$1)version',
