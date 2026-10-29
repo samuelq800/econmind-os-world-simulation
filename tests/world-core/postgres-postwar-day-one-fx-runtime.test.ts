@@ -23,12 +23,15 @@ import type {
   SqlExecutor,
 } from '../../apps/world-worker/src/persistence/sql-database.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
+const cutoffKind = process.env.ECONMIND_POSTWAR_FX_TEST_REVOKE_KIND ?? 'QUOTE';
+if (!['QUOTE', 'SOURCE'].includes(cutoffKind))
+  throw Error('TEST_ONLY_FX_REVOKE_KIND_INVALID');
 const enabled = process.env.ECONMIND_POSTWAR_DAY_ONE_FX_NATIVE === '1';
 const evidence = '/workspace/.cloud-setup/evidence/fx-cfc-runtime-20261029';
 const root = path.resolve(import.meta.dirname, '../..');
 describe('actual cfc Treasury FX fixed Worker connection', () => {
   it.skipIf(!enabled)(
-    'intakes and commits six real counterlegs, preserves reservations and recovers FINAL after quote revocation',
+    'intakes and commits six real counterlegs, preserves reservations and recovers FINAL after source currentness revocation',
     async () => {
       await mkdir(evidence, { recursive: true });
       const fixture = await createPostwarDayOneFxNativeFixture({
@@ -42,6 +45,7 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
         status: 'IN_PROGRESS',
         classification: 'TEST_ONLY_ISOLATED_CFC_NATIVE_NOT_PRODUCTION',
         seedFingerprint: marker.seedFingerprint,
+        cutoffKind,
       };
       const databaseErrors: unknown[] = [];
       function recordDatabaseError(error: unknown, statement: string): void {
@@ -320,7 +324,11 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
           receipts: '1',
           version: '1',
         });
-        expect((await submit(request)).status).toBe('QUEUED');
+        summary.countsAfterFirstCommit = await counts();
+        summary.counterLegs = batches;
+        summary.stage = 'EXACT_FINAL_INTAKE_RETRY';
+        expect((await submit(request)).status).toBe('FINALIZED');
+        expect(await counts()).toEqual(summary.countsAfterFirstCommit);
         expect(await connection.consumeOnce()).toEqual({ status: 'IDLE' });
         const next = makeRequest('CUTOFF', '1');
         expect((await submit(next)).status).toBe('QUEUED');
@@ -347,15 +355,25 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
               const draft = await source.candidateFactory.prepare(input);
               if (mode === 'REVOKE') {
                 await publisher.transaction((tx) =>
-                  tx.query(
-                    'select world_v2.revoke_postwar_day_one_fx_quote($1,$2,$3,$4)',
-                    [
-                      marker.worldId,
-                      marker.countryId,
-                      quote.quoteRef,
-                      'TEST_ONLY_PREPARE_COMMIT_REVOKE',
-                    ],
-                  ),
+                  cutoffKind === 'SOURCE'
+                    ? tx.query(
+                        'select world_v2.revoke_postwar_day_one_fx_source($1,$2)',
+                        [
+                          String(
+                            publication.registrations[0]!.registration_ref,
+                          ),
+                          'TEST_ONLY_PREPARE_COMMIT_SOURCE_REVOKE',
+                        ],
+                      )
+                    : tx.query(
+                        'select world_v2.revoke_postwar_day_one_fx_quote($1,$2,$3,$4)',
+                        [
+                          marker.worldId,
+                          marker.countryId,
+                          quote.quoteRef,
+                          'TEST_ONLY_PREPARE_COMMIT_QUOTE_REVOKE',
+                        ],
+                      ),
                 );
                 return draft;
               }
@@ -397,14 +415,14 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
         summary.stage =
           mode === 'TAMPER'
             ? 'ACTUAL_BATCH_TAMPER_CUTOFF'
-            : 'QUOTE_REVOKE_CUTOFF';
+            : cutoffKind + '_REVOKE_CUTOFF';
         await expect(execute()).rejects.toThrow();
         expect(await counts()).toEqual(before);
         mode = 'REVOKE';
         summary.stage =
           mode === 'TAMPER'
             ? 'ACTUAL_BATCH_TAMPER_CUTOFF'
-            : 'QUOTE_REVOKE_CUTOFF';
+            : cutoffKind + '_REVOKE_CUTOFF';
         await expect(execute()).rejects.toThrow();
         expect(await counts()).toEqual(before);
         const oldCommand = await ports.workerDatabase.transaction((tx) =>
@@ -437,7 +455,8 @@ describe('actual cfc Treasury FX fixed Worker connection', () => {
         summary.quoteSha256 = quote.quoteSha256;
         summary.counterLegs = batches;
         summary.tamperedActualBalancedBatchRejected = true;
-        summary.quoteRevokedAfterPreparationRejected = true;
+        summary.quoteRevokedAfterPreparationRejected = cutoffKind === 'QUOTE';
+        summary.sourceRevokedAfterPreparationRejected = cutoffKind === 'SOURCE';
         summary.exactFinalRecoveredAfterRevocation = true;
         summary.production = false;
       } catch (error) {
