@@ -29,6 +29,8 @@ import {
 } from '../../apps/world-worker/src/persistence/postwar-office-projection-store.js';
 import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { SELECT_POSTWAR_COUNTRY_VACANCY_SOURCE } from '../support/postwar-social-country-source-selection.js';
+import { serializePostwarSocialPrefixEvidence } from '../support/postwar-social-prefix-evidence-json.js';
+import { copyImmutablePostwarSocialPrefixScopes } from '../support/postwar-social-prefix-scope-fixture.js';
 const checkpointPath = process.env.ECONMIND_SOCIAL_PREFIX_NATIVE_CHECKPOINT;
 const native = checkpointPath ? describe : describe.skip;
 const root = path.resolve(import.meta.dirname, '../..');
@@ -70,6 +72,25 @@ native('actual two-country committed Social current prefix', () => {
       out =
         process.env.ECONMIND_SOCIAL_PREFIX_NATIVE_EVIDENCE_DIR ??
         '/workspace/office-connection-evidence/postwar-social-prefix-native-development-20261028';
+    const scopeTemplatePath =
+      process.env.ECONMIND_SOCIAL_PREFIX_NATIVE_SCOPE_TEMPLATE;
+    const scopeTemplate = scopeTemplatePath
+      ? (JSON.parse(await readFile(scopeTemplatePath, 'utf8')) as {
+          referenceMarker: string;
+          templateDatabase: string;
+          seedFingerprint: string;
+          admissionRef: string;
+          worldVersion: string;
+          eventSequence: string;
+        })
+      : null;
+    if (scopeTemplate) {
+      expect(scopeTemplate.referenceMarker).toBe(raw.referenceMarker);
+      expect(scopeTemplate.seedFingerprint).toBe(marker.seedFingerprint);
+      expect(scopeTemplate.admissionRef).toBe(marker.admissionRef);
+      expect(scopeTemplate.worldVersion).toBe('4');
+      expect(scopeTemplate.eventSequence).toBe('4');
+    }
     expect(base.seedFingerprint).toBe(marker.seedFingerprint);
     expect(base.admissionRef).toBe(marker.admissionRef);
     await mkdir(out, { recursive: true });
@@ -95,10 +116,13 @@ native('actual two-country committed Social current prefix', () => {
         'TEST_ONLY_ACTUAL_TWO_COUNTRY_CORE_NATIVE_CURRENT_NOT_PRODUCTION',
       checkpoint: checkpointPath,
       referenceMarker: raw.referenceMarker,
+      h3Template: base,
+      immutableScopeTemplate: scopeTemplate,
       ownedDatabase: clone.database,
       production: false,
       WorldClock: false,
       stages: [],
+      reusedH0Documents: [],
     };
     const stages = evidence.stages as { stage: string; at: string }[];
     const stage = (s: string) => {
@@ -140,12 +164,14 @@ native('actual two-country committed Social current prefix', () => {
     };
     try {
       stage('COPY_EXACT_COUNTRY02_H0_ANCESTOR_FROM_SAME_STORED_SEED');
-      const hd = JSON.parse(
-        await readFile(
-          '/workspace/office-connection-evidence/postwar-persistent-bounded-native-20261028/projection-template.json',
-          'utf8',
-        ),
-      ) as { templateDatabase: string };
+      const hd =
+        scopeTemplate ??
+        (JSON.parse(
+          await readFile(
+            '/workspace/office-connection-evidence/postwar-persistent-bounded-native-20261028/projection-template.json',
+            'utf8',
+          ),
+        ) as { templateDatabase: string });
       ancestor = await clonePostwarNativeReference(
         marker,
         'prefix_ancestor',
@@ -153,12 +179,29 @@ native('actual two-country committed Social current prefix', () => {
       );
       const ac = await ancestor.installer.connect();
       try {
-        const info = (
-          await ac.query(
-            "select encode(sha256(convert_to(canonical_payload,'UTF8')),'hex')as sha from world_v2.opening_seed where world_id=$1",
-            [marker.worldId],
-          )
-        ).rows[0];
+        const referenceHeader = scopeTemplate
+          ? JSON.parse(
+              await readFile(
+                path.join(marker.evidenceDirectory, 'reference-header.json'),
+                'utf8',
+              ),
+            )
+          : null;
+        if (referenceHeader) {
+          expect(referenceHeader.seed_fingerprint).toBe(marker.seedFingerprint);
+          expect(referenceHeader.admission_ref).toBe(marker.admissionRef);
+          expect(referenceHeader.source_bundle_sha256).toBe(
+            marker.sourceBundleSha256,
+          );
+        }
+        const info = referenceHeader
+          ? { sha: text(referenceHeader.canonical_intent_sha256) }
+          : (
+              await ac.query(
+                "select encode(sha256(convert_to(canonical_payload,'UTF8')),'hex')as sha from world_v2.opening_seed where world_id=$1",
+                [marker.worldId],
+              )
+            ).rows[0];
         for (const dataset of ['positions', 'service-pools']) {
           let doc = (
             await ac.query(
@@ -167,6 +210,8 @@ native('actual two-country committed Social current prefix', () => {
             )
           ).rows[0];
           if (!doc) {
+            if (scopeTemplate)
+              throw Error('BOUNDED_SCOPE_FIXTURE_REQUIRES_EXISTING_H0_PAGES');
             await ac.query('set role world_v2_postwar_projection_publisher');
             try {
               doc = (
@@ -187,6 +232,12 @@ native('actual two-country committed Social current prefix', () => {
           }
           expect(doc.seed_fingerprint).toBe(marker.seedFingerprint);
           expect(doc.admission_ref).toBe(marker.admissionRef);
+          if (scopeTemplate) {
+            expect(String(doc.world_version)).toBe('0');
+            expect(String(doc.event_sequence)).toBe('0');
+            expect(doc.canonical_seed_sha256).toBe(info.sha);
+            expect(doc.source_bundle_sha256).toBe(marker.sourceBundleSha256);
+          }
           const cols = Object.keys(doc);
           await clone.installer.query(
             `insert into world_v2.postwar_office_projection_document(${cols.map(ident).join(',')})values(${cols.map((_, i) => '$' + (i + 1)).join(',')})`,
@@ -198,6 +249,24 @@ native('actual two-country committed Social current prefix', () => {
               [doc.document_ref],
             )
           ).rows) {
+            if (scopeTemplate) {
+              expect(sha(p.rows_text)).toBe(p.page_sha256);
+              expect(Buffer.byteLength(p.rows_text)).toBeLessThanOrEqual(48000);
+              (evidence.reusedH0Documents as unknown[]).push({
+                countryId: doc.country_id,
+                dataset: doc.dataset,
+                documentRef: doc.document_ref,
+                canonicalSeedSha256: doc.canonical_seed_sha256,
+                documentSha256: doc.document_sha256,
+                sourceId: doc.source_id,
+                sourcePayloadHash: doc.source_payload_hash,
+                originWorldVersion: String(doc.world_version),
+                originEventSequence: String(doc.event_sequence),
+                pageIndex: p.page_index,
+                pageSha256: p.page_sha256,
+                pageBytes: Buffer.byteLength(p.rows_text),
+              });
+            }
             const cs = Object.keys(p);
             await clone.installer.query(
               `insert into world_v2.postwar_office_projection_page(${cs.map(ident).join(',')})values(${cs.map((_, i) => '$' + (i + 1)).join(',')})`,
@@ -208,8 +277,10 @@ native('actual two-country committed Social current prefix', () => {
       } finally {
         ac.release();
       }
-      await ancestor.drop();
-      ancestor = undefined;
+      if (!scopeTemplate) {
+        await ancestor.drop();
+        ancestor = undefined;
+      }
       // A distinct TEST_ONLY verified subject gets coherent real scope records;
       // the original Country01 subject is never reassigned or made cross-country.
       for (const [office, capability] of [
@@ -264,6 +335,35 @@ native('actual two-country committed Social current prefix', () => {
       );
       await clone.installer.query(ddl);
       evidence.proposalSha256 = sha(ddl);
+      if (scopeTemplate && ancestor) {
+        const referenceHeader = JSON.parse(
+          await readFile(
+            path.join(marker.evidenceDirectory, 'reference-header.json'),
+            'utf8',
+          ),
+        );
+        const reuse = await copyImmutablePostwarSocialPrefixScopes({
+          source: ancestor.installer,
+          target: clone.installer,
+          marker,
+          expectedCanonicalSeedSha256: text(
+            referenceHeader.canonical_intent_sha256,
+          ),
+        });
+        evidence.immutableScopeReuse = reuse;
+        console.info(
+          'SOCIAL_PREFIX_NATIVE_SCOPE_PINS_MATCH:' +
+            JSON.stringify({
+              origin: reuse.origin,
+              destination: reuse.destination,
+              sourceRows: reuse.sourceRows,
+              sourceScopeBytes: reuse.sourceScopeBytes,
+              commandsOrAuthorityCopied: reuse.commandsOrAuthorityCopied,
+            }),
+        );
+        await ancestor.drop();
+        ancestor = undefined;
+      }
       // Controlled, single PL/pgSQL source extraction. Selection below reads
       // only one immutable <=256 KiB country scope, not the 124 MB seed.
       await clone.installer.query(
@@ -296,8 +396,9 @@ native('actual two-country committed Social current prefix', () => {
         maximumRows: 1,
         fullSeedParsedBySelectionQuery: false,
         heapOrRssPeakMeasured: false,
-        scopePreparation:
-          'SINGLE_CONTROLLED_PLPGSQL_EXTRACTION_REUSED_BY_PUBLICATION',
+        scopePreparation: scopeTemplate
+          ? 'EXPLICIT_TEST_ONLY_VERIFIED_IMMUTABLE_SCOPE_REUSE_NO_FULL_SEED_SQL_PARSE'
+          : 'SINGLE_CONTROLLED_PLPGSQL_EXTRACTION_REUSED_BY_PUBLICATION',
       };
       const database = createPostwarSocialPositionRuntimeDatabase(
           new PostgresSqlDatabase(writer),
@@ -573,9 +674,11 @@ native('actual two-country committed Social current prefix', () => {
       evidence.handoff = handoff;
       await writeFile(
         path.join(out, 'current-template-v2.json'),
-        JSON.stringify(handoff, null, 2) + '\n',
+        serializePostwarSocialPrefixEvidence(handoff),
       );
+      evidence.status = 'ACTUAL_NATIVE_H4_COMPLETE_CASE_ASSERTIONS_PASSED';
     } catch (error) {
+      evidence.status = 'FAIL';
       evidence.failure = error instanceof Error ? error.message : String(error);
       throw error;
     } finally {
@@ -609,7 +712,7 @@ native('actual two-country committed Social current prefix', () => {
                 evidence.failedAfterCommitCheckpoint = checkpoint;
                 await writeFile(
                   path.join(out, 'failed-h4-checkpoint.json'),
-                  JSON.stringify(checkpoint, null, 2) + '\n',
+                  serializePostwarSocialPrefixEvidence(checkpoint),
                 );
               } catch (error) {
                 evidence.checkpointPreservationFailure =
@@ -623,9 +726,14 @@ native('actual two-country committed Social current prefix', () => {
                 if (!evidence.failure) throw error;
               });
           } finally {
+            evidence.nodeMemory = {
+              resourceUsageMaxRssKiB: process.resourceUsage().maxRSS,
+              memoryUsageBytes: process.memoryUsage(),
+              scope: 'VITEST_WORKER_PROCESS_CUMULATIVE_HIGH_WATER_NOT_PG_PEAK',
+            };
             await writeFile(
               path.join(out, 'native-evidence.json'),
-              JSON.stringify(evidence, null, 2) + '\n',
+              serializePostwarSocialPrefixEvidence(evidence),
             );
           }
         }
