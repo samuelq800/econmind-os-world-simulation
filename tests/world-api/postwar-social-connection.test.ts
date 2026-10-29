@@ -10,17 +10,81 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
   WORLD_MODEL_VERSION,
+  AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   parseCanonicalCommand,
 } from '@econmind/core';
 import { AUTHENTICATED_OFFICE_COMMAND_SCHEMA } from '@econmind/core/authenticated-office-command-contract';
 import {
   loadPostwarSocialConnectionOpeningAdoption,
+  createPostwarSocialRuntimeConnection,
   type OfficialLabourSocialOpeningAdoption,
 } from '../../apps/world-worker/dist/runtime-preparation/social-runtime-connection.js';
 import {
   createPostwarSocialConnection,
   type PostwarSocialConnectionConfiguration,
 } from '../../apps/world-api/src/runtime/postwar-social-connection.js';
+
+import { createServerCommandHostBinding } from '../../apps/world-worker/dist/runtime-preparation/production-world-command-host-exports.js';
+import { createSourceOwnedExecutorComposition } from '../../apps/world-api/src/runtime-preparation/source-owned-executor-composition.js';
+
+/** Keep the explicitly uninstalled legacy offline diagnostic's original
+ * cancellation coverage. This is a real field-absent host composition, never
+ * a fallback from an explicitly installed-but-unprepared source. No HTTP,
+ * Ready flag or successful source proof is supplied by this protocol fixture. */
+function legacyDiagnostic(config: PostwarSocialConnectionConfiguration) {
+  const poolsOwner = createPostwarSocialConnection(config);
+  const sources = createPostwarSocialRuntimeConnection({
+    worldId: config.admittedWorldPins.worldId,
+    workerId: config.workerId,
+    workerPool: config.workerPool,
+    workerRole: config.workerRole,
+    openingAdoption: config.openingAdoption,
+  });
+  const binding = createServerCommandHostBinding({
+    worldId: config.admittedWorldPins.worldId,
+    workerId: config.workerId,
+    seedRef: config.admittedWorldPins.seedRef,
+    contentHash: config.admittedWorldPins.contentHash,
+    admissionRef: config.admittedWorldPins.admissionRef,
+    modelVersion: config.modelVersion,
+    intakePool: config.intakePool,
+    sourcePool: config.sourcePool,
+    readerRole: config.sourceReaderRole,
+    authorizationPublisherRole: config.authorizationPublisherRole,
+    workerDatabase: sources.database,
+    clock: config.clock,
+    resolveActorId: config.resolveActorId,
+    readers: sources.readers,
+  });
+  const diagnostic = createSourceOwnedExecutorComposition(binding);
+  return {
+    async preflightOnly(input: Parameters<typeof diagnostic.preflightOnly>[0]) {
+      const r = await diagnostic.preflightOnly(input);
+      return {
+        ...r,
+        status:
+          r.status === 'SOURCE_PREFLIGHT_DENIED'
+            ? ('SOURCE_PREFLIGHT_NOT_CONFIRMED' as const)
+            : r.status,
+      };
+    },
+    async stop() {
+      const errors: unknown[] = [];
+      for (const close of [
+        () => diagnostic.stop(),
+        () => sources.close(),
+        () => poolsOwner.stop(),
+      ])
+        try {
+          await close();
+        } catch (e) {
+          errors.push(e);
+        }
+      if (errors.length)
+        throw new AggregateError(errors, 'LEGACY_DIAGNOSTIC_CLEANUP_FAILED');
+    },
+  };
+}
 
 const root = path.resolve(import.meta.dirname, '../..');
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -155,22 +219,122 @@ function canonical() {
     sha,
   );
 }
+function recovery(originalRequest = wire()) {
+  return {
+    schemaVersion: AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+    requestId: '00000000-0000-4000-8000-000000000002',
+    request: {
+      worldId: originalRequest.request.worldId,
+      commandId: originalRequest.request.commandId,
+      idempotencyKey: originalRequest.request.idempotencyKey,
+      originalRequest,
+    },
+  };
+}
 
 describe('explicit Social Node connection installation, no default route or activation', () => {
-  it('constructs actual official factories and a genuine PREPARED local runtime without SQL or clock/consumer start', async () => {
+  it('exposes only snapshotted explicit HTTP origins and retains the structured command alias', async () => {
+    const f = fixture('ci'),
+      origins = ['https://pages.example'];
+    const connection = createPostwarSocialConnection({
+      ...f.config,
+      allowedOrigins: origins,
+    });
+    origins.push('https://later.example');
+    expect(connection.transportOrigins).toEqual(['https://pages.example']);
+    expect(Object.isFrozen(connection.transportOrigins)).toBe(true);
+    expect(
+      (await connection.handleCommand({ authorization: null, request: wire() }))
+        .httpStatus,
+    ).toBe(503);
+    expect(() =>
+      createPostwarSocialConnection({
+        ...f.config,
+        allowedOrigins: ['http://unsafe.example'],
+      }),
+    ).toThrow('TRANSPORT_ORIGINS_INVALID');
+    await connection.stop();
+  });
+  it('recovers only the strict original Social manual family through the actual shared recovery service', async () => {
+    const f = fixture('ci'),
+      connection = createPostwarSocialConnection(f.config);
+    const result = await connection.recover({
+      authorization: null,
+      request: recovery(),
+    });
+    expect(result.httpStatus).toBe(503);
+    expect(result.body).toMatchObject({
+      error: { code: 'SOURCE_NOT_PREPARED' },
+    });
+    expect(result.body.schemaVersion).toBe(
+      AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+    );
+    const other = wire('CORE_FINANCE_BUDGET_APPROPRIATION_V1');
+    other.request.officeId = 'FINANCE';
+    expect(
+      (
+        await connection.recover({
+          authorization: null,
+          request: recovery(other),
+        })
+      ).body,
+    ).toMatchObject({
+      ok: false,
+      error: { code: 'UNSUPPORTED_SOCIAL_RECOVERY' },
+    });
+    const altered = recovery();
+    altered.request.commandId = 'COMMAND_OTHER';
+    expect(
+      (await connection.recover({ authorization: null, request: altered }))
+        .body,
+    ).toMatchObject({ ok: false, error: { code: 'PROTOCOL_ERROR' } });
+    expect(f.calls.connects).toBe(0);
+    await connection.stop();
+    expect(
+      (await connection.recover({ authorization: null, request: recovery() }))
+        .body,
+    ).toMatchObject({
+      schemaVersion: AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+      ok: false,
+      error: { code: 'NOT_CONNECTED' },
+    });
+  });
+  it('keeps production recovery explicitly uninstalled without granting a consumer or changing the write gate', async () => {
+    const f = fixture(),
+      connection = createPostwarSocialConnection(f.config);
+    expect(
+      (
+        await connection.recover({
+          authorization: 'Bearer TEST_ONLY',
+          request: recovery(),
+        })
+      ).body,
+    ).toMatchObject({
+      schemaVersion: AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+      ok: false,
+      error: { code: 'SOCIAL_PRODUCTION_RECOVERY_NOT_INSTALLED' },
+    });
+    expect(connection.preparedRuntime).toBeNull();
+    expect(f.calls.connects).toBe(0);
+    await connection.stop();
+  });
+  it('keeps the local consumer inaccessible and HTTP closed until genuine source preparation, without constructor SQL or clock start', async () => {
     const f = fixture('ci'),
       connection = createPostwarSocialConnection(f.config);
     expect(connection.preparationMode).toBe('LOCAL_CI_PREPARED_INTAKE');
-    expect(connection.preparedRuntime?.consumer.state()).toBe('PREPARED');
+    expect(connection.preparedRuntime).toBeNull();
     const unauthenticated = await connection.handle({
       authorization: null,
       request: wire(),
     });
-    expect(unauthenticated.httpStatus).toBe(401);
+    expect(unauthenticated.httpStatus).toBe(503);
+    expect(unauthenticated.body).toMatchObject({
+      error: { code: 'SOURCE_NOT_PREPARED' },
+    });
     expect(unauthenticated.body.ok).toBe(false);
     expect(f.calls).toEqual({ queries: 0, connects: 0, ends: 0, fetches: 0 });
     await connection.stop();
-    expect(connection.preparedRuntime?.consumer.state()).toBe('STOPPED');
+    expect(connection.preparedRuntime).toBeNull();
     expect(f.calls.ends).toBe(4);
     expect(
       (await connection.handle({ authorization: null, request: wire() })).body,
@@ -241,9 +405,9 @@ describe('explicit Social Node connection installation, no default route or acti
     expect(f.calls.connects).toBe(0);
     await connection.stop();
   });
-  it('reports a failed real connection attempt as source unconfirmed, never EMPTY or definite source denial', async () => {
+  it('keeps legacy offline diagnostic unreachable-source classification as unconfirmed, never EMPTY or definite source denial', async () => {
     const f = fixture(),
-      connection = createPostwarSocialConnection(f.config);
+      connection = legacyDiagnostic(f.config);
     f.controls.get('source')!.connect = async () => {
       throw Error('TEST_ONLY_UNREACHABLE_DATABASE');
     };
@@ -261,9 +425,9 @@ describe('explicit Social Node connection installation, no default route or acti
     await connection.stop();
     expect(f.calls.ends).toBe(4);
   });
-  it('joins a late connection after cancellation, destroys it, then ends all owned pools exactly once', async () => {
+  it('keeps legacy offline diagnostic late-client cancellation/destroy before its pool-owner shutdown', async () => {
     const f = fixture(),
-      connection = createPostwarSocialConnection(f.config),
+      connection = legacyDiagnostic(f.config),
       started = deferred<void>(),
       late = deferred<PoolClient>();
     f.controls.get('source')!.connect = () => {
@@ -313,5 +477,53 @@ describe('explicit Social Node connection installation, no default route or acti
       'SOCIAL_CONNECTION_CLEANUP_UNCONFIRMED',
     );
     expect(f.calls.ends).toBe(4);
+  });
+  it('requires real DB preparation, keeps failed preparation idempotent and never exposes a consumer', async () => {
+    const f = fixture('ci'),
+      connection = createPostwarSocialConnection(f.config);
+    const preparation = connection.prepare();
+    await expect(preparation).rejects.toThrow();
+    expect(connection.prepare()).toBe(preparation);
+    await expect(connection.prepare()).rejects.toThrow();
+    expect(connection.preparedRuntime).toBeNull();
+    expect(f.calls.connects).toBe(1);
+    expect(
+      (await connection.handleCommand({ authorization: null, request: wire() }))
+        .body,
+    ).toMatchObject({ error: { code: 'SOURCE_NOT_PREPARED' } });
+    await connection.stop();
+    expect(f.calls.ends).toBe(4);
+  });
+  it('drains a late preparation connection before closing owned pools and cannot become prepared during stop', async () => {
+    const f = fixture('ci'),
+      connection = createPostwarSocialConnection(f.config),
+      started = deferred<void>(),
+      late = deferred<PoolClient>();
+    f.controls.get('worker')!.connect = () => {
+      started.resolve();
+      return late.promise;
+    };
+    const preparation = connection.prepare(),
+      rejected = expect(preparation).rejects.toThrow();
+    await started.promise;
+    const closing = connection.stop();
+    await Promise.resolve();
+    expect(f.calls.ends).toBe(0);
+    late.resolve({
+      query: async () => {
+        throw Error('TEST_ONLY_STARTUP_QUERY_FAILED');
+      },
+      release: () => {
+        f.events.push('release:worker');
+      },
+    } as unknown as PoolClient);
+    await rejected;
+    await closing;
+    expect(connection.preparedRuntime).toBeNull();
+    expect(f.calls.ends).toBe(4);
+    expect(f.events.indexOf('release:worker')).toBeGreaterThanOrEqual(0);
+    expect(f.events.indexOf('release:worker')).toBeLessThan(
+      f.events.indexOf('end:worker'),
+    );
   });
 });

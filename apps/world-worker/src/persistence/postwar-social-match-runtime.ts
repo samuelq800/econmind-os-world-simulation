@@ -1,3 +1,6 @@
+import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
+import type { CurrentMaterializationObservation } from './current-materialization-observation.js';
+import type { PreparedPostwarSocialSource } from './prepared-postwar-social-source.js';
 /** Fixed once-only day-zero MATCH publication/consumption over actual originals.
  * No Clock service/advance, demo grant, request snapshot or Ready callback. */
 import { createHash } from 'node:crypto';
@@ -181,6 +184,7 @@ export function createPostwarSocialMatchPublisher() {
   });
 }
 export function createPostwarSocialMatchRuntime(configuration: {
+  readonly preparedSource?: PreparedPostwarSocialSource;
   readonly database: SqlDatabase;
   readonly workerRole: string;
   readonly workerId: string;
@@ -190,7 +194,12 @@ export function createPostwarSocialMatchRuntime(configuration: {
     originals = createPostgresSocialOperatingOriginalReader(configuration);
   const captured = new Map<
     string,
-    { binding: unknown; stateHash: string; readFactsHash: string }
+    {
+      binding: unknown;
+      stateHash: string;
+      observation: Readonly<CurrentMaterializationObservation>;
+      readFactsHash: string;
+    }
   >();
   const deriveFrom = async (tx: SqlExecutor, command: CanonicalCommand) => {
     const parsed = parseSocialEmploymentServiceCommand(command, digest);
@@ -330,7 +339,7 @@ export function createPostwarSocialMatchRuntime(configuration: {
       clockBasis:
         'LAST_COMMITTED_PLAN_SIMTIME_EXISTING_OPENING_E01_DAY_ZERO_NO_CLOCK_ADVANCE',
     });
-    return { state, readFacts, binding, head, operation };
+    return { state, readFacts, binding, head, operation, lineage };
   };
   const snapshotReader: SocialEmploymentRuntimeSnapshotReader = Object.freeze({
     async readFrom(
@@ -342,8 +351,15 @@ export function createPostwarSocialMatchRuntime(configuration: {
         fresh.head.eventSequence !== input.headEventSequence
       )
         invalid('actual held head differs');
+      const observation = await observePostwarSocialMaterialization({
+        executor: input.transaction,
+        lineage: fresh.lineage,
+        countryId: input.command.countryId!,
+        kind: 'SERVICE',
+      });
       captured.set(input.command.fingerprint, {
         binding: fresh.binding,
+        observation,
         stateHash: hash(fresh.state),
         readFactsHash: hash(fresh.readFacts),
       });
@@ -405,11 +421,16 @@ export function createPostwarSocialMatchRuntime(configuration: {
         record.readFactsHash !== hash(p.readFacts)
       )
         invalid('factory did not consume the exact actual reader snapshot');
+      const draft = prepareSocialJobMatchAtomicDraft({
+        preparation: p,
+        sha256Hex: digest,
+      });
       return freeze({
-        ...prepareSocialJobMatchAtomicDraft({
-          preparation: p,
-          sha256Hex: digest,
-        }),
+        ...draft,
+        currentMaterializations: draft.currentMaterializations.map((m) => ({
+          ...m,
+          observation: record.observation,
+        })),
         officeOperatingSourceReadBinding: record.binding,
       });
     },

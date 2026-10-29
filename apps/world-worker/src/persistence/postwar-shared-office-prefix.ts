@@ -16,7 +16,7 @@ import {
   validatePostwarSocialEmploymentStateDocument,
   type PostwarSocialEmploymentStateDocument,
 } from '../preparation/postwar-social-employment-state.js';
-import type { ValidatedCanonicalLineageData } from './validated-canonical-lineage.js';
+import type { PostwarSocialReplayLineage } from './prepared-postwar-social-source.js';
 const digest = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), digest);
 const issuedPrefixes = new WeakSet<object>();
@@ -28,7 +28,7 @@ function freeze<T>(v: T): T {
   return v;
 }
 export function replayPostwarSharedOfficePrefix(input: {
-  readonly lineage: Readonly<ValidatedCanonicalLineageData>;
+  readonly lineage: Readonly<PostwarSocialReplayLineage>;
   readonly document: PostwarSocialEmploymentStateDocument;
 }) {
   const { lineage } = input;

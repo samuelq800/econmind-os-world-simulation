@@ -37,7 +37,11 @@ import type {
   AtomicTransitionDraft,
 } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
-import { readIssuedSocialGoverningSourceBinding } from './social-employment-runtime-snapshot-reader.js';
+import type { CurrentMaterializationObservation } from './current-materialization-observation.js';
+import {
+  readIssuedSocialGoverningSourceBinding,
+  readIssuedSocialMaterializationObservation,
+} from './social-employment-runtime-snapshot-reader.js';
 
 /** Root implements this inside its ONE admitted-opening + committed-event reader.
  * Materializations/projections are not allowed as authoritative inputs. TEST_ONLY
@@ -147,6 +151,7 @@ export interface SocialJobMatchPreparation {
   readonly state: SocialEmploymentServiceState;
   readonly readFacts: SocialEmploymentReadFacts;
   readonly governingSourceReadBinding: unknown | null;
+  readonly currentMaterializationObservation: Readonly<CurrentMaterializationObservation> | null;
   readonly commitAssertion: WorldWriterCommitAssertion;
   readonly eventSequence: string;
   readonly observedAtReal: string;
@@ -298,6 +303,8 @@ export class SqlSocialJobMatchCandidateSource {
         reader,
         rawSnapshot,
       );
+      const currentMaterializationObservation =
+        readIssuedSocialMaterializationObservation(reader, rawSnapshot);
       const snapshot = frozenCopy(rawSnapshot);
       if (snapshot.status === 'MISSING_OPERATING_STATE')
         throw new SocialOperatingStateMissingError(this.#input.openingAdoption);
@@ -339,6 +346,7 @@ export class SqlSocialJobMatchCandidateSource {
         state: snapshot.state,
         readFacts: snapshot.readFacts,
         governingSourceReadBinding,
+        currentMaterializationObservation,
         commitAssertion: createWorldWriterCommitAssertion(
           lease,
           headWorldVersion,
@@ -431,6 +439,9 @@ export function prepareSocialJobMatchAtomicDraft(input: {
       {
         key: `SOCIAL_EMPLOYMENT_SERVICE_${p.command.countryId}`,
         payload: operation.state,
+        ...(p.currentMaterializationObservation
+          ? { observation: p.currentMaterializationObservation }
+          : {}),
       },
     ]),
     authorityKind:

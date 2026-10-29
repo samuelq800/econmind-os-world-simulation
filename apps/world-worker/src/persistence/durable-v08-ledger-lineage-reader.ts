@@ -646,6 +646,44 @@ export class DurableV08LedgerLineageReader {
     return parseCommand(row, this.#sha256Hex);
   }
 
+  /** Immutable historical submission read only. The owning source protocol
+   * must already hold its actual canonical H/source/admission locks. This
+   * parses and hashes exactly the same durable command columns as the writer
+   * read, without requesting UPDATE privileges merely to lock append-only
+   * history. It creates no authorization, source, lease or commit proof. */
+  async readCommandReadOnlyFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+    requestedCommandId: string,
+  ): Promise<Readonly<CanonicalCommand>> {
+    const result = await transaction.query<DurableCommandRow>(
+      `select actor_id as command_actor_id,
+              auth_subject::text as command_auth_subject,
+              canonical_payload as command_canonical_payload,
+              country_id as command_country_id,
+              expected_world_version as command_expected_world_version,
+              command_fingerprint as command_fingerprint,
+              command_id as command_id,
+              idempotency_key as command_idempotency_key,
+              office_id as command_office_id,
+              payload_sha256 as command_payload_sha256,
+              schema_version as command_schema_version,
+              sim_time as command_sim_time,
+              submitted_at_real as command_submitted_at_real,
+              command_type as command_type,
+              world_id as command_world_id,
+              correlation_id
+         from world_v2.command_submission
+        where world_id = $1 and command_id = $2`,
+      [worldId(requestedWorldId), requestedCommandId],
+    );
+    const row = result.rows[0];
+    if (row === undefined || result.rows.length !== 1) {
+      invalid('Durable Command is absent or duplicated');
+    }
+    return parseCommand(row, this.#sha256Hex);
+  }
+
   /**
    * New read-only preparation boundary. No source adoption, commit, lock or
    * snapshot proof is issued here. A final writer may use it only AFTER its

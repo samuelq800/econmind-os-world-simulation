@@ -33,6 +33,13 @@ import {
 } from './industry-production-source-cutoff.js';
 import type { SqlExecutor } from './sql-database.js';
 import type { AtomicTransitionDraft } from './atomic-transition-repository.js';
+import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
+import { withValidatedCanonicalLineageFrom } from './validated-canonical-lineage.js';
+import {
+  readPostwarIndustryLabourFrom,
+  assertPostwarIndustryLabourObservation,
+  type PostwarIndustryLabourObservation,
+} from './postwar-industry-labour-source.js';
 import {
   assertCurrentMaterializationObservation,
   type CurrentMaterializationObservation,
@@ -125,6 +132,7 @@ export const POSTWAR_INDUSTRY_MISSING_FACT_CODES = [
   'TECHNOLOGY_RIGHT_OR_NONREQUIREMENT_MISSING',
   'GRANTED_ACTIVITY_LICENSE_MISSING',
   'ACTUAL_FACILITY_LABOUR_ALLOCATION_MISSING',
+  'ACTUAL_FACILITY_WORK_PERIOD_MISSING',
   'LOGISTICS_COEFFICIENT_MISSING',
   'ACTUAL_POWER_DELIVERY_MISSING',
   'ACTUAL_WATER_DELIVERY_MISSING',
@@ -534,12 +542,16 @@ export interface PostwarIndustrySourceObservation {
   readonly seedFingerprint: string;
   readonly admissionRef: string;
   readonly inspected: PostwarIndustryOriginalInspection;
+  readonly labour: Readonly<PostwarIndustryLabourObservation> | null;
 }
 /** Fixed server factory. Caller JSON/Ready/fact booleans are not its source. */
 export function createPostwarIndustryProductionSource(input: {
   sourceContext: PostwarPhysicalSourceContext;
   scope: Readonly<{ worldId: string; countryId: string }>;
   runtimeReaderRole: string;
+  /** Fixed server reader only; absence preserves the original staffing gap.
+   * Does not supply work-period/attendance or admission authority. */
+  labourLineageReader?: DurableV08LedgerLineageReader;
 }) {
   const context = input.sourceContext;
   if (!isVerifiedOfficialOpeningDecisionSource(context.source))
@@ -556,6 +568,12 @@ export function createPostwarIndustryProductionSource(input: {
     sourceBytes: context.sourceBytes,
     ownerDecisionBytes: context.ownerOriginalBytes,
   });
+  if (
+    input.labourLineageReader !== undefined &&
+    !(input.labourLineageReader instanceof DurableV08LedgerLineageReader)
+  )
+    invalid('FIXED_LABOUR_LINEAGE_READER_REQUIRED');
+  const labourLineageReader = input.labourLineageReader;
   if (
     !/^[a-z][a-z0-9_]{0,62}$/u.test(input.runtimeReaderRole) ||
     [
@@ -632,19 +650,57 @@ export function createPostwarIndustryProductionSource(input: {
     const bytes = text(row.document_text),
       digest = text(row.document_sha256);
     if (sha(bytes) !== digest) invalid('ORIGINAL_BYTES_HASH_MISMATCH');
-    const inspected = inspectPostwarIndustryOriginalDocument(lossless(bytes));
+    let inspected = inspectPostwarIndustryOriginalDocument(lossless(bytes));
     if (
       inspected.scope.worldId !== configured.worldId ||
       inspected.scope.countryId !== configured.countryId ||
       inspected.scope.facilityId !== request.facilityId
     )
       invalid('LOCKED_ORIGINAL_SCOPE_MISMATCH');
+    let labour: Readonly<PostwarIndustryLabourObservation> | null = null;
+    if (labourLineageReader !== undefined) {
+      labour = await withValidatedCanonicalLineageFrom(
+        {
+          reader: labourLineageReader,
+          executor: tx,
+          worldId: configured.worldId,
+        },
+        async (lineageView) =>
+          readPostwarIndustryLabourFrom({
+            executor: tx,
+            lineageView,
+            command,
+            scope: inspected.scope,
+            seedFingerprint: text(row.seed_fingerprint),
+            eventSequence: request.eventSequence,
+          }),
+      );
+      assertPostwarIndustryLabourObservation(labour);
+      if (labour.sourceChecksumsSha256 !== context.source.pins.checksumsSha256)
+        invalid('LABOUR_SELECTED_SOURCE_CHECKSUMS_MISMATCH');
+      inspected = freeze({
+        ...inspected,
+        missing: [
+          ...inspected.missing.filter(
+            (fact) => fact.code !== 'ACTUAL_FACILITY_LABOUR_ALLOCATION_MISSING',
+          ),
+          {
+            code: 'ACTUAL_FACILITY_WORK_PERIOD_MISSING' as const,
+            field: 'labourWorkPeriod',
+            sourcePointer: 'carrier.socialEmployment.inputs.sourcePositions',
+            detail:
+              'Current facility employment is bound to the complete validated prefix. Headcount and opening population/payroll references do not establish attendance, completed work or an allocated person-day.',
+          },
+        ],
+      });
+    }
     return freeze({
       registrationRef: text(row.registration_ref),
       documentSha256: digest,
       seedFingerprint: text(row.seed_fingerprint),
       admissionRef: text(row.admission_ref),
       inspected,
+      labour,
     });
   };
   return Object.freeze({

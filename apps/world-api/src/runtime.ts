@@ -35,8 +35,12 @@ import {
   handleOfficialPublicCors,
   readOfficialPublicCorsOrigins,
 } from './integration/official-public-cors.js';
-import { createPostwarFinanceNodeRoute } from './runtime/postwar-finance-node-route.js';
+import {
+  createPostwarFinanceNodeRoute,
+  createPostwarOfficeNodeRoute,
+} from './runtime/postwar-finance-node-route.js';
 import type { PostwarFinanceConnection } from './runtime/postwar-finance-connection.js';
+import type { PostwarSocialConnection } from './runtime/postwar-social-connection.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
@@ -144,21 +148,40 @@ function createApiServer(
   requestFetch?: typeof fetch,
   officialCountryPool?: ManagedOfficialCountryPool,
   postwarFinanceConnection?: PostwarFinanceConnection,
+  postwarSocialConnection?: PostwarSocialConnection,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
   let allDataVerifiedAt = 0;
   let allDataProbe: Promise<boolean> | undefined;
   const financeRoute =
-    postwarFinanceConnection === undefined
-      ? undefined
-      : createPostwarFinanceNodeRoute(postwarFinanceConnection);
+    postwarSocialConnection !== undefined
+      ? createPostwarOfficeNodeRoute({
+          social: postwarSocialConnection,
+          ...(postwarFinanceConnection
+            ? { finance: postwarFinanceConnection }
+            : {}),
+        })
+      : postwarFinanceConnection === undefined
+        ? undefined
+        : createPostwarFinanceNodeRoute(postwarFinanceConnection);
   const financeHealth = () =>
     financeRoute === undefined
       ? {}
       : {
+          ...(postwarSocialConnection
+            ? {
+                postwarSocial: {
+                  routeInstalled: true,
+                  configured: true,
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                  preparationMode: postwarSocialConnection.preparationMode,
+                },
+              }
+            : {}),
           postwarFinance: {
-            routeInstalled: true,
+            routeInstalled: postwarFinanceConnection !== undefined,
             configured:
               postwarFinanceConnection?.status ===
               'EXPLICIT_MANUAL_FINANCE_CONNECTION',
@@ -426,19 +449,34 @@ export async function startApiRuntime(
     readonly season1Fetch?: typeof fetch;
     readonly officialCountryPool?: ManagedOfficialCountryPool;
     readonly postwarFinanceConnection?: PostwarFinanceConnection;
+    readonly postwarSocialConnection?: PostwarSocialConnection;
   } = {},
 ): Promise<RunningApiRuntime> {
-  const officialCountryPool =
-    config.officialCountryDatabase === undefined
-      ? undefined
-      : (dependencies.officialCountryPool ??
-        createOfficialCountryReadPool(config.officialCountryDatabase));
-  const lifecycle = createApiServer(
-    config,
-    dependencies.season1Fetch,
-    officialCountryPool,
-    dependencies.postwarFinanceConnection,
-  );
+  let officialCountryPool: ManagedOfficialCountryPool | undefined;
+  let lifecycle: ReturnType<typeof createApiServer>;
+  try {
+    officialCountryPool =
+      config.officialCountryDatabase === undefined
+        ? undefined
+        : (dependencies.officialCountryPool ??
+          createOfficialCountryReadPool(config.officialCountryDatabase));
+    // Real cold preparation is part of product startup, before any listener.
+    // Failure is drained/cleaned with the same installed dependency lifecycle.
+    await dependencies.postwarSocialConnection?.prepare();
+    lifecycle = createApiServer(
+      config,
+      dependencies.season1Fetch,
+      officialCountryPool,
+      dependencies.postwarFinanceConnection,
+      dependencies.postwarSocialConnection,
+    );
+  } catch (error) {
+    return failStartupAfterCleanup(error, [
+      () => dependencies.postwarFinanceConnection?.stop(),
+      () => dependencies.postwarSocialConnection?.stop(),
+      () => officialCountryPool?.end(),
+    ]);
+  }
   try {
     await new Promise<void>((resolve, reject) => {
       const startupError = (error: Error) => {

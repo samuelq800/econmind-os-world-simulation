@@ -4,8 +4,14 @@
  * The present standard Worker constructor retains its local/CI safety gate;
  * this installer never spoofs that environment to activate a formal host. */
 import { createHash } from 'node:crypto';
-import { AUTHENTICATED_COMMAND_RECOVERY_PATH } from '@econmind/core';
-import { AUTHENTICATED_OFFICE_COMMAND_PATH } from '@econmind/core/authenticated-office-command-contract';
+import {
+  AUTHENTICATED_COMMAND_RECOVERY_PATH,
+  type AuthenticatedCommandRecoveryResponseDto,
+} from '@econmind/core';
+import {
+  AUTHENTICATED_OFFICE_COMMAND_PATH,
+  type AuthenticatedOfficeCommandResponseDto,
+} from '@econmind/core/authenticated-office-command-contract';
 import {
   createBoundedFinanceBudgetIntakeRuntime,
   createPostgresFinanceBudgetCapacitySource,
@@ -13,6 +19,8 @@ import {
   createFinanceBudgetIntakeAuthorizationPool,
 } from '@econmind/world-worker/finance-budget-runtime';
 import { createBoundedOfficeCommandFetchHandler } from '../integration/bounded-office-command-fetch-handler.js';
+import { createBoundedAuthenticatedOfficeCommandService } from '../integration/bounded-authenticated-office-command-service.js';
+import { createBoundedOfficeCommandRecoveryService } from '../integration/bounded-office-command-recovery-service.js';
 import type { AuthenticatedOfficeCommandServiceConfig } from '../integration/authenticated-office-command-service.js';
 
 type RuntimeInput = Parameters<
@@ -21,7 +29,21 @@ type RuntimeInput = Parameters<
 type Clock = RuntimeInput['clock'];
 type HttpConfig = AuthenticatedOfficeCommandServiceConfig;
 type FinancePorts = ReturnType<typeof createBoundedFinanceBudgetIntakeRuntime>;
+export interface PostwarFinanceStructuredRequest {
+  readonly authorization: unknown;
+  readonly request: unknown;
+  readonly signal?: AbortSignal;
+}
 export interface PostwarFinanceConnection {
+  readonly transportOrigins: readonly string[];
+  handleCommand(input: PostwarFinanceStructuredRequest): Promise<{
+    readonly httpStatus: number;
+    readonly body: AuthenticatedOfficeCommandResponseDto;
+  }>;
+  recover(input: PostwarFinanceStructuredRequest): Promise<{
+    readonly httpStatus: number;
+    readonly body: AuthenticatedCommandRecoveryResponseDto;
+  }>;
   readonly status: 'EXPLICIT_MANUAL_FINANCE_CONNECTION' | 'NOT_CONNECTED';
   readonly runtime: FinancePorts['runtime'] | null;
   readonly budget: FinancePorts['budget'] | null;
@@ -131,29 +153,55 @@ export function createPostwarFinanceConnection(
           }),
         })
       : null;
-  const handler = createBoundedOfficeCommandFetchHandler(
+  const composition: HttpConfig | null =
     c && owned && intakePool
       ? {
-          allowedOrigins: c.allowedOrigins,
-          composition: {
-            readPool: c.readPool,
-            writerPool: intakePool,
-            readerRole: c.readerRole,
-            writerRole: c.intakeRole,
-            authorizationPublisherRole: c.authorizationPublisherRole,
-            admittedWorldPins: c.admittedWorldPins,
-            auth: c.auth,
-            resolveActorId: c.resolveActorId,
-            clock: c.clock,
-            runtime: owned.runtime,
-          },
+          readPool: c.readPool,
+          writerPool: intakePool,
+          readerRole: c.readerRole,
+          writerRole: c.intakeRole,
+          authorizationPublisherRole: c.authorizationPublisherRole,
+          admittedWorldPins: c.admittedWorldPins,
+          auth: c.auth,
+          resolveActorId: c.resolveActorId,
+          clock: c.clock,
+          runtime: owned.runtime,
         }
-      : null,
+      : null;
+  const handler = createBoundedOfficeCommandFetchHandler(
+    c && composition ? { allowedOrigins: c.allowedOrigins, composition } : null,
   );
+  const commands = createBoundedAuthenticatedOfficeCommandService(composition);
+  const recovery = createBoundedOfficeCommandRecoveryService(composition);
   let stopped = false,
     stopping: Promise<void> | null = null;
-  const pending = new Set<Promise<Response>>();
+  const pending = new Set<Promise<unknown>>();
+  function track<T>(operation: Promise<T>): Promise<T> {
+    pending.add(operation);
+    void operation.then(
+      () => pending.delete(operation),
+      () => pending.delete(operation),
+    );
+    return operation;
+  }
   return Object.freeze({
+    transportOrigins: c?.allowedOrigins ?? Object.freeze([]),
+    handleCommand(input: PostwarFinanceStructuredRequest) {
+      return track(
+        (stopped
+          ? createBoundedAuthenticatedOfficeCommandService(null)
+          : commands
+        ).handle(input),
+      );
+    },
+    recover(input: PostwarFinanceStructuredRequest) {
+      return track(
+        (stopped
+          ? createBoundedOfficeCommandRecoveryService(null)
+          : recovery
+        ).handle(input),
+      );
+    },
     status: c
       ? ('EXPLICIT_MANUAL_FINANCE_CONNECTION' as const)
       : ('NOT_CONNECTED' as const),
@@ -165,13 +213,7 @@ export function createPostwarFinanceConnection(
       if (!paths.has(new URL(request.url).pathname))
         return Promise.resolve(null);
       if (stopped) return createBoundedOfficeCommandFetchHandler(null)(request);
-      const operation = handler(request);
-      pending.add(operation);
-      void operation.then(
-        () => pending.delete(operation),
-        () => pending.delete(operation),
-      );
-      return operation;
+      return track(handler(request));
     },
     prepareManualConsumption(): void {
       if (!owned || stopped)

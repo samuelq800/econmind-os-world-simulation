@@ -4,6 +4,8 @@
 import type { Pool } from 'pg';
 import {
   canonicalSerialize,
+  AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+  type AuthenticatedCommandRecoveryResponseDto,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   type CanonicalCommand,
@@ -14,6 +16,7 @@ import {
 } from '@econmind/core/authenticated-office-command-contract';
 import {
   createPostwarSocialRuntimeConnection,
+  createSocialIntakeAuthorizationPool,
   type PostwarSocialRuntimeConnectionInput,
 } from '@econmind/world-worker/social-runtime-connection';
 import {
@@ -31,6 +34,8 @@ import {
 } from '../integration/bounded-authenticated-office-command-service.js';
 import { createSourceOwnedExecutorComposition } from '../runtime-preparation/source-owned-executor-composition.js';
 import { RequestCompletion } from '../runtime-preparation/request-completion.js';
+import { createBoundedOfficeCommandRecoveryService } from '../integration/bounded-office-command-recovery-service.js';
+import { parseRecoveryRequest } from '../runtime-preparation/bounded-executor-transport.js';
 
 export interface PostwarSocialConnectionConfiguration {
   readonly environment: 'local' | 'ci' | 'staging' | 'production';
@@ -52,10 +57,17 @@ export interface PostwarSocialConnectionConfiguration {
   readonly auth: AuthenticatedOfficeCommandServiceConfig['auth'];
   readonly clock: ServerCommandHostDependencies['clock'];
   readonly resolveActorId: ServerCommandHostDependencies['resolveActorId'];
+  /** Explicit HTTP policy only. Empty/absent keeps the combined HTTP mux
+   * closed for this Office; existing structured server calls are unchanged. */
+  readonly allowedOrigins?: readonly string[];
 }
 export interface SocialCommandServiceResult {
   readonly httpStatus: number;
   readonly body: AuthenticatedOfficeCommandResponseDto;
+}
+export interface SocialRecoveryServiceResult {
+  readonly httpStatus: number;
+  readonly body: AuthenticatedCommandRecoveryResponseDto;
 }
 export interface PostwarSocialCommandHandleRequest {
   readonly authorization: unknown;
@@ -79,10 +91,20 @@ export interface PostwarSocialConnection {
   readonly classification: 'SOCIAL_SERVER_DEPENDENCIES_INSTALLED_NOT_RUNTIME_ACCEPTANCE';
   readonly preparationMode:
     'LOCAL_CI_PREPARED_INTAKE' | 'PRODUCTION_SOURCE_PREFLIGHT_ONLY';
-  /** Private genuine consumer exists only for explicit local/ci. It remains
-   * PREPARED. Calling this constructor never polls/starts it or advances time. */
+  /** Finite genuine DB preparation. No caller seed/Ready, source registration,
+   * lease acquisition, consumer start or clock advance. Required before HTTP. */
+  prepare(): Promise<void>;
+  /** Hidden until immutable preparation succeeds. Remains PREPARED; the
+   * explicit sole dispatcher, never this installer, owns manual consumption. */
   readonly preparedRuntime: ManualOfficeIntakeRuntime | null;
   readonly productionGates: readonly string[];
+  readonly transportOrigins: readonly string[];
+  handleCommand(
+    input: PostwarSocialCommandHandleRequest,
+  ): Promise<SocialCommandServiceResult>;
+  recover(
+    input: PostwarSocialCommandHandleRequest,
+  ): Promise<SocialRecoveryServiceResult>;
   handle(
     input: PostwarSocialCommandHandleRequest,
   ): Promise<SocialCommandServiceResult>;
@@ -124,7 +146,7 @@ function failure(code: string, httpStatus = 503): SocialCommandServiceResult {
   };
 }
 const gates = Object.freeze([
-  'DEFAULT_NODE_RUNTIME_ROUTE_NOT_MOUNTED',
+  'DEFAULT_NODE_RUNTIME_HAS_NO_AUTOMATIC_SOCIAL_INSTALLATION',
   'PRODUCTION_DURABLE_CONSUMER_NOT_INSTALLED_LOCAL_CI_ONLY',
   'PRODUCTION_MANUAL_INTAKE_POSITION_GATE_CLOSED',
   'SOURCE_PREFLIGHT_REQUIRES_SEPARATE_EXPLICIT_OFFLINE_SEED_READER_NOT_BOUNDED_ONLINE_READER',
@@ -143,6 +165,24 @@ export function createPostwarSocialConnection(
     admittedWorldPins: Object.freeze({ ...configuration.admittedWorldPins }),
     auth: Object.freeze({ ...configuration.auth }),
   });
+  const transportOrigins = Object.freeze([...new Set(c.allowedOrigins ?? [])]);
+  if (
+    transportOrigins.length > 8 ||
+    transportOrigins.some((s) => {
+      try {
+        const u = new URL(s);
+        return (
+          u.protocol !== 'https:' ||
+          u.origin !== s ||
+          !!u.username ||
+          !!u.password
+        );
+      } catch {
+        return true;
+      }
+    })
+  )
+    throw Error('SOCIAL_CONNECTION_TRANSPORT_ORIGINS_INVALID');
   if (!['local', 'ci', 'staging', 'production'].includes(c.environment))
     throw Error('SOCIAL_CONNECTION_ENVIRONMENT_REQUIRED');
   const pools = [c.boundedReadPool, c.intakePool, c.sourcePool, c.workerPool];
@@ -179,6 +219,9 @@ export function createPostwarSocialConnection(
     workerRole: c.workerRole,
     openingAdoption: c.openingAdoption,
   });
+  // Same fixed wrapper object is used by runtime construction and HTTP.
+  // Its private identity must not differ merely due to two adapter instances.
+  const intakePool = createSocialIntakeAuthorizationPool(c.intakePool);
   const binding = createServerCommandHostBinding({
     worldId: c.admittedWorldPins.worldId,
     workerId: c.workerId,
@@ -186,7 +229,7 @@ export function createPostwarSocialConnection(
     contentHash: c.admittedWorldPins.contentHash,
     admissionRef: c.admittedWorldPins.admissionRef,
     modelVersion: c.modelVersion,
-    intakePool: c.intakePool,
+    intakePool,
     sourcePool: c.sourcePool,
     readerRole: c.sourceReaderRole,
     authorizationPublisherRole: c.authorizationPublisherRole,
@@ -194,19 +237,24 @@ export function createPostwarSocialConnection(
     clock: c.clock,
     resolveActorId: c.resolveActorId,
     readers: sources.readers,
+    socialRuntimeConnection: sources,
+    socialMetadataRead: Object.freeze({
+      pool: c.boundedReadPool,
+      readerRole: c.boundedReaderRole,
+    }),
   });
   const preflight = createSourceOwnedExecutorComposition(binding);
   const local = c.environment === 'local' || c.environment === 'ci';
   const runtime = local
     ? sources.createPreparedIntake({
         environment: c.environment === 'ci' ? 'ci' : 'local',
-        intakePool: c.intakePool,
+        intakePool,
         clock: c.clock,
       })
     : null;
-  const service = createBoundedAuthenticatedOfficeCommandService({
+  const composition: AuthenticatedOfficeCommandServiceConfig = {
     readPool: c.boundedReadPool,
-    writerPool: c.intakePool,
+    writerPool: intakePool,
     readerRole: c.boundedReaderRole,
     writerRole: c.intakeRole,
     authorizationPublisherRole: c.authorizationPublisherRole,
@@ -215,10 +263,14 @@ export function createPostwarSocialConnection(
     resolveActorId: c.resolveActorId,
     clock: c.clock,
     runtime,
-  });
+  };
+  const service = createBoundedAuthenticatedOfficeCommandService(composition);
+  const recovery = createBoundedOfficeCommandRecoveryService(composition);
   let phase: 'OPEN' | 'STOPPING' | 'CLOSED' | 'FAULTED' = 'OPEN',
     stopping: Promise<void> | null = null,
-    cleanupFailed = false;
+    cleanupFailed = false,
+    sourcePrepared = false;
+  let preparing: Promise<void> | null = null;
   const active = new Map<Promise<unknown>, AbortController>();
   function run<T>(
     signal: AbortSignal | undefined,
@@ -265,14 +317,73 @@ export function createPostwarSocialConnection(
     );
     return promise;
   }
-  return Object.freeze({
+  const connection: Readonly<PostwarSocialConnection> = Object.freeze({
     classification:
       'SOCIAL_SERVER_DEPENDENCIES_INSTALLED_NOT_RUNTIME_ACCEPTANCE' as const,
     preparationMode: local
       ? ('LOCAL_CI_PREPARED_INTAKE' as const)
       : ('PRODUCTION_SOURCE_PREFLIGHT_ONLY' as const),
-    preparedRuntime: runtime,
+    get preparedRuntime() {
+      return sourcePrepared ? runtime : null;
+    },
+    prepare(): Promise<void> {
+      if (phase !== 'OPEN')
+        return Promise.reject(Error('SOCIAL_CONNECTION_RETIRED'));
+      preparing ??= run(undefined, async () => {
+        await sources.prepare({
+          observedAtReal: c.clock.nowReal(),
+          admittedWorldPins: c.admittedWorldPins,
+          modelVersion: c.modelVersion,
+        });
+        if (phase !== 'OPEN') throw Error('SOCIAL_PREPARATION_RETIRED');
+        sourcePrepared = true;
+      });
+      return preparing;
+    },
     productionGates: gates,
+    transportOrigins,
+    handleCommand(
+      request: PostwarSocialCommandHandleRequest,
+    ): Promise<SocialCommandServiceResult> {
+      return connection.handle(request);
+    },
+    async recover(
+      request: PostwarSocialCommandHandleRequest,
+    ): Promise<SocialRecoveryServiceResult> {
+      const fail = (
+        code: string,
+        httpStatus = 503,
+      ): SocialRecoveryServiceResult => ({
+        httpStatus,
+        body: {
+          schemaVersion: AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+          requestId: '00000000-0000-4000-8000-000000000000',
+          ok: false,
+          error: { code, retryable: false },
+        },
+      });
+      if (phase !== 'OPEN') return fail('NOT_CONNECTED');
+      if (!local) return fail('SOCIAL_PRODUCTION_RECOVERY_NOT_INSTALLED');
+      try {
+        const parsed = parseRecoveryRequest(
+          JSON.parse(canonicalSerialize(request.request)),
+        );
+        const original = parsed.request.originalRequest.request;
+        if (
+          original.officeId !== 'SOCIAL' ||
+          !manualFamilies.has(original.commandType)
+        )
+          return fail('UNSUPPORTED_SOCIAL_RECOVERY', 400);
+        if (parsed.request.worldId !== c.admittedWorldPins.worldId)
+          return fail('WORLD_BINDING_MISMATCH', 403);
+      } catch {
+        return fail('PROTOCOL_ERROR', 400);
+      }
+      if (!sourcePrepared) return fail('SOURCE_NOT_PREPARED');
+      return run(request.signal, (signal) =>
+        recovery.handle({ ...request, signal }),
+      );
+    },
     async handle(
       request: PostwarSocialCommandHandleRequest,
     ): Promise<SocialCommandServiceResult> {
@@ -298,6 +409,7 @@ export function createPostwarSocialConnection(
       } catch {
         return failure('PROTOCOL_ERROR', 400);
       }
+      if (!sourcePrepared) return failure('SOURCE_NOT_PREPARED');
       return run(request.signal, (signal) =>
         service.handle({ ...request, signal }),
       );
@@ -359,4 +471,5 @@ export function createPostwarSocialConnection(
       return stopping;
     },
   });
+  return connection;
 }

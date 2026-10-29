@@ -1,3 +1,5 @@
+import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
+import type { CurrentMaterializationObservation } from './current-materialization-observation.js';
 /** Server Social source resolution/replay. No source issuer, registry, host or writes. */
 import { createHash } from 'node:crypto';
 import { types } from 'node:util';
@@ -55,12 +57,14 @@ import {
   replayPostwarSocialEmploymentLineage,
   assertSocialPositionOfferEventOriginal,
 } from './postwar-social-employment-lineage.js';
-import { readPostwarOperatingGenesisFromSeed } from '../preparation/postwar-operating-genesis-adoption.js';
 import {
-  readValidatedCanonicalLineageFrom,
-  withValidatedCanonicalLineageFrom,
-  type ValidatedCanonicalLineageView,
-} from './validated-canonical-lineage.js';
+  readSocialCanonicalLineageFrom,
+  withSocialCanonicalLineageFrom,
+  socialOriginalAt,
+  socialDocumentForLineage,
+  type PreparedPostwarSocialSource,
+  type SocialCanonicalLineageView,
+} from './prepared-postwar-social-source.js';
 import type { SocialEmploymentRuntimeSnapshotReader } from './social-job-match-candidate-source.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type { IndustryProductionHistoricalReadGuard } from './industry-production-source-cutoff.js';
@@ -396,9 +400,11 @@ function assertOriginalOrigin(
   );
   if (sources.length !== 1 || sources[0]!.payloadHash !== fp(p.payloadHash))
     invalid('actual opening original identity mismatch');
-  const value = atPointer(
-    JSON.parse(sources[0]!.canonicalPayload) as unknown,
-    p.pointer,
+  const value = socialOriginalAt(
+    bound.lineage,
+    p.sourceId,
+    fp(p.payloadHash),
+    text(p.pointer),
   );
   if (canonicalSerialize(value) !== canonicalSerialize(original.value))
     invalid('original value differs from actual publication');
@@ -525,11 +531,11 @@ function currentOriginals(
  * inside the actual mandatory custody callback, with an active genuine view. */
 function validateCapturedSocialOriginalsFrom(
   executor: SqlExecutor,
-  view: ValidatedCanonicalLineageView,
+  view: SocialCanonicalLineageView,
   bound: BoundSocialSourceData,
   snapshot: CapturedSnapshot,
 ): VerifiedOriginalData {
-  const data = readValidatedCanonicalLineageFrom(executor, view);
+  const data = readSocialCanonicalLineageFrom(executor, view);
   if (data !== bound.lineage) invalid('different active lineage');
   if (
     canonicalSerialize(snapshot.publicationHead) !==
@@ -898,7 +904,7 @@ function validateCapturedSocialOriginalsFrom(
         ? 0
         : 1,
   );
-  readValidatedCanonicalLineageFrom(executor, view);
+  readSocialCanonicalLineageFrom(executor, view);
   return Object.freeze({
     bound,
     snapshot,
@@ -962,7 +968,7 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
     invalid('unsupported domain effect taxonomy');
   const productionIds = productionEventIds(lineage);
   const currentDocument = hasPositionEvents
-    ? readPostwarOperatingGenesisFromSeed(lineage.seed).socialEmployment
+    ? socialDocumentForLineage(lineage)
     : undefined;
   if (hasPositionEvents && !currentDocument)
     invalid(
@@ -1310,6 +1316,7 @@ type SnapshotResult = Awaited<
   ReturnType<SocialEmploymentRuntimeSnapshotReader['readFrom']>
 >;
 interface ResolvedSource {
+  readonly lineage: BoundSocialSourceData['lineage'];
   readonly snapshot: Extract<SnapshotResult, { status: 'REPLAYED' }>;
   readonly binding: Readonly<GoverningSourceReadBindingV1>;
 }
@@ -1317,6 +1324,10 @@ type ReadInput = Parameters<
   SocialEmploymentRuntimeSnapshotReader['readFrom']
 >[0];
 interface PrivateConstruction {
+  readonly materializationObservations: WeakMap<
+    object,
+    Readonly<CurrentMaterializationObservation>
+  >;
   readonly issued: WeakMap<object, Readonly<GoverningSourceReadBindingV1>>;
   readonly resolve: (input: ReadInput) => Promise<ResolvedSource>;
 }
@@ -1325,6 +1336,7 @@ const constructions = new WeakMap<object, PrivateConstruction>();
 export interface SocialEmploymentRuntimeSnapshotReaderConstruction {
   readonly mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
   readonly database: SqlDatabase;
+  readonly preparedSource?: PreparedPostwarSocialSource;
   readonly sha256Hex: Sha256Hex;
   /** Fixed PostgreSQL host identity only; source read temporarily delegates to
    * the actual fixed SQL reader and restores this verified writer in the same
@@ -1410,6 +1422,10 @@ export function createSocialEmploymentRuntimeSnapshotReader(
     custody = input.custody,
     withSnapshot = custody.withSnapshotFrom;
   const issued = new WeakMap<object, Readonly<GoverningSourceReadBindingV1>>();
+  const materializationObservations = new WeakMap<
+    object,
+    Readonly<CurrentMaterializationObservation>
+  >();
   const resolveUnscoped = async (
     supplied: ReadInput,
   ): Promise<ResolvedSource> => {
@@ -1449,15 +1465,20 @@ export function createSocialEmploymentRuntimeSnapshotReader(
         'industry-persistence-schema-read-context-v1'
     )
       invalid('Industry historical read context required');
-    return withValidatedCanonicalLineageFrom(
+    return withSocialCanonicalLineageFrom(
       {
         reader: lineageReader,
+        database: input.database,
+        ...(input.preparedSource
+          ? { preparedSource: input.preparedSource }
+          : {}),
+        countryId: command.countryId,
         executor: transaction,
         worldId: command.worldId,
         ...(industryReadContext === undefined ? {} : { industryReadContext }),
       },
       async (view) => {
-        const lineage = readValidatedCanonicalLineageFrom(transaction, view);
+        const lineage = readSocialCanonicalLineageFrom(transaction, view);
         if (
           lineage.headWorldVersion !== headWorldVersion ||
           lineage.headEventSequence !== headEventSequence
@@ -1483,7 +1504,7 @@ export function createSocialEmploymentRuntimeSnapshotReader(
             async (raw) => {
               if (!open || ++calls !== 1)
                 invalid('custody callback must be used exactly once in scope');
-              readValidatedCanonicalLineageFrom(transaction, view);
+              readSocialCanonicalLineageFrom(transaction, view);
               const captured = captureSnapshot(raw);
               if (captured === null)
                 missing('actual Social operating source not supplied');
@@ -1507,9 +1528,10 @@ export function createSocialEmploymentRuntimeSnapshotReader(
               const binding = parseGoverningSourceReadBinding(
                 governingBindingData(verified, replayed),
               );
-              readValidatedCanonicalLineageFrom(transaction, view);
+              readSocialCanonicalLineageFrom(transaction, view);
               resolved = Object.freeze({
                 binding,
+                lineage,
                 snapshot: freeze({
                   status: 'REPLAYED' as const,
                   provenance:
@@ -1526,7 +1548,7 @@ export function createSocialEmploymentRuntimeSnapshotReader(
               return resolved;
             },
           );
-          readValidatedCanonicalLineageFrom(transaction, view);
+          readSocialCanonicalLineageFrom(transaction, view);
           if (calls !== 1 || resolved === undefined || returned !== resolved)
             invalid(
               'custody did not return its exact completed callback result',
@@ -1564,6 +1586,15 @@ export function createSocialEmploymentRuntimeSnapshotReader(
     async readFrom(request: ReadInput): Promise<SnapshotResult> {
       try {
         const result = await resolve(request);
+        if (input.postgresWorkerRole !== undefined) {
+          const observation = await observePostwarSocialMaterialization({
+            executor: request.transaction,
+            lineage: result.lineage,
+            countryId: request.command.countryId!,
+            kind: 'SERVICE',
+          });
+          materializationObservations.set(result.snapshot, observation);
+        }
         issued.set(result.snapshot, result.binding);
         return result.snapshot;
       } catch (error) {
@@ -1573,7 +1604,10 @@ export function createSocialEmploymentRuntimeSnapshotReader(
       }
     },
   });
-  constructions.set(reader, Object.freeze({ issued, resolve }));
+  constructions.set(
+    reader,
+    Object.freeze({ issued, resolve, materializationObservations }),
+  );
   return reader;
 }
 
@@ -1585,6 +1619,18 @@ export function readIssuedSocialGoverningSourceBinding(
 ): Readonly<GoverningSourceReadBindingV1> | null {
   if (!issuedSnapshot || typeof issuedSnapshot !== 'object') return null;
   return constructions.get(reader)?.issued.get(issuedSnapshot) ?? null;
+}
+
+/** Exact snapshot association only. A cloned snapshot cannot acquire a DB
+ * observation, and this value never grants source/command authority. */
+export function readIssuedSocialMaterializationObservation(
+  reader: SocialEmploymentRuntimeSnapshotReader,
+  snapshot: SnapshotResult,
+): Readonly<CurrentMaterializationObservation> | null {
+  return snapshot && typeof snapshot === 'object'
+    ? (constructions.get(reader)?.materializationObservations.get(snapshot) ??
+        null)
+    : null;
 }
 
 /** D installs this port at its receipt-first, actual H/auth-held BEFORE_EVENTS

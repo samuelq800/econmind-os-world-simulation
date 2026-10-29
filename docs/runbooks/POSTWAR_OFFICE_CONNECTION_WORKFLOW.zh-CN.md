@@ -80,11 +80,27 @@ pnpm exec vitest run tests/world-core/postwar-native-reference-db.test.ts
 它通过 `startApiRuntime` 的显式 `postwarFinanceConnection` 依赖执行 JWT 提交、单步消费、
 进程重启恢复和撤权拒绝；默认进程启动不会自动安装连接或启动消费。
 Finance 与 Social 连接使用相同命令路径，不能依次调用两个处理器来消费同一请求体。
-当前 Node 安装槽只支持显式 Finance 连接，不代表六办公室共用分发器已经接通。
+Node 可显式配置 `postwarFinanceConnection` 与 `postwarSocialConnection`：固定入口有界读取一次
+请求体，按严格办公室/命令类型选择唯一连接；恢复也绑定原始请求，不在失败后尝试另一个连接。
+显式 Social 连接在监听前完成产品 `prepare()`：离线验证不可变种子，在线只读取并核对有界的
+完整当前前缀及来源、席位和撤销状态。未准备的 HTTP 入口保持关闭，不在请求期重读完整种子。
+准备不授予执行权限，也不启动 consumer。当前真实验收使用 Node 进程，不能套用为 Workers 内存验收。
+写请求交给服务后若传输中断、提交结果不明，必须先恢复回执，不得自动重发。
+HTTP 分派不等于共享执行调度：两个本地 consumer 都读取全 World 队首，不能同时启动，
+也不能用轮流尝试消费作为全办公室调度器。正式执行门保持关闭。
+
+Social 标准 Node 路径的隔离验收为 `tests/world-api/postwar-social-node-native.test.ts`：
+`ECONMIND_SOCIAL_NODE_H3_CHECKPOINT` 指向真实封存 H3，
+`ECONMIND_SOCIAL_NODE_SCOPE_CHECKPOINT` 指向同种子封存 H4 小来源。
+该测试在三个独立 Node 进程间分别入队、单次消费、恢复 FINAL，检查重复请求与权限拒绝。
+必须记录实际运行结果；未启用 descriptor 的 skip 不代表成功。
+`social-intake-authorization.sql` 只提供精确的身份/席位锁读取，专用角色的成员关系须由
+已有发布链单独核对，不能给 intake 增加修改权限元数据的权力。
 
 SQL 审查包生成器为 `tools/office-connection/postwar-schema-delta.mjs`。使用
 `--source-root <clean-world-checkout> --candidate-sha <full-SHA> --companion-root <companion-checkout> --output-directory <fresh-directory>`，
-生成固定哈希的 18 份非 Clock 提案、逐文件事务副本、依赖与冲突前提、恢复说明。
+生成当前候选固定哈希的 19 份非 Clock 提案、逐文件事务副本、依赖与冲突前提、恢复说明。
+此前 62261b5c 候选为 18 份，旧包不能替代新增 Social 锁读取提案的验证。
 它不执行 SQL 或注册迁移；不确定 COMMIT 结果必须停止核对，不能盲目重试。
 
 ## 当前边界
@@ -93,5 +109,10 @@ Finance 已有受控预算写链与重启验收，Social 已有 POSITION/PLAN/MA
 其余办公室已有受控历史/账本读取样本。它们不代表 120 模块全部完成或生产已发布。
 Finance 主页面新增覆盖是 HUD 1 项和只读正文 10 项，不包含政策输入提交。
 工资支付仍需真实 completed-day recognition；生产仍需实际用水交付及合格运行成本等原件。
-GCU 新初态未获批准，不能从 B/R 拆分或自行生成。库存旧指针仅为采用上下文，V2 才区分金融直接来源。
+Industry 用工读取可将已采用 E03 岗位与同一完整前缀的当前人数精确关联到设施，
+但人数不等于完成工日；缺少实际工作记录仍须拒绝生产，未知前缀不能回退到开局人数。
+项目负责人已采用一次性 GCU 开局方案：各国私人银行按一天计划进口货值加入境运费获得资产，
+并记同额初始权益，70 国合计不超过 `6,662,014,088.360237 GCU`。
+其新版本生成在独立候选实施；本连接候选及既有 c427 参考库不因此自动获得 GCU，不能从 B/R 拆分，
+也不能覆盖既有状态。库存旧指针仅为采用上下文，V2 才区分金融直接来源。
 最终发布仍须现有生产发布链、具体最小角色和 provider 配置，不使用开发服务代替正式上线。

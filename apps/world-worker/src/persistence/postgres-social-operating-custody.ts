@@ -9,6 +9,7 @@ import {
   canonicalHashInput,
   canonicalSha256,
   type OpeningSeed,
+  type IndustryPersistenceSchemaReadContextV1,
   parseIndustryPersistenceSchemaBoundaryContext,
 } from '@econmind/core';
 import {
@@ -21,6 +22,12 @@ import {
   replayPostwarSocialEmploymentLineage,
   type SocialOfferCommittedOrigin,
 } from './postwar-social-employment-lineage.js';
+import {
+  readPreparedPostwarSocialLineageFrom,
+  readPreparedSocialOriginals,
+  type PreparedPostwarSocialSource,
+  type PostwarSocialReplayLineage,
+} from './prepared-postwar-social-source.js';
 import { WorldOpeningSeedStore } from './opening-seed-store.js';
 import {
   SOCIAL_SOURCE_MATERIAL_PATHS,
@@ -97,7 +104,7 @@ function sourceDenial(error: unknown): SourceDenialReason | null {
     ? reason
     : null;
 }
-async function lockRegisteredSourceFrom(
+export async function lockRegisteredSourceFrom(
   tx: SqlExecutor,
   world: string,
   country: string,
@@ -300,11 +307,52 @@ export function createPostgresSocialOperatingLineageExecutor(
   });
 }
 
+async function readLineageAndOriginalsFrom(
+  configuration: {
+    readonly database: SqlDatabase;
+    readonly preparedSource?: PreparedPostwarSocialSource;
+  },
+  reader: DurableV08LedgerLineageReader,
+  tx: SqlExecutor,
+  worldId: string,
+  countryId: string,
+  industryContext?: IndustryPersistenceSchemaReadContextV1,
+) {
+  if (configuration.preparedSource) {
+    if (industryContext)
+      invalid(
+        'prepared Social source does not support Industry posting history',
+      );
+    const lineage = await readPreparedPostwarSocialLineageFrom({
+      preparation: configuration.preparedSource,
+      executor: tx,
+      database: configuration.database,
+      worldId,
+      countryId,
+    });
+    const base = readPreparedSocialOriginals(configuration.preparedSource);
+    return {
+      lineage,
+      original: { employment: base.document, source: base.source },
+    };
+  }
+  const lineage =
+    await DurableV08LedgerLineageReader.prototype.readValidatedLineageFrom.call(
+      reader,
+      createPostgresSocialOperatingLineageExecutor(tx, { worldId, countryId }),
+      worldId,
+      industryContext,
+    );
+  const original = sourceFrom(lineage.seed);
+  return { lineage, original };
+}
+
 /** Protected original reader for the position/offer publisher path. Unlike the
  * PLAN snapshot it does not require an already existing ACTIVE offer. The SQL
  * source/admission locks still survive until the caller's outer COMMIT. */
 export function createPostgresSocialOperatingOriginalReader(configuration: {
   readonly database: SqlDatabase;
+  readonly preparedSource?: PreparedPostwarSocialSource;
 }) {
   const reader = new DurableV08LedgerLineageReader({
     database: configuration.database,
@@ -316,13 +364,12 @@ export function createPostgresSocialOperatingOriginalReader(configuration: {
       selection: { worldId: string; countryId: string },
       consume: (
         originals: Readonly<{
-          lineage: Awaited<
-            ReturnType<
-              DurableV08LedgerLineageReader['readValidatedLineageFrom']
-            >
-          >;
+          lineage: Readonly<PostwarSocialReplayLineage>;
           document: ReturnType<typeof sourceFrom>['employment'];
-          source: ReturnType<typeof sourceFrom>['source'];
+          source: Pick<
+            ReturnType<typeof sourceFrom>['source'],
+            'sourceId' | 'payloadHash' | 'locator'
+          >;
           registration: Row;
         }>,
       ) => Promise<Result>,
@@ -343,16 +390,13 @@ export function createPostgresSocialOperatingOriginalReader(configuration: {
         return result.rows[0];
       };
       const registration = await lock();
-      const lineage =
-        await DurableV08LedgerLineageReader.prototype.readValidatedLineageFrom.call(
-          reader,
-          createPostgresSocialOperatingLineageExecutor(tx, {
-            worldId: world,
-            countryId: country,
-          }),
-          world,
-        );
-      const original = sourceFrom(lineage.seed);
+      const { lineage, original } = await readLineageAndOriginalsFrom(
+        configuration,
+        reader,
+        tx,
+        world,
+        country,
+      );
       if (
         registration.seed_fingerprint !== lineage.seed.fingerprint ||
         registration.source_id !== original.source.sourceId ||
@@ -381,6 +425,7 @@ export function createPostgresSocialOperatingOriginalReader(configuration: {
  * locks. Existing snapshot reader owns complete H-prefix semantic replay. */
 export function createPostgresSocialOperatingCustody(configuration: {
   readonly database: SqlDatabase;
+  readonly preparedSource?: PreparedPostwarSocialSource;
   readonly industryProtectedRead?: SocialEmploymentRuntimeSnapshotReaderConstruction['industryProtectedRead'];
 }): Readonly<SocialOperatingCustodyPort> {
   const protectedRead = configuration.industryProtectedRead;
@@ -461,18 +506,15 @@ export function createPostgresSocialOperatingCustody(configuration: {
         invalid(
           'Industry historical read context required; commit context is forbidden',
         );
-      const lineage =
-        await DurableV08LedgerLineageReader.prototype.readValidatedLineageFrom.call(
-          reader,
-          createPostgresSocialOperatingLineageExecutor(tx, {
-            worldId: request.publicationHead.worldId,
-            countryId: request.commandBinding.countryId,
-          }),
-          request.publicationHead.worldId,
-          industryContext,
-        );
-      const { seed } = lineage,
-        original = sourceFrom(seed);
+      const { lineage, original } = await readLineageAndOriginalsFrom(
+        configuration,
+        reader,
+        tx,
+        request.publicationHead.worldId,
+        request.commandBinding.countryId,
+        industryContext,
+      );
+      const { seed } = lineage;
       if (
         registration.seed_fingerprint !== seed.fingerprint ||
         registration.source_id !== original.source.sourceId ||

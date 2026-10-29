@@ -135,6 +135,48 @@ describe('unapproved postwar schema delta package boundary', () => {
       result.chunks.some((c) => c.entry.id === 'isolated-world-clock'),
     ).toBe(false);
   });
+  it('packages an explicit additional intake-lock dependency without enrolling roles or changing the recovery boundary', () => {
+    const f = fixture();
+    const source = Buffer.from(
+      'begin;\ncreate role world_v2_delta_intake_lock_reader nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;\ncreate function world_v2.delta_intake_lock()returns int language sql as $$select 1$$;\ncommit;\n',
+    );
+    const entry = {
+      id: 'delta-social-intake',
+      path: 'database/proposals/delta-social-intake.sql',
+      disposition: 'CANDIDATE_SOCIAL_INTAKE_AUTHORIZATION',
+      dependencies: ['delta-b'],
+      baselineDependencies: ['BASELINE_001'],
+      createdRelations: [],
+      createdRoles: ['world_v2_delta_intake_lock_reader'],
+      reusedRoles: ['world_v2_delta_owner'],
+      definedFunctions: ['delta_intake_lock'],
+      renamedFunctions: [],
+      sourceRoleDeps: {
+        world_v2_delta_owner: 'delta-a',
+        world_v2_delta_intake_lock_reader: 'delta-social-intake',
+      },
+      sha256: sha(source),
+    };
+    f.candidate.pins.proposals.splice(2, 0, entry);
+    f.sources.set(entry.path, source);
+    const result = createUnapprovedSchemaDeltaPlan(f.candidate, f.sources);
+    expect(result.manifest.inventoriedProposalCount).toBe(4);
+    expect(result.manifest.packagedProposalCount).toBe(3);
+    expect(result.manifest.installationAllowed).toBe(false);
+    expect(result.manifest.acrossFilesAtomic).toBe(false);
+    const actual = result.chunks[2]!.entry;
+    expect(actual.dependencies).toEqual(['delta-b']);
+    expect(actual.sourceRoleDeps).toEqual(entry.sourceRoleDeps);
+    expect(actual.preconditions.rolesMustBeAbsent).toEqual([
+      'world_v2_delta_intake_lock_reader',
+    ]);
+    expect(actual.preconditions.reusedRoles[0]!.enrollmentApproved).toBe(false);
+    expect(actual.executionAllowed).toBe(false);
+    expect(actual.recovery.uncertainCommit).toBe(
+      'UNKNOWN_STOP_NO_RETRY_VERIFY_CATALOG_AND_RELEASE_LEDGER',
+    );
+    expect(result.chunks[2]!.transaction).toEqual(source);
+  });
   it('detects stale SQL even when object names and candidate metadata look unchanged', () => {
     const f = fixture();
     f.sources.set(
@@ -213,13 +255,14 @@ describe('unapproved postwar schema delta package boundary', () => {
       'VALID_UTF8_SQL_REQUIRED',
     );
   });
-  it('classifies the existing eighteen non-Clock source files without running or editing any SQL', async () => {
+  it('classifies the existing nineteen non-Clock source files without running or editing any SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
     const selected = names.filter(
       (n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql',
     );
-    expect(selected).toHaveLength(18);
+    expect(selected).toHaveLength(19);
+    expect(selected).toContain('social-intake-authorization.sql');
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));
       const result = classifyDeltaTransaction(bytes);

@@ -4,6 +4,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { AUTHENTICATED_COMMAND_RECOVERY_PATH } from '@econmind/core';
 import { AUTHENTICATED_OFFICE_COMMAND_PATH } from '@econmind/core/authenticated-office-command-contract';
+import {
+  createPostwarOfficeCommandFetchHandler,
+  type PostwarOfficeCommandConnections,
+} from './postwar-office-command-fetch-handler.js';
 import type { PostwarFinanceConnection } from './postwar-finance-connection.js';
 
 const origin = 'http://world-api.invalid';
@@ -24,8 +28,8 @@ const hop = new Set([
 ]);
 const disconnected = () =>
   new DOMException('Node client disconnected', 'AbortError');
-export function createPostwarFinanceNodeRoute(
-  connection: PostwarFinanceConnection,
+function createNodeCommandRoute(
+  connection: Pick<PostwarFinanceConnection, 'handle' | 'stop'>,
   options: Readonly<{ timeoutMs?: number }> = {},
 ) {
   const timeoutMs = options.timeoutMs ?? 10000;
@@ -40,6 +44,7 @@ export function createPostwarFinanceNodeRoute(
     res: ServerResponse,
   ): Promise<void> {
     const controller = new AbortController();
+    let dispatched = false;
     let bodyController: ReadableStreamDefaultController<Uint8Array> | undefined,
       bodyStopped = false;
     const stopBody = () => {
@@ -129,6 +134,7 @@ export function createPostwarFinanceNodeRoute(
         ...(body === undefined ? {} : { body, duplex: 'half' as const }),
       };
       const request = new Request(origin + req.url, init);
+      dispatched = true;
       const operation = connection.handle(request);
       // A late result after disconnect/deadline must not retain a response body.
       void operation.then(
@@ -174,6 +180,10 @@ export function createPostwarFinanceNodeRoute(
       });
     } catch {
       if (!res.destroyed && !res.headersSent) {
+        const unknownWrite =
+          dispatched &&
+          req.method === 'POST' &&
+          req.url?.split('?', 1)[0] === AUTHENTICATED_OFFICE_COMMAND_PATH;
         res.writeHead(503, {
           'cache-control': 'private, no-store',
           'content-type': 'application/json',
@@ -183,10 +193,10 @@ export function createPostwarFinanceNodeRoute(
           JSON.stringify({
             ok: false,
             error: {
-              code: controller.signal.aborted
-                ? 'CANCELLED'
+              code: unknownWrite
+                ? 'WRITE_OUTCOME_UNKNOWN'
                 : 'UPSTREAM_UNAVAILABLE',
-              retryable: true,
+              retryable: !unknownWrite,
             },
           }),
         );
@@ -219,4 +229,22 @@ export function createPostwarFinanceNodeRoute(
       await connection.stop();
     },
   });
+}
+
+/** Compatibility entry: preserves the existing Finance-only Fetch behavior. */
+export function createPostwarFinanceNodeRoute(
+  connection: PostwarFinanceConnection,
+  options: Readonly<{ timeoutMs?: number }> = {},
+) {
+  return createNodeCommandRoute(connection, options);
+}
+/** Fixed dual-office entry: only the explicit Finance/Social structured ports. */
+export function createPostwarOfficeNodeRoute(
+  connections: PostwarOfficeCommandConnections,
+  options: Readonly<{ timeoutMs?: number }> = {},
+) {
+  return createNodeCommandRoute(
+    createPostwarOfficeCommandFetchHandler(connections),
+    options,
+  );
 }

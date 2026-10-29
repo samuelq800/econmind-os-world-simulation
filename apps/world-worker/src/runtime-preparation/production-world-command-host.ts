@@ -11,6 +11,11 @@ import {
   type ManualOfficeRuntimeReaders,
 } from '../preparation/manual-office-command-composition.js';
 import { CommandRequestIdentityRegistry } from './private-command-request-registry.js';
+import {
+  isPostwarSocialRuntimeConnection,
+  isPreparedPostwarSocialRuntimeConnection,
+  type PostwarSocialRuntimeConnection,
+} from './social-runtime-connection.js';
 
 import { createPostwarOfficeProjectionStore } from '../persistence/postwar-office-projection-store.js';
 import { createPostgresFinanceBudgetNativeRuntime } from '../persistence/postgres-finance-budget-custody.js';
@@ -40,6 +45,11 @@ export interface ServerCommandHostDependencies {
   readonly resolveActorId: (subject: string) => Promise<string | null>;
   readonly readers: ManualOfficeRuntimeReaders;
   readonly financeCapacitySource?: PostgresFinanceBudgetCapacitySource;
+  readonly socialRuntimeConnection?: Readonly<PostwarSocialRuntimeConnection>;
+  readonly socialMetadataRead?: Readonly<{
+    pool: Pick<Pool, 'connect'>;
+    readerRole: string;
+  }>;
 }
 const registrations = new WeakMap<
   object,
@@ -73,6 +83,13 @@ export function createServerCommandHostBinding(
     typeof input.clock?.simTime !== 'function' ||
     typeof input.resolveActorId !== 'function' ||
     !input.readers ||
+    (input.socialRuntimeConnection !== undefined &&
+      !isPostwarSocialRuntimeConnection(
+        input.socialRuntimeConnection,
+        input.worldId,
+      )) ||
+    (input.socialMetadataRead !== undefined &&
+      typeof input.socialMetadataRead.pool?.connect !== 'function') ||
     (input.financeCapacitySource !== undefined &&
       !isPostgresFinanceBudgetCapacitySource(
         input.financeCapacitySource,
@@ -95,11 +112,20 @@ export function createServerCommandHostBinding(
     runtimeReaderRole: input.readerRole,
     authorizationPublisherRole: input.authorizationPublisherRole,
   });
+  if (input.socialMetadataRead)
+    new RuntimeReadBindingStore({
+      database: input.workerDatabase,
+      runtimeReaderRole: input.socialMetadataRead.readerRole,
+      authorizationPublisherRole: input.authorizationPublisherRole,
+    });
   const binding = Object.freeze({}) as ServerCommandHostBinding;
   registrations.set(
     binding,
     Object.freeze({
       ...input,
+      ...(input.socialMetadataRead
+        ? { socialMetadataRead: Object.freeze({ ...input.socialMetadataRead }) }
+        : {}),
       readers: Object.freeze({
         ...input.readers,
         ...(input.financeCapacitySource
@@ -314,8 +340,21 @@ async function readCurrentBinding(
   const abort = () => release(true);
   signal.addEventListener('abort', abort, { once: true });
   try {
+    const socialMetadata =
+      d.socialRuntimeConnection !== undefined && command.officeId === 'SOCIAL';
+    if (
+      socialMetadata &&
+      (!d.socialMetadataRead ||
+        !isPreparedPostwarSocialRuntimeConnection(
+          d.socialRuntimeConnection,
+          d.worldId,
+        ))
+    )
+      throw Error('PREPARED_SOCIAL_RUNTIME_CONNECTION_REQUIRED');
     check();
-    client = await d.sourcePool.connect();
+    client = await (
+      socialMetadata ? d.socialMetadataRead!.pool : d.sourcePool
+    ).connect();
     if (signal.aborted) {
       release(true);
       throw new Error('COMMAND_REQUEST_RETIRED');
@@ -337,9 +376,14 @@ async function readCurrentBinding(
     await executor.query("select set_config('request.jwt.claim.sub',$1,true)", [
       command.authSubject,
     ]);
-    if (d.financeCapacitySource && command.officeId === 'FINANCE') {
+    if (
+      (d.financeCapacitySource && command.officeId === 'FINANCE') ||
+      socialMetadata
+    ) {
       const store = createPostwarOfficeProjectionStore({
-        runtimeReaderRole: d.readerRole,
+        runtimeReaderRole: socialMetadata
+          ? d.socialMetadataRead!.readerRole
+          : d.readerRole,
         authorizationPublisherRole: d.authorizationPublisherRole,
       });
       const headers = await store.readCurrentSeatHeadersFrom(executor, {
@@ -347,7 +391,7 @@ async function readCurrentBinding(
       });
       const matches = headers.filter(
         (h) =>
-          h.scope.officeId === 'FINANCE' &&
+          h.scope.officeId === command.officeId &&
           h.scope.countryId === command.countryId &&
           h.scope.authSubject === command.authSubject,
       );

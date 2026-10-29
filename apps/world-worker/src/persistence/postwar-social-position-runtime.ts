@@ -1,3 +1,5 @@
+import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
+import type { PreparedPostwarSocialSource } from './prepared-postwar-social-source.js';
 /** Fixed local/host construction for lawful GOV position + offer creation.
  * Reads registered originals and full prefix, never request-supplied wages,
  * balances, Ready flags or authorization DTOs. No production registration. */
@@ -47,6 +49,7 @@ import type {
   AtomicTransitionDraft,
 } from './atomic-transition-repository.js';
 import type { FinanceNativeBudgetCapacityEncumbrance } from '@econmind/core/finance-budget-native';
+import { SOCIAL_MANUAL_CLAIM_AUTHORIZATION_LOCK_QUERY } from './social-intake-authorization.js';
 export const SOCIAL_POSITION_SOURCE_PURPOSE =
   'SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_SOURCE_EVALUATION_V1' as const;
 const digest = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -228,6 +231,23 @@ export function createPostwarSocialPositionRuntimeDatabase(
             args: readonly unknown[] = [],
           ) {
             if (
+              statement === SOCIAL_MANUAL_CLAIM_AUTHORIZATION_LOCK_QUERY &&
+              args[3] === 'SOCIAL'
+            ) {
+              if (
+                args.length !== 5 ||
+                args[4] !== 'SOCIAL_LABOUR' ||
+                args.some((v) => typeof v !== 'string')
+              )
+                invalid('fixed Social manual claim parameters differ');
+              return roles.withSourceReaderFrom(tx, () =>
+                tx.query<Row>(
+                  'select team_id,authorization_version from world_v2.lock_social_operating_current_authorization($1,$2,$3::uuid,$4,$5)',
+                  [args[0], args[2], args[1], args[3], args[4]],
+                ),
+              );
+            }
+            if (
               statement === WORKER_CURRENT_AUTHORIZATION_LOCK_QUERY ||
               statement === WORKER_REVOKED_AUTHORIZATION_LOCK_QUERY
             ) {
@@ -376,6 +396,7 @@ export function projectPostwarSocialBudgetReservations(
   );
 }
 export function createPostwarSocialPositionRuntime(configuration: {
+  readonly preparedSource?: PreparedPostwarSocialSource;
   readonly database: SqlDatabase;
   readonly workerId: string;
   readonly workerRole: string;
@@ -686,6 +707,13 @@ export function createPostwarSocialPositionRuntime(configuration: {
           worldVersionAfter: event.worldVersion,
           events: [event],
         });
+        const materializationObservation =
+          await observePostwarSocialMaterialization({
+            executor: tx,
+            lineage: fresh.lineage,
+            countryId: command.countryId!,
+            kind: 'POSITION',
+          });
         const draft: AtomicTransitionDraft & {
           readonly officeOperatingSourceReadBinding: SocialPositionSourceReadBinding;
         } = freeze({
@@ -705,6 +733,7 @@ export function createPostwarSocialPositionRuntime(configuration: {
             {
               key: `SOCIAL_POSITION_LIFECYCLE_${command.countryId}`,
               payload: fresh.operation.state,
+              observation: materializationObservation,
             },
           ],
           authorityKind: 'DISCRETIONARY_USER',

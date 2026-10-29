@@ -8,7 +8,7 @@ import {
   type AuthoritativeEvent,
 } from '@econmind/core';
 import type { PostwarSocialEmploymentStateDocument } from '../preparation/postwar-social-employment-state.js';
-import type { ValidatedCanonicalLineageData } from './validated-canonical-lineage.js';
+import type { PostwarSocialReplayLineage } from './prepared-postwar-social-source.js';
 import { replayPostwarSharedOfficePrefix } from './postwar-shared-office-prefix.js';
 function invalid(reason: string): never {
   throw Error(`POSTWAR_SOCIAL_LINEAGE:${reason}`);
@@ -29,7 +29,7 @@ export interface SocialEmploymentLifecycleCheckpoint {
 }
 export function replayPostwarSocialEmploymentLineage(input: {
   readonly document: PostwarSocialEmploymentStateDocument;
-  readonly lineage: Readonly<ValidatedCanonicalLineageData>;
+  readonly lineage: Readonly<PostwarSocialReplayLineage>;
 }) {
   const shared = replayPostwarSharedOfficePrefix(input);
   return Object.freeze({
@@ -43,7 +43,7 @@ export function replayPostwarSocialEmploymentLineage(input: {
 /** Only the actual lineage Event can supply this offer original. Full lifecycle
  * replay is performed independently above; this check never accepts a DTO flag. */
 export function assertSocialPositionOfferEventOriginal(input: {
-  readonly lineage: Readonly<ValidatedCanonicalLineageData>;
+  readonly lineage: Readonly<PostwarSocialReplayLineage>;
   readonly eventId: string;
   readonly payloadHash: string;
   readonly pointer: string;

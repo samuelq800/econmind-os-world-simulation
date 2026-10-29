@@ -36,6 +36,10 @@
       "types": "./dist/commands/finance-budget-prepared-ledger.d.ts",
       "default": "./dist/commands/finance-budget-prepared-ledger.js"
     },
+    "./finance-social-prepared-ledger": {
+      "types": "./dist/commands/finance-social-prepared-ledger.d.ts",
+      "default": "./dist/commands/finance-social-prepared-ledger.js"
+    },
     "./finance-budget-capacity-data": {
       "types": "./dist/commands/finance-budget-capacity-data.d.ts",
       "default": "./dist/commands/finance-budget-capacity-data.js"

@@ -1,3 +1,12 @@
+import {
+  createPostwarSocialSourcePreparation,
+  isPreparedPostwarSocialSource,
+  retirePreparedPostwarSocialSource,
+  type PreparedPostwarSocialSource,
+  preparePostwarSocialSource,
+  type PostwarSocialSourcePreparationInput,
+} from '../persistence/prepared-postwar-social-source.js';
+export type { PostwarSocialSourcePreparationInput } from '../persistence/prepared-postwar-social-source.js';
 /** Fixed Social dependency installation only. No source registration, grants,
  * publisher invocation, lease/consumer start, listener or Clock construction. */
 import { createHash } from 'node:crypto';
@@ -23,6 +32,8 @@ import {
 } from '../intake/manual-office-intake-runtime.js';
 import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
 import { loadPostwarSourceContext } from '../preparation/postwar-source-context.js';
+import { createSocialIntakeAuthorizationPool } from '../persistence/social-intake-authorization.js';
+export { createSocialIntakeAuthorizationPool } from '../persistence/social-intake-authorization.js';
 
 export type { OfficialLabourSocialOpeningAdoption } from '../preparation/official-labour-social-opening-adoption.js';
 /** Explicit offline repository source-data loader. Private adoption identity is
@@ -54,6 +65,7 @@ export interface PostwarSocialRuntimeConnection {
   readonly readers: Readonly<ManualOfficeRuntimeReaders>;
   /** Uses the existing genuinely issued local/CI runtime; stays PREPARED. No
    * production environment is relabelled as ci, no startPreparation is called. */
+  prepare(input: PostwarSocialSourcePreparationInput): Promise<void>;
   createPreparedIntake(
     input: PostwarSocialPreparedIntakeInput,
   ): ManualOfficeIntakeRuntime;
@@ -91,7 +103,9 @@ export function createPostwarSocialRuntimeConnection(
     typeof input.workerPool.query !== 'function'
   )
     throw Error('SOCIAL_CONNECTION_WORKER_POOL_REQUIRED');
-  consumeLabourSocialOpeningAdoption(input.openingAdoption);
+  const openingScope = consumeLabourSocialOpeningAdoption(
+    input.openingAdoption,
+  );
   const base = new PostgresSqlDatabase(workerPool);
   const pending = new Set<Promise<unknown>>();
   const runtimes = new Set<ManualOfficeIntakeRuntime>();
@@ -116,12 +130,15 @@ export function createPostwarSocialRuntimeConnection(
   const database = createPostwarSocialPositionRuntimeDatabase(managed, {
     workerRole: input.workerRole,
   });
+  const preparedSource = createPostwarSocialSourcePreparation();
   const position = createPostwarSocialPositionRuntime({
+    preparedSource,
     database,
     workerRole: input.workerRole,
     workerId: holder,
   });
   const match = createPostwarSocialMatchRuntime({
+    preparedSource,
     database,
     workerRole: input.workerRole,
     workerId: holder,
@@ -129,9 +146,10 @@ export function createPostwarSocialRuntimeConnection(
   });
   const snapshotReader = createSocialEmploymentRuntimeSnapshotReader({
     mode: 'OFFICIAL_RUNTIME',
+    preparedSource,
     database,
     sha256Hex: sha,
-    custody: createPostgresSocialOperatingCustody({ database }),
+    custody: createPostgresSocialOperatingCustody({ database, preparedSource }),
     postgresWorkerRole: input.workerRole,
   });
   const readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
@@ -143,23 +161,46 @@ export function createPostwarSocialRuntimeConnection(
       snapshotReader,
     }),
   });
-  return Object.freeze({
+  const connection: Readonly<PostwarSocialRuntimeConnection> = Object.freeze({
     classification:
       'FIXED_SOCIAL_FACTORIES_NOT_SOURCE_OR_EXECUTION_AUTHORITY' as const,
     worldId: world,
     workerId: holder,
     database,
     readers,
+    prepare(configuration: PostwarSocialSourcePreparationInput): Promise<void> {
+      if (closed || closing)
+        return Promise.reject(Error('SOCIAL_CONNECTION_RETIRED'));
+      if (configuration.admittedWorldPins.worldId !== world)
+        return Promise.reject(
+          Error('SOCIAL_CONNECTION_PREPARATION_WORLD_MISMATCH'),
+        );
+      return track(() =>
+        preparePostwarSocialSource({
+          preparation: preparedSource,
+          database,
+          workerRole: input.workerRole,
+          countryIds: openingScope.countryIds,
+          configuration,
+        }),
+      );
+    },
     createPreparedIntake(
       configuration: PostwarSocialPreparedIntakeInput,
     ): ManualOfficeIntakeRuntime {
       if (closed || closing) throw Error('SOCIAL_CONNECTION_RETIRED');
       if (!['local', 'ci'].includes(configuration.environment))
         throw Error('SOCIAL_PRODUCTION_CONSUMER_NOT_INSTALLED');
-      if (configuration.intakePool === workerPool)
+      if (
+        configuration.intakePool === workerPool ||
+        configuration.intakePool ===
+          createSocialIntakeAuthorizationPool(workerPool)
+      )
         throw Error('SOCIAL_CONNECTION_SEPARATE_INTAKE_REQUIRED');
       const runtime = createManualOfficeIntakeRuntime({
-        intakePool: configuration.intakePool,
+        intakePool: createSocialIntakeAuthorizationPool(
+          configuration.intakePool,
+        ),
         workerDatabase: database,
         worldId: world,
         workerId: holder,
@@ -179,8 +220,42 @@ export function createPostwarSocialRuntimeConnection(
         await Promise.all([...runtimes].map((r) => r.consumer.stop()));
         closed = true;
         while (pending.size) await Promise.allSettled([...pending]);
+        retirePreparedPostwarSocialSource(preparedSource);
+        issuedConnections.delete(connection);
       })();
       return closing;
     },
   });
+  issuedConnections.set(connection, { source: preparedSource, world });
+  return connection;
+}
+const issuedConnections = new WeakMap<
+  object,
+  { source: PreparedPostwarSocialSource; world: string }
+>();
+/** Only this fixed instance's actual completed DATA preparation is recognized.
+ * A copy/wrapper, same-shaped object or caller flag cannot replace the instance;
+ * true does not admit a source or authorize an operation. */
+export function isPreparedPostwarSocialRuntimeConnection(
+  value: unknown,
+  world: string,
+): value is Readonly<PostwarSocialRuntimeConnection> {
+  if (value === null || typeof value !== 'object') return false;
+  const binding = issuedConnections.get(value);
+  return (
+    binding !== undefined &&
+    binding.world === world &&
+    isPreparedPostwarSocialSource(binding.source, world)
+  );
+}
+
+export function isPostwarSocialRuntimeConnection(
+  value: unknown,
+  world: string,
+): value is Readonly<PostwarSocialRuntimeConnection> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    issuedConnections.get(value)?.world === world
+  );
 }

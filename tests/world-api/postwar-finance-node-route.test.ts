@@ -343,6 +343,9 @@ describe('explicit Finance installation on standard Node API', () => {
   it('constructs a fixed-origin Request without trusting Host and writes safe Fetch response bytes', async () => {
     let observed: Request | undefined;
     const connection: PostwarFinanceConnection = {
+      transportOrigins: [],
+      handleCommand: createPostwarFinanceConnection(null).handleCommand,
+      recover: createPostwarFinanceConnection(null).recover,
       status: 'NOT_CONNECTED',
       runtime: null,
       budget: null,
@@ -390,6 +393,9 @@ describe('explicit Finance installation on standard Node API', () => {
       aborted = deferred(),
       order: string[] = [];
     const connection: PostwarFinanceConnection = {
+      transportOrigins: [],
+      handleCommand: createPostwarFinanceConnection(null).handleCommand,
+      recover: createPostwarFinanceConnection(null).recover,
       status: 'NOT_CONNECTED',
       runtime: null,
       budget: null,
@@ -444,6 +450,9 @@ describe('explicit Finance installation on standard Node API', () => {
       aborted = deferred();
     let stops = 0;
     const connection: PostwarFinanceConnection = {
+      transportOrigins: [],
+      handleCommand: createPostwarFinanceConnection(null).handleCommand,
+      recover: createPostwarFinanceConnection(null).recover,
       status: 'NOT_CONNECTED',
       runtime: null,
       budget: null,
@@ -494,6 +503,9 @@ describe('explicit Finance installation on standard Node API', () => {
   it('bounds a noncooperative transport deadline and rejects increasing the10s budget', async () => {
     let aborted = false;
     const connection: PostwarFinanceConnection = {
+      transportOrigins: [],
+      handleCommand: createPostwarFinanceConnection(null).handleCommand,
+      recover: createPostwarFinanceConnection(null).recover,
       status: 'NOT_CONNECTED',
       runtime: null,
       budget: null,
@@ -525,14 +537,14 @@ describe('explicit Finance installation on standard Node API', () => {
     if (!address || typeof address === 'string')
       throw Error('OWNED_LOOPBACK_REQUIRED');
     try {
-      expect(
-        (
-          await fetch(
-            'http://127.0.0.1:' + address.port + '/v1/office-command',
-            { method: 'POST' },
-          )
-        ).status,
-      ).toBe(503);
+      const response = await fetch(
+        'http://127.0.0.1:' + address.port + '/v1/office-command',
+        { method: 'POST' },
+      );
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({
+        error: { code: 'WRITE_OUTCOME_UNKNOWN', retryable: false },
+      });
       expect(aborted).toBe(true);
     } finally {
       route.stopAccepting();
