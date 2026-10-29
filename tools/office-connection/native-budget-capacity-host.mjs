@@ -6,6 +6,10 @@ import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 if (process.env.ECONMIND_BUDGET_CAPACITY_TEST_HOST !== '1' || !process.send)
   throw Error('EXPLICIT_PARENT_OWNED_NATIVE_HOST_REQUIRED');
+const installerFlag = process.env.ECONMIND_BUDGET_CAPACITY_CONNECTION_INSTALLER;
+if (installerFlag !== undefined && installerFlag !== '1')
+  throw Error('EXPLICIT_CONNECTION_INSTALLER_FLAG_REQUIRED');
+const useConnectionInstaller = installerFlag === '1';
 const pendingMessages = [];
 const queueMessage = (message) => pendingMessages.push(message);
 process.on('message', queueMessage);
@@ -40,7 +44,8 @@ async function close() {
     server.closeAllConnections();
     await new Promise((resolve) => server.close(resolve));
   }
-  await state?.runtime.consumer.stop();
+  if (state?.connection) await state.connection.stop();
+  else await state?.runtime.consumer.stop();
   await Promise.all((state?.pools ?? pendingPools).map((pool) => pool.end()));
   send({ type: 'CLOSED', ownedCleanup: true });
   if (process.connected) process.disconnect();
@@ -107,7 +112,7 @@ async function start(c) {
     return result;
   };
   const raw = new W.PostgresSqlDatabase(worker),
-    database = W.createFinanceBudgetAuthorizationDatabase({
+    observedDatabase = {
       query: (sql, args) => observed(raw, sql, args),
       transaction: async (work) => {
         try {
@@ -119,31 +124,14 @@ async function start(c) {
           throw error;
         }
       },
-    });
+    },
+    database = W.createFinanceBudgetAuthorizationDatabase(observedDatabase);
   const intakePool = W.createFinanceBudgetIntakeAuthorizationPool(rawIntake),
-    clock = {
+    rawClock = {
       nowReal: () => new Date().toISOString(),
       simTime: async () => (c.historyMode === 'BUDGET_SOCIAL' ? '3000' : '0'),
-    };
-  const started = performance.now(),
-    heap = process.memoryUsage().heapUsed;
-  const capacitySource = W.createPostgresFinanceBudgetCapacitySource({
-    worldId: c.pins.worldId,
-    countryId: c.countryId,
-    expectedRawSourceSHA256: c.sourceSHA256,
-    historyMode: c.historyMode ?? 'BUDGET_ONLY',
-  });
-  const { runtime } = W.createBoundedFinanceBudgetIntakeRuntime({
-    capacitySource,
-    intakePool,
-    workerDatabase: database,
-    worldId: c.pins.worldId,
-    workerId: c.workerId,
-    clock,
-    sha256Hex: sha,
-    environment: { ECONMIND_ENV: 'ci', NODE_ENV: 'test', VITEST: 'true' },
-  });
-  runtime.consumer.startPreparation();
+    },
+    clock = useConnectionInstaller ? Object.freeze(rawClock) : rawClock;
   const auth = {
     projectRef: c.projectRef,
     expectedIssuer: c.issuer,
@@ -156,22 +144,71 @@ async function start(c) {
       return response;
     },
   };
-  const handler = createBoundedOfficeCommandFetchHandler({
-    allowedOrigins: [c.ui],
-    composition: {
-      readPool,
-      readerRole: c.readerRole,
-      writerPool: intakePool,
-      writerRole: c.intakeRole,
-      authorizationPublisherRole: c.authorizationPublisherRole,
-      admittedWorldPins: c.pins,
-      auth,
-      resolveActorId: async (subject) =>
-        subject === c.subject ? 'ACTOR_NATIVE_BUDGET_TEST_ONLY' : null,
-      clock,
-      runtime,
-    },
+  const started = performance.now(),
+    heap = process.memoryUsage().heapUsed;
+  const capacitySource = W.createPostgresFinanceBudgetCapacitySource({
+    worldId: c.pins.worldId,
+    countryId: c.countryId,
+    expectedRawSourceSHA256: c.sourceSHA256,
+    historyMode: c.historyMode ?? 'BUDGET_ONLY',
   });
+  const connection = useConnectionInstaller
+    ? (
+        await import('../../apps/world-api/dist/runtime/postwar-finance-connection.js')
+      ).createPostwarFinanceConnection({
+        worldId: c.pins.worldId,
+        countryId: c.countryId,
+        workerId: c.workerId,
+        admittedWorldPins: c.pins,
+        expectedCapacitySourceSHA256: c.sourceSHA256,
+        readPool,
+        intakePool: rawIntake,
+        workerDatabase: observedDatabase,
+        readerRole: c.readerRole,
+        intakeRole: c.intakeRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+        auth,
+        resolveActorId: async (subject) =>
+          subject === c.subject ? 'ACTOR_NATIVE_BUDGET_TEST_ONLY' : null,
+        clock,
+        allowedOrigins: [c.ui],
+        // This executable is explicitly an owned isolated CI fixture. Preserve
+        // that actual environment; no formal host is disguised or activated.
+        environment: { ECONMIND_ENV: 'ci', NODE_ENV: 'test', VITEST: 'true' },
+      })
+    : null;
+  const runtime =
+    connection?.runtime ??
+    W.createBoundedFinanceBudgetIntakeRuntime({
+      capacitySource,
+      intakePool,
+      workerDatabase: database,
+      worldId: c.pins.worldId,
+      workerId: c.workerId,
+      clock,
+      sha256Hex: sha,
+      environment: { ECONMIND_ENV: 'ci', NODE_ENV: 'test', VITEST: 'true' },
+    }).runtime;
+  if (connection) connection.prepareManualConsumption();
+  else runtime.consumer.startPreparation();
+  const handler = connection
+    ? (request) => connection.handle(request)
+    : createBoundedOfficeCommandFetchHandler({
+        allowedOrigins: [c.ui],
+        composition: {
+          readPool,
+          readerRole: c.readerRole,
+          writerPool: intakePool,
+          writerRole: c.intakeRole,
+          authorizationPublisherRole: c.authorizationPublisherRole,
+          admittedWorldPins: c.pins,
+          auth,
+          resolveActorId: async (subject) =>
+            subject === c.subject ? 'ACTOR_NATIVE_BUDGET_TEST_ONLY' : null,
+          clock,
+          runtime,
+        },
+      });
   const seat = createPostwarCurrentSeatFetchHandler({
     pool: readPool,
     readerRole: c.readerRole,
@@ -246,6 +283,7 @@ async function start(c) {
   base = `http://127.0.0.1:${address.port}`;
   state = {
     runtime,
+    connection,
     server,
     pools: [worker, rawIntake, readPool],
     metrics,
@@ -256,6 +294,9 @@ async function start(c) {
   send({
     type: 'LISTENING_TEST_ONLY',
     base,
+    ...(connection
+      ? { connectionInstaller: 'STANDARD_EXPLICIT_FINANCE_CONNECTION' }
+      : {}),
     coldConstruction: {
       milliseconds: performance.now() - started,
       heapDeltaBytes: process.memoryUsage().heapUsed - heap,
@@ -271,13 +312,18 @@ const receiveMessage = (message) => {
       send({
         type: 'RESULT',
         id: message.id,
-        result: await state.runtime.consumer.consumeOnce(),
+        result: state.connection
+          ? await state.connection.consumeOnce()
+          : await state.runtime.consumer.consumeOnce(),
       });
     else if (message.operation === 'inspect' && state)
       send({
         type: 'RESULT',
         id: message.id,
         result: {
+          ...(state.connection
+            ? { connectionInstaller: 'STANDARD_EXPLICIT_FINANCE_CONNECTION' }
+            : {}),
           heapUsed: process.memoryUsage().heapUsed,
           rss: process.memoryUsage().rss,
           metrics: state.metrics,
