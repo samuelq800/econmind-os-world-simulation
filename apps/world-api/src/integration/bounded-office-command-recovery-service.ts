@@ -7,7 +7,10 @@ import {
   canonicalSerialize,
   type AuthenticatedCommandRecoveryResponseDto,
 } from '@econmind/core';
-import { OFFICE_COMMAND_CURRENT_BINDING_QUERY } from '@econmind/world-worker/office-command-intake';
+import {
+  OFFICE_COMMAND_CURRENT_BINDING_QUERY,
+  manualOfficeCommandCapability,
+} from '@econmind/world-worker/office-command-intake';
 import { createBoundedOfficeCommandBindingProvider } from './bounded-office-command-binding.js';
 import { createPostgresServerReadBindingSnapshotReader } from './postgres-server-read-binding.js';
 import { readManualRecoveryFrom } from './authenticated-command-recovery-reader.js';
@@ -112,14 +115,7 @@ export function createBoundedOfficeCommandRecoveryService(
             signal,
           },
           async (tx) => {
-            const capability =
-              original.officeId === 'FINANCE'
-                ? 'FINANCE_BUDGET'
-                : original.officeId === 'SOCIAL'
-                  ? 'SOCIAL_LABOUR'
-                  : original.officeId === 'CENTRAL_BANK'
-                    ? 'CENTRAL_BANK_MONETARY_POLICY'
-                    : 'CAPTAIN_CABINET';
+            const capability = manualOfficeCommandCapability(original);
             const args = [
               request.request.worldId,
               claims.authSubject,

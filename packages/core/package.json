@@ -12,6 +12,14 @@
       "types": "./dist/commands/authenticated-financial-intake-contract.d.ts",
       "default": "./dist/commands/authenticated-financial-intake-contract.js"
     },
+    "./postwar-day-one-treasury-fx": {
+      "types": "./dist/finance/postwar-day-one-treasury-fx.d.ts",
+      "default": "./dist/finance/postwar-day-one-treasury-fx.js"
+    },
+    "./postwar-day-one-fx-command-contract": {
+      "types": "./dist/commands/authenticated-fx-command-contract.d.ts",
+      "default": "./dist/commands/authenticated-fx-command-contract.js"
+    },
     "./authenticated-office-command-contract": {
       "types": "./dist/commands/authenticated-office-command-contract.d.ts",
       "default": "./dist/commands/authenticated-office-command-contract.js"

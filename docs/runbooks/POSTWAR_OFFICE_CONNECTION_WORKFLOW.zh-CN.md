@@ -116,5 +116,17 @@ Industry 用工读取可将已采用 E03 岗位与同一完整前缀的当前人
 使用 `node tools/office-connection/postwar-gcu-opening.mjs --world NEW_WORLD_ID --seed NEW_SEED_ID --value-date YYYY-MM-DD --out NEW_DIRECTORY`
 构建新版本并完整复验原开局链；输出目录必须新建。现有 c427 参考库不自动获得 GCU，不能从 B/R
 拆分或覆盖既有状态。银行现金不等于 GOV/OP 资金，实际换汇仍需独立的经营授权、可执行报价和结算链。
+首日换汇规则已由项目负责人另行采用，原文与版本化参数分别位于
+`docs/governance/owner-inputs/2026-10-29/DAY_ONE_FX_USER_ADOPTION.original.json`、
+`config/postwar-genesis/day-one-fx.v1.json`。构建 Core/Worker 后，运行
+`node tools/office-connection/postwar-day-one-fx.mjs --seed-file EXISTING_NEW_WORLD_SEED --out FRESH_DIRECTORY`
+从已验证的新 GCU 种子生成 70 国报价包；此命令不复制种子、不写数据库、不付款。
+报价使用各国原 LC/GCU 单位与数值、零初始点差，首个模拟日结束即失效。
+请求 LC 数额为最大支出，GCU 向下取六位后按原汇率精确反算实际 LC 扣款；余额留在原账户。
+政府结算要求真实 `FINANCE_TREASURY` 授权、当前报价与未占用资金，
+以四条 LC 腿完成 TGA 至银行央行清算账户转移，以两条 GCU 腿完成银行至政府支付。
+两币种各自平衡，在同一原子事务提交；不能动用央行外汇储备或透支。
+企业付款代表权不由此政策授予，报价包也不等于运行时准入或生产上线。
+FX 原生 fixture 使用独立 cfc 新种子 bootstrap/admission，不覆盖现有 c427 参考库。
 库存旧指针仅为采用上下文，V2 才区分金融直接来源。
 最终发布仍须现有生产发布链、具体最小角色和 provider 配置，不使用开发服务代替正式上线。

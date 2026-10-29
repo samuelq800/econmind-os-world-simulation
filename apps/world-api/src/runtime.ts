@@ -41,6 +41,7 @@ import {
 } from './runtime/postwar-finance-node-route.js';
 import type { PostwarFinanceConnection } from './runtime/postwar-finance-connection.js';
 import type { PostwarSocialConnection } from './runtime/postwar-social-connection.js';
+import type { PostwarTreasuryFxConnection } from './runtime/postwar-treasury-fx-connection.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
@@ -149,15 +150,22 @@ function createApiServer(
   officialCountryPool?: ManagedOfficialCountryPool,
   postwarFinanceConnection?: PostwarFinanceConnection,
   postwarSocialConnection?: PostwarSocialConnection,
+  postwarTreasuryFxConnection?: PostwarTreasuryFxConnection,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
   let allDataVerifiedAt = 0;
   let allDataProbe: Promise<boolean> | undefined;
   const financeRoute =
-    postwarSocialConnection !== undefined
+    postwarSocialConnection !== undefined ||
+    postwarTreasuryFxConnection !== undefined
       ? createPostwarOfficeNodeRoute({
-          social: postwarSocialConnection,
+          ...(postwarSocialConnection
+            ? { social: postwarSocialConnection }
+            : {}),
+          ...(postwarTreasuryFxConnection
+            ? { treasuryFx: postwarTreasuryFxConnection }
+            : {}),
           ...(postwarFinanceConnection
             ? { finance: postwarFinanceConnection }
             : {}),
@@ -169,6 +177,18 @@ function createApiServer(
     financeRoute === undefined
       ? {}
       : {
+          ...(postwarTreasuryFxConnection
+            ? {
+                postwarTreasuryFx: {
+                  routeInstalled: true,
+                  configured:
+                    postwarTreasuryFxConnection.status ===
+                    'EXPLICIT_MANUAL_TREASURY_FX_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
           ...(postwarSocialConnection
             ? {
                 postwarSocial: {
@@ -450,11 +470,24 @@ export async function startApiRuntime(
     readonly officialCountryPool?: ManagedOfficialCountryPool;
     readonly postwarFinanceConnection?: PostwarFinanceConnection;
     readonly postwarSocialConnection?: PostwarSocialConnection;
+    readonly postwarTreasuryFxConnection?: PostwarTreasuryFxConnection;
   } = {},
 ): Promise<RunningApiRuntime> {
   let officialCountryPool: ManagedOfficialCountryPool | undefined;
   let lifecycle: ReturnType<typeof createApiServer>;
   try {
+    if (
+      dependencies.postwarTreasuryFxConnection &&
+      (dependencies.postwarFinanceConnection ||
+        dependencies.postwarSocialConnection)
+    )
+      throw Error('POSTWAR_TREASURY_FX_REQUIRES_SOLE_EXPLICIT_CONSUMER');
+    if (
+      dependencies.postwarTreasuryFxConnection?.environment &&
+      config.environment !==
+        dependencies.postwarTreasuryFxConnection.environment
+    )
+      throw Error('POSTWAR_TREASURY_FX_EXACT_ENVIRONMENT_REQUIRED');
     officialCountryPool =
       config.officialCountryDatabase === undefined
         ? undefined
@@ -469,11 +502,13 @@ export async function startApiRuntime(
       officialCountryPool,
       dependencies.postwarFinanceConnection,
       dependencies.postwarSocialConnection,
+      dependencies.postwarTreasuryFxConnection,
     );
   } catch (error) {
     return failStartupAfterCleanup(error, [
       () => dependencies.postwarFinanceConnection?.stop(),
       () => dependencies.postwarSocialConnection?.stop(),
+      () => dependencies.postwarTreasuryFxConnection?.stop(),
       () => officialCountryPool?.end(),
     ]);
   }

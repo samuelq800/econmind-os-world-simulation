@@ -29,7 +29,14 @@ import {
   type ManualOfficeRuntimeReaders,
 } from './manual-office-command-composition.js';
 import type { AuthorizedOfficeContext } from '@econmind/core';
-import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import {
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+} from '@econmind/core/authenticated-office-command-contract';
+import {
+  readPostwarTreasuryFxSourceBinding,
+  type PostwarTreasuryFxSourceBinding,
+} from '../runtime-preparation/postwar-treasury-fx-runtime-connection.js';
 import { isFinanceBudgetNativeCommitGuard } from '../persistence/postgres-finance-budget-custody.js';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
 import { isPostwarSocialMatchSourceCommitProtectionPort } from '../persistence/postwar-social-match-runtime.js';
@@ -164,6 +171,28 @@ export function createDurableCommandConsumptionPreparation(
   }
   return createDurableCommandConsumer(input, null);
 }
+/** Fixed private issuer only. No caller source registry, candidate or readiness flag.
+ * Unsupported families remain at the actual global queue head. */
+export function createTreasuryFxCommandConsumptionPreparation(
+  binding: PostwarTreasuryFxSourceBinding,
+) {
+  const fixed = readPostwarTreasuryFxSourceBinding(binding);
+  if (!['local', 'ci'].includes(fixed.environment.ECONMIND_ENV ?? ''))
+    invalid('Treasury FX preparation is local/CI only');
+  return createDurableCommandConsumer(
+    {
+      database: fixed.workerDatabase,
+      workerId: fixed.workerId,
+      worldId: fixed.worldId,
+      clock: fixed.clock,
+      sha256Hex: fixed.sha256Hex,
+      environment: fixed.environment,
+      officeReaders: fixed.readers,
+    },
+    null,
+    binding,
+  );
+}
 /** Explicit finite server composition. No environment substitution, loop,
  * lease acquisition or Clock construction. Missing formal originals deny first. */
 export function createProductionFinanceCommandConsumption(
@@ -186,38 +215,41 @@ export function createProductionFinanceCommandConsumption(
 function createDurableCommandConsumer(
   input: DurableConsumptionInput,
   serverBinding: ServerCommandHostBinding | null,
+  treasuryFxBinding: PostwarTreasuryFxSourceBinding | null = null,
 ) {
   const world = worldId(input.worldId);
   const holder = workerId(input.workerId);
   const clock = input.clock;
   const officeReaders = Object.freeze({ ...input.officeReaders });
   const lineage = new DurableV08LedgerLineageReader(input);
-  const delivery = serverBinding
-    ? null
-    : createAuthoritativeWorkerExecution({
-        database: input.database,
-        workerId: holder,
-        sha256Hex: input.sha256Hex,
-        candidateFactory: createSqlNarrowTreasuryGcuDeliveryCandidateFactory({
+  const delivery =
+    serverBinding || treasuryFxBinding
+      ? null
+      : createAuthoritativeWorkerExecution({
           database: input.database,
           workerId: holder,
           sha256Hex: input.sha256Hex,
-        }),
-      });
-  const shipment = serverBinding
-    ? null
-    : createAuthoritativeWorkerExecution({
-        database: input.database,
-        workerId: holder,
-        sha256Hex: input.sha256Hex,
-        candidateFactory: createSqlNarrowTreasuryGcuShipmentCandidateFactory({
+          candidateFactory: createSqlNarrowTreasuryGcuDeliveryCandidateFactory({
+            database: input.database,
+            workerId: holder,
+            sha256Hex: input.sha256Hex,
+          }),
+        });
+  const shipment =
+    serverBinding || treasuryFxBinding
+      ? null
+      : createAuthoritativeWorkerExecution({
           database: input.database,
           workerId: holder,
           sha256Hex: input.sha256Hex,
-        }),
-      });
+          candidateFactory: createSqlNarrowTreasuryGcuShipmentCandidateFactory({
+            database: input.database,
+            workerId: holder,
+            sha256Hex: input.sha256Hex,
+          }),
+        });
   const reservation =
-    clock === null || serverBinding !== null
+    clock === null || serverBinding !== null || treasuryFxBinding !== null
       ? null
       : createLocalNarrowReservationWorker({
           ...input,
@@ -474,6 +506,8 @@ function createDurableCommandConsumer(
     if (clock === null) return blocked('SERVER_CLOCK_NOT_BOUND');
     let selectedId: string | null = null;
     try {
+      if (treasuryFxBinding)
+        readPostwarTreasuryFxSourceBinding(treasuryFxBinding);
       const at = timestamp(clock.nowReal());
       const simTime = SimTime.fromTicks(await clock.simTime(world));
       const selected = await input.database.transaction(async (transaction) => {
@@ -509,6 +543,12 @@ function createDurableCommandConsumer(
           command.officeId !== 'FINANCE')
       )
         return blocked('FINITE_FINANCE_FAMILY_REQUIRED', command.commandId);
+      if (
+        treasuryFxBinding &&
+        (command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND ||
+          command.officeId !== 'FINANCE')
+      )
+        return blocked('TREASURY_FX_FAMILY_NOT_INSTALLED', command.commandId);
       const manualCapability = manualOfficeCapability(command);
       const matchRuntime = officeReaders.socialMatch;
       const socialMatch =
@@ -600,6 +640,12 @@ function createDurableCommandConsumer(
           workerId: holder,
           sha256Hex: input.sha256Hex,
           candidateFactory: composition.factory,
+          ...(composition.dayOneFxSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                dayOneFxSourceCommitProtectionPort:
+                  composition.dayOneFxSourceCommitProtectionPort,
+              }),
           ...(composition.captainSourceCommitProtectionPort === undefined
             ? {}
             : {

@@ -1,4 +1,4 @@
-/** Fixed Finance/Social transport, never a general handler registry. Request
+/** Fixed Finance/Social/Treasury-FX transport, never a general handler registry. Request
  * selectors choose one installed service; they confer no identity or source
  * authority. The selected service still verifies JWT and current SQL bindings. */
 import {
@@ -11,6 +11,7 @@ import {
   AUTHENTICATED_OFFICE_COMMAND_PATH,
   AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
 } from '@econmind/core/authenticated-office-command-contract';
 import {
   boundedBytes,
@@ -26,6 +27,7 @@ import {
 import { RequestCompletion } from '../runtime-preparation/request-completion.js';
 import type { PostwarFinanceConnection } from './postwar-finance-connection.js';
 import type { PostwarSocialConnection } from './postwar-social-connection.js';
+import type { PostwarTreasuryFxConnection } from './postwar-treasury-fx-connection.js';
 
 function decode(recovering: boolean, body: unknown) {
   if (recovering) {
@@ -38,15 +40,18 @@ function decode(recovering: boolean, body: unknown) {
 export interface PostwarOfficeCommandConnections {
   readonly finance?: PostwarFinanceConnection;
   readonly social?: PostwarSocialConnection;
+  readonly treasuryFx?: PostwarTreasuryFxConnection;
 }
 export function createPostwarOfficeCommandFetchHandler(
   input: PostwarOfficeCommandConnections,
 ) {
   const finance = input.finance,
-    social = input.social;
+    social = input.social,
+    treasuryFx = input.treasuryFx;
   const origins = new Set([
     ...(finance?.transportOrigins ?? []),
     ...(social?.transportOrigins ?? []),
+    ...(treasuryFx?.transportOrigins ?? []),
   ]);
   if (
     origins.size > 8 ||
@@ -156,13 +161,17 @@ export function createPostwarOfficeCommandFetchHandler(
             selector.officeId === 'FINANCE' &&
             selector.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND
               ? finance
-              : selector.officeId === 'SOCIAL' &&
-                  [
-                    SOCIAL_POSITION_OFFER_CREATE_COMMAND,
-                    SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
-                  ].some((f) => f === selector.commandType)
-                ? social
-                : undefined;
+              : selector.officeId === 'FINANCE' &&
+                  selector.commandType ===
+                    POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+                ? treasuryFx
+                : selector.officeId === 'SOCIAL' &&
+                    [
+                      SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+                      SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+                    ].some((f) => f === selector.commandType)
+                  ? social
+                  : undefined;
           if (!target || target.transportOrigins.length === 0)
             return fail(503, 'OFFICE_CONNECTION_NOT_INSTALLED');
           if (!target.transportOrigins.includes(origin)) {
@@ -233,6 +242,11 @@ export function createPostwarOfficeCommandFetchHandler(
         }
         try {
           await social?.stop();
+        } catch (e) {
+          errors.push(e);
+        }
+        try {
+          await treasuryFx?.stop();
         } catch (e) {
           errors.push(e);
         }

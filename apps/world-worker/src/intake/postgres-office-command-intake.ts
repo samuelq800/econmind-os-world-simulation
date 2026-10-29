@@ -32,6 +32,7 @@ import {
 import type { FinancialIntakeBindingDto } from '@econmind/core/authenticated-financial-intake-contract';
 import {
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
   type ManualOfficeSourceRejectionDto,
   type ManualOfficeQueueAcknowledgementDto,
   type ManualOfficeCommandRequestDto,
@@ -120,26 +121,39 @@ export function parseManualOfficeCommandRequest(
       (row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
         row.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)) ||
     (row.officeId === 'FINANCE' &&
-      row.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+      (row.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
+        row.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND))
   ))
     invalid();
   return Object.freeze(row) as unknown as ManualOfficeCommandRequestDto;
 }
 
-const capability = (office: ManualOfficeCommandRequestDto['officeId']) => {
-  switch (office) {
-    case 'CAPTAIN':
-      return CAPTAIN_POLITICAL_CAPITAL_CAPABILITY;
-    case 'CENTRAL_BANK':
-      return CENTRAL_BANK_OMO_CAPABILITY;
-    case 'SOCIAL':
-      return SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY;
-    case 'FINANCE':
-      return 'FINANCE_BUDGET' as const;
-    default:
-      return invalid();
-  }
-};
+/** Fixed family/capability mapping shared with authenticated recovery. Office
+ * scope alone never grants Treasury or private-entity disposition authority. */
+export function manualOfficeCommandCapability(request: {
+  readonly officeId: string | null;
+  readonly commandType: string;
+}) {
+  const { officeId: office, commandType: family } = request;
+  if (office === 'CAPTAIN' && family === CAPTAIN_POLITICAL_CAPITAL_COMMAND)
+    return CAPTAIN_POLITICAL_CAPITAL_CAPABILITY;
+  if (office === 'CENTRAL_BANK' && family === CENTRAL_BANK_OMO_COMMAND)
+    return CENTRAL_BANK_OMO_CAPABILITY;
+  if (
+    office === 'SOCIAL' &&
+    (family === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
+      family === SOCIAL_POSITION_OFFER_CREATE_COMMAND)
+  )
+    return SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY;
+  if (office === 'FINANCE' && family === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+    return 'FINANCE_BUDGET' as const;
+  if (
+    office === 'FINANCE' &&
+    family === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+  )
+    return 'FINANCE_TREASURY' as const;
+  return invalid();
+}
 
 export const OFFICE_COMMAND_CURRENT_BINDING_QUERY = `
 select seat.seat_ref, authz.team_id, authz.authorization_version,
@@ -334,7 +348,7 @@ export class PostgresOfficeCommandIntake {
           request.officeId,
           b.seatRef,
           b.identity.authorizationRevision,
-          capability(request.officeId),
+          manualOfficeCommandCapability(request),
           scope,
         ],
       );
@@ -373,7 +387,7 @@ export class PostgresOfficeCommandIntake {
         worldId: worldId(request.worldId),
         requestedCountryId: countryId(request.countryId),
         requestedOfficeId: officeId(request.officeId),
-        capability: capability(request.officeId),
+        capability: manualOfficeCommandCapability(request),
       });
       const storedRows = await query<StoredCommand>(
         `select world_id as "worldId", command_id as "commandId", idempotency_key as "idempotencyKey",
@@ -451,7 +465,7 @@ export class PostgresOfficeCommandIntake {
           request.officeId,
           b.seatRef,
           b.identity.authorizationRevision,
-          capability(request.officeId),
+          manualOfficeCommandCapability(request),
           scope,
         ],
       );

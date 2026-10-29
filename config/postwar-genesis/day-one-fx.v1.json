@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "postwar-day-one-fx-policy-v1",
+  "version": "POSTWAR_DAY_ONE_FX_20261029_V1",
+  "provenanceKind": "GENERATED_POLICY",
+  "authorization": "docs/governance/owner-inputs/2026-10-29/DAY_ONE_FX_USER_ADOPTION.original.json",
+  "rateBasis": "EXACT_EXISTING_COUNTRY_LC_PER_GCU",
+  "spreadBps": "0",
+  "validFromSimTime": "0",
+  "validForSimDays": "1",
+  "gcuQuantum": "0.000001",
+  "fill": "FLOOR_GCU_TO_QUANTUM_THEN_EXACT_LC_PRODUCT",
+  "localMaximumRemainder": "REMAINS_IN_ORIGINAL_TREASURY_ACCOUNT_NOT_A_FEE",
+  "payer": "GOV_TGA_ONLY_WITH_FINANCE_TREASURY_AUTHORITY",
+  "dealer": "EXISTING_PRIVATE_BANK_REAL_GCU_CASH",
+  "localSettlement": "TGA_CLAIM_TO_EXISTING_BANK_CB_SETTLEMENT_CLAIM",
+  "availableFunds": "CURRENT_BALANCES_MINUS_ALL_ACTUAL_ENCUMBRANCES",
+  "overdraft": false,
+  "officialGcuReservesTouched": false,
+  "unsignedTradePlansBecomeQuotes": false,
+  "OPPaymentMandateGranted": false,
+  "productionAdmission": false,
+  "worldClockStarted": false
+}

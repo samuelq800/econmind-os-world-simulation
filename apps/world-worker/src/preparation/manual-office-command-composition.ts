@@ -45,7 +45,16 @@ import type { AtomicTransitionCandidateFactory } from '../persistence/atomic-tra
 import type { SqlDatabase } from '../persistence/sql-database.js';
 import { createSocialEmploymentCommitSourceGuard } from '../persistence/social-employment-runtime-snapshot-reader.js';
 import type { SourceCommitProtectionPort } from '../projections/governing-source-commit-boundary-contract.js';
-import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import {
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+} from '@econmind/core/authenticated-office-command-contract';
+import { MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY } from '../persistence/manual-office-authorization-sql.js';
+import {
+  isPostwarDayOneFxRuntime,
+  type createPostwarDayOneFxRuntime,
+  type DayOneFxSourceCommitProtectionPort,
+} from '../persistence/postwar-day-one-fx-runtime.js';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
 import {
   isFinanceBudgetNativeCommitGuard,
@@ -67,6 +76,7 @@ import type { createPostwarSocialMatchRuntime } from '../persistence/postwar-soc
 /** Server constructor dependencies only. No request snapshot, prebuilt draft,
  * caller candidateFactory, readiness registry or automatic publisher port. */
 export interface ManualOfficeRuntimeReaders {
+  readonly treasuryFx?: ReturnType<typeof createPostwarDayOneFxRuntime> | null;
   /** Automatic source is a separate fixed publisher path, never a browser intent. */
   readonly socialMatch?: ReturnType<
     typeof createPostwarSocialMatchRuntime
@@ -104,6 +114,10 @@ export function manualOfficeCapability(command: CanonicalCommand) {
         : null;
     case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
       return command.officeId === 'SOCIAL' ? ('SOCIAL_LABOUR' as const) : null;
+    case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND:
+      return command.officeId === 'FINANCE'
+        ? ('FINANCE_TREASURY' as const)
+        : null;
     case FINANCE_BUDGET_APPROPRIATION_COMMAND:
       return command.officeId === 'FINANCE'
         ? ('FINANCE_BUDGET' as const)
@@ -135,22 +149,13 @@ export async function authorizeManualOfficeCommand(input: {
     const r = await input.database.query<{
       team_id: string;
       authorization_version: string;
-    }>(
-      `select a.team_id, a.authorization_version from world_v2.current_commit_authorization a
-       where a.world_id=$1 and a.auth_subject=$2::uuid and a.country_id=$3
-         and a.office_id=$4 and a.capability=$5 and a.active
-         and not exists(select 1 from world_v2.current_commit_authorization other
-           where other.world_id=a.world_id and other.auth_subject=a.auth_subject and other.active
-             and (other.country_id is distinct from a.country_id or other.team_id is distinct from a.team_id
-               or other.authorization_version is distinct from a.authorization_version))`,
-      [
-        command.worldId,
-        command.authSubject,
-        command.countryId,
-        command.officeId,
-        capability,
-      ],
-    );
+    }>(MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY, [
+      command.worldId,
+      command.authSubject,
+      command.countryId,
+      command.officeId,
+      capability,
+    ]);
     if (r.rows.length !== 1 || !r.rows[0]) return null;
     return {
       authSubject: command.authSubject,
@@ -206,6 +211,7 @@ export function createManualOfficeCommandComposition(input: {
 }): {
   readonly factory: AtomicTransitionCandidateFactory;
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
+  readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
   readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
   readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
   readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
@@ -216,6 +222,17 @@ export function createManualOfficeCommandComposition(input: {
   const cap = manualOfficeCapability(command);
   if (cap === null) invalid('Manual factory requires a supported family');
   switch (command.commandType) {
+    case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.treasuryFx;
+      if (!isPostwarDayOneFxRuntime(runtime)) return null;
+      return {
+        factory: runtime.candidateFactory,
+        dayOneFxSourceCommitProtectionPort: runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.preflightCanonical(command, observedAtReal),
+      };
+    }
     case SOCIAL_POSITION_OFFER_CREATE_COMMAND: {
       validateManualOfficeCommandIntent(command);
       const runtime = input.readers.socialPosition;

@@ -42,6 +42,12 @@ import {
   type WorldWriterCommitAssertion,
 } from '@econmind/core';
 import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/postwar-day-one-fx-command-contract';
+import {
+  isPostwarDayOneFxSourceCommitProtectionPort,
+  type DayOneFxSourceCommitProtectionPort,
+  type DayOneFxSourceCommitRequest,
+} from './postwar-day-one-fx-runtime.js';
 import {
   PRODUCTION_WATER_CONSUMED_EVENT,
   assertProductionWaterConsumptionCommitBinding,
@@ -959,6 +965,7 @@ export class AtomicTransitionRepository {
   readonly #financeBudgetSourceCommitProtectionPort: FinanceBudgetNativeCommitGuard | null;
   readonly #socialMatchSourceCommitProtectionPort: SocialMatchSourceCommitProtectionPort | null;
   readonly #captainSourceCommitProtectionPort: CaptainSourceCommitProtectionPort | null;
+  readonly #dayOneFxSourceCommitProtectionPort: DayOneFxSourceCommitProtectionPort | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
@@ -973,7 +980,19 @@ export class AtomicTransitionRepository {
     readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
     readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
     readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
+    readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
   }) {
+    if (
+      input.dayOneFxSourceCommitProtectionPort !== undefined &&
+      !isPostwarDayOneFxSourceCommitProtectionPort(
+        input.dayOneFxSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'Day-one Treasury FX source port must be issued by its fixed native runtime',
+      );
+    this.#dayOneFxSourceCommitProtectionPort =
+      input.dayOneFxSourceCommitProtectionPort ?? null;
     if (
       input.captainSourceCommitProtectionPort !== undefined &&
       !isPostwarCaptainSourceCommitProtectionPort(
@@ -1190,6 +1209,7 @@ export class AtomicTransitionRepository {
           head,
         );
         await this.#assertCaptainSourceCurrent(transaction, candidate, head);
+        await this.#assertDayOneFxSourceCurrent(transaction, candidate, head);
         if (production)
           await this.#assertIndustryProductionCurrent(
             transaction,
@@ -1349,6 +1369,76 @@ export class AtomicTransitionRepository {
       observed,
       this.#sha256Hex,
     );
+  }
+
+  /** New FX has no legacy fallback. Exact FINAL recovery precedes this fresh
+   * source check; a fresh write requires both current Treasury authorization
+   * and a privately issued source guard in the SAME commit transaction. */
+  async #assertDayOneFxSourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    if (
+      candidate.command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+    )
+      return;
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding;
+    const proof = candidate.commitAuthorization;
+    if (
+      candidate.command.officeId !== 'FINANCE' ||
+      candidate.authorityKind !== 'DISCRETIONARY_USER' ||
+      this.#dayOneFxSourceCommitProtectionPort === null ||
+      !isCommitAuthorizationProof(proof) ||
+      proof.capability !== 'FINANCE_TREASURY' ||
+      candidate.inventoryPostings.length !== 0 ||
+      candidate.currentMaterializations.length !== 0 ||
+      captured.captureFailed ||
+      captured.canonicalData === null
+    )
+      invalid(
+        'Fresh day-one Treasury FX requires its genuine source guard, binding and Treasury authorization',
+      );
+    const request: Readonly<DayOneFxSourceCommitRequest> = Object.freeze({
+      phase: 'BEFORE_EVENTS',
+      purpose: 'POSTWAR_DAY_ONE_TREASURY_FX_SOURCE_RECHECK_V1',
+      command: candidate.command,
+      transition: candidate.transition,
+      financialPostingBatches: candidate.financialPostingBatches,
+      currentHead: Object.freeze({
+        worldId: candidate.command.worldId,
+        ...head,
+      }),
+      observedAtReal: candidate.observedAtReal,
+      readBinding: JSON.parse(captured.canonicalData) as unknown,
+      commitAuthorization: proof,
+    });
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: request.purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(request.readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    const audit: unknown =
+      await this.#dayOneFxSourceCommitProtectionPort.assertCurrentFrom(
+        transaction,
+        request,
+      );
+    const observed = captureGoverningSourceReadBinding({
+      governingSourceReadBinding: audit,
+    });
+    if (
+      observed.captureFailed ||
+      observed.canonicalData !== canonicalSerialize(expected)
+    )
+      invalid(
+        'Day-one Treasury FX source guard must bind the exact command, head and source observation',
+      );
   }
 
   async #assertCaptainSourceCurrent(

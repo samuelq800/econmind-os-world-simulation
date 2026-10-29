@@ -1,6 +1,14 @@
 import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
-import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import {
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+} from '@econmind/core/authenticated-office-command-contract';
+import { isPostwarDayOneFxRuntime } from '../persistence/postwar-day-one-fx-runtime.js';
+import {
+  readPostwarTreasuryFxSourceBinding,
+  type PostwarTreasuryFxSourceBinding,
+} from '../runtime-preparation/postwar-treasury-fx-runtime-connection.js';
 import {
   DomainError,
   DOMAIN_ERROR_CODES,
@@ -26,6 +34,7 @@ import {
 } from '../runtime-preparation/production-world-command-host.js';
 import {
   createDurableCommandConsumptionPreparation,
+  createTreasuryFxCommandConsumptionPreparation,
   createProductionFinanceCommandConsumption,
   type DurableConsumptionClock,
 } from '../preparation/durable-command-consumption.js';
@@ -51,6 +60,7 @@ type Construction = {
   readonly sha256Hex: Sha256Hex;
   readonly environment: NodeJS.ProcessEnv;
   readonly readers: ManualOfficeRuntimeReaders;
+  readonly treasuryFxBinding?: PostwarTreasuryFxSourceBinding;
   readonly productionBinding?: ServerCommandHostBinding;
   readonly productionHost?: ReturnType<typeof createProductionWorldCommandHost>;
 };
@@ -60,6 +70,21 @@ const constructions = new WeakMap<ManualOfficeIntakeRuntime, Construction>();
  * caller candidate, readiness predicate, boolean READY or executable callback. */
 export function createManualOfficeIntakeRuntime(
   input: Construction,
+): ManualOfficeIntakeRuntime {
+  return constructManualOfficeIntakeRuntime(input);
+}
+export function createTreasuryFxManualOfficeIntakeRuntime(
+  binding: PostwarTreasuryFxSourceBinding,
+): ManualOfficeIntakeRuntime {
+  const fixed = readPostwarTreasuryFxSourceBinding(binding);
+  return constructManualOfficeIntakeRuntime(
+    { ...fixed, workerDatabase: fixed.workerDatabase },
+    binding,
+  );
+}
+function constructManualOfficeIntakeRuntime(
+  input: Construction,
+  treasuryFxBinding: PostwarTreasuryFxSourceBinding | null = null,
 ): ManualOfficeIntakeRuntime {
   const head = async () => {
     const r = await input.workerDatabase.query<{
@@ -151,16 +176,19 @@ export function createManualOfficeIntakeRuntime(
   const construction = Object.freeze({
     ...input,
     readers: Object.freeze(readers),
+    ...(treasuryFxBinding ? { treasuryFxBinding } : {}),
   });
-  const consumer = createDurableCommandConsumptionPreparation({
-    database: construction.workerDatabase,
-    workerId: construction.workerId,
-    worldId: construction.worldId,
-    clock: construction.clock,
-    sha256Hex: construction.sha256Hex,
-    environment: construction.environment,
-    officeReaders: construction.readers,
-  });
+  const consumer = treasuryFxBinding
+    ? createTreasuryFxCommandConsumptionPreparation(treasuryFxBinding)
+    : createDurableCommandConsumptionPreparation({
+        database: construction.workerDatabase,
+        workerId: construction.workerId,
+        worldId: construction.worldId,
+        clock: construction.clock,
+        sha256Hex: construction.sha256Hex,
+        environment: construction.environment,
+        officeReaders: construction.readers,
+      });
   const runtime = Object.freeze({ consumer });
   constructions.set(runtime, construction);
   return runtime;
@@ -352,6 +380,19 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
 ): boolean {
   if (!runtime) return false;
   const construction = constructions.get(runtime as ManualOfficeIntakeRuntime);
+  if (construction?.treasuryFxBinding) {
+    readPostwarTreasuryFxSourceBinding(construction.treasuryFxBinding);
+    return (
+      commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND &&
+      isPostwarDayOneFxRuntime(construction.readers.treasuryFx)
+    );
+  }
+  if (commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND)
+    return (
+      !!construction &&
+      !construction.productionBinding &&
+      isPostwarDayOneFxRuntime(construction.readers.treasuryFx)
+    );
   if (construction?.productionBinding)
     return (
       commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND &&

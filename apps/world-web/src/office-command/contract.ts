@@ -30,7 +30,10 @@ export const officeFamilies = Object.freeze({
     'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
     'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
   ] as const),
-  FINANCE: Object.freeze(['CORE_FINANCE_BUDGET_APPROPRIATION_V1'] as const),
+  FINANCE: Object.freeze([
+    'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
+    'POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1',
+  ] as const),
 } as const satisfies Record<
   ManualOfficeCommandRequestDto['officeId'],
   readonly ManualOfficeCommandFamily[]

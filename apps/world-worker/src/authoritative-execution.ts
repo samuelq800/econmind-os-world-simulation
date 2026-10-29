@@ -27,6 +27,7 @@ import type { SocialPositionSourceCommitProtectionPort } from './persistence/pos
 import type { FinanceBudgetNativeCommitGuard } from './persistence/postgres-finance-budget-custody.js';
 import type { SocialMatchSourceCommitProtectionPort } from './persistence/postwar-social-match-runtime.js';
 import type { CaptainSourceCommitProtectionPort } from './persistence/postwar-captain-runtime.js';
+import type { DayOneFxSourceCommitProtectionPort } from './persistence/postwar-day-one-fx-runtime.js';
 
 interface CurrentCommitAuthorization {
   readonly authSubject: string;
@@ -226,12 +227,19 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
   readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
   readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
+  readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
 }): Readonly<AuthoritativeWorkerExecution> {
   const repository = new AtomicTransitionRepository({
     database: input.database,
     authorizationGuard: createTransactionCutoffAuthorizationGuard(),
     workerId: input.workerId,
     sha256Hex: input.sha256Hex,
+    ...(input.dayOneFxSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          dayOneFxSourceCommitProtectionPort:
+            input.dayOneFxSourceCommitProtectionPort,
+        }),
     ...(input.captainSourceCommitProtectionPort === undefined
       ? {}
       : {

@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
 } from '@econmind/core/authenticated-office-command-contract';
 import {
   officeFamilies,
@@ -64,7 +65,7 @@ function envelope(officeId: string, commandType: string) {
   };
 }
 
-describe('browser manual Office transport permits only the five registered manual families', () => {
+describe('browser manual Office transport permits only the six registered manual families', () => {
   it('retains exact readonly family types without enabling any automatic family', () => {
     expectTypeOf(officeFamilies).toEqualTypeOf<{
       readonly CAPTAIN: readonly ['CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'];
@@ -73,7 +74,10 @@ describe('browser manual Office transport permits only the five registered manua
         'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
         'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
       ];
-      readonly FINANCE: readonly ['CORE_FINANCE_BUDGET_APPROPRIATION_V1'];
+      readonly FINANCE: readonly [
+        'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
+        'POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1',
+      ];
     }>();
     expect(Object.keys(officeFamilies).sort()).toEqual([
       'CAPTAIN',
@@ -89,6 +93,37 @@ describe('browser manual Office transport permits only the five registered manua
       expect(parseOfficeIntent(value, config(office))).toEqual(value);
     },
   );
+  it('carries Treasury FX only through the current Finance identity and never as a private OP or CB action', () => {
+    const value = envelope('FINANCE', POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND);
+    expect(parseOfficeIntent(value, config('FINANCE'))).toEqual(value);
+    for (const office of [
+      'CAPTAIN',
+      'CENTRAL_BANK',
+      'SOCIAL',
+      'INDUSTRY',
+      'TRADE',
+    ]) {
+      expect(
+        parseOfficeIntent(
+          envelope(office, POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND),
+          config(office),
+        ),
+      ).toBeNull();
+      expect(parseOfficeIntent(value, config(office))).toBeNull();
+    }
+    expect(
+      parseOfficeIntent(
+        envelope('FINANCE', 'POSTWAR_DAY_ONE_PRIVATE_FX_SPOT_V1'),
+        config('FINANCE'),
+      ),
+    ).toBeNull();
+    expect(
+      parseOfficeIntent(value, {
+        ...config('FINANCE'),
+        identity: { ...config('FINANCE').identity, countryId: 'COUNTRY_OTHER' },
+      }),
+    ).toBeNull();
+  });
   it('permits funded Social position transport only for the authenticated Social identity', () => {
     const value = envelope('SOCIAL', officeFamilies.SOCIAL[1]);
     expect(parseOfficeIntent(value, config('SOCIAL'))).toEqual(value);
