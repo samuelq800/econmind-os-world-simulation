@@ -194,6 +194,73 @@ declare s record;d world_v2.postwar_financial_current_document%rowtype;b world_v
  jsonb_build_object('offset',p_offset,'limit',p_limit,'returned',returned,'total',d.total_rows,'nextOffset',case when p_offset+returned<d.total_rows then p_offset+returned else null end),selected::text;
 end;$$;
 alter function world_v2.read_postwar_financial_current_page(text,text,text,integer,integer,text)owner to world_v2_postwar_projection_owner;
+-- BEGIN BOUNDED_FINANCIAL_PUBLICATION_ORIGINALS_V1
+-- DATA ONLY over already sealed originals. This is neither source admission,
+-- an actor/current-authority token nor proof that the current prefix is supported.
+-- The existing publication function independently replays/checks its full prefix.
+create function world_v2.read_postwar_financial_current_publication_originals(p_world text,p_country text)
+returns table(originals_text text,originals_sha256 text)
+language plpgsql security definer set search_path=pg_catalog as $$
+declare effective name;h record;a record;s world_v2.postwar_social_prefix_scope%rowtype;d world_v2.postwar_office_projection_document%rowtype;
+ scope_body jsonb;documents jsonb:='[]';funds jsonb;ledger_finance jsonb;ledger_bank jsonb;items jsonb;payload text;
+ expected_canonical_sha text;page_count_actual bigint;row_count_actual bigint;source_bytes bigint;total_source_bytes bigint:=0;
+begin
+ effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
+ if not pg_has_role(effective,'world_v2_postwar_projection_publisher','MEMBER')
+ or pg_has_role(effective,'world_v2_postwar_projection_owner','MEMBER')
+ or pg_has_role(effective,'world_v2_postwar_projection_reader','MEMBER')then raise exception 'FINANCIAL_FIXED_SEPARATE_OFFLINE_PUBLISHER_REQUIRED'using errcode='42501';end if;
+ -- Fresh READ COMMITTED, actual H SHARE, admission/permit SHARE, then exact
+ -- unrevoked same-country seven H0 document locks: the existing lock order.
+ select * into strict h from world_v2.lock_postwar_financial_current_publication(p_world,p_country);
+ select * into strict a from world_v2.postwar_projection_admission_header(p_world);
+ -- No preparation fallback: absent sealed scope stays unavailable. This query
+ -- only uses seed/admission metadata through the existing header, never the
+ -- raw seed payload or source preparation, and cannot hydrate a seed.
+ select * into strict s from world_v2.postwar_social_prefix_scope x where x.world_id=p_world and x.country_id=p_country for share;
+ if s.seed_fingerprint is distinct from a.seed_fingerprint or s.admission_ref is distinct from a.admission_ref
+ or s.source_bundle_sha256 is distinct from a.source_bundle_sha256
+ or s.scope_sha256 is distinct from encode(sha256(convert_to(s.scope_document,'UTF8')),'hex')then raise exception 'FINANCIAL_SEALED_SCOPE_LINEAGE_REQUIRED'using errcode='23514';end if;
+ scope_body:=s.scope_document::jsonb;
+ if scope_body->>'countryId'is distinct from p_country or jsonb_typeof(scope_body->'funding')is distinct from 'array'then raise exception 'FINANCIAL_SEALED_COUNTRY_FUNDING_REQUIRED'using errcode='23514';end if;
+ select coalesce(jsonb_agg(x order by x->>'accountRef'),'[]'::jsonb)into funds from jsonb_array_elements(scope_body->'funding')x where x->>'payerRole'='GOV';
+ if jsonb_array_length(funds)<>1 or exists(select 1 from jsonb_array_elements(funds)x where x->>'countryId'is distinct from p_country)then raise exception 'FINANCIAL_EXACT_SEALED_GOV_ACCOUNT_REQUIRED'using errcode='23514';end if;
+ for d in select * from world_v2.postwar_office_projection_document x where x.world_id=p_world and x.country_id=p_country and x.office_id in('FINANCE','CENTRAL_BANK')order by x.office_id,x.dataset loop
+  if d.seed_fingerprint is distinct from a.seed_fingerprint or d.admission_ref is distinct from a.admission_ref or d.seed_id is distinct from a.seed_id
+  or d.source_bundle_sha256 is distinct from a.source_bundle_sha256 or d.canonical_seed_sha256 is distinct from s.canonical_seed_sha256
+  or d.source_id is distinct from s.source_id or d.source_payload_hash is distinct from s.source_payload_hash
+  or d.world_version<>0 or d.event_sequence<>0 or d.projection_version<>'postwar-office-projection.v1'
+  or(d.office_id='FINANCE'and d.dataset not in('currency-fx','opening-financial-legs'))
+  or(d.office_id='CENTRAL_BANK'and d.dataset not in('currency-fx','cb-categories','cb-holdings','bank-loans','opening-financial-legs'))
+  or exists(select 1 from world_v2.postwar_office_projection_revocation r where r.world_id=p_world and r.document_ref=d.document_ref)then raise exception 'FINANCIAL_SEALED_ORIGINAL_LINEAGE_OR_REVOCATION_INVALID'using errcode='23514';end if;
+  select count(*),coalesce(sum(p.row_count),0),coalesce(sum(octet_length(p.rows_text)),0)into page_count_actual,row_count_actual,source_bytes from world_v2.postwar_office_projection_page p where p.document_ref=d.document_ref and p.world_id=p_world;
+  total_source_bytes:=total_source_bytes+source_bytes;
+  if d.page_count<>page_count_actual or d.total_rows<>row_count_actual or page_count_actual>64 or total_source_bytes>1048576 then raise exception 'FINANCIAL_SEALED_ORIGINAL_BOUNDED_PAGES_REQUIRED'using errcode='54000';end if;
+  if exists(select 1 from(
+   select p.*,row_number()over(order by p.page_index)-1 as expected_index,
+    coalesce(sum(p.row_count)over(order by p.page_index rows between unbounded preceding and 1 preceding),0)as expected_offset
+   from world_v2.postwar_office_projection_page p where p.document_ref=d.document_ref and p.world_id=p_world
+  )p where p.page_index<>p.expected_index or p.row_offset<>p.expected_offset or p.row_count<>jsonb_array_length(p.rows_text::jsonb)
+    or p.page_sha256 is distinct from encode(sha256(convert_to(p.rows_text,'UTF8')),'hex'))then raise exception 'FINANCIAL_SEALED_PAGE_HASH_OR_SEQUENCE_INVALID'using errcode='23514';end if;
+  select coalesce(jsonb_agg(x order by p.page_index,n),'[]'::jsonb)into items from world_v2.postwar_office_projection_page p cross join lateral jsonb_array_elements(p.rows_text::jsonb)with ordinality q(x,n)where p.document_ref=d.document_ref and p.world_id=p_world;
+  if d.document_sha256 is distinct from encode(sha256(convert_to(items::text,'UTF8')),'hex')then raise exception 'FINANCIAL_SEALED_DOCUMENT_HASH_INVALID'using errcode='23514';end if;
+  documents:=documents||jsonb_build_array(jsonb_build_object('officeId',d.office_id,'dataset',d.dataset,'documentRef',d.document_ref,'documentSha256',d.document_sha256,'sourceVersion',d.source_version,'sourceId',d.source_id,'sourcePayloadHash',d.source_payload_hash));
+  expected_canonical_sha:=d.canonical_seed_sha256;
+ end loop;
+ if jsonb_array_length(documents)<>7 then raise exception 'FINANCIAL_EXACT_SEVEN_SEALED_ORIGINALS_REQUIRED'using errcode='23514';end if;
+ ledger_finance:=world_v2.postwar_financial_h0_ledger_rows(p_world,p_country,'FINANCE');
+ ledger_bank:=world_v2.postwar_financial_h0_ledger_rows(p_world,p_country,'CENTRAL_BANK');
+ payload:=jsonb_build_object('schemaVersion','postwar-financial-current-publication-originals-v1','dataNature','IMMUTABLE_ADMITTED_H0_FINANCIAL_DATA_ONLY','worldId',p_world,'countryId',p_country,
+  'head',jsonb_build_object('worldVersion',h.world_version,'eventSequence',h.event_sequence),
+  'seedId',a.seed_id,'seedFingerprint',a.seed_fingerprint,'admissionRef',a.admission_ref,
+  'canonicalSeedSha256',expected_canonical_sha,'sourceBundleSha256',a.source_bundle_sha256,
+  'financeLedgerRows',ledger_finance,'centralBankLedgerRows',ledger_bank,'fundingAccounts',funds,'originalDocuments',documents)::text;
+ if octet_length(payload)>65536 then raise exception 'FINANCIAL_PUBLICATION_ORIGINALS_64K_BOUND'using errcode='54000';end if;
+ return query select payload,encode(sha256(convert_to(payload,'UTF8')),'hex');
+end;$$;
+alter function world_v2.read_postwar_financial_current_publication_originals(text,text)owner to world_v2_postwar_projection_owner;
+revoke all on function world_v2.read_postwar_financial_current_publication_originals(text,text)from public;
+grant execute on function world_v2.read_postwar_financial_current_publication_originals(text,text)to world_v2_postwar_projection_publisher;
+-- END BOUNDED_FINANCIAL_PUBLICATION_ORIGINALS_V1
 revoke all on function world_v2.lock_postwar_financial_current_publication(text,text),world_v2.postwar_financial_complete_prefix(text),world_v2.postwar_financial_h0_ledger_rows(text,text,text),world_v2.postwar_financial_capacity_rows(text,text,jsonb),world_v2.publish_postwar_financial_current_projection(text,text,text,text,text),world_v2.read_postwar_financial_current_page(text,text,text,integer,integer,text)from public;
 grant execute on function world_v2.lock_postwar_financial_current_publication(text,text),world_v2.publish_postwar_financial_current_projection(text,text,text,text,text)to world_v2_postwar_projection_publisher;
 grant execute on function world_v2.read_postwar_financial_current_page(text,text,text,integer,integer,text)to world_v2_postwar_projection_reader;

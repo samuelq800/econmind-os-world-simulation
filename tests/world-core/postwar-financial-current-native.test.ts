@@ -317,3 +317,196 @@ suite('actual mixed prefix financial current native', () => {
     }
   }, 180000);
 });
+
+const getterTemplate = process.env.ECONMIND_FINANCIAL_CURRENT_GETTER_TEMPLATE;
+(getterTemplate ? describe : describe.skip)(
+  'actual sealed H6 bounded financial publication originals getter',
+  () => {
+    it('returns hash-bound DATA_ONLY small originals with separate EXEC role, fresh locks and revocation denial without loading a seed', async () => {
+      const descriptor = JSON.parse(
+        await readFile(getterTemplate!, 'utf8'),
+      ) as {
+        referenceMarker: string;
+        templateDatabase: string;
+        seedFingerprint: string;
+        admissionRef: string;
+      };
+      const marker = await loadPostwarNativeReferenceMarker(
+        descriptor.referenceMarker,
+      );
+      expect(descriptor.seedFingerprint).toBe(marker.seedFingerprint);
+      expect(descriptor.admissionRef).toBe(marker.admissionRef);
+      const clone = await clonePostwarNativeReference(
+        marker,
+        'financial_getter',
+        descriptor.templateDatabase,
+      );
+      const out =
+        '/workspace/office-connection-evidence/postwar-financial-current-getter-20261028';
+      await mkdir(out, { recursive: true });
+      const sqlPath =
+        'database/proposals/postwar-financial-current-derived-read.sql';
+      const sql = await readFile(path.join(root, sqlPath), 'utf8');
+      const begin = sql.indexOf(
+        '-- BEGIN BOUNDED_FINANCIAL_PUBLICATION_ORIGINALS_V1',
+      );
+      const end = sql.indexOf(
+        '-- END BOUNDED_FINANCIAL_PUBLICATION_ORIGINALS_V1',
+      );
+      if (begin < 0 || end <= begin)
+        throw Error('FIXED_GETTER_SOURCE_BLOCK_REQUIRED');
+      const fragment = sql.slice(begin, end);
+      const body = fragment.replace(/--[^\n]*/gu, '');
+      expect(body).not.toMatch(
+        /\bcanonical_payload\b|\bprepare_postwar_social_prefix_scopes\s*\(/iu,
+      );
+      expect(body).not.toMatch(/\b(?:from|join)\s+world_v2\.opening_seed\b/iu);
+      const query =
+        'select * from world_v2.read_postwar_financial_current_publication_originals($1,$2)';
+      const calls: string[] = [];
+      async function asPublisher(
+        country = marker.countryId,
+        mode = 'read committed',
+      ) {
+        const c = await clone.installer.connect();
+        try {
+          await c.query('begin isolation level ' + mode);
+          await c.query('set local role world_v2_postwar_projection_publisher');
+          calls.push(query);
+          return await c.query<{
+            originals_text: string;
+            originals_sha256: string;
+          }>(query, [marker.worldId, country]);
+        } finally {
+          await c.query('rollback').catch(() => {});
+          c.release();
+        }
+      }
+      try {
+        // Exact new function only; previous schema/source/events remain intact.
+        await clone.installer.query(
+          'begin;grant create on schema world_v2 to world_v2_postwar_projection_owner;' +
+            fragment +
+            'revoke create on schema world_v2 from world_v2_postwar_projection_owner;commit;',
+        );
+        const result = await asPublisher();
+        expect(result.rows).toHaveLength(1);
+        const row = result.rows[0]!;
+        expect(Buffer.byteLength(row.originals_text)).toBeLessThanOrEqual(
+          65536,
+        );
+        expect(sha(row.originals_text)).toBe(row.originals_sha256);
+        const originals = JSON.parse(row.originals_text);
+        expect(originals.schemaVersion).toBe(
+          'postwar-financial-current-publication-originals-v1',
+        );
+        expect(originals.dataNature).toBe(
+          'IMMUTABLE_ADMITTED_H0_FINANCIAL_DATA_ONLY',
+        );
+        expect(originals.head).toEqual({
+          worldVersion: '6',
+          eventSequence: '10',
+        });
+        expect(originals.seedFingerprint).toBe(marker.seedFingerprint);
+        expect(originals.admissionRef).toBe(marker.admissionRef);
+        expect(originals.sourceBundleSha256).toBe(marker.sourceBundleSha256);
+        expect(originals.canonicalSeedSha256).toMatch(/^[a-f0-9]{64}$/u);
+        expect(originals.originalDocuments).toHaveLength(7);
+        expect(originals.fundingAccounts).toHaveLength(1);
+        const fund = originals.fundingAccounts[0];
+        expect(fund.payerRole).toBe('GOV');
+        const tga = originals.financeLedgerRows.find(
+          (p: { account: { accountId: string } }) =>
+            p.account.accountId === fund.accountRef,
+        );
+        expect(tga.netDebitBalance.amount).toBe('206838792635.904');
+        expect(tga.account.claimId).toBe(fund.claimId);
+        expect(
+          originals.centralBankLedgerRows.some(
+            (p: {
+              account: { claimId: string; accountClass: string };
+              netDebitBalance: { amount: string };
+            }) =>
+              p.account.claimId === fund.claimId &&
+              p.account.accountClass === 'LIABILITY' &&
+              p.netDebitBalance.amount === '-206838792635.904',
+          ),
+        ).toBe(true);
+        await expect(
+          asPublisher('COUNTRY_UNKNOWN' as typeof marker.countryId),
+        ).rejects.toMatchObject({ code: '55000' });
+        await expect(
+          asPublisher(marker.countryId, 'repeatable read read only'),
+        ).rejects.toMatchObject({ code: '25000' });
+        await expect(
+          clone.boundedReader.query(query, [marker.worldId, marker.countryId]),
+        ).rejects.toMatchObject({ code: '42501' });
+        const c = await clone.installer.connect();
+        try {
+          await c.query('begin');
+          await c.query('set local role world_v2_postwar_projection_publisher');
+          await c.query(
+            'select world_v2.revoke_postwar_office_projection($1,$2,$3)',
+            [
+              marker.worldId,
+              originals.originalDocuments[0].documentRef,
+              'TEST_ONLY_GETTER_REVOCATION',
+            ],
+          );
+          await c.query('commit');
+        } finally {
+          await c.query('rollback').catch(() => {});
+          c.release();
+        }
+        await expect(asPublisher()).rejects.toMatchObject({ code: '55000' });
+        await writeFile(
+          path.join(out, 'report.json'),
+          JSON.stringify(
+            {
+              classification:
+                'TEST_ONLY_ACTUAL_H6_DATA_ONLY_GETTER_NOT_PRODUCTION',
+              status: 'PASS',
+              sourceSQLSha256: sha(sql),
+              fragmentSha256: sha(fragment),
+              seedFingerprint: marker.seedFingerprint,
+              admissionRef: marker.admissionRef,
+              bytes: Buffer.byteLength(row.originals_text),
+              originalsSha256: row.originals_sha256,
+              head: originals.head,
+              originalDocuments: originals.originalDocuments,
+              checks: [
+                'RAW_SHA_AND_64K',
+                'EXACT_SEED_ADMISSION_HEAD',
+                'SEVEN_ORIGINALS',
+                'GOV_RECIPROCAL_LEDGER',
+                'UNKNOWN_COUNTRY_DENIED',
+                'NON_FRESH_ISOLATION_DENIED',
+                'ACTUAL_BOUNDED_READER_EXEC_DENIED',
+                'ORIGINAL_REVOCATION_DENIED',
+              ],
+              canonicalSeedLoaded: false,
+              calls,
+              sourceRegenerated: false,
+              WorldClock: false,
+            },
+            null,
+            2,
+          ) + '\n',
+        );
+      } catch (error) {
+        await clone.installer.query('rollback').catch(() => {});
+        await writeFile(
+          path.join(out, 'failure-' + Date.now() + '.json'),
+          JSON.stringify(
+            { status: 'FAIL', error: String(error), sourceSQLSha256: sha(sql) },
+            null,
+            2,
+          ) + '\n',
+        );
+        throw error;
+      } finally {
+        await clone.drop();
+      }
+    }, 30000);
+  },
+);
