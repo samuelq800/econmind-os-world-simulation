@@ -1,7 +1,12 @@
+import {
+  readFinanceSocialSourceBinding,
+  type FinanceSocialSourceBinding,
+} from '../runtime-preparation/finance-social-runtime-connection.js';
 /** Fixed explicit composition; no caller candidate/facts callback or Ready
  * flag. A lost process-local immutable preparation stays disconnected. */
 import {
   createManualOfficeIntakeRuntime,
+  createFinanceSocialManualOfficeIntakeRuntime,
   createRegisteredFinanceManualOfficeIntakeRuntime,
   type ManualOfficeIntakeRuntime,
 } from './manual-office-intake-runtime.js';
@@ -75,6 +80,23 @@ export function createPreparedFinanceBudgetIntakeRuntime(
     ...config,
     readers: { financeBudget: budget },
   });
+  instances.add(runtime);
+  return Object.freeze({ runtime, budget });
+}
+
+/** Same private Finance runtime identity, fixed genuine paired dependencies. */
+export function createBoundedFinanceSocialIntakeRuntime(
+  binding: FinanceSocialSourceBinding,
+): Readonly<{
+  runtime: ManualOfficeIntakeRuntime;
+  budget: NonNullable<
+    import('../preparation/manual-office-command-composition.js').ManualOfficeRuntimeReaders['financeBudget']
+  >;
+}> {
+  const deps = readFinanceSocialSourceBinding(binding),
+    budget = deps.readers.financeBudget;
+  if (!budget) throw Error('FIXED_PAIRED_FINANCE_SOURCE_REQUIRED');
+  const runtime = createFinanceSocialManualOfficeIntakeRuntime(binding);
   instances.add(runtime);
   return Object.freeze({ runtime, budget });
 }

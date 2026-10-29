@@ -8,6 +8,8 @@ import {
   DOMAIN_ERROR_CODES,
   canonicalHashInput,
   canonicalSha256,
+  countryId as canonicalCountryId,
+  worldId as canonicalWorldId,
   validateCanonicalCommand,
   type CanonicalCommand,
 } from '@econmind/core';
@@ -30,6 +32,20 @@ const sources = new WeakMap<
     countryId: string;
     expectedRawSourceSHA256: string | null;
     historyMode: 'BUDGET_ONLY' | 'BUDGET_SOCIAL';
+  }
+>();
+// A route is only a finite server selector over the original fixed adapters.
+// It carries no policy, balance, currentness, SQL privilege or admission fact.
+const worldSources = new WeakMap<
+  PostgresFinanceBudgetCapacitySource,
+  {
+    readonly worldId: string;
+    readonly sourcesByCountry: ReadonlyMap<
+      string,
+      PostgresFinanceBudgetCapacitySource
+    >;
+    readonly countryIds: readonly string[];
+    readonly historyMode: 'BUDGET_SOCIAL';
   }
 >();
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -73,9 +89,106 @@ export function isPostgresFinanceBudgetCapacitySource(
   return (
     !!value &&
     typeof value === 'object' &&
-    sources.get(value as PostgresFinanceBudgetCapacitySource)?.worldId ===
+    (sources.get(value as PostgresFinanceBudgetCapacitySource)?.worldId ===
+      worldId ||
+      worldSources.get(value as PostgresFinanceBudgetCapacitySource)
+        ?.worldId === worldId)
+  );
+}
+
+/** Explicit deployment selector, normally taken from the actually adopted
+ * Social country roster. Never take this configuration from an intake request.
+ * Each selected country still has to supply its actual admitted SQL original,
+ * policy, current actor and lease when the original fixed reader runs. */
+export function createPostgresFinanceBudgetWorldCapacitySource(config: {
+  readonly worldId: string;
+  readonly countries: readonly {
+    readonly countryId: string;
+    readonly expectedRawSourceSHA256?: string;
+  }[];
+  readonly historyMode: 'BUDGET_SOCIAL';
+}): PostgresFinanceBudgetCapacitySource {
+  if (
+    !config ||
+    typeof config.worldId !== 'string' ||
+    config.historyMode !== 'BUDGET_SOCIAL' ||
+    !Array.isArray(config.countries) ||
+    config.countries.length < 1 ||
+    config.countries.length > 70
+  )
+    invalid(
+      'finite adopted country selectors and explicit mixed history required',
+    );
+  canonicalWorldId(config.worldId);
+  const sourcesByCountry = new Map<
+    string,
+    PostgresFinanceBudgetCapacitySource
+  >();
+  for (const country of config.countries) {
+    if (!country || typeof country.countryId !== 'string')
+      invalid('exact configured country required');
+    canonicalCountryId(country.countryId);
+    if (sourcesByCountry.has(country.countryId))
+      invalid('duplicate configured country');
+    sourcesByCountry.set(
+      country.countryId,
+      createPostgresFinanceBudgetCapacitySource({
+        worldId: config.worldId,
+        countryId: country.countryId,
+        historyMode: 'BUDGET_SOCIAL',
+        ...(country.expectedRawSourceSHA256 === undefined
+          ? {}
+          : { expectedRawSourceSHA256: country.expectedRawSourceSHA256 }),
+      }),
+    );
+  }
+  const port = Object.freeze({}) as PostgresFinanceBudgetCapacitySource;
+  worldSources.set(port, {
+    worldId: config.worldId,
+    sourcesByCountry,
+    countryIds: Object.freeze([...sourcesByCountry.keys()].sort()),
+    historyMode: 'BUDGET_SOCIAL',
+  });
+  return port;
+}
+
+export function isPostgresFinanceBudgetWorldCapacitySource(
+  value: unknown,
+  worldId: string,
+): value is PostgresFinanceBudgetCapacitySource {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    worldSources.get(value as PostgresFinanceBudgetCapacitySource)?.worldId ===
       worldId
   );
+}
+
+/** Immutable selector metadata only, not proof that any SQL source is ready. */
+export function readPostgresFinanceBudgetCapacitySourceScope(
+  source: PostgresFinanceBudgetCapacitySource,
+): Readonly<{
+  kind: 'COUNTRY' | 'FINITE_WORLD';
+  worldId: string;
+  countryIds: readonly string[];
+  historyMode: 'BUDGET_ONLY' | 'BUDGET_SOCIAL';
+}> {
+  const world = worldSources.get(source);
+  if (world)
+    return Object.freeze({
+      kind: 'FINITE_WORLD',
+      worldId: world.worldId,
+      countryIds: world.countryIds,
+      historyMode: world.historyMode,
+    });
+  const fixed = sources.get(source);
+  if (!fixed) invalid('genuine server capacity source required');
+  return Object.freeze({
+    kind: 'COUNTRY',
+    worldId: fixed.worldId,
+    countryIds: Object.freeze([fixed.countryId]),
+    historyMode: fixed.historyMode,
+  });
 }
 export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
   readonly source: PostgresFinanceBudgetCapacitySource;
@@ -87,10 +200,15 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
   readonly workerId: string;
   readonly observedAtReal: string;
 }) {
-  const config = sources.get(input.source),
-    c = input.command,
+  const c = input.command,
     tx = input.executor;
   validateCanonicalCommand(c, sha);
+  const world = worldSources.get(input.source);
+  const fixed =
+    world?.worldId === c.worldId
+      ? world.sourcesByCountry.get(c.countryId)
+      : input.source;
+  const config = fixed === undefined ? undefined : sources.get(fixed);
   if (
     !config ||
     config.worldId !== c.worldId ||

@@ -1,3 +1,4 @@
+import { MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY } from '../persistence/manual-office-authorization-sql.js';
 import {
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_CAPABILITY,
@@ -49,7 +50,6 @@ import {
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
   POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
 } from '@econmind/core/authenticated-office-command-contract';
-import { MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY } from '../persistence/manual-office-authorization-sql.js';
 import {
   isPostwarDayOneFxRuntime,
   type createPostwarDayOneFxRuntime,

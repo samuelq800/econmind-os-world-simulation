@@ -42,6 +42,11 @@ import {
 import type { PostwarFinanceConnection } from './runtime/postwar-finance-connection.js';
 import type { PostwarSocialConnection } from './runtime/postwar-social-connection.js';
 import type { PostwarTreasuryFxConnection } from './runtime/postwar-treasury-fx-connection.js';
+import {
+  readPostwarFinanceSocialApiConnection,
+  type PostwarFinanceSocialApiConnection,
+  type PostwarSharedOfficeConsumer,
+} from './runtime/postwar-finance-social-connection.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
@@ -60,6 +65,7 @@ export interface ApiRuntimeConfig {
 export interface RunningApiRuntime {
   readonly origin: string;
   readonly port: number;
+  readonly sharedOfficeConsumer?: Readonly<PostwarSharedOfficeConsumer>;
   readonly ready: () => boolean;
   readonly shutdown: () => Promise<void>;
 }
@@ -151,6 +157,7 @@ function createApiServer(
   postwarFinanceConnection?: PostwarFinanceConnection,
   postwarSocialConnection?: PostwarSocialConnection,
   postwarTreasuryFxConnection?: PostwarTreasuryFxConnection,
+  sharedConsumerConfigured = false,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
@@ -184,6 +191,15 @@ function createApiServer(
                   configured:
                     postwarTreasuryFxConnection.status ===
                     'EXPLICIT_MANUAL_TREASURY_FX_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(sharedConsumerConfigured
+            ? {
+                postwarSharedConsumer: {
+                  configured: true,
                   productionReady: false,
                   manualConsumptionOnly: true,
                 },
@@ -471,15 +487,19 @@ export async function startApiRuntime(
     readonly postwarFinanceConnection?: PostwarFinanceConnection;
     readonly postwarSocialConnection?: PostwarSocialConnection;
     readonly postwarTreasuryFxConnection?: PostwarTreasuryFxConnection;
+    readonly postwarFinanceSocialConnection?: Readonly<PostwarFinanceSocialApiConnection>;
   } = {},
 ): Promise<RunningApiRuntime> {
   let officialCountryPool: ManagedOfficialCountryPool | undefined;
   let lifecycle: ReturnType<typeof createApiServer>;
+  let shared:
+    ReturnType<typeof readPostwarFinanceSocialApiConnection> | undefined;
   try {
     if (
       dependencies.postwarTreasuryFxConnection &&
       (dependencies.postwarFinanceConnection ||
-        dependencies.postwarSocialConnection)
+        dependencies.postwarSocialConnection ||
+        dependencies.postwarFinanceSocialConnection)
     )
       throw Error('POSTWAR_TREASURY_FX_REQUIRES_SOLE_EXPLICIT_CONSUMER');
     if (
@@ -488,6 +508,18 @@ export async function startApiRuntime(
         dependencies.postwarTreasuryFxConnection.environment
     )
       throw Error('POSTWAR_TREASURY_FX_EXACT_ENVIRONMENT_REQUIRED');
+    if (dependencies.postwarFinanceSocialConnection) {
+      shared = readPostwarFinanceSocialApiConnection(
+        dependencies.postwarFinanceSocialConnection,
+      );
+      if (
+        dependencies.postwarFinanceConnection ||
+        dependencies.postwarSocialConnection ||
+        dependencies.postwarTreasuryFxConnection ||
+        config.environment !== shared.environment
+      )
+        throw Error('POSTWAR_SHARED_NODE_EXCLUSIVE_EXACT_ENVIRONMENT_REQUIRED');
+    }
     officialCountryPool =
       config.officialCountryDatabase === undefined
         ? undefined
@@ -495,19 +527,24 @@ export async function startApiRuntime(
           createOfficialCountryReadPool(config.officialCountryDatabase));
     // Real cold preparation is part of product startup, before any listener.
     // Failure is drained/cleaned with the same installed dependency lifecycle.
-    await dependencies.postwarSocialConnection?.prepare();
+    if (shared) await dependencies.postwarFinanceSocialConnection!.prepare();
+    else await dependencies.postwarSocialConnection?.prepare();
     lifecycle = createApiServer(
       config,
       dependencies.season1Fetch,
       officialCountryPool,
-      dependencies.postwarFinanceConnection,
-      dependencies.postwarSocialConnection,
+      shared?.finance ?? dependencies.postwarFinanceConnection,
+      shared?.social ?? dependencies.postwarSocialConnection,
       dependencies.postwarTreasuryFxConnection,
+      shared !== undefined,
     );
   } catch (error) {
     return failStartupAfterCleanup(error, [
-      () => dependencies.postwarFinanceConnection?.stop(),
-      () => dependencies.postwarSocialConnection?.stop(),
+      () =>
+        shared
+          ? dependencies.postwarFinanceSocialConnection!.stop()
+          : dependencies.postwarFinanceConnection?.stop(),
+      () => (shared ? undefined : dependencies.postwarSocialConnection?.stop()),
       () => dependencies.postwarTreasuryFxConnection?.stop(),
       () => officialCountryPool?.end(),
     ]);
@@ -528,6 +565,10 @@ export async function startApiRuntime(
     lifecycle.stopReadiness();
     return failStartupAfterCleanup(error, [
       () => lifecycle.drainFinance(),
+      () =>
+        shared
+          ? dependencies.postwarFinanceSocialConnection!.stop()
+          : undefined,
       () => officialCountryPool?.end(),
     ]);
   }
@@ -539,6 +580,10 @@ export async function startApiRuntime(
       [
         () => closeServer(lifecycle.server, config.shutdownGraceMs),
         () => lifecycle.drainFinance(),
+        () =>
+          shared
+            ? dependencies.postwarFinanceSocialConnection!.stop()
+            : undefined,
         () => officialCountryPool?.end(),
       ],
     );
@@ -550,19 +595,32 @@ export async function startApiRuntime(
   return {
     origin: `http://${originHost}:${address.port}`,
     port: address.port,
+    ...(shared ? { sharedOfficeConsumer: shared.control } : {}),
     ready: lifecycle.ready,
     shutdown: () => {
       lifecycle.stopReadiness();
       shutdownPromise ??= (async () => {
-        try {
-          await closeServer(lifecycle.server, config.shutdownGraceMs);
-        } finally {
+        const errors: unknown[] = [];
+        for (const operation of [
+          () => closeServer(lifecycle.server, config.shutdownGraceMs),
+          () => lifecycle.drainFinance(),
+          () =>
+            shared
+              ? dependencies.postwarFinanceSocialConnection!.stop()
+              : undefined,
+          () => officialCountryPool?.end(),
+        ]) {
           try {
-            await lifecycle.drainFinance();
-          } finally {
-            await officialCountryPool?.end();
+            await operation();
+          } catch (error) {
+            errors.push(error);
           }
         }
+        if (errors.length)
+          throw new AggregateError(
+            errors,
+            'world-api shutdown cleanup was incomplete',
+          );
       })();
       return shutdownPromise;
     },
