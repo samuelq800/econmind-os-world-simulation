@@ -1,7 +1,7 @@
 /** Actual loopback Node HTTP + real Finance installer handlers. Transport-only
  * controlled delayed ports below test abort/drain, not DB or economic authority. */
-import { request as nodeRequest, createServer } from 'node:http';
-import { describe, it, expect } from 'vitest';
+import { request as nodeRequest, createServer, Server } from 'node:http';
+import { describe, it, expect, vi } from 'vitest';
 import { startApiRuntime } from '../../apps/world-api/src/runtime.js';
 import { createPostwarFinanceNodeRoute } from '../../apps/world-api/src/runtime/postwar-finance-node-route.js';
 import {
@@ -16,6 +16,29 @@ const config = {
   port: 0,
   shutdownGraceMs: 30,
 };
+const officialDatabase = {
+  connectionString: 'UNUSED_TEST_ONLY_NO_DATABASE_CONNECTION',
+  loginRole: 'test_only_official_reader',
+  readerRole: 'world_v2_api_reader' as const,
+};
+function failingStartupPorts() {
+  const stopFailure = new Error('CONTROLLED_FINANCE_STOP_FAILURE');
+  const pool = {
+    query: vi.fn(async () => {
+      throw Error('STARTUP_CLEANUP_TEST_MUST_NOT_QUERY_DATABASE');
+    }),
+    end: vi.fn(async () => {}),
+  };
+  const stop = vi.fn(async () => {
+    throw stopFailure;
+  });
+  return {
+    stopFailure,
+    pool,
+    stop,
+    connection: { ...createPostwarFinanceConnection(null), stop },
+  };
+}
 function installed() {
   let connects = 0,
     queries = 0;
@@ -81,6 +104,113 @@ function deferred() {
   return { promise, resolve };
 }
 describe('explicit Finance installation on standard Node API', () => {
+  it('ends the official read pool after actual EADDRINUSE even if Finance stop fails, preserving both errors', async () => {
+    const occupied = createServer(),
+      f = failingStartupPorts();
+    await new Promise<void>((resolve) =>
+      occupied.listen(0, '127.0.0.1', resolve),
+    );
+    const address = occupied.address();
+    if (!address || typeof address === 'string')
+      throw Error('OWNED_OCCUPIED_LOOPBACK_REQUIRED');
+    let unexpectedRuntime:
+      Awaited<ReturnType<typeof startApiRuntime>> | undefined;
+    try {
+      let failure: unknown;
+      try {
+        unexpectedRuntime = await startApiRuntime(
+          {
+            ...config,
+            port: address.port,
+            officialCountryDatabase: officialDatabase,
+          },
+          {
+            officialCountryPool: f.pool,
+            postwarFinanceConnection: f.connection,
+          },
+        );
+      } catch (error) {
+        failure = error;
+      }
+      expect(failure).toBeInstanceOf(AggregateError);
+      const aggregate = failure as AggregateError;
+      expect(aggregate.errors).toHaveLength(2);
+      expect(aggregate.errors[0]).toMatchObject({ code: 'EADDRINUSE' });
+      expect(aggregate.errors[1]).toBe(f.stopFailure);
+      expect(aggregate.cause).toBe(aggregate.errors[0]);
+      expect(f.stop).toHaveBeenCalledTimes(1);
+      expect(f.pool.end).toHaveBeenCalledTimes(1);
+      expect(f.pool.query).not.toHaveBeenCalled();
+      expect(occupied.listening).toBe(true);
+    } finally {
+      await unexpectedRuntime?.shutdown().catch(() => {});
+      await new Promise<void>((resolve, reject) =>
+        occupied.close((error) => (error ? reject(error) : resolve())),
+      );
+    }
+    expect(occupied.listening).toBe(false);
+  });
+  it('attempts every invalid-address startup cleanup and preserves close/Finance failures with the primary cause', async () => {
+    const f = failingStartupPorts(),
+      closeFailure = new Error('CONTROLLED_LISTENER_CLOSE_FAILURE'),
+      originalClose = Server.prototype.close,
+      ownedServers = new Set<Server>();
+    let unexpectedRuntime:
+      Awaited<ReturnType<typeof startApiRuntime>> | undefined;
+    const addressSpy = vi
+      .spyOn(Server.prototype, 'address')
+      .mockImplementation(function (this: Server) {
+        ownedServers.add(this);
+        return null;
+      });
+    const closeSpy = vi
+      .spyOn(Server.prototype, 'close')
+      .mockImplementation(function (this: Server, callback) {
+        // Actually close our listener, then report a controlled cleanup failure.
+        // This fixture must not leave a socket open merely to test an error path.
+        return originalClose.call(this, (error) =>
+          callback?.(error ?? closeFailure),
+        );
+      });
+    try {
+      let failure: unknown;
+      try {
+        unexpectedRuntime = await startApiRuntime(
+          { ...config, officialCountryDatabase: officialDatabase },
+          {
+            officialCountryPool: f.pool,
+            postwarFinanceConnection: f.connection,
+          },
+        );
+      } catch (error) {
+        failure = error;
+      }
+      expect(failure).toBeInstanceOf(AggregateError);
+      const aggregate = failure as AggregateError;
+      expect(aggregate.errors).toHaveLength(3);
+      expect(aggregate.errors[0]).toMatchObject({
+        message: 'world-api did not acquire a TCP address',
+      });
+      expect(aggregate.errors[1]).toBe(closeFailure);
+      expect(aggregate.errors[2]).toBe(f.stopFailure);
+      expect(aggregate.cause).toBe(aggregate.errors[0]);
+      expect(f.stop).toHaveBeenCalledTimes(1);
+      expect(f.pool.end).toHaveBeenCalledTimes(1);
+      expect(f.pool.query).not.toHaveBeenCalled();
+      expect(closeSpy).toHaveBeenCalledTimes(1);
+      expect(ownedServers.size).toBe(1);
+      expect([...ownedServers][0]?.listening).toBe(false);
+    } finally {
+      addressSpy.mockRestore();
+      closeSpy.mockRestore();
+      await unexpectedRuntime?.shutdown().catch(() => {});
+      for (const server of ownedServers)
+        if (server.listening)
+          await new Promise<void>((resolve, reject) =>
+            server.close((error) => (error ? reject(error) : resolve())),
+          );
+    }
+  });
   it('preserves default POST405 and leaves health without a configured Finance claim', async () => {
     const api = await startApiRuntime(config);
     try {

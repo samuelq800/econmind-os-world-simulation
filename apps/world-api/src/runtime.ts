@@ -399,6 +399,27 @@ function closeServer(server: Server, graceMs: number): Promise<void> {
   });
 }
 
+async function failStartupAfterCleanup(
+  startupError: unknown,
+  cleanup: readonly (() => Promise<unknown> | undefined)[],
+): Promise<never> {
+  const failures: unknown[] = [];
+  for (const operation of cleanup) {
+    try {
+      await operation();
+    } catch (error) {
+      failures.push(error);
+    }
+  }
+  if (failures.length)
+    throw new AggregateError(
+      [startupError, ...failures],
+      'world-api startup failed and cleanup was incomplete',
+      { cause: startupError },
+    );
+  throw startupError;
+}
+
 export async function startApiRuntime(
   config: ApiRuntimeConfig = readApiRuntimeConfig(),
   dependencies: {
@@ -432,17 +453,22 @@ export async function startApiRuntime(
     });
   } catch (error) {
     lifecycle.stopReadiness();
-    await lifecycle.drainFinance();
-    await officialCountryPool?.end();
-    throw error;
+    return failStartupAfterCleanup(error, [
+      () => lifecycle.drainFinance(),
+      () => officialCountryPool?.end(),
+    ]);
   }
   const address = lifecycle.server.address();
   if (address === null || typeof address === 'string') {
     lifecycle.stopReadiness();
-    await closeServer(lifecycle.server, config.shutdownGraceMs);
-    await lifecycle.drainFinance();
-    await officialCountryPool?.end();
-    throw new Error('world-api did not acquire a TCP address');
+    return failStartupAfterCleanup(
+      new Error('world-api did not acquire a TCP address'),
+      [
+        () => closeServer(lifecycle.server, config.shutdownGraceMs),
+        () => lifecycle.drainFinance(),
+        () => officialCountryPool?.end(),
+      ],
+    );
   }
   let shutdownPromise: Promise<void> | undefined;
   const originHost = config.host.includes(':')
