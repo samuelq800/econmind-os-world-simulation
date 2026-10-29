@@ -270,15 +270,21 @@ native('one actual World consumer across Finance and Social', () => {
             },
             currency: policy.currency,
             amount: operation === 'SET_ENVELOPE' ? '1000' : '100',
-            envelopeRevisionRef: 'ENVELOPE_REV_SHARED_' + nonce,
+            envelopeRevisionRef:
+              'ENVELOPE_REV_SHARED_' + policy.countryId + '_' + nonce,
             lineRef:
               operation === 'SET_ENVELOPE'
                 ? null
                 : 'LINE_SHARED_' + name + '_' + nonce,
             revisionRef:
               operation === 'SET_ENVELOPE'
-                ? 'ENVELOPE_REV_SHARED_' + nonce
-                : 'LINE_REV_SHARED_' + name + '_' + nonce,
+                ? 'ENVELOPE_REV_SHARED_' + policy.countryId + '_' + nonce
+                : 'LINE_REV_SHARED_' +
+                  policy.countryId +
+                  '_' +
+                  name +
+                  '_' +
+                  nonce,
             predecessorRevisionRef: null,
           },
         });
