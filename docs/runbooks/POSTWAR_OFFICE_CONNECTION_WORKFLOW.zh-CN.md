@@ -60,6 +60,33 @@ pnpm exec vitest run tests/world-core/postwar-native-reference-db.test.ts
 保留失败原件，修复后另存新结果。每次封存源码 SHA、执行命令、退出码和报告 hash。
 重测试错峰；来源准备成功后复用 sealed 小源，不为重试在线错误反复初始化世界。
 
+预算提交后的完整回读使用 `tests/world-api/postwar-budget-current-readback-native.test.ts`，
+传入实际 H6 checkpoint 的 `ECONMIND_POSTWAR_MIXED_H6_CHECKPOINT`，以及已封存混合来源的
+`ECONMIND_POSTWAR_MIXED_CAPACITY_SOURCE_CHECKPOINT`。它检验 H7 提交后旧页面不可用、
+独立派生发布后的同版本页面、旧游标失效和重复发布；派生失败只能重试派生，不能重发经济命令。
+`@econmind/world-worker/postwar-budget-current-readback` 提供显式一次性安装接口；
+来源连接与派生发布连接必须分开，发布连接沿用已有专用角色，不给命令写入角色增加发布权限。
+
+两国完整原生命令验收是 `tests/world-core/postwar-social-current-prefix-native.test.ts`。
+`ECONMIND_SOCIAL_PREFIX_NATIVE_CHECKPOINT` 指向真实 H3 checkpoint；已有同种子封存来源时，
+可用 `ECONMIND_SOCIAL_PREFIX_NATIVE_SCOPE_TEMPLATE` 指向真实 H4 descriptor，复用经逐行
+哈希校验的不可变来源。该测试用法不复制经济事件、当前状态或权限，不将原测试失败改记为通过。
+
+主测试中的 skip 应按 case 与文件分别统计；仅启用指定环境变量后实际执行的原生测试，
+才能作为对应数据库路径的验证证据。旧候选完整检查与新增源码的验证结论必须分别记录。
+
+标准 Node API 的安装验收使用 `tests/world-api/postwar-finance-connection-native.test.ts`，
+除上述两个 H6/小来源 descriptor 外，设置 `ECONMIND_POSTWAR_FINANCE_CONNECTION_NATIVE=1`。
+它通过 `startApiRuntime` 的显式 `postwarFinanceConnection` 依赖执行 JWT 提交、单步消费、
+进程重启恢复和撤权拒绝；默认进程启动不会自动安装连接或启动消费。
+Finance 与 Social 连接使用相同命令路径，不能依次调用两个处理器来消费同一请求体。
+当前 Node 安装槽只支持显式 Finance 连接，不代表六办公室共用分发器已经接通。
+
+SQL 审查包生成器为 `tools/office-connection/postwar-schema-delta.mjs`。使用
+`--source-root <clean-world-checkout> --candidate-sha <full-SHA> --companion-root <companion-checkout> --output-directory <fresh-directory>`，
+生成固定哈希的 18 份非 Clock 提案、逐文件事务副本、依赖与冲突前提、恢复说明。
+它不执行 SQL 或注册迁移；不确定 COMMIT 结果必须停止核对，不能盲目重试。
+
 ## 当前边界
 
 Finance 已有受控预算写链与重启验收，Social 已有 POSITION/PLAN/MATCH 和跨国当前读取；

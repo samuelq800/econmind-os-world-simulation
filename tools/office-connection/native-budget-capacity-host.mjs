@@ -33,19 +33,24 @@ let state = null,
   closing = false;
 const pendingPools = [];
 let pendingServer = null;
+let pendingApiRuntime = null;
 const send = (value) => {
   if (process.connected) process.send(value);
 };
 async function close() {
   if (closing) return;
   closing = true;
+  const apiRuntime = state?.apiRuntime ?? pendingApiRuntime;
   const server = state?.server ?? pendingServer;
-  if (server?.listening) {
-    server.closeAllConnections();
-    await new Promise((resolve) => server.close(resolve));
+  if (apiRuntime) await apiRuntime.shutdown();
+  else {
+    if (server?.listening) {
+      server.closeAllConnections();
+      await new Promise((resolve) => server.close(resolve));
+    }
+    if (state?.connection) await state.connection.stop();
+    else await state?.runtime.consumer.stop();
   }
-  if (state?.connection) await state.connection.stop();
-  else await state?.runtime.consumer.stop();
   await Promise.all((state?.pools ?? pendingPools).map((pool) => pool.end()));
   send({ type: 'CLOSED', ownedCleanup: true });
   if (process.connected) process.disconnect();
@@ -226,65 +231,84 @@ async function start(c) {
   });
   const metrics = [];
   let base = '';
-  const server = createServer(async (req, res) => {
-    const abort = new AbortController();
-    res.on('close', () => {
-      if (!res.writableEnded) abort.abort();
-    });
-    const began = performance.now(),
-      before = process.memoryUsage().heapUsed;
-    try {
-      const chunks = [];
-      let size = 0;
-      for await (const chunk of req) {
-        const b = Buffer.from(chunk);
-        size += b.length;
-        if (size > 16384) {
-          res.writeHead(413).end();
+  let server = null,
+    apiRuntime = null;
+  if (connection) {
+    const { startApiRuntime } =
+      await import('../../apps/world-api/dist/runtime.js');
+    apiRuntime = await startApiRuntime(
+      {
+        environment: 'ci',
+        host: '127.0.0.1',
+        port: 0,
+        shutdownGraceMs: 5000,
+      },
+      { postwarFinanceConnection: connection },
+    );
+    pendingApiRuntime = apiRuntime;
+    base = apiRuntime.origin;
+  } else {
+    server = createServer(async (req, res) => {
+      const abort = new AbortController();
+      res.on('close', () => {
+        if (!res.writableEnded) abort.abort();
+      });
+      const began = performance.now(),
+        before = process.memoryUsage().heapUsed;
+      try {
+        const chunks = [];
+        let size = 0;
+        for await (const chunk of req) {
+          const b = Buffer.from(chunk);
+          size += b.length;
+          if (size > 16384) {
+            res.writeHead(413).end();
+            return;
+          }
+          chunks.push(b);
+        }
+        const request = new Request(base + req.url, {
+          method: req.method ?? 'GET',
+          headers: req.headers,
+          ...(['GET', 'HEAD'].includes(req.method ?? 'GET')
+            ? {}
+            : { body: Buffer.concat(chunks) }),
+          signal: abort.signal,
+        });
+        const response =
+          new URL(request.url).pathname === C.AUTHENTICATED_CURRENT_SEAT_PATH
+            ? await seat(request)
+            : await handler(request);
+        if (!response) {
+          res.writeHead(404).end();
           return;
         }
-        chunks.push(b);
+        const bytes = Buffer.from(await response.arrayBuffer());
+        metrics.push({
+          path: new URL(request.url).pathname,
+          status: response.status,
+          bytes: bytes.length,
+          milliseconds: performance.now() - began,
+          heapDeltaBytes: process.memoryUsage().heapUsed - before,
+        });
+        res.writeHead(response.status, Object.fromEntries(response.headers));
+        res.end(bytes);
+      } catch {
+        if (!res.destroyed) res.writeHead(503).end();
       }
-      const request = new Request(base + req.url, {
-        method: req.method ?? 'GET',
-        headers: req.headers,
-        ...(['GET', 'HEAD'].includes(req.method ?? 'GET')
-          ? {}
-          : { body: Buffer.concat(chunks) }),
-        signal: abort.signal,
-      });
-      const response =
-        new URL(request.url).pathname === C.AUTHENTICATED_CURRENT_SEAT_PATH
-          ? await seat(request)
-          : await handler(request);
-      if (!response) {
-        res.writeHead(404).end();
-        return;
-      }
-      const bytes = Buffer.from(await response.arrayBuffer());
-      metrics.push({
-        path: new URL(request.url).pathname,
-        status: response.status,
-        bytes: bytes.length,
-        milliseconds: performance.now() - began,
-        heapDeltaBytes: process.memoryUsage().heapUsed - before,
-      });
-      res.writeHead(response.status, Object.fromEntries(response.headers));
-      res.end(bytes);
-    } catch {
-      if (!res.destroyed) res.writeHead(503).end();
-    }
-  });
-  pendingServer = server;
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const address = server.address();
-  if (!address || typeof address === 'string')
-    throw Error('OWNED_LOOPBACK_REQUIRED');
-  base = `http://127.0.0.1:${address.port}`;
+    });
+    pendingServer = server;
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const address = server.address();
+    if (!address || typeof address === 'string')
+      throw Error('OWNED_LOOPBACK_REQUIRED');
+    base = `http://127.0.0.1:${address.port}`;
+  }
   state = {
     runtime,
     connection,
     server,
+    apiRuntime,
     pools: [worker, rawIntake, readPool],
     metrics,
     queries,
@@ -295,7 +319,10 @@ async function start(c) {
     type: 'LISTENING_TEST_ONLY',
     base,
     ...(connection
-      ? { connectionInstaller: 'STANDARD_EXPLICIT_FINANCE_CONNECTION' }
+      ? {
+          connectionInstaller: 'STANDARD_EXPLICIT_FINANCE_CONNECTION',
+          nodeRuntime: 'STANDARD_NODE_API_RUNTIME',
+        }
       : {}),
     coldConstruction: {
       milliseconds: performance.now() - started,
@@ -322,7 +349,10 @@ const receiveMessage = (message) => {
         id: message.id,
         result: {
           ...(state.connection
-            ? { connectionInstaller: 'STANDARD_EXPLICIT_FINANCE_CONNECTION' }
+            ? {
+                connectionInstaller: 'STANDARD_EXPLICIT_FINANCE_CONNECTION',
+                nodeRuntime: 'STANDARD_NODE_API_RUNTIME',
+              }
             : {}),
           heapUsed: process.memoryUsage().heapUsed,
           rss: process.memoryUsage().rss,

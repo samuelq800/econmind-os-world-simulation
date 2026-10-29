@@ -28,9 +28,10 @@ native(
         );
       const f = await createPostwarMixedBudgetRuntimeFixture(checkpoint);
       const dir =
-        '/workspace/.cloud-setup/evidence/postwar-finance-connection-native-20261029';
+        '/workspace/.cloud-setup/evidence/postwar-finance-connection-native-20261029/standard-node-runtime';
       const evidence: Record<string, unknown> = {
-        classification: 'ACTUAL_ISOLATED_CI_FINANCE_CONNECTION_NOT_DEPLOYED',
+        classification:
+          'ACTUAL_STANDARD_NODE_CI_FINANCE_CONNECTION_NOT_DEPLOYED',
         seedFingerprint: f.marker.seedFingerprint,
         admissionRef: f.marker.admissionRef,
         sourceSHA256: f.sourceSHA256,
@@ -200,6 +201,7 @@ native(
         expect(info.connectionInstaller).toBe(
           'STANDARD_EXPLICIT_FINANCE_CONNECTION',
         );
+        expect(info.nodeRuntime).toBe('STANDARD_NODE_API_RUNTIME');
         hosts.push(info);
         base = String(info.base);
       }
@@ -309,7 +311,9 @@ native(
             receipt: { outcome: 'COMMITTED', worldVersionAfter: '7' },
           },
         });
-        hosts.push(await ask('inspect'));
+        const installed = await ask('inspect');
+        expect(installed.nodeRuntime).toBe('STANDARD_NODE_API_RUNTIME');
+        hosts.push(installed);
         await close();
         await launch();
         expect((await call('/v1/office-command', envelope)).body).toMatchObject(
