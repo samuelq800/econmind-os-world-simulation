@@ -495,6 +495,12 @@ export async function startApiRuntime(
   let shared:
     ReturnType<typeof readPostwarFinanceSocialApiConnection> | undefined;
   try {
+    // Resolve only genuine ownership before validation can reject a mixed
+    // installation, so every transferred resource is still drained on failure.
+    if (dependencies.postwarFinanceSocialConnection)
+      shared = readPostwarFinanceSocialApiConnection(
+        dependencies.postwarFinanceSocialConnection,
+      );
     if (
       dependencies.postwarTreasuryFxConnection &&
       (dependencies.postwarFinanceConnection ||
@@ -508,10 +514,7 @@ export async function startApiRuntime(
         dependencies.postwarTreasuryFxConnection.environment
     )
       throw Error('POSTWAR_TREASURY_FX_EXACT_ENVIRONMENT_REQUIRED');
-    if (dependencies.postwarFinanceSocialConnection) {
-      shared = readPostwarFinanceSocialApiConnection(
-        dependencies.postwarFinanceSocialConnection,
-      );
+    if (shared) {
       if (
         dependencies.postwarFinanceConnection ||
         dependencies.postwarSocialConnection ||
@@ -535,7 +538,7 @@ export async function startApiRuntime(
       officialCountryPool,
       shared?.finance ?? dependencies.postwarFinanceConnection,
       shared?.social ?? dependencies.postwarSocialConnection,
-      dependencies.postwarTreasuryFxConnection,
+      shared?.treasuryFx ?? dependencies.postwarTreasuryFxConnection,
       shared !== undefined,
     );
   } catch (error) {
@@ -543,8 +546,9 @@ export async function startApiRuntime(
       () =>
         shared
           ? dependencies.postwarFinanceSocialConnection!.stop()
-          : dependencies.postwarFinanceConnection?.stop(),
-      () => (shared ? undefined : dependencies.postwarSocialConnection?.stop()),
+          : undefined,
+      () => dependencies.postwarFinanceConnection?.stop(),
+      () => dependencies.postwarSocialConnection?.stop(),
       () => dependencies.postwarTreasuryFxConnection?.stop(),
       () => officialCountryPool?.end(),
     ]);

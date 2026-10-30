@@ -11,8 +11,13 @@ import {
 } from '@econmind/core/authenticated-office-command-contract';
 import {
   readPostwarTreasuryFxRuntimeBinding,
+  isPostwarTreasuryFxRuntimeConnection,
   type PostwarTreasuryFxRuntimeConnection,
 } from '@econmind/world-worker/postwar-treasury-fx-runtime-connection';
+import {
+  readPostwarFinanceSocialRuntimeBinding,
+  type PostwarFinanceSocialRuntimeConnection,
+} from '@econmind/world-worker/finance-social-runtime-connection';
 import {
   createBoundedAuthenticatedOfficeCommandService,
   type AuthenticatedOfficeCommandServiceConfig,
@@ -43,8 +48,7 @@ export interface PostwarTreasuryFxConnection {
   }>;
   stop(): Promise<void>;
 }
-export interface PostwarTreasuryFxConnectionConfig {
-  readonly binding: Readonly<PostwarTreasuryFxRuntimeConnection>;
+export interface PostwarTreasuryFxHttpConfiguration {
   readonly readPool: AuthenticatedOfficeCommandServiceConfig['readPool'];
   readonly readerRole: string;
   readonly intakeRole: string;
@@ -54,8 +58,22 @@ export interface PostwarTreasuryFxConnectionConfig {
   readonly resolveActorId: AuthenticatedOfficeCommandServiceConfig['resolveActorId'];
   readonly allowedOrigins: readonly string[];
 }
+export interface PostwarTreasuryFxConnectionConfig extends PostwarTreasuryFxHttpConfiguration {
+  readonly binding: Readonly<PostwarTreasuryFxRuntimeConnection>;
+}
 export function createPostwarTreasuryFxConnection(
-  config: PostwarTreasuryFxConnectionConfig | null = null,
+  config?: PostwarTreasuryFxConnectionConfig | null,
+): Readonly<PostwarTreasuryFxConnection>;
+export function createPostwarTreasuryFxConnection(
+  config: PostwarTreasuryFxHttpConfiguration,
+  sharedConnection: Readonly<PostwarFinanceSocialRuntimeConnection>,
+): Readonly<PostwarTreasuryFxConnection>;
+export function createPostwarTreasuryFxConnection(
+  config:
+    | PostwarTreasuryFxConnectionConfig
+    | PostwarTreasuryFxHttpConfiguration
+    | null = null,
+  sharedConnection?: Readonly<PostwarFinanceSocialRuntimeConnection>,
 ): Readonly<PostwarTreasuryFxConnection> {
   const c = config
     ? Object.freeze({
@@ -65,8 +83,27 @@ export function createPostwarTreasuryFxConnection(
         allowedOrigins: Object.freeze([...new Set(config.allowedOrigins)]),
       })
     : null;
-  const ports = c ? readPostwarTreasuryFxRuntimeBinding(c.binding) : null;
-  if (ports && !['local', 'ci'].includes(ports.environment.ECONMIND_ENV ?? ''))
+  const shared = sharedConnection
+    ? readPostwarFinanceSocialRuntimeBinding(sharedConnection)
+    : null;
+  if (shared && (!c || 'binding' in c || !shared.treasuryFx))
+    throw Error('TREASURY_FX_EXACT_SHARED_SOURCE_REQUIRED');
+  let standaloneController: Readonly<PostwarTreasuryFxRuntimeConnection> | null =
+    null;
+  if (c && !shared && 'binding' in c) {
+    if (!isPostwarTreasuryFxRuntimeConnection(c.binding))
+      throw Error('TREASURY_FX_GENUINE_LIVE_CONTROLLER_REQUIRED');
+    standaloneController = c.binding;
+  }
+  const standalone = standaloneController
+    ? readPostwarTreasuryFxRuntimeBinding(standaloneController)
+    : null;
+  if (c && !shared && !standalone)
+    throw Error('TREASURY_FX_GENUINE_LIVE_CONTROLLER_REQUIRED');
+  const ports = shared ?? standalone;
+  const environment =
+    shared?.environment ?? standalone?.environment.ECONMIND_ENV;
+  if (ports && !['local', 'ci'].includes(environment ?? ''))
     throw Error('TREASURY_FX_LOCAL_CI_ONLY');
   if (
     c &&
@@ -159,14 +196,18 @@ export function createPostwarTreasuryFxConnection(
   function closed(): boolean {
     if (stopped || !c || !ports) return true;
     try {
-      return readPostwarTreasuryFxRuntimeBinding(c.binding) !== ports;
+      return sharedConnection
+        ? readPostwarFinanceSocialRuntimeBinding(sharedConnection) !== shared
+        : !standaloneController ||
+            readPostwarTreasuryFxRuntimeBinding(standaloneController) !==
+              standalone;
     } catch {
       return true;
     }
   }
   return Object.freeze({
     environment: ports
-      ? ports.environment.ECONMIND_ENV === 'ci'
+      ? environment === 'ci'
         ? ('ci' as const)
         : ('local' as const)
       : null,

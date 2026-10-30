@@ -19,6 +19,13 @@ import {
 } from '../../apps/world-api/src/runtime/postwar-finance-social-connection.js';
 import type { PostwarSocialConnectionConfiguration } from '../../apps/world-api/src/runtime/postwar-social-connection.js';
 import { startApiRuntime } from '../../apps/world-api/src/runtime.js';
+import { createPostwarTreasuryFxConnection } from '../../apps/world-api/src/runtime/postwar-treasury-fx-connection.js';
+import { createPostwarOfficeCommandFetchHandler } from '../../apps/world-api/src/runtime/postwar-office-command-fetch-handler.js';
+import {
+  AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_PAYLOAD_SCHEMA,
+} from '@econmind/core/authenticated-office-command-contract';
 let openingAdoption: OfficialLabourSocialOpeningAdoption;
 beforeAll(async () => {
   openingAdoption = await loadPostwarSocialConnectionOpeningAdoption(
@@ -32,7 +39,7 @@ function deferred() {
   });
   return { promise, resolve };
 }
-function fixture(worldId: string) {
+function fixture(worldId: string, treasuryFx = false) {
   const events: string[] = [];
   function transport(name: string) {
     const control = { ends: 0, connects: 0, end: async () => {} };
@@ -77,6 +84,9 @@ function fixture(worldId: string) {
     intakePool: intake.pool,
     clock,
     environment: 'ci',
+    ...(treasuryFx
+      ? { treasuryFx: { workerRole: 'fixture_shared_worker' } }
+      : {}),
   });
   const config: PostwarSocialConnectionConfiguration = {
     environment: 'ci',
@@ -281,5 +291,177 @@ describe('genuine shared Finance/Social API owner', () => {
       ),
     ).rejects.toThrow('EXACT_ENVIRONMENT');
     expect(f.pools.map((p) => p.control.ends)).toEqual([1, 1, 1, 1]);
+  });
+  it('installs the FX HTTP borrower only from the same genuine shared source and keeps its consumer hidden', async () => {
+    const f = fixture('WORLD_SHARED_API_FX', true);
+    // Deliberately unusable preparation DATA. It is never prepared/admitted;
+    // only genuine Worker source validation may turn data into a live source.
+    const owner = await createPostwarFinanceSocialApiConnection({
+      binding: f.binding,
+      social: f.config,
+      treasuryFxPreparation: {} as never,
+    });
+    const api = readPostwarFinanceSocialApiConnection(owner),
+      worker = readPostwarFinanceSocialRuntimeBinding(f.binding);
+    try {
+      expect(api.treasuryFx).toBeDefined();
+      expect(worker.treasuryFx).not.toBeNull();
+      expect(worker.runtime.consumer.state()).toBe('PREPARED');
+      expect(api.finance.runtime).toBeNull();
+      expect(api.social.preparedRuntime).toBeNull();
+      expect(Object.hasOwn(api.treasuryFx!, 'consumeOnce')).toBe(false);
+      expect(() => owner.control.startPreparation()).toThrow(
+        'SOURCE_NOT_PREPARED',
+      );
+      const mux = createPostwarOfficeCommandFetchHandler(api);
+      const response = await mux.handle(
+        new Request('https://api.example/v1/office-command', {
+          method: 'POST',
+          headers: {
+            origin: 'https://world.example',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
+            requestId: '11111111-1111-4111-8111-111111111111',
+            request: {
+              worldId: f.config.admittedWorldPins.worldId,
+              countryId: 'COUNTRY_01',
+              officeId: 'FINANCE',
+              commandType: POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+              commandId: 'COMMAND_FX_TEST_ONLY',
+              idempotencyKey: 'KEY_FX_TEST_ONLY',
+              expectedWorldVersion: '0',
+              payload: {
+                schemaVersion: POSTWAR_DAY_ONE_TREASURY_FX_PAYLOAD_SCHEMA,
+                quoteRef: 'QUOTE_TEST_ONLY',
+                payerTreasuryAccountId: 'TGA_TEST_ONLY',
+                payerGcuAccountId: 'GOV_GCU_TEST_ONLY',
+                dealerGcuAccountId: 'BANK_GCU_TEST_ONLY',
+                localAmount: '1',
+                localCurrency: 'XAA',
+                expectedQuoteSha256: '1'.repeat(64),
+              },
+            },
+          }),
+        }),
+      );
+      expect(response?.status).toBe(401);
+      expect(await response?.json()).toMatchObject({
+        error: { code: 'AUTHENTICATION_REQUIRED' },
+      });
+      await mux.stop();
+      expect(readPostwarFinanceSocialRuntimeBinding(f.binding)).toBe(worker);
+      expect(f.pools.map((p) => p.control.ends)).toEqual([0, 0, 0, 0]);
+      expect(f.pools.map((p) => p.control.connects)).toEqual([0, 0, 0, 0]);
+    } finally {
+      await owner.stop();
+    }
+    expect(f.pools.map((p) => p.control.ends)).toEqual([1, 1, 1, 1]);
+  });
+  it('rejects missing/extra preparation and shared/standalone controller substitution without taking pools', async () => {
+    const enabled = fixture('WORLD_SHARED_API_FX_REQUIRED', true),
+      disabled = fixture('WORLD_SHARED_API_FX_ABSENT');
+    const http = {
+      readPool: enabled.config.boundedReadPool,
+      readerRole: enabled.config.boundedReaderRole,
+      intakeRole: enabled.config.intakeRole,
+      authorizationPublisherRole: enabled.config.authorizationPublisherRole,
+      admittedWorldPins: enabled.config.admittedWorldPins,
+      auth: enabled.config.auth,
+      resolveActorId: enabled.config.resolveActorId,
+      allowedOrigins: ['https://world.example'],
+    };
+    try {
+      await expect(
+        createPostwarFinanceSocialApiConnection({
+          binding: enabled.binding,
+          social: enabled.config,
+        }),
+      ).rejects.toThrow('EXACT_FX_PREPARATION_REQUIRED');
+      await expect(
+        createPostwarFinanceSocialApiConnection({
+          binding: disabled.binding,
+          social: disabled.config,
+          treasuryFxPreparation: {} as never,
+        }),
+      ).rejects.toThrow('EXACT_FX_PREPARATION_REQUIRED');
+      expect(() =>
+        createPostwarTreasuryFxConnection(http, { ...enabled.binding }),
+      ).toThrow('GENUINE');
+      expect(() =>
+        createPostwarTreasuryFxConnection(
+          { ...http, binding: {} as never } as never,
+          enabled.binding,
+        ),
+      ).toThrow('EXACT_SHARED_SOURCE');
+      expect(() =>
+        createPostwarTreasuryFxConnection(
+          { ...http, admittedWorldPins: disabled.config.admittedWorldPins },
+          disabled.binding,
+        ),
+      ).toThrow('EXACT_SHARED_SOURCE');
+      expect(enabled.pools.map((p) => p.control.ends)).toEqual([0, 0, 0, 0]);
+      expect(disabled.pools.map((p) => p.control.ends)).toEqual([0, 0, 0, 0]);
+    } finally {
+      await enabled.binding.stop();
+      await disabled.binding.stop();
+    }
+  });
+  it('holds the triple-owner World reservation until all four pools settle after every HTTP borrower retires', async () => {
+    const f = fixture('WORLD_SHARED_API_FX_CLOSE', true);
+    const owner = await createPostwarFinanceSocialApiConnection({
+      binding: f.binding,
+      social: f.config,
+      treasuryFxPreparation: {} as never,
+    });
+    const ports = readPostwarFinanceSocialApiConnection(owner),
+      gate = deferred();
+    f.pools[0]!.control.end = () => gate.promise;
+    const stopping = owner.stop();
+    while (!f.pools[0]!.control.ends)
+      await new Promise((r) => setTimeout(r, 0));
+    expect(
+      (
+        await ports.treasuryFx!.handleCommand({
+          authorization: null,
+          request: {},
+        })
+      ).body,
+    ).toMatchObject({ error: { code: 'NOT_CONNECTED' } });
+    const replacement = fixture('WORLD_SHARED_API_FX_CLOSE', true);
+    try {
+      await expect(
+        createPostwarFinanceSocialApiConnection({
+          binding: replacement.binding,
+          social: replacement.config,
+          treasuryFxPreparation: {} as never,
+        }),
+      ).rejects.toThrow('WORLD_ALREADY_OWNED');
+    } finally {
+      gate.resolve();
+      await stopping;
+      await replacement.binding.stop();
+    }
+    expect(f.pools.map((p) => p.control.ends)).toEqual([1, 1, 1, 1]);
+  });
+  it('drains the genuine triple-owner when Node rejects an independent FX slot before preparation', async () => {
+    const f = fixture('WORLD_SHARED_API_FX_NODE_CONFLICT', true);
+    const owner = await createPostwarFinanceSocialApiConnection({
+      binding: f.binding,
+      social: f.config,
+      treasuryFxPreparation: {} as never,
+    });
+    await expect(
+      startApiRuntime(nodeConfig, {
+        postwarFinanceSocialConnection: owner,
+        postwarTreasuryFxConnection: createPostwarTreasuryFxConnection(null),
+      }),
+    ).rejects.toThrow('SOLE_EXPLICIT_CONSUMER');
+    expect(f.pools.map((p) => p.control.ends)).toEqual([1, 1, 1, 1]);
+    expect(f.pools.map((p) => p.control.connects)).toEqual([0, 0, 0, 0]);
+    expect(() => readPostwarFinanceSocialApiConnection(owner)).toThrow(
+      'GENUINE',
+    );
   });
 });

@@ -770,7 +770,7 @@ describe('complete bounded mixed prefix / mock transport, real Core semantics', 
     ).toBe(true);
   });
 
-  it('rejects a stale/oversized head and any actual posting before issuing mixed calculation evidence', async () => {
+  it('rejects a stale/oversized head and an actual posting without an FX canonical frame before issuing mixed calculation evidence', async () => {
     const data = await dataset(),
       t = transport(data);
     const read = t.executor.query;
@@ -780,10 +780,23 @@ describe('complete bounded mixed prefix / mock transport, real Core semantics', 
           rows: [{ financial: true, inventory: false }] as never[],
           rowCount: 1,
         };
+      if (sql.includes('count(*)'))
+        return { rows: [{ count: '1' }] as never[], rowCount: 1 };
+      if (sql.includes('from world_v2.financial_posting_batch'))
+        return {
+          rows: [
+            {
+              causation_command_id: 'COMMAND_ORPHAN_TEST_ONLY',
+              canonical_payload: '{}',
+              fingerprint: 'sha256:' + '1'.repeat(64),
+            },
+          ] as never[],
+          rowCount: 1,
+        };
       return read(sql, parameters);
     };
     await expect(t.read()).rejects.toThrow(
-      'unsupported financial or inventory posting effect',
+      'posting set differs from complete canonical prefix',
     );
     data.head.event_sequence = '257';
     await expect(t.read()).rejects.toThrow(

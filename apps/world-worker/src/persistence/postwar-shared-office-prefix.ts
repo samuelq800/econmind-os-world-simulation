@@ -42,18 +42,20 @@ export function replayPostwarSharedOfficePrefix(input: {
     ...t,
     events: t.transition.events,
   }));
-  const evidence = prepareFinanceNativeBudgetMixedPrefix(
-    {
-      worldId: lineage.worldId,
-      frames,
-      socialCountries: document.countries.map((c) => ({
-        countryId: c.countryId,
-        state: c.state,
-        offers: c.offers,
-      })),
-    },
-    digest,
-  );
+  const evidence =
+    lineage.mixedPrefixEvidence ??
+    prepareFinanceNativeBudgetMixedPrefix(
+      {
+        worldId: lineage.worldId,
+        frames,
+        socialCountries: document.countries.map((c) => ({
+          countryId: c.countryId,
+          state: c.state,
+          offers: c.offers,
+        })),
+      },
+      digest,
+    );
   const result = readFinanceNativeBudgetMixedPrefix(
     evidence,
     lineage.worldId,

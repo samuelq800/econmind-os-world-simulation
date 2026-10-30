@@ -3,6 +3,27 @@
  * Worker must protect actual policy/originals and source cutoff through commit. */
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import { Money } from '../numeric/money.js';
+import { canonicalDecimal } from '../numeric/world-decimal.js';
+import {
+  createFinancialAccount,
+  parseFinancialLedgerSnapshot,
+  type FinancialAccount,
+} from '../finance/financial-ledger.js';
+import { authorizeFinancialLedgerState } from '../opening/ledger-authority.js';
+import { inheritProductionDepositInstruments } from '../finance/production-deposit-funding.js';
+import {
+  parsePostwarDayOneFxQuoteData,
+  replayPostwarDayOneTreasuryFxFrame,
+  type PostwarDayOneFxQuoteData,
+  type PostwarDayOneTreasuryFxAccounts,
+} from '../finance/postwar-day-one-treasury-fx.js';
+import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from './authenticated-fx-command-contract.js';
+import {
+  financialAccountId,
+  legalEntityId,
+  countryId as coreCountryId,
+} from '../ids.js';
+
 import {
   canonicalSerialize,
   canonicalHashInput,
@@ -170,6 +191,8 @@ export interface FinanceNativeBudgetMixedPrefixResult {
   readonly budgetEncumbrances: readonly FinanceNativeBudgetCapacityEncumbrance[];
   readonly socialCountries: readonly FinanceNativeBudgetMixedSocialCountry[];
   readonly socialReservations: readonly SocialPositionPayrollReservation[];
+  readonly financialState?: Readonly<FinancialLedgerState>;
+  readonly currentTreasuryBalances?: readonly FinanceSocialFxCurrentTreasuryBalance[];
   readonly checkpoints: readonly {
     readonly eventId: string;
     readonly countryId: string;
@@ -187,6 +210,8 @@ const mixedPrefixes = new WeakMap<
   {
     readonly worldId: string;
     readonly framesHash: string;
+    readonly completeFrames?: true;
+    readonly financialBase?: Readonly<FinancialLedgerState>;
     readonly result: Readonly<FinanceNativeBudgetMixedPrefixResult>;
   }
 >();
@@ -482,6 +507,156 @@ function replayBudgetFrame(
   }
   return freeze(after);
 }
+
+/** Immutable source data only. The owning Worker still holds/rechecks its own
+ * source/admission/auth/lease/head. Neither this token nor a quote grants it. */
+export interface FinanceSocialFxOpeningEncumbrance {
+  readonly reference: string;
+  readonly accountId: string;
+  readonly amount: string;
+  readonly currency: string;
+}
+export interface FinanceSocialFxOriginal {
+  readonly quote: PostwarDayOneFxQuoteData;
+  readonly treasuryAsset: FinancialAccount;
+  readonly treasuryLiability: FinancialAccount;
+  readonly bankSettlementAsset: FinancialAccount;
+  readonly bankSettlementLiability: FinancialAccount;
+  readonly bankGcuAsset: FinancialAccount;
+}
+export interface FinanceSocialFxCurrentTreasuryBalance {
+  readonly countryId: string;
+  readonly accountId: string;
+  readonly claimId: string;
+  readonly ownerId: string;
+  readonly currency: string;
+  readonly amount: string;
+}
+declare const financialReplayBase: unique symbol;
+export interface FinanceNativeBudgetFinancialReplayBase {
+  readonly [financialReplayBase]: true;
+}
+const financialReplayBases = new WeakMap<
+  FinanceNativeBudgetFinancialReplayBase,
+  {
+    readonly financial: Readonly<FinancialLedgerState>;
+    readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
+    readonly fxOriginals: ReadonlyMap<string, FinanceSocialFxOriginal>;
+  }
+>();
+export function prepareFinanceNativeBudgetFinancialReplay(
+  input: {
+    readonly financial: Readonly<FinancialLedgerState>;
+    readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
+    readonly fxOriginals: readonly FinanceSocialFxOriginal[];
+  },
+  sha: Sha256Hex,
+): FinanceNativeBudgetFinancialReplayBase {
+  const base = input.financial;
+  if (!isAuthoritativeFinancialLedgerState(base) || base.worldVersion !== '0')
+    invalid('GENUINE_H0_FINANCIAL_REPLAY_BASE_REQUIRED');
+  const seen = new Set<string>(),
+    totals = new Map<string, Money>();
+  const opening = input.openingEncumbrances.map((r) => {
+    if (!r || !ref(r.reference) || seen.has(r.reference))
+      invalid('UNIQUE_OPENING_ENCUMBRANCE_REQUIRED');
+    seen.add(r.reference);
+    const a = base.accounts.find((a) => a.accountId === r.accountId);
+    if (!a || a.currency !== r.currency)
+      invalid('OPENING_ENCUMBRANCE_ORIGINAL_ACCOUNT_REQUIRED');
+    const m = Money.from(r.amount, r.currency);
+    if (m.amount.isNegative() || canonicalDecimal(m.amount) !== r.amount)
+      invalid('EXACT_OPENING_ENCUMBRANCE_AMOUNT_REQUIRED');
+    totals.set(
+      a.accountId,
+      (totals.get(a.accountId) ?? Money.from('0', a.currency)).add(m),
+    );
+    return Object.freeze({ ...r });
+  });
+  for (const [id, amount] of totals) {
+    const a = base.accounts.find((a) => a.accountId === id)!;
+    const balance =
+      base.positions.find((p) => p.account.accountId === id)?.netDebitBalance ??
+      Money.from('0', a.currency);
+    if (amount.amount.greaterThan(balance.amount))
+      invalid('OPENING_ENCUMBRANCE_EXCEEDS_ACTUAL_BALANCE');
+  }
+  const originals = new Map<string, FinanceSocialFxOriginal>();
+  let seed: string | undefined;
+  for (const r of input.fxOriginals) {
+    const q = parsePostwarDayOneFxQuoteData(r.quote, sha);
+    if (
+      q.worldId !== base.worldId ||
+      originals.has(q.quoteRef) ||
+      (seed !== undefined && seed !== q.seedFingerprint)
+    )
+      invalid('EXACT_UNIQUE_FX_ORIGINAL_WORLD_REQUIRED');
+    seed = q.seedFingerprint;
+    for (const key of [
+      'treasuryAsset',
+      'treasuryLiability',
+      'bankSettlementAsset',
+      'bankSettlementLiability',
+      'bankGcuAsset',
+    ] as const) {
+      const a = createFinancialAccount(r[key]);
+      if (
+        !same(
+          a,
+          base.accounts.find((b) => b.accountId === a.accountId),
+        ) ||
+        a.worldId !== base.worldId ||
+        a.countryId !== q.countryId
+      )
+        invalid('FX_ORIGINAL_DIFFERS_FROM_GENUINE_H0_LEDGER');
+    }
+    if (r.bankGcuAsset.accountId !== q.dealerGcuAccountId)
+      invalid('EXACT_FX_BANK_CASH_ORIGINAL_REQUIRED');
+    originals.set(q.quoteRef, freeze({ ...r, quote: q }));
+  }
+  const token = Object.freeze({}) as FinanceNativeBudgetFinancialReplayBase;
+  financialReplayBases.set(token, {
+    financial: base,
+    openingEncumbrances: Object.freeze(opening),
+    fxOriginals: originals,
+  });
+  return token;
+}
+function financialAtVersion(
+  state: Readonly<FinancialLedgerState>,
+  worldVersion: string,
+): Readonly<FinancialLedgerState> {
+  if (state.worldVersion === worldVersion) return state;
+  const next = authorizeFinancialLedgerState(
+    parseFinancialLedgerSnapshot({ ...state, worldVersion }),
+  );
+  inheritProductionDepositInstruments(next, state);
+  return next;
+}
+function completeFrameHash(
+  frames: readonly FinanceNativeBudgetFrame[],
+  sha: Sha256Hex,
+) {
+  return hash(frames, sha);
+}
+/** A same-world different opening ledger cannot borrow a replayed balance. */
+export function readFinanceNativeBudgetMixedFinancialState(input: {
+  readonly evidence: FinanceNativeBudgetMixedPrefixEvidence;
+  readonly financialBase: Readonly<FinancialLedgerState>;
+  readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+  readonly sha256Hex: Sha256Hex;
+}): Readonly<FinancialLedgerState> {
+  const meta = mixedPrefixes.get(input.evidence);
+  const result = readFinanceNativeBudgetMixedPrefix(
+    input.evidence,
+    input.financialBase.worldId,
+    input.frames,
+    input.sha256Hex,
+  );
+  if (meta?.financialBase !== input.financialBase || !result.financialState)
+    invalid('EXACT_GENUINE_FINANCIAL_REPLAY_BASE_REQUIRED');
+  return result.financialState;
+}
 function frameHash(
   frames: readonly FinanceNativeBudgetFrame[],
   sha: Sha256Hex,
@@ -501,7 +676,10 @@ export function readFinanceNativeBudgetMixedPrefix(
   if (
     !issued ||
     issued.worldId !== worldId ||
-    issued.framesHash !== frameHash(frames, sha)
+    issued.framesHash !==
+      (issued.completeFrames
+        ? completeFrameHash(frames, sha)
+        : frameHash(frames, sha))
   )
     invalid('GENUINE_EXACT_MIXED_PREFIX_EVIDENCE_REQUIRED');
   return issued.result;
@@ -513,6 +691,7 @@ export function prepareFinanceNativeBudgetMixedPrefix(
   input: {
     readonly worldId: string;
     readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+    readonly financialReplay?: FinanceNativeBudgetFinancialReplayBase;
     readonly socialCountries: readonly {
       readonly countryId: string;
       readonly state: SocialEmploymentServiceState;
@@ -521,6 +700,18 @@ export function prepareFinanceNativeBudgetMixedPrefix(
   },
   sha: Sha256Hex,
 ): FinanceNativeBudgetMixedPrefixEvidence {
+  const financialReplay =
+    input.financialReplay === undefined
+      ? undefined
+      : financialReplayBases.get(input.financialReplay);
+  if (
+    input.financialReplay !== undefined &&
+    (!financialReplay || financialReplay.financial.worldId !== input.worldId)
+  )
+    invalid('GENUINE_SAME_WORLD_FINANCIAL_REPLAY_REQUIRED');
+  if (financialReplay && input.frames.length > 256)
+    invalid('BOUNDED_COMPLETE_FINANCIAL_PREFIX_REQUIRED');
+  let financial = financialReplay?.financial;
   let budget: FinanceNativeBudgetState = {
     worldId: input.worldId,
     worldVersion: '0',
@@ -584,7 +775,11 @@ export function prepareFinanceNativeBudgetMixedPrefix(
       invalid('COMPLETE_UNIQUE_ORDERED_MIXED_PREFIX_REQUIRED');
     if (
       frame.inventoryPostings.length !== 0 ||
-      frame.financialPostingBatches.length !== 0
+      (frame.financialPostingBatches.length !== 0 &&
+        !(
+          financialReplay &&
+          command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+        ))
     )
       invalid('UNSUPPORTED_MIXED_PREFIX_POSTING_EFFECT');
     const transition = createAuthoritativeTransition({
@@ -603,6 +798,18 @@ export function prepareFinanceNativeBudgetMixedPrefix(
       transition,
       receipt: frame.receipt,
     });
+    if (financialReplay) {
+      const canonicalReceipt = createFinalCommandReceipt({
+        command,
+        transition,
+        outcome: 'COMMITTED',
+        reasonCode: null,
+        simTime: command.simTime,
+        recordedAtReal: frame.receipt.recordedAtReal,
+      });
+      if (!same(canonicalReceipt, frame.receipt))
+        invalid('EXACT_CANONICAL_FINANCIAL_PREFIX_RECEIPT_REQUIRED');
+    }
     for (const [i, event] of frame.events.entries()) {
       validateAuthoritativeEvent(event, sha);
       if (
@@ -646,6 +853,99 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         previous.countryId !== p.scope.countryId
       )
         invalid('BUDGET_LINE_DIFFERS_FROM_REAL_CAPACITY_ACCOUNT');
+    } else if (
+      command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+    ) {
+      if (!financialReplay || !financial)
+        invalid('FX_REQUIRES_GENUINE_PREPARED_FINANCIAL_BASE');
+      const event = frame.events[0];
+      if (!event || frame.events.length !== 1)
+        invalid('EXACT_FX_EVENT_REQUIRED');
+      const p = JSON.parse(event.canonicalPayload) as {
+        quote?: { quoteRef?: string };
+        encumbrances?: { sourceRef?: string; sourceSha256?: string };
+      };
+      const original = financialReplay.fxOriginals.get(p.quote?.quoteRef ?? '');
+      if (!original) invalid('IMMUTABLE_HISTORICAL_FX_QUOTE_REQUIRED');
+      const q = original.quote;
+      const payload = JSON.parse(command.canonicalPayload) as {
+        payerGcuAccountId: string;
+      };
+      const treasuryGcuAsset = createFinancialAccount({
+        worldId: financial.worldId,
+        countryId: coreCountryId(q.countryId),
+        ownerId: legalEntityId(q.governmentEntityId),
+        accountId: financialAccountId(payload.payerGcuAccountId),
+        accountClass: 'CASH',
+        currency: 'GCU',
+        claimId: null,
+        counterpartyEntityId: null,
+      });
+      const accounts: PostwarDayOneTreasuryFxAccounts = {
+        treasuryAsset: original.treasuryAsset,
+        treasuryLiability: original.treasuryLiability,
+        bankSettlementAsset: original.bankSettlementAsset,
+        bankSettlementLiability: original.bankSettlementLiability,
+        bankGcuAsset: original.bankGcuAsset,
+        treasuryGcuAsset,
+      };
+      let treasuryReserved = Money.from('0', q.localCurrency),
+        bankReserved = Money.from('0', 'GCU');
+      for (const r of financialReplay.openingEncumbrances) {
+        if (r.accountId === original.treasuryAsset.accountId)
+          treasuryReserved = treasuryReserved.add(
+            Money.from(r.amount, r.currency),
+          );
+        if (r.accountId === original.bankGcuAsset.accountId)
+          bankReserved = bankReserved.add(Money.from(r.amount, r.currency));
+      }
+      for (const r of caps.values())
+        if (r.accountId === original.treasuryAsset.accountId) {
+          if (
+            r.countryId !== q.countryId ||
+            r.governmentEntityId !== q.governmentEntityId ||
+            r.currency !== q.localCurrency ||
+            r.claimId !== original.treasuryAsset.claimId
+          )
+            invalid('FX_BUDGET_ENCUMBRANCE_SCOPE_MISMATCH');
+          treasuryReserved = treasuryReserved.add(
+            Money.from(r.amount, r.currency),
+          );
+        }
+      for (const c of countries.values())
+        for (const r of c.lifecycle.reservations)
+          if (r.accountId === original.treasuryAsset.accountId) {
+            if (
+              r.countryId !== q.countryId ||
+              r.employerId !== q.governmentEntityId ||
+              r.currency !== q.localCurrency
+            )
+              invalid('FX_SOCIAL_ENCUMBRANCE_SCOPE_MISMATCH');
+            treasuryReserved = treasuryReserved.add(
+              Money.from(r.amount, r.currency),
+            );
+          }
+      financial = replayPostwarDayOneTreasuryFxFrame(
+        {
+          financialBefore: financial,
+          frame,
+          quote: q,
+          accounts,
+          encumbrances: {
+            worldVersion: financial.worldVersion,
+            treasuryReservedAmount: canonicalDecimal(treasuryReserved.amount),
+            bankGcuReservedAmount: canonicalDecimal(bankReserved.amount),
+            sourceRef: p.encumbrances?.sourceRef ?? '',
+            sourceSha256: p.encumbrances?.sourceSha256 ?? '',
+          },
+        },
+        sha,
+      ).financial;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: event.sequence,
+      });
     } else {
       const country = countries.get(command.countryId);
       if (!country) invalid('SOCIAL_COUNTRY_ORIGINALS_REQUIRED');
@@ -741,12 +1041,106 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         eventSequence: event.sequence,
       });
     }
+    if (financial)
+      financial = financialAtVersion(financial, transition.worldVersionAfter);
+    if (financial && financialReplay) {
+      const accounts = new Map<string, FinancialAccount>(
+        financial.accounts.map((a) => [a.accountId, a]),
+      );
+      const positions = new Map<string, Money>(
+        financial.positions.map((p) => [
+          p.account.accountId,
+          p.netDebitBalance,
+        ]),
+      );
+      const amounts = new Map<string, Money>(),
+        references = new Set<string>();
+      const reserve = (
+        reference: string,
+        id: string,
+        currency: string,
+        amount: string,
+        owner?: string,
+        country?: string,
+        claim?: string,
+      ) => {
+        if (references.has(reference))
+          invalid('MIXED_CAPACITY_REFERENCE_COUNTED_TWICE');
+        references.add(reference);
+        const a = accounts.get(id);
+        if (
+          !a ||
+          a.currency !== currency ||
+          (owner !== undefined && a.ownerId !== owner) ||
+          (country !== undefined && a.countryId !== country) ||
+          (claim !== undefined && a.claimId !== claim)
+        )
+          invalid('MIXED_CAPACITY_ACTUAL_ACCOUNT_SCOPE_REQUIRED');
+        const value = Money.from(amount, currency);
+        if (value.amount.isNegative()) invalid('NEGATIVE_MIXED_CAPACITY');
+        amounts.set(
+          id,
+          (amounts.get(id) ?? Money.from('0', currency)).add(value),
+        );
+      };
+      for (const r of financialReplay.openingEncumbrances)
+        reserve(r.reference, r.accountId, r.currency, r.amount);
+      for (const r of caps.values())
+        reserve(
+          r.reference,
+          r.accountId,
+          r.currency,
+          r.amount,
+          r.governmentEntityId,
+          r.countryId,
+          r.claimId,
+        );
+      for (const c of countries.values())
+        for (const r of c.lifecycle.reservations)
+          reserve(
+            r.reservationId,
+            r.accountId,
+            r.currency,
+            r.amount,
+            r.employerId,
+            r.countryId,
+          );
+      for (const [id, amount] of amounts) {
+        const balance =
+          positions.get(id) ?? Money.from('0', accounts.get(id)!.currency);
+        if (amount.amount.greaterThan(balance.amount))
+          invalid('MIXED_CAPACITY_EXCEEDS_CURRENT_FINANCIAL_BALANCE');
+      }
+    }
     commandIds.add(command.commandId);
     if (command.idempotencyKey !== null) keys.add(command.idempotencyKey);
     lastSimTime = command.simTime.ticks;
   }
   const socialCountries = [...countries.values()];
+  const currentTreasuryBalances: FinanceSocialFxCurrentTreasuryBalance[] = [];
+  if (financial && financialReplay)
+    for (const original of financialReplay.fxOriginals.values()) {
+      const a = original.treasuryAsset;
+      if (!currentTreasuryBalances.some((r) => r.accountId === a.accountId))
+        currentTreasuryBalances.push({
+          countryId: a.countryId,
+          accountId: a.accountId,
+          claimId: a.claimId!,
+          ownerId: a.ownerId,
+          currency: a.currency,
+          amount: canonicalDecimal(
+            (
+              financial.positions.find(
+                (p) => p.account.accountId === a.accountId,
+              )?.netDebitBalance ?? Money.from('0', a.currency)
+            ).amount,
+          ),
+        });
+    }
   const result = freeze({
+    ...(financial === undefined
+      ? {}
+      : { financialState: financial, currentTreasuryBalances }),
     budgetState: budget,
     budgetEncumbrances: [...caps.values()],
     socialCountries,
@@ -758,7 +1152,15 @@ export function prepareFinanceNativeBudgetMixedPrefix(
   const evidence = Object.freeze({}) as FinanceNativeBudgetMixedPrefixEvidence;
   mixedPrefixes.set(evidence, {
     worldId: input.worldId,
-    framesHash: frameHash(input.frames, sha),
+    framesHash: financialReplay
+      ? completeFrameHash(input.frames, sha)
+      : frameHash(input.frames, sha),
+    ...(financialReplay === undefined
+      ? {}
+      : {
+          completeFrames: true as const,
+          financialBase: financialReplay.financial,
+        }),
     result,
   });
   return evidence;
@@ -838,6 +1240,12 @@ export function evaluateFinanceNativeBudgetSource(input: {
           source.frames,
           sha,
         );
+  if (
+    mixed?.financialState !== undefined &&
+    (source.capacityData !== undefined ||
+      source.financialState !== mixed.financialState)
+  )
+    invalid('ACTUAL_REPLAYED_FINANCIAL_STATE_REQUIRED_NOT_OPENING_CAPACITY');
   let treasury: FinancialPosition | undefined;
   if (source.capacityData !== undefined) {
     if (source.financialState !== undefined)

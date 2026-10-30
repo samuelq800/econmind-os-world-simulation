@@ -37,19 +37,15 @@ import {
   calculatePostwarDayOneTreasuryFx,
   applyPostwarDayOneTreasuryFx,
   assertPostwarDayOneTreasuryFxCommitBinding,
-  replayPostwarDayOneTreasuryFxFrame,
   POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT,
   type PostwarDayOneFxQuoteData,
   type PostwarDayOneTreasuryFxAccounts,
   type PostwarDayOneFxEncumbrances,
 } from '@econmind/core/postwar-day-one-treasury-fx';
-import {
-  prepareFinanceNativeBudgetMixedPrefix,
-  readFinanceNativeBudgetMixedPrefix,
-} from '@econmind/core/finance-budget-native';
+import type { FinanceSocialFxOriginal } from '@econmind/core/finance-budget-native';
 import {
   prepareFinanceSocialLedger,
-  replayPreparedFinanceSocialLedger,
+  replayPreparedFinanceSocialFxLedger,
 } from '@econmind/core/finance-social-prepared-ledger';
 import {
   createPostwarDayOneFxPolicy,
@@ -60,6 +56,7 @@ import {
   type PostwarGenesisFunding,
 } from '../preparation/postwar-operating-genesis-adoption.js';
 import type { PostwarSocialEmploymentStateDocument } from '../preparation/postwar-social-employment-state.js';
+import { readPostwarDayOneFxCommittedQuoteForTreasuryFrom } from './postgres-postwar-day-one-fx-history-originals.js';
 import { lockPostwarDayOneFxOriginalFrom } from './postgres-postwar-day-one-fx-originals.js';
 import { readPostwarDayOneFxHistoryFrom } from './postwar-day-one-fx-history.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
@@ -259,6 +256,7 @@ export function createPostwarDayOneFxRuntime(config: {
   let prepared: {
       policy: PostwarDayOneFxPolicy;
       ledger: ReturnType<typeof prepareFinanceSocialLedger>;
+      financialAccounts: readonly FinancialAccount[];
       social: PostwarSocialEmploymentStateDocument;
       funding: readonly PostwarGenesisFunding[];
     } | null = null,
@@ -327,43 +325,141 @@ export function createPostwarDayOneFxRuntime(config: {
       )
     )
       invalid('COMMAND_PRECEDES_ACTUAL_PREFIX');
-    const firstFx = history.frames.findIndex(
-      (f) => f.command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
-    );
-    const prefix =
-      firstFx < 0 ? history.frames : history.frames.slice(0, firstFx);
-    if (prefix.some((f) => f.financialPostingRows.length !== 0))
-      invalid('UNRECOGNIZED_PREFIX_FINANCIAL_EFFECT');
-    const frames = prefix.map((f) => ({ ...f, financialPostingBatches: [] }));
-    const evidence = prepareFinanceNativeBudgetMixedPrefix(
-      {
-        worldId: command.worldId,
-        frames,
-        socialCountries: p.social.countries.map((c) => ({
-          countryId: c.countryId,
-          state: c.state,
-          offers: c.offers,
-        })),
-      },
-      sha,
-    );
-    const mixed = readFinanceNativeBudgetMixedPrefix(
-      evidence,
-      command.worldId,
-      frames,
-      sha,
-    );
-    const prefixHead = {
-      worldVersion: prefix.at(-1)?.transition.worldVersionAfter ?? '0',
-      eventSequence: prefix.at(-1)?.events.at(-1)?.sequence ?? '0',
-    };
-    let financial = replayPreparedFinanceSocialLedger({
+    // Every committed frame is retained. Each historical FX original is read
+    // from the real fixed custody witness; a startup quote is only immutable
+    // data and cannot establish historical registration or current permission.
+    const fxOriginals: FinanceSocialFxOriginal[] = [];
+    for (const frame of history.frames) {
+      if (
+        frame.command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+      )
+        continue;
+      const event = frame.events[0];
+      if (
+        !event ||
+        frame.events.length !== 1 ||
+        event.eventType !== POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT
+      )
+        invalid('EXACT_COMMITTED_FX_EVENT_REQUIRED');
+      const payload = JSON.parse(frame.command.canonicalPayload) as Record<
+        string,
+        unknown
+      >;
+      if (
+        typeof payload.quoteRef !== 'string' ||
+        typeof payload.expectedQuoteSha256 !== 'string'
+      )
+        invalid('HISTORICAL_QUOTE_IDENTITY_REQUIRED');
+      const historical = await readPostwarDayOneFxCommittedQuoteForTreasuryFrom(
+        tx,
+        {
+          worldId: command.worldId,
+          hostCountryId: command.countryId,
+          sourceCountryId: frame.command.countryId,
+          seedFingerprint: p.policy.seedFingerprint,
+          admissionRef: original.admissionRef,
+          eventId: event.eventId,
+          eventPayloadHash: event.payloadHash,
+          quoteRef: payload.quoteRef,
+          quoteSha256: payload.expectedQuoteSha256,
+        },
+      );
+      const q = one(
+        p.policy.quotes.filter((q) => q.countryId === frame.command.countryId),
+        'HISTORICAL_VERIFIED_COUNTRY_REQUIRED',
+      );
+      if (
+        !same(historical.quote, q) ||
+        !same(historical.observedHead, {
+          worldVersion: history.head.worldVersion,
+          eventSequence: history.head.eventSequence,
+        }) ||
+        historical.trace.commandId !== frame.command.commandId ||
+        historical.trace.commandFingerprint !== frame.command.fingerprint ||
+        historical.trace.seedId !== original.seedId ||
+        historical.trace.hostSourceRef !== original.registrationRef ||
+        historical.trace.worldVersion !== event.worldVersion ||
+        historical.trace.eventSequence !== event.sequence
+      )
+        invalid('ACTUAL_HISTORICAL_QUOTE_PREFIX_OR_SOURCE_DIFFERS');
+      const asset = (owner: string) =>
+        one(
+          p.financialAccounts.filter(
+            (a) =>
+              a.worldId === q.worldId &&
+              a.countryId === q.countryId &&
+              a.ownerId === owner &&
+              a.accountClass === 'ASSET' &&
+              a.counterpartyEntityId === q.centralBankEntityId &&
+              a.currency === q.localCurrency &&
+              a.claimId !== null,
+          ),
+          'EXACT_ORIGINAL_HISTORICAL_CLAIM_ASSET_REQUIRED',
+        );
+      const mirror = (a: FinancialAccount) =>
+        one(
+          p.financialAccounts.filter(
+            (b) =>
+              b.worldId === q.worldId &&
+              b.countryId === q.countryId &&
+              b.ownerId === q.centralBankEntityId &&
+              b.accountClass === 'LIABILITY' &&
+              b.counterpartyEntityId === a.ownerId &&
+              b.currency === q.localCurrency &&
+              b.claimId === a.claimId,
+          ),
+          'EXACT_ORIGINAL_HISTORICAL_CLAIM_MIRROR_REQUIRED',
+        );
+      const treasuryAsset = asset(q.governmentEntityId),
+        bankSettlementAsset = asset(q.bankEntityId);
+      const bankGcuAsset = one(
+        p.financialAccounts.filter(
+          (a) =>
+            a.accountId === q.dealerGcuAccountId &&
+            a.countryId === q.countryId &&
+            a.ownerId === q.bankEntityId &&
+            a.accountClass === 'CASH' &&
+            a.currency === 'GCU',
+        ),
+        'EXACT_ORIGINAL_BANK_GCU_REQUIRED',
+      );
+      const seen = fxOriginals.find((o) => o.quote.quoteRef === q.quoteRef);
+      if (seen) {
+        if (!same(seen.quote, q)) invalid('IMMUTABLE_HISTORICAL_QUOTE_CHANGED');
+      } else
+        fxOriginals.push({
+          quote: q,
+          treasuryAsset,
+          treasuryLiability: mirror(treasuryAsset),
+          bankSettlementAsset,
+          bankSettlementLiability: mirror(bankSettlementAsset),
+          bankGcuAsset,
+        });
+    }
+    const frames = history.frames;
+    const mixed = replayPreparedFinanceSocialFxLedger({
       prepared: p.ledger,
-      mixedPrefixEvidence: evidence,
       frames,
-      expectedHead: prefixHead,
+      socialCountries: p.social.countries.map((c) => ({
+        countryId: c.countryId,
+        state: c.state,
+        offers: c.offers,
+      })),
+      openingEncumbrances: p.funding.map((f) => ({
+        reference: f.fundingId,
+        accountId: f.accountId,
+        amount: Money.from(f.ceilingAmount, f.currency).toCanonicalValue()
+          .amount,
+        currency: f.currency,
+      })),
+      fxOriginals,
+      expectedHead: {
+        worldVersion: history.head.worldVersion,
+        eventSequence: history.head.eventSequence,
+      },
       sha256Hex: sha,
     });
+    const financial = mixed.financial;
     const reservations = (
       q: PostwarDayOneFxQuoteData,
       a: PostwarDayOneTreasuryFxAccounts,
@@ -454,64 +550,6 @@ export function createPostwarDayOneFxRuntime(config: {
         ),
       });
     };
-    if (firstFx >= 0) {
-      for (let i = firstFx; i < history.frames.length; i++) {
-        const f = history.frames[i]!;
-        if (f.command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND)
-          invalid('POST_FX_NON_FX_REPLAY_NOT_INSTALLED');
-        const q = one(
-            p.policy.quotes.filter((x) => x.countryId === f.command.countryId),
-            'HISTORICAL_QUOTE_COUNTRY_REQUIRED',
-          ),
-          a = accounts(financial, q);
-        const actual = f.financialPostingRows
-          .map((r) => {
-            const body = JSON.parse(r.canonical_payload) as Record<
-              string,
-              unknown
-            >;
-            if (canonicalSerialize(body) !== r.canonical_payload)
-              invalid('CANONICAL_POSTING_BYTES_REQUIRED');
-            return { ...body, fingerprint: r.fingerprint } as Record<
-              string,
-              unknown
-            >;
-          })
-          .sort((a, b) =>
-            a.settlementCurrency === q.localCurrency
-              ? -1
-              : b.settlementCurrency === q.localCurrency
-                ? 1
-                : 0,
-          );
-        const e = reservations(
-          q,
-          a,
-          financial.worldVersion,
-          history.frames.slice(0, i).map((x) => ({
-            command: x.command,
-            transition: x.transition,
-            receipt: x.receipt,
-          })),
-        );
-        financial = replayPostwarDayOneTreasuryFxFrame(
-          {
-            financialBefore: financial,
-            frame: {
-              command: f.command,
-              transition: f.transition,
-              receipt: f.receipt,
-              financialPostingBatches: actual,
-              inventoryPostings: [],
-            },
-            quote: q,
-            accounts: a,
-            encumbrances: e,
-          },
-          sha,
-        ).financial;
-      }
-    }
     if (financial.worldVersion !== history.head.worldVersion)
       invalid('COMPLETE_FINANCIAL_HEAD_REQUIRED');
     const a = accounts(financial, quote),
@@ -782,6 +820,7 @@ export function createPostwarDayOneFxRuntime(config: {
         prepared = Object.freeze({
           policy,
           ledger: prepareFinanceSocialLedger(financial),
+          financialAccounts: financial.accounts,
           social: opening.socialEmployment,
           funding: opening.facts.funding,
         });

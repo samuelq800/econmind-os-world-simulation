@@ -10,6 +10,7 @@ import {
   parseAuthoritativeEvent,
   type CanonicalCommand,
 } from '@econmind/core';
+import { decodeBoundedPostwarFinancialPostings } from './bounded-postwar-fx-postings.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
 import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
@@ -183,6 +184,11 @@ export async function readPostwarDayOneFxHistoryFrom(input: {
         transition,
         receipt,
         inventoryPostings: Object.freeze([]),
+        financialPostingBatches: decodeBoundedPostwarFinancialPostings({
+          command: g.command,
+          transition,
+          rows: postings.rows,
+        }),
         financialPostingRows: Object.freeze(
           postings.rows.filter(
             (p) => p.causation_command_id === g.command.commandId,

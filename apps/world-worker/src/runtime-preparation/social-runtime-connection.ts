@@ -4,6 +4,7 @@ import {
 } from './finance-social-runtime-connection.js';
 import {
   createPostwarSocialSourcePreparation,
+  readPreparedPostwarSocialFinancialReplayBase,
   isPreparedPostwarSocialSource,
   retirePreparedPostwarSocialSource,
   type PreparedPostwarSocialSource,
@@ -286,6 +287,18 @@ export function isPostwarSocialRuntimeConnection(
     issuedConnections.has(value) &&
     issuedConnections.get(value)!.world === world
   );
+}
+
+/** Same fixed instance's genuine H0 DATA baseline. This accessor creates no
+ * current authority and cannot substitute for either office's source locks. */
+export function readPostwarSocialRuntimeFinancialReplayBase(
+  value: Readonly<PostwarSocialRuntimeConnection>,
+  world: string,
+) {
+  const binding = issuedConnections.get(value);
+  if (!binding || binding.world !== world)
+    throw Error('GENUINE_SOCIAL_FINANCIAL_REPLAY_CONNECTION_REQUIRED');
+  return readPreparedPostwarSocialFinancialReplayBase(binding.source);
 }
 
 /** Server-only transport ownership metadata, not credentials or source facts. */

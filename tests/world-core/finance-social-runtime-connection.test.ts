@@ -11,6 +11,7 @@ import {
   createPostwarFinanceSocialRuntimeConnection,
   readPostwarFinanceSocialRuntimeBinding,
   isPostwarFinanceSocialRuntimeConnection,
+  hasPreparedPostwarFinanceSocialTreasuryFx,
   readFinanceSocialSourceBinding,
 } from '../../apps/world-worker/src/runtime-preparation/finance-social-runtime-connection.js';
 import {
@@ -140,6 +141,52 @@ describe('fixed Finance/Social single World issuer', () => {
       isPostwarFinanceSocialRuntimeConnection(connection, connection.worldId),
     ).toBe(false);
     expect(() => readPostwarFinanceSocialRuntimeBinding(connection)).toThrow();
+  });
+  it('never permits an installed but unprepared FX source or a copied binding to consume', async () => {
+    const f = fixtures('WORLD_SHARED_FX_PREPARE_GATE');
+    const connection = createPostwarFinanceSocialRuntimeConnection({
+      ...f.input,
+      treasuryFx: { workerRole: 'worker_shared_test' },
+    });
+    try {
+      expect(
+        readPostwarFinanceSocialRuntimeBinding(connection).treasuryFx,
+      ).not.toBeNull();
+      expect(hasPreparedPostwarFinanceSocialTreasuryFx(connection)).toBe(false);
+      expect(hasPreparedPostwarFinanceSocialTreasuryFx({ ...connection })).toBe(
+        false,
+      );
+      await expect(connection.prepare({} as never)).rejects.toThrow(
+        'FX_EXACT_PREPARATION_REQUIRED',
+      );
+      expect(() => connection.consumeOnce()).toThrow('SOURCE_NOT_PREPARED');
+      expect(() => connection.startPreparation()).toThrow(
+        'SOURCE_NOT_PREPARED',
+      );
+      expect(f.worker.queries).toEqual([]);
+    } finally {
+      await connection.stop();
+    }
+    expect(hasPreparedPostwarFinanceSocialTreasuryFx(connection)).toBe(false);
+    await expect(connection.prepareTreasuryFx({} as never)).rejects.toThrow(
+      'RUNTIME_RETIRED',
+    );
+  });
+  it('rejects staged FX preparation when the fixed source was not installed', async () => {
+    const f = fixtures('WORLD_SHARED_NO_FX');
+    const connection = createPostwarFinanceSocialRuntimeConnection(f.input);
+    try {
+      await expect(connection.prepareTreasuryFx({} as never)).rejects.toThrow(
+        'FX_SOURCE_NOT_INSTALLED',
+      );
+      await expect(
+        connection.prepare({} as never, {} as never),
+      ).rejects.toThrow('FX_EXACT_PREPARATION_REQUIRED');
+      expect(f.worker.queries).toEqual([]);
+      expect(hasPreparedPostwarFinanceSocialTreasuryFx(connection)).toBe(false);
+    } finally {
+      await connection.stop();
+    }
   });
   it('uses one fixed adapter stack for both exact Office intake lock queries', async () => {
     const f = fixtures('WORLD_SHARED_INTAKE'),

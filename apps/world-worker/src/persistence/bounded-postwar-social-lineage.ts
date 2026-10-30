@@ -10,11 +10,15 @@ import {
   validateFinalReceiptForCommand,
   type CanonicalCommand,
 } from '@econmind/core';
-import {
-  FINANCE_NATIVE_BUDGET_EVENT_TYPES,
-  type FinanceNativeBudgetCanonicalFrame,
-} from '@econmind/core/finance-budget-native';
+import { FINANCE_NATIVE_BUDGET_EVENT_TYPES } from '@econmind/core/finance-budget-native';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
+import {
+  readBoundedPostwarFinancialPostingRowsFrom,
+  decodeBoundedPostwarFinancialPostings,
+  type BoundedPostwarCanonicalFrame,
+} from './bounded-postwar-fx-postings.js';
+import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import { POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT } from '@econmind/core/postwar-day-one-treasury-fx';
 import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import { BOUNDED_MIXED_OFFICE_LIMITS } from './bounded-mixed-office-history.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
@@ -75,10 +79,13 @@ export async function readBoundedPostwarSocialFramesFrom(input: {
   );
   if (
     effects.rows.length !== 1 ||
-    effects.rows[0]!.financial !== false ||
+    typeof effects.rows[0]!.financial !== 'boolean' ||
     effects.rows[0]!.inventory !== false
   )
-    invalid('unsupported financial or inventory posting effect');
+    invalid('unsupported inventory posting effect');
+  const postings = effects.rows[0]!.financial
+    ? await readBoundedPostwarFinancialPostingRowsFrom(tx, input.worldId)
+    : { rows: [], bytes: 0 };
   const e = await tx.query<Record<string, unknown>>(
     'select event_id,event_type,schema_version,world_id,causation_command_id,correlation_id,world_version::text,event_sequence::text as sequence,sim_time::text,recorded_at_real,corrects_event_id,canonical_payload,payload_sha256,event_fingerprint from world_v2.authoritative_event where world_id=$1 and octet_length(canonical_payload)<=65536 order by event_sequence limit 257',
     [input.worldId],
@@ -88,7 +95,9 @@ export async function readBoundedPostwarSocialFramesFrom(input: {
     e.rows.length > limit.events
   )
     invalid('complete bounded event prefix required');
-  let prefixBytes = 0;
+  let prefixBytes = postings.bytes;
+  if (prefixBytes > limit.prefixBytes)
+    invalid('complete prefix byte capacity exceeded');
   const reader = new DurableV08LedgerLineageReader({
     database: input.database,
     sha256Hex: sha,
@@ -105,7 +114,8 @@ export async function readBoundedPostwarSocialFramesFrom(input: {
       socialCommand = socialTypes.get(eventType);
     if (
       !FINANCE_NATIVE_BUDGET_EVENT_TYPES.some((t) => t === eventType) &&
-      !socialCommand
+      !socialCommand &&
+      eventType !== POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT
     )
       invalid('unknown intervening family');
     const id = text(row.causation_command_id);
@@ -130,7 +140,9 @@ export async function readBoundedPostwarSocialFramesFrom(input: {
     }
     if (
       group.command.commandType !==
-      (socialCommand ?? 'CORE_FINANCE_BUDGET_APPROPRIATION_V1')
+      (eventType === POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT
+        ? POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+        : (socialCommand ?? 'CORE_FINANCE_BUDGET_APPROPRIATION_V1'))
     )
       invalid('event/command family mismatch');
     const bytes = text(row.canonical_payload);
@@ -167,7 +179,7 @@ export async function readBoundedPostwarSocialFramesFrom(input: {
       invalid('event hashes mismatch');
     group.events.push(event);
   }
-  const frames: FinanceNativeBudgetCanonicalFrame[] = [];
+  const frames: BoundedPostwarCanonicalFrame[] = [];
   for (const group of groups.values()) {
     const transition = createAuthoritativeTransition({
       command: group.command,
@@ -187,10 +199,19 @@ export async function readBoundedPostwarSocialFramesFrom(input: {
       ...group,
       transition,
       receipt,
-      financialPostingBatches: [],
+      financialPostingBatches: decodeBoundedPostwarFinancialPostings({
+        command: group.command,
+        transition,
+        rows: postings.rows,
+      }),
       inventoryPostings: [],
     });
   }
+  if (
+    frames.reduce((n, f) => n + f.financialPostingBatches.length, 0) !==
+    postings.rows.length
+  )
+    invalid('posting set differs from complete canonical prefix');
   const committed = await tx.query<{ command_id: string }>(
     "select command_id from world_v2.command_receipt where world_id=$1 and outcome='COMMITTED'order by world_version_after,command_id limit 257",
     [input.worldId],

@@ -225,7 +225,7 @@ export function createFinanceSocialCommandConsumptionPreparation(
       officeReaders: d.readers,
     },
     null,
-    'FINANCE_SOCIAL',
+    d.readers.treasuryFx ? 'FINANCE_SOCIAL_FX' : 'FINANCE_SOCIAL',
   );
 }
 /** Explicit finite server composition. No environment substitution, loop,
@@ -250,7 +250,10 @@ export function createProductionFinanceCommandConsumption(
 function createDurableCommandConsumer(
   input: DurableConsumptionInput,
   serverBinding: ServerCommandHostBinding | null,
-  familyBoundary: 'LEGACY_GENERIC' | 'FINANCE_SOCIAL' = 'LEGACY_GENERIC',
+  familyBoundary:
+    | 'LEGACY_GENERIC'
+    | 'FINANCE_SOCIAL'
+    | 'FINANCE_SOCIAL_FX' = 'LEGACY_GENERIC',
   treasuryFxBinding: PostwarTreasuryFxSourceBinding | null = null,
 ) {
   const world = worldId(input.worldId);
@@ -259,7 +262,7 @@ function createDurableCommandConsumer(
   const officeReaders = Object.freeze({ ...input.officeReaders });
   const lineage = new DurableV08LedgerLineageReader(input);
   const delivery =
-    serverBinding || treasuryFxBinding || familyBoundary === 'FINANCE_SOCIAL'
+    serverBinding || treasuryFxBinding || familyBoundary !== 'LEGACY_GENERIC'
       ? null
       : createAuthoritativeWorkerExecution({
           database: input.database,
@@ -272,7 +275,7 @@ function createDurableCommandConsumer(
           }),
         });
   const shipment =
-    serverBinding || treasuryFxBinding || familyBoundary === 'FINANCE_SOCIAL'
+    serverBinding || treasuryFxBinding || familyBoundary !== 'LEGACY_GENERIC'
       ? null
       : createAuthoritativeWorkerExecution({
           database: input.database,
@@ -288,7 +291,7 @@ function createDurableCommandConsumer(
     clock === null ||
     serverBinding !== null ||
     treasuryFxBinding !== null ||
-    familyBoundary === 'FINANCE_SOCIAL'
+    familyBoundary !== 'LEGACY_GENERIC'
       ? null
       : createLocalNarrowReservationWorker({
           ...input,
@@ -580,8 +583,12 @@ function createDurableCommandConsumer(
       // skip an unsupported head, alter its expected version, or invoke a
       // source/claim/legacy goods branch for an uninstalled family.
       if (
-        familyBoundary === 'FINANCE_SOCIAL' &&
-        !FINANCE_SOCIAL_COMMAND_FAMILIES.has(command.commandType)
+        familyBoundary !== 'LEGACY_GENERIC' &&
+        !FINANCE_SOCIAL_COMMAND_FAMILIES.has(command.commandType) &&
+        !(
+          familyBoundary === 'FINANCE_SOCIAL_FX' &&
+          command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+        )
       )
         return blocked(
           'FINANCE_SOCIAL_FAMILY_NOT_INSTALLED',

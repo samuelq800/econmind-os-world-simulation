@@ -36,7 +36,11 @@ function deferred() {
   });
   return { promise, resolve };
 }
-function harness(type = 'UNKNOWN_TEST_ONLY_ECONOMY', forcedWorld?: string) {
+function harness(
+  type = 'UNKNOWN_TEST_ONLY_ECONOMY',
+  forcedWorld?: string,
+  withFx = false,
+) {
   const world = forcedWorld ?? `WORLD_TEST_ONLY_FIXED_CONSUMER_${++serial}`;
   const makeCommand = (commandType: string, suffix: string) =>
     parseCanonicalCommand(
@@ -136,6 +140,9 @@ function harness(type = 'UNKNOWN_TEST_ONLY_ECONOMY', forcedWorld?: string) {
       simTime: vi.fn(async () => '10'),
     }),
     environment: 'ci' as const,
+    ...(withFx
+      ? { treasuryFx: { workerRole: 'fixture_shared_boundary_worker' } }
+      : {}),
   };
   const connection = createPostwarFinanceSocialRuntimeConnection(configuration);
   const ports = readPostwarFinanceSocialRuntimeBinding(connection);
@@ -215,15 +222,17 @@ describe('fixed Finance/Social global FIFO boundary', () => {
     }
     expect(h.end).not.toHaveBeenCalled();
   });
-  it.each([
-    'UNKNOWN_TEST_ONLY_ECONOMY',
-    'CORE_GOODS_TRANSFER_V1',
-    'CORE_GOODS_SHIPMENT_V1',
-    'CORE_GOODS_DELIVERY_V1',
-    'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
-  ])(
-    'blocks %s at the true global queue head without source reads, claim, writes or a legacy goods constructor',
-    async (type) => {
+  it.each(
+    [
+      'UNKNOWN_TEST_ONLY_ECONOMY',
+      'CORE_GOODS_TRANSFER_V1',
+      'CORE_GOODS_SHIPMENT_V1',
+      'CORE_GOODS_DELIVERY_V1',
+      'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+    ].flatMap((type) => [false, true].map((withFx) => ({ type, withFx }))),
+  )(
+    'blocks $type with FX=$withFx at the true global queue head without source reads, claim, writes or a legacy goods constructor',
+    async ({ type, withFx }) => {
       const reserve = vi.spyOn(
           reservation,
           'createLocalNarrowReservationWorker',
@@ -236,7 +245,7 @@ describe('fixed Finance/Social global FIFO boundary', () => {
           delivery,
           'createSqlNarrowTreasuryGcuDeliveryCandidateFactory',
         );
-      const h = harness(type);
+      const h = harness(type, undefined, withFx);
       try {
         const consumer = h.ports.runtime.consumer;
         consumer.startPreparation(); // TEST_ONLY local engine lifecycle; source remains unprepared.

@@ -17,10 +17,18 @@ import {
   parseFinanceBudgetCapacityData,
   readFinanceBudgetCapacityData,
 } from '@econmind/core/finance-budget-capacity-data';
-import type { FinanceNativeBudgetPolicy } from '@econmind/core/finance-budget-native';
+import type {
+  FinanceNativeBudgetPolicy,
+  FinanceNativeBudgetSource,
+} from '@econmind/core/finance-budget-native';
 import { readBoundedFinanceBudgetHistoryFrom } from './bounded-finance-budget-history.js';
 import { readBoundedMixedOfficeHistoryFrom } from './bounded-mixed-office-history.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import {
+  isPostwarSocialRuntimeConnection,
+  readPostwarSocialRuntimeConnectionResources,
+  type PostwarSocialRuntimeConnection,
+} from '../runtime-preparation/social-runtime-connection.js';
 declare const capacitySource: unique symbol;
 export interface PostgresFinanceBudgetCapacitySource {
   readonly [capacitySource]: true;
@@ -48,6 +56,33 @@ const worldSources = new WeakMap<
     readonly historyMode: 'BUDGET_SOCIAL';
   }
 >();
+const replayBoundSources = new WeakMap<
+  PostgresFinanceBudgetCapacitySource,
+  {
+    source: PostgresFinanceBudgetCapacitySource;
+    social: Readonly<PostwarSocialRuntimeConnection>;
+  }
+>();
+/** Fixed same-World private-instance binding; no supplied ledger, callback,
+ * copied reader or ready flag. Original independent source behavior is retained. */
+export function bindPostgresFinanceBudgetCapacitySourceToSocialReplay(
+  source: PostgresFinanceBudgetCapacitySource,
+  social: Readonly<PostwarSocialRuntimeConnection>,
+): PostgresFinanceBudgetCapacitySource {
+  const scope = readPostgresFinanceBudgetCapacitySourceScope(source);
+  if (!isPostwarSocialRuntimeConnection(social, scope.worldId))
+    invalid('genuine same-World Social data preparation required');
+  const countries =
+    readPostwarSocialRuntimeConnectionResources(social).countryIds;
+  if (scope.countryIds.some((c) => !countries.includes(c)))
+    invalid('exact Social country roster required');
+  const bound = Object.freeze({}) as PostgresFinanceBudgetCapacitySource;
+  replayBoundSources.set(bound, {
+    source: replayBoundSources.get(source)?.source ?? source,
+    social,
+  });
+  return bound;
+}
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
 function invalid(message: string): never {
@@ -89,10 +124,14 @@ export function isPostgresFinanceBudgetCapacitySource(
   return (
     !!value &&
     typeof value === 'object' &&
-    (sources.get(value as PostgresFinanceBudgetCapacitySource)?.worldId ===
-      worldId ||
-      worldSources.get(value as PostgresFinanceBudgetCapacitySource)
-        ?.worldId === worldId)
+    (sources.get(
+      replayBoundSources.get(value as PostgresFinanceBudgetCapacitySource)
+        ?.source ?? (value as PostgresFinanceBudgetCapacitySource),
+    )?.worldId === worldId ||
+      worldSources.get(
+        replayBoundSources.get(value as PostgresFinanceBudgetCapacitySource)
+          ?.source ?? (value as PostgresFinanceBudgetCapacitySource),
+      )?.worldId === worldId)
   );
 }
 
@@ -159,8 +198,10 @@ export function isPostgresFinanceBudgetWorldCapacitySource(
   return (
     !!value &&
     typeof value === 'object' &&
-    worldSources.get(value as PostgresFinanceBudgetCapacitySource)?.worldId ===
-      worldId
+    worldSources.get(
+      replayBoundSources.get(value as PostgresFinanceBudgetCapacitySource)
+        ?.source ?? (value as PostgresFinanceBudgetCapacitySource),
+    )?.worldId === worldId
   );
 }
 
@@ -173,7 +214,8 @@ export function readPostgresFinanceBudgetCapacitySourceScope(
   countryIds: readonly string[];
   historyMode: 'BUDGET_ONLY' | 'BUDGET_SOCIAL';
 }> {
-  const world = worldSources.get(source);
+  const actualSource = replayBoundSources.get(source)?.source ?? source;
+  const world = worldSources.get(actualSource);
   if (world)
     return Object.freeze({
       kind: 'FINITE_WORLD',
@@ -181,7 +223,7 @@ export function readPostgresFinanceBudgetCapacitySourceScope(
       countryIds: world.countryIds,
       historyMode: world.historyMode,
     });
-  const fixed = sources.get(source);
+  const fixed = sources.get(actualSource);
   if (!fixed) invalid('genuine server capacity source required');
   return Object.freeze({
     kind: 'COUNTRY',
@@ -199,15 +241,17 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
   readonly sourceRow: Readonly<Record<string, unknown>>;
   readonly workerId: string;
   readonly observedAtReal: string;
-}) {
+}): Promise<Readonly<FinanceNativeBudgetSource>> {
   const c = input.command,
     tx = input.executor;
   validateCanonicalCommand(c, sha);
-  const world = worldSources.get(input.source);
+  const replayBinding = replayBoundSources.get(input.source);
+  const actualSource = replayBinding?.source ?? input.source;
+  const world = worldSources.get(actualSource);
   const fixed =
     world?.worldId === c.worldId
       ? world.sourcesByCountry.get(c.countryId)
-      : input.source;
+      : actualSource;
   const config = fixed === undefined ? undefined : sources.get(fixed);
   if (
     !config ||
@@ -269,6 +313,9 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
           observedAtReal: input.observedAtReal,
           envelopeRef: input.policy.envelopeRef,
           effectivePeriodRef: input.policy.effectivePeriodRef,
+          ...(replayBinding
+            ? { preparedSocialConnection: replayBinding.social }
+            : {}),
           sourcePins: {
             seedId: p.seedId,
             seedFingerprint: p.seedFingerprint,
@@ -340,7 +387,9 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
   ]);
   return Object.freeze({
     policy: input.policy,
-    capacityData: data,
+    ...(mixed?.financialState
+      ? { financialState: mixed.financialState }
+      : { capacityData: data }),
     ...(mixed === null
       ? {}
       : { mixedPrefixEvidence: mixed.mixedPrefixEvidence }),

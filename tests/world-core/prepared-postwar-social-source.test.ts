@@ -139,12 +139,31 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
           if (sql.includes('lock_social_operating_lineage_head'))
             rows = [
               {
-                world_version: scenario === 'LIMIT' ? '257' : '1',
-                event_sequence: scenario === 'LIMIT' ? '257' : '1',
+                world_version:
+                  scenario === 'LIMIT'
+                    ? '257'
+                    : scenario === 'POSTING'
+                      ? '0'
+                      : '1',
+                event_sequence:
+                  scenario === 'LIMIT'
+                    ? '257'
+                    : scenario === 'POSTING'
+                      ? '0'
+                      : '1',
               },
             ];
           else if (sql.includes('as financial'))
             rows = [{ financial: scenario === 'POSTING', inventory: false }];
+          else if (sql.includes('count(*)')) rows = [{ count: '1' }];
+          else if (sql.includes('from world_v2.financial_posting_batch'))
+            rows = [
+              {
+                causation_command_id: 'COMMAND_ORPHAN_TEST_ONLY',
+                canonical_payload: '{}',
+                fingerprint: 'sha256:' + '1'.repeat(64),
+              },
+            ];
           else if (sql.includes('authoritative_event'))
             rows =
               scenario === 'UNKNOWN' ? [{ event_type: 'UNKNOWN_EVENT' }] : [];
@@ -167,7 +186,7 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
         scenario === 'UNKNOWN'
           ? 'unknown intervening family'
           : scenario === 'POSTING'
-            ? 'unsupported financial or inventory posting effect'
+            ? 'posting set differs from complete canonical prefix'
             : scenario === 'LIMIT'
               ? 'bounded replay capacity exceeded'
               : 'complete bounded event prefix required',

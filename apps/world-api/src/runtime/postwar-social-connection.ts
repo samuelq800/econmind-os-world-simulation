@@ -164,7 +164,13 @@ const manualFamilies: ReadonlySet<string> = new Set([
 export function createPostwarSocialConnection(
   configuration: PostwarSocialConnectionConfiguration,
   sharedConnection?: Readonly<PostwarFinanceSocialRuntimeConnection>,
+  sharedFxPreparation?: Parameters<
+    PostwarFinanceSocialRuntimeConnection['prepare']
+  >[1],
 ): Readonly<PostwarSocialConnection> {
+  if (sharedFxPreparation !== undefined && !sharedConnection)
+    throw Error('SOCIAL_FX_PREPARATION_REQUIRES_GENUINE_SHARED_BINDING');
+  let fxPreparation = sharedFxPreparation;
   const c = Object.freeze({
     ...configuration,
     admittedWorldPins: Object.freeze({ ...configuration.admittedWorldPins }),
@@ -353,11 +359,15 @@ export function createPostwarSocialConnection(
       if (phase !== 'OPEN')
         return Promise.reject(Error('SOCIAL_CONNECTION_RETIRED'));
       preparing ??= run(undefined, async () => {
-        await (sharedConnection ?? sources).prepare({
+        const preparation = {
           observedAtReal: c.clock.nowReal(),
           admittedWorldPins: c.admittedWorldPins,
           modelVersion: c.modelVersion,
-        });
+        };
+        if (sharedConnection)
+          await sharedConnection.prepare(preparation, fxPreparation);
+        else await sources.prepare(preparation);
+        fxPreparation = undefined;
         if (phase !== 'OPEN') throw Error('SOCIAL_PREPARATION_RETIRED');
         sourcePrepared = true;
       });
@@ -468,6 +478,7 @@ export function createPostwarSocialConnection(
     stop(): Promise<void> {
       if (stopping) return stopping;
       phase = 'STOPPING';
+      fxPreparation = undefined;
       for (const controller of active.values()) controller.abort();
       stopping = (async () => {
         const errors: unknown[] = [];

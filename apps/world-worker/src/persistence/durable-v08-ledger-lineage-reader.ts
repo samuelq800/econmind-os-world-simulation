@@ -445,6 +445,22 @@ function parseFinancialPosting(input: {
   return batch;
 }
 
+/** Read-only deterministic decoder over actual bounded historical rows. This
+ * reuses the writer lineage's canonical batch reconstruction and hashes; it
+ * grants neither a source/transaction scope nor financial-ledger authority. */
+export function decodeDurableFinancialPostingBatch(input: {
+  readonly command: CanonicalCommand;
+  readonly transition: AuthoritativeTransition;
+  readonly row: Readonly<{
+    canonical_payload: unknown;
+    causation_command_id: unknown;
+    fingerprint: unknown;
+  }>;
+  readonly sha256Hex: Sha256Hex;
+}): FinancialPostingBatch {
+  return parseFinancialPosting(input);
+}
+
 export interface DurableV08LedgerLineageSnapshot {
   readonly headEventSequence: string;
   readonly headWorldVersion: string;

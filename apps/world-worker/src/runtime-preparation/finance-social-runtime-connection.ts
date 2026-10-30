@@ -9,7 +9,17 @@ import {
 } from '../persistence/postgres-finance-budget-custody.js';
 import { createFinanceBudgetIntakeAuthorizationPool } from '../persistence/finance-budget-intake-authorization.js';
 import {
+  createPostwarDayOneFxAuthorizationDatabase,
+  createPostwarDayOneFxIntakeAuthorizationPool,
+} from '../persistence/postgres-postwar-day-one-fx-originals.js';
+import {
+  createPostwarDayOneFxRuntime,
+  type PostwarDayOneFxRuntime,
+  type PostwarDayOneFxPreparationInput,
+} from '../persistence/postwar-day-one-fx-runtime.js';
+import {
   isPostgresFinanceBudgetWorldCapacitySource,
+  bindPostgresFinanceBudgetCapacitySourceToSocialReplay,
   readPostgresFinanceBudgetCapacitySourceScope,
   type PostgresFinanceBudgetCapacitySource,
 } from '../persistence/postgres-finance-budget-capacity-source.js';
@@ -66,6 +76,8 @@ export interface PostwarFinanceSocialRuntimeConnectionInput {
   readonly intakePool: Pick<Pool, 'connect'>;
   readonly clock: DurableConsumptionClock;
   readonly environment: 'local' | 'ci';
+  /** Explicit installation of the fixed source only, never another consumer. */
+  readonly treasuryFx?: { readonly workerRole: string };
 }
 export interface PostwarFinanceSocialRuntimePorts {
   readonly worldId: string;
@@ -78,13 +90,19 @@ export interface PostwarFinanceSocialRuntimePorts {
   readonly environment: 'local' | 'ci';
   readonly runtime: ManualOfficeIntakeRuntime;
   readonly budget: NonNullable<ManualOfficeRuntimeReaders['financeBudget']>;
+  readonly treasuryFx: PostwarDayOneFxRuntime | null;
   readonly socialConnection: Readonly<PostwarSocialRuntimeConnection>;
   readonly financeCountryIds: readonly string[];
 }
 export interface PostwarFinanceSocialRuntimeConnection {
   readonly worldId: string;
   readonly workerId: string;
-  prepare(input: PostwarSocialSourcePreparationInput): Promise<void>;
+  prepare(
+    input: PostwarSocialSourcePreparationInput,
+    fxOpening?: PostwarDayOneFxPreparationInput,
+  ): Promise<void>;
+  /** Complete the fixed FX source first so a host can release its large seed. */
+  prepareTreasuryFx(opening: PostwarDayOneFxPreparationInput): Promise<void>;
   startPreparation(): void;
   consumeOnce(): Promise<DurableConsumptionStep>;
   stop(): Promise<void>;
@@ -94,6 +112,13 @@ const connections = new WeakMap<
   Readonly<PostwarFinanceSocialRuntimePorts>
 >();
 const connectionSources = new WeakMap<object, FinanceSocialSourceBinding>();
+const preparedTreasuryFxConnections = new WeakSet<object>();
+/** Startup state only; never authorization, admission or permission to consume. */
+export function hasPreparedPostwarFinanceSocialTreasuryFx(
+  value: Readonly<PostwarFinanceSocialRuntimeConnection>,
+): boolean {
+  return connections.has(value) && preparedTreasuryFxConnections.has(value);
+}
 const worldOwners = new Map<string, object>();
 export function isPostwarFinanceSocialRuntimeConnection(
   value: unknown,
@@ -157,21 +182,39 @@ export function createPostwarFinanceSocialRuntimeConnection(
     // The Finance adapter must be outermost: Social's general authority lock
     // adapter also serves Social's dual-capability read and must not consume the
     // Finance execution cutoff before Finance's exact fixed helper sees it.
+    const fxDatabase = input.treasuryFx
+      ? createPostwarDayOneFxAuthorizationDatabase(social.database)
+      : social.database;
     const database = createManualOfficeAuthorizationTransactionDatabase(
-      createFinanceBudgetAuthorizationDatabase(social.database),
+      createFinanceBudgetAuthorizationDatabase(fxDatabase),
     );
+    const socialIntake = createSocialIntakeAuthorizationPool(input.intakePool);
     const intakePool = createFinanceBudgetIntakeAuthorizationPool(
-      createSocialIntakeAuthorizationPool(input.intakePool),
+      input.treasuryFx
+        ? createPostwarDayOneFxIntakeAuthorizationPool(socialIntake)
+        : socialIntake,
     );
+    const treasuryFx = input.treasuryFx
+      ? createPostwarDayOneFxRuntime({
+          database,
+          worldId: world,
+          workerId: social.workerId,
+          workerRole: input.treasuryFx.workerRole,
+        })
+      : null;
     const budget = createPostgresFinanceBudgetNativeRuntime({
       database,
       workerId: social.workerId,
       sha256Hex: sha,
-      capacitySource: input.capacitySource,
+      capacitySource: bindPostgresFinanceBudgetCapacitySourceToSocialReplay(
+        input.capacitySource,
+        social,
+      ),
     });
     const readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
       ...social.readers,
       financeBudget: budget,
+      ...(treasuryFx ? { treasuryFx } : {}),
     });
     sources.set(
       token,
@@ -195,24 +238,65 @@ export function createPostwarFinanceSocialRuntimeConnection(
       runtime = issued.runtime;
     let stopped = false,
       stopping: Promise<void> | null = null;
+    let fxPrepared = false;
+    let fxPreparing: Promise<void> | null = null;
+    let fxPreparationPin: string | null = null;
     const requireLive = () => {
       if (stopped || stopping || !sources.has(token))
         throw Error('FINANCE_SOCIAL_RUNTIME_RETIRED');
     };
     const requirePrepared = () => {
       requireLive();
-      if (!isPreparedPostwarSocialRuntimeConnection(social, world))
+      if (
+        !isPreparedPostwarSocialRuntimeConnection(social, world) ||
+        (treasuryFx !== null && !fxPrepared)
+      )
         throw Error('FINANCE_SOCIAL_SOURCE_NOT_PREPARED');
+    };
+    const prepareTreasuryFx = async (
+      opening: PostwarDayOneFxPreparationInput,
+    ): Promise<void> => {
+      requireLive();
+      if (!treasuryFx) throw Error('FINANCE_SOCIAL_FX_SOURCE_NOT_INSTALLED');
+      const pin = sha(
+        JSON.stringify({
+          world: opening.seed.worldId,
+          seed: opening.seed.fingerprint,
+          policy: sha(opening.policyBytes),
+          adoption: sha(opening.userReceiptBytes),
+        }),
+      );
+      if (fxPreparationPin !== null && fxPreparationPin !== pin)
+        throw Error('FINANCE_SOCIAL_FX_PREPARATION_PINS_CHANGED');
+      fxPreparationPin = pin;
+      fxPreparing ??= treasuryFx.prepare(opening).then(() => {
+        fxPrepared = true;
+      });
+      await fxPreparing;
+      requireLive();
+      preparedTreasuryFxConnections.add(connection);
     };
     const connection: Readonly<PostwarFinanceSocialRuntimeConnection> =
       Object.freeze({
         worldId: world,
         workerId: social.workerId,
-        async prepare(configuration: PostwarSocialSourcePreparationInput) {
+        async prepare(
+          configuration: PostwarSocialSourcePreparationInput,
+          fxOpening?: PostwarDayOneFxPreparationInput,
+        ) {
           requireLive();
+          if (
+            (!treasuryFx && fxOpening) ||
+            (treasuryFx && !fxPrepared && !fxOpening)
+          )
+            throw Error('FINANCE_SOCIAL_FX_EXACT_PREPARATION_REQUIRED');
+          if (fxOpening) await prepareTreasuryFx(fxOpening);
+          // Hosts controlling peak memory can call prepareTreasuryFx first,
+          // release their raw seed, then call prepare without an FX argument.
           await social.prepare(configuration);
           requireLive();
         },
+        prepareTreasuryFx,
         startPreparation() {
           requirePrepared();
           runtime.consumer.startPreparation();
@@ -224,8 +308,11 @@ export function createPostwarFinanceSocialRuntimeConnection(
         stop() {
           if (stopping) return stopping;
           stopped = true;
+          preparedTreasuryFxConnections.delete(connection);
           stopping = (async () => {
             await runtime.consumer.stop();
+            if (fxPreparing) await Promise.allSettled([fxPreparing]);
+            await treasuryFx?.close();
             releasePostwarSocialRuntimeForSharedConsumer(social, token);
             sources.delete(token);
             await social.close();
@@ -250,6 +337,7 @@ export function createPostwarFinanceSocialRuntimeConnection(
         environment: input.environment,
         runtime,
         budget: issued.budget,
+        treasuryFx,
         socialConnection: social,
         financeCountryIds: scope.countryIds,
       }),

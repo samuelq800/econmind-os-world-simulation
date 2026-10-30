@@ -10,16 +10,25 @@ import {
   type OpeningSeed,
   type OpeningSource,
   type FinancialLedgerState,
+  type FinancialAccount,
   type IndustryPersistenceSchemaReadContextV1,
 } from '@econmind/core';
-import { prepareFinanceNativeBudgetMixedPrefix } from '@econmind/core/finance-budget-native';
+import {
+  prepareFinanceNativeBudgetMixedPrefix,
+  type FinanceNativeBudgetMixedPrefixEvidence,
+} from '@econmind/core/finance-budget-native';
+import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import { replayPreparedPostwarFinanceSocialFxFrom } from './prepared-postwar-finance-social-fx-replay.js';
 import {
   prepareFinanceSocialLedger,
   replayPreparedFinanceSocialLedger,
   type PreparedFinanceSocialLedger,
 } from '@econmind/core/finance-social-prepared-ledger';
 import { WorldOpeningSeedStore } from './opening-seed-store.js';
-import { readPostwarOperatingGenesisFromSeed } from '../preparation/postwar-operating-genesis-adoption.js';
+import {
+  readPostwarOperatingGenesisFromSeed,
+  type PostwarGenesisFunding,
+} from '../preparation/postwar-operating-genesis-adoption.js';
 import {
   validatePostwarSocialEmploymentStateDocument,
   type PostwarSocialEmploymentStateDocument,
@@ -56,6 +65,7 @@ export interface PostwarSocialReplayLineage {
   readonly headEventSequence: string;
   readonly ledgers: Readonly<{ financial: Readonly<FinancialLedgerState> }>;
   readonly transitions: ValidatedCanonicalLineageData['transitions'];
+  readonly mixedPrefixEvidence?: FinanceNativeBudgetMixedPrefixEvidence;
 }
 export interface PostwarSocialPreparationPins {
   readonly worldId: string;
@@ -79,6 +89,9 @@ interface Base {
   readonly source: Readonly<SourceMetadata>;
   readonly document: PostwarSocialEmploymentStateDocument;
   readonly ledger: PreparedFinanceSocialLedger;
+  readonly financialAccounts: readonly FinancialAccount[];
+  readonly funding: readonly PostwarGenesisFunding[];
+  readonly sourceMetadata: readonly SourceMetadata[];
   readonly registrations: ReadonlyMap<string, string>;
   readonly retainedDocumentBytes: number;
 }
@@ -232,9 +245,11 @@ export async function preparePostwarSocialSource(input: {
           registrations.set(country.countryId, canonicalSerialize(r));
         }
         if (!registrations.size) invalid('CANONICAL_COUNTRIES_REQUIRED');
-        const ledger = prepareFinanceSocialLedger(
-          rebuildV08LedgersFromLineage({ seed, sha256Hex: sha }).financial,
-        );
+        const financial = rebuildV08LedgersFromLineage({
+          seed,
+          sha256Hex: sha,
+        }).financial;
+        const ledger = prepareFinanceSocialLedger(financial);
         return Object.freeze({
           pins,
           modelVersion: c.modelVersion,
@@ -248,6 +263,17 @@ export async function preparePostwarSocialSource(input: {
           source,
           document,
           ledger,
+          financialAccounts: financial.accounts,
+          funding: view.facts.funding,
+          sourceMetadata: Object.freeze(
+            seed.sources.map((s) =>
+              Object.freeze({
+                sourceId: s.sourceId,
+                payloadHash: s.payloadHash,
+                locator: s.locator,
+              }),
+            ),
+          ),
           registrations,
           retainedDocumentBytes: Buffer.byteLength(
             canonicalSerialize(document),
@@ -285,6 +311,43 @@ export function readPreparedSocialOriginals(
     seed: b.seed,
   });
 }
+/** Genuine immutable DATA baseline only. Every consumer still obtains current
+ * source/admission/head/authority independently; retired/forged tokens fail. */
+export interface PreparedPostwarSocialFinancialReplayBase {
+  readonly prepared: PreparedFinanceSocialLedger;
+  readonly financialAccounts: readonly FinancialAccount[];
+  readonly funding: readonly PostwarGenesisFunding[];
+  readonly document: PostwarSocialEmploymentStateDocument;
+  readonly pins: PostwarSocialPreparationPins;
+  readonly sourceMetadata: readonly SourceMetadata[];
+}
+const issuedFinancialReplayBases = new WeakMap<
+  object,
+  PreparedPostwarSocialSource
+>();
+export function readPreparedPostwarSocialFinancialReplayBase(
+  preparation: PreparedPostwarSocialSource,
+): Readonly<PreparedPostwarSocialFinancialReplayBase> {
+  const b = baseOf(preparation);
+  const value = Object.freeze({
+    prepared: b.ledger,
+    financialAccounts: b.financialAccounts,
+    funding: b.funding,
+    document: b.document,
+    pins: b.pins,
+    sourceMetadata: b.sourceMetadata,
+  });
+  issuedFinancialReplayBases.set(value, preparation);
+  return value;
+}
+export function consumePreparedPostwarSocialFinancialReplayBase(
+  value: Readonly<PreparedPostwarSocialFinancialReplayBase>,
+): Readonly<PreparedPostwarSocialFinancialReplayBase> {
+  const preparation = issuedFinancialReplayBases.get(value);
+  if (!preparation || baseOf(preparation).ledger !== value.prepared)
+    invalid('GENUINE_LIVE_FINANCIAL_REPLAY_BASE_REQUIRED');
+  return value;
+}
 export async function readPreparedPostwarSocialLineageFrom(input: {
   readonly preparation: PreparedPostwarSocialSource;
   readonly executor: SqlExecutor;
@@ -310,38 +373,61 @@ export async function readPreparedPostwarSocialLineageFrom(input: {
     input.countryId,
   );
   const prefix = await readBoundedPostwarSocialFramesFrom(input);
-  const mixedPrefixEvidence = prepareFinanceNativeBudgetMixedPrefix(
-    {
-      worldId: input.worldId,
+  const fxReplay = prefix.frames.some(
+    (f) => f.command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+  )
+    ? await replayPreparedPostwarFinanceSocialFxFrom({
+        executor: input.executor,
+        baseline: readPreparedPostwarSocialFinancialReplayBase(
+          input.preparation,
+        ),
+        worldId: input.worldId,
+        hostCountryId: input.countryId,
+        officeId: 'SOCIAL',
+        seedId: b.pins.seedRef,
+        seedFingerprint: b.pins.contentHash,
+        admissionRef: b.pins.admissionRef,
+        frames: prefix.frames,
+        expectedHead: prefix.head,
+      })
+    : null;
+  const mixedPrefixEvidence =
+    fxReplay?.mixedPrefixEvidence ??
+    prepareFinanceNativeBudgetMixedPrefix(
+      {
+        worldId: input.worldId,
+        frames: prefix.frames,
+        socialCountries: b.document.countries.map((c) => ({
+          countryId: c.countryId,
+          state: c.state,
+          offers: c.offers,
+        })),
+      },
+      sha,
+    );
+  const financial =
+    fxReplay?.financial ??
+    replayPreparedFinanceSocialLedger({
+      prepared: b.ledger,
+      mixedPrefixEvidence,
       frames: prefix.frames,
-      socialCountries: b.document.countries.map((c) => ({
-        countryId: c.countryId,
-        state: c.state,
-        offers: c.offers,
-      })),
-    },
-    sha,
-  );
-  const financial = replayPreparedFinanceSocialLedger({
-    prepared: b.ledger,
-    mixedPrefixEvidence,
-    frames: prefix.frames,
-    expectedHead: prefix.head,
-    sha256Hex: sha,
-  });
+      expectedHead: prefix.head,
+      sha256Hex: sha,
+    });
   const lineage = Object.freeze({
     worldId: input.worldId,
     seed: b.seed,
     headWorldVersion: prefix.head.worldVersion,
     headEventSequence: prefix.head.eventSequence,
     ledgers: Object.freeze({ financial }),
+    mixedPrefixEvidence,
     transitions: Object.freeze(
       prefix.frames.map((f) =>
         Object.freeze({
           command: f.command,
           transition: f.transition,
           receipt: f.receipt,
-          financialPostingBatches: Object.freeze([]),
+          financialPostingBatches: f.financialPostingBatches,
           inventoryPostings: Object.freeze([]),
         }),
       ),

@@ -21,10 +21,18 @@ import {
 } from './receipt.js';
 import {
   readFinanceNativeBudgetMixedPrefix,
+  prepareFinanceNativeBudgetFinancialReplay,
+  prepareFinanceNativeBudgetMixedPrefix,
+  readFinanceNativeBudgetMixedFinancialState,
+  type FinanceSocialFxOpeningEncumbrance,
+  type FinanceSocialFxOriginal,
+  type FinanceSocialFxCurrentTreasuryBalance,
+  type FinanceNativeBudgetMixedPrefixResult,
   type FinanceNativeBudgetCanonicalFrame,
   type FinanceNativeBudgetMixedPrefixEvidence,
 } from './finance-budget-native.js';
-import type { Sha256Hex } from './command.js';
+import { canonicalSha256, type Sha256Hex } from './command.js';
+import { canonicalHashInput } from '../serialization/canonical.js';
 
 declare const preparedLedger: unique symbol;
 export interface PreparedFinanceSocialLedger {
@@ -78,6 +86,13 @@ export function replayPreparedFinanceSocialLedger(input: {
     replay.budgetState.eventSequence !== input.expectedHead.eventSequence
   )
     invalid('exact complete current head required');
+  if (replay.financialState !== undefined)
+    return readFinanceNativeBudgetMixedFinancialState({
+      evidence: input.mixedPrefixEvidence,
+      financialBase: base,
+      frames: input.frames,
+      sha256Hex: input.sha256Hex,
+    });
   // Evidence binds commands/events; these adjacent canonical containers and
   // posting arrays must independently be checked on EVERY use, not cached.
   let version = '0';
@@ -136,4 +151,91 @@ export function replayPreparedFinanceSocialLedger(input: {
   );
   inheritProductionDepositInstruments(current, base);
   return current;
+}
+
+export type {
+  FinanceSocialFxOpeningEncumbrance,
+  FinanceSocialFxOriginal,
+  FinanceSocialFxCurrentTreasuryBalance,
+} from './finance-budget-native.js';
+export interface PreparedFinanceSocialFxReplayResult {
+  readonly financial: Readonly<FinancialLedgerState>;
+  readonly mixedPrefixEvidence: FinanceNativeBudgetMixedPrefixEvidence;
+  readonly budgetState: FinanceNativeBudgetMixedPrefixResult['budgetState'];
+  readonly socialCountries: FinanceNativeBudgetMixedPrefixResult['socialCountries'];
+  readonly socialReservations: FinanceNativeBudgetMixedPrefixResult['socialReservations'];
+  readonly budgetEncumbrances: FinanceNativeBudgetMixedPrefixResult['budgetEncumbrances'];
+  readonly checkpoints: FinanceNativeBudgetMixedPrefixResult['checkpoints'];
+  readonly currentTreasuryBalances: readonly FinanceSocialFxCurrentTreasuryBalance[];
+  readonly frameHashes: readonly string[];
+}
+/** Complete linear replay. There is no filtering, skipped cursor, caller
+ * balance/currentness flag, new opening seed or reconstruction from a DTO. */
+export function replayPreparedFinanceSocialFxLedger(input: {
+  readonly prepared: PreparedFinanceSocialLedger;
+  readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+  readonly socialCountries: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['socialCountries'];
+  readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
+  readonly fxOriginals: readonly FinanceSocialFxOriginal[];
+  readonly expectedHead: {
+    readonly worldVersion: string;
+    readonly eventSequence: string;
+  };
+  readonly sha256Hex: Sha256Hex;
+}): PreparedFinanceSocialFxReplayResult {
+  const base = bases.get(input.prepared);
+  if (!base || input.frames.length > 256)
+    invalid('genuine H0 preparation and bounded complete prefix required');
+  const financialReplay = prepareFinanceNativeBudgetFinancialReplay(
+    {
+      financial: base,
+      openingEncumbrances: input.openingEncumbrances,
+      fxOriginals: input.fxOriginals,
+    },
+    input.sha256Hex,
+  );
+  const evidence = prepareFinanceNativeBudgetMixedPrefix(
+    {
+      worldId: base.worldId,
+      frames: input.frames,
+      socialCountries: input.socialCountries,
+      financialReplay,
+    },
+    input.sha256Hex,
+  );
+  const result = readFinanceNativeBudgetMixedPrefix(
+    evidence,
+    base.worldId,
+    input.frames,
+    input.sha256Hex,
+  );
+  if (
+    result.budgetState.worldVersion !== input.expectedHead.worldVersion ||
+    result.budgetState.eventSequence !== input.expectedHead.eventSequence
+  )
+    invalid('exact complete current FX prefix head required');
+  const financial = readFinanceNativeBudgetMixedFinancialState({
+    evidence,
+    financialBase: base,
+    frames: input.frames,
+    sha256Hex: input.sha256Hex,
+  });
+  return Object.freeze({
+    financial,
+    mixedPrefixEvidence: evidence,
+    budgetState: result.budgetState,
+    socialCountries: result.socialCountries,
+    socialReservations: result.socialReservations,
+    budgetEncumbrances: result.budgetEncumbrances,
+    checkpoints: result.checkpoints,
+    currentTreasuryBalances:
+      result.currentTreasuryBalances ?? Object.freeze([]),
+    frameHashes: Object.freeze(
+      input.frames.map((frame) =>
+        canonicalSha256(canonicalHashInput(frame), input.sha256Hex),
+      ),
+    ),
+  });
 }

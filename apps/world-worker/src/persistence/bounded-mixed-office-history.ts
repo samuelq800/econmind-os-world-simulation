@@ -12,6 +12,7 @@ import {
   createAuthoritativeTransition,
   validateFinalReceiptForCommand,
   type CanonicalCommand,
+  type FinancialLedgerState,
   type SocialEmploymentServiceState,
   type SocialEmploymentWageOffer,
 } from '@econmind/core';
@@ -19,11 +20,25 @@ import {
   FINANCE_NATIVE_BUDGET_EVENT_TYPES,
   prepareFinanceNativeBudgetMixedPrefix,
   readFinanceNativeBudgetMixedPrefix,
-  type FinanceNativeBudgetCanonicalFrame,
+  type FinanceNativeBudgetMixedPrefixResult,
+  type FinanceNativeBudgetMixedPrefixEvidence,
+  type FinanceNativeBudgetState,
 } from '@econmind/core/finance-budget-native';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
+import {
+  readBoundedPostwarFinancialPostingRowsFrom,
+  decodeBoundedPostwarFinancialPostings,
+  type BoundedPostwarCanonicalFrame,
+} from './bounded-postwar-fx-postings.js';
+import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import { POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT } from '@econmind/core/postwar-day-one-treasury-fx';
 import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import {
+  readPostwarSocialRuntimeFinancialReplayBase,
+  type PostwarSocialRuntimeConnection,
+} from '../runtime-preparation/social-runtime-connection.js';
+import { replayPreparedPostwarFinanceSocialFxFrom } from './prepared-postwar-finance-social-fx-replay.js';
 
 export const BOUNDED_MIXED_OFFICE_LIMITS = Object.freeze({
   events: 256,
@@ -95,6 +110,25 @@ export interface BoundedMixedOfficeFundingAccount {
   readonly availableAmount: string;
   readonly reservedAmount: string;
 }
+/** Public data shape only; the private Core ledger provenance remains on the
+ * actual object but is never exported as a transferable authority constructor. */
+export interface BoundedMixedOfficeHistory {
+  readonly classification: 'COMPLETE_BOUNDED_CORE_REPLAY_DATA_ONLY';
+  readonly head: Readonly<{ world_version: string; event_sequence: string }>;
+  readonly frames: readonly BoundedPostwarCanonicalFrame[];
+  readonly state: FinanceNativeBudgetState;
+  readonly mixedPrefixEvidence: FinanceNativeBudgetMixedPrefixEvidence;
+  readonly socialReservations: FinanceNativeBudgetMixedPrefixResult['socialReservations'];
+  readonly sourceBindings: readonly Readonly<{
+    countryId: string;
+    sourceSha256: string;
+    sourceRef: string;
+  }>[];
+  readonly fundingAccounts: readonly BoundedMixedOfficeFundingAccount[];
+  readonly financialState?: Readonly<FinancialLedgerState>;
+  readonly prefixBytes: number;
+  readonly sourceBytes: number;
+}
 export async function readBoundedMixedOfficeHistoryFrom(input: {
   readonly executor: SqlExecutor;
   readonly database: SqlDatabase;
@@ -106,7 +140,8 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
   readonly envelopeRef: string;
   readonly effectivePeriodRef: string;
   readonly sourcePins: BoundedMixedOfficeSourcePins;
-}) {
+  readonly preparedSocialConnection?: Readonly<PostwarSocialRuntimeConnection>;
+}): Promise<Readonly<BoundedMixedOfficeHistory>> {
   const tx = input.executor,
     limit = BOUNDED_MIXED_OFFICE_LIMITS;
   const h = await tx.query<{ world_version: string; event_sequence: string }>(
@@ -127,10 +162,13 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
   );
   if (
     effects.rows.length !== 1 ||
-    effects.rows[0]!.financial !== false ||
+    typeof effects.rows[0]!.financial !== 'boolean' ||
     effects.rows[0]!.inventory !== false
   )
-    invalid('unsupported financial or inventory posting effect');
+    invalid('unsupported inventory posting effect');
+  const postings = effects.rows[0]!.financial
+    ? await readBoundedPostwarFinancialPostingRowsFrom(tx, input.worldId)
+    : { rows: [], bytes: 0 };
   const e = await tx.query<Record<string, unknown>>(
     'select event_id,event_type,schema_version,world_id,causation_command_id,correlation_id,world_version::text,event_sequence::text as sequence,sim_time::text,recorded_at_real,corrects_event_id,canonical_payload,payload_sha256,event_fingerprint from world_v2.authoritative_event where world_id=$1 and octet_length(canonical_payload)<=65536 order by event_sequence limit 257',
     [input.worldId],
@@ -140,7 +178,9 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
     e.rows.length > limit.events
   )
     invalid('complete bounded event prefix required');
-  let prefixBytes = 0;
+  let prefixBytes = postings.bytes;
+  if (prefixBytes > limit.prefixBytes)
+    invalid('complete prefix byte capacity exceeded');
   const reader = new DurableV08LedgerLineageReader({
     database: input.database,
     sha256Hex: sha,
@@ -158,7 +198,8 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
       socialCommand = socialTypes.get(eventType);
     if (
       !FINANCE_NATIVE_BUDGET_EVENT_TYPES.some((t) => t === eventType) &&
-      !socialCommand
+      !socialCommand &&
+      eventType !== POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT
     )
       invalid('unknown intervening family');
     const id = text(row.causation_command_id);
@@ -170,7 +211,11 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
       );
       if (bounded.rows.length !== 1 || bounded.rows[0]!.present !== true)
         invalid('bounded canonical command required');
-      const command = await reader.readCommandFrom(tx, input.worldId, id);
+      const command = await reader.readCommandReadOnlyFrom(
+        tx,
+        input.worldId,
+        id,
+      );
       if (Buffer.byteLength(command.canonicalPayload) > limit.commandBytes)
         invalid('bounded canonical command required');
       prefixBytes += Buffer.byteLength(command.canonicalPayload);
@@ -179,10 +224,16 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
     }
     if (
       group.command.commandType !==
-      (socialCommand ?? 'CORE_FINANCE_BUDGET_APPROPRIATION_V1')
+      (eventType === POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT
+        ? POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+        : (socialCommand ?? 'CORE_FINANCE_BUDGET_APPROPRIATION_V1'))
     )
       invalid('event/command family mismatch');
-    participants.add(group.command.countryId);
+    // FX financial originals come from the genuine full-World H0 ledger and
+    // registered historical quote. This old sealed source is labour-domain
+    // input only; every FX frame/posting is still replayed in full below.
+    if (group.command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND)
+      participants.add(group.command.countryId);
     const bytes = text(row.canonical_payload);
     prefixBytes += Buffer.byteLength(bytes);
     if (
@@ -217,7 +268,7 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
       invalid('event hashes mismatch');
     group.events.push(event);
   }
-  const frames: FinanceNativeBudgetCanonicalFrame[] = [];
+  const frames: BoundedPostwarCanonicalFrame[] = [];
   for (const group of groups.values()) {
     const transition = createAuthoritativeTransition({
       command: group.command,
@@ -237,10 +288,19 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
       ...group,
       transition,
       receipt,
-      financialPostingBatches: [],
+      financialPostingBatches: decodeBoundedPostwarFinancialPostings({
+        command: group.command,
+        transition,
+        rows: postings.rows,
+      }),
       inventoryPostings: [],
     });
   }
+  if (
+    frames.reduce((n, f) => n + f.financialPostingBatches.length, 0) !==
+    postings.rows.length
+  )
+    invalid('posting set differs from complete canonical prefix');
   const committed = await tx.query<{ command_id: string }>(
     "select command_id from world_v2.command_receipt where world_id=$1 and outcome='COMMITTED'order by world_version_after,command_id limit 257",
     [input.worldId],
@@ -359,16 +419,62 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
       sourceRef: text(row.source_ref),
     });
   }
-  const mixedPrefixEvidence = prepareFinanceNativeBudgetMixedPrefix(
-    { worldId: input.worldId, frames, socialCountries: countries },
-    sha,
+  const hasFx = frames.some(
+    (f) => f.command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
   );
-  const result = readFinanceNativeBudgetMixedPrefix(
-    mixedPrefixEvidence,
-    input.worldId,
-    frames,
-    sha,
-  );
+  if (hasFx && !input.preparedSocialConnection)
+    invalid('genuine prepared H0 baseline required for FX financial effects');
+  const baseline = hasFx
+    ? readPostwarSocialRuntimeFinancialReplayBase(
+        input.preparedSocialConnection!,
+        input.worldId,
+      )
+    : null;
+  if (baseline)
+    for (const country of countries) {
+      const expected = baseline.document.countries.filter(
+        (c) => c.countryId === country.countryId,
+      );
+      if (
+        expected.length !== 1 ||
+        canonicalSerialize(expected[0]!.state) !==
+          canonicalSerialize(country.state) ||
+        canonicalSerialize(expected[0]!.offers) !==
+          canonicalSerialize(country.offers)
+      )
+        invalid('prepared country baseline differs from actual sealed source');
+    }
+  const fxReplay = baseline
+    ? await replayPreparedPostwarFinanceSocialFxFrom({
+        executor: tx,
+        baseline,
+        worldId: input.worldId,
+        hostCountryId: input.countryId,
+        officeId: 'FINANCE',
+        seedId: input.sourcePins.seedId,
+        seedFingerprint: input.sourcePins.seedFingerprint,
+        admissionRef: input.sourcePins.admissionRef,
+        frames,
+        expectedHead: {
+          worldVersion: head.world_version,
+          eventSequence: head.event_sequence,
+        },
+      })
+    : null;
+  const mixedPrefixEvidence =
+    fxReplay?.mixedPrefixEvidence ??
+    prepareFinanceNativeBudgetMixedPrefix(
+      { worldId: input.worldId, frames, socialCountries: countries },
+      sha,
+    );
+  const result =
+    fxReplay ??
+    readFinanceNativeBudgetMixedPrefix(
+      mixedPrefixEvidence,
+      input.worldId,
+      frames,
+      sha,
+    );
   if (
     result.budgetState.worldVersion !== head.world_version ||
     result.budgetState.eventSequence !== head.event_sequence
@@ -405,13 +511,28 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
       totals.get(a.accountRef)!.add(Money.from(c.amount, c.currency)),
     );
   }
-  for (const a of funding)
+  for (const a of funding) {
+    const current = fxReplay?.financial.positions.find(
+      (p) => p.account.accountId === a.accountRef,
+    );
     if (
-      totals
-        .get(a.accountRef)!
-        .amount.greaterThan(Money.from(a.availableAmount, a.currency).amount)
+      fxReplay &&
+      (!current ||
+        current.account.countryId !== a.countryId ||
+        current.account.ownerId !== a.payerEntityId ||
+        current.account.claimId !== a.claimId ||
+        current.account.currency !== a.currency ||
+        current.account.counterpartyEntityId !== a.issuerEntityId ||
+        current.account.accountClass !== 'ASSET')
     )
+      invalid(
+        'actual replayed treasury account differs from immutable funding original',
+      );
+    const available =
+      current?.netDebitBalance ?? Money.from(a.availableAmount, a.currency);
+    if (totals.get(a.accountRef)!.amount.greaterThan(available.amount))
       invalid('global fiscal capacity overbooked');
+  }
   return freeze({
     classification: 'COMPLETE_BOUNDED_CORE_REPLAY_DATA_ONLY' as const,
     head,
@@ -421,6 +542,7 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
     socialReservations: result.socialReservations,
     sourceBindings,
     fundingAccounts: funding,
+    ...(fxReplay ? { financialState: fxReplay.financial } : {}),
     prefixBytes,
     sourceBytes,
   });
