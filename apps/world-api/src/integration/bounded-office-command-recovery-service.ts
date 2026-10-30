@@ -22,6 +22,17 @@ import {
 } from '../runtime-preparation/bounded-executor-transport.js';
 import type { AuthenticatedOfficeCommandServiceConfig } from './authenticated-office-command-service.js';
 
+export const POSTWAR_OFFICE_RECOVERY_BINDING_READ_QUERY =
+  'select * from world_v2.read_postwar_office_recovery_binding($1,$2::uuid,$3,$4,$5,$6,$7,$8)';
+/** Legacy metadata readers retain their existing SQL/proposal dependencies. */
+export function boundedOfficeRecoveryBindingQuery(
+  mode: AuthenticatedOfficeCommandServiceConfig['recoveryBindingMode'],
+): string {
+  return mode === 'POSTWAR_READ_ONLY_V1'
+    ? POSTWAR_OFFICE_RECOVERY_BINDING_READ_QUERY
+    : OFFICE_COMMAND_CURRENT_BINDING_QUERY;
+}
+
 export function createBoundedOfficeCommandRecoveryService(
   config: AuthenticatedOfficeCommandServiceConfig | null = null,
 ) {
@@ -127,7 +138,7 @@ export function createBoundedOfficeCommandRecoveryService(
               before.identity.scopeKey,
             ];
             const current = await tx.query<Record<string, string>>(
-              OFFICE_COMMAND_CURRENT_BINDING_QUERY,
+              boundedOfficeRecoveryBindingQuery(c.recoveryBindingMode),
               args,
             );
             const actual = current.rows[0];

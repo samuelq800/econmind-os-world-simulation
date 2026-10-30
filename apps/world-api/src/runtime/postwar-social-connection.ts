@@ -33,10 +33,8 @@ import {
   parseManualOfficeCommandRequest,
   type ManualOfficeIntakeRuntime,
 } from '@econmind/world-worker/office-command-intake';
-import {
-  createBoundedAuthenticatedOfficeCommandService,
-  type AuthenticatedOfficeCommandServiceConfig,
-} from '../integration/bounded-authenticated-office-command-service.js';
+import { createBoundedAuthenticatedOfficeCommandService } from '../integration/bounded-authenticated-office-command-service.js';
+import type { AuthenticatedOfficeCommandServiceConfig } from '../integration/authenticated-office-command-service.js';
 import { createSourceOwnedExecutorComposition } from '../runtime-preparation/source-owned-executor-composition.js';
 import { RequestCompletion } from '../runtime-preparation/request-completion.js';
 import { createBoundedOfficeCommandRecoveryService } from '../integration/bounded-office-command-recovery-service.js';
@@ -288,6 +286,7 @@ export function createPostwarSocialConnection(
   const composition: AuthenticatedOfficeCommandServiceConfig = {
     readPool: c.boundedReadPool,
     writerPool: intakePool,
+    recoveryBindingMode: 'POSTWAR_READ_ONLY_V1',
     readerRole: c.boundedReaderRole,
     writerRole: c.intakeRole,
     authorizationPublisherRole: c.authorizationPublisherRole,

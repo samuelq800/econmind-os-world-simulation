@@ -18,10 +18,8 @@ import {
   readPostwarFinanceSocialRuntimeBinding,
   type PostwarFinanceSocialRuntimeConnection,
 } from '@econmind/world-worker/finance-social-runtime-connection';
-import {
-  createBoundedAuthenticatedOfficeCommandService,
-  type AuthenticatedOfficeCommandServiceConfig,
-} from '../integration/bounded-authenticated-office-command-service.js';
+import { createBoundedAuthenticatedOfficeCommandService } from '../integration/bounded-authenticated-office-command-service.js';
+import type { AuthenticatedOfficeCommandServiceConfig } from '../integration/authenticated-office-command-service.js';
 import { createBoundedOfficeCommandRecoveryService } from '../integration/bounded-office-command-recovery-service.js';
 import {
   parseOfficeEnvelope,
@@ -135,6 +133,7 @@ export function createPostwarTreasuryFxConnection(
       ? {
           readPool: c.readPool,
           writerPool: ports.intakePool,
+          recoveryBindingMode: 'POSTWAR_READ_ONLY_V1',
           readerRole: c.readerRole,
           writerRole: c.intakeRole,
           authorizationPublisherRole: c.authorizationPublisherRole,

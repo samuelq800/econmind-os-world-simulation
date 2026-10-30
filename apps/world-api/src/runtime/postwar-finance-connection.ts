@@ -183,6 +183,7 @@ export function createPostwarFinanceConnection(
       ? {
           readPool: c.readPool,
           writerPool: intakePool,
+          recoveryBindingMode: 'POSTWAR_READ_ONLY_V1',
           readerRole: c.readerRole,
           writerRole: c.intakeRole,
           authorizationPublisherRole: c.authorizationPublisherRole,
