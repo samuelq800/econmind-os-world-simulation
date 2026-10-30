@@ -4,6 +4,10 @@ import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import {
+  isExactColdFxSourceRevocation,
+  wireColdError,
+} from './native-mixed-cold-errors.mjs';
 if (process.env.ECONMIND_MIXED_COLD_RESTART_HOST !== '1' || !process.send)
   throw Error('EXPLICIT_PARENT_OWNED_MIXED_COLD_HOST_REQUIRED');
 const queue = [];
@@ -402,12 +406,8 @@ async function revoked(request) {
   try {
     await ports.treasuryFx.preflightCanonical(command, ports.clock.nowReal());
   } catch (error) {
-    if (
-      !(error instanceof Error) ||
-      !error.message.includes('POSTWAR_DAY_ONE_FX_CUSTODY:FX_SOURCE_REVOKED')
-    )
-      throw error;
-    rejection = { name: error.name, message: error.message, code: error.code };
+    if (!isExactColdFxSourceRevocation(error)) throw error;
+    rejection = wireColdError(error);
     denied = true;
   }
   if (!denied) fail('REVOKED_SOURCE_WAS_ACCEPTED');
@@ -440,6 +440,7 @@ async function dispatch(m) {
       id: m.id,
       message: error.message,
       stack: error.stack,
+      error: wireColdError(error),
     });
     process.exitCode = 1;
     await close();

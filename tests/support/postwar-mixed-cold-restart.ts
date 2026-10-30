@@ -1,6 +1,7 @@
 /** TEST_ONLY OS-boundary verifier. Import has no effects. No schema/source
  * initialization, grant, publication, worker lease or consumer is started. */
 import { fork } from 'node:child_process';
+import { isExactColdFxSourceRevocation } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
 import type { ManualOfficeCommandRequestDto } from '@econmind/core/authenticated-office-command-contract';
 import type { createPostwarFinanceSocialFxNativeFixture } from './postwar-finance-social-fx-native-fixture.js';
 type Fixture = Awaited<
@@ -20,6 +21,7 @@ export interface MixedColdGeneration {
 }
 export interface MixedColdRevokedReport {
   readonly newFxDenied: true;
+  readonly rejection: Readonly<Record<string, unknown>>;
   readonly finalizedCount: number;
   readonly countsBefore: Readonly<Record<string, string>>;
   readonly countsAfter: Readonly<Record<string, string>>;
@@ -83,7 +85,13 @@ async function startGeneration(configuration: object) {
     else if (m.type === 'CLOSED') closed = m;
     else if (m.type === 'ERROR') {
       const e = Error(
-        'MIXED_COLD_CHILD:' + String(m.message) + '\n' + String(m.stack),
+        'MIXED_COLD_CHILD:' +
+          String(m.message) +
+          '\n' +
+          String(m.stack) +
+          '\n' +
+          JSON.stringify(m.error),
+        { cause: m.error },
       );
       if (typeof m.id === 'string' && pending.has(m.id)) {
         const p = pending.get(m.id)!;
@@ -205,6 +213,7 @@ async function startGeneration(configuration: object) {
             resolve: (r) => {
               if (
                 r.newFxDenied !== true ||
+                !isExactColdFxSourceRevocation(r.rejection) ||
                 !Number.isSafeInteger(r.finalizedCount) ||
                 JSON.stringify(r.countsBefore) !== JSON.stringify(r.countsAfter)
               ) {
