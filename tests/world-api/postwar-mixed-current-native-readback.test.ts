@@ -6,12 +6,10 @@ import { createHash, randomBytes } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import * as C from '@econmind/core';
 import type { ManualOfficeCommandRequestDto } from '@econmind/core/authenticated-office-command-contract';
-import type { FinancialIntakeBindingDto } from '@econmind/core/authenticated-financial-intake-contract';
 import type { ServerReadAuthority } from '../../apps/world-web/src/production-read/contract.js';
-import {
-  PostgresOfficeCommandIntake,
-  manualOfficeCommandCapability,
-} from '../../apps/world-worker/src/intake/postgres-office-command-intake.js';
+import { createBoundedOfficeCommandBindingProvider } from '../../apps/world-api/src/integration/bounded-office-command-binding.js';
+import { parseSupabaseAuthSubject } from '../../apps/world-api/src/integration/identity.js';
+import { PostgresOfficeCommandIntake } from '../../apps/world-worker/src/intake/postgres-office-command-intake.js';
 import {
   derivePostwarMixedFinancialCurrentFrom,
   POSTWAR_MIXED_FINANCIAL_PUBLISH_QUERY,
@@ -26,6 +24,21 @@ import {
 const enabled = process.env.ECONMIND_POSTWAR_MIXED_CURRENT_NATIVE === '1';
 const evidence =
   '/workspace/.cloud-setup/evidence/fx-cfc-mixed-current-native-20261030';
+function actualCursor(source: unknown) {
+  if (!source || typeof source !== 'object' || Array.isArray(source))
+    throw Error('ACTUAL_RESPONSE_CURSOR_REQUIRED');
+  const fields = source as Record<string, unknown>,
+    sourceVersion = fields.sourceVersion,
+    bindingVersion = fields.bindingVersion;
+  if (
+    typeof sourceVersion !== 'string' ||
+    typeof bindingVersion !== 'string' ||
+    !/^sha256:[a-f0-9]{64}$/u.test(sourceVersion) ||
+    !/^sha256:[a-f0-9]{64}$/u.test(bindingVersion)
+  )
+    throw Error('ACTUAL_RESPONSE_CURSOR_REQUIRED');
+  return { sourceVersion, bindingVersion };
+}
 describe('actual mixed current readback (explicit independent native slot only)', () => {
   it.skipIf(!enabled)(
     'publishes actual Finance/CB/Social at the same head, rejects stale/unavailable/revoked data and preserves legal EMPTY',
@@ -84,6 +97,11 @@ describe('actual mixed current readback (explicit independent native slot only)'
         seed = undefined;
         summary.stage = 'INSTALL_FIXED_SQL_AND_REGISTER_ACTUAL_H0';
         readback = await installCfcMixedCurrentReadbackFrom(fixture, data);
+        const bindingProvider = createBoundedOfficeCommandBindingProvider({
+          pool: fixture.readPool,
+          readerRole: fixture.readRole,
+          authorizationPublisherRole: marker.roles.authorizationPublisherRole,
+        });
         await expect(
           fixture.readPool.query(
             'select canonical_payload from world_v2.opening_seed',
@@ -186,50 +204,17 @@ describe('actual mixed current readback (explicit independent native slot only)'
           clock: ports.clock,
         });
         async function submit(request: ManualOfficeCommandRequestDto) {
-          const r = await fixture.clone.installer.query(
-            "select s.seat_ref,a.authorization_version,h.world_version::text,h.event_sequence::text,ad.model_version,e.scope_key from world_v2.runtime_read_seat s join world_v2.current_commit_authorization a using(world_id,auth_subject,country_id,office_id)join world_v2.world_head h using(world_id)join world_v2.runtime_opening_admission ad using(world_id)join world_v2.projection_entitlement e on e.world_id=s.world_id and e.auth_subject=s.auth_subject and e.authorization_version=s.authorization_revision and e.classification='OFFICE_PRIVATE'and e.scope_key='OFFICE_'||upper(encode(convert_to(s.country_id,'UTF8'),'hex'))||'_'||upper(encode(convert_to(s.office_id,'UTF8'),'hex'))where s.world_id=$1 and s.auth_subject=$2::uuid and s.country_id=$3 and s.office_id=$4 and a.capability=$5 and a.active",
-            [
-              marker.worldId,
-              marker.subject,
-              marker.countryId,
-              request.officeId,
-              manualOfficeCommandCapability(request),
-            ],
-          );
-          expect(r.rows).toHaveLength(1);
-          const s = r.rows[0]!;
-          const binding: FinancialIntakeBindingDto = {
-            source: 'SERVER_VERIFIED_READ_BINDING',
-            capability: 'READ_AUTHORIZED_PROJECTION_AND_FINAL',
-            seatRef: s.seat_ref,
-            seatState: 'ACTIVE',
-            identity: {
-              authSubjectId: marker.subject,
-              worldId: marker.worldId,
-              countryId: marker.countryId,
-              officeId: request.officeId,
-              scopeKey: s.scope_key,
+          const binding = await bindingProvider.resolve({
+            verifiedSubject: parseSupabaseAuthSubject(marker.subject),
+            worldId: marker.worldId,
+            projectionSelector: {
               classification: 'OFFICE_PRIVATE',
-              authorizationRevision: s.authorization_version,
-              modelVersion: s.model_version,
-              projectionVersion: 'postwar-office-runtime-read-v1',
+              scopeKey: `OFFICE_${Buffer.from(request.countryId).toString('hex').toUpperCase()}_${Buffer.from(request.officeId).toString('hex').toUpperCase()}`,
             },
-            seed: {
-              worldId: marker.worldId,
-              seedRef: marker.seedId,
-              contentHash: marker.seedFingerprint,
-              admissionRef: marker.admissionRef,
-            },
-            readback: {
-              worldId: marker.worldId,
-              seedRef: marker.seedId,
-              contentHash: marker.seedFingerprint,
-              admissionRef: marker.admissionRef,
-              worldVersion: s.world_version,
-              eventSequence: s.event_sequence,
-              readbackRef: marker.admissionRef,
-            },
-          };
+            finalSelector: null,
+            signal: AbortSignal.timeout(10000),
+          });
+          if (!binding) throw Error('ACTUAL_LOW_ROLE_CURRENT_BINDING_REQUIRED');
           expect(
             (
               await intake.submit({
@@ -307,7 +292,7 @@ describe('actual mixed current readback (explicit independent native slot only)'
           null
         ) {
           const p = socialPage.body.page as { nextOffset: number },
-            s = socialPage.body.source as Record<string, string>;
+            s = actualCursor(socialPage.body.source);
           socialPage = await readback.read({
             officeId: 'SOCIAL',
             dataset: 'positions',
@@ -328,7 +313,7 @@ describe('actual mixed current readback (explicit independent native slot only)'
           dataset: 'ledger-balances',
           limit: 1,
         });
-        const firstSource = first.body.source as Record<string, string>,
+        const firstSource = actualCursor(first.body.source),
           firstPage = first.body.page as { nextOffset: number | null };
         expect(firstPage.nextOffset).not.toBeNull();
         const second = await readback.read({
@@ -365,7 +350,13 @@ describe('actual mixed current readback (explicit independent native slot only)'
                   );
                 },
               ),
-            ).rejects.toThrow();
+            ).rejects.toMatchObject({
+              outcome: 'ROLLED_BACK',
+              cause: {
+                code: '23514',
+                message: 'MIXED_FINANCIAL_SQL_ROWS_DIFFER_FROM_GENUINE_CORE',
+              },
+            });
           },
         );
         summary.failedPublicationRetry =
