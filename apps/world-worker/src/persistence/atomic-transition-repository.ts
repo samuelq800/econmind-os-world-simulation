@@ -792,6 +792,14 @@ function parseReceiptRow(
   return validateFinalReceiptForCommand({ command, receipt });
 }
 
+/** Pure DATA decoder reused by the fixed bounded history reader. */
+export function decodeDurableFinalReceiptRow(
+  row: Readonly<Record<string, unknown>>,
+  command: CanonicalCommand,
+): Readonly<FinalCommandReceipt> {
+  return parseReceiptRow(row as unknown as ReceiptRow, command);
+}
+
 const RECEIPT_SELECT = `select world_id,
        command_id,
        idempotency_key,

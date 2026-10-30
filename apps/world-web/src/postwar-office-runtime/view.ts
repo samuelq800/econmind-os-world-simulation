@@ -133,11 +133,15 @@ export function createPostwarRuntimeView(
               : page.source.dataNature === 'ADMITTED_IMMUTABLE_OPENING_FACTS'
                 ? `Opening facts (historical) · Checked at World version ${page.authority.readback.worldVersion}`
                 : page.source.dataNature ===
-                      'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
-                    page.source.dataNature ===
-                      'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX'
-                  ? `Committed current state · World version ${page.source.worldVersion} · State origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)}`
-                  : 'Admitted opening snapshot · World version 0',
+                      'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX' &&
+                    page.source.originWorldVersion === '0'
+                  ? `Verified current state from admitted opening · World version ${page.source.worldVersion} · State origin 0`
+                  : page.source.dataNature ===
+                        'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
+                      page.source.dataNature ===
+                        'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX'
+                    ? `Committed current state · World version ${page.source.worldVersion} · State origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)}`
+                    : 'Admitted opening snapshot · World version 0',
           ),
           text(
             'p',

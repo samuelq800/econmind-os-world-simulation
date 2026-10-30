@@ -355,6 +355,7 @@ const proposals = [
   'finance-budget-mixed-source',
   'postwar-day-one-fx-history-read',
   'postwar-bounded-journal-read',
+  'postwar-bounded-prefix-read',
   'postwar-social-mixed-match-publisher',
 ] as const;
 const fixedRoles = [

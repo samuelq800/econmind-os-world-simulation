@@ -228,6 +228,14 @@ function parseCommand(
   return command;
 }
 
+/** Pure canonical DATA decoding. This does not provide source or commit authority. */
+export function decodeDurableCanonicalCommandRow(
+  row: Readonly<Record<string, unknown>>,
+  sha256Hex: Sha256Hex,
+): CanonicalCommand {
+  return parseCommand(row as unknown as DurableCommandRow, sha256Hex);
+}
+
 function parseEvent(row: DurableTransitionRow, sha256Hex: Sha256Hex) {
   const payload = canonicalObject(row.event_canonical_payload, 'Event');
   const event = parseAuthoritativeEvent(

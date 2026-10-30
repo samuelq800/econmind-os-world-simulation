@@ -835,6 +835,27 @@ describe('posting-aware mixed current page wire', () => {
           : 'PAGE',
       );
       client.disconnect();
+      if (scenario === '0' || scenario === '3') {
+        vi.stubGlobal('fetch', async (_url: unknown, init?: RequestInit) =>
+          Response.json({
+            ...wire,
+            requestId: JSON.parse(String(init?.body)).requestId,
+          }),
+        );
+        const doc = new HostDocument('social'),
+          view = createPostwarRuntimeView(f.config, () => undefined);
+        await view.refresh();
+        const displayed = view.render(doc as unknown as Document).textContent;
+        expect(displayed).toContain('World version 7');
+        expect(displayed).toContain('State origin ' + origin);
+        if (origin === '0') {
+          expect(displayed).toContain(
+            'Verified current state from admitted opening',
+          );
+          expect(displayed).not.toContain('Committed current state');
+        } else expect(displayed).toContain('Committed current state');
+        view.disconnect();
+      }
     },
   );
   it('shows GCU and posting evidence, then clears balances when current publication is unavailable', async () => {

@@ -65,8 +65,51 @@ function transport() {
   ) => {
     statements.push(sql);
     let rows: unknown[];
-    if (sql.includes('lock_social_operating_lineage_head'))
-      rows = [{ world_version: '1', event_sequence: '1' }];
+    if (sql.includes('read_postwar_bounded_prefix'))
+      rows = [
+        {
+          world_version: '1',
+          event_sequence: '1',
+          events,
+          commands: [
+            {
+              actor_id: c.actorId,
+              auth_subject: c.authSubject,
+              canonical_payload: c.canonicalPayload,
+              country_id: c.countryId,
+              expected_world_version: c.expectedWorldVersion,
+              command_fingerprint: c.fingerprint,
+              command_id: c.commandId,
+              idempotency_key: c.idempotencyKey,
+              office_id: c.officeId,
+              payload_sha256: c.payloadHash,
+              schema_version: c.schemaVersion,
+              sim_time: c.simTime.toCanonicalValue(),
+              submitted_at_real: c.submittedAtReal,
+              command_type: c.commandType,
+              world_id: c.worldId,
+              correlation_id: c.correlationId,
+            },
+          ],
+          receipts: [
+            {
+              world_id: r.worldId,
+              command_id: r.commandId,
+              idempotency_key: r.idempotencyKey,
+              schema_version: r.schemaVersion,
+              command_fingerprint: r.commandFingerprint,
+              outcome: r.outcome,
+              reason_code: r.reasonCode,
+              transition_id: r.transitionId,
+              world_version_before: r.worldVersionBefore,
+              world_version_after: r.worldVersionAfter,
+              sim_time: r.simTime.toCanonicalValue(),
+              event_ids: r.eventIds,
+              recorded_at_real: r.recordedAtReal,
+            },
+          ],
+        },
+      ];
     else if (sql.includes('read_postwar_bounded_journal'))
       rows = [
         {

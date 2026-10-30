@@ -542,7 +542,46 @@ function transport(data: Awaited<ReturnType<typeof dataset>>) {
   ) => {
     statements.push({ sql, parameters });
     let result: unknown[] = [];
-    if (sql.includes('from world_v2.world_head')) result = [data.head];
+    if (sql.includes('read_postwar_bounded_prefix'))
+      result = [
+        {
+          ...data.head,
+          events: rows,
+          commands: data.frames.map(({ command: c }) => ({
+            actor_id: c.actorId,
+            auth_subject: c.authSubject,
+            canonical_payload: c.canonicalPayload,
+            country_id: c.countryId,
+            expected_world_version: c.expectedWorldVersion,
+            command_fingerprint: c.fingerprint,
+            command_id: c.commandId,
+            idempotency_key: c.idempotencyKey,
+            office_id: c.officeId,
+            payload_sha256: c.payloadHash,
+            schema_version: c.schemaVersion,
+            sim_time: c.simTime.toCanonicalValue(),
+            submitted_at_real: c.submittedAtReal,
+            command_type: c.commandType,
+            world_id: c.worldId,
+            correlation_id: c.correlationId,
+          })),
+          receipts: data.frames.map(({ receipt: r }) => ({
+            world_id: r.worldId,
+            command_id: r.commandId,
+            idempotency_key: r.idempotencyKey,
+            schema_version: r.schemaVersion,
+            command_fingerprint: r.commandFingerprint,
+            outcome: r.outcome,
+            reason_code: r.reasonCode,
+            transition_id: r.transitionId,
+            world_version_before: r.worldVersionBefore,
+            world_version_after: r.worldVersionAfter,
+            sim_time: r.simTime.toCanonicalValue(),
+            event_ids: r.eventIds,
+            recorded_at_real: r.recordedAtReal,
+          })),
+        },
+      ];
     else if (sql.includes('read_postwar_bounded_journal'))
       result = [
         {
@@ -807,7 +846,7 @@ describe('complete bounded mixed prefix / mock transport, real Core semantics', 
     );
     data.head.event_sequence = '257';
     await expect(t.read()).rejects.toThrow(
-      'stale head or bounded replay capacity exceeded',
+      'complete bounded prefix count and actual head required',
     );
   });
   it('recomputes Social effects rather than treating their zero postings as no-effect', async () => {

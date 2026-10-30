@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import { COMMAND_SCHEMA_VERSION, parseCanonicalCommand } from '@econmind/core';
 import { describe, it, expect } from 'vitest';
 import {
   createPostwarSocialSourcePreparation,
@@ -103,8 +105,16 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
       query: async <Row extends object>(sql: string) => {
         statements.push(sql);
         let rows: unknown[];
-        if (sql.includes('lock_social_operating_lineage_head'))
-          rows = [{ world_version: '0', event_sequence: '0' }];
+        if (sql.includes('read_postwar_bounded_prefix'))
+          rows = [
+            {
+              world_version: '0',
+              event_sequence: '0',
+              events: [],
+              commands: [],
+              receipts: [],
+            },
+          ];
         else if (sql.includes('read_postwar_bounded_journal'))
           rows = [
             {
@@ -136,15 +146,63 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
     });
     expect(result.head).toEqual({ worldVersion: '0', eventSequence: '0' });
     expect(result.frames).toEqual([]);
-    expect(statements).toHaveLength(4);
+    expect(statements).toHaveLength(2);
+    expect(statements.every((s) => s.includes('read_postwar_bounded_'))).toBe(
+      true,
+    );
     expect(statements.every((s) => !s.includes('opening_seed'))).toBe(true);
   });
   it('unknown family, missing prefix rows, unsupported posting and bounds fail closed', async () => {
+    const c = parseCanonicalCommand(
+      {
+        schemaVersion: COMMAND_SCHEMA_VERSION,
+        worldId: 'WORLD_TEST',
+        countryId: 'COUNTRY_01',
+        officeId: 'SOCIAL',
+        commandType: 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
+        commandId: 'COMMAND_TEST_ONLY',
+        idempotencyKey: 'KEY_TEST_ONLY',
+        actorId: 'ACTOR_TEST_ONLY',
+        authSubject: '11111111-1111-4111-8111-111111111111',
+        correlationId: 'CORRELATION_TEST_ONLY',
+        expectedWorldVersion: '0',
+        simTime: '0',
+        submittedAtReal: '2026-10-29T00:00:00.000Z',
+        payload: {
+          schemaVersion: 'social-employment-service-plan-v1',
+          locationId: 'LOCATION_TEST_ONLY',
+          skill: 'HIGH',
+          positionId: 'POSITION_TEST_ONLY',
+          servicePoolId: 'POOL_TEST_ONLY',
+          requestedMatches: '1',
+          dueDayIndex: '0',
+        },
+      },
+      (s) => createHash('sha256').update(s).digest('hex'),
+    );
+    const rawCommand = {
+      actor_id: c.actorId,
+      auth_subject: c.authSubject,
+      canonical_payload: c.canonicalPayload,
+      country_id: c.countryId,
+      expected_world_version: c.expectedWorldVersion,
+      command_fingerprint: c.fingerprint,
+      command_id: c.commandId,
+      idempotency_key: c.idempotencyKey,
+      office_id: c.officeId,
+      payload_sha256: c.payloadHash,
+      schema_version: c.schemaVersion,
+      sim_time: c.simTime.toCanonicalValue(),
+      submitted_at_real: c.submittedAtReal,
+      command_type: c.commandType,
+      world_id: c.worldId,
+      correlation_id: c.correlationId,
+    };
     for (const scenario of ['UNKNOWN', 'MISSING', 'POSTING', 'LIMIT']) {
       const executor: SqlExecutor = {
         query: async <Row extends object>(sql: string) => {
           let rows: unknown[];
-          if (sql.includes('lock_social_operating_lineage_head'))
+          if (sql.includes('read_postwar_bounded_prefix'))
             rows = [
               {
                 world_version:
@@ -159,6 +217,21 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
                     : scenario === 'POSTING'
                       ? '0'
                       : '1',
+                events:
+                  scenario === 'UNKNOWN'
+                    ? [{ event_type: 'UNKNOWN_EVENT' }]
+                    : [],
+                commands: scenario === 'UNKNOWN' ? [rawCommand] : [],
+                receipts:
+                  scenario === 'UNKNOWN'
+                    ? [
+                        {
+                          world_id: 'WORLD_TEST',
+                          command_id: c.commandId,
+                          outcome: 'COMMITTED',
+                        },
+                      ]
+                    : [],
               },
             ];
           else if (sql.includes('read_postwar_bounded_journal'))
@@ -180,9 +253,6 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
                     : [],
               },
             ];
-          else if (sql.includes('authoritative_event'))
-            rows =
-              scenario === 'UNKNOWN' ? [{ event_type: 'UNKNOWN_EVENT' }] : [];
           else throw Error('unexpected query');
           return { rows: rows as Row[], rowCount: rows.length };
         },
@@ -204,8 +274,8 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
           : scenario === 'POSTING'
             ? 'posting set differs from complete canonical prefix'
             : scenario === 'LIMIT'
-              ? 'bounded replay capacity exceeded'
-              : 'complete bounded event prefix required',
+              ? 'complete bounded prefix count and actual head required'
+              : 'complete bounded prefix count and actual head required',
       );
     }
   });
