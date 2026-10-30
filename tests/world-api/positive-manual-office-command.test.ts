@@ -9,7 +9,7 @@ import {
   type ManualOfficeIntakeRuntime,
 } from '../../apps/world-worker/dist/intake/postgres-office-command-intake.js';
 import { createAuthenticatedOfficeCommandService } from '../../apps/world-api/src/integration/authenticated-office-command-service.js';
-import type { ManualOfficeRuntimeReaders } from '../../apps/world-worker/src/preparation/manual-office-command-composition.js';
+import type { ManualOfficeRuntimeReaders } from '../../apps/world-worker/dist/preparation/manual-office-command-composition.js';
 import type {
   SqlDatabase,
   SqlExecutor,
