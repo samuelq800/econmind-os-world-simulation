@@ -107,10 +107,13 @@ and installed tooling/Node builtins, but cannot import worker, API, arbitrary
 server helpers, or browser runtime implementation. Browser/shared runtime cannot
 import build-context files. Running in Node is not an authority exemption.
 
-The exact public service launcher and unified bootstrap coordinator listed in
-SERVER_TOOLS have SERVER_TOOL context and SERVER_ONLY ownership. They are part
-of complete scan coverage and may use installed tooling and Node builtins, but
-do not grant browser/shared code an import edge into server operational logic.
+The exact public service launcher, unified bootstrap coordinator, and their
+`scripts/process-parent-pid.mjs` ownership-polling helper listed in SERVER_TOOLS
+have SERVER_TOOL context and SERVER_ONLY ownership. All three are scanned and
+may use installed tooling and Node builtins. Server tools may import each other
+and the approved TOOL_POLICY helpers; they cannot import application runtime
+implementation. Browser, shared, API, and Worker runtime code cannot import
+these server operational modules. Other scripts gain no ownership exemption.
 
 `node_modules`, `dist`, `coverage`, and `.vite` directory segments are excluded
 as installed dependencies or generated output. Governed local imports into

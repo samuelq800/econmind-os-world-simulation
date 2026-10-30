@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "postwar-social-services-policy-v1",
+  "policyVersion": "POSTWAR_SOCIAL_SERVICES_V1",
+  "provenance": "GENERATED_POLICY",
+  "authorizationReference": "Sentinel_a619bdbe25588191aa05709db76c7567_2026_10_28_142754_UTC",
+  "scope": "Existing BASIC schools and HOSPITALS; generated postwar initial state, no historical events or cash",
+  "childrenShareOfNonWorkingAgeBps": "7000",
+  "childrenRegionalVariationBps": "300",
+  "baseDisruptionBps": "1800",
+  "disruptionJitterBps": "1200",
+  "education": {
+    "entryAge": "6",
+    "lastSchoolAge": "17",
+    "yearSimDays": "360",
+    "studentsPerFilledQualifiedTeacher": "26",
+    "baseAttendanceBps": "9500",
+    "disruptionAttendanceDivisor": "2",
+    "gradeOlderAgePenaltyBps": "80",
+    "programmes": [
+      {
+        "id": "BASIC_PRIMARY",
+        "firstAge": "6",
+        "lastAge": "11",
+        "years": "6"
+      },
+      {
+        "id": "BASIC_LOWER_SECONDARY",
+        "firstAge": "12",
+        "lastAge": "14",
+        "years": "3"
+      },
+      {
+        "id": "BASIC_UPPER_SECONDARY",
+        "firstAge": "15",
+        "lastAge": "17",
+        "years": "3"
+      }
+    ]
+  },
+  "healthcare": {
+    "doctorHighBps": "1800",
+    "nurseHighBps": "1200",
+    "nurseMediumBps": "3400",
+    "technicianMediumBps": "1400",
+    "supportLowBps": "1600",
+    "supportMediumBps": "600",
+    "doctorDisruptionShiftMaxBps": "200",
+    "baseDemandMultiplierBps": "11000",
+    "baseOccupiedBedBps": "4500",
+    "occupiedBedDisruptionDivisor": "2",
+    "hospitalizedChildrenBps": "1500",
+    "hospitalizedAdultsOutsideLabourBps": "5500",
+    "hospitalizedElderlyBps": "3000",
+    "baseBacklogSimDays": "2",
+    "extraBacklogDisruptionDivisor": "1000",
+    "doctorsCasesPerSimDay": "12",
+    "nursesCasesPerSimDay": "8",
+    "techniciansCasesPerSimDay": "24",
+    "supportCasesPerSimDay": "30",
+    "nurseBedCapacity": "8",
+    "doctorBedCapacity": "24",
+    "facilityEpisodesPerBedSimDay": "4",
+    "dosesPerEpisode": "1"
+  },
+  "funding": "Finalization requires explicit local-currency education/care budgets, positive unit costs, country ceilings and finite material/medicine/equipment/water/power capacity from the aggregate financial/input plan. These are not supplied by capacity or staffing demand.",
+  "ageWeights0Through15": [
+    "110",
+    "108",
+    "106",
+    "104",
+    "102",
+    "100",
+    "98",
+    "96",
+    "94",
+    "92",
+    "90",
+    "88",
+    "86",
+    "84",
+    "82",
+    "80"
+  ],
+  "upperSecondaryYouthShareOfWorkingAgeOutsideLabourForceBps": "1000",
+  "operatingCosts": {
+    "provenance": "GENERATED_POLICY",
+    "educationDailyMeanWageDivisor": "52",
+    "healthcareDailyMeanWageDivisor": "8",
+    "simDaysPerYear": "360",
+    "generatedPriceDecimalPlaces": "6",
+    "excludesStaffPayroll": "true",
+    "meaning": "Non-payroll operating price requirements; finite supplies and actual allocated cash are independently validated, never created by this price."
+  }
+}

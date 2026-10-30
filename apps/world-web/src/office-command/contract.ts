@@ -24,15 +24,19 @@ export interface OfficeCommandEndpoint {
   readonly deploymentRef: string;
 }
 export const officeFamilies = Object.freeze({
-  CAPTAIN: 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
-  CENTRAL_BANK: 'CORE_CENTRAL_BANK_OMO_V1',
-  SOCIAL: 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
+  CAPTAIN: Object.freeze(['CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'] as const),
+  CENTRAL_BANK: Object.freeze(['CORE_CENTRAL_BANK_OMO_V1'] as const),
+  SOCIAL: Object.freeze([
+    'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
+    'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
+  ] as const),
+  FINANCE: Object.freeze([
+    'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
+    'POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1',
+  ] as const),
 } as const satisfies Record<
-  Extract<
-    ManualOfficeCommandRequestDto['officeId'],
-    'CAPTAIN' | 'CENTRAL_BANK' | 'SOCIAL'
-  >,
-  ManualOfficeCommandFamily
+  ManualOfficeCommandRequestDto['officeId'],
+  readonly ManualOfficeCommandFamily[]
 >);
 export const exactKeys = (
   v: Record<string, unknown>,
@@ -80,8 +84,11 @@ export function parseOfficeIntent(
         'payload',
       ]) ||
       !Object.hasOwn(officeFamilies, String(r.officeId)) ||
-      officeFamilies[r.officeId as keyof typeof officeFamilies] !==
-        r.commandType ||
+      !(
+        officeFamilies[
+          r.officeId as keyof typeof officeFamilies
+        ] as readonly unknown[]
+      ).includes(r.commandType) ||
       ![r.worldId, r.countryId, r.commandId, r.idempotencyKey].every(
         canonicalId,
       ) ||

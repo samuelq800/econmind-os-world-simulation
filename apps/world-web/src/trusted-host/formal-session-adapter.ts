@@ -1,6 +1,11 @@
 import type { AuthorizedBrowserIdentity } from '../authorized-client/client.js';
 import { createProductionReadClient } from '../production-read/client.js';
 import {
+  createPostwarRuntimeClient,
+  POSTWAR_RUNTIME_SCHEMA,
+  officeDatasets,
+} from '../postwar-office-runtime/client.js';
+import {
   officeProjectionRoles,
   type OfficeProjectionView,
 } from '../office-projection/model.js';
@@ -464,21 +469,31 @@ export function installFormalSessionAdapter(
           }
           // A provider JSON object alone never establishes even read connectivity.
           // Re-read through the existing authenticated API transport and parser.
-          const verifier = createProductionReadClient(read);
+          const postwar = identity.projectionVersion === POSTWAR_RUNTIME_SCHEMA;
+          const verifier = postwar
+            ? createPostwarRuntimeClient(read)
+            : createProductionReadClient(read);
           const abortVerification = () => verifier.disconnect();
           controller.signal.addEventListener('abort', abortVerification, {
             once: true,
           });
           let verified;
           try {
-            verified = await verifier.readProjection(requestId());
+            verified =
+              'readPage' in verifier
+                ? await verifier.readPage(
+                    officeDatasets[identity.officeId]?.[0] ?? '',
+                    requestId(),
+                  )
+                : await verifier.readProjection(requestId());
           } finally {
             verifier.disconnect();
             controller.signal.removeEventListener('abort', abortVerification);
           }
           if (
             !current() ||
-            verified.status !== 'PROJECTION' ||
+            !['PROJECTION', 'PAGE', 'EMPTY'].includes(verified.status) ||
+            !('authority' in verified) ||
             BigInt(verified.authority.readback.worldVersion) <
               BigInt(String(row(authority?.readback)?.worldVersion))
           ) {

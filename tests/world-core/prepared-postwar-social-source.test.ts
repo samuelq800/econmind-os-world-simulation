@@ -1,0 +1,282 @@
+import { createHash } from 'node:crypto';
+import { COMMAND_SCHEMA_VERSION, parseCanonicalCommand } from '@econmind/core';
+import { describe, it, expect } from 'vitest';
+import {
+  createPostwarSocialSourcePreparation,
+  preparePostwarSocialSource,
+  readPreparedSocialOriginals,
+  readSocialCanonicalLineageFrom,
+  readPreparedPostwarSocialLineageFrom,
+} from '../../apps/world-worker/src/persistence/prepared-postwar-social-source.js';
+import { readBoundedPostwarSocialFramesFrom } from '../../apps/world-worker/src/persistence/bounded-postwar-social-lineage.js';
+import type {
+  SqlDatabase,
+  SqlExecutor,
+} from '../../apps/world-worker/src/persistence/sql-database.js';
+
+describe('prepared Social source data boundary (protocol, not admission)', () => {
+  it('unprepared/forged tokens and escaped lexical views cannot provide source data', async () => {
+    const token = createPostwarSocialSourcePreparation();
+    expect(() => readPreparedSocialOriginals(token)).toThrow(
+      'SOURCE_NOT_PREPARED',
+    );
+    expect(() =>
+      readSocialCanonicalLineageFrom(
+        { query: async () => ({ rows: [], rowCount: 0 }) },
+        {} as never,
+      ),
+    ).toThrow('forged');
+    let queries = 0;
+    const database: SqlDatabase = {
+      query: async () => {
+        queries++;
+        throw Error('unexpected');
+      },
+      transaction: async () => {
+        queries++;
+        throw Error('unexpected');
+      },
+    };
+    await expect(
+      readPreparedPostwarSocialLineageFrom({
+        preparation: token,
+        executor: database,
+        database,
+        worldId: 'WORLD_TEST',
+        countryId: 'COUNTRY_01',
+      }),
+    ).rejects.toThrow('SOURCE_NOT_PREPARED');
+    await expect(
+      preparePostwarSocialSource({
+        preparation: {} as never,
+        database,
+        workerRole: 'worker_test',
+        countryIds: ['COUNTRY_01'],
+        configuration: {
+          observedAtReal: '2026-10-29T00:00:00.000Z',
+          modelVersion: 'MODEL_TEST',
+          admittedWorldPins: {
+            worldId: 'WORLD_TEST',
+            seedRef: 'SEED_TEST',
+            contentHash: 'sha256:' + '1'.repeat(64),
+            admissionRef: 'ADMISSION_TEST',
+          },
+        },
+      }),
+    ).rejects.toThrow('GENUINE_PREPARATION_REQUIRED');
+    expect(queries).toBe(0);
+  });
+  it('failed real preparation leaves no usable baseline and does not swallow the DB cause', async () => {
+    const token = createPostwarSocialSourcePreparation(),
+      failure = Error('actual backend unavailable');
+    const database: SqlDatabase = {
+      query: async () => {
+        throw failure;
+      },
+      transaction: async () => {
+        throw failure;
+      },
+    };
+    const input = {
+      preparation: token,
+      database,
+      workerRole: 'worker_test',
+      countryIds: ['COUNTRY_01'],
+      configuration: {
+        observedAtReal: '2026-10-29T00:00:00.000Z',
+        modelVersion: 'MODEL_TEST',
+        admittedWorldPins: {
+          worldId: 'WORLD_TEST',
+          seedRef: 'SEED_TEST',
+          contentHash: 'sha256:' + '1'.repeat(64),
+          admissionRef: 'ADMISSION_TEST',
+        },
+      },
+    };
+    await expect(preparePostwarSocialSource(input)).rejects.toBe(failure);
+    await expect(preparePostwarSocialSource(input)).rejects.toBe(failure);
+    expect(() => readPreparedSocialOriginals(token)).toThrow(
+      'SOURCE_NOT_PREPARED',
+    );
+  });
+  it('bounded H0 protocol reads actual head/effect/event/receipt rows with no seed SQL', async () => {
+    const statements: string[] = [];
+    const executor: SqlExecutor = {
+      query: async <Row extends object>(sql: string) => {
+        statements.push(sql);
+        let rows: unknown[];
+        if (sql.includes('read_postwar_bounded_prefix'))
+          rows = [
+            {
+              world_version: '0',
+              event_sequence: '0',
+              events: [],
+              commands: [],
+              receipts: [],
+            },
+          ];
+        else if (sql.includes('read_postwar_bounded_journal'))
+          rows = [
+            {
+              world_version: '0',
+              event_sequence: '0',
+              financial_batch_count: '0',
+              inventory_posting_count: '0',
+              financial_batches: [],
+            },
+          ];
+        else if (
+          sql.includes('authoritative_event') ||
+          sql.includes('command_receipt')
+        )
+          rows = [];
+        else throw Error('unexpected SQL ' + sql);
+        return { rows: rows as Row[], rowCount: rows.length };
+      },
+    };
+    const database: SqlDatabase = {
+      ...executor,
+      transaction: async (consume) => consume(executor),
+    };
+    const result = await readBoundedPostwarSocialFramesFrom({
+      executor,
+      database,
+      worldId: 'WORLD_TEST',
+      countryId: 'COUNTRY_01',
+    });
+    expect(result.head).toEqual({ worldVersion: '0', eventSequence: '0' });
+    expect(result.frames).toEqual([]);
+    expect(statements).toHaveLength(2);
+    expect(statements.every((s) => s.includes('read_postwar_bounded_'))).toBe(
+      true,
+    );
+    expect(statements.every((s) => !s.includes('opening_seed'))).toBe(true);
+  });
+  it('unknown family, missing prefix rows, unsupported posting and bounds fail closed', async () => {
+    const c = parseCanonicalCommand(
+      {
+        schemaVersion: COMMAND_SCHEMA_VERSION,
+        worldId: 'WORLD_TEST',
+        countryId: 'COUNTRY_01',
+        officeId: 'SOCIAL',
+        commandType: 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
+        commandId: 'COMMAND_TEST_ONLY',
+        idempotencyKey: 'KEY_TEST_ONLY',
+        actorId: 'ACTOR_TEST_ONLY',
+        authSubject: '11111111-1111-4111-8111-111111111111',
+        correlationId: 'CORRELATION_TEST_ONLY',
+        expectedWorldVersion: '0',
+        simTime: '0',
+        submittedAtReal: '2026-10-29T00:00:00.000Z',
+        payload: {
+          schemaVersion: 'social-employment-service-plan-v1',
+          locationId: 'LOCATION_TEST_ONLY',
+          skill: 'HIGH',
+          positionId: 'POSITION_TEST_ONLY',
+          servicePoolId: 'POOL_TEST_ONLY',
+          requestedMatches: '1',
+          dueDayIndex: '0',
+        },
+      },
+      (s) => createHash('sha256').update(s).digest('hex'),
+    );
+    const rawCommand = {
+      actor_id: c.actorId,
+      auth_subject: c.authSubject,
+      canonical_payload: c.canonicalPayload,
+      country_id: c.countryId,
+      expected_world_version: c.expectedWorldVersion,
+      command_fingerprint: c.fingerprint,
+      command_id: c.commandId,
+      idempotency_key: c.idempotencyKey,
+      office_id: c.officeId,
+      payload_sha256: c.payloadHash,
+      schema_version: c.schemaVersion,
+      sim_time: c.simTime.toCanonicalValue(),
+      submitted_at_real: c.submittedAtReal,
+      command_type: c.commandType,
+      world_id: c.worldId,
+      correlation_id: c.correlationId,
+    };
+    for (const scenario of ['UNKNOWN', 'MISSING', 'POSTING', 'LIMIT']) {
+      const executor: SqlExecutor = {
+        query: async <Row extends object>(sql: string) => {
+          let rows: unknown[];
+          if (sql.includes('read_postwar_bounded_prefix'))
+            rows = [
+              {
+                world_version:
+                  scenario === 'LIMIT'
+                    ? '257'
+                    : scenario === 'POSTING'
+                      ? '0'
+                      : '1',
+                event_sequence:
+                  scenario === 'LIMIT'
+                    ? '257'
+                    : scenario === 'POSTING'
+                      ? '0'
+                      : '1',
+                events:
+                  scenario === 'UNKNOWN'
+                    ? [{ event_type: 'UNKNOWN_EVENT' }]
+                    : [],
+                commands: scenario === 'UNKNOWN' ? [rawCommand] : [],
+                receipts:
+                  scenario === 'UNKNOWN'
+                    ? [
+                        {
+                          world_id: 'WORLD_TEST',
+                          command_id: c.commandId,
+                          outcome: 'COMMITTED',
+                        },
+                      ]
+                    : [],
+              },
+            ];
+          else if (sql.includes('read_postwar_bounded_journal'))
+            rows = [
+              {
+                world_version: scenario === 'POSTING' ? '0' : '1',
+                event_sequence: scenario === 'POSTING' ? '0' : '1',
+                financial_batch_count: scenario === 'POSTING' ? '1' : '0',
+                inventory_posting_count: '0',
+                financial_batches:
+                  scenario === 'POSTING'
+                    ? [
+                        {
+                          causation_command_id: 'COMMAND_ORPHAN_TEST_ONLY',
+                          canonical_payload: '{}',
+                          fingerprint: 'sha256:' + '1'.repeat(64),
+                        },
+                      ]
+                    : [],
+              },
+            ];
+          else throw Error('unexpected query');
+          return { rows: rows as Row[], rowCount: rows.length };
+        },
+      };
+      const database: SqlDatabase = {
+        ...executor,
+        transaction: async (consume) => consume(executor),
+      };
+      await expect(
+        readBoundedPostwarSocialFramesFrom({
+          executor,
+          database,
+          worldId: 'WORLD_TEST',
+          countryId: 'COUNTRY_01',
+        }),
+      ).rejects.toThrow(
+        scenario === 'UNKNOWN'
+          ? 'unknown intervening family'
+          : scenario === 'POSTING'
+            ? 'posting set differs from complete canonical prefix'
+            : scenario === 'LIMIT'
+              ? 'complete bounded prefix count and actual head required'
+              : 'complete bounded prefix count and actual head required',
+      );
+    }
+  });
+});

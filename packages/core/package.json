@@ -12,13 +12,61 @@
       "types": "./dist/commands/authenticated-financial-intake-contract.d.ts",
       "default": "./dist/commands/authenticated-financial-intake-contract.js"
     },
+    "./postwar-day-one-treasury-fx": {
+      "types": "./dist/finance/postwar-day-one-treasury-fx.d.ts",
+      "default": "./dist/finance/postwar-day-one-treasury-fx.js"
+    },
+    "./postwar-social-mixed-current-contract": {
+      "types": "./dist/read-models/postwar-social-mixed-current-contract.d.ts",
+      "import": "./dist/read-models/postwar-social-mixed-current-contract.js"
+    },
+    "./postwar-financial-mixed-current-contract": {
+      "types": "./dist/read-models/postwar-financial-mixed-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-financial-mixed-current-contract.js"
+    },
+    "./postwar-day-one-fx-command-contract": {
+      "types": "./dist/commands/authenticated-fx-command-contract.d.ts",
+      "default": "./dist/commands/authenticated-fx-command-contract.js"
+    },
     "./authenticated-office-command-contract": {
       "types": "./dist/commands/authenticated-office-command-contract.d.ts",
       "default": "./dist/commands/authenticated-office-command-contract.js"
     },
+    "./finance-budget-conditional-contract": {
+      "types": "./dist/commands/finance-budget-conditional-contract.d.ts",
+      "default": "./dist/commands/finance-budget-conditional-contract.js"
+    },
+    "./finance-budget-event-wire-contract": {
+      "types": "./dist/commands/finance-budget-event-wire-contract.d.ts",
+      "default": "./dist/commands/finance-budget-event-wire-contract.js"
+    },
+    "./finance-budget-native": {
+      "types": "./dist/commands/finance-budget-native.d.ts",
+      "default": "./dist/commands/finance-budget-native.js"
+    },
     "./economic-read-visibility-contract": {
       "types": "./dist/authorization/economic-read-visibility-contract.d.ts",
       "default": "./dist/authorization/economic-read-visibility-contract.js"
+    },
+    "./finance-budget-prepared-ledger": {
+      "types": "./dist/commands/finance-budget-prepared-ledger.d.ts",
+      "default": "./dist/commands/finance-budget-prepared-ledger.js"
+    },
+    "./finance-social-prepared-ledger": {
+      "types": "./dist/commands/finance-social-prepared-ledger.d.ts",
+      "default": "./dist/commands/finance-social-prepared-ledger.js"
+    },
+    "./finance-budget-capacity-data": {
+      "types": "./dist/commands/finance-budget-capacity-data.d.ts",
+      "default": "./dist/commands/finance-budget-capacity-data.js"
+    },
+    "./postwar-opening-payroll": {
+      "types": "./dist/commands/postwar-opening-payroll.d.ts",
+      "default": "./dist/commands/postwar-opening-payroll.js"
+    },
+    "./production-water-consumption": {
+      "types": "./dist/inventory/production-water-consumption.d.ts",
+      "default": "./dist/inventory/production-water-consumption.js"
     }
   },
   "scripts": {

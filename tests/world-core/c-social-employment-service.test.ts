@@ -807,7 +807,7 @@ describe('SOC-1 server source → real AtomicTransitionDraft, TEST_ONLY SQL prot
           expect(candidate.inventoryPostings).toEqual([]);
           expect(candidate.financialPostingBatches).toEqual([]);
           expect(candidate.currentMaterializations[0]!.key).toBe(
-            'SOCIAL_EMPLOYMENT_SERVICE',
+            `SOCIAL_EMPLOYMENT_SERVICE_${scope.countryId}`,
           );
           return { receipt: draft.receipt, transition: draft.transition };
         },

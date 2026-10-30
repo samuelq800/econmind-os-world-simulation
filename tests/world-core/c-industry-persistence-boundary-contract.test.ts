@@ -648,13 +648,21 @@ describe('existing refusal and additive exports', () => {
       assertInventoryPersistenceSchemaAdmitted([f.posting]),
     ).toThrow();
   });
-  it('preserves the whole old Core guard source and every base root export byte', () => {
+  it('preserves the production admission guard and every base root export byte', () => {
     const base = 'bf4a3f558d6aaa5f2d522ae3d6f77bc9cf0ed9c2';
     const original = (path: string) =>
       execFileSync('git', ['show', `${base}:${path}`], { encoding: 'utf8' });
     const guardPath =
       'packages/core/src/inventory/production-consumption-posting.ts';
-    expect(readFileSync(guardPath, 'utf8')).toBe(original(guardPath));
+    // Funding now also recognizes a fully proven original bank deposit. That
+    // additive data validation must not activate production schema admission.
+    const declaration =
+      'export function assertInventoryPersistenceSchemaAdmitted(';
+    const actualGuard = readFileSync(guardPath, 'utf8');
+    expect(actualGuard).toContain(declaration);
+    expect(actualGuard.slice(actualGuard.indexOf(declaration))).toBe(
+      original(guardPath).slice(original(guardPath).indexOf(declaration)),
+    );
     const oldIndex = original('packages/core/src/index.ts');
     const actualIndex = readFileSync('packages/core/src/index.ts', 'utf8');
     expect(actualIndex.startsWith(oldIndex)).toBe(true);

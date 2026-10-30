@@ -26,6 +26,7 @@ import {
   createOpeningSource,
   createReservationPosting,
   canonicalSerialize,
+  canonicalHashInput,
   eventId,
   financialAccountId,
   financialOpeningBatchId,
@@ -646,5 +647,98 @@ describe('V08.3 opening seed and reconciliation', () => {
         code: DOMAIN_ERROR_CODES.OPENING_SEED_INVALID,
       }),
     );
+  });
+  it('retains the exact payload hash domain and rejects noncanonical payload bytes', () => {
+    const payload = {
+      text: 'quotes " slash \\ newline\n雪',
+      nested: [true, null, { amount: '1.50' }],
+    };
+    const original = source('SOURCE_CANONICAL_BYTES', payload);
+    expect(original.payloadHash).toBe(
+      `sha256:${sha256(canonicalHashInput({ payload }))}`,
+    );
+    const opening = createOpeningSeed(
+      {
+        schemaVersion: OPENING_SEED_SCHEMA_VERSION,
+        seedId: openingSeedId('SEED_CANONICAL_BYTES'),
+        worldId: WORLD,
+        openingWorldVersion: '0',
+        replayBinding: CURRENT_REPLAY_BINDING,
+        sources: [original],
+        inventoryEntries: [],
+        financialBatches: [],
+      },
+      sha256,
+    );
+    const raw = JSON.parse(canonicalSerialize(opening));
+    expect(canonicalSerialize(parseOpeningSeed(raw, sha256))).toBe(
+      canonicalSerialize(opening),
+    );
+    for (const canonicalPayload of [
+      JSON.stringify({ text: payload.text, nested: payload.nested }),
+      original.canonicalPayload + ' ',
+      '{"nested":[true,null,{"amount":"1.50"}],"text":"other","text":"other"}',
+      '{"amount":1}',
+    ]) {
+      expect(() =>
+        parseOpeningSeed(
+          { ...raw, sources: [{ ...raw.sources[0], canonicalPayload }] },
+          sha256,
+        ),
+      ).toThrow();
+    }
+    for (const mutate of [
+      (s: Record<string, unknown>) => {
+        s.extra = true;
+      },
+      (s: Record<string, unknown>) => {
+        Object.defineProperty(s, 'hidden', { value: true });
+      },
+      (s: Record<string, unknown>) => {
+        Object.defineProperty(s, Symbol('hidden'), {
+          value: true,
+          enumerable: true,
+        });
+      },
+    ]) {
+      const changed = { ...raw.sources[0] };
+      mutate(changed);
+      expect(() =>
+        parseOpeningSeed({ ...raw, sources: [changed] }, sha256),
+      ).toThrow();
+    }
+    for (const mutate of [
+      (v: typeof raw) => {
+        Object.defineProperty(v.sources[0], 'canonicalPayload', {
+          get: () => original.canonicalPayload,
+          enumerable: true,
+        });
+      },
+      (v: typeof raw) => {
+        Object.defineProperty(v.sources, 'hidden', { value: true });
+      },
+      (v: typeof raw) => {
+        Object.defineProperty(v.sources, '0', {
+          get: () => raw.sources[0],
+          enumerable: true,
+        });
+      },
+      (v: typeof raw) => {
+        v.sources = new Proxy(v.sources, {});
+      },
+      (v: typeof raw) => {
+        v.sources[0] = new Proxy(v.sources[0], {});
+      },
+      (v: typeof raw) => {
+        v.extra = true;
+      },
+      (v: typeof raw) => {
+        v.fingerprint = 'sha256:' + '0'.repeat(64);
+      },
+    ]) {
+      const changed = JSON.parse(canonicalSerialize(opening));
+      mutate(changed);
+      expect(() => parseOpeningSeed(changed, sha256)).toThrow();
+    }
   });
 });

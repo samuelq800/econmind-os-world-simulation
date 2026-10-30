@@ -4,6 +4,8 @@ import {
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   CENTRAL_BANK_OMO_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  parseSocialPositionOfferCreateIntent,
   DomainError,
   DOMAIN_ERROR_CODES,
   actorId,
@@ -17,8 +19,10 @@ import {
 } from '@econmind/core';
 import {
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
   type ManualOfficeCommandRequestDto,
 } from '@econmind/core/authenticated-office-command-contract';
+import { parsePostwarDayOneTreasuryFxPayload } from '@econmind/core/postwar-day-one-treasury-fx';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 export interface StoredManualOfficeCommand {
   worldId: string;
@@ -75,7 +79,10 @@ export function decodeStoredManualOfficeCommand(
     original.canonicalPayload !== canonicalPayload
   )
     conflict();
-  if (original.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+  if (
+    original.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
+    original.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+  )
     validateManualOfficeCommandIntent(original);
   return original;
 }
@@ -109,6 +116,33 @@ export function validateManualOfficeCommandIntent(
       )
         invalid();
       return;
+    case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialPositionOfferCreateIntent(
+        JSON.parse(command.canonicalPayload),
+      );
+      return;
+    case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND: {
+      if (
+        command.officeId !== 'FINANCE' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      try {
+        parsePostwarDayOneTreasuryFxPayload(
+          JSON.parse(command.canonicalPayload),
+        );
+      } catch {
+        invalid();
+      }
+      return;
+    }
     case FINANCE_BUDGET_APPROPRIATION_COMMAND: {
       if (
         command.officeId !== 'FINANCE' ||

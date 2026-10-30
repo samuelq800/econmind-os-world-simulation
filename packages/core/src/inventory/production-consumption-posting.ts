@@ -1,3 +1,4 @@
+import { isSettledOriginalProductionDeposit } from '../finance/production-deposit-funding.js';
 import {
   canonicalSha256,
   type CanonicalCommand,
@@ -39,6 +40,7 @@ import {
 } from './inventory-ledger.js';
 import {
   type FinancialPostingBatch,
+  type FinancialPostingLeg,
   type FinancialLedgerState,
 } from '../finance/financial-ledger.js';
 import { isAuthoritativeFinancialLedgerState } from '../opening/ledger-authority.js';
@@ -367,6 +369,40 @@ export function isValidatedProductionPosting(
   return instances.has(posting);
 }
 
+/** Same deterministic selector is shared by Core replay and Worker cutoff.
+ * Arbitrary ASSET is never a payment instrument. */
+export function selectSettledProductionFundingPayment(
+  posting: InventoryProductionPosting,
+  batch: FinancialPostingBatch,
+  financial: FinancialLedgerState,
+): FinancialPostingLeg {
+  const op = posting.evidence.operating.payload;
+  const cost = Money.from(op.settledCost.amount, op.settledCost.currency);
+  const expense = batch.legs.find((l) => l.legId === op.costLegId);
+  if (!expense) invalid('Production settled expense leg required');
+  const cash = batch.legs.filter(
+    (l) =>
+      l.direction === 'CREDIT' &&
+      l.account.ownerId === op.operatorId &&
+      l.account.countryId === posting.evidence.output.countryId &&
+      (l.account.accountClass === 'CASH' ||
+        l.account.accountClass === 'DEPOSIT' ||
+        (l.account.accountClass === 'ASSET' &&
+          isSettledOriginalProductionDeposit({
+            payment: l,
+            expense,
+            batch,
+            financial,
+          }))) &&
+      l.amount.currency === cost.currency,
+  );
+  if (cash.length !== 1 || !cash[0]!.amount.amount.equals(cost.amount))
+    invalid(
+      'Production needs an exact settled cash/deposit payment, not a free payable',
+    );
+  return cash[0]!;
+}
+
 /** Replay must resolve real settled financial lineage, not merely accept a source reference. */
 export function assertProductionFunding(
   posting: InventoryProductionPosting,
@@ -409,21 +445,9 @@ export function assertProductionFunding(
     !expense.amount.amount.equals(cost.amount)
   )
     invalid('Production cost does not match the settled expense leg');
-  const cash = batch.legs.filter(
-    (l) =>
-      l.direction === 'CREDIT' &&
-      l.account.ownerId === op.operatorId &&
-      l.account.countryId === posting.evidence.output.countryId &&
-      (l.account.accountClass === 'CASH' ||
-        l.account.accountClass === 'DEPOSIT') &&
-      l.amount.currency === cost.currency,
-  );
-  if (cash.length !== 1 || !cash[0]!.amount.amount.equals(cost.amount))
-    invalid(
-      'Production needs an exact settled cash/deposit payment, not a free payable',
-    );
+  const cash = selectSettledProductionFundingPayment(posting, batch, financial);
   const balance = financial.positions.find(
-    (p) => p.account.accountId === cash[0]!.account.accountId,
+    (p) => p.account.accountId === cash.account.accountId,
   );
   if (balance?.netDebitBalance.amount.isNegative())
     invalid(

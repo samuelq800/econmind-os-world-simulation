@@ -340,6 +340,72 @@ describe('resolved repository authority boundaries', () => {
     expect(toolImport.output).toContain('FORBIDDEN_ARCHITECTURE_DEPENDENCY');
   });
 
+  it('registers the exact parent-process helper for both launchers and scans its implementation', async () => {
+    const result = await runBoundaryFixture({
+      source: 'export {};',
+      files: {
+        'scripts/run-development-service.mjs':
+          "import { readProcessParentPid } from './process-parent-pid.mjs'; void readProcessParentPid;",
+        'scripts/run-development-stack.mjs':
+          "import { readProcessParentPid } from './process-parent-pid.mjs'; void readProcessParentPid;",
+        'scripts/process-parent-pid.mjs':
+          "import { readFile } from 'node:fs/promises'; export const readProcessParentPid = readFile;",
+      },
+    });
+    expect(result.exitCode, result.output).toBe(0);
+    expect(result.output).toContain('scripts/process-parent-pid.mjs');
+
+    const forbiddenImplementation = await runBoundaryFixture({
+      source: 'export {};',
+      files: {
+        'scripts/process-parent-pid.mjs':
+          "import '../apps/world-worker/src/index.js';",
+      },
+    });
+    expect(forbiddenImplementation.exitCode).toBe(1);
+    expect(forbiddenImplementation.output).toContain(
+      'FORBIDDEN_ARCHITECTURE_DEPENDENCY',
+    );
+    expect(forbiddenImplementation.output).toContain(
+      'scripts/process-parent-pid.mjs',
+    );
+  });
+
+  it.each([
+    'apps/world-web/src/helper.ts',
+    'apps/world-api/src/helper.ts',
+    'apps/world-worker/src/helper.ts',
+    'packages/contracts/src/helper.ts',
+  ])(
+    'denies a runtime import of the parent-process helper from %s',
+    async (file) => {
+      const result = await runBoundaryFixture({
+        source: 'export {};',
+        files: {
+          [file]: "import '../../../scripts/process-parent-pid.mjs';",
+          'scripts/process-parent-pid.mjs': 'export {};',
+        },
+      });
+      expect(result.exitCode).toBe(1);
+      expect(result.output).toContain('FORBIDDEN_ARCHITECTURE_DEPENDENCY');
+      expect(result.output).toContain('SERVER_TOOL');
+    },
+  );
+
+  it('does not extend the parent-process helper registration to adjacent unowned scripts', async () => {
+    const result = await runBoundaryFixture({
+      source: 'export {};',
+      files: {
+        'scripts/run-development-service.mjs':
+          "import './unregistered-process-helper.mjs';",
+        'scripts/unregistered-process-helper.mjs': 'export {};',
+      },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('UNRESOLVED_ARCHITECTURE_IMPORT');
+    expect(result.output).toContain('unregistered-process-helper.mjs');
+  });
+
   it('keeps the real Vite config, helpers, and installed npm imports valid', () => {
     const result = spawnSync(process.execPath, [scannerPath], {
       cwd: repositoryRoot,

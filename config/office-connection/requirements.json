@@ -1,0 +1,273 @@
+{
+  "schemaVersion": "office-connection-requirements-v1",
+  "sourceCommit": "14595f81caec2ed5ce7cec564d7db9609b693718",
+  "status": "OFFLINE_INVENTORY_IMPLEMENTED_RUNTIME_ACCEPTANCE_NOT_RUN",
+  "catalogPath": "apps/world-web/public/season1-immersive/catalog.json",
+  "selectedSourceMatrixPath": "apps/world-web/src/official-data/full-data-wiring-matrix.json",
+  "sourceUnitsPath": "requirements/source_units.jsonl",
+  "selectedSourceRegistryPath": "apps/world-api/src/integration/official-dataset-registry.ts",
+  "selectedSourceReaderPath": "apps/world-api/src/integration/official-country-role-reader.ts",
+  "localEditorPath": "apps/world-web/public/season1-immersive/game.js",
+  "countryPagePath": "apps/world-web/public/season1-immersive/country-game.js",
+  "offices": [
+    "CAPTAIN",
+    "FINANCE",
+    "CENTRAL_BANK",
+    "INDUSTRY",
+    "TRADE",
+    "SOCIAL"
+  ],
+  "officeSurfaces": {
+    "CAPTAIN": "captain",
+    "FINANCE": "finance",
+    "CENTRAL_BANK": "bank",
+    "INDUSTRY": "industry",
+    "TRADE": "trade",
+    "SOCIAL": "social"
+  },
+  "sourcePins": {
+    "apps/world-web/public/season1-immersive/catalog.json": "66da624db58faac33cedc807e141dd75dbcd9ef4d8ab41e1ad2b5398d90dbbb1",
+    "apps/world-web/src/official-data/full-data-wiring-matrix.json": "217970d6940c4bfcb50f812790d9119c347c65f9885c7b7a5b34029a670e20e6",
+    "requirements/source_units.jsonl": "d26ba03f9c00013ea8b95841001366d3f4a53952d0f4396db8a31feb46f7ac08",
+    "apps/world-web/public/season1-immersive/game.js": "f3bc25a0915cf6a579467e7e5f5da4029ad9b3eda129d091bd0b30fa517f2707",
+    "apps/world-web/public/season1-immersive/country-game.js": "4e3bc7e6fe764e8988f2b025bb72af683953223fff2fa3dc9fa3a7299de0d901",
+    "apps/world-web/public/season1-immersive/country-context.js": "c4348cca13e37041b6c1dde34719161d6752bfbb95bf86090761fc431b42037e",
+    "apps/world-web/public/season1-immersive/i18n.js": "b5891fd64d632086cee094c1638b109a6257d63755f82f5246e9de63638cc35f",
+    "apps/world-web/public/season1-immersive/immersive.js": "5a83606ee7d018019672b19c5bdf75e4241758fe2878f05bf701de2612d7b171",
+    "apps/world-web/public/season1-immersive/journey.js": "4f70c8bdcae72472f5bd4d1023ef4ee13bae9cb3b043cc962f7fb4f1dbb4a4e1",
+    "apps/world-web/public/season1-immersive/living-world.js": "b803317b0532f4bf5f3986cab07e775407bede208150790704489e2f306405f3",
+    "apps/world-web/public/season1-immersive/seat-boundaries.js": "015e0631aea47373a28f930d00689f50f8eb867e4da7ab99d47c82744ccc8284",
+    "apps/world-web/public/season1-immersive/world-clock.js": "b8318e701d88bc403b699cd4687e427bf402db904fc509640bbd94f3986a33bc",
+    "apps/world-web/src/official-data/official-explorer-country-manifest.ts": "8135a910cce230c0a0e86e458c800a2b119c9a200b20eac14054bd1a05411d94"
+  },
+  "pageCommandSources": [
+    {
+      "path": "apps/world-web/public/season1-immersive/country-context.js",
+      "scope": "COUNTRY_SOURCE_PAGE"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/country-game.js",
+      "scope": "COUNTRY_SOURCE_PAGE"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/game.js",
+      "scope": "LOCAL_DEMO_OR_PRESENTATION"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/i18n.js",
+      "scope": "LOCAL_DEMO_OR_PRESENTATION"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/immersive.js",
+      "scope": "LOCAL_DEMO_OR_PRESENTATION"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/journey.js",
+      "scope": "LOCAL_DEMO_OR_PRESENTATION"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/living-world.js",
+      "scope": "LOCAL_DEMO_OR_PRESENTATION"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/seat-boundaries.js",
+      "scope": "LOCAL_DEMO_OR_PRESENTATION"
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/world-clock.js",
+      "scope": "LOCAL_DEMO_OR_PRESENTATION"
+    }
+  ],
+  "expectedCounts": {
+    "offices": 6,
+    "modules": 120,
+    "fields": 1126,
+    "readouts": 158,
+    "moduleActions": 120,
+    "pageCommands": 148,
+    "dynamicCommandExpressions": 5,
+    "sourceDatasets": 34,
+    "selectedCountries": 70
+  },
+  "expectedOfficeCounts": {
+    "CAPTAIN": {
+      "modules": 9,
+      "fields": 58,
+      "readouts": 6
+    },
+    "FINANCE": {
+      "modules": 20,
+      "fields": 174,
+      "readouts": 48
+    },
+    "CENTRAL_BANK": {
+      "modules": 15,
+      "fields": 110,
+      "readouts": 17
+    },
+    "INDUSTRY": {
+      "modules": 23,
+      "fields": 210,
+      "readouts": 33
+    },
+    "TRADE": {
+      "modules": 28,
+      "fields": 384,
+      "readouts": 21
+    },
+    "SOCIAL": {
+      "modules": 25,
+      "fields": 190,
+      "readouts": 33
+    }
+  },
+  "evidencePaths": [
+    "AGENTS.md",
+    "PLANS.md",
+    "status/progress.json",
+    "status/decisions.json",
+    "requirements/source_unit_assignments.jsonl",
+    "apps/world-api/src/integration/official-dataset-registry.ts",
+    "apps/world-api/src/integration/official-dataset-source.ts",
+    "apps/world-api/src/integration/official-country-role-reader.ts",
+    "apps/world-api/src/integration/official-dataset-route.ts",
+    "apps/world-web/src/official-data/official-source-status-registry.ts",
+    "apps/world-web/src/official-data/official-explorer-country-manifest.ts",
+    "apps/world-web/src/official-data/FULL_DATA_WIRING.md",
+    "apps/world-web/src/office-command/contract.ts",
+    "packages/core/src/commands/authenticated-office-command-contract.ts",
+    "apps/world-worker/src/intake/postgres-office-command-intake.ts",
+    "apps/world-worker/src/preparation/manual-office-command-composition.ts",
+    "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+    "apps/world-worker/src/projections/industry-production-governing-source.ts",
+    "apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts",
+    "apps/world-api/src/read-models/trade-contract-read-projection.ts",
+    "apps/world-web/src/office-projection/controller.ts",
+    "apps/world-web/src/office-projection/model.ts",
+    "apps/world-web/src/country-runtime/trusted-runtime.ts",
+    "apps/world-web/src/country-runtime/entry.ts",
+    "apps/world-api/src/integration/postgres-final-receipt-reader.ts",
+    "apps/world-api/src/integration/https-authenticated-read-route.ts",
+    "apps/world-api/src/integration/authenticated-office-command-service.ts",
+    "apps/world-worker/src/persistence/industry-production-source-cutoff.ts",
+    "packages/core/src/inventory/production-persistence-admission-contract.ts",
+    "packages/core/src/resource-inventory/foundation.ts",
+    "packages/core/src/engine-kernels/trade-logistics-foundation.ts",
+    "packages/core/src/engine-kernels/international-contract-foundation.ts"
+  ],
+  "existingRuntimeInfrastructure": {
+    "bindingRule": "INFRASTRUCTURE_REFERENCES_ARE_NOT_CATALOG_FIELD_OR_ACTION_CONNECTIONS",
+    "manualOfficeCommand": {
+      "contractPath": "packages/core/src/commands/authenticated-office-command-contract.ts",
+      "apiPath": "/v1/office-command",
+      "browserContractPath": "apps/world-web/src/office-command/contract.ts",
+      "browserFamilies": [
+        "CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1",
+        "CORE_CENTRAL_BANK_OMO_V1",
+        "CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1"
+      ],
+      "financeBudget": "SCHEMA_REGISTERED_SOURCE_RUNTIME_BLOCKED",
+      "industryFamily": null,
+      "tradeFamily": null,
+      "catalogItemBinding": null
+    },
+    "intake": {
+      "path": "apps/world-worker/src/intake/postgres-office-command-intake.ts",
+      "tables": ["world_v2.command_submission", "world_v2.command_queue"],
+      "authorityTables": [
+        "world_v2.runtime_read_seat",
+        "world_v2.current_commit_authorization",
+        "world_v2.runtime_opening_admission",
+        "world_v2.projection_entitlement",
+        "world_v2.world_head"
+      ],
+      "writeMeaning": "DURABLE_QUEUE_ACK_NOT_ECONOMIC_COMMIT",
+      "catalogItemBinding": null
+    },
+    "settlement": {
+      "path": "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+      "tables": [
+        "world_v2.authoritative_event",
+        "world_v2.inventory_posting",
+        "world_v2.financial_posting_batch",
+        "world_v2.command_receipt",
+        "world_v2.current_materialization",
+        "world_v2.notification_outbox",
+        "world_v2.authoritative_commit_authorization",
+        "world_v2.world_head"
+      ],
+      "catalogItemBinding": null
+    },
+    "industry": {
+      "sourcePortPath": "apps/world-worker/src/projections/industry-production-governing-source.ts",
+      "productionCustodyAdapter": null,
+      "status": "PRODUCTION_ADAPTER_NOT_SUPPLIED",
+      "catalogItemBinding": null
+    },
+    "trade": {
+      "readProjectionPath": "apps/world-api/src/read-models/trade-contract-read-projection.ts",
+      "status": "PREPARATION_ONLY_NOT_ROUTE_OR_PERSISTENCE",
+      "catalogItemBinding": null
+    },
+    "readback": {
+      "controllerPath": "apps/world-web/src/office-projection/controller.ts",
+      "receiptReaderPath": "apps/world-api/src/integration/postgres-final-receipt-reader.ts",
+      "catalogItemBinding": null
+    },
+    "stagedTrade": {
+      "path": "apps/world-web/src/country-runtime/trusted-runtime.ts",
+      "status": "ISOLATED_LOCAL_HOST_PREPARED_INVENTORY_RESERVATION",
+      "scope": "TRADE_ONLY_NO_PAYMENT_SHIPPING_OR_DELIVERY",
+      "productionAcceptance": "NOT_RUN",
+      "catalogItemBinding": null
+    }
+  },
+  "acceptanceRequirements": [
+    {
+      "id": "AUTHORITY",
+      "requiredEvidence": "Adopted current source identity, revision, fingerprint, units, custody and admission. A specification or selected source alone is insufficient."
+    },
+    {
+      "id": "API_DATABASE",
+      "requiredEvidence": "Exact browser DTO and route to authoritative database reader/writer; null until traced for this field or action."
+    },
+    {
+      "id": "ISOLATION",
+      "requiredEvidence": "Server verified JWT, current seat/team and authorization revision, admission, world/country/office/classification; normal cross-scope denial checks."
+    },
+    {
+      "id": "IDEMPOTENCY",
+      "requiredEvidence": "Same command/idempotency key returns original immutable outcome; conflicting payload rejected; unknown write outcome uses original lookup."
+    },
+    {
+      "id": "CONCURRENCY",
+      "requiredEvidence": "Atomic authoritative events/postings/receipt/head with lease/fence, expected head and cooperating source protection; rollback and competing ordinary requests."
+    },
+    {
+      "id": "AUDIT",
+      "requiredEvidence": "Command fingerprint, append-only events, posting IDs, final receipt, head and outbox provenance."
+    },
+    {
+      "id": "READBACK",
+      "requiredEvidence": "Authorized browser FINAL lookup and projection refresh at least the receipt head, exact values and units; queue acknowledgement is not success."
+    },
+    {
+      "id": "PERSISTENCE",
+      "requiredEvidence": "Independent session/reload reads durable final outcome and values from the authoritative database; browser localStorage does not satisfy this."
+    }
+  ],
+  "updatePolicy": "Any changed pinned source, office, module, field, result readout or page command requires explicit manifest review. Do not auto-refresh pins or mark runtime acceptance PASS from this tool.",
+  "pageCommandDirectory": "apps/world-web/public/season1-immersive",
+  "sourcePinScope": "CURRENT_REVIEWED_WORKING_TREE_BYTES_BASE_COMMIT_RECORDED_SEPARATELY",
+  "reviewedWorkingTreeSources": [
+    {
+      "path": "apps/world-web/public/season1-immersive/country-context.js",
+      "reason": "Authorized source pagination bounds repair; no page command changes."
+    },
+    {
+      "path": "apps/world-web/public/season1-immersive/country-game.js",
+      "reason": "Authorized source last-page empty-state wording repair; no page command changes."
+    }
+  ],
+  "selectedCountryManifestPath": "apps/world-web/src/official-data/official-explorer-country-manifest.ts"
+}

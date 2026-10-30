@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "postwar-utility-policy-v1",
+  "version": "POSTWAR_UTILITIES_20261028_V1",
+  "classification": "GENERATED_POLICY",
+  "authorizationReference": "Sentinel_a619bdbe25588191aa05709db76c7567",
+  "scope": "FIRST_SIMULATION_DAY_PUBLIC_SERVICE_PURCHASE_OPTIONS",
+  "power": {
+    "openingStoredEnergyPublicOptionShare": "0.1",
+    "maximumDischargeHours": "6",
+    "scenarioDischargeEfficiency": "0.85",
+    "lossBasis": "PRESERVED_SOURCE_LOSS_FRACTION_FOR_CONDITIONAL_ROUTE_ONLY",
+    "sourceOwnerPreserved": true,
+    "permission": "FINITE_NPC_OP_TO_GOV_PURCHASE_OPTION_NOT_EXECUTED",
+    "generationAssumedMWh": "0",
+    "chargeAssumedMWh": "0"
+  },
+  "water": {
+    "calendar": "SOURCE_GREGORIAN_MONTH_ACTUAL_DAYS",
+    "quotaBasis": "LOCAL_MONTHLY_RUNOFF_AFTER_ECOLOGY_MINUS_ALL_ORIGINAL_QUOTAS_CAPPED_BY_SOURCE_UNALLOCATED_REMAINDER",
+    "basinConstraint": "ALL_LOCAL_PUBLIC_OPTIONS_SHARE_ONE_BASIN_POST_ECOLOGY_REMAINDER_AFTER_ALL_ORIGINAL_RIGHTS",
+    "newHolder": "EXISTING_GOV",
+    "rightValiditySimDays": "1",
+    "existingHouseholdAndOperatorRightsChanged": false,
+    "transportTreatmentOrQualityInvented": false
+  },
+  "recipes": {
+    "BASIC_EDUCATION": {
+      "waterM3PerStudentDay": "0.025",
+      "powerMWhPerStudentDay": "0.002"
+    },
+    "HOSPITAL": { "waterM3PerCase": "0.2", "powerMWhPerCase": "0.02" }
+  },
+  "generatedInitialAvailability": {
+    "classification": "GENERATED_POLICY_NOT_OBSERVED_NETWORK_OR_WATER_QUALITY",
+    "powerConnectionBps": "clamp(2000,8000,2500+floor(access*3500)+floor(min(stockBufferDays,90)/90*1500)-floor(maxHazard*1500))",
+    "waterTreatmentBps": "clamp(1500,7500,2500+floor(access*3500)+floor(min(stockBufferDays,90)/90*1000)-floor(maxHazard*1500))",
+    "qualityCompliantShareBps": "clamp(3500,9000,6000+floor(access*2000)-floor(drought*1500)-floor(flood*1500))",
+    "capacityBasis": "ONLY_MATCHED_ADOPTED_PUBLIC_SCHOOL_HOSPITAL_LOCAL_BRANCHES_AND_EXISTING_STORAGE_OR_UNALLOCATED_WATER",
+    "noNewPlantOrWaterEnergyCreated": true
+  },
+  "powerRecipeIncludesLocalWaterTreatmentAndPumping": true,
+  "operatingCosts": {
+    "classification": "GENERATED_POLICY_BENCHMARK_NOT_OBSERVED_MARKET_PRICE",
+    "gcuPerMWh": "80",
+    "gcuPerM3": "0.02",
+    "funding": "EXISTING_SOCIAL_NON_PAYROLL_OPERATING_ALLOCATION_NO_EXTRA_GRANT",
+    "dueWindowSimDays": "1",
+    "paidAtGenesis": "0"
+  },
+  "allocation": "ONE_GLOBAL_PLAN_PRO_RATA_PHYSICAL_UNITS_STABLE_ID_THEN_FLOOR_WHOLE_SERVICE_COUNTS",
+  "resourceReservationDecimalPlaces": "6",
+  "missingDeliveryEvidence": "EXPLICIT_GENERATED_BOUNDED_INITIAL_AVAILABILITY_SEPARATE_FROM_UNCHANGED_SOURCE_STATUS_AND_ACTUAL_DELIVERY",
+  "actualDeliveryAtGenesis": "0",
+  "financialPaymentsCreated": false,
+  "commodityCatalogChanged": false,
+  "worldClockStarted": false
+}

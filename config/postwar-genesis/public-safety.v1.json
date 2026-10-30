@@ -1,0 +1,203 @@
+{
+  "schemaVersion": "postwar-public-safety-policy-v1",
+  "policyVersion": "POSTWAR_PUBLIC_SAFETY_V1",
+  "provenance": "GENERATED_POLICY",
+  "ownerInstructionRef": "2026-10-28T14:27:54Z",
+  "setting": "POSTWAR_RECONSTRUCTION_WITH_PRESERVED_COUNTRY_AND_RESOURCE_DIFFERENCES",
+  "initialWindowSimDays": "30",
+  "policePer100000People": "180",
+  "maxOtherDomesticServicesShareBps": "200",
+  "postwarPressureBps": "2500",
+  "stockBufferStressPressureBps": "2500",
+  "stockBufferReferenceDays": "90",
+  "unemploymentPressureBps": "3000",
+  "urbanPressureBps": "1500",
+  "hazardPressureBps": "1000",
+  "accessDeficitPressureBps": "1500",
+  "seedJitterBps": "500",
+  "applicationsPerAdministratorPerWindow": "150",
+  "caseHandlingPerOfficerPerWindow": "8",
+  "functions": [
+    {
+      "function": "POLICE_OFFICER",
+      "skill": "MEDIUM",
+      "shareBps": "3500",
+      "footCapacityBps": "3500"
+    },
+    {
+      "function": "POLICE_OFFICER",
+      "skill": "HIGH",
+      "shareBps": "500",
+      "footCapacityBps": "3500"
+    },
+    {
+      "function": "INVESTIGATIVE",
+      "skill": "MEDIUM",
+      "shareBps": "1200",
+      "footCapacityBps": "2500"
+    },
+    {
+      "function": "INVESTIGATIVE",
+      "skill": "HIGH",
+      "shareBps": "300",
+      "footCapacityBps": "2500"
+    },
+    {
+      "function": "PUBLIC_ORDER",
+      "skill": "MEDIUM",
+      "shareBps": "1500",
+      "footCapacityBps": "1500"
+    },
+    {
+      "function": "CIVIL_EMERGENCY",
+      "skill": "MEDIUM",
+      "shareBps": "1000",
+      "footCapacityBps": "1000"
+    },
+    {
+      "function": "CIVIL_EMERGENCY",
+      "skill": "HIGH",
+      "shareBps": "300",
+      "footCapacityBps": "1000"
+    },
+    {
+      "function": "COMMUNITY_SAFETY",
+      "skill": "MEDIUM",
+      "shareBps": "1000",
+      "footCapacityBps": "6000"
+    },
+    {
+      "function": "ADMIN_SUPPORT",
+      "skill": "LOW",
+      "shareBps": "500",
+      "footCapacityBps": "10000"
+    },
+    {
+      "function": "ADMIN_SUPPORT",
+      "skill": "MEDIUM",
+      "shareBps": "200",
+      "footCapacityBps": "10000"
+    }
+  ],
+  "incidents": [
+    {
+      "category": "VIOLENT_CRIME",
+      "per100000People": "45",
+      "severity": "HIGH",
+      "requiredFunction": "POLICE_OFFICER",
+      "requiredStaffPerCase": "2"
+    },
+    {
+      "category": "PROPERTY_CRIME",
+      "per100000People": "180",
+      "severity": "MEDIUM",
+      "requiredFunction": "INVESTIGATIVE",
+      "requiredStaffPerCase": "1"
+    },
+    {
+      "category": "ECONOMIC_GENERAL_CRIME",
+      "per100000People": "70",
+      "severity": "MEDIUM",
+      "requiredFunction": "INVESTIGATIVE",
+      "requiredStaffPerCase": "1"
+    },
+    {
+      "category": "PUBLIC_DISORDER",
+      "per100000People": "90",
+      "severity": "HIGH",
+      "requiredFunction": "PUBLIC_ORDER",
+      "requiredStaffPerCase": "3"
+    },
+    {
+      "category": "CRITICAL_INFRASTRUCTURE_INCIDENT",
+      "per100000People": "25",
+      "severity": "HIGH",
+      "requiredFunction": "CIVIL_EMERGENCY",
+      "requiredStaffPerCase": "2"
+    },
+    {
+      "category": "CIVIL_EMERGENCY",
+      "per100000People": "60",
+      "severity": "HIGH",
+      "requiredFunction": "CIVIL_EMERGENCY",
+      "requiredStaffPerCase": "2"
+    }
+  ],
+  "programmes": [
+    {
+      "type": "UNEMPLOYMENT_INSURANCE",
+      "populationBasis": "UNEMPLOYED",
+      "eligibleBps": "7000",
+      "applicationBps": "6500",
+      "annualWageReplacementBps": "3500",
+      "durationSimDays": "180"
+    },
+    {
+      "type": "INCOME_SUPPORT",
+      "populationBasis": "POPULATION",
+      "eligibleBps": "650",
+      "applicationBps": "6000",
+      "annualWageReplacementBps": "1000",
+      "durationSimDays": "180"
+    },
+    {
+      "type": "FOOD_SUPPORT",
+      "populationBasis": "POPULATION",
+      "eligibleBps": "900",
+      "applicationBps": "7000",
+      "annualWageReplacementBps": "700",
+      "durationSimDays": "90"
+    },
+    {
+      "type": "ENERGY_SUPPORT",
+      "populationBasis": "POPULATION",
+      "eligibleBps": "500",
+      "applicationBps": "5500",
+      "annualWageReplacementBps": "400",
+      "durationSimDays": "90"
+    },
+    {
+      "type": "PENSION",
+      "populationBasis": "NON_WORKING_AGE",
+      "eligibleBps": "3500",
+      "applicationBps": "8000",
+      "annualWageReplacementBps": "2500",
+      "durationSimDays": "360"
+    },
+    {
+      "type": "HOUSING_BENEFIT",
+      "populationBasis": "POPULATION",
+      "eligibleBps": "450",
+      "applicationBps": "6000",
+      "annualWageReplacementBps": "1200",
+      "durationSimDays": "180"
+    },
+    {
+      "type": "FAMILY_CHILD_SUPPORT",
+      "populationBasis": "NON_WORKING_AGE",
+      "eligibleBps": "4000",
+      "applicationBps": "6000",
+      "annualWageReplacementBps": "600",
+      "durationSimDays": "180"
+    },
+    {
+      "type": "EMERGENCY_HOUSEHOLD_ASSISTANCE",
+      "populationBasis": "POPULATION",
+      "eligibleBps": "400",
+      "applicationBps": "7500",
+      "annualWageReplacementBps": "1500",
+      "durationSimDays": "30"
+    },
+    {
+      "type": "HEALTHCARE_COST_SUPPORT",
+      "populationBasis": "POPULATION",
+      "eligibleBps": "500",
+      "applicationBps": "6500",
+      "annualWageReplacementBps": "1000",
+      "durationSimDays": "90"
+    }
+  ],
+  "equipmentPolicy": "NO_REUSE_OF_OPERATOR_STOCK_OR_OTHER_SERVICES_ALLOCATIONS; UNFUNDED_OR_UNSTAFFED_CAPACITY_IS_ZERO; NO_EQUIPMENT_REDUCES_TO_FOOT_SERVICE_ONLY",
+  "paymentPolicy": "T0_PAID_ZERO_NO_INVENTED_PAYMENT_EVENTS; APPROVAL_AND_SCHEDULING_REQUIRE_ADMIN_AND_RESERVED_EXISTING_GOV_FUNDS",
+  "populationAccounting": "PROGRAMME_ELIGIBILITY_COUNTS_CAN_OVERLAP_AND_ARE_NOT_ADDED_AS_UNIQUE_POPULATION; CASE_COHORTS_ARE_EXPANDABLE_BY_STABLE_ORDINAL"
+}

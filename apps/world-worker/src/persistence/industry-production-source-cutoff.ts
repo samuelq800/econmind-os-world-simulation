@@ -1,6 +1,7 @@
 import {
   Money,
   assertProductionFunding,
+  selectSettledProductionFundingPayment,
   bindAuthoritativeTransition,
   canonicalSerialize,
   rebuildV08LedgersFromLineage,
@@ -16,7 +17,9 @@ import {
   type IndustryPersistenceSchemaReadContextV1,
   type IndustryPersistenceSchemaCommitContextV1,
   type IndustryPersistenceSchemaPostingIdentityV1,
+  PRODUCTION_SETTLED_EVENT_TYPE,
 } from '@econmind/core';
+import { PRODUCTION_WATER_CONSUMED_EVENT } from '@econmind/core/production-water-consumption';
 import {
   readValidatedCanonicalLineageFrom,
   type ValidatedCanonicalLineageView,
@@ -286,7 +289,14 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
     transition.worldVersionBefore !== data.headWorldVersion ||
     transition.worldVersionAfter !==
       (BigInt(data.headWorldVersion) + 1n).toString() ||
-    transition.events.length !== 1 ||
+    !(
+      transition.events.length === 1 ||
+      (transition.events.length === 2 &&
+        transition.events[0]!.eventType === PRODUCTION_SETTLED_EVENT_TYPE &&
+        transition.events[1]!.eventType === PRODUCTION_WATER_CONSUMED_EVENT &&
+        BigInt(transition.events[1]!.sequence) ===
+          BigInt(transition.events[0]!.sequence) + 1n)
+    ) ||
     transition.events[0]!.sequence !==
       (BigInt(data.headEventSequence) + 1n).toString()
   )
@@ -349,15 +359,11 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
     sha256Hex: input.sha256Hex,
   });
   const expense = batch.legs.find((l) => l.legId === op.costLegId)!;
-  const cash = batch.legs.filter(
-    (l) =>
-      l.direction === 'CREDIT' &&
-      ['CASH', 'DEPOSIT'].includes(l.account.accountClass) &&
-      l.account.ownerId === op.operatorId &&
-      l.account.countryId === posting.evidence.output.countryId &&
-      l.amount.currency === op.settledCost.currency,
+  const cash = selectSettledProductionFundingPayment(
+    posting,
+    batch,
+    current.financial,
   );
-  if (cash.length !== 1) industryInputInvalid('EXACT_FUNDING_CASH_REQUIRED');
   const events = row.transition.events;
   equal(source.original, {
     worldId: data.worldId,
@@ -368,7 +374,7 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
     batchId: batch.batchId,
     batchFingerprint: batch.fingerprint,
     costLegId: op.costLegId,
-    cashAccountId: cash[0]!.account.accountId,
+    cashAccountId: cash.account.accountId,
     expenseAccountId: expense.account.accountId,
     amount: op.settledCost.amount,
     currency: op.settledCost.currency,
@@ -410,7 +416,7 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
       costLegId: op.costLegId,
       amount: op.settledCost.amount,
       currency: op.settledCost.currency,
-      cashAccountId: cash[0]!.account.accountId,
+      cashAccountId: cash.account.accountId,
       expenseAccountId: expense.account.accountId,
     },
     originalCutoff: {
@@ -485,6 +491,10 @@ export interface IndustryProductionCutoffRequest {
   readonly fundingBatchId: string;
   readonly fundingFingerprint: string;
   readonly costLegId: string;
+  readonly currentMaterializations?: readonly Readonly<{
+    key: string;
+    payloadHash: `sha256:${string}`;
+  }>[];
 }
 export interface IndustryProductionCutoffObservation {
   readonly schemaVersion: 'industry-production-cutoff-observation-v1';

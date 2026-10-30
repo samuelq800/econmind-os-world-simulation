@@ -249,7 +249,11 @@
           return { kind: 'INVALID', reason: 'SECTION_MISMATCH' };
         if (spec.sourceKind === 'GEOGRAPHY' && geographyStringSections.has(options.section)) {
           if (typeof data.fragment !== 'string' || !Number.isSafeInteger(data.totalLength) ||
-            data.fragmentOffset !== offset || (data.nextFragmentOffset !== null && !Number.isSafeInteger(data.nextFragmentOffset)))
+            data.totalLength < 0 || data.fragmentOffset !== offset ||
+            data.fragmentLength !== data.fragment.length || data.fragment.length > 16384 ||
+            data.fragment.length > Math.max(0, data.totalLength - offset) ||
+            (offset < data.totalLength && data.fragment.length === 0) ||
+            data.nextFragmentOffset !== (offset + data.fragment.length < data.totalLength ? offset + data.fragment.length : null))
             return { kind: 'INVALID', reason: 'FRAGMENT_INVALID' };
           return { kind: 'FRAGMENT', dataset: slug, section: options.section, fragment: data.fragment,
             nextOffset: data.nextFragmentOffset, total: data.totalLength };
@@ -260,6 +264,8 @@
         }
         if (!Array.isArray(data.items) || data.offset !== offset || data.returned !== data.items.length ||
           data.items.length > limit || !Number.isSafeInteger(data.total) || data.total < 0 ||
+          data.items.length > Math.max(0, data.total - offset) ||
+          (offset < data.total && data.items.length === 0) ||
           !record(data.filters) || data.filters.countryId !== (filtered ? countryId : null) ||
           data.nextOffset !== (offset + data.items.length < data.total ? offset + data.items.length : null) ||
           !noNumericTokens(data.items)) return { kind: 'INVALID', reason: 'DATASET_SHAPE_INVALID' };

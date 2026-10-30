@@ -18,6 +18,11 @@ import {
 
 import { NarrowTransferApprovalStore } from '../persistence/narrow-transfer-approval-store.js';
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
+import {
+  createPostwarNarrowTradeFreshSourceGuard,
+  isPostwarNarrowTradeFreshSourceGuard,
+  type PostwarNarrowTradeFreshSourceGuard,
+} from '../persistence/postwar-narrow-trade-source.js';
 
 /** Server-issued binding, never deserialize this from HTTP JSON. */
 export interface NarrowTransferIntakeScope {
@@ -121,16 +126,38 @@ function postgresInteger(value: string | null): void {
  * This is deliberately NOT the old synchronous final-only HTTP receipt port.
  */
 export class PostgresNarrowTransferIntake {
+  /** Diagnostic only; existing ADR-09 construction never claims postwar source. */
+  readonly sourceBoundary:
+    'LEGACY_ADR09_NOT_POSTWAR_SOURCE' | 'POSTWAR_ORIGINALS_REQUIRED';
   readonly #database: SqlDatabase;
   readonly #sha256Hex: Sha256Hex;
   readonly #approvals: NarrowTransferApprovalStore;
+  readonly #postwarSource: PostwarNarrowTradeFreshSourceGuard | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
     readonly sha256Hex: Sha256Hex;
+    /** Explicit server selection; legacy ADR-09 fixtures remain independent.
+     * A postwar selection without the registered fixed source guard refuses. */
+    readonly postwarSource?: Readonly<{
+      mode: 'POSTWAR_ADMITTED_H0';
+      guard: PostwarNarrowTradeFreshSourceGuard;
+    }>;
   }) {
     this.#database = input.database;
     this.#sha256Hex = input.sha256Hex;
+    if (
+      input.postwarSource &&
+      (input.postwarSource.mode !== 'POSTWAR_ADMITTED_H0' ||
+        !isPostwarNarrowTradeFreshSourceGuard(input.postwarSource.guard))
+    )
+      invalid(
+        'Postwar intake requires the registered server-owned original source guard',
+      );
+    this.#postwarSource = input.postwarSource?.guard ?? null;
+    this.sourceBoundary = this.#postwarSource
+      ? 'POSTWAR_ORIGINALS_REQUIRED'
+      : 'LEGACY_ADR09_NOT_POSTWAR_SOURCE';
     // Fixed existing guard: callers cannot inject an always-approved mock.
     this.#approvals = new NarrowTransferApprovalStore(input);
   }
@@ -228,8 +255,16 @@ export class PostgresNarrowTransferIntake {
           deny('Command is outside its offer lifetime');
         }
         if (operation === 'SUBMIT') {
+          await this.#postwarSource?.assertFrom(transaction, {
+            command: durable,
+            authorization: auth,
+          });
           await this.#insert(transaction, durable);
         } else {
+          await this.#postwarSource?.assertFrom(transaction, {
+            command: durable,
+            authorization: auth,
+          });
           await this.#approvals.assertCurrent(transaction, {
             command: durable,
             observedAtReal,
@@ -448,4 +483,23 @@ export class PostgresNarrowTransferIntake {
       acknowledgement,
     });
   }
+}
+
+/** Explicit server composition. Cannot silently reuse legacy ADR-09 source
+ * selection as a postwar registration/queue source. Starts no consumer/Clock. */
+export function createPostwarNarrowTransferIntake(input: {
+  readonly database: SqlDatabase;
+  readonly sha256Hex: Sha256Hex;
+  readonly runtimeRole: string;
+}) {
+  return new PostgresNarrowTransferIntake({
+    database: input.database,
+    sha256Hex: input.sha256Hex,
+    postwarSource: {
+      mode: 'POSTWAR_ADMITTED_H0',
+      guard: createPostwarNarrowTradeFreshSourceGuard({
+        runtimeRole: input.runtimeRole,
+      }),
+    },
+  });
 }

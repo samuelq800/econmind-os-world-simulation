@@ -1,3 +1,9 @@
+import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from './authenticated-fx-command-contract.js';
+export {
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_PAYLOAD_SCHEMA,
+  type PostwarDayOneTreasuryFxPayload,
+} from './authenticated-fx-command-contract.js';
 /** Pure transport for manual Office intent. A parsed intent grants no authority.
  * Durable acknowledgement is queue registration only; no economic outcome. */
 export const AUTHENTICATED_OFFICE_COMMAND_SCHEMA =
@@ -12,7 +18,9 @@ export type ManualOfficeCommandFamily =
   | 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'
   | 'CORE_CENTRAL_BANK_OMO_V1'
   | 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1'
-  | typeof FINANCE_BUDGET_APPROPRIATION_COMMAND;
+  | 'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'
+  | typeof FINANCE_BUDGET_APPROPRIATION_COMMAND
+  | typeof POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND;
 
 export interface ManualOfficeCommandRequestDto {
   readonly worldId: string;
