@@ -1,3 +1,4 @@
+import { assertPostwarCurrentSocialMatchPlan } from './postwar-social-match-current-plan.js';
 import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
 import type { CurrentMaterializationObservation } from './current-materialization-observation.js';
 import type { PreparedPostwarSocialSource } from './prepared-postwar-social-source.js';
@@ -240,14 +241,11 @@ export function createPostwarSocialMatchRuntime(configuration: {
       ),
     );
     const { lineage, document, grant, publication } = original;
-    const last = lineage.transitions.at(-1),
-      planEntry = lineage.transitions.find(
-        (e) => e.command.commandId === parsed.intent.planCommandId,
-      );
+    const planEntry = lineage.transitions.find(
+      (e) => e.command.commandId === parsed.intent.planCommandId,
+    );
     if (
-      !last ||
       !planEntry ||
-      last.command.commandId !== planEntry.command.commandId ||
       planEntry.receipt.outcome !== 'COMMITTED' ||
       planEntry.command.fingerprint !== parsed.intent.planFingerprint ||
       planEntry.command.countryId !== command.countryId ||
@@ -262,11 +260,21 @@ export function createPostwarSocialMatchRuntime(configuration: {
       publication.grant_ref !== grant.grant_ref
     )
       invalid(
-        'last canonical PLAN, actual publisher, day-zero boundary or publication differs',
+        'canonical PLAN, actual publisher, day-zero boundary or publication differs',
       );
     const plan = parseSocialEmploymentServiceCommand(planEntry.command, digest);
     if (plan.kind !== 'PLAN') invalid('actual original PLAN required');
     const replay = replayPostwarSocialEmploymentLineage({ document, lineage });
+    assertPostwarCurrentSocialMatchPlan({
+      frames: lineage.transitions.map((t) => ({
+        ...t,
+        events: t.transition.events,
+      })),
+      socialCountries: replay.countries,
+      countryId: command.countryId,
+      planCommandId: parsed.intent.planCommandId,
+      requirePending: true,
+    });
     const country = replay.countries.find(
         (c) => c.countryId === command.countryId,
       ),
@@ -337,7 +345,7 @@ export function createPostwarSocialMatchRuntime(configuration: {
       readFactsHash: hash(readFacts),
       physicalBodyHash: physical.immutableBodyHash,
       clockBasis:
-        'LAST_COMMITTED_PLAN_SIMTIME_EXISTING_OPENING_E01_DAY_ZERO_NO_CLOCK_ADVANCE',
+        'CURRENT_PENDING_PLAN_SIMTIME_COMPLETE_MIXED_PREFIX_OPENING_E01_DAY_ZERO_NO_CLOCK_ADVANCE',
     });
     return { state, readFacts, binding, head, operation, lineage };
   };

@@ -24,6 +24,7 @@ import {
   replayPreparedFinanceSocialLedger,
   type PreparedFinanceSocialLedger,
 } from '@econmind/core/finance-social-prepared-ledger';
+import { readPostwarSocialStartupSeedFrom } from './postwar-social-startup-seed.js';
 import { WorldOpeningSeedStore } from './opening-seed-store.js';
 import {
   readPostwarOperatingGenesisFromSeed,
@@ -77,6 +78,9 @@ export interface PostwarSocialSourcePreparationInput {
   readonly observedAtReal: string;
   readonly admittedWorldPins: PostwarSocialPreparationPins;
   readonly modelVersion: string;
+  /** Server-only actual Core opening DATA, normally shared with FX startup.
+   * Never an HTTP DTO or an assertion of admission/readiness. */
+  readonly startupSeed?: Readonly<OpeningSeed>;
 }
 declare const preparedSocial: unique symbol;
 export interface PreparedPostwarSocialSource {
@@ -188,10 +192,24 @@ export async function preparePostwarSocialSource(input: {
           firstRow.admission_ref !== pins.admissionRef
         )
           invalid('ACTUAL_PREPARATION_ADMISSION_REQUIRED');
-        const seed = await new WorldOpeningSeedStore({
-          database: input.database,
-          sha256Hex: sha,
-        }).loadFrom(tx, pins.worldId);
+        const seed = c.startupSeed
+          ? await readPostwarSocialStartupSeedFrom({
+              executor: tx,
+              seed: c.startupSeed,
+              worldId: pins.worldId,
+              countryId: countryIds[0]!,
+              seedRef: pins.seedRef,
+              seedFingerprint: pins.contentHash,
+              admissionRef: pins.admissionRef,
+              modelVersion: c.modelVersion,
+              registration: firstRow,
+            })
+          : // Legacy offline-capable path only. Missing raw permission is an
+            // explicit failure; it never justifies granting an online reader raw.
+            await new WorldOpeningSeedStore({
+              database: input.database,
+              sha256Hex: sha,
+            }).loadFrom(tx, pins.worldId);
         if (
           seed.worldId !== pins.worldId ||
           seed.seedId !== pins.seedRef ||

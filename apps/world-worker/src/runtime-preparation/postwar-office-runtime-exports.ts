@@ -11,3 +11,9 @@ export {
   type PostwarOfficeProjectionPage,
 } from '../persistence/postwar-office-projection-store.js';
 export type { SqlExecutor } from '../persistence/sql-database.js';
+
+export {
+  createPostwarSocialMixedCurrentProjectionStore,
+  type PostwarSocialMixedCurrentSource,
+  type PostwarSocialMixedCurrentPage,
+} from '../persistence/postwar-social-mixed-current-projection.js';

@@ -126,13 +126,17 @@ export function createPostwarRuntimeView(
           text(
             'p',
             page.source.dataNature ===
-              'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX'
+              'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX' ||
+              page.source.dataNature ===
+                'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX'
               ? `Current ledger claims and reserved capacity · World version ${page.source.worldVersion}`
               : page.source.dataNature === 'ADMITTED_IMMUTABLE_OPENING_FACTS'
                 ? `Opening facts (historical) · Checked at World version ${page.authority.readback.worldVersion}`
                 : page.source.dataNature ===
-                    'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION'
-                  ? `Committed current state · World version ${page.source.worldVersion}`
+                      'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
+                    page.source.dataNature ===
+                      'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX'
+                  ? `Committed current state · World version ${page.source.worldVersion} · State origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)}`
                   : 'Admitted opening snapshot · World version 0',
           ),
           text(
@@ -140,6 +144,25 @@ export function createPostwarRuntimeView(
             `Rows ${page.page.offset + (page.rows.length ? 1 : 0)}–${page.page.offset + page.rows.length} / ${page.page.total} · Source ${page.source.sourceVersion}`,
           ),
         );
+        if (
+          page.source.dataNature ===
+          'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX'
+        ) {
+          const coverage = page.source.currentFinancialCoverage;
+          if (
+            coverage &&
+            typeof coverage === 'object' &&
+            'financialPostingCount' in coverage &&
+            'financialBatchCount' in coverage &&
+            'financialPostingsFingerprint' in coverage
+          )
+            section.append(
+              text(
+                'p',
+                `Financial posting legs ${String(coverage.financialPostingCount)} · Batches ${String(coverage.financialBatchCount)} · ${String(coverage.financialPostingsFingerprint)}`,
+              ),
+            );
+        }
         if (page.status === 'EMPTY')
           section.append(
             text(
@@ -193,8 +216,26 @@ export function createPostwarRuntimeView(
               'availableCapacity',
               'reservationNature',
               'balanceNature',
+              'governmentGcuCurrency',
+              'governmentGcuCashBalance',
+              'governmentGcuAccountIds',
+              'gcuBalanceNature',
             ],
-            'ledger-balances': ['account', 'netDebitBalance'],
+            'ledger-balances':
+              page.source.dataNature ===
+              'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX'
+                ? [
+                    'ownerKind',
+                    'ownerEntityId',
+                    'accountId',
+                    'currency',
+                    'accountClass',
+                    'claimId',
+                    'counterpartyEntityId',
+                    'netDebitBalance',
+                    'balanceNature',
+                  ]
+                : ['account', 'netDebitBalance'],
             'public-service-summary': [
               'regionId',
               'kind',

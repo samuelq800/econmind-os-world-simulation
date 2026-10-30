@@ -1,5 +1,6 @@
 /** Explicit local/CI Node owner. HTTP borrowers share one privately issued
  * Worker runtime. This owner never starts a loop or discovers credentials. */
+import type { OpeningSeed } from '@econmind/core';
 import {
   readPostwarFinanceSocialRuntimeBinding,
   hasPreparedPostwarFinanceSocialTreasuryFx,
@@ -26,6 +27,9 @@ export interface PostwarFinanceSocialApiConnectionInput {
    * validation. Borrowed office connections never end any of them. */
   readonly social: PostwarSocialConnectionConfiguration;
   readonly financeAllowedOrigins?: readonly string[];
+  /** Offline Core seed, verified against live SQL header/source pins by Worker.
+   * Server startup only; never an HTTP field or online-reader privilege. */
+  readonly socialStartupSeed?: Readonly<OpeningSeed>;
   /** Actual server-held opening/policy/receipt inputs for the fixed FX source.
    * Never accepted from HTTP and never substituted with a readiness flag. */
   readonly treasuryFxPreparation?: Parameters<
@@ -137,6 +141,7 @@ export async function createPostwarFinanceSocialApiConnection(
       c,
       binding,
       input.treasuryFxPreparation,
+      input.socialStartupSeed,
     );
     finance = createPostwarFinanceConnection(
       {

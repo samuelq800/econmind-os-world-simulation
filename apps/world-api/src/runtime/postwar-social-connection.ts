@@ -13,6 +13,7 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   type CanonicalCommand,
+  type OpeningSeed,
 } from '@econmind/core';
 import {
   AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
@@ -95,7 +96,8 @@ export interface PostwarSocialConnection {
   readonly classification: 'SOCIAL_SERVER_DEPENDENCIES_INSTALLED_NOT_RUNTIME_ACCEPTANCE';
   readonly preparationMode:
     'LOCAL_CI_PREPARED_INTAKE' | 'PRODUCTION_SOURCE_PREFLIGHT_ONLY';
-  /** Finite genuine DB preparation. No caller seed/Ready, source registration,
+  /** Finite preparation verifies actual startup data against genuine DB pins.
+   * No caller Ready, source registration,
    * lease acquisition, consumer start or clock advance. Required before HTTP. */
   prepare(): Promise<void>;
   /** Hidden until immutable preparation succeeds. Remains PREPARED; the
@@ -167,10 +169,12 @@ export function createPostwarSocialConnection(
   sharedFxPreparation?: Parameters<
     PostwarFinanceSocialRuntimeConnection['prepare']
   >[1],
+  startupSeed?: Readonly<OpeningSeed>,
 ): Readonly<PostwarSocialConnection> {
   if (sharedFxPreparation !== undefined && !sharedConnection)
     throw Error('SOCIAL_FX_PREPARATION_REQUIRES_GENUINE_SHARED_BINDING');
   let fxPreparation = sharedFxPreparation;
+  let socialStartupSeed = startupSeed;
   const c = Object.freeze({
     ...configuration,
     admittedWorldPins: Object.freeze({ ...configuration.admittedWorldPins }),
@@ -363,11 +367,18 @@ export function createPostwarSocialConnection(
           observedAtReal: c.clock.nowReal(),
           admittedWorldPins: c.admittedWorldPins,
           modelVersion: c.modelVersion,
+          ...(socialStartupSeed ? { startupSeed: socialStartupSeed } : {}),
         };
-        if (sharedConnection)
-          await sharedConnection.prepare(preparation, fxPreparation);
-        else await sources.prepare(preparation);
-        fxPreparation = undefined;
+        try {
+          if (sharedConnection)
+            await sharedConnection.prepare(preparation, fxPreparation);
+          else await sources.prepare(preparation);
+        } finally {
+          // Preparation is single-shot; a failed host must also release its
+          // large startup input and may not retain it through online requests.
+          fxPreparation = undefined;
+          socialStartupSeed = undefined;
+        }
         if (phase !== 'OPEN') throw Error('SOCIAL_PREPARATION_RETIRED');
         sourcePrepared = true;
       });
@@ -479,6 +490,7 @@ export function createPostwarSocialConnection(
       if (stopping) return stopping;
       phase = 'STOPPING';
       fxPreparation = undefined;
+      socialStartupSeed = undefined;
       for (const controller of active.values()) controller.abort();
       stopping = (async () => {
         const errors: unknown[] = [];

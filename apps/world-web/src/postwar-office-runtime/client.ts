@@ -1,3 +1,14 @@
+import {
+  POSTWAR_SOCIAL_MIXED_CURRENT_NATURE,
+  parsePostwarSocialMixedCoverage,
+  parsePostwarSocialMixedStateBinding,
+} from '@econmind/core/postwar-social-mixed-current-contract';
+import {
+  POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE,
+  parsePostwarFinancialMixedCoverage,
+  parsePostwarMixedFinancialBalanceRow,
+  parsePostwarMixedTreasuryCapacityRow,
+} from '@econmind/core/postwar-financial-mixed-current-contract';
 import { sameAuthorizedIdentity } from '../prototype/authorized-read-adapter.js';
 import {
   hash,
@@ -131,6 +142,20 @@ function financialCoverageMatches(
   authority: ServerReadAuthority,
 ): boolean {
   const coverage = row(source.currentFinancialCoverage);
+  if (
+    coverage?.schemaVersion === 'postwar-financial-current-prefix-coverage-v2'
+  ) {
+    try {
+      parsePostwarFinancialMixedCoverage(coverage, {
+        countryId: authority.identity.countryId,
+        worldVersion: authority.readback.worldVersion,
+        eventSequence: authority.readback.eventSequence,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
   const fields = [
     'schemaVersion',
     'reducerVersion',
@@ -401,24 +426,43 @@ export function createPostwarRuntimeClient(
           source.eventSequence !== '0' &&
           c.identity.officeId === 'SOCIAL' &&
           ['positions', 'service-pools'].includes(dataset) &&
-          source.dataNature ===
-            'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION';
+          (source.dataNature ===
+            'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
+            source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE);
         const financialOffice = ['FINANCE', 'CENTRAL_BANK'].includes(
           c.identity.officeId,
         );
         const financialCurrent =
-          source.dataNature ===
-            'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX' &&
+          (source.dataNature ===
+            'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX' ||
+            source.dataNature === POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE) &&
           financialOffice &&
           ['ledger-balances', 'treasury-capacity'].includes(dataset) &&
-          source.worldVersion !== '0' &&
-          source.eventSequence !== '0';
+          (source.dataNature === POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE ||
+            (source.worldVersion !== '0' && source.eventSequence !== '0'));
         const historicalFacts =
           historical &&
           c.identity.officeId !== 'SOCIAL' &&
           !['ledger-balances', 'treasury-capacity'].includes(dataset);
         if (!opening && !currentSocial && !financialCurrent && !historicalFacts)
           throw Error('UNPROVEN_CURRENT_DATA_KIND');
+        if (source.dataNature === POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE) {
+          const office = c.identity.officeId;
+          if (office !== 'FINANCE' && office !== 'CENTRAL_BANK')
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          if (dataset === 'ledger-balances')
+            for (const value of rows)
+              parsePostwarMixedFinancialBalanceRow(value, {
+                countryId: c.identity.countryId,
+                officeId: office,
+              });
+          if (dataset === 'treasury-capacity') {
+            if (office !== 'FINANCE' || page.total !== 1)
+              throw Error('CURRENT_STATE_BINDING_MISMATCH');
+            for (const value of rows)
+              parsePostwarMixedTreasuryCapacityRow(value, c.identity.countryId);
+          }
+        }
         if (financialCurrent || historicalFacts) {
           if (
             source.originWorldVersion !== '0' ||
@@ -432,7 +476,45 @@ export function createPostwarRuntimeClient(
           )
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
         }
-        if (currentSocial) {
+        if (
+          currentSocial &&
+          source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE
+        ) {
+          try {
+            if (!observedHeadMatches(source, authority))
+              throw Error('HEAD_MISMATCH');
+            const coverage = parsePostwarSocialMixedCoverage(
+              source.currentPrefixCoverage,
+              {
+                countryId: c.identity.countryId,
+                worldVersion: authority.readback.worldVersion,
+                eventSequence: authority.readback.eventSequence,
+              },
+            );
+            if (
+              source.originWorldVersion !== coverage.originWorldVersion ||
+              source.originEventSequence !== coverage.originEventSequence
+            )
+              throw Error('ORIGIN_MISMATCH');
+            const binding = parsePostwarSocialMixedStateBinding(
+              source.currentStateBinding,
+              coverage,
+            );
+            if (
+              binding &&
+              ![
+                `SOCIAL_POSITION_LIFECYCLE_${c.identity.countryId}`,
+                `SOCIAL_EMPLOYMENT_SERVICE_${c.identity.countryId}`,
+              ].includes(binding.materializationKey)
+            )
+              throw Error('MATERIALIZATION_SCOPE_MISMATCH');
+            for (const value of rows)
+              if (row(value)?.countryId !== c.identity.countryId)
+                throw Error('ROW_COUNTRY_MISMATCH');
+          } catch {
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          }
+        } else if (currentSocial) {
           const binding = row(source.currentStateBinding);
           const fields = [
             'sourceCommandId',

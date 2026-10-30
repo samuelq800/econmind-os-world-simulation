@@ -12,7 +12,7 @@ import { createPostwarSocialPositionRuntimeDatabase } from '../../apps/world-wor
 import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
 
 describe('fixed Social intake/claim metadata lock delegation', () => {
-  it('reuses the exact pool identity and rewrites only the Social cutoff query, preserving actual results/errors/release', async () => {
+  it('reuses the exact pool identity and rewrites only the two exact Social binding queries, preserving actual results/errors/release', async () => {
     const statements: { sql: string; args: readonly unknown[] }[] = [];
     const result = {
       rowCount: 1,
@@ -69,11 +69,71 @@ describe('fixed Social intake/claim metadata lock delegation', () => {
       sql: SOCIAL_INTAKE_BINDING_LOCK_QUERY,
       args,
     });
-    expect(statements[1]!.sql).toBe(OFFICE_COMMAND_CURRENT_BINDING_QUERY);
+    expect(statements[1]).toEqual({
+      sql: SOCIAL_INTAKE_BINDING_LOCK_QUERY,
+      args,
+    });
     expect(statements[2]!.sql).toBe(lock);
     expect(
       statements.some((s) => /\bgrant\b|\bset\s+role\b/iu.test(s.sql)),
     ).toBe(false);
+  });
+  it('keeps eight-string/Social Labour gates on both literals and never rewrites other SQL or offices', async () => {
+    const seen: { sql: string; parameters: readonly unknown[] }[] = [];
+    const client = {
+      query: (sql: string, parameters: readonly unknown[] = []) => {
+        seen.push({ sql, parameters });
+        return Promise.resolve({ rows: [], rowCount: 0 });
+      },
+      release() {},
+    };
+    const wrapped = createSocialIntakeAuthorizationPool({
+      connect: async () => client as unknown as PoolClient,
+    });
+    const connection = await wrapped.connect();
+    const args = [
+      'WORLD_TEST',
+      '11111111-1111-4111-8111-111111111111',
+      'COUNTRY_01',
+      'SOCIAL',
+      'SEAT_TEST',
+      'REV_1',
+      'SOCIAL_LABOUR',
+      'OFFICE_SCOPE_TEST',
+    ];
+    const locked =
+      OFFICE_COMMAND_CURRENT_BINDING_QUERY + ' for share of authz,entitlement';
+    try {
+      for (const statement of [OFFICE_COMMAND_CURRENT_BINDING_QUERY, locked]) {
+        for (const invalid of [
+          args.slice(0, 7),
+          [...args, 'EXTRA'],
+          args.map((v, i) => (i === 6 ? 'OTHER_CAPABILITY' : v)),
+          args.map((v, i) => (i === 5 ? 1 : v)),
+        ])
+          expect(() => connection.query(statement, invalid)).toThrow(
+            'SOCIAL_INTAKE_FIXED_PARAMETERS_REQUIRED',
+          );
+        const foreign = args.map((v, i) =>
+          i === 3 ? 'FINANCE' : i === 6 ? 'FINANCE_BUDGET' : v,
+        );
+        await connection.query(statement, foreign);
+        expect(seen.at(-1)).toEqual({ sql: statement, parameters: foreign });
+      }
+      for (const statement of [
+        OFFICE_COMMAND_CURRENT_BINDING_QUERY + ' ',
+        locked + ' ',
+        'select 1',
+      ]) {
+        await connection.query(statement, args);
+        expect(seen.at(-1)).toEqual({ sql: statement, parameters: args });
+      }
+      expect(seen.some((s) => s.sql === SOCIAL_INTAKE_BINDING_LOCK_QUERY)).toBe(
+        false,
+      );
+    } finally {
+      connection.release();
+    }
   });
   it('delegates the exact Social manual claim lock in the same transaction and restores the verified writer', async () => {
     let role = 'fixture_social_writer';

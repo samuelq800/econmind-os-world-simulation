@@ -16,6 +16,14 @@
       "types": "./dist/finance/postwar-day-one-treasury-fx.d.ts",
       "default": "./dist/finance/postwar-day-one-treasury-fx.js"
     },
+    "./postwar-social-mixed-current-contract": {
+      "types": "./dist/read-models/postwar-social-mixed-current-contract.d.ts",
+      "import": "./dist/read-models/postwar-social-mixed-current-contract.js"
+    },
+    "./postwar-financial-mixed-current-contract": {
+      "types": "./dist/read-models/postwar-financial-mixed-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-financial-mixed-current-contract.js"
+    },
     "./postwar-day-one-fx-command-contract": {
       "types": "./dist/commands/authenticated-fx-command-contract.d.ts",
       "default": "./dist/commands/authenticated-fx-command-contract.js"

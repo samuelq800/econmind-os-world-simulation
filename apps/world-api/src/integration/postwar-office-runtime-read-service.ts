@@ -8,6 +8,8 @@ import {
 } from '@econmind/core';
 import {
   createPostwarOfficeProjectionStore,
+  createPostwarSocialMixedCurrentProjectionStore,
+  type PostwarSocialMixedCurrentSource,
   PostwarOfficeProjectionStoreError,
   POSTWAR_PROJECTION_DATASETS,
   type PostwarOfficeProjectionPage,
@@ -15,9 +17,10 @@ import {
   type PostwarProjectionOffice,
 } from '@econmind/world-worker/postwar-office-runtime';
 import {
-  createPostwarFinancialCurrentProjectionStore,
+  createPostwarFinancialMixedCurrentProjectionStore,
   POSTWAR_FINANCIAL_CURRENT_DATASETS,
   type PostwarFinancialCurrentSource,
+  type PostwarFinancialMixedCurrentSource,
 } from '@econmind/world-worker/postwar-financial-current-read';
 import {
   createPostwarPhysicalOpeningHeadReader,
@@ -55,13 +58,25 @@ type OriginalSuccessPage = Extract<
   PostwarOfficeProjectionPage,
   { status: 'PAGE' | 'EMPTY' }
 >;
+type FinancialReadSource =
+  PostwarFinancialCurrentSource | PostwarFinancialMixedCurrentSource;
 type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
-  readonly source: Omit<OriginalSuccessPage['source'], 'dataNature'> & {
+  readonly source: Omit<
+    OriginalSuccessPage['source'],
+    'dataNature' | 'currentPrefixCoverage' | 'currentStateBinding'
+  > & {
+    readonly currentPrefixCoverage?:
+      | OriginalSuccessPage['source']['currentPrefixCoverage']
+      | PostwarSocialMixedCurrentSource['currentPrefixCoverage'];
+    readonly currentStateBinding?:
+      | OriginalSuccessPage['source']['currentStateBinding']
+      | PostwarSocialMixedCurrentSource['currentStateBinding'];
     readonly dataNature:
       | OriginalSuccessPage['source']['dataNature']
-      | PostwarFinancialCurrentSource['dataNature']
+      | FinancialReadSource['dataNature']
+      | PostwarSocialMixedCurrentSource['dataNature']
       | 'ADMITTED_IMMUTABLE_OPENING_FACTS';
-    readonly currentFinancialCoverage?: PostwarFinancialCurrentSource['currentFinancialCoverage'];
+    readonly currentFinancialCoverage?: FinancialReadSource['currentFinancialCoverage'];
     readonly originWorldVersion?: string;
     readonly originEventSequence?: string;
     readonly observedHead?: Readonly<{
@@ -348,8 +363,14 @@ export function createPostwarOfficeRuntimeReadService(
         authorizationPublisherRole: c.authorizationPublisherRole,
       })
     : null;
+  const socialStore = c
+    ? createPostwarSocialMixedCurrentProjectionStore({
+        runtimeReaderRole: c.readerRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+      })
+    : null;
   const financialStore = c
-    ? createPostwarFinancialCurrentProjectionStore({
+    ? createPostwarFinancialMixedCurrentProjectionStore({
         runtimeReaderRole: c.readerRole,
         authorizationPublisherRole: c.authorizationPublisherRole,
       })
@@ -493,22 +514,29 @@ export function createPostwarOfficeRuntimeReadService(
                         ...pageRequest,
                         officeId: request.office,
                       })
-                    : (request.office === 'INDUSTRY' ||
-                          request.office === 'TRADE' ||
-                          request.office === 'CAPTAIN') &&
-                        head.worldVersion !== '0'
-                      ? await (
-                          request.dataset === 'opening-inventory-entries'
-                            ? inventoryStore!
-                            : physicalStore!
-                        ).readPageFrom(read, {
+                    : request.office === 'SOCIAL' &&
+                        head.worldVersion !== '0' &&
+                        ['positions', 'service-pools'].includes(request.dataset)
+                      ? await socialStore!.readPageFrom(read, {
                           ...pageRequest,
-                          officeId: request.office,
+                          officeId: 'SOCIAL',
                         })
-                      : await store.readPageFrom(read, {
-                          ...pageRequest,
-                          officeId: request.office,
-                        });
+                      : (request.office === 'INDUSTRY' ||
+                            request.office === 'TRADE' ||
+                            request.office === 'CAPTAIN') &&
+                          head.worldVersion !== '0'
+                        ? await (
+                            request.dataset === 'opening-inventory-entries'
+                              ? inventoryStore!
+                              : physicalStore!
+                          ).readPageFrom(read, {
+                            ...pageRequest,
+                            officeId: request.office,
+                          })
+                        : await store.readPageFrom(read, {
+                            ...pageRequest,
+                            officeId: request.office,
+                          });
                 if (!('scope' in page))
                   return fail(
                     page.status === 'DENIED'

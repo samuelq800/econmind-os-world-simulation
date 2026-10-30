@@ -1,4 +1,4 @@
-/** Borrowed intake pool adapter for ONE exact current-binding cutoff query.
+/** Borrowed intake adapter for the two exact initial/locked binding queries.
  * No pool creation, role change, environment lookup, facts callback or authority
  * DML grant. Fixed SQL definer holds real metadata locks in the same transaction. */
 import type { Pool } from 'pg';
@@ -16,9 +16,10 @@ export function createFinanceBudgetIntakeAuthorizationPool(
           if (key === 'query')
             return (statement: string, parameters?: readonly unknown[]) => {
               if (
-                statement ===
-                  OFFICE_COMMAND_CURRENT_BINDING_QUERY +
-                    ' for share of authz,entitlement' &&
+                (statement === OFFICE_COMMAND_CURRENT_BINDING_QUERY ||
+                  statement ===
+                    OFFICE_COMMAND_CURRENT_BINDING_QUERY +
+                      ' for share of authz,entitlement') &&
                 parameters?.length === 8 &&
                 parameters[3] === 'FINANCE' &&
                 parameters[6] === 'FINANCE_BUDGET'

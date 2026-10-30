@@ -1,4 +1,4 @@
-/** One fixed metadata lock-read adapter. No membership/UPDATE grant, role
+/** Fixed initial and cutoff metadata reads through one lock-read adapter. No membership/UPDATE grant, role
  * escalation, arbitrary SQL rewrite, source publication or Ready callback. */
 import type { Pool } from 'pg';
 import { OFFICE_COMMAND_CURRENT_BINDING_QUERY } from '../intake/postgres-office-command-intake.js';
@@ -32,9 +32,10 @@ export function createSocialIntakeAuthorizationPool(
           if (key === 'query')
             return (statement: string, parameters?: readonly unknown[]) => {
               if (
-                statement ===
-                  OFFICE_COMMAND_CURRENT_BINDING_QUERY +
-                    ' for share of authz,entitlement' &&
+                (statement === OFFICE_COMMAND_CURRENT_BINDING_QUERY ||
+                  statement ===
+                    OFFICE_COMMAND_CURRENT_BINDING_QUERY +
+                      ' for share of authz,entitlement') &&
                 parameters?.[3] === 'SOCIAL'
               ) {
                 if (

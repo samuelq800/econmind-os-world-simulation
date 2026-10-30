@@ -412,7 +412,7 @@ export async function withMixedTestProof<
     },
     worldId: world,
     requestedCountryId: country,
-    requestedOfficeId: 'FINANCE',
+    requestedOfficeId: C.officeId('FINANCE'),
     capability,
   });
   let result: T | undefined;

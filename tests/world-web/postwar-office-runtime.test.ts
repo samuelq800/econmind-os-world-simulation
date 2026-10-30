@@ -680,3 +680,234 @@ describe('new current-seat version / actual installed page consumers TEST_ONLY',
     },
   );
 });
+
+/** DATA-only mixed-prefix fixtures; neither authority nor native ledger proof. */
+describe('posting-aware mixed current page wire', () => {
+  const coverage = (countryId: string) => ({
+    schemaVersion: 'postwar-financial-current-prefix-coverage-v2',
+    reducerVersion: 'POSTWAR_FINANCIAL_SOCIAL_FX_COMPLETE_PREFIX_V2',
+    countryId,
+    coverageRef: 'MIXED_COVERAGE_TEST',
+    prefixFingerprint: hash,
+    knownEffectsFingerprint: hash,
+    globalWorldVersion: '7',
+    globalEventSequence: '12',
+    coveredThroughEventId: 'EVENT_TEST',
+    coveredThroughEventFingerprint: hash,
+    financialPostingCount: '6',
+    financialBatchCount: '2',
+    financialPostingsFingerprint: hash,
+  });
+  it.each([
+    'valid',
+    'wrong-country',
+    'wrong-head',
+    'missing-postings',
+    'private-extra-field',
+  ])(
+    'checks Finance actual balances and complete mixed coverage (%s)',
+    async (fault) => {
+      const f = fixture();
+      f.config.identity.officeId = 'FINANCE';
+      const original = f.body('ledger-balances', 0, 1);
+      original.authority.readback.worldVersion = '7';
+      original.authority.readback.eventSequence = '12';
+      const wire = {
+        ...original,
+        source: {
+          ...original.source,
+          officeId: 'FINANCE',
+          dataNature: 'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX',
+          worldVersion: '7',
+          eventSequence: '12',
+          originWorldVersion: '0',
+          originEventSequence: '0',
+          observedHead: { worldVersion: '7', eventSequence: '12' },
+          currentFinancialCoverage: coverage(f.config.identity.countryId),
+        },
+        rows: [
+          {
+            schemaVersion: 'postwar-current-financial-balance-row-v2',
+            countryId: f.config.identity.countryId,
+            accountId: 'TEST_GOV_GCU',
+            ownerEntityId: 'TEST_GOV',
+            ownerKind: 'GOV',
+            currency: 'GCU',
+            accountClass: 'CASH',
+            claimId: null,
+            counterpartyEntityId: null,
+            netDebitBalance: '1.25',
+            balanceNature: 'GCU_CASH',
+          },
+        ],
+      };
+      if (fault === 'wrong-country') wire.rows[0]!.countryId = 'COUNTRY_OTHER';
+      if (fault === 'wrong-head')
+        wire.source.currentFinancialCoverage.globalWorldVersion = '6';
+      if (fault === 'missing-postings')
+        Reflect.deleteProperty(
+          wire.source.currentFinancialCoverage,
+          'financialPostingsFingerprint',
+        );
+      if (fault === 'private-extra-field')
+        Object.assign(wire.rows[0]!, { privateOriginalLedger: {} });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      const result = await client.readPage('ledger-balances', requestId);
+      expect(result.status).toBe(fault === 'valid' ? 'PAGE' : 'UNAVAILABLE');
+      client.disconnect();
+    },
+  );
+  it.each(['0', '3', 'foreign-row', 'missing-binding'])(
+    'separates Social state origin from current mixed head (%s)',
+    async (scenario) => {
+      const f = fixture(),
+        original = f.body('positions', 0, 1),
+        origin = scenario === '0' ? '0' : '3';
+      original.authority.readback.worldVersion = '7';
+      original.authority.readback.eventSequence = '12';
+      const mixedCoverage = {
+        schemaVersion: 'postwar-social-current-prefix-coverage-v3',
+        reducerVersion: 'POSTWAR_SOCIAL_FINANCE_FX_COMPLETE_PREFIX_V3',
+        countryId: f.config.identity.countryId,
+        coverageRef: 'SOCIAL_MIXED_COVERAGE_TEST',
+        globalWorldVersion: '7',
+        globalEventSequence: '12',
+        originWorldVersion: origin,
+        originEventSequence: origin,
+        prefixFingerprint: hash,
+        knownEffectsFingerprint: hash,
+        coveredThroughEventId: 'EVENT_TEST',
+        coveredThroughEventFingerprint: hash,
+        financialPostingCount: '6',
+        financialBatchCount: '2',
+        financialPostingsFingerprint: hash,
+        employmentStateHash: hash,
+        materializationHash: hash,
+        stateOrigin:
+          origin === '0'
+            ? 'ADMITTED_OPENING_SOURCE'
+            : 'COMMITTED_MATERIALIZATION',
+      };
+      const wire = {
+        ...original,
+        source: {
+          ...original.source,
+          dataNature: 'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX',
+          worldVersion: '7',
+          eventSequence: '12',
+          originWorldVersion: origin,
+          originEventSequence: origin,
+          observedHead: { worldVersion: '7', eventSequence: '12' },
+          currentPrefixCoverage: mixedCoverage,
+        },
+        rows: [
+          {
+            ...original.rows[0],
+            countryId:
+              scenario === 'foreign-row'
+                ? 'COUNTRY_OTHER'
+                : f.config.identity.countryId,
+          },
+        ],
+      };
+      if (origin !== '0' && scenario !== 'missing-binding')
+        Object.assign(wire.source, {
+          currentStateBinding: {
+            sourceCommandId: 'COMMAND_TEST',
+            commandFingerprint: hash,
+            sourceEventId: 'EVENT_TEST',
+            eventFingerprint: hash,
+            materializationKey: `SOCIAL_POSITION_LIFECYCLE_${f.config.identity.countryId}`,
+            materializationHash: hash,
+            canonicalMaterializationSha256: 'a'.repeat(64),
+            sourceStateWorldVersion: origin,
+            sourceEventSequence: origin,
+          },
+        });
+      const client = createPostwarRuntimeClient(f.config, {
+        fetcher: async () => Response.json(wire),
+      });
+      expect((await client.readPage('positions', requestId)).status).toBe(
+        ['foreign-row', 'missing-binding'].includes(scenario)
+          ? 'UNAVAILABLE'
+          : 'PAGE',
+      );
+      client.disconnect();
+    },
+  );
+  it('shows GCU and posting evidence, then clears balances when current publication is unavailable', async () => {
+    const f = fixture();
+    f.config.identity.officeId = 'FINANCE';
+    const original = f.body('ledger-balances', 0, 1);
+    original.authority.readback.worldVersion = '7';
+    original.authority.readback.eventSequence = '12';
+    let available = true;
+    vi.stubGlobal('fetch', async (_url: unknown, init?: RequestInit) => {
+      const q = JSON.parse(String(init?.body));
+      return Response.json(
+        available
+          ? {
+              ...original,
+              requestId: q.requestId,
+              source: {
+                ...original.source,
+                officeId: 'FINANCE',
+                dataNature: 'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX',
+                worldVersion: '7',
+                eventSequence: '12',
+                originWorldVersion: '0',
+                originEventSequence: '0',
+                observedHead: { worldVersion: '7', eventSequence: '12' },
+                currentFinancialCoverage: coverage(f.config.identity.countryId),
+              },
+              rows: [
+                {
+                  schemaVersion: 'postwar-current-financial-balance-row-v2',
+                  countryId: f.config.identity.countryId,
+                  accountId: 'TEST_GOV_GCU',
+                  ownerEntityId: 'TEST_GOV',
+                  ownerKind: 'GOV',
+                  currency: 'GCU',
+                  accountClass: 'CASH',
+                  claimId: null,
+                  counterpartyEntityId: null,
+                  netDebitBalance: '1.25',
+                  balanceNature: 'GCU_CASH',
+                },
+              ],
+            }
+          : {
+              schemaVersion: POSTWAR_RUNTIME_SCHEMA,
+              requestId: q.requestId,
+              ok: false,
+              error: { code: 'CURRENT_FINANCIAL_UNAVAILABLE', retryable: true },
+            },
+        { status: available ? 200 : 503 },
+      );
+    });
+    const doc = new HostDocument('finance'),
+      view = createPostwarRuntimeView(f.config, () => undefined);
+    const rendered = view.render(doc as unknown as Document) as unknown as {
+      all: () => { tag: string; listeners: Map<string, () => void> }[];
+    };
+    const select = rendered.all().find((n) => n.tag === 'select')!;
+    Object.assign(select, { value: 'ledger-balances' });
+    select.listeners.get('change')!();
+    await vi.waitFor(() => expect(view.state().status).toBe('CURRENT'));
+    const text = view.render(doc as unknown as Document).textContent;
+    expect(text).toContain('TEST_GOV_GCU');
+    expect(text).toContain('1.25');
+    expect(text).toContain('Financial posting legs 6');
+    expect(text).toContain('Batches 2');
+    expect(text).toContain(hash);
+    available = false;
+    await view.refresh();
+    expect(view.state().status).toBe('UNAVAILABLE');
+    expect(view.render(doc as unknown as Document).textContent).not.toContain(
+      'TEST_GOV_GCU',
+    );
+    view.disconnect();
+  });
+});

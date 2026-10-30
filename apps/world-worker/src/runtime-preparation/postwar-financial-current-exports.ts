@@ -10,3 +10,10 @@ export {
   type PostwarFinancialCurrentCoverage,
   type PostwarFinancialCapacityRow,
 } from '../persistence/postwar-financial-current-projection.js';
+
+export {
+  createPostwarFinancialMixedCurrentProjectionStore,
+  POSTWAR_FINANCIAL_MIXED_CURRENT_DATASETS,
+  type PostwarFinancialMixedCurrentSource,
+  type PostwarFinancialMixedCurrentPage,
+} from '../persistence/postwar-financial-mixed-current-projection.js';
