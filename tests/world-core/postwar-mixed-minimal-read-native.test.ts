@@ -28,6 +28,8 @@ import {
 import { readBoundedPostwarCanonicalPrefixFrom } from '../../apps/world-worker/src/persistence/bounded-postwar-canonical-prefix.js';
 import { readBoundedPostwarJournalFrom } from '../../apps/world-worker/src/persistence/bounded-postwar-fx-postings.js';
 import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
+import { createPostwarSocialSourceRoleScope } from '../../apps/world-worker/src/persistence/postwar-social-position-runtime.js';
+import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { createBoundedOfficeCommandBindingProvider } from '../../apps/world-api/src/integration/bounded-office-command-binding.js';
 import { createBoundedOfficeCommandRecoveryService } from '../../apps/world-api/src/integration/bounded-office-command-recovery-service.js';
 import { parseSupabaseAuthSubject } from '../../apps/world-api/src/integration/identity.js';
@@ -255,11 +257,44 @@ describe('actual minimal-role mixed source/current/recovery contract', () => {
         report.h2 = h2;
         await stage('ACTUAL_SOURCE_READER_COMPLETE_H2');
         const source = new PostgresSqlDatabase(f.sourcePool);
-        const actual = await source.transaction(async (tx) => {
+        const socialRoles = createPostwarSocialSourceRoleScope({
+          workerRole: f.sourceRole,
+        });
+        const roleRead = <T>(
+          office: 'SOCIAL' | 'FINANCE',
+          consume: (tx: SqlExecutor) => Promise<T>,
+        ): Promise<T> => {
+          const database =
+            office === 'SOCIAL' ? source : new PostgresSqlDatabase(f.worker);
+          return database.transaction(async (tx) => {
+            await tx.query('set transaction isolation level repeatable read');
+            const read = async () => {
+              // Same savepoint discipline as lockRegisteredSourceFrom: retain
+              // the original SQL denial while allowing product role restoration.
+              await tx.query('savepoint minimal_fixed_read');
+              try {
+                const value = await consume(tx);
+                await tx.query('release savepoint minimal_fixed_read');
+                return value;
+              } catch (error) {
+                await tx.query('rollback to savepoint minimal_fixed_read');
+                await tx.query('release savepoint minimal_fixed_read');
+                throw error;
+              }
+            };
+            if (office === 'SOCIAL')
+              return socialRoles.withSourceReaderFrom(tx, read);
+            await tx.query(
+              'set local role world_v2_finance_budget_source_reader',
+            );
+            return read();
+          });
+        };
+        const actual = await roleRead('SOCIAL', async (tx) => {
           const who = (
             await tx.query<{ role: string }>('select current_user as role')
           ).rows[0]!.role;
-          expect(who).toBe(f.sourceRole);
+          expect(who).toBe('world_v2_social_source_reader');
           const meta = (
             await tx.query<Record<string, unknown>>(
               'select * from world_v2.lock_social_startup_seed_header($1,$2)',
@@ -303,12 +338,7 @@ describe('actual minimal-role mixed source/current/recovery contract', () => {
           };
         });
         report.actualMinimalSource = actual;
-        report.actualFinanceReader = await new PostgresSqlDatabase(
-          f.worker,
-        ).transaction(async (tx) => {
-          await tx.query(
-            'set local role world_v2_finance_budget_source_reader',
-          );
+        report.actualFinanceReader = await roleRead('FINANCE', async (tx) => {
           const who = (
             await tx.query<{ role: string }>('select current_user as role')
           ).rows[0]!.role;
@@ -342,14 +372,23 @@ describe('actual minimal-role mixed source/current/recovery contract', () => {
           'opening_seed',
         ])
           await expect(
-            f.sourcePool.query('select * from world_v2.' + table + ' limit 1'),
-          ).rejects.toMatchObject({ code: '42501' });
+            roleRead('SOCIAL', (tx) =>
+              tx.query('select * from world_v2.' + table + ' limit 1'),
+            ),
+          ).rejects.toMatchObject({ cause: { code: '42501' } });
         await expect(
-          f.sourcePool.query(
-            'select * from world_v2.read_postwar_bounded_prefix($1,$2,$3)',
-            [marker.worldId, marker.countryId, 'FINANCE'],
+          roleRead('SOCIAL', (tx) =>
+            tx.query(
+              'select * from world_v2.read_postwar_bounded_prefix($1,$2,$3)',
+              [marker.worldId, marker.countryId, 'FINANCE'],
+            ),
           ),
-        ).rejects.toMatchObject({ code: '42501' });
+        ).rejects.toMatchObject({
+          cause: {
+            code: '42501',
+            message: 'JOURNAL_FIXED_SOURCE_READER_REQUIRED',
+          },
+        });
         await stage('GENUINE_BUDGET_FX_SOCIAL_SOURCE_PREFLIGHT');
         const canonical = (r: ManualOfficeCommandRequestDto) =>
           buildManualOfficeCommandIntent({
@@ -649,7 +688,7 @@ describe('actual minimal-role mixed source/current/recovery contract', () => {
           publisher.release();
         }
         await expect(
-          source.transaction((tx) =>
+          roleRead('SOCIAL', (tx) =>
             readBoundedPostwarCanonicalPrefixFrom(tx, {
               worldId: marker.worldId,
               countryId: marker.countryId,
