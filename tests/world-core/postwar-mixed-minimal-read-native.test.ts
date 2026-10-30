@@ -237,7 +237,8 @@ describe('actual minimal-role mixed source/current/recovery contract', () => {
           report.commits = commits;
           expect(step).toMatchObject({
             status: 'PROCESSED',
-            outcome: 'COMMITTED',
+            source: 'NEW_FINAL',
+            receipt: { outcome: 'COMMITTED' },
           });
           expect((await counts()).version).toBe(String(i + 1));
         }
