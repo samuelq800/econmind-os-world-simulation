@@ -171,7 +171,8 @@ permissions:
 jobs:
   trusted-country-runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # The full chain reached cleanup at ~9m57s; allow runner cleanup headroom.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:

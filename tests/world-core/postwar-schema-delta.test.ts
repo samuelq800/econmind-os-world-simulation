@@ -9,6 +9,41 @@ import {
   preparePostwarSchemaDelta,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const sha = (v: Buffer) => createHash('sha256').update(v).digest('hex');
+// Explicit reviewed inventory: companion fixed 31-proposal policy, with its
+// isolated Clock deliberately excluded. New proposals require an explicit
+// inventory update; never accept an arbitrary directory count or widen scope.
+const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
+  'captain-operating-custody.sql',
+  'current-authorization-writer-preparation.sql',
+  'finance-budget-capacity-source.sql',
+  'finance-budget-custody.sql',
+  'finance-budget-mixed-source.sql',
+  'financial-posting-decimal-validation.sql',
+  'postwar-bounded-journal-read.sql',
+  'postwar-bounded-prefix-read.sql',
+  'postwar-day-one-fx-custody.sql',
+  'postwar-day-one-fx-history-read.sql',
+  'postwar-finance-social-source-publication.sql',
+  'postwar-financial-current-derived-read.sql',
+  'postwar-industry-production-source.sql',
+  'postwar-mixed-current-projection-read.sql',
+  'postwar-mixed-financial-current-publication.sql',
+  'postwar-narrow-trade-source.sql',
+  'postwar-office-derived-read.sql',
+  'postwar-office-recovery-read.sql',
+  'postwar-physical-inventory-provenance.sql',
+  'postwar-physical-opening-facts-read.sql',
+  'postwar-runtime-source-read-policy.sql',
+  'postwar-social-current-derived-read.sql',
+  'postwar-social-current-prefix-read.sql',
+  'postwar-social-mixed-match-publisher.sql',
+  'postwar-social-startup-seed-header.sql',
+  'runtime-admission-publication.sql',
+  'runtime-read-binding-storage.sql',
+  'social-intake-authorization.sql',
+  'social-operating-custody.sql',
+  'social-operating-match-publisher.sql',
+]);
 function fixture(
   first = 'create role world_v2_delta_owner nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;\ncreate table world_v2.delta_a(id text);\ncreate function world_v2.delta_guard() returns int language sql as $$select 1$$;\n',
 ) {
@@ -255,14 +290,15 @@ describe('unapproved postwar schema delta package boundary', () => {
       'VALID_UTF8_SQL_REQUIRED',
     );
   });
-  it('classifies the existing nineteen non-Clock source files without running or editing any SQL', async () => {
+  it('classifies the complete reviewed thirty non-Clock proposal paths without running or editing SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
-    const selected = names.filter(
-      (n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql',
-    );
-    expect(selected).toHaveLength(19);
-    expect(selected).toContain('social-intake-authorization.sql');
+    const selected = names
+      .filter((n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql')
+      .sort();
+    expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
+    expect(selected).toHaveLength(30);
+    expect(selected).not.toContain('isolated-world-clock.sql');
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));
       const result = classifyDeltaTransaction(bytes);
