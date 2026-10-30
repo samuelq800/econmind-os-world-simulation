@@ -17,7 +17,6 @@ import {
   prepareFinanceNativeBudgetMixedPrefix,
   type FinanceNativeBudgetMixedPrefixEvidence,
 } from '@econmind/core/finance-budget-native';
-import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
 import { replayPreparedPostwarFinanceSocialFxFrom } from './prepared-postwar-finance-social-fx-replay.js';
 import {
   prepareFinanceSocialLedger,
@@ -392,7 +391,10 @@ export async function readPreparedPostwarSocialLineageFrom(input: {
   );
   const prefix = await readBoundedPostwarSocialFramesFrom(input);
   const fxReplay = prefix.frames.some(
-    (f) => f.command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+    (f) =>
+      f.financialPostingBatches.length !== 0 ||
+      f.inventoryPostings.length !== 0 ||
+      f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
   )
     ? await replayPreparedPostwarFinanceSocialFxFrom({
         executor: input.executor,

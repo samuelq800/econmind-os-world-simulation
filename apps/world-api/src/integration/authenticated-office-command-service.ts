@@ -25,7 +25,8 @@ export type AuthenticatedOfficeCommandServiceConfig =
   AuthenticatedFinancialIntakeCompositionConfig & {
     readonly runtime?: ManualOfficeIntakeRuntime | null;
     /** Explicit trusted postwar composition only; never an HTTP grant. */
-    readonly recoveryBindingMode?: 'POSTWAR_READ_ONLY_V1';
+    readonly recoveryBindingMode?:
+      'POSTWAR_READ_ONLY_V1' | 'POSTWAR_CAPTAIN_READ_ONLY_V1';
   };
 
 const uuid = (v: unknown): v is string =>

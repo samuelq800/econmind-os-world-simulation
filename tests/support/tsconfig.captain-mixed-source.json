@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "emscripten"
+    ],
+    "lib": [
+      "ES2024",
+      "DOM"
+    ]
+  },
+  "include": [
+    "../world-core/captain-finance-social-prepared-ledger.test.ts",
+    "../world-core/postwar-captain-source-publication.test.ts",
+    "captain-finance-social-fixture.ts",
+    "../world-core/postwar-captain-current-sql.test.ts",
+    "../world-core/postwar-captain-current-projection.test.ts"
+  ]
+}

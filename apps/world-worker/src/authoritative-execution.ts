@@ -29,6 +29,11 @@ import type { SocialMatchSourceCommitProtectionPort } from './persistence/postwa
 import type { CaptainSourceCommitProtectionPort } from './persistence/postwar-captain-runtime.js';
 import type { DayOneFxSourceCommitProtectionPort } from './persistence/postwar-day-one-fx-runtime.js';
 
+import type { CentralBankOmoSourceCommitProtectionPort } from './persistence/postwar-central-bank-omo-runtime.js';
+import type { PostwarNarrowTradeSourceCommitProtectionPort } from './persistence/postwar-narrow-trade-current-source.js';
+import type { BeneficialHousingRentSourceCommitProtectionPort } from './persistence/postwar-beneficial-housing-rent-runtime.js';
+import type { IndustryProductionCutoffGuard } from './persistence/industry-production-source-cutoff.js';
+
 interface CurrentCommitAuthorization {
   readonly authSubject: string;
   readonly worldId: string;
@@ -228,12 +233,37 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
   readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
   readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
+  readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
+  readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
+  readonly postwarNarrowTradeSourceCommitProtectionPort?: PostwarNarrowTradeSourceCommitProtectionPort;
+  readonly beneficialHousingRentSourceCommitProtectionPort?: BeneficialHousingRentSourceCommitProtectionPort;
 }): Readonly<AuthoritativeWorkerExecution> {
   const repository = new AtomicTransitionRepository({
     database: input.database,
     authorizationGuard: createTransactionCutoffAuthorizationGuard(),
     workerId: input.workerId,
     sha256Hex: input.sha256Hex,
+    ...(input.centralBankOmoSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          centralBankOmoSourceCommitProtectionPort:
+            input.centralBankOmoSourceCommitProtectionPort,
+        }),
+    ...(input.postwarNarrowTradeSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          postwarNarrowTradeSourceCommitProtectionPort:
+            input.postwarNarrowTradeSourceCommitProtectionPort,
+        }),
+    ...(input.beneficialHousingRentSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          beneficialHousingRentSourceCommitProtectionPort:
+            input.beneficialHousingRentSourceCommitProtectionPort,
+        }),
+    ...(input.industryProductionCutoffGuard === undefined
+      ? {}
+      : { industryProductionCutoffGuard: input.industryProductionCutoffGuard }),
     ...(input.dayOneFxSourceCommitProtectionPort === undefined
       ? {}
       : {

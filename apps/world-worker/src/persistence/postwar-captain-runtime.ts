@@ -32,6 +32,7 @@ import type { AtomicTransitionCandidateFactory } from './atomic-transition-repos
 import type { OfficeOperatingSourceBinding } from './office-operating-source-commit-protection.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 
+import type { PostwarCaptainMixedSource } from './postwar-captain-mixed-source.js';
 export const CAPTAIN_SOURCE_PURPOSE =
   'CAPTAIN_POLITICAL_CAPITAL_SOURCE_RECHECK_V1' as const;
 export interface CaptainSourceCommitRequest {
@@ -107,6 +108,7 @@ function canonicalTime(value: string): void {
  * native custodian; neither admits its source. */
 export function createPostwarCaptainRuntime(configuration: {
   readonly database: SqlDatabase;
+  readonly mixedSource?: PostwarCaptainMixedSource;
   readonly workerId: string;
   readonly workerRole: string;
   readonly mode: 'TEST_ONLY_LOCAL' | 'OFFICIAL_RUNTIME';
@@ -175,6 +177,9 @@ export function createPostwarCaptainRuntime(configuration: {
     database: sourceDatabase,
     workerId: configuration.workerId,
     mode: configuration.mode,
+    ...(configuration.mixedSource
+      ? { mixedSource: configuration.mixedSource }
+      : {}),
   });
   const reader: CaptainPoliticalCapitalRuntimeReader = native.reader;
   const factory: AtomicTransitionCandidateFactory = {

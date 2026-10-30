@@ -72,10 +72,16 @@ import {
   type CaptainSourceCommitProtectionPort,
 } from '../persistence/postwar-captain-runtime.js';
 import type { createPostwarSocialMatchRuntime } from '../persistence/postwar-social-match-runtime.js';
+import {
+  isPostwarCentralBankOmoRuntime,
+  type PostwarCentralBankOmoRuntime,
+  type CentralBankOmoSourceCommitProtectionPort,
+} from '../persistence/postwar-central-bank-omo-runtime.js';
 
 /** Server constructor dependencies only. No request snapshot, prebuilt draft,
  * caller candidateFactory, readiness registry or automatic publisher port. */
 export interface ManualOfficeRuntimeReaders {
+  readonly centralBankNative?: PostwarCentralBankOmoRuntime | null;
   readonly treasuryFx?: ReturnType<typeof createPostwarDayOneFxRuntime> | null;
   /** Automatic source is a separate fixed publisher path, never a browser intent. */
   readonly socialMatch?: ReturnType<
@@ -215,6 +221,7 @@ export function createManualOfficeCommandComposition(input: {
   readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
   readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
   readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
+  readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
   assertSourceBeforeClaim(observedAtReal: string): Promise<void>;
 } | null {
   const command = input.command,
@@ -309,6 +316,21 @@ export function createManualOfficeCommandComposition(input: {
     }
     case CENTRAL_BANK_OMO_COMMAND: {
       const intent = parseCentralBankOmoIntent(command, digest);
+      if (
+        input.readers.centralBankNative !== undefined &&
+        input.readers.centralBankNative !== null
+      ) {
+        const runtime = input.readers.centralBankNative;
+        if (!isPostwarCentralBankOmoRuntime(runtime)) return null;
+        return {
+          factory: runtime.factory,
+          centralBankOmoSourceCommitProtectionPort:
+            runtime.sourceCommitProtectionPort,
+          async assertSourceBeforeClaim(observedAtReal) {
+            await runtime.preflight(command, observedAtReal);
+          },
+        };
+      }
       const reader = input.readers.centralBank;
       if (!reader) return null;
       const factory: AtomicTransitionCandidateFactory = {

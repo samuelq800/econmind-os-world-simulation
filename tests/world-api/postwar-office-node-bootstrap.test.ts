@@ -126,6 +126,11 @@ function protocol() {
     }),
   };
   const binding = {
+    retryDerivedPublication: vi.fn(async (commandId: string) => ({
+      status: 'UNAVAILABLE',
+      commandId,
+      reason: 'DERIVED_PUBLICATION_REQUIRES_RETRY',
+    })),
     stop: vi.fn(() => {
       bindingStopping ??= (async () => {
         events.push('consumer:stop');
@@ -389,6 +394,67 @@ describe('explicit fixed office Node bootstrap ownership protocol', () => {
     });
     expect(fixed.api.mock.calls[0]?.[0].treasuryFxPreparation).toBe(fx);
     await host.shutdown();
+  });
+  it('projects only Captain source mode onto the same Worker role and consumer', async () => {
+    const f = protocol(),
+      candidate = vi.fn();
+    const captain = {
+      mode: 'TEST_ONLY_LOCAL' as const,
+      candidateFactory: candidate,
+      ready: candidate,
+    };
+    const host = await startPostwarOfficeNodeBootstrap({
+      ...f.config,
+      captain,
+    });
+    expect(fixed.shared.mock.calls[0]?.[0].captain).toEqual({
+      workerRole: f.config.social.workerRole,
+      mode: 'TEST_ONLY_LOCAL',
+    });
+    expect(fixed.shared).toHaveBeenCalledOnce();
+    expect(candidate).not.toHaveBeenCalled();
+    expect(f.control.startPreparation).not.toHaveBeenCalled();
+    host.consumer.startPreparation();
+    expect(f.control.startPreparation).toHaveBeenCalledOnce();
+    await host.shutdown();
+    for (const p of f.pools.values()) expect(p.ends).toBe(1);
+  });
+  it('passes only an explicit borrowed publication DB and retries derived work without another economic step', async () => {
+    const f = protocol();
+    const publicationDatabase = { query: vi.fn(), transaction: vi.fn() };
+    const host = await startPostwarOfficeNodeBootstrap({
+      ...f.config,
+      publicationDatabase,
+    });
+    expect(fixed.shared.mock.calls[0]?.[0].publicationDatabase).toBe(
+      publicationDatabase,
+    );
+    expect(
+      await host.retryDerivedPublication('COMMAND_TEST_ONLY_FINAL'),
+    ).toMatchObject({
+      status: 'UNAVAILABLE',
+      commandId: 'COMMAND_TEST_ONLY_FINAL',
+    });
+    expect(f.binding.retryDerivedPublication).toHaveBeenCalledExactlyOnceWith(
+      'COMMAND_TEST_ONLY_FINAL',
+    );
+    expect(f.control.consumeOnce).not.toHaveBeenCalled();
+    await host.shutdown();
+    expect(publicationDatabase.transaction).not.toHaveBeenCalled();
+    expect(() =>
+      host.retryDerivedPublication('COMMAND_TEST_ONLY_FINAL'),
+    ).toThrow('STOPPING_OR_STOPPED');
+  });
+  it('forwards bounded read configuration to the same fixed API owner without another pool', async () => {
+    const f = protocol();
+    const read = { readerRole: 'node_protocol_bounded' } as NonNullable<
+      PostwarOfficeNodeBootstrapInput['read']
+    >;
+    const host = await startPostwarOfficeNodeBootstrap({ ...f.config, read });
+    expect(fixed.api.mock.calls[0]?.[0].read).toBe(read);
+    expect(fixed.api).toHaveBeenCalledOnce();
+    await host.shutdown();
+    for (const p of f.pools.values()) expect(p.ends).toBe(1);
   });
   it('uses genuine fixed issuers and refuses unverified startup before any listener or consumer', async () => {
     const f = protocol();

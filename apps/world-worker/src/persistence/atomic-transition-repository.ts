@@ -2,6 +2,8 @@ import { types as nodeTypes } from 'node:util';
 import {
   DOMAIN_ERROR_CODES,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
+  CENTRAL_BANK_OMO_COMMAND,
+  BENEFICIAL_HOUSING_RENT_COMMAND,
   DomainError,
   NARROW_TREASURY_GCU_COMMAND_TYPE,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
@@ -54,6 +56,20 @@ import {
   type ProductionWaterConsumptionCommitBinding,
 } from '@econmind/core/production-water-consumption';
 import { isPostwarIndustryProductionSourceGuard } from './postwar-industry-production-source.js';
+
+import {
+  isPostwarCentralBankOmoSourceCommitProtectionPort,
+  type CentralBankOmoSourceCommitProtectionPort,
+} from './postwar-central-bank-omo-runtime.js';
+import {
+  isPostwarNarrowTradeCurrentSourceCommitProtectionPort,
+  type PostwarNarrowTradeSourceCommitProtectionPort,
+} from './postwar-narrow-trade-current-source.js';
+import {
+  isPostwarBeneficialHousingRentSourceCommitProtectionPort,
+  type BeneficialHousingRentSourceCommitProtectionPort,
+} from './postwar-beneficial-housing-rent-runtime.js';
+import { isPostwarIndustryOperatingCutoffGuard } from './postwar-industry-operating-cutoff.js';
 
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type {
@@ -974,6 +990,9 @@ export class AtomicTransitionRepository {
   readonly #socialMatchSourceCommitProtectionPort: SocialMatchSourceCommitProtectionPort | null;
   readonly #captainSourceCommitProtectionPort: CaptainSourceCommitProtectionPort | null;
   readonly #dayOneFxSourceCommitProtectionPort: DayOneFxSourceCommitProtectionPort | null;
+  readonly #centralBankOmoSourceCommitProtectionPort: CentralBankOmoSourceCommitProtectionPort | null;
+  readonly #postwarNarrowTradeSourceCommitProtectionPort: PostwarNarrowTradeSourceCommitProtectionPort | null;
+  readonly #beneficialHousingRentSourceCommitProtectionPort: BeneficialHousingRentSourceCommitProtectionPort | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
@@ -989,6 +1008,9 @@ export class AtomicTransitionRepository {
     readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
     readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
     readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
+    readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
+    readonly postwarNarrowTradeSourceCommitProtectionPort?: PostwarNarrowTradeSourceCommitProtectionPort;
+    readonly beneficialHousingRentSourceCommitProtectionPort?: BeneficialHousingRentSourceCommitProtectionPort;
   }) {
     if (
       input.dayOneFxSourceCommitProtectionPort !== undefined &&
@@ -1001,6 +1023,42 @@ export class AtomicTransitionRepository {
       );
     this.#dayOneFxSourceCommitProtectionPort =
       input.dayOneFxSourceCommitProtectionPort ?? null;
+    if (
+      input.centralBankOmoSourceCommitProtectionPort !== undefined &&
+      !isPostwarCentralBankOmoSourceCommitProtectionPort(
+        input.centralBankOmoSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'centralBankOmoSourceCommitProtectionPort must come from its fixed runtime issuer',
+      );
+    this.#centralBankOmoSourceCommitProtectionPort =
+      input.centralBankOmoSourceCommitProtectionPort ?? null;
+
+    if (
+      input.postwarNarrowTradeSourceCommitProtectionPort !== undefined &&
+      !isPostwarNarrowTradeCurrentSourceCommitProtectionPort(
+        input.postwarNarrowTradeSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'postwarNarrowTradeSourceCommitProtectionPort must come from its fixed runtime issuer',
+      );
+    this.#postwarNarrowTradeSourceCommitProtectionPort =
+      input.postwarNarrowTradeSourceCommitProtectionPort ?? null;
+
+    if (
+      input.beneficialHousingRentSourceCommitProtectionPort !== undefined &&
+      !isPostwarBeneficialHousingRentSourceCommitProtectionPort(
+        input.beneficialHousingRentSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'beneficialHousingRentSourceCommitProtectionPort must come from its fixed runtime issuer',
+      );
+    this.#beneficialHousingRentSourceCommitProtectionPort =
+      input.beneficialHousingRentSourceCommitProtectionPort ?? null;
+
     if (
       input.captainSourceCommitProtectionPort !== undefined &&
       !isPostwarCaptainSourceCommitProtectionPort(
@@ -1218,6 +1276,11 @@ export class AtomicTransitionRepository {
         );
         await this.#assertCaptainSourceCurrent(transaction, candidate, head);
         await this.#assertDayOneFxSourceCurrent(transaction, candidate, head);
+        await this.#assertAdditionalOfficeSourcesCurrent(
+          transaction,
+          candidate,
+          head,
+        );
         if (production)
           await this.#assertIndustryProductionCurrent(
             transaction,
@@ -1325,6 +1388,9 @@ export class AtomicTransitionRepository {
     if (withWater) {
       if (
         !isPostwarIndustryProductionSourceGuard(
+          this.#industryProductionCutoffGuard,
+        ) &&
+        !isPostwarIndustryOperatingCutoffGuard(
           this.#industryProductionCutoffGuard,
         )
       )
@@ -1446,6 +1512,164 @@ export class AtomicTransitionRepository {
     )
       invalid(
         'Day-one Treasury FX source guard must bind the exact command, head and source observation',
+      );
+  }
+
+  /** Fixed domain issuers only. This runs after exact FINAL recovery and all
+   * existing authorization locks, in the same transaction before event writes. */
+  async #assertAdditionalOfficeSourcesCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    const commandType = candidate.command.commandType;
+    const isOmo = commandType === CENTRAL_BANK_OMO_COMMAND;
+    const isTrade = commandType === NARROW_TREASURY_GCU_COMMAND_TYPE;
+    const isRent = commandType === BENEFICIAL_HOUSING_RENT_COMMAND;
+    if (!isOmo && !isTrade && !isRent) return;
+    const configured = isOmo
+      ? this.#centralBankOmoSourceCommitProtectionPort
+      : isTrade
+        ? this.#postwarNarrowTradeSourceCommitProtectionPort
+        : this.#beneficialHousingRentSourceCommitProtectionPort;
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding;
+    // Preserve the existing OMO/trade preparation path. A configured native
+    // runtime or supplied binding can never fall back to that path. Rent has
+    // no legacy authoritative path and always requires its fixed issuer.
+    if (
+      !isRent &&
+      configured === null &&
+      !captured.captureFailed &&
+      captured.canonicalData === null
+    )
+      return;
+    if (
+      configured === null ||
+      captured.captureFailed ||
+      captured.canonicalData === null
+    )
+      invalid(
+        'Fresh office execution requires its fixed source guard and captured binding',
+      );
+    const currentHead = Object.freeze({
+      worldId: candidate.command.worldId,
+      ...head,
+    });
+    const readBinding: unknown = JSON.parse(captured.canonicalData);
+    const common = {
+      phase: 'BEFORE_EVENTS' as const,
+      command: candidate.command,
+      transition: candidate.transition,
+      inventoryPostings: candidate.inventoryPostings,
+      financialPostingBatches: candidate.financialPostingBatches,
+      currentMaterializations: candidate.currentMaterializations,
+      currentHead,
+      observedAtReal: candidate.observedAtReal,
+      readBinding,
+    };
+    let purpose: string;
+    let audit: unknown;
+    if (isRent) {
+      if (
+        candidate.inventoryPostings.length !== 0 ||
+        candidate.currentMaterializations.length !== 0
+      )
+        invalid(
+          'Native rent requires financial-only effects and derived receipt readback',
+        );
+      if (
+        candidate.authorityKind !== 'VERSIONED_AUTOMATIC' ||
+        candidate.command.officeId !== null ||
+        candidate.commitAuthorization !== null ||
+        this.#beneficialHousingRentSourceCommitProtectionPort === null
+      )
+        invalid(
+          'Rent requires the fixed automatic family and no discretionary proof',
+        );
+      purpose = 'POSTWAR_BENEFICIAL_HOUSING_RENT_SOURCE_RECHECK_V1';
+      audit =
+        await this.#beneficialHousingRentSourceCommitProtectionPort.assertCurrentFrom(
+          transaction,
+          {
+            ...common,
+            purpose: 'POSTWAR_BENEFICIAL_HOUSING_RENT_SOURCE_RECHECK_V1',
+            commitAuthorization: null,
+          },
+        );
+    } else {
+      const proof = candidate.commitAuthorization;
+      if (
+        candidate.authorityKind !== 'DISCRETIONARY_USER' ||
+        !isCommitAuthorizationProof(proof)
+      )
+        invalid(
+          'OMO and trade source checks require current discretionary authorization',
+        );
+      if (isOmo) {
+        if (
+          candidate.inventoryPostings.length !== 0 ||
+          candidate.currentMaterializations.length !== 0
+        )
+          invalid(
+            'Native OMO cannot attach inventory or unchecked projection effects',
+          );
+        if (
+          candidate.command.officeId !== 'CENTRAL_BANK' ||
+          this.#centralBankOmoSourceCommitProtectionPort === null
+        )
+          invalid('OMO requires its exact office and fixed runtime source');
+        purpose = 'CENTRAL_BANK_OMO_SOURCE_RECHECK_V1';
+        audit =
+          await this.#centralBankOmoSourceCommitProtectionPort.assertCurrentFrom(
+            transaction,
+            {
+              ...common,
+              purpose: 'CENTRAL_BANK_OMO_SOURCE_RECHECK_V1',
+              commitAuthorization: proof,
+            },
+          );
+      } else {
+        if (candidate.currentMaterializations.length !== 0)
+          invalid(
+            'Native trade reserve cannot attach unchecked projection effects',
+          );
+        if (
+          candidate.command.officeId !== 'TRADE' ||
+          this.#postwarNarrowTradeSourceCommitProtectionPort === null
+        )
+          invalid('Trade requires its exact office and fixed runtime source');
+        purpose = 'POSTWAR_NARROW_TRADE_CURRENT_SOURCE_RECHECK_V1';
+        audit =
+          await this.#postwarNarrowTradeSourceCommitProtectionPort.assertCurrentFrom(
+            transaction,
+            {
+              ...common,
+              purpose: 'POSTWAR_NARROW_TRADE_CURRENT_SOURCE_RECHECK_V1',
+              commitAuthorization: proof,
+            },
+          );
+      }
+    }
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    const observed = captureGoverningSourceReadBinding({
+      governingSourceReadBinding: audit,
+    });
+    if (
+      observed.captureFailed ||
+      observed.canonicalData !== canonicalSerialize(expected)
+    )
+      invalid(
+        'Office source guard returned a different command, head, binding or protection audit',
       );
   }
 

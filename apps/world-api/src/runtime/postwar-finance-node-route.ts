@@ -2,7 +2,16 @@
  * remain in the installed Fetch handler. Pools and manual execution stay with
  * the owner of that installation; no environment or Host header is consulted. */
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { AUTHENTICATED_COMMAND_RECOVERY_PATH } from '@econmind/core';
+import {
+  AUTHENTICATED_COMMAND_RECOVERY_PATH,
+  AUTHENTICATED_CURRENT_SEAT_PATH,
+} from '@econmind/core';
+import type { ExplicitReadPreparationConfig } from '../runtime-preparation/explicit-read-preparation-config.js';
+import {
+  createPostwarOfficeRuntimeFetchHandler,
+  createPostwarCurrentSeatFetchHandler,
+  POSTWAR_OFFICE_RUNTIME_READ_PATH,
+} from '../runtime-preparation/postwar-office-runtime-fetch-handler.js';
 import { AUTHENTICATED_OFFICE_COMMAND_PATH } from '@econmind/core/authenticated-office-command-contract';
 import {
   createPostwarOfficeCommandFetchHandler,
@@ -31,6 +40,7 @@ const disconnected = () =>
 function createNodeCommandRoute(
   connection: Pick<PostwarFinanceConnection, 'handle' | 'stop'>,
   options: Readonly<{ timeoutMs?: number }> = {},
+  routePaths: readonly string[] = paths,
 ) {
   const timeoutMs = options.timeoutMs ?? 10000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10000)
@@ -38,7 +48,7 @@ function createNodeCommandRoute(
   let accepting = true;
   const active = new Set<Promise<void>>();
   const matches = (req: IncomingMessage) =>
-    paths.some((p) => req.url === p || req.url?.startsWith(p + '?'));
+    routePaths.some((p) => req.url === p || req.url?.startsWith(p + '?'));
   async function serve(
     req: IncomingMessage,
     res: ServerResponse,
@@ -246,5 +256,35 @@ export function createPostwarOfficeNodeRoute(
   return createNodeCommandRoute(
     createPostwarOfficeCommandFetchHandler(connections),
     options,
+  );
+}
+
+/** Fixed read-only routes over the same bounded JWT/SQL service used at edge.
+ * Pool lifetime belongs to the explicit shared owner, never this transport. */
+export function createPostwarOfficeReadNodeRoute(
+  configuration: ExplicitReadPreparationConfig,
+  options: Readonly<{ timeoutMs?: number }> = {},
+) {
+  const pages = createPostwarOfficeRuntimeFetchHandler(configuration);
+  const seats = createPostwarCurrentSeatFetchHandler(configuration);
+  return createNodeCommandRoute(
+    {
+      async handle(request) {
+        const result = await (new URL(request.url).pathname ===
+        AUTHENTICATED_CURRENT_SEAT_PATH
+          ? seats(request)
+          : pages(request));
+        return (
+          result ??
+          new Response(null, {
+            status: 404,
+            headers: { 'cache-control': 'private, no-store' },
+          })
+        );
+      },
+      async stop() {},
+    },
+    options,
+    [POSTWAR_OFFICE_RUNTIME_READ_PATH, AUTHENTICATED_CURRENT_SEAT_PATH],
   );
 }

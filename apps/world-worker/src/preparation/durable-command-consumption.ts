@@ -4,6 +4,7 @@ import {
   DomainError,
   SimTime,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
+  CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   canonicalSerialize,
@@ -42,6 +43,8 @@ import {
 import { isFinanceBudgetNativeCommitGuard } from '../persistence/postgres-finance-budget-custody.js';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
 import { isPostwarSocialMatchSourceCommitProtectionPort } from '../persistence/postwar-social-match-runtime.js';
+import { isPostwarCaptainSourceCommitProtectionPort } from '../persistence/postwar-captain-runtime.js';
+import { isPreparedPostwarSocialRuntimeConnection } from '../runtime-preparation/social-runtime-connection.js';
 
 import {
   registeredFinanceCommandHostDependencies,
@@ -226,6 +229,8 @@ export function createFinanceSocialCommandConsumptionPreparation(
     },
     null,
     d.readers.treasuryFx ? 'FINANCE_SOCIAL_FX' : 'FINANCE_SOCIAL',
+    null,
+    binding,
   );
 }
 /** Explicit finite server composition. No environment substitution, loop,
@@ -255,6 +260,7 @@ function createDurableCommandConsumer(
     | 'FINANCE_SOCIAL'
     | 'FINANCE_SOCIAL_FX' = 'LEGACY_GENERIC',
   treasuryFxBinding: PostwarTreasuryFxSourceBinding | null = null,
+  financeSocialBinding: FinanceSocialSourceBinding | null = null,
 ) {
   const world = worldId(input.worldId);
   const holder = workerId(input.workerId);
@@ -582,8 +588,29 @@ function createDurableCommandConsumer(
       // Keep the real global queue head. Never add an Office WHERE clause,
       // skip an unsupported head, alter its expected version, or invoke a
       // source/claim/legacy goods branch for an uninstalled family.
+      // Only the private fixed issuer may add Captain to this same consumer.
+      // A structural reader/guard or another generic consumer is insufficient.
+      const captainInstalled =
+        financeSocialBinding !== null &&
+        command.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND &&
+        isPostwarCaptainSourceCommitProtectionPort(
+          officeReaders.captainNative?.sourceCommitProtectionPort,
+        );
+      if (
+        captainInstalled &&
+        !isPreparedPostwarSocialRuntimeConnection(
+          readFinanceSocialSourceBinding(financeSocialBinding!)
+            .socialConnection,
+          world,
+        )
+      )
+        return blocked(
+          'FINANCE_SOCIAL_CAPTAIN_SOURCE_NOT_PREPARED',
+          command.commandId,
+        );
       if (
         familyBoundary !== 'LEGACY_GENERIC' &&
+        !captainInstalled &&
         !FINANCE_SOCIAL_COMMAND_FAMILIES.has(command.commandType) &&
         !(
           familyBoundary === 'FINANCE_SOCIAL_FX' &&
@@ -702,6 +729,12 @@ function createDurableCommandConsumer(
             : {
                 dayOneFxSourceCommitProtectionPort:
                   composition.dayOneFxSourceCommitProtectionPort,
+              }),
+          ...(composition.centralBankOmoSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                centralBankOmoSourceCommitProtectionPort:
+                  composition.centralBankOmoSourceCommitProtectionPort,
               }),
           ...(composition.captainSourceCommitProtectionPort === undefined
             ? {}

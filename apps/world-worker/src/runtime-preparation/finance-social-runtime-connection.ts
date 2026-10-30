@@ -26,11 +26,19 @@ import {
 import { createBoundedFinanceSocialIntakeRuntime } from '../intake/prepared-finance-budget-intake-runtime.js';
 import type { ManualOfficeIntakeRuntime } from '../intake/manual-office-intake-runtime.js';
 import type { ManualOfficeRuntimeReaders } from '../preparation/manual-office-command-composition.js';
-import type {
-  DurableConsumptionClock,
-  DurableConsumptionStep,
-} from '../preparation/durable-command-consumption.js';
+import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
 import type { SqlDatabase } from '../persistence/sql-database.js';
+import {
+  createPostwarOfficePublicationController,
+  type PostwarOfficeConsumptionStep,
+  type PostwarDerivedPublicationResult,
+} from '../persistence/postwar-office-publication-controller.js';
+import { createPostwarCaptainMixedSource } from '../persistence/postwar-captain-mixed-source.js';
+import { createPostwarCaptainRuntime } from '../persistence/postwar-captain-runtime.js';
+import {
+  createPostwarCaptainIntakeAuthorizationPool,
+  createPostwarCaptainAuthorizationDatabase,
+} from '../persistence/postwar-captain-intake-authorization.js';
 import {
   createSocialIntakeAuthorizationPool,
   isPostwarSocialRuntimeConnection,
@@ -78,6 +86,14 @@ export interface PostwarFinanceSocialRuntimeConnectionInput {
   readonly environment: 'local' | 'ci';
   /** Explicit installation of the fixed source only, never another consumer. */
   readonly treasuryFx?: { readonly workerRole: string };
+  /** Explicit borrowed publisher transport. This controller joins publication,
+   * but the host must end its separate pool after stop completes. */
+  readonly publicationDatabase?: SqlDatabase;
+  /** Fixed source mode only; it never supplies capital, candidates or authority. */
+  readonly captain?: {
+    readonly workerRole: string;
+    readonly mode: 'TEST_ONLY_LOCAL' | 'OFFICIAL_RUNTIME';
+  };
 }
 export interface PostwarFinanceSocialRuntimePorts {
   readonly worldId: string;
@@ -91,6 +107,12 @@ export interface PostwarFinanceSocialRuntimePorts {
   readonly runtime: ManualOfficeIntakeRuntime;
   readonly budget: NonNullable<ManualOfficeRuntimeReaders['financeBudget']>;
   readonly treasuryFx: PostwarDayOneFxRuntime | null;
+  readonly captain: NonNullable<
+    ManualOfficeRuntimeReaders['captainNative']
+  > | null;
+  readonly publication: ReturnType<
+    typeof createPostwarOfficePublicationController
+  > | null;
   readonly socialConnection: Readonly<PostwarSocialRuntimeConnection>;
   readonly financeCountryIds: readonly string[];
 }
@@ -104,7 +126,11 @@ export interface PostwarFinanceSocialRuntimeConnection {
   /** Complete the fixed FX source first so a host can release its large seed. */
   prepareTreasuryFx(opening: PostwarDayOneFxPreparationInput): Promise<void>;
   startPreparation(): void;
-  consumeOnce(): Promise<DurableConsumptionStep>;
+  consumeOnce(): Promise<PostwarOfficeConsumptionStep>;
+  /** Derived retry only: the fixed helper reloads the actual permanent FINAL. */
+  retryDerivedPublication(
+    commandId: string,
+  ): Promise<PostwarDerivedPublicationResult>;
   stop(): Promise<void>;
 }
 const connections = new WeakMap<
@@ -172,6 +198,18 @@ export function createPostwarFinanceSocialRuntimeConnection(
     input.intakePool === resources.workerPool
   )
     throw Error('FINANCE_SOCIAL_SEPARATE_INTAKE_REQUIRED');
+  if (
+    input.captain &&
+    !['TEST_ONLY_LOCAL', 'OFFICIAL_RUNTIME'].includes(input.captain.mode)
+  )
+    throw Error('FINANCE_SOCIAL_CAPTAIN_EXPLICIT_SOURCE_MODE_REQUIRED');
+  if (
+    input.captain &&
+    (input.captain.workerRole !== resources.workerRole ||
+      (input.treasuryFx &&
+        input.captain.workerRole !== input.treasuryFx.workerRole))
+  )
+    throw Error('FINANCE_SOCIAL_CAPTAIN_EXACT_WORKER_ROLE_REQUIRED');
   if (worldOwners.has(world))
     throw Error('FINANCE_SOCIAL_WORLD_CONSUMER_ALREADY_BOUND');
   const reservation = Object.freeze({});
@@ -185,15 +223,22 @@ export function createPostwarFinanceSocialRuntimeConnection(
     const fxDatabase = input.treasuryFx
       ? createPostwarDayOneFxAuthorizationDatabase(social.database)
       : social.database;
+    const financeDatabase =
+      createFinanceBudgetAuthorizationDatabase(fxDatabase);
     const database = createManualOfficeAuthorizationTransactionDatabase(
-      createFinanceBudgetAuthorizationDatabase(fxDatabase),
+      input.captain
+        ? createPostwarCaptainAuthorizationDatabase(financeDatabase)
+        : financeDatabase,
     );
     const socialIntake = createSocialIntakeAuthorizationPool(input.intakePool);
-    const intakePool = createFinanceBudgetIntakeAuthorizationPool(
+    const financeIntake = createFinanceBudgetIntakeAuthorizationPool(
       input.treasuryFx
         ? createPostwarDayOneFxIntakeAuthorizationPool(socialIntake)
         : socialIntake,
     );
+    const intakePool = input.captain
+      ? createPostwarCaptainIntakeAuthorizationPool(financeIntake)
+      : financeIntake;
     const treasuryFx = input.treasuryFx
       ? createPostwarDayOneFxRuntime({
           database,
@@ -211,10 +256,23 @@ export function createPostwarFinanceSocialRuntimeConnection(
         social,
       ),
     });
+    const captain = input.captain
+      ? createPostwarCaptainRuntime({
+          database,
+          workerId: social.workerId,
+          workerRole: input.captain.workerRole,
+          mode: input.captain.mode,
+          mixedSource: createPostwarCaptainMixedSource({
+            worldId: world,
+            social,
+          }),
+        })
+      : null;
     const readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
       ...social.readers,
       financeBudget: budget,
       ...(treasuryFx ? { treasuryFx } : {}),
+      ...(captain ? { captainNative: captain } : {}),
     });
     sources.set(
       token,
@@ -236,6 +294,17 @@ export function createPostwarFinanceSocialRuntimeConnection(
     reserved = true;
     const issued = createBoundedFinanceSocialIntakeRuntime(token),
       runtime = issued.runtime;
+    const publication = input.publicationDatabase
+      ? createPostwarOfficePublicationController({
+          worldId: world,
+          database,
+          workerRole: resources.workerRole,
+          socialConnection: social,
+          publicationDatabase: input.publicationDatabase,
+        })
+      : null;
+    let combinedActive: Promise<PostwarOfficeConsumptionStep> | null = null;
+    let retryActive: Promise<PostwarDerivedPublicationResult> | null = null;
     let stopped = false,
       stopping: Promise<void> | null = null;
     let fxPrepared = false;
@@ -303,14 +372,64 @@ export function createPostwarFinanceSocialRuntimeConnection(
         },
         consumeOnce() {
           requirePrepared();
-          return runtime.consumer.consumeOnce();
+          if (!publication) return runtime.consumer.consumeOnce();
+          if (combinedActive || retryActive)
+            return Promise.resolve(
+              Object.freeze({
+                status: 'BLOCKED' as const,
+                reason: 'STEP_ALREADY_RUNNING',
+                commandId: null,
+              }),
+            );
+          const work = Promise.resolve()
+            .then(() => runtime.consumer.consumeOnce())
+            .then((step) => publication.afterCommitted(step));
+          combinedActive = work;
+          void work.then(
+            () => {
+              if (combinedActive === work) combinedActive = null;
+            },
+            () => {
+              if (combinedActive === work) combinedActive = null;
+            },
+          );
+          return work;
+        },
+        retryDerivedPublication(commandId: string) {
+          requirePrepared();
+          if (!publication)
+            throw Error('FINANCE_SOCIAL_PUBLICATION_NOT_INSTALLED');
+          if (combinedActive || retryActive)
+            return Promise.resolve(
+              Object.freeze({
+                status: 'UNAVAILABLE' as const,
+                commandId,
+                reason: 'DERIVED_PUBLICATION_REQUIRES_RETRY' as const,
+              }),
+            );
+          const work = Promise.resolve().then(() =>
+            publication.retryCommitted(commandId),
+          );
+          retryActive = work;
+          void work.then(
+            () => {
+              if (retryActive === work) retryActive = null;
+            },
+            () => {
+              if (retryActive === work) retryActive = null;
+            },
+          );
+          return work;
         },
         stop() {
           if (stopping) return stopping;
           stopped = true;
           preparedTreasuryFxConnections.delete(connection);
           stopping = (async () => {
+            if (combinedActive || retryActive)
+              await Promise.allSettled([combinedActive, retryActive]);
             await runtime.consumer.stop();
+            await publication?.close();
             if (fxPreparing) await Promise.allSettled([fxPreparing]);
             await treasuryFx?.close();
             releasePostwarSocialRuntimeForSharedConsumer(social, token);
@@ -338,6 +457,8 @@ export function createPostwarFinanceSocialRuntimeConnection(
         runtime,
         budget: issued.budget,
         treasuryFx,
+        captain,
+        publication,
         socialConnection: social,
         financeCountryIds: scope.countryIds,
       }),

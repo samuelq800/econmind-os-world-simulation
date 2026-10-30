@@ -66,6 +66,7 @@ import type {
   AtomicTransitionDraft,
 } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import { readPostwarBeneficialHousingRentMixedOriginalsForDatabase } from './postwar-beneficial-housing-rent-mixed-source.js';
 export const DAY_ONE_FX_SOURCE_PURPOSE =
   'POSTWAR_DAY_ONE_TREASURY_FX_SOURCE_RECHECK_V1' as const;
 export interface DayOneFxSourceCommitRequest {
@@ -121,6 +122,7 @@ export const isPostwarDayOneFxRuntime = (
   v: unknown,
 ): v is PostwarDayOneFxRuntime =>
   typeof v === 'object' && v !== null && issuedRuntimes.has(v);
+import { readPostwarCaptainHistoryOriginalsFrom } from './postwar-captain-history-originals.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
 const same = (a: unknown, b: unknown) =>
@@ -437,8 +439,31 @@ export function createPostwarDayOneFxRuntime(config: {
         });
     }
     const frames = history.frames;
+    const captainCountries = frames.some(
+      (f) => f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+    )
+      ? await readPostwarCaptainHistoryOriginalsFrom(tx, {
+          worldId: command.worldId,
+          hostCountryId: command.countryId,
+          officeId: 'TREASURY_FX',
+          seedFingerprint: p.policy.seedFingerprint,
+          admissionRef: original.admissionRef,
+          expectedHead: history.head,
+          frames,
+        })
+      : undefined;
+    const beneficialHousingRentReceipts =
+      readPostwarBeneficialHousingRentMixedOriginalsForDatabase({
+        database,
+        worldId: command.worldId,
+        seedId: original.seedId,
+        seedFingerprint: original.seedFingerprint,
+      });
     const mixed = replayPreparedFinanceSocialFxLedger({
       prepared: p.ledger,
+      ...(beneficialHousingRentReceipts === undefined
+        ? {}
+        : { beneficialHousingRentReceipts }),
       frames,
       socialCountries: p.social.countries.map((c) => ({
         countryId: c.countryId,
@@ -453,6 +478,7 @@ export function createPostwarDayOneFxRuntime(config: {
         currency: f.currency,
       })),
       fxOriginals,
+      ...(captainCountries === undefined ? {} : { captainCountries }),
       expectedHead: {
         worldVersion: history.head.worldVersion,
         eventSequence: history.head.eventSequence,

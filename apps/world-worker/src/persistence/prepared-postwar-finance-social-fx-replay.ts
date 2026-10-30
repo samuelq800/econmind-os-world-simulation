@@ -3,6 +3,7 @@
  * locks belong to the caller's fixed transaction and are never cached here. */
 import { createHash } from 'node:crypto';
 import {
+  CENTRAL_BANK_OMO_COMMAND,
   DomainError,
   Money,
   DOMAIN_ERROR_CODES,
@@ -22,6 +23,13 @@ import {
 import { readPostwarDayOneFxCommittedQuoteFrom } from './postgres-postwar-day-one-fx-history-originals.js';
 import type { SqlExecutor } from './sql-database.js';
 import type { PostwarGenesisFunding } from '../preparation/postwar-operating-genesis-adoption.js';
+import {
+  readPostwarCaptainHistoryOriginalsFrom,
+  readPostwarCaptainCurrentOriginalsFrom,
+  type PostwarCaptainOriginalStatus,
+} from './postwar-captain-history-originals.js';
+import { readCentralBankOmoCommittedOriginalsFrom } from './postgres-central-bank-omo-history.js';
+import { readPostwarBeneficialHousingRentMixedOriginalsForSocialBase } from './postwar-beneficial-housing-rent-mixed-source.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 function invalid(reason: string): never {
   throw new DomainError(
@@ -62,6 +70,11 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
   readonly worldId: string;
   readonly hostCountryId: string;
   readonly officeId: 'SOCIAL' | 'FINANCE';
+  /** Fixed current-publication selector, never supplied capital/authority. */
+  readonly captainCountryId?: string;
+  readonly requireCaptain?: boolean;
+  /** Fixed server source mode, never HTTP input or an admission flag. */
+  readonly omoOriginalMode?: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
   readonly seedId: string;
   readonly seedFingerprint: string;
   readonly admissionRef: string;
@@ -70,7 +83,11 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
     worldVersion: string;
     eventSequence: string;
   }>;
-}): Promise<PreparedFinanceSocialFxReplayResult> {
+}): Promise<
+  PreparedFinanceSocialFxReplayResult & {
+    readonly captainOriginalStatus?: PostwarCaptainOriginalStatus;
+  }
+> {
   const b = consumePreparedPostwarSocialFinancialReplayBase(input.baseline);
   if (
     b.pins.worldId !== input.worldId ||
@@ -199,7 +216,54 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
         bankGcuAsset,
       });
   }
-  return replayPreparedFinanceSocialFxLedger({
+  if (
+    input.captainCountryId !== undefined &&
+    input.captainCountryId !== input.hostCountryId
+  )
+    invalid('EXACT_CAPTAIN_CURRENT_HOST_REQUIRED');
+  const scope = {
+    worldId: input.worldId,
+    hostCountryId: input.hostCountryId,
+    officeId: input.officeId,
+    seedFingerprint: input.seedFingerprint,
+    admissionRef: input.admissionRef,
+    expectedHead: input.expectedHead,
+    frames: input.frames,
+  };
+  const current =
+    input.captainCountryId === undefined
+      ? null
+      : await readPostwarCaptainCurrentOriginalsFrom(input.executor, scope);
+  if (current?.status === 'REVOKED') invalid('CAPTAIN_CURRENT_SOURCE_REVOKED');
+  if (
+    current?.status === 'NO_REGISTERED_CAPTAIN_ORIGINAL' &&
+    (input.requireCaptain !== false ||
+      input.frames.some(
+        (f) =>
+          f.command.countryId === input.hostCountryId &&
+          f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+      ))
+  )
+    invalid('CAPTAIN_CURRENT_REGISTERED_GENESIS_REQUIRED');
+  const selected =
+    current?.captainCountries ??
+    (input.frames.some(
+      (f) => f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+    )
+      ? await readPostwarCaptainHistoryOriginalsFrom(input.executor, scope)
+      : undefined);
+  const captainCountries = selected?.length ? selected : undefined;
+  const omoHistory = input.frames.some(
+    (f) => f.command.commandType === CENTRAL_BANK_OMO_COMMAND,
+  )
+    ? await readCentralBankOmoCommittedOriginalsFrom(input.executor, {
+        ...scope,
+        mode: input.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
+      })
+    : undefined;
+  const beneficialHousingRentReceipts =
+    readPostwarBeneficialHousingRentMixedOriginalsForSocialBase(input.baseline);
+  const result = replayPreparedFinanceSocialFxLedger({
     prepared: b.prepared,
     frames: input.frames,
     socialCountries: b.document.countries.map((c) => ({
@@ -209,7 +273,22 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
     })),
     openingEncumbrances: projectPostwarOpeningFinancialEncumbrances(b.funding),
     fxOriginals: originals,
+    ...(captainCountries === undefined ? {} : { captainCountries }),
+    ...(omoHistory === undefined
+      ? {}
+      : {
+          omoOriginals: omoHistory.countries.map((c) => ({
+            ...c.original,
+            quotes: c.quotes.map((q) => q.quote),
+          })),
+        }),
+    ...(beneficialHousingRentReceipts === undefined
+      ? {}
+      : { beneficialHousingRentReceipts }),
     expectedHead: input.expectedHead,
     sha256Hex: sha,
   });
+  return current
+    ? Object.freeze({ ...result, captainOriginalStatus: current.status })
+    : result;
 }

@@ -1,6 +1,8 @@
 /** Transport dispatch fixtures only, not SQL/admission/economic acceptance.
  * Actual bounded services and current SQL authorization remain mandatory. */
 import { describe, it, expect } from 'vitest';
+import { CAPTAIN_POLITICAL_CAPITAL_COMMAND } from '@econmind/core';
+import { createPostwarCaptainConnection } from '../../apps/world-api/src/runtime/postwar-captain-connection.js';
 import { startApiRuntime } from '../../apps/world-api/src/runtime.js';
 import { createPostwarOfficeCommandFetchHandler } from '../../apps/world-api/src/runtime/postwar-office-command-fetch-handler.js';
 import {
@@ -108,6 +110,88 @@ function ports() {
   return { finance, social, calls, stops };
 }
 describe('fixed dual-office standard Node entry', () => {
+  it('dispatches Captain commands and recovery exactly once, rejects cross-family selectors, and drains its borrower before pool owners', async () => {
+    const p = ports();
+    const captain = {
+      ...createPostwarCaptainConnection(),
+      transportOrigins: [origin],
+      async handleCommand(
+        input: Parameters<typeof p.finance.handleCommand>[0],
+      ) {
+        p.calls.push({ office: 'CAPTAIN', operation: 'command', ...input });
+        return {
+          httpStatus: 503,
+          body: {
+            schemaVersion: 'world-authenticated-office-command-v1' as const,
+            requestId: '11111111-1111-4111-8111-111111111111',
+            ok: false as const,
+            error: { code: 'CAPTAIN_FIXTURE', retryable: false },
+          },
+        };
+      },
+      async recover(input: Parameters<typeof p.finance.recover>[0]) {
+        p.calls.push({ office: 'CAPTAIN', operation: 'recovery', ...input });
+        return {
+          httpStatus: 503,
+          body: {
+            schemaVersion: 'world-command-recovery-v1' as const,
+            requestId: '11111111-1111-4111-8111-111111111111',
+            ok: false as const,
+            error: { code: 'CAPTAIN_FIXTURE', retryable: false },
+          },
+        };
+      },
+      async stop() {
+        p.stops.push('CAPTAIN');
+      },
+    };
+    const handler = createPostwarOfficeCommandFetchHandler({
+      captain,
+      finance: p.finance,
+      social: p.social,
+    });
+    const send = (dto: unknown, recover = false) =>
+      handler.handle(
+        new Request(
+          'https://api.example/' +
+            (recover ? 'v1/command-recovery' : 'v1/office-command'),
+          {
+            method: 'POST',
+            headers: {
+              origin,
+              'content-type': 'application/json',
+              authorization: 'Bearer TEST_ONLY_OPAQUE',
+            },
+            body: JSON.stringify(dto),
+          },
+        ),
+      );
+    const dto = envelope('CAPTAIN', CAPTAIN_POLITICAL_CAPITAL_COMMAND);
+    for (const isRecovery of [false, true]) {
+      const response = await send(isRecovery ? recovery(dto) : dto, isRecovery);
+      expect(response?.status).toBe(503);
+      expect(await response?.json()).toMatchObject({
+        error: { code: 'CAPTAIN_FIXTURE' },
+      });
+    }
+    expect((await send(envelope('CAPTAIN', financeType)))?.status).toBe(400);
+    expect(
+      (await send(envelope('FINANCE', CAPTAIN_POLITICAL_CAPITAL_COMMAND)))
+        ?.status,
+    ).toBe(400);
+    expect(p.calls.map((c) => [c.office, c.operation])).toEqual([
+      ['CAPTAIN', 'command'],
+      ['CAPTAIN', 'recovery'],
+    ]);
+    expect(
+      p.calls.every((c) => c.authorization === 'Bearer TEST_ONLY_OPAQUE'),
+    ).toBe(true);
+    await handler.stop();
+    await handler.stop();
+    expect(p.stops).toEqual(['CAPTAIN', 'FINANCE', 'SOCIAL']);
+    expect((await send(dto))?.status).toBe(503);
+    expect(p.calls).toHaveLength(2);
+  });
   it('dispatches each command/recovery once to its exact installed office, without503 fallback', async () => {
     const p = ports(),
       api = await startApiRuntime(

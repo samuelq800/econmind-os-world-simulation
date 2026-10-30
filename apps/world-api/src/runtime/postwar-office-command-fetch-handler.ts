@@ -3,6 +3,7 @@
  * authority. The selected service still verifies JWT and current SQL bindings. */
 import {
   AUTHENTICATED_COMMAND_RECOVERY_PATH,
+  CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
@@ -25,6 +26,7 @@ import {
   ZERO_REQUEST_ID,
 } from '../runtime-preparation/bounded-executor-transport.js';
 import { RequestCompletion } from '../runtime-preparation/request-completion.js';
+import type { PostwarCaptainConnection } from './postwar-captain-connection.js';
 import type { PostwarFinanceConnection } from './postwar-finance-connection.js';
 import type { PostwarSocialConnection } from './postwar-social-connection.js';
 import type { PostwarTreasuryFxConnection } from './postwar-treasury-fx-connection.js';
@@ -38,6 +40,7 @@ function decode(recovering: boolean, body: unknown) {
   return { request, selector: request.request };
 }
 export interface PostwarOfficeCommandConnections {
+  readonly captain?: PostwarCaptainConnection;
   readonly finance?: PostwarFinanceConnection;
   readonly social?: PostwarSocialConnection;
   readonly treasuryFx?: PostwarTreasuryFxConnection;
@@ -45,10 +48,12 @@ export interface PostwarOfficeCommandConnections {
 export function createPostwarOfficeCommandFetchHandler(
   input: PostwarOfficeCommandConnections,
 ) {
-  const finance = input.finance,
+  const captain = input.captain,
+    finance = input.finance,
     social = input.social,
     treasuryFx = input.treasuryFx;
   const origins = new Set([
+    ...(captain?.transportOrigins ?? []),
     ...(finance?.transportOrigins ?? []),
     ...(social?.transportOrigins ?? []),
     ...(treasuryFx?.transportOrigins ?? []),
@@ -158,20 +163,23 @@ export function createPostwarOfficeCommandFetchHandler(
           }
           const { request: parsed, selector } = decoded;
           const target =
-            selector.officeId === 'FINANCE' &&
-            selector.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND
-              ? finance
+            selector.officeId === 'CAPTAIN' &&
+            selector.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND
+              ? captain
               : selector.officeId === 'FINANCE' &&
-                  selector.commandType ===
-                    POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
-                ? treasuryFx
-                : selector.officeId === 'SOCIAL' &&
-                    [
-                      SOCIAL_POSITION_OFFER_CREATE_COMMAND,
-                      SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
-                    ].some((f) => f === selector.commandType)
-                  ? social
-                  : undefined;
+                  selector.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND
+                ? finance
+                : selector.officeId === 'FINANCE' &&
+                    selector.commandType ===
+                      POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+                  ? treasuryFx
+                  : selector.officeId === 'SOCIAL' &&
+                      [
+                        SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+                        SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+                      ].some((f) => f === selector.commandType)
+                    ? social
+                    : undefined;
           if (!target || target.transportOrigins.length === 0)
             return fail(503, 'OFFICE_CONNECTION_NOT_INSTALLED');
           if (!target.transportOrigins.includes(origin)) {
@@ -232,21 +240,26 @@ export function createPostwarOfficeCommandFetchHandler(
       stopped = true;
       stopping ??= (async () => {
         while (active.size) await Promise.allSettled([...active]);
-        // Finance borrows pools. Finish its work before Social, whose connection
-        // owns and closes its four pools. No consumer is started by this mux.
+        // Borrowers drain before Social closes the owned pools.
+        // No consumer is started by this mux.
         const errors: unknown[] = [];
+        try {
+          await captain?.stop();
+        } catch (e) {
+          errors.push(e);
+        }
         try {
           await finance?.stop();
         } catch (e) {
           errors.push(e);
         }
         try {
-          await social?.stop();
+          await treasuryFx?.stop();
         } catch (e) {
           errors.push(e);
         }
         try {
-          await treasuryFx?.stop();
+          await social?.stop();
         } catch (e) {
           errors.push(e);
         }

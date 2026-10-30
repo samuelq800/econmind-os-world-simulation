@@ -244,7 +244,10 @@ function reconcileSnapshot(input: {
   accounts: Readonly<Record<string, FinancialAccountId>>;
   fields: Readonly<Record<string, FinancialAccountClass>>;
   ownerRef: string;
-  source: CentralBankOmoSource;
+  source: {
+    readonly financialState: FinancialLedgerState;
+    readonly facts: Pick<CentralBankOmoSourceFacts, 'worldId' | 'countryId'>;
+  };
 }): Readonly<Record<string, FinancialAccount>> {
   const { snapshot, accounts, fields, source, ownerRef } = input;
   keys(accounts, Object.keys(fields));
@@ -295,6 +298,69 @@ function reconcileSnapshot(input: {
   )
     invalid('unmapped BANK/CB account requires full valuation/register source');
   return Object.freeze(result);
+}
+
+/** Read-only H0 original reconciliation, using the same exhaustive account
+ * and monetary rules as an actual OMO. This is not source admission or a
+ * financial-state constructor. Foreign/unmapped accounts remain unsupported. */
+export function assertCentralBankOmoOpeningOriginal(input: {
+  readonly financialState: FinancialLedgerState;
+  readonly worldId: string;
+  readonly countryId: string;
+  readonly bank: CentralBankOmoSourceFacts['bank'];
+  readonly centralBank: CentralBankOmoSourceFacts['centralBank'];
+  readonly bankAccounts: CentralBankOmoSourceFacts['bankAccounts'];
+  readonly centralBankAccounts: CentralBankOmoSourceFacts['centralBankAccounts'];
+}): void {
+  if (
+    !isAuthoritativeFinancialLedgerState(input.financialState) ||
+    input.financialState.worldVersion !== '0' ||
+    input.financialState.worldId !== input.worldId ||
+    input.bank.currency !== input.centralBank.currency ||
+    input.bank.currency === 'GCU' ||
+    input.bank.bankRef === input.centralBank.centralBankRef
+  )
+    invalid('same genuine H0 World/LC bank originals required');
+  keys(input.bank, [
+    ...Object.keys(BANK_FIELDS),
+    'bankRef',
+    'centralBankRef',
+    'currency',
+    'nonPerformingLoans',
+  ]);
+  keys(input.centralBank, [
+    ...Object.keys(CB_FIELDS),
+    'centralBankRef',
+    'commercialBankRef',
+    'currency',
+  ]);
+  const source = {
+    financialState: input.financialState,
+    facts: { worldId: input.worldId, countryId: input.countryId },
+  };
+  const bank = reconcileSnapshot({
+    snapshot: input.bank,
+    accounts: input.bankAccounts,
+    fields: BANK_FIELDS,
+    ownerRef: input.bank.bankRef,
+    source,
+  });
+  const central = reconcileSnapshot({
+    snapshot: input.centralBank,
+    accounts: input.centralBankAccounts,
+    fields: CB_FIELDS,
+    ownerRef: input.centralBank.centralBankRef,
+    source,
+  });
+  const asset = bank.reservesAtCentralBank!,
+    liability = central.commercialBankReserves!;
+  if (
+    asset.claimId === null ||
+    asset.claimId !== liability.claimId ||
+    asset.counterpartyEntityId !== liability.ownerId ||
+    liability.counterpartyEntityId !== asset.ownerId
+  )
+    invalid('R reserve asset/liability must be the same actual mirrored claim');
 }
 
 function rights(input: {

@@ -9,6 +9,7 @@ import {
 import {
   createPostwarFinanceSocialRuntimeConnection,
   type PostwarFinanceSocialRuntimeConnection,
+  type PostwarFinanceSocialRuntimePorts,
 } from '@econmind/world-worker/finance-social-runtime-connection';
 import type { Pool } from 'pg';
 import {
@@ -40,6 +41,15 @@ export interface PostwarOfficeNodeBootstrapInput {
       PostwarFinanceSocialApiConnectionInput['treasuryFxPreparation']
     >;
   }>;
+  /** Same Worker role and fixed mixed-source constructor; not a host permit. */
+  readonly captain?: {
+    readonly mode: 'TEST_ONLY_LOCAL' | 'OFFICIAL_RUNTIME';
+  };
+  /** Borrowed separate publisher DB; caller ends that pool after shutdown.
+   * No pool/credential is discovered and no publication occurs by default. */
+  readonly publicationDatabase?: PostwarFinanceSocialRuntimePorts['database'];
+  /** Same admitted pins/auth and bounded pool; checked by the fixed API owner. */
+  readonly read?: PostwarFinanceSocialApiConnectionInput['read'];
   readonly financeAllowedOrigins?: readonly string[];
 }
 export interface PostwarOfficeNodeBootstrap {
@@ -48,6 +58,11 @@ export interface PostwarOfficeNodeBootstrap {
   readonly port: number;
   readonly consumer: Readonly<PostwarSharedOfficeConsumer>;
   ready(): boolean;
+  retryDerivedPublication(
+    commandId: string,
+  ): ReturnType<
+    PostwarFinanceSocialRuntimeConnection['retryDerivedPublication']
+  >;
   shutdown(): Promise<void>;
 }
 
@@ -169,12 +184,19 @@ export async function startPostwarOfficeNodeBootstrap(
       intakePool: social.intakePool,
       clock: c.clock,
       environment: c.environment,
+      ...(input.publicationDatabase
+        ? { publicationDatabase: input.publicationDatabase }
+        : {}),
       ...(input.treasuryFx ? { treasuryFx: { workerRole: c.workerRole } } : {}),
+      ...(input.captain
+        ? { captain: { workerRole: c.workerRole, mode: input.captain.mode } }
+        : {}),
     });
     owner = await createPostwarFinanceSocialApiConnection({
       binding,
       social,
       socialStartupSeed: input.startupSeed,
+      ...(input.read ? { read: input.read } : {}),
       ...(input.treasuryFx
         ? { treasuryFxPreparation: input.treasuryFx.preparation }
         : {}),
@@ -187,7 +209,8 @@ export async function startPostwarOfficeNodeBootstrap(
       postwarFinanceSocialConnection: owner,
     });
     const running = runtime,
-      control = owner.control;
+      control = owner.control,
+      installedBinding = binding;
     if (running.sharedOfficeConsumer !== control)
       throw Error('POSTWAR_NODE_SOLE_CONSUMER_IDENTITY_REQUIRED');
     const requireLive = () => {
@@ -208,6 +231,10 @@ export async function startPostwarOfficeNodeBootstrap(
           return control.consumeOnce();
         },
       }),
+      retryDerivedPublication(commandId: string) {
+        requireLive();
+        return installedBinding.retryDerivedPublication(commandId);
+      },
       shutdown,
     });
   } catch (error) {

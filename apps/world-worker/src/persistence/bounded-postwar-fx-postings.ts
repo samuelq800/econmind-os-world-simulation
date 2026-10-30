@@ -3,8 +3,10 @@
  * replay independently validates each actual economic effect. */
 import { createHash } from 'node:crypto';
 import {
+  CENTRAL_BANK_OMO_COMMAND,
   DomainError,
   DOMAIN_ERROR_CODES,
+  BENEFICIAL_HOUSING_RENT_COMMAND,
   type AuthoritativeTransition,
   type CanonicalCommand,
   type FinancialPostingBatch,
@@ -45,11 +47,19 @@ export async function readBoundedPostwarJournalFrom(
     POSTWAR_BOUNDED_JOURNAL_QUERY,
     [input.worldId, input.countryId, input.officeId],
   );
-  const r = result.rows[0];
+  if (result.rows.length !== 1)
+    invalid('one complete bounded journal required');
+  return decodeBoundedPostwarJournal(result.rows[0]);
+}
+/** Data-only decoding for fixed domain-specific SQL getters. This function
+ * does not grant source access, admission, currentness or execution authority. */
+export function decodeBoundedPostwarJournal(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    invalid('complete fixed journal response required');
+  const r = value as Record<string, unknown>;
   const uint = (v: unknown): v is string =>
     typeof v === 'string' && /^(?:0|[1-9]\d*)$/u.test(v);
   if (
-    result.rows.length !== 1 ||
     !r ||
     !uint(r.world_version) ||
     !uint(r.event_sequence) ||
@@ -107,6 +117,29 @@ export function decodeBoundedPostwarFinancialPostings(input: {
   const rows = input.rows.filter(
     (r) => r.causation_command_id === input.command.commandId,
   );
+  if (input.command.commandType === CENTRAL_BANK_OMO_COMMAND) {
+    if (rows.length !== 1) invalid('exact one OMO LC batch required');
+    const batch = decodeDurableFinancialPostingBatch({
+      ...input,
+      row: rows[0]!,
+      sha256Hex: sha,
+    });
+    if (batch.settlementCurrency === 'GCU' || batch.legs.length !== 4)
+      invalid('exact four-leg OMO LC batch required');
+    // Structural reconstruction only. Shared Core independently validates the
+    // complete original/quote, rights, event and all four actual ledger legs.
+    return Object.freeze([batch]);
+  }
+  if (input.command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND) {
+    if (rows.length !== 1) invalid('exact one beneficial rent batch required');
+    // This only validates canonical data. The Core rent replay must rederive
+    // the complete lease/claim transfer against its admitted origin.
+    return Object.freeze(
+      rows.map((row) =>
+        decodeDurableFinancialPostingBatch({ ...input, row, sha256Hex: sha }),
+      ),
+    );
+  }
   if (input.command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND) {
     if (rows.length)
       invalid('financial effects outside the installed FX family');

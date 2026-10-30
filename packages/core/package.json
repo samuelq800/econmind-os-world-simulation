@@ -16,6 +16,14 @@
       "types": "./dist/finance/postwar-day-one-treasury-fx.d.ts",
       "default": "./dist/finance/postwar-day-one-treasury-fx.js"
     },
+    "./postwar-captain-current-contract": {
+      "types": "./dist/read-models/postwar-captain-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-captain-current-contract.js"
+    },
+    "./industry-production-command": {
+      "types": "./dist/commands/industry-production-command.d.ts",
+      "default": "./dist/commands/industry-production-command.js"
+    },
     "./postwar-social-mixed-current-contract": {
       "types": "./dist/read-models/postwar-social-mixed-current-contract.d.ts",
       "import": "./dist/read-models/postwar-social-mixed-current-contract.js"

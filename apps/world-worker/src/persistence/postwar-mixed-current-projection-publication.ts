@@ -65,6 +65,9 @@ export interface PostwarMixedCurrentProjectionFacts {
       reservations: PreparedFinanceSocialFxReplayResult['socialReservations'];
     }>;
   }>;
+  readonly captainCountries?: PreparedFinanceSocialFxReplayResult['captainCountries'];
+  readonly captainOriginalStatus?:
+    'NO_REGISTERED_CAPTAIN_ORIGINAL' | 'PRESENT' | 'REVOKED';
   readonly document: PostwarSocialEmploymentStateDocument;
   readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
   readonly coverage: Readonly<PostwarMixedCurrentProjectionCoverage>;
@@ -82,6 +85,45 @@ export function consumePostwarMixedCurrentProjectionSnapshotFrom(
     throw Error('GENUINE_LIVE_MIXED_CURRENT_SNAPSHOT_REQUIRED');
   return entry.facts;
 }
+/** Pure mapper over the same live complete-prefix snapshot; no source or
+ * actor proof can be supplied as a JSON DTO. */
+export function derivePostwarMixedSocialCurrentFrom(
+  tx: SqlExecutor,
+  token: PostwarMixedCurrentProjectionSnapshot,
+): string {
+  const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token),
+    countries = f.shared.social.countries.filter(
+      (c) => c.countryId === f.countryId,
+    );
+  if (countries.length !== 1)
+    throw Error('EXACT_REPLAYED_SOCIAL_COUNTRY_REQUIRED');
+  const lifecycle = countries[0]!.lifecycle,
+    employment = lifecycle.employment;
+  const origin = f.frames
+    .filter(
+      (frame) =>
+        frame.command.countryId === f.countryId &&
+        [
+          'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
+          'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
+          'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1',
+        ].includes(frame.command.commandType),
+    )
+    .at(-1);
+  return canonicalSerialize({
+    coverage: f.coverage,
+    head: f.head,
+    seedPins: f.seedPins,
+    employmentStateHash: hash(employment),
+    materializationHash:
+      origin?.command.commandType ===
+      'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'
+        ? hash(lifecycle)
+        : hash(employment),
+    positionsHash: hash(employment.labour.positions),
+    servicePoolsHash: hash(employment.servicePools),
+  });
+}
 export interface PostwarMixedCurrentProjectionSource {
   readonly worldId: string;
   /** Server-only DATA mapper scope; no writes to authoritative state. */
@@ -91,6 +133,14 @@ export interface PostwarMixedCurrentProjectionSource {
       tx: SqlExecutor,
       snapshot: PostwarMixedCurrentProjectionSnapshot,
     ) => Promise<T>,
+  ): Promise<T>;
+  withCaptainSnapshot<T>(
+    country: string,
+    consume: (
+      tx: SqlExecutor,
+      snapshot: PostwarMixedCurrentProjectionSnapshot,
+    ) => Promise<T>,
+    options?: { readonly requireCaptain: boolean },
   ): Promise<T>;
   publishSocialCountry(
     country: string,
@@ -132,164 +182,169 @@ export function createPostwarMixedCurrentProjectionSource(config: {
     );
     return result;
   };
+  const withSnapshotFrom = <T>(
+    requestedCountry: string,
+    purpose: 'STANDARD' | 'CAPTAIN_CURRENT',
+    consume: (
+      tx: SqlExecutor,
+      value: PostwarMixedCurrentProjectionSnapshot,
+    ) => Promise<T>,
+    requireCaptain = true,
+  ): Promise<T> => {
+    return run(async () => {
+      const country = countryId(requestedCountry),
+        baseline = readPostwarSocialRuntimeFinancialReplayBase(social, world),
+        b = consumePreparedPostwarSocialFinancialReplayBase(baseline);
+      if (!b.document.countries.some((c) => c.countryId === country))
+        throw Error('ACTUAL_ADOPTED_COUNTRY_REQUIRED');
+      return social.database.transaction((tx) =>
+        roles.withSourceReaderFrom(tx, async () => {
+          const locked = await lockRegisteredSourceFrom(tx, world, country),
+            r = locked.rows[0];
+          if (
+            locked.rows.length !== 1 ||
+            !r ||
+            r.seed_fingerprint !== b.pins.contentHash ||
+            r.admission_ref !== b.pins.admissionRef
+          )
+            throw Error('ACTUAL_CURRENT_SOURCE_PINS_REQUIRED');
+          const bounded = await readBoundedPostwarSocialFramesFrom({
+            executor: tx,
+            database: social.database,
+            worldId: world,
+            countryId: country,
+          });
+          if (BigInt(bounded.head.worldVersion) <= 0n)
+            throw Error('MIXED_CURRENT_POSITIVE_HEAD_REQUIRED');
+          const replay = await replayPreparedPostwarFinanceSocialFxFrom({
+            executor: tx,
+            baseline,
+            worldId: world,
+            hostCountryId: country,
+            officeId: 'SOCIAL',
+            seedId: b.pins.seedRef,
+            seedFingerprint: b.pins.contentHash,
+            admissionRef: b.pins.admissionRef,
+            ...(purpose === 'CAPTAIN_CURRENT'
+              ? { captainCountryId: country, requireCaptain }
+              : {}),
+            frames: bounded.frames,
+            expectedHead: bounded.head,
+          });
+          const frames = bounded.frames,
+            events = frames.flatMap((f) => f.events),
+            last = events.at(-1);
+          if (!last) throw Error('COMPLETE_POSITIVE_PREFIX_REQUIRED');
+          const batches = frames.flatMap((f) => f.financialPostingBatches),
+            head = Object.freeze({ worldId: world, ...bounded.head });
+          const coverage = Object.freeze({
+            prefixFingerprint: hash({
+              worldId: world,
+              seedFingerprint: b.pins.contentHash,
+              headWorldVersion: head.worldVersion,
+              headEventSequence: head.eventSequence,
+              frames,
+            }),
+            knownEffectsFingerprint: hash(
+              frames.map((f) => ({
+                commandId: f.command.commandId,
+                countryId: f.command.countryId,
+                commandType: f.command.commandType,
+                transitionFingerprint: hash(f.transition),
+                receiptFingerprint: hash(f.receipt),
+                eventFingerprints: f.events.map((e) => e.fingerprint),
+                worldVersionBefore: f.transition.worldVersionBefore,
+                worldVersionAfter: f.transition.worldVersionAfter,
+                events: f.events.map((e) => ({
+                  eventId: e.eventId,
+                  fingerprint: e.fingerprint,
+                  sequence: e.sequence,
+                  worldVersion: e.worldVersion,
+                })),
+              })),
+            ),
+            coveredThroughEventId: last.eventId,
+            coveredThroughEventFingerprint: last.fingerprint,
+            financialPostingCount: String(
+              batches.reduce((n, b) => n + b.legs.length, 0),
+            ),
+            financialBatchCount: String(batches.length),
+            financialPostingsFingerprint: hash(batches),
+          });
+          const facts: Readonly<PostwarMixedCurrentProjectionFacts> =
+            Object.freeze({
+              countryId: country,
+              head,
+              seedPins: Object.freeze({
+                worldId: world,
+                seedId: b.pins.seedRef,
+                seedFingerprint: b.pins.contentHash,
+                admissionRef: b.pins.admissionRef,
+              }),
+              financial: replay.financial,
+              shared: Object.freeze({
+                budget: Object.freeze({
+                  state: replay.budgetState,
+                  encumbrances: replay.budgetEncumbrances,
+                }),
+                social: Object.freeze({
+                  countries: replay.socialCountries,
+                  reservations: replay.socialReservations,
+                }),
+              }),
+              ...(replay.captainOriginalStatus === undefined
+                ? {}
+                : { captainOriginalStatus: replay.captainOriginalStatus }),
+              ...(replay.captainCountries === undefined
+                ? {}
+                : { captainCountries: replay.captainCountries }),
+              document: b.document,
+              frames,
+              coverage,
+            });
+          const value = Object.freeze(
+            {},
+          ) as PostwarMixedCurrentProjectionSnapshot;
+          snapshots.set(value, { executor: tx, facts });
+          try {
+            return await consume(tx, value);
+          } finally {
+            snapshots.delete(value);
+          }
+        }),
+      );
+    });
+  };
   const source: Readonly<PostwarMixedCurrentProjectionSource> = Object.freeze({
     worldId: world,
     withSnapshot<T>(
-      requestedCountry: string,
+      country: string,
       consume: (
         tx: SqlExecutor,
-        value: PostwarMixedCurrentProjectionSnapshot,
+        snapshot: PostwarMixedCurrentProjectionSnapshot,
       ) => Promise<T>,
-    ): Promise<T> {
-      return run(async () => {
-        const country = countryId(requestedCountry),
-          baseline = readPostwarSocialRuntimeFinancialReplayBase(social, world),
-          b = consumePreparedPostwarSocialFinancialReplayBase(baseline);
-        if (!b.document.countries.some((c) => c.countryId === country))
-          throw Error('ACTUAL_ADOPTED_COUNTRY_REQUIRED');
-        return social.database.transaction((tx) =>
-          roles.withSourceReaderFrom(tx, async () => {
-            const locked = await lockRegisteredSourceFrom(tx, world, country),
-              r = locked.rows[0];
-            if (
-              locked.rows.length !== 1 ||
-              !r ||
-              r.seed_fingerprint !== b.pins.contentHash ||
-              r.admission_ref !== b.pins.admissionRef
-            )
-              throw Error('ACTUAL_CURRENT_SOURCE_PINS_REQUIRED');
-            const bounded = await readBoundedPostwarSocialFramesFrom({
-              executor: tx,
-              database: social.database,
-              worldId: world,
-              countryId: country,
-            });
-            if (BigInt(bounded.head.worldVersion) <= 0n)
-              throw Error('MIXED_CURRENT_POSITIVE_HEAD_REQUIRED');
-            const replay = await replayPreparedPostwarFinanceSocialFxFrom({
-              executor: tx,
-              baseline,
-              worldId: world,
-              hostCountryId: country,
-              officeId: 'SOCIAL',
-              seedId: b.pins.seedRef,
-              seedFingerprint: b.pins.contentHash,
-              admissionRef: b.pins.admissionRef,
-              frames: bounded.frames,
-              expectedHead: bounded.head,
-            });
-            const frames = bounded.frames,
-              events = frames.flatMap((f) => f.events),
-              last = events.at(-1);
-            if (!last) throw Error('COMPLETE_POSITIVE_PREFIX_REQUIRED');
-            const batches = frames.flatMap((f) => f.financialPostingBatches),
-              head = Object.freeze({ worldId: world, ...bounded.head });
-            const coverage = Object.freeze({
-              prefixFingerprint: hash({
-                worldId: world,
-                seedFingerprint: b.pins.contentHash,
-                headWorldVersion: head.worldVersion,
-                headEventSequence: head.eventSequence,
-                frames,
-              }),
-              knownEffectsFingerprint: hash(
-                frames.map((f) => ({
-                  commandId: f.command.commandId,
-                  countryId: f.command.countryId,
-                  commandType: f.command.commandType,
-                  transitionFingerprint: hash(f.transition),
-                  receiptFingerprint: hash(f.receipt),
-                  eventFingerprints: f.events.map((e) => e.fingerprint),
-                  worldVersionBefore: f.transition.worldVersionBefore,
-                  worldVersionAfter: f.transition.worldVersionAfter,
-                  events: f.events.map((e) => ({
-                    eventId: e.eventId,
-                    fingerprint: e.fingerprint,
-                    sequence: e.sequence,
-                    worldVersion: e.worldVersion,
-                  })),
-                })),
-              ),
-              coveredThroughEventId: last.eventId,
-              coveredThroughEventFingerprint: last.fingerprint,
-              financialPostingCount: String(
-                batches.reduce((n, b) => n + b.legs.length, 0),
-              ),
-              financialBatchCount: String(batches.length),
-              financialPostingsFingerprint: hash(batches),
-            });
-            const facts: Readonly<PostwarMixedCurrentProjectionFacts> =
-              Object.freeze({
-                countryId: country,
-                head,
-                seedPins: Object.freeze({
-                  worldId: world,
-                  seedId: b.pins.seedRef,
-                  seedFingerprint: b.pins.contentHash,
-                  admissionRef: b.pins.admissionRef,
-                }),
-                financial: replay.financial,
-                shared: Object.freeze({
-                  budget: Object.freeze({
-                    state: replay.budgetState,
-                    encumbrances: replay.budgetEncumbrances,
-                  }),
-                  social: Object.freeze({
-                    countries: replay.socialCountries,
-                    reservations: replay.socialReservations,
-                  }),
-                }),
-                document: b.document,
-                frames,
-                coverage,
-              });
-            const value = Object.freeze(
-              {},
-            ) as PostwarMixedCurrentProjectionSnapshot;
-            snapshots.set(value, { executor: tx, facts });
-            try {
-              return await consume(tx, value);
-            } finally {
-              snapshots.delete(value);
-            }
-          }),
-        );
-      });
+    ) {
+      return withSnapshotFrom(country, 'STANDARD', consume);
+    },
+    withCaptainSnapshot<T>(
+      country: string,
+      consume: (
+        tx: SqlExecutor,
+        snapshot: PostwarMixedCurrentProjectionSnapshot,
+      ) => Promise<T>,
+      options?: { readonly requireCaptain: boolean },
+    ) {
+      return withSnapshotFrom(
+        country,
+        'CAPTAIN_CURRENT',
+        consume,
+        options?.requireCaptain ?? true,
+      );
     },
     publishSocialCountry(country: string) {
       return source.withSnapshot(country, async (tx, token) => {
         const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token),
-          countries = f.shared.social.countries.filter(
-            (c) => c.countryId === f.countryId,
-          );
-        if (countries.length !== 1)
-          throw Error('EXACT_REPLAYED_SOCIAL_COUNTRY_REQUIRED');
-        const lifecycle = countries[0]!.lifecycle,
-          employment = lifecycle.employment;
-        const origin = f.frames
-          .filter(
-            (frame) =>
-              frame.command.countryId === f.countryId &&
-              [
-                'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
-                'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
-                'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1',
-              ].includes(frame.command.commandType),
-          )
-          .at(-1);
-        const assertion = canonicalSerialize({
-          coverage: f.coverage,
-          head: f.head,
-          seedPins: f.seedPins,
-          employmentStateHash: hash(employment),
-          materializationHash:
-            origin?.command.commandType ===
-            'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'
-              ? hash(lifecycle)
-              : hash(employment),
-          positionsHash: hash(employment.labour.positions),
-          servicePoolsHash: hash(employment.servicePools),
-        });
+          assertion = derivePostwarMixedSocialCurrentFrom(tx, token);
         return config.publicationDatabase.transaction(async (pub) => {
           const result = await pub.query(
             'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',

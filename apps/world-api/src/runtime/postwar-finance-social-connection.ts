@@ -1,6 +1,14 @@
 /** Explicit local/CI Node owner. HTTP borrowers share one privately issued
  * Worker runtime. This owner never starts a loop or discovers credentials. */
-import type { OpeningSeed } from '@econmind/core';
+import { canonicalSerialize, type OpeningSeed } from '@econmind/core';
+import {
+  explicitReadConfig,
+  type ExplicitReadPreparationConfig,
+} from '../runtime-preparation/explicit-read-preparation-config.js';
+import {
+  createPostwarCaptainConnection,
+  type PostwarCaptainConnection,
+} from './postwar-captain-connection.js';
 import {
   readPostwarFinanceSocialRuntimeBinding,
   hasPreparedPostwarFinanceSocialTreasuryFx,
@@ -27,6 +35,8 @@ export interface PostwarFinanceSocialApiConnectionInput {
    * validation. Borrowed office connections never end any of them. */
   readonly social: PostwarSocialConnectionConfiguration;
   readonly financeAllowedOrigins?: readonly string[];
+  /** Optional fixed page/seat HTTP routes borrowing the same bounded read pool. */
+  readonly read?: Omit<ExplicitReadPreparationConfig, 'pool'>;
   /** Offline Core seed, verified against live SQL header/source pins by Worker.
    * Server startup only; never an HTTP field or online-reader privilege. */
   readonly socialStartupSeed?: Readonly<OpeningSeed>;
@@ -49,6 +59,8 @@ export interface PostwarFinanceSocialApiConnection {
   stop(): Promise<void>;
 }
 export interface PostwarFinanceSocialApiPorts {
+  readonly readConfiguration?: ExplicitReadPreparationConfig;
+  readonly captain?: Readonly<PostwarCaptainConnection>;
   readonly finance: Readonly<PostwarFinanceConnection>;
   readonly social: Readonly<PostwarSocialConnection>;
   readonly treasuryFx?: Readonly<PostwarTreasuryFxConnection>;
@@ -97,6 +109,7 @@ export async function createPostwarFinanceSocialApiConnection(
   const pools = [
     ...new Set([c.boundedReadPool, c.intakePool, c.sourcePool, c.workerPool]),
   ];
+  let captain: Readonly<PostwarCaptainConnection> | undefined;
   let finance: Readonly<PostwarFinanceConnection> | undefined;
   let social: Readonly<PostwarSocialConnection> | undefined;
   let treasuryFx: Readonly<PostwarTreasuryFxConnection> | undefined;
@@ -110,6 +123,7 @@ export async function createPostwarFinanceSocialApiConnection(
       // Retire all borrowers immediately, then await both drains. Neither
       // borrower calls this owner or stops its shared Worker/source/pools.
       const drains = await Promise.allSettled([
+        Promise.resolve().then(() => captain?.stop()),
         Promise.resolve().then(() => finance?.stop()),
         Promise.resolve().then(() => social?.stop()),
         Promise.resolve().then(() => treasuryFx?.stop()),
@@ -137,6 +151,23 @@ export async function createPostwarFinanceSocialApiConnection(
     return stopping;
   };
   try {
+    const readConfiguration = input.read
+      ? explicitReadConfig({ ...input.read, pool: c.boundedReadPool })
+      : null;
+    if (
+      input.read &&
+      (!readConfiguration ||
+        readConfiguration.readerRole !== c.boundedReaderRole ||
+        readConfiguration.authorizationPublisherRole !==
+          c.authorizationPublisherRole ||
+        canonicalSerialize(readConfiguration.admittedWorldPins) !==
+          canonicalSerialize(c.admittedWorldPins) ||
+        readConfiguration.auth.projectRef !== c.auth.projectRef ||
+        readConfiguration.auth.expectedIssuer !== c.auth.expectedIssuer ||
+        readConfiguration.auth.jwksUrl !== c.auth.jwksUrl ||
+        readConfiguration.auth.audience !== c.auth.audience)
+    )
+      throw Error('EXACT_SHARED_READ_CONFIGURATION_REQUIRED');
     social = createPostwarSocialConnection(
       c,
       binding,
@@ -165,6 +196,20 @@ export async function createPostwarFinanceSocialApiConnection(
       },
       binding,
     );
+    if (ports.captain)
+      captain = createPostwarCaptainConnection(
+        {
+          readPool: c.boundedReadPool,
+          readerRole: c.boundedReaderRole,
+          intakeRole: c.intakeRole,
+          authorizationPublisherRole: c.authorizationPublisherRole,
+          admittedWorldPins: c.admittedWorldPins,
+          auth: c.auth,
+          resolveActorId: c.resolveActorId,
+          allowedOrigins: c.allowedOrigins ?? [],
+        },
+        binding,
+      );
     if (ports.treasuryFx)
       treasuryFx = createPostwarTreasuryFxConnection(
         {
@@ -182,6 +227,7 @@ export async function createPostwarFinanceSocialApiConnection(
     // Validate the actual finite HTTP union now, so constructor errors use the
     // same complete cleanup as failed preparation/listen, before installation.
     createPostwarOfficeCommandFetchHandler({
+      ...(captain ? { captain } : {}),
       finance,
       social,
       ...(treasuryFx ? { treasuryFx } : {}),
@@ -212,6 +258,8 @@ export async function createPostwarFinanceSocialApiConnection(
     owners.set(
       owner,
       Object.freeze({
+        ...(readConfiguration ? { readConfiguration } : {}),
+        ...(captain ? { captain } : {}),
         finance,
         social,
         ...(treasuryFx ? { treasuryFx } : {}),

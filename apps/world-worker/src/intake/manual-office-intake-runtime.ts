@@ -17,6 +17,7 @@ import {
   DomainError,
   DOMAIN_ERROR_CODES,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   type CanonicalCommand,
   type Sha256Hex,
 } from '@econmind/core';
@@ -24,6 +25,8 @@ import { PostgresTransactionError } from '../persistence/postgres-sql-database.j
 import type { SqlDatabase } from '../persistence/sql-database.js';
 import { isFinanceBudgetNativeCommitGuard } from '../persistence/postgres-finance-budget-custody.js';
 import { isPostwarSocialPositionSourceCommitProtectionPort } from '../persistence/postwar-social-position-runtime.js';
+import { isPostwarCaptainSourceCommitProtectionPort } from '../persistence/postwar-captain-runtime.js';
+import { isPreparedPostwarSocialRuntimeConnection } from '../runtime-preparation/social-runtime-connection.js';
 import {
   boundProductionManualIntakeRuntime,
   isProductionManualIntakeRuntime,
@@ -66,6 +69,7 @@ type Construction = {
   readonly environment: NodeJS.ProcessEnv;
   readonly readers: ManualOfficeRuntimeReaders;
   readonly treasuryFxBinding?: PostwarTreasuryFxSourceBinding;
+  readonly financeSocialBinding?: FinanceSocialSourceBinding;
   readonly productionBinding?: ServerCommandHostBinding;
   readonly productionHost?: ReturnType<typeof createProductionWorldCommandHost>;
 };
@@ -194,6 +198,7 @@ function constructManualOfficeIntakeRuntime(
     ...input,
     readers: Object.freeze(readers),
     ...(treasuryFxBinding ? { treasuryFxBinding } : {}),
+    ...(financeSocialBinding ? { financeSocialBinding } : {}),
   });
   const consumer = treasuryFxBinding
     ? createTreasuryFxCommandConsumptionPreparation(treasuryFxBinding)
@@ -412,6 +417,23 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
       !construction.productionBinding &&
       isPostwarDayOneFxRuntime(construction.readers.treasuryFx)
     );
+  if (
+    commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND &&
+    construction?.financeSocialBinding
+  ) {
+    const fixed = readFinanceSocialSourceBinding(
+      construction.financeSocialBinding,
+    );
+    return (
+      isPreparedPostwarSocialRuntimeConnection(
+        fixed.socialConnection,
+        construction.worldId,
+      ) &&
+      isPostwarCaptainSourceCommitProtectionPort(
+        construction.readers.captainNative?.sourceCommitProtectionPort,
+      )
+    );
+  }
   if (construction?.productionBinding)
     return (
       commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND &&

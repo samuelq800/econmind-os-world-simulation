@@ -26,6 +26,7 @@ import {
   readFinanceNativeBudgetMixedFinancialState,
   type FinanceSocialFxOpeningEncumbrance,
   type FinanceSocialFxOriginal,
+  type FinanceSocialOmoOriginal,
   type FinanceSocialFxCurrentTreasuryBalance,
   type FinanceNativeBudgetMixedPrefixResult,
   type FinanceNativeBudgetCanonicalFrame,
@@ -154,11 +155,14 @@ export function replayPreparedFinanceSocialLedger(input: {
 }
 
 export type {
+  FinanceSocialOmoOriginal,
   FinanceSocialFxOpeningEncumbrance,
   FinanceSocialFxOriginal,
   FinanceSocialFxCurrentTreasuryBalance,
 } from './finance-budget-native.js';
 export interface PreparedFinanceSocialFxReplayResult {
+  readonly beneficialHousingRentOrigins?: FinanceNativeBudgetMixedPrefixResult['beneficialHousingRentOrigins'];
+  readonly omoCountries?: FinanceNativeBudgetMixedPrefixResult['omoCountries'];
   readonly financial: Readonly<FinancialLedgerState>;
   readonly mixedPrefixEvidence: FinanceNativeBudgetMixedPrefixEvidence;
   readonly budgetState: FinanceNativeBudgetMixedPrefixResult['budgetState'];
@@ -166,6 +170,7 @@ export interface PreparedFinanceSocialFxReplayResult {
   readonly socialReservations: FinanceNativeBudgetMixedPrefixResult['socialReservations'];
   readonly budgetEncumbrances: FinanceNativeBudgetMixedPrefixResult['budgetEncumbrances'];
   readonly checkpoints: FinanceNativeBudgetMixedPrefixResult['checkpoints'];
+  readonly captainCountries?: FinanceNativeBudgetMixedPrefixResult['captainCountries'];
   readonly currentTreasuryBalances: readonly FinanceSocialFxCurrentTreasuryBalance[];
   readonly frameHashes: readonly string[];
 }
@@ -177,8 +182,15 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   readonly socialCountries: Parameters<
     typeof prepareFinanceNativeBudgetMixedPrefix
   >[0]['socialCountries'];
+  readonly captainCountries?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['captainCountries'];
   readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
   readonly fxOriginals: readonly FinanceSocialFxOriginal[];
+  readonly omoOriginals?: readonly FinanceSocialOmoOriginal[];
+  readonly beneficialHousingRentReceipts?: Parameters<
+    typeof prepareFinanceNativeBudgetFinancialReplay
+  >[0]['beneficialHousingRentReceipts'];
   readonly expectedHead: {
     readonly worldVersion: string;
     readonly eventSequence: string;
@@ -193,6 +205,14 @@ export function replayPreparedFinanceSocialFxLedger(input: {
       financial: base,
       openingEncumbrances: input.openingEncumbrances,
       fxOriginals: input.fxOriginals,
+      ...(input.beneficialHousingRentReceipts === undefined
+        ? {}
+        : {
+            beneficialHousingRentReceipts: input.beneficialHousingRentReceipts,
+          }),
+      ...(input.omoOriginals === undefined
+        ? {}
+        : { omoOriginals: input.omoOriginals }),
     },
     input.sha256Hex,
   );
@@ -202,6 +222,9 @@ export function replayPreparedFinanceSocialFxLedger(input: {
       frames: input.frames,
       socialCountries: input.socialCountries,
       financialReplay,
+      ...(input.captainCountries === undefined
+        ? {}
+        : { captainCountries: input.captainCountries }),
     },
     input.sha256Hex,
   );
@@ -224,6 +247,15 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   });
   return Object.freeze({
     financial,
+    ...(result.beneficialHousingRentOrigins === undefined
+      ? {}
+      : { beneficialHousingRentOrigins: result.beneficialHousingRentOrigins }),
+    ...(result.omoCountries === undefined
+      ? {}
+      : { omoCountries: result.omoCountries }),
+    ...(result.captainCountries === undefined
+      ? {}
+      : { captainCountries: result.captainCountries }),
     mixedPrefixEvidence: evidence,
     budgetState: result.budgetState,
     socialCountries: result.socialCountries,

@@ -17,3 +17,9 @@ export {
   type PostwarSocialMixedCurrentSource,
   type PostwarSocialMixedCurrentPage,
 } from '../persistence/postwar-social-mixed-current-projection.js';
+
+export {
+  createPostwarCaptainCurrentProjectionStore,
+  type PostwarCaptainCurrentSource,
+  type PostwarCaptainCurrentPage,
+} from '../persistence/postwar-captain-current-projection.js';
