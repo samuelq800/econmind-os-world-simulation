@@ -1,7 +1,8 @@
 /** TEST_ONLY cfc fixture. Importing this module never opens PG. Only the
  * coordinated native constructor clones the existing sealed cfc baseline.
- * Small source records are derived from the actual Core-validated artifact;
- * their fixture registrar is NOT a verified production/bounded publisher. */
+ * Source facts use actual Core derivation and fixed controlled publishers;
+ * budget policy, MATCH issuer and identities remain explicit test fixtures.
+ * Local execution does not establish production admission or release approval. */
 import { createHash } from 'node:crypto';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -32,6 +33,7 @@ import {
 } from '../../apps/world-worker/src/runtime-preparation/finance-social-runtime-connection.js';
 import { createPostgresFinanceBudgetWorldCapacitySource } from '../../apps/world-worker/src/persistence/postgres-finance-budget-capacity-source.js';
 import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
+import { publishCfcFinanceSocialFixtureSources } from './postwar-finance-social-fixed-source-publisher.js';
 import { publishPostwarDayOneFxOriginals } from '../../apps/world-worker/src/persistence/postgres-postwar-day-one-fx-originals.js';
 import { publishPostwarMixedSocialMatchDue } from '../../apps/world-worker/src/persistence/postwar-social-mixed-match-publisher.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
@@ -352,6 +354,7 @@ const proposals = [
   'finance-budget-capacity-source',
   'finance-budget-mixed-source',
   'postwar-day-one-fx-history-read',
+  'postwar-bounded-journal-read',
   'postwar-social-mixed-match-publisher',
 ] as const;
 const fixedRoles = [
@@ -587,6 +590,22 @@ export async function createPostwarFinanceSocialFxNativeFixture(
       admissionRef: base.marker.admissionRef,
       canonicalSeedSHA256: String(base.header.canonical_intent_sha256),
     });
+    const controlledSourcePublication =
+      await publishCfcFinanceSocialFixtureSources({
+        seed,
+        installer: base.clone.installer,
+      });
+    const publishedCapacitySourceSHA256 =
+      controlledSourcePublication.sourceRows.find(
+        (row) =>
+          row.countryId === base.marker.countryId &&
+          row.function === 'publish_postwar_finance_source_bounded',
+      )?.sourceSha256;
+    if (
+      typeof publishedCapacitySourceSHA256 !== 'string' ||
+      !/^[a-f0-9]{64}$/u.test(publishedCapacitySourceSHA256)
+    )
+      invalid('ACTUAL_PUBLISHED_CAPACITY_SHA_REQUIRED');
     const normativeBytes = await readFile(
       path.join(root, 'specs/extracted/FINANCE.md'),
       'utf8',
@@ -625,12 +644,11 @@ export async function createPostwarFinanceSocialFxNativeFixture(
     };
     validateFinanceNativeBudgetPolicy(c01Policy);
     const policyText = C.canonicalSerialize(c01Policy),
-      capacityText = C.canonicalSerialize(small.capacity),
       policyRef = 'POLICY_MIXED_CFC_' + suffix.toUpperCase();
     const setup = new PostgresSqlDatabase(base.clone.installer);
-    // Authorized TEST_ONLY registrar: canonical source and immutable admission
-    // metadata are independently locked before small Core-derived records enter.
-    // This is not a formal bounded publication implementation or approval.
+    // Source originals were published through the real fixed-role entry above.
+    // Only budget policy, MATCH issuer and test identities remain TEST_ONLY;
+    // this does not claim production admission/release or human approval.
     await setup.transaction(async (tx) => {
       const h = (
         await tx.query<{
@@ -653,55 +671,6 @@ export async function createPostwarFinanceSocialFxNativeFixture(
         h[0]!.canonical_sha !== base.header.canonical_intent_sha256
       )
         invalid('ACTUAL_LOCKED_CFC_H0_HEADER_REQUIRED');
-      for (const c of small.countries) {
-        const scopeText = C.canonicalSerialize(c.scope),
-          scopeSha = sha(scopeText);
-        const body = {
-          schemaVersion: 'finance-budget-mixed-social-source-v1',
-          worldId: small.worldId,
-          countryId: c.countryId,
-          seedId: small.seedId,
-          seedFingerprint: small.seedFingerprint,
-          admissionRef: base.marker.admissionRef,
-          canonicalSeedSha256:
-            'sha256:' + String(base.header.canonical_intent_sha256),
-          sourceBundleSha256: base.marker.sourceBundleSha256,
-          operatingSourceId: small.operatingSourceId,
-          operatingSourcePayloadHash: small.operatingSourcePayloadHash,
-          state: c.state,
-          offers: c.offers,
-          fundingAccounts: c.fundingAccounts,
-          scopeSha256: scopeSha,
-        };
-        const text = C.canonicalSerialize(body);
-        if (Buffer.byteLength(text) > 262144)
-          invalid('MIXED_COUNTRY_EXCEEDS_256KIB');
-        await tx.query(
-          "insert into world_v2.social_operating_source_registration(world_id,country_id,registration_ref,seed_fingerprint,source_id,source_payload_hash,admission_ref,issuer_role)values($1,$2,'SOCIAL_REG_'||upper(encode(sha256(convert_to(jsonb_build_array($1::text,$2::text,$3::text,$4::text)::text,'UTF8')),'hex')),$3,$4,$5,$6,'world_v2_social_source_publisher')",
-          [
-            small.worldId,
-            c.countryId,
-            small.seedFingerprint,
-            small.operatingSourceId,
-            small.operatingSourcePayloadHash,
-            base.marker.admissionRef,
-          ],
-        );
-        await tx.query(
-          "insert into world_v2.finance_budget_mixed_social_original values($1,$2,'BUDGET_MIXED_SOCIAL_'||upper(encode(sha256(convert_to($3||chr(10)||$2,'UTF8')),'hex')),$3,$4,$5,$6,$7,$8,$9)",
-          [
-            small.worldId,
-            c.countryId,
-            small.seedFingerprint,
-            base.marker.admissionRef,
-            base.header.canonical_intent_sha256,
-            text,
-            sha(text),
-            scopeText,
-            scopeSha,
-          ],
-        );
-      }
       await tx.query(
         'insert into world_v2.finance_budget_policy_original values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)',
         [
@@ -716,18 +685,6 @@ export async function createPostwarFinanceSocialFxNativeFixture(
           policyText,
           sha(policyText),
           normativeSha,
-        ],
-      );
-      await tx.query(
-        "insert into world_v2.finance_budget_capacity_original values($1,$2,'BUDGET_CAPACITY_SOURCE_'||upper(encode(sha256(convert_to($3||chr(10)||$2,'UTF8')),'hex')),$3,$4,$5,$6,$7)",
-        [
-          small.worldId,
-          c01Policy.countryId,
-          small.seedFingerprint,
-          base.marker.admissionRef,
-          base.header.canonical_intent_sha256,
-          capacityText,
-          sha(capacityText),
         ],
       );
       // The finite day-zero rule is verified against the actual country source;
@@ -853,7 +810,7 @@ export async function createPostwarFinanceSocialFxNativeFixture(
         countries: [
           {
             countryId: c01Policy.countryId,
-            expectedRawSourceSHA256: sha(capacityText),
+            expectedRawSourceSHA256: publishedCapacitySourceSHA256,
           },
         ],
         historyMode: 'BUDGET_SOCIAL',
@@ -938,7 +895,7 @@ export async function createPostwarFinanceSocialFxNativeFixture(
     };
     const provenance = {
       classification:
-        'TEST_ONLY_CORE_DERIVED_SMALL_SOURCE_REGISTRAR_NOT_FORMAL_BOUNDED_PUBLICATION',
+        'CONTROLLED_SOURCE_PUBLICATION_WITH_TEST_ONLY_POLICY_ISSUER_AND_IDENTITIES',
       seedFingerprint: small.seedFingerprint,
       admissionRef: base.marker.admissionRef,
       canonicalSeedSHA256: base.header.canonical_intent_sha256,
@@ -951,12 +908,14 @@ export async function createPostwarFinanceSocialFxNativeFixture(
           Buffer.byteLength(C.canonicalSerialize(c.scope)),
         ),
       ),
-      capacitySourceSHA256: sha(capacityText),
+      capacitySourceSHA256: publishedCapacitySourceSHA256,
+      controlledSourcePublication,
       policyRef,
       installedProposalSHA256: installed,
       oldC427Copied: false,
       wholeSeedPgJsonParse: false,
-      formalPublisherAcceptance: false,
+      controlledPublisherEntryUsed: true,
+      productionAdmissionOrReleaseApproved: false,
     };
     await writeFile(
       path.join(evidenceDirectory, 'mixed-fixture-provenance.json'),

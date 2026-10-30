@@ -13,7 +13,7 @@ import {
 import { FINANCE_NATIVE_BUDGET_EVENT_TYPES } from '@econmind/core/finance-budget-native';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
 import {
-  readBoundedPostwarFinancialPostingRowsFrom,
+  readBoundedPostwarJournalFrom,
   decodeBoundedPostwarFinancialPostings,
   type BoundedPostwarCanonicalFrame,
 } from './bounded-postwar-fx-postings.js';
@@ -73,19 +73,19 @@ export async function readBoundedPostwarSocialFramesFrom(input: {
     BigInt(head.world_version) > BigInt(limit.events)
   )
     invalid('stale head or bounded replay capacity exceeded');
-  const effects = await tx.query<{ financial: boolean; inventory: boolean }>(
-    'select exists(select 1 from world_v2.financial_posting_batch where world_id=$1)as financial,exists(select 1 from world_v2.inventory_posting where world_id=$1)as inventory',
-    [input.worldId],
-  );
+  const postings = await readBoundedPostwarJournalFrom(tx, {
+    worldId: input.worldId,
+    countryId: input.countryId,
+    officeId: 'SOCIAL',
+  });
   if (
-    effects.rows.length !== 1 ||
-    typeof effects.rows[0]!.financial !== 'boolean' ||
-    effects.rows[0]!.inventory !== false
+    postings.head.worldVersion !== integer(head.world_version) ||
+    postings.head.eventSequence !== integer(head.event_sequence) ||
+    postings.inventoryPostingCount !== '0'
   )
-    invalid('unsupported inventory posting effect');
-  const postings = effects.rows[0]!.financial
-    ? await readBoundedPostwarFinancialPostingRowsFrom(tx, input.worldId)
-    : { rows: [], bytes: 0 };
+    invalid(
+      'journal differs from held current head or unsupported inventory effect',
+    );
   const e = await tx.query<Record<string, unknown>>(
     'select event_id,event_type,schema_version,world_id,causation_command_id,correlation_id,world_version::text,event_sequence::text as sequence,sim_time::text,recorded_at_real,corrects_event_id,canonical_payload,payload_sha256,event_fingerprint from world_v2.authoritative_event where world_id=$1 and octet_length(canonical_payload)<=65536 order by event_sequence limit 257',
     [input.worldId],

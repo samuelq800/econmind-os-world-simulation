@@ -543,8 +543,15 @@ function transport(data: Awaited<ReturnType<typeof dataset>>) {
     statements.push({ sql, parameters });
     let result: unknown[] = [];
     if (sql.includes('from world_v2.world_head')) result = [data.head];
-    else if (sql.includes('as financial'))
-      result = [{ financial: false, inventory: false }];
+    else if (sql.includes('read_postwar_bounded_journal'))
+      result = [
+        {
+          ...data.head,
+          financial_batch_count: '0',
+          inventory_posting_count: '0',
+          financial_batches: [],
+        },
+      ];
     else if (sql.startsWith('select event_id,event_type')) result = rows;
     else if (
       sql.startsWith('select exists(select 1 from world_v2.command_submission')
@@ -775,20 +782,20 @@ describe('complete bounded mixed prefix / mock transport, real Core semantics', 
       t = transport(data);
     const read = t.executor.query;
     t.executor.query = async (sql, parameters) => {
-      if (sql.includes('as financial'))
-        return {
-          rows: [{ financial: true, inventory: false }] as never[],
-          rowCount: 1,
-        };
-      if (sql.includes('count(*)'))
-        return { rows: [{ count: '1' }] as never[], rowCount: 1 };
-      if (sql.includes('from world_v2.financial_posting_batch'))
+      if (sql.includes('read_postwar_bounded_journal'))
         return {
           rows: [
             {
-              causation_command_id: 'COMMAND_ORPHAN_TEST_ONLY',
-              canonical_payload: '{}',
-              fingerprint: 'sha256:' + '1'.repeat(64),
+              ...data.head,
+              financial_batch_count: '1',
+              inventory_posting_count: '0',
+              financial_batches: [
+                {
+                  causation_command_id: 'COMMAND_ORPHAN_TEST_ONLY',
+                  canonical_payload: '{}',
+                  fingerprint: 'sha256:' + '1'.repeat(64),
+                },
+              ],
             },
           ] as never[],
           rowCount: 1,

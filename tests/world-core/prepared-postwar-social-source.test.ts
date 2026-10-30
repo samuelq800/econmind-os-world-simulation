@@ -105,8 +105,16 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
         let rows: unknown[];
         if (sql.includes('lock_social_operating_lineage_head'))
           rows = [{ world_version: '0', event_sequence: '0' }];
-        else if (sql.includes('as financial'))
-          rows = [{ financial: false, inventory: false }];
+        else if (sql.includes('read_postwar_bounded_journal'))
+          rows = [
+            {
+              world_version: '0',
+              event_sequence: '0',
+              financial_batch_count: '0',
+              inventory_posting_count: '0',
+              financial_batches: [],
+            },
+          ];
         else if (
           sql.includes('authoritative_event') ||
           sql.includes('command_receipt')
@@ -153,15 +161,23 @@ describe('prepared Social source data boundary (protocol, not admission)', () =>
                       : '1',
               },
             ];
-          else if (sql.includes('as financial'))
-            rows = [{ financial: scenario === 'POSTING', inventory: false }];
-          else if (sql.includes('count(*)')) rows = [{ count: '1' }];
-          else if (sql.includes('from world_v2.financial_posting_batch'))
+          else if (sql.includes('read_postwar_bounded_journal'))
             rows = [
               {
-                causation_command_id: 'COMMAND_ORPHAN_TEST_ONLY',
-                canonical_payload: '{}',
-                fingerprint: 'sha256:' + '1'.repeat(64),
+                world_version: scenario === 'POSTING' ? '0' : '1',
+                event_sequence: scenario === 'POSTING' ? '0' : '1',
+                financial_batch_count: scenario === 'POSTING' ? '1' : '0',
+                inventory_posting_count: '0',
+                financial_batches:
+                  scenario === 'POSTING'
+                    ? [
+                        {
+                          causation_command_id: 'COMMAND_ORPHAN_TEST_ONLY',
+                          canonical_payload: '{}',
+                          fingerprint: 'sha256:' + '1'.repeat(64),
+                        },
+                      ]
+                    : [],
               },
             ];
           else if (sql.includes('authoritative_event'))

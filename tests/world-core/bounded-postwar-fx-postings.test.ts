@@ -11,7 +11,7 @@ import {
   mixedFxFrame,
 } from '../support/finance-social-fx-replay-fixture.js';
 import { readBoundedPostwarSocialFramesFrom } from '../../apps/world-worker/src/persistence/bounded-postwar-social-lineage.js';
-import { readBoundedPostwarFinancialPostingRowsFrom } from '../../apps/world-worker/src/persistence/bounded-postwar-fx-postings.js';
+import { readBoundedPostwarJournalFrom } from '../../apps/world-worker/src/persistence/bounded-postwar-fx-postings.js';
 import type {
   SqlDatabase,
   SqlExecutor,
@@ -67,12 +67,16 @@ function transport() {
     let rows: unknown[];
     if (sql.includes('lock_social_operating_lineage_head'))
       rows = [{ world_version: '1', event_sequence: '1' }];
-    else if (sql.includes('as financial'))
-      rows = [{ financial: true, inventory: false }];
-    else if (sql.includes('count(*)'))
-      rows = [{ count: String(postings.length) }];
-    else if (sql.includes('from world_v2.financial_posting_batch'))
-      rows = postings;
+    else if (sql.includes('read_postwar_bounded_journal'))
+      rows = [
+        {
+          world_version: '1',
+          event_sequence: '1',
+          financial_batch_count: String(postings.length),
+          inventory_posting_count: '0',
+          financial_batches: postings,
+        },
+      ];
     else if (sql.startsWith('select event_id,event_type')) rows = events;
     else if (
       sql.startsWith('select exists(select 1 from world_v2.command_submission')
@@ -164,18 +168,14 @@ describe('complete bounded actual FX posting sets', () => {
         'create schema world_v2; create table world_v2.command_submission(world_id text,command_id text,primary key(world_id,command_id));',
       );
       await db.exec(source.slice(start, end + 4));
-      const executor: SqlExecutor = {
-        query: async <Row extends object>(sql, parameters = []) => {
-          const result = await db.query<Row>(sql, [...parameters]);
-          return { rows: result.rows, rowCount: result.rows.length };
-        },
-      };
-      expect(
-        await readBoundedPostwarFinancialPostingRowsFrom(
-          executor,
-          frame.command.worldId,
-        ),
-      ).toEqual({ rows: [], bytes: 0 });
+      // The new controlled getter's installation/ACL is tested separately.
+      // Keep the real-column regression that previously caught fingerprint vs
+      // batch_fingerprint; this query is never an online runtime escape hatch.
+      const result = await db.query(
+        'select causation_command_id,canonical_payload,batch_fingerprint as fingerprint from world_v2.financial_posting_batch where world_id=$1',
+        [frame.command.worldId],
+      );
+      expect(result.rows).toEqual([]);
     } finally {
       await db.close();
     }
@@ -232,22 +232,34 @@ describe('complete bounded actual FX posting sets', () => {
     for (const mode of ['COUNT', 'OVERSIZE', 'FILTERED'] as const) {
       const tx: SqlExecutor = {
         query: async <Row extends object>(sql: string) => {
-          const rows = sql.includes('count(*)')
-            ? [{ count: mode === 'COUNT' ? '513' : '1' }]
-            : mode === 'FILTERED'
-              ? []
-              : [
-                  {
-                    causation_command_id: 'COMMAND_TEST_ONLY',
-                    canonical_payload: 'x'.repeat(65537),
-                    fingerprint: 'sha256:' + '1'.repeat(64),
-                  },
-                ];
+          expect(sql).toContain('read_postwar_bounded_journal');
+          const rows = [
+            {
+              world_version: '1',
+              event_sequence: '1',
+              financial_batch_count: mode === 'COUNT' ? '513' : '1',
+              inventory_posting_count: '0',
+              financial_batches:
+                mode === 'FILTERED'
+                  ? []
+                  : [
+                      {
+                        causation_command_id: 'COMMAND_TEST_ONLY',
+                        canonical_payload: 'x'.repeat(65537),
+                        fingerprint: 'sha256:' + '1'.repeat(64),
+                      },
+                    ],
+            },
+          ];
           return { rows: rows as Row[], rowCount: rows.length };
         },
       };
       await expect(
-        readBoundedPostwarFinancialPostingRowsFrom(tx, frame.command.worldId),
+        readBoundedPostwarJournalFrom(tx, {
+          worldId: frame.command.worldId,
+          countryId: frame.command.countryId,
+          officeId: 'SOCIAL',
+        }),
       ).rejects.toThrow('bounded');
     }
   });

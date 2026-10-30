@@ -31,41 +31,70 @@ function invalid(message: string): never {
     'Bounded FX postings: ' + message,
   );
 }
-export async function readBoundedPostwarFinancialPostingRowsFrom(
+export const POSTWAR_BOUNDED_JOURNAL_QUERY =
+  'select * from world_v2.read_postwar_bounded_journal($1,$2,$3)';
+export async function readBoundedPostwarJournalFrom(
   tx: SqlExecutor,
-  worldId: string,
+  input: {
+    readonly worldId: string;
+    readonly countryId: string;
+    readonly officeId: 'SOCIAL' | 'FINANCE';
+  },
 ) {
-  const totals = await tx.query<{ count: string }>(
-    'select count(*)::text as count from world_v2.financial_posting_batch where world_id=$1',
-    [worldId],
+  const result = await tx.query<Record<string, unknown>>(
+    POSTWAR_BOUNDED_JOURNAL_QUERY,
+    [input.worldId, input.countryId, input.officeId],
   );
+  const r = result.rows[0];
+  const uint = (v: unknown): v is string =>
+    typeof v === 'string' && /^(?:0|[1-9]\d*)$/u.test(v);
   if (
-    totals.rows.length !== 1 ||
-    !/^(?:0|[1-9]\d*)$/u.test(totals.rows[0]!.count) ||
-    BigInt(totals.rows[0]!.count) > BigInt(MAX_BATCHES)
+    result.rows.length !== 1 ||
+    !r ||
+    !uint(r.world_version) ||
+    !uint(r.event_sequence) ||
+    BigInt(r.world_version) > 256n ||
+    BigInt(r.event_sequence) > 256n ||
+    !uint(r.financial_batch_count) ||
+    BigInt(r.financial_batch_count) > BigInt(MAX_BATCHES) ||
+    r.inventory_posting_count !== '0' ||
+    !Array.isArray(r.financial_batches) ||
+    r.financial_batches.length !== Number(r.financial_batch_count)
   )
-    invalid('complete bounded batch count required');
-  const result = await tx.query<BoundedPostwarFinancialPostingRow>(
-    'select causation_command_id,canonical_payload,batch_fingerprint as fingerprint from world_v2.financial_posting_batch where world_id=$1 and octet_length(canonical_payload)<=65536 order by batch_id limit 513',
-    [worldId],
-  );
-  if (result.rows.length !== Number(totals.rows[0]!.count))
-    invalid('complete bounded batch set required');
-  const rows = result.rows.map((row) => {
+    invalid('complete bounded journal and actual head required');
+  const rows = r.financial_batches.map((row: unknown) => {
+    if (!row || typeof row !== 'object' || Array.isArray(row))
+      invalid('canonical batch row required');
+    const b = row as Record<string, unknown>;
     if (
-      typeof row.causation_command_id !== 'string' ||
-      typeof row.canonical_payload !== 'string' ||
-      Buffer.byteLength(row.canonical_payload) > MAX_BATCH_BYTES
+      typeof b.causation_command_id !== 'string' ||
+      !b.causation_command_id ||
+      typeof b.canonical_payload !== 'string' ||
+      Buffer.byteLength(b.canonical_payload) > MAX_BATCH_BYTES ||
+      typeof b.fingerprint !== 'string' ||
+      !/^sha256:[a-f0-9]{64}$/u.test(b.fingerprint)
     )
-      invalid('bounded canonical batch bytes required');
-    return Object.freeze({ ...row });
+      invalid('bounded canonical batch bytes and fingerprint required');
+    return Object.freeze({
+      causation_command_id: b.causation_command_id,
+      canonical_payload: b.canonical_payload,
+      fingerprint: b.fingerprint,
+    });
   });
+  const bytes = rows.reduce(
+    (n, b) => n + Buffer.byteLength(b.canonical_payload),
+    0,
+  );
+  if (bytes > 1048576) invalid('complete journal byte capacity exceeded');
   return Object.freeze({
     rows: Object.freeze(rows),
-    bytes: rows.reduce(
-      (n, r) => n + Buffer.byteLength(r.canonical_payload as string),
-      0,
-    ),
+    bytes,
+    head: Object.freeze({
+      worldVersion: r.world_version,
+      eventSequence: r.event_sequence,
+    }),
+    financialBatchCount: r.financial_batch_count,
+    inventoryPostingCount: r.inventory_posting_count,
   });
 }
 /** Both non-FX effects and missing/extra FX batches deny. Complete global-set
