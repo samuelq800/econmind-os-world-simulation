@@ -362,44 +362,54 @@ describe('postwar Social E03 source uses complete Core state and one actual fund
         }
       }
   });
-  it('re-derives serialized source bytes using Core and refuses forged source/funding/duties', () => {
+  it('re-derives serialized source bytes using Core and refuses countries outside the source', () => {
     const parsed = validatePostwarSocialEmploymentStateDocument(
       JSON.parse(canonicalSerialize(document)),
     );
     expect(parsed).toEqual(document);
-    for (const mutate of [
-      (d: typeof document) => {
+    expect(() =>
+      selectPostwarSocialEmploymentCountry(document, 'COUNTRY_71'),
+    ).toThrow('country outside');
+  });
+  it.each([
+    {
+      name: 'changed Core employment',
+      mutate: (d: typeof document) => {
         (
           d.state.labour.positions[0] as { employedCount: string }
         ).employedCount = '0';
       },
-      (d: typeof document) => {
+    },
+    {
+      name: 'forged active validation offer',
+      mutate: (d: typeof document) => {
         (
           d.countries[0]!.validationReadFacts.facts.offer as { state: string }
         ).state = 'ACTIVE';
       },
-      (d: typeof document) => {
+    },
+    {
+      name: 'unfunded payroll reservation',
+      mutate: (d: typeof document) => {
         (
           d.inputs.positionFunding[0] as { uncoveredReservationAmount: string }
         ).uncoveredReservationAmount = '1';
       },
-      (d: typeof document) => {
+    },
+    {
+      name: 'inflated worker duties',
+      mutate: (d: typeof document) => {
         (
           d.countries[0]!.dutyAssignments[0] as { totalMinutes: string }
         ).totalMinutes = '999999999999';
       },
-    ]) {
-      const changed = JSON.parse(
-        canonicalSerialize(document),
-      ) as typeof document;
-      mutate(changed);
-      expect(() =>
-        validatePostwarSocialEmploymentStateDocument(changed),
-      ).toThrow();
-    }
+    },
+  ])('refuses $name through the complete source validator', ({ mutate }) => {
+    const changed = JSON.parse(canonicalSerialize(document)) as typeof document;
+    mutate(changed);
     expect(() =>
-      selectPostwarSocialEmploymentCountry(document, 'COUNTRY_71'),
-    ).toThrow('country outside');
+      validatePostwarSocialEmploymentStateDocument(changed),
+    ).toThrow();
   });
   it('requires true source issuers and full Core state; re-running the same sources produces identical bytes', () => {
     expect(() =>
