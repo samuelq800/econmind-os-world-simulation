@@ -8,6 +8,7 @@ import {
   type CentralBankOmoSourceFacts,
 } from '@econmind/core';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import { parsePostwarDayOneFxQuoteData } from '@econmind/core/postwar-day-one-treasury-fx';
 
 export const CENTRAL_BANK_OMO_CUSTODY_PROPOSAL =
   'database/proposals/central-bank-omo-custody.sql';
@@ -27,6 +28,9 @@ export interface CentralBankOmoOriginal {
   readonly bankAccounts: CentralBankOmoSourceFacts['bankAccounts'];
   readonly centralBankAccounts: CentralBankOmoSourceFacts['centralBankAccounts'];
   readonly holdings: CentralBankOmoSourceFacts['holdings'];
+  readonly valuationQuote?: NonNullable<
+    CentralBankOmoSourceFacts['valuationQuote']
+  >;
 }
 export interface CentralBankOmoCustodyBinding {
   readonly adoptionRef: string;
@@ -79,6 +83,25 @@ function objectBytes<T>(v: unknown, hash: unknown): T {
   )
     invalidCentralBankOmoOriginal('CANONICAL_ORIGINAL_REQUIRED');
   return data as T;
+}
+/** This validates denomination DATA only. Its independent adoption and exact
+ * opening source hashes are checked by the calling held runtime. */
+export function assertCentralBankOmoValuationQuoteScope(
+  original: Readonly<CentralBankOmoOriginal>,
+): void {
+  if (original.valuationQuote === undefined) return;
+  const q = parsePostwarDayOneFxQuoteData(original.valuationQuote, sha);
+  if (
+    q.seedFingerprint !== original.seedFingerprint ||
+    q.worldId !== original.worldId ||
+    q.countryId !== original.countryId ||
+    q.localCurrency !== original.bank.currency ||
+    q.localCurrency !== original.centralBank.currency ||
+    q.bankEntityId !== original.bank.bankRef ||
+    q.centralBankEntityId !== original.centralBank.centralBankRef ||
+    q.governmentEntityId !== original.domesticTreasuryRef
+  )
+    invalidCentralBankOmoOriginal('EXACT_VALUATION_ORIGINAL_SCOPE_REQUIRED');
 }
 export async function lockCentralBankOmoOriginalsFrom(
   tx: SqlExecutor,
@@ -138,6 +161,7 @@ export async function lockCentralBankOmoOriginalsFrom(
     r.quote_text,
     r.quote_sha256,
   );
+  assertCentralBankOmoValuationQuoteScope(original);
   if (
     original.schemaVersion !== 'central-bank-omo-original-v1' ||
     original.worldId !== input.worldId ||
@@ -177,6 +201,7 @@ export async function publishCentralBankOmoOriginals(input: {
   readonly original: Readonly<CentralBankOmoOriginal>;
   readonly quote: Readonly<CentralBankOmoSourceFacts['quote']>;
 }): Promise<void> {
+  assertCentralBankOmoValuationQuoteScope(input.original);
   await input.database.transaction(async (tx) => {
     await tx.query(
       'select world_v2.publish_central_bank_omo_originals($1,$2,$3)',

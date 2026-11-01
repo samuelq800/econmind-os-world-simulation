@@ -1,4 +1,13 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import {
+  readFinanceSocialSourceBinding,
+  type FinanceSocialSourceBinding,
+} from './finance-social-runtime-connection.js';
+import {
+  registeredWorldExecutionClockScope,
+  isRegisteredWorldExecutionDatabase,
+  readRegisteredWorldExecutionFrom,
+} from '../time/registered-world-execution-state.js';
 import type { Pool, PoolClient } from 'pg';
 import { createHash } from 'node:crypto';
 import { canonicalSerialize, type CanonicalCommand } from '@econmind/core';
@@ -46,6 +55,8 @@ export interface ServerCommandHostDependencies {
   readonly readers: ManualOfficeRuntimeReaders;
   readonly financeCapacitySource?: PostgresFinanceBudgetCapacitySource;
   readonly socialRuntimeConnection?: Readonly<PostwarSocialRuntimeConnection>;
+  /** Only the private fixed shared issuer can supply this live identity. */
+  readonly sharedSourceBinding?: FinanceSocialSourceBinding;
   readonly socialMetadataRead?: Readonly<{
     pool: Pick<Pool, 'connect'>;
     readerRole: string;
@@ -169,16 +180,56 @@ export function registeredFinanceCommandHostDependencies(binding: unknown) {
 export function productionFinanceCommandExecutionBlocker(
   binding: unknown,
 ): string | null {
+  let d;
   try {
-    registeredFinanceCommandHostDependencies(binding);
+    d = registeredFinanceCommandHostDependencies(binding);
   } catch {
     return 'REGISTERED_FIXED_FINANCE_SERVER_BINDING_REQUIRED';
   }
-  // world_head has no Clock state/control reference. The only durable Clock
-  // implementation with a positive path is explicitly TEST_ONLY. A frozen
-  // nowReal/simTime callback registers dependencies, NOT a formal Clock original.
-  // No environment label, user boolean or structural callback can change this.
+  const clock = registeredWorldExecutionClockScope(d.clock);
+  let shared = false;
+  if (d.sharedSourceBinding) {
+    try {
+      const fixed = readFinanceSocialSourceBinding(d.sharedSourceBinding);
+      shared =
+        fixed.formalBinding === binding &&
+        fixed.database === d.workerDatabase &&
+        fixed.clock === d.clock &&
+        fixed.worldId === d.worldId &&
+        fixed.workerId === d.workerId;
+    } catch {
+      /* Retired or structurally forged private binding remains denied. */
+    }
+  }
+  if (
+    clock &&
+    clock.worldId === d.worldId &&
+    clock.workerId === d.workerId &&
+    (isRegisteredWorldExecutionDatabase(d.workerDatabase, d.clock) || shared)
+  )
+    return null;
+  // Construction is not current authorization: only the private fixed DB Clock
+  // and a transaction-cutoff guarded DB may reach the fresh durable checks.
+  // A frozen callback or an opening-publication permit still cannot do so.
   return 'FORMAL_CLOCK_SOURCE_CONTROL_AND_SOLE_CONSUMER_NOT_REGISTERED';
+}
+
+export async function assertProductionFinanceExecutionCurrent(
+  binding: unknown,
+): Promise<void> {
+  const d = registeredFinanceCommandHostDependencies(binding);
+  const blocker = productionFinanceCommandExecutionBlocker(binding);
+  if (blocker) throw Error(blocker);
+  await d.workerDatabase.transaction(async (tx) => {
+    const state = await readRegisteredWorldExecutionFrom(tx, d.clock);
+    if (
+      state.seedId !== d.seedRef ||
+      state.seedFingerprint !== d.contentHash ||
+      state.admissionRef !== d.admissionRef ||
+      state.modelVersion !== d.modelVersion
+    )
+      throw Error('FORMAL_EXECUTION_EXACT_ADMISSION_PINS_REQUIRED');
+  });
 }
 
 declare const productionRuntimeBrand: unique symbol;
@@ -516,6 +567,12 @@ export async function preflightProductionManualIntakeRuntime(
     !state.stopped;
   const execute = async () => {
     try {
+      if (
+        command.officeId === 'FINANCE' ||
+        isRegisteredWorldExecutionDatabase(d.workerDatabase, d.clock) ||
+        d.sharedSourceBinding
+      )
+        await assertProductionFinanceExecutionCurrent(state!.binding);
       const before = await readCurrentBinding(d, command, request.signal);
       if (!live()) return false;
       const authority = await authorizeManualOfficeCommand({

@@ -10,3 +10,7 @@ export {
   type ServerCommandHostBinding,
   type ServerCommandHostDependencies,
 } from './production-world-command-host.js';
+export {
+  createRegisteredWorldExecutionClock,
+  type RegisteredWorldExecutionState,
+} from '../time/registered-world-execution-state.js';

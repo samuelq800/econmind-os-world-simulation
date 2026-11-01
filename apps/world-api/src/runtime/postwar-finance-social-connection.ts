@@ -65,7 +65,7 @@ export interface PostwarFinanceSocialApiPorts {
   readonly social: Readonly<PostwarSocialConnection>;
   readonly treasuryFx?: Readonly<PostwarTreasuryFxConnection>;
   readonly control: Readonly<PostwarSharedOfficeConsumer>;
-  readonly environment: 'local' | 'ci';
+  readonly environment: 'local' | 'ci' | 'staging' | 'production';
 }
 const owners = new WeakMap<object, Readonly<PostwarFinanceSocialApiPorts>>();
 const worlds = new Map<string, object>();

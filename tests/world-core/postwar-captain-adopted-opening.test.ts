@@ -24,14 +24,22 @@ const input = {
   ),
 };
 beforeAll(async () => {
-  [policyBytes, receiptBytes] = await Promise.all(
-    ['captain-opening.v1.json', 'captain-opening-adoption.v1.json'].map((p) =>
-      readFile(
-        new URL('../../config/postwar-genesis/' + p, import.meta.url),
-        'utf8',
+  [policyBytes, receiptBytes] = await Promise.all([
+    readFile(
+      new URL(
+        '../../config/postwar-genesis/captain-opening.v1.json',
+        import.meta.url,
       ),
+      'utf8',
     ),
-  );
+    readFile(
+      new URL(
+        '../../config/postwar-genesis/captain-opening-adoption.v1.json',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ]);
   policy = parseAdoptedCaptainOpeningPolicy({ policyBytes, receiptBytes });
 });
 describe('explicitly adopted new-scenario Captain opening rule', () => {

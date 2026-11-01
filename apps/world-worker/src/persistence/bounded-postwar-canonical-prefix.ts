@@ -16,6 +16,7 @@ import {
   readBoundedPostwarJournalFrom,
   decodeBoundedPostwarJournal,
   decodeBoundedPostwarFinancialPostings,
+  decodeBoundedPostwarInventoryPostings,
   type BoundedPostwarCanonicalFrame,
 } from './bounded-postwar-fx-postings.js';
 import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
@@ -51,6 +52,9 @@ const integer = (v: unknown): string => {
 const timestamp = (v: unknown) =>
   v instanceof Date ? v.toISOString() : text(v);
 const socialTypes = new Map([
+  ['NARROW_TREASURY_GCU_RESERVED_V1', 'CORE_GOODS_TRANSFER_V1'],
+  ['NARROW_TREASURY_GCU_SHIPPED_V1', 'CORE_GOODS_SHIPMENT_V1'],
+  ['NARROW_TREASURY_GCU_DELIVERED_V1', 'CORE_GOODS_DELIVERY_V1'],
   ['CENTRAL_BANK_OMO_SETTLED_V1', 'CORE_CENTRAL_BANK_OMO_V1'],
   [
     'POSTWAR_BENEFICIAL_HOUSING_RENT_SETTLED_V1',
@@ -177,11 +181,11 @@ export function decodeBoundedPostwarCanonicalPrefix(input: {
     financial_batch_count: supplied?.financialBatchCount,
     inventory_posting_count: supplied?.inventoryPostingCount,
     financial_batches: supplied?.rows,
+    inventory_postings: supplied?.inventoryRows,
   });
   if (
     postings.head.worldVersion !== integer(head.world_version) ||
-    postings.head.eventSequence !== integer(head.event_sequence) ||
-    postings.inventoryPostingCount !== '0'
+    postings.head.eventSequence !== integer(head.event_sequence)
   )
     invalid(
       'journal differs from held current head or unsupported inventory effect',
@@ -285,9 +289,18 @@ export function decodeBoundedPostwarCanonicalPrefix(input: {
         transition,
         rows: postings.rows,
       }),
-      inventoryPostings: [],
+      inventoryPostings: decodeBoundedPostwarInventoryPostings({
+        command: group.command,
+        transition,
+        rows: postings.inventoryRows,
+      }),
     });
   }
+  if (
+    frames.reduce((n, f) => n + f.inventoryPostings.length, 0) !==
+    postings.inventoryRows.length
+  )
+    invalid('inventory set differs from complete canonical prefix');
   if (
     frames.reduce((n, f) => n + f.financialPostingBatches.length, 0) !==
     postings.rows.length

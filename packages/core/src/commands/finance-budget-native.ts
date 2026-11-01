@@ -19,6 +19,20 @@ import {
 } from './central-bank-open-market-operation.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
+  POSTWAR_NARROW_GOODS_TYPES,
+  replayPostwarNarrowGoodsFrame,
+  type PostwarNarrowGoodsReplayEntry,
+} from '../transfers/postwar-narrow-trade-mixed-replay.js';
+import {
+  parseInventoryLedgerSnapshot,
+  type InventoryLedgerState,
+} from '../inventory/inventory-ledger.js';
+import {
+  reconcileV08LedgerSnapshots,
+  type RebuiltV08Ledgers,
+} from '../opening/opening-seed.js';
+import { authorizeInventoryLedgerState } from '../opening/ledger-authority.js';
+import {
   BENEFICIAL_HOUSING_RENT_COMMAND,
   type BeneficialHousingReclassificationReceipt,
 } from '../finance/beneficial-housing-rent.js';
@@ -29,6 +43,7 @@ import {
   type BeneficialHousingRentMixedReplayOrigin,
 } from './beneficial-housing-rent-mixed-replay.js';
 
+import { projectCentralBankDayOneValuedSnapshot } from '../finance/central-bank-day-one-valuation.js';
 import { Money } from '../numeric/money.js';
 import { canonicalDecimal } from '../numeric/world-decimal.js';
 import {
@@ -218,6 +233,8 @@ export interface FinanceNativeBudgetMixedCaptainCountry {
   readonly state: CaptainPoliticalCapitalReplayState;
 }
 export interface FinanceNativeBudgetMixedPrefixResult {
+  readonly inventoryState?: Readonly<InventoryLedgerState>;
+  readonly narrowGoodsTransfers?: readonly PostwarNarrowGoodsReplayEntry[];
   readonly beneficialHousingRentOrigins?: readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[];
   readonly omoCountries?: readonly {
     readonly countryId: string;
@@ -564,6 +581,9 @@ export interface FinanceSocialFxOriginal {
 /** Immutable register/quote DATA. The genuine H0 ledger is independently
  * required; these records grant no issuer, custody or current trading right. */
 export interface FinanceSocialOmoOriginal {
+  readonly valuationQuote?: NonNullable<
+    CentralBankOmoSourceFacts['valuationQuote']
+  >;
   readonly countryId: string;
   readonly domesticTreasuryRef: string;
   readonly bank: CentralBankOmoSourceFacts['bank'];
@@ -589,6 +609,7 @@ const financialReplayBases = new WeakMap<
   FinanceNativeBudgetFinancialReplayBase,
   {
     readonly financial: Readonly<FinancialLedgerState>;
+    readonly inventory?: Readonly<InventoryLedgerState>;
     readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
     readonly fxOriginals: ReadonlyMap<string, FinanceSocialFxOriginal>;
     readonly omoOriginals: ReadonlyMap<string, FinanceSocialOmoOriginal>;
@@ -598,6 +619,7 @@ const financialReplayBases = new WeakMap<
 export function prepareFinanceNativeBudgetFinancialReplay(
   input: {
     readonly financial: Readonly<FinancialLedgerState>;
+    readonly opening?: Readonly<RebuiltV08Ledgers>;
     readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
     readonly fxOriginals: readonly FinanceSocialFxOriginal[];
     readonly omoOriginals?: readonly FinanceSocialOmoOriginal[];
@@ -608,6 +630,18 @@ export function prepareFinanceNativeBudgetFinancialReplay(
   const base = input.financial;
   if (!isAuthoritativeFinancialLedgerState(base) || base.worldVersion !== '0')
     invalid('GENUINE_H0_FINANCIAL_REPLAY_BASE_REQUIRED');
+  if (input.opening !== undefined) {
+    reconcileV08LedgerSnapshots({
+      reconstructed: input.opening,
+      sha256Hex: sha,
+    });
+    if (
+      input.opening.financial !== base ||
+      input.opening.worldVersion !== '0' ||
+      input.opening.inventory.worldVersion !== '0'
+    )
+      invalid('EXACT_GENUINE_PAIRED_H0_LEDGER_BASE_REQUIRED');
+  }
   const seen = new Set<string>(),
     totals = new Map<string, Money>();
   const opening = input.openingEncumbrances.map((r) => {
@@ -684,6 +718,7 @@ export function prepareFinanceNativeBudgetFinancialReplay(
       financialState: base,
       worldId: base.worldId,
       ...original,
+      sha256Hex: sha,
     });
     const quotes = new Set<string>();
     for (const quote of original.quotes) {
@@ -712,6 +747,9 @@ export function prepareFinanceNativeBudgetFinancialReplay(
       ? {}
       : { beneficialHousingRentOrigins }),
     financial: base,
+    ...(input.opening === undefined
+      ? {}
+      : { inventory: input.opening.inventory }),
     openingEncumbrances: Object.freeze(opening),
     fxOriginals: originals,
     omoOriginals,
@@ -833,6 +871,9 @@ export function prepareFinanceNativeBudgetMixedPrefix(
     );
   }
   let financial = financialReplay?.financial;
+  let inventory = financialReplay?.inventory;
+  let goodsEntries: ReadonlyMap<string, PostwarNarrowGoodsReplayEntry> =
+    new Map();
   let rentOrigins = financialReplay?.beneficialHousingRentOrigins;
   const omoHoldings = new Map<string, readonly OmoSecurityHolding[]>(
     [...(financialReplay?.omoOriginals ?? [])].map(([countryId, original]) => [
@@ -902,12 +943,16 @@ export function prepareFinanceNativeBudgetMixedPrefix(
     )
       invalid('COMPLETE_UNIQUE_ORDERED_MIXED_PREFIX_REQUIRED');
     if (
-      frame.inventoryPostings.length !== 0 ||
+      (frame.inventoryPostings.length !== 0 &&
+        !(
+          inventory && POSTWAR_NARROW_GOODS_TYPES.includes(command.commandType)
+        )) ||
       (frame.financialPostingBatches.length !== 0 &&
         !(
           financialReplay &&
           (command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND ||
             command.commandType === CENTRAL_BANK_OMO_COMMAND ||
+            (inventory && command.commandType === 'CORE_GOODS_DELIVERY_V1') ||
             (command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND &&
               rentOrigins !== undefined))
         ))
@@ -984,6 +1029,24 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         previous.countryId !== p.scope.countryId
       )
         invalid('BUDGET_LINE_DIFFERS_FROM_REAL_CAPACITY_ACCOUNT');
+    } else if (POSTWAR_NARROW_GOODS_TYPES.includes(command.commandType)) {
+      if (!inventory || !financial)
+        invalid('GENUINE_PREPARED_INVENTORY_AND_FINANCIAL_REQUIRED');
+      const reduced = replayPostwarNarrowGoodsFrame({
+        frame,
+        inventory,
+        financial,
+        entries: goodsEntries,
+        sha256Hex: sha,
+      });
+      inventory = reduced.inventory;
+      financial = reduced.financial;
+      goodsEntries = reduced.entries;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events[0]!.sequence,
+      });
     } else if (command.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND) {
       const current = captains.get(command.countryId);
       const event = frame.events[0];
@@ -1076,11 +1139,34 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         currentSimTime: command.simTime.toCanonicalValue(),
         currentEventSequence: budget.eventSequence,
         domesticTreasuryRef: original.domesticTreasuryRef,
-        bank: currentSnapshot(original.bank, original.bankAccounts),
-        centralBank: currentSnapshot(
-          original.centralBank,
-          original.centralBankAccounts,
-        ),
+        bank: original.valuationQuote
+          ? projectCentralBankDayOneValuedSnapshot({
+              snapshot: currentSnapshot(original.bank, original.bankAccounts),
+              financial,
+              quote: original.valuationQuote,
+              ownerRef: original.bank.bankRef,
+              simTime: command.simTime,
+              assetField: 'settlementCash',
+              sha256Hex: sha,
+            })
+          : currentSnapshot(original.bank, original.bankAccounts),
+        centralBank: original.valuationQuote
+          ? projectCentralBankDayOneValuedSnapshot({
+              snapshot: currentSnapshot(
+                original.centralBank,
+                original.centralBankAccounts,
+              ),
+              financial,
+              quote: original.valuationQuote,
+              ownerRef: original.centralBank.centralBankRef,
+              simTime: command.simTime,
+              assetField: 'otherAssets',
+              sha256Hex: sha,
+            })
+          : currentSnapshot(original.centralBank, original.centralBankAccounts),
+        ...(original.valuationQuote === undefined
+          ? {}
+          : { valuationQuote: original.valuationQuote }),
         bankAccounts: original.bankAccounts,
         centralBankAccounts: original.centralBankAccounts,
         holdings: omoHoldings.get(original.countryId)!,
@@ -1311,6 +1397,14 @@ export function prepareFinanceNativeBudgetMixedPrefix(
           lastEventSequence: budget.eventSequence,
         }),
       );
+    // This is after complete real sibling reduction, never a caller no-effect flag.
+    if (inventory && inventory.worldVersion !== transition.worldVersionAfter)
+      inventory = authorizeInventoryLedgerState(
+        parseInventoryLedgerSnapshot({
+          ...inventory,
+          worldVersion: transition.worldVersionAfter,
+        }),
+      );
     if (financial)
       financial = financialAtVersion(financial, transition.worldVersionAfter);
     // Domain synchronization follows actual full sibling reduction only. It
@@ -1416,6 +1510,12 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         });
     }
   const result = freeze({
+    ...(inventory === undefined
+      ? {}
+      : {
+          inventoryState: inventory,
+          narrowGoodsTransfers: [...goodsEntries.values()],
+        }),
     ...(rentOrigins === undefined
       ? {}
       : { beneficialHousingRentOrigins: rentOrigins }),

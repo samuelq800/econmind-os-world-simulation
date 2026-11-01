@@ -19,6 +19,7 @@ const read = (p: string) =>
   readFile(new URL('../../' + p, import.meta.url), 'utf8');
 export async function installPostwarNarrowTradeCutoffFixture(
   db: NarrowTradeTestDatabase,
+  options: Readonly<{ extraBuyerBankCash?: boolean }> = {},
 ) {
   const sha = narrowCutoffSha,
     world = 'WORLD_TEST_ONLY_TRADE_CUTOFF',
@@ -59,6 +60,30 @@ export async function installPostwarNarrowTradeCutoffFixture(
     );
     await db.exec(sql);
   }
+  // Negative-only fixture: independently owned same-country bank cash. It is
+  // opening TEST_ONLY DATA, never a runtime mint, mandate or government asset.
+  const foreignCashLegs: C.FinancialOpeningLeg[] = options.extraBuyerBankCash
+    ? ['CASH', 'EQUITY'].map((kind, index) => ({
+        legId: C.financialOpeningLegId('OPENING_TEST_ONLY_BUYER_BANK_' + kind),
+        counterpartLegId: C.financialOpeningLegId(
+          'OPENING_TEST_ONLY_BUYER_BANK_' + (index ? 'CASH' : 'EQUITY'),
+        ),
+        account: C.createFinancialAccount({
+          worldId: C.worldId(world),
+          countryId: C.countryId(buyer),
+          accountId: C.financialAccountId(
+            'ACCOUNT_TEST_ONLY_BUYER_BANK_' + kind,
+          ),
+          ownerId: C.legalEntityId('ENTITY_TEST_ONLY_BANK_2'),
+          accountClass: kind === 'CASH' ? 'CASH' : 'EQUITY',
+          currency: 'GCU',
+          claimId: null,
+          counterpartyEntityId: null,
+        }),
+        direction: index ? 'CREDIT' : 'DEBIT',
+        amount: C.Money.from('1', 'GCU'),
+      }))
+    : [];
   const rights = C.createOpeningSource(
     {
       schemaVersion: C.OPENING_SOURCE_SCHEMA_VERSION,
@@ -179,6 +204,7 @@ export async function installPostwarNarrowTradeCutoffFixture(
           sourceId: financial.sourceId,
           settlementCurrency: 'GCU',
           legs: [
+            ...foreignCashLegs,
             {
               legId: C.financialOpeningLegId('OPENING_BANK_CASH'),
               counterpartLegId: C.financialOpeningLegId('OPENING_BANK_EQUITY'),

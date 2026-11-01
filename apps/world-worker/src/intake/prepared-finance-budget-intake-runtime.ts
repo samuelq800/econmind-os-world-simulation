@@ -93,6 +93,20 @@ export function createBoundedFinanceSocialIntakeRuntime(
     import('../preparation/manual-office-command-composition.js').ManualOfficeRuntimeReaders['financeBudget']
   >;
 }> {
+  if (readFinanceSocialSourceBinding(binding).formalBinding)
+    throw Error('EXPLICIT_FORMAL_SHARED_ISSUER_REQUIRED');
+  return constructBoundedFinanceSocialIntakeRuntime(binding);
+}
+export function createProductionBoundedFinanceSocialIntakeRuntime(
+  binding: FinanceSocialSourceBinding,
+) {
+  if (!readFinanceSocialSourceBinding(binding).formalBinding)
+    throw Error('GENUINE_FORMAL_SHARED_BINDING_REQUIRED');
+  return constructBoundedFinanceSocialIntakeRuntime(binding);
+}
+function constructBoundedFinanceSocialIntakeRuntime(
+  binding: FinanceSocialSourceBinding,
+) {
   const deps = readFinanceSocialSourceBinding(binding),
     budget = deps.readers.financeBudget;
   if (!budget) throw Error('FIXED_PAIRED_FINANCE_SOURCE_REQUIRED');

@@ -21,6 +21,8 @@ export const POSTWAR_DAY_ONE_FX_COMMITTED_QUOTE_QUERY =
   'select * from world_v2.read_postwar_day_one_fx_committed_quote($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)';
 export const POSTWAR_DAY_ONE_FX_TREASURY_HISTORY_PURPOSE =
   'TREASURY_FX_SOURCE_REPLAY' as const;
+export const POSTWAR_DAY_ONE_FX_CB_OMO_HISTORY_PURPOSE =
+  'CB_OMO_SOURCE_REPLAY' as const;
 const sha = (value: string) => createHash('sha256').update(value).digest('hex');
 function invalid(reason: string): never {
   throw new DomainError(
@@ -43,7 +45,7 @@ export interface PostwarDayOneFxCommittedQuoteRequest {
   /** The actually held Social/Finance source scope, NOT the foreign payer. */
   readonly hostCountryId: string;
   readonly sourceCountryId: string;
-  readonly officeId: 'SOCIAL' | 'FINANCE';
+  readonly officeId: 'SOCIAL' | 'FINANCE' | 'CENTRAL_BANK';
   readonly seedFingerprint: string;
   readonly admissionRef: string;
   readonly eventId: string;
@@ -61,7 +63,7 @@ export interface PostwarDayOneFxCommittedQuote {
   readonly trace: Readonly<{
     hostCountryId: string;
     sourceCountryId: string;
-    officeId: 'SOCIAL' | 'FINANCE';
+    officeId: 'SOCIAL' | 'FINANCE' | 'CENTRAL_BANK';
     hostSourceRef: string;
     registrationRef: string;
     sourceRevision: string;
@@ -84,7 +86,21 @@ export async function readPostwarDayOneFxCommittedQuoteFrom(
   tx: SqlExecutor,
   input: PostwarDayOneFxCommittedQuoteRequest,
 ): Promise<Readonly<PostwarDayOneFxCommittedQuote>> {
+  if (input.officeId === 'CENTRAL_BANK')
+    invalid('FIXED_CB_REPLAY_ENTRY_REQUIRED');
   return readCommittedQuoteFrom(tx, input, 'SOURCE_REPLAY');
+}
+/** Fixed CB host DATA read, using only its own current custody. It never
+ * borrows Treasury/Budget capabilities or grants permission for a new FX. */
+export async function readPostwarDayOneFxCommittedQuoteForCentralBankFrom(
+  tx: SqlExecutor,
+  input: Omit<PostwarDayOneFxCommittedQuoteRequest, 'officeId'>,
+): Promise<Readonly<PostwarDayOneFxCommittedQuote>> {
+  return readCommittedQuoteFrom(
+    tx,
+    { ...input, officeId: 'CENTRAL_BANK' },
+    POSTWAR_DAY_ONE_FX_CB_OMO_HISTORY_PURPOSE,
+  );
 }
 /** Fixed Treasury source replay only. Does not borrow a Budget role/policy.
  * New FX commands must still pass the separate current source/quote lock. */
@@ -101,13 +117,16 @@ export async function readPostwarDayOneFxCommittedQuoteForTreasuryFrom(
 async function readCommittedQuoteFrom(
   tx: SqlExecutor,
   input: PostwarDayOneFxCommittedQuoteRequest,
-  purpose: 'SOURCE_REPLAY' | typeof POSTWAR_DAY_ONE_FX_TREASURY_HISTORY_PURPOSE,
+  purpose:
+    | 'SOURCE_REPLAY'
+    | typeof POSTWAR_DAY_ONE_FX_TREASURY_HISTORY_PURPOSE
+    | typeof POSTWAR_DAY_ONE_FX_CB_OMO_HISTORY_PURPOSE,
 ): Promise<Readonly<PostwarDayOneFxCommittedQuote>> {
   worldId(input.worldId);
   countryId(input.hostCountryId);
   countryId(input.sourceCountryId);
   if (
-    !['SOCIAL', 'FINANCE'].includes(input.officeId) ||
+    !['SOCIAL', 'FINANCE', 'CENTRAL_BANK'].includes(input.officeId) ||
     !/^sha256:[a-f0-9]{64}$/u.test(input.seedFingerprint) ||
     !/^sha256:[a-f0-9]{64}$/u.test(input.eventPayloadHash) ||
     !/^[a-f0-9]{64}$/u.test(input.quoteSha256)

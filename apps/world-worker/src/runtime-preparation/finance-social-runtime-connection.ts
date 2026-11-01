@@ -1,4 +1,13 @@
 import { createManualOfficeAuthorizationTransactionDatabase } from '../persistence/manual-office-authorization-transaction-scope.js';
+import {
+  createServerCommandHostBinding,
+  registeredFinanceCommandHostDependencies,
+  type ServerCommandHostBinding,
+} from './production-world-command-host.js';
+import {
+  createRegisteredWorldExecutionDatabase,
+  registeredWorldExecutionClockScope,
+} from '../time/registered-world-execution-state.js';
 /** Fixed local/CI single-World consumer composition. Source ports and SQL
  * currentness remain mandatory; this binding is not admission or activation. */
 import { createHash } from 'node:crypto';
@@ -23,7 +32,10 @@ import {
   readPostgresFinanceBudgetCapacitySourceScope,
   type PostgresFinanceBudgetCapacitySource,
 } from '../persistence/postgres-finance-budget-capacity-source.js';
-import { createBoundedFinanceSocialIntakeRuntime } from '../intake/prepared-finance-budget-intake-runtime.js';
+import {
+  createBoundedFinanceSocialIntakeRuntime,
+  createProductionBoundedFinanceSocialIntakeRuntime,
+} from '../intake/prepared-finance-budget-intake-runtime.js';
 import type { ManualOfficeIntakeRuntime } from '../intake/manual-office-intake-runtime.js';
 import type { ManualOfficeRuntimeReaders } from '../preparation/manual-office-command-composition.js';
 import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
@@ -55,6 +67,7 @@ export interface FinanceSocialSourceBinding {
   readonly [sourceBinding]: true;
 }
 export interface FinanceSocialSourceDependencies {
+  readonly formalBinding: ServerCommandHostBinding | null;
   readonly worldId: string;
   readonly workerId: string;
   readonly database: SqlDatabase;
@@ -96,6 +109,7 @@ export interface PostwarFinanceSocialRuntimeConnectionInput {
   };
 }
 export interface PostwarFinanceSocialRuntimePorts {
+  readonly formalBinding: ServerCommandHostBinding | null;
   readonly worldId: string;
   readonly workerId: string;
   readonly database: SqlDatabase;
@@ -103,7 +117,7 @@ export interface PostwarFinanceSocialRuntimePorts {
   readonly rawIntakePool: Pick<Pool, 'connect'>;
   readonly workerPool: Pool;
   readonly clock: DurableConsumptionClock;
-  readonly environment: 'local' | 'ci';
+  readonly environment: 'local' | 'ci' | 'staging' | 'production';
   readonly runtime: ManualOfficeIntakeRuntime;
   readonly budget: NonNullable<ManualOfficeRuntimeReaders['financeBudget']>;
   readonly treasuryFx: PostwarDayOneFxRuntime | null;
@@ -170,12 +184,67 @@ export function readPostwarFinanceSocialRuntimeBinding(
 export function createPostwarFinanceSocialRuntimeConnection(
   input: PostwarFinanceSocialRuntimeConnectionInput,
 ): Readonly<PostwarFinanceSocialRuntimeConnection> {
+  if (!['local', 'ci'].includes(input.environment))
+    throw Error('FINANCE_SOCIAL_LOCAL_CI_ONLY');
+  return constructFinanceSocialRuntimeConnection(input);
+}
+export interface ProductionPostwarFinanceSocialRuntimeConnectionInput {
+  readonly binding: ServerCommandHostBinding;
+  readonly environment: 'staging' | 'production';
+  readonly publicationDatabase?: SqlDatabase;
+  readonly treasuryFx?: { readonly workerRole: string };
+  readonly captain?: {
+    readonly workerRole: string;
+    readonly mode: 'OFFICIAL_RUNTIME';
+  };
+}
+/** Fixed formal issuer. No environment relabel, arbitrary reader or simulated
+ * time callback; every request/transaction still requires current DB originals. */
+export function createProductionPostwarFinanceSocialRuntimeConnection(
+  input: ProductionPostwarFinanceSocialRuntimeConnectionInput,
+): Readonly<PostwarFinanceSocialRuntimeConnection> {
+  const d = registeredFinanceCommandHostDependencies(input.binding),
+    social = d.socialRuntimeConnection,
+    clock = registeredWorldExecutionClockScope(d.clock);
+  if (
+    !['staging', 'production'].includes(input.environment) ||
+    !social ||
+    !isPostwarSocialRuntimeConnection(social, d.worldId) ||
+    d.workerDatabase !== social.database ||
+    social.workerId !== d.workerId ||
+    !clock ||
+    clock.database !== social.database ||
+    clock.worldId !== d.worldId ||
+    clock.workerId !== d.workerId ||
+    (input.captain && input.captain.mode !== 'OFFICIAL_RUNTIME')
+  )
+    throw Error('FORMAL_SHARED_EXACT_SERVER_CLOCK_DATABASE_BINDING_REQUIRED');
+  return constructFinanceSocialRuntimeConnection(
+    {
+      socialConnection: social,
+      capacitySource: d.financeCapacitySource,
+      intakePool: d.intakePool,
+      clock: d.clock,
+      environment: input.environment,
+      ...(input.publicationDatabase
+        ? { publicationDatabase: input.publicationDatabase }
+        : {}),
+      ...(input.treasuryFx ? { treasuryFx: input.treasuryFx } : {}),
+      ...(input.captain ? { captain: input.captain } : {}),
+    },
+    input.binding,
+  );
+}
+function constructFinanceSocialRuntimeConnection(
+  input: Omit<PostwarFinanceSocialRuntimeConnectionInput, 'environment'> & {
+    readonly environment: 'local' | 'ci' | 'staging' | 'production';
+  },
+  serverBinding: ServerCommandHostBinding | null = null,
+): Readonly<PostwarFinanceSocialRuntimeConnection> {
   const social = input.socialConnection,
     world = social?.worldId;
   if (!isPostwarSocialRuntimeConnection(social, world))
     throw Error('GENUINE_SOCIAL_RUNTIME_CONNECTION_REQUIRED');
-  if (!['local', 'ci'].includes(input.environment))
-    throw Error('FINANCE_SOCIAL_LOCAL_CI_ONLY');
   if (!isPostgresFinanceBudgetWorldCapacitySource(input.capacitySource, world))
     throw Error('GENUINE_FINITE_WORLD_FINANCE_CAPACITY_SOURCE_REQUIRED');
   if (
@@ -220,9 +289,20 @@ export function createPostwarFinanceSocialRuntimeConnection(
     // The Finance adapter must be outermost: Social's general authority lock
     // adapter also serves Social's dual-capability read and must not consume the
     // Finance execution cutoff before Finance's exact fixed helper sees it.
-    const fxDatabase = input.treasuryFx
-      ? createPostwarDayOneFxAuthorizationDatabase(social.database)
+    const d = serverBinding
+      ? registeredFinanceCommandHostDependencies(serverBinding)
+      : null;
+    const executionDatabase = d
+      ? createRegisteredWorldExecutionDatabase(social.database, input.clock, {
+          seedId: d.seedRef,
+          seedFingerprint: d.contentHash,
+          admissionRef: d.admissionRef,
+          modelVersion: d.modelVersion,
+        })
       : social.database;
+    const fxDatabase = input.treasuryFx
+      ? createPostwarDayOneFxAuthorizationDatabase(executionDatabase)
+      : executionDatabase;
     const financeDatabase =
       createFinanceBudgetAuthorizationDatabase(fxDatabase);
     const database = createManualOfficeAuthorizationTransactionDatabase(
@@ -278,6 +358,7 @@ export function createPostwarFinanceSocialRuntimeConnection(
       token,
       Object.freeze({
         worldId: world,
+        formalBinding: null,
         workerId: social.workerId,
         database,
         intakePool,
@@ -290,9 +371,34 @@ export function createPostwarFinanceSocialRuntimeConnection(
         socialConnection: social,
       }),
     );
+    const formalBinding = d
+      ? createServerCommandHostBinding({
+          ...d,
+          workerDatabase: database,
+          intakePool,
+          readers,
+          financeCapacitySource:
+            bindPostgresFinanceBudgetCapacitySourceToSocialReplay(
+              input.capacitySource,
+              social,
+            ),
+          socialRuntimeConnection: social,
+          sharedSourceBinding: token,
+        })
+      : null;
+    if (formalBinding)
+      sources.set(
+        token,
+        Object.freeze({
+          ...readFinanceSocialSourceBinding(token),
+          formalBinding,
+        }),
+      );
     reservePostwarSocialRuntimeForSharedConsumer(social, token);
     reserved = true;
-    const issued = createBoundedFinanceSocialIntakeRuntime(token),
+    const issued = formalBinding
+        ? createProductionBoundedFinanceSocialIntakeRuntime(token)
+        : createBoundedFinanceSocialIntakeRuntime(token),
       runtime = issued.runtime;
     const publication = input.publicationDatabase
       ? createPostwarOfficePublicationController({
@@ -454,6 +560,7 @@ export function createPostwarFinanceSocialRuntimeConnection(
         workerPool: resources.workerPool,
         clock: input.clock,
         environment: input.environment,
+        formalBinding,
         runtime,
         budget: issued.budget,
         treasuryFx,

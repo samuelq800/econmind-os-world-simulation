@@ -37,7 +37,7 @@ describe('Trade current source inert protocol boundaries', () => {
       ),
     ).toThrow('complete bounded prefix');
   });
-  it('rejects inventory effects and uninstalled command families without filtering them away', () => {
+  it('rejects incomplete inventory sets and uninstalled command families without filtering them away', () => {
     expect(() =>
       decodePostwarNarrowTradeCurrentPrefix(
         { ...empty, inventory_posting_count: '1' },
@@ -46,7 +46,7 @@ describe('Trade current source inert protocol boundaries', () => {
     ).toThrow('complete bounded journal');
     expect(() =>
       decodePostwarNarrowTradeCurrentPrefix(
-        { ...empty, commands: [{ command_type: 'CORE_GOODS_TRANSFER_V1' }] },
+        { ...empty, commands: [{ command_type: 'CORE_UNINSTALLED_GOODS_V1' }] },
         'WORLD_TEST',
       ),
     ).toThrow('REPLAY_UNAVAILABLE');

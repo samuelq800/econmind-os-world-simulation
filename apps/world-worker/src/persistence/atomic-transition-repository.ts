@@ -1524,7 +1524,11 @@ export class AtomicTransitionRepository {
   ): Promise<void> {
     const commandType = candidate.command.commandType;
     const isOmo = commandType === CENTRAL_BANK_OMO_COMMAND;
-    const isTrade = commandType === NARROW_TREASURY_GCU_COMMAND_TYPE;
+    const isTradeAutomatic =
+      commandType === 'CORE_GOODS_SHIPMENT_V1' ||
+      commandType === 'CORE_GOODS_DELIVERY_V1';
+    const isTrade =
+      commandType === NARROW_TREASURY_GCU_COMMAND_TYPE || isTradeAutomatic;
     const isRent = commandType === BENEFICIAL_HOUSING_RENT_COMMAND;
     if (!isOmo && !isTrade && !isRent) return;
     const configured = isOmo
@@ -1593,6 +1597,27 @@ export class AtomicTransitionRepository {
           {
             ...common,
             purpose: 'POSTWAR_BENEFICIAL_HOUSING_RENT_SOURCE_RECHECK_V1',
+            commitAuthorization: null,
+          },
+        );
+    } else if (isTradeAutomatic) {
+      // Fulfil the already committed contract under the existing automatic
+      // queue/lease authority. Never impersonate its former discretionary user.
+      if (
+        candidate.authorityKind !== 'VERSIONED_AUTOMATIC' ||
+        candidate.command.officeId !== null ||
+        candidate.commitAuthorization !== null ||
+        candidate.currentMaterializations.length !== 0 ||
+        this.#postwarNarrowTradeSourceCommitProtectionPort === null
+      )
+        invalid('Automatic trade requires its fixed source and no user proof');
+      purpose = 'POSTWAR_NARROW_TRADE_CURRENT_SOURCE_RECHECK_V1';
+      audit =
+        await this.#postwarNarrowTradeSourceCommitProtectionPort.assertCurrentFrom(
+          transaction,
+          {
+            ...common,
+            purpose: 'POSTWAR_NARROW_TRADE_CURRENT_SOURCE_RECHECK_V1',
             commitAuthorization: null,
           },
         );

@@ -70,7 +70,7 @@ export interface PostwarOfficeNodeBootstrap {
  * transport facade gives both those owners and outer compensation one shared
  * end promise without mutating or widening the original Pool. All owned
  * lifecycle callers use pg's promise form of end(). */
-function ownedPool(pool: Pool): Pool {
+export function ownedPool(pool: Pool): Pool {
   let ending: Promise<void> | undefined;
   const methods = new Map<PropertyKey, unknown>();
   return new Proxy(pool, {

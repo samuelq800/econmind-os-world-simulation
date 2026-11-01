@@ -9,6 +9,11 @@ import {
   parseFinancialLedgerSnapshot,
   type FinancialLedgerState,
 } from '../finance/financial-ledger.js';
+import type { InventoryLedgerState } from '../inventory/inventory-ledger.js';
+import {
+  reconcileV08LedgerSnapshots,
+  type RebuiltV08Ledgers,
+} from '../opening/opening-seed.js';
 import { inheritProductionDepositInstruments } from '../finance/production-deposit-funding.js';
 import {
   authorizeFinancialLedgerState,
@@ -41,7 +46,10 @@ export interface PreparedFinanceSocialLedger {
 }
 const bases = new WeakMap<
   PreparedFinanceSocialLedger,
-  Readonly<FinancialLedgerState>
+  Readonly<{
+    financial: Readonly<FinancialLedgerState>;
+    opening?: Readonly<RebuiltV08Ledgers>;
+  }>
 >();
 function invalid(reason: string): never {
   throw new DomainError(
@@ -57,7 +65,25 @@ export function prepareFinanceSocialLedger(
   if (!isAuthoritativeFinancialLedgerState(base) || base.worldVersion !== '0')
     invalid('genuine H0 financial base required');
   const token = Object.freeze({}) as PreparedFinanceSocialLedger;
-  bases.set(token, base);
+  bases.set(token, Object.freeze({ financial: base }));
+  return token;
+}
+/** Genuine Core paired reconstruction only. An independently genuine inventory
+ * from another same-world seed cannot be attached to this financial base. The
+ * full seed/raw source is not retained; each request still checks actual pins. */
+export function prepareFinanceSocialLedgerFromOpening(
+  opening: Readonly<RebuiltV08Ledgers>,
+  sha256Hex: Sha256Hex,
+): PreparedFinanceSocialLedger {
+  reconcileV08LedgerSnapshots({ reconstructed: opening, sha256Hex });
+  if (
+    opening.worldVersion !== '0' ||
+    opening.financial.worldVersion !== '0' ||
+    opening.inventory.worldVersion !== '0'
+  )
+    invalid('genuine paired H0 reconstruction required');
+  const token = prepareFinanceSocialLedger(opening.financial);
+  bases.set(token, Object.freeze({ financial: opening.financial, opening }));
   return token;
 }
 export function replayPreparedFinanceSocialLedger(input: {
@@ -70,7 +96,8 @@ export function replayPreparedFinanceSocialLedger(input: {
   }>;
   readonly sha256Hex: Sha256Hex;
 }): Readonly<FinancialLedgerState> {
-  const base = bases.get(input.prepared);
+  const preparedBase = bases.get(input.prepared);
+  const base = preparedBase?.financial;
   if (!base || input.frames.length > 256)
     invalid('genuine preparation and bounded complete prefix required');
   // The existing private evidence validates domain effects, all countries,
@@ -164,6 +191,8 @@ export interface PreparedFinanceSocialFxReplayResult {
   readonly beneficialHousingRentOrigins?: FinanceNativeBudgetMixedPrefixResult['beneficialHousingRentOrigins'];
   readonly omoCountries?: FinanceNativeBudgetMixedPrefixResult['omoCountries'];
   readonly financial: Readonly<FinancialLedgerState>;
+  readonly inventory?: Readonly<InventoryLedgerState>;
+  readonly narrowGoodsTransfers?: FinanceNativeBudgetMixedPrefixResult['narrowGoodsTransfers'];
   readonly mixedPrefixEvidence: FinanceNativeBudgetMixedPrefixEvidence;
   readonly budgetState: FinanceNativeBudgetMixedPrefixResult['budgetState'];
   readonly socialCountries: FinanceNativeBudgetMixedPrefixResult['socialCountries'];
@@ -197,12 +226,16 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   };
   readonly sha256Hex: Sha256Hex;
 }): PreparedFinanceSocialFxReplayResult {
-  const base = bases.get(input.prepared);
+  const preparedBase = bases.get(input.prepared);
+  const base = preparedBase?.financial;
   if (!base || input.frames.length > 256)
     invalid('genuine H0 preparation and bounded complete prefix required');
   const financialReplay = prepareFinanceNativeBudgetFinancialReplay(
     {
       financial: base,
+      ...(preparedBase?.opening === undefined
+        ? {}
+        : { opening: preparedBase.opening }),
       openingEncumbrances: input.openingEncumbrances,
       fxOriginals: input.fxOriginals,
       ...(input.beneficialHousingRentReceipts === undefined
@@ -247,6 +280,12 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   });
   return Object.freeze({
     financial,
+    ...(result.inventoryState === undefined
+      ? {}
+      : { inventory: result.inventoryState }),
+    ...(result.narrowGoodsTransfers === undefined
+      ? {}
+      : { narrowGoodsTransfers: result.narrowGoodsTransfers }),
     ...(result.beneficialHousingRentOrigins === undefined
       ? {}
       : { beneficialHousingRentOrigins: result.beneficialHousingRentOrigins }),

@@ -263,6 +263,22 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
     : undefined;
   const beneficialHousingRentReceipts =
     readPostwarBeneficialHousingRentMixedOriginalsForSocialBase(input.baseline);
+  for (const country of omoHistory?.countries ?? []) {
+    const q = country.original.valuationQuote;
+    if (
+      q !== undefined &&
+      [
+        [q.financialSourceId, q.financialSourcePayloadHash],
+        [q.gcuSourceId, q.gcuSourcePayloadHash],
+      ].some(
+        ([sourceId, payloadHash]) =>
+          b.sourceMetadata.filter(
+            (s) => s.sourceId === sourceId && s.payloadHash === payloadHash,
+          ).length !== 1,
+      )
+    )
+      invalid('historical OMO valuation differs from genuine H0 source hashes');
+  }
   const result = replayPreparedFinanceSocialFxLedger({
     prepared: b.prepared,
     frames: input.frames,

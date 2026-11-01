@@ -211,7 +211,29 @@ export function createPostwarCaptainCurrentProjectionStore(config: {
         source.hashAlgorithm !== 'POSTGRES_JSONB_TEXT_UTF8_SHA256'
       )
         invalid('SOURCE_HEADER_REQUIRED');
-      obj(source.sourcePointer);
+      const pointer = obj(source.sourcePointer),
+        parent = obj(pointer.canonicalSeedParent);
+      if (
+        pointer.schemaVersion !== 'postwar-captain-current-source-pointer-v2' ||
+        pointer.canonicalSeedSha256 !== source.canonicalSeedSha256 ||
+        !text(parent.documentRef) ||
+        !rawHash(parent.documentSha256) ||
+        !fp(parent.sourceVersion)
+      )
+        invalid('IMMUTABLE_CANONICAL_PARENT_REQUIRED');
+      if (coverage.originWorldVersion === '0') {
+        if (pointer.lastCaptainEvent !== null)
+          invalid('ZERO_ORIGIN_HAS_NO_CAPTAIN_EVENT');
+      } else {
+        const event = obj(pointer.lastCaptainEvent);
+        if (
+          !text(event.eventId) ||
+          !fp(event.eventFingerprint) ||
+          event.worldVersion !== coverage.originWorldVersion ||
+          event.eventSequence !== coverage.originEventSequence
+        )
+          invalid('EXACT_CAPTAIN_ORIGIN_EVENT_REQUIRED');
+      }
       const raw =
         typeof row.rows_text === 'string'
           ? row.rows_text

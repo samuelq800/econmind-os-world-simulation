@@ -138,6 +138,7 @@ beforeAll(async () => {
  create table world_v2.runtime_admission_publication_revocation(authorization_id text);
  create table world_v2.world_writer_lease(world_id text,holder_id text,fencing_token bigint,acquired_at_real timestamptz,renewed_at_real timestamptz,lease_expires_at_real timestamptz);
  create table world_v2.current_commit_authorization(world_id text,auth_subject uuid,country_id text,office_id text,team_id text,authorization_version text,capability text,active boolean);
+ create table world_v2.runtime_read_seat(seat_ref text,world_id text,auth_subject uuid,country_id text,office_id text,team_id text,authorization_revision text);
  create table world_v2.authoritative_event(event_id text,event_type text,schema_version text,world_id text,causation_command_id text,correlation_id text,world_version bigint,event_sequence bigint,sim_time bigint,recorded_at_real timestamptz,corrects_event_id text,canonical_payload text,payload_sha256 text,event_fingerprint text);
  create table world_v2.command_submission(actor_id text,auth_subject uuid,canonical_payload text,country_id text,expected_world_version bigint,command_fingerprint text,command_id text,idempotency_key text,office_id text,payload_sha256 text,schema_version text,sim_time bigint,submitted_at_real timestamptz,command_type text,world_id text,correlation_id text);
  create table world_v2.command_receipt(world_id text,command_id text,idempotency_key text,schema_version text,command_fingerprint text,outcome text,reason_code text,transition_id text,world_version_before bigint,world_version_after bigint,sim_time bigint,event_ids jsonb,recorded_at_real timestamptz);
@@ -147,6 +148,11 @@ beforeAll(async () => {
  create role world_v2_social_source_reader nologin nosuperuser nobypassrls;
  create role world_v2_finance_budget_source_reader nologin nosuperuser nobypassrls;
  create role world_v2_day_one_fx_source_reader nologin nosuperuser nobypassrls;
+ create role world_v2_cb_omo_source_reader nologin nosuperuser nobypassrls;
+ grant usage on schema world_v2 to world_v2_cb_omo_source_reader;
+ create table world_v2.central_bank_omo_adoption(adoption_ref text,world_id text,country_id text,seed_fingerprint text,admission_ref text);
+ create table world_v2.central_bank_omo_revocation(adoption_ref text,resource_ref text);
+ create table world_v2.central_bank_omo_original(adoption_ref text);
  grant usage on schema world_v2 to world_v2_social_source_reader,world_v2_finance_budget_source_reader,world_v2_day_one_fx_source_reader;
  create table world_v2.social_operating_source_registration(world_id text,country_id text,registration_ref text,seed_fingerprint text,admission_ref text);
  create table world_v2.social_operating_source_revocation(registration_ref text);
@@ -158,6 +164,25 @@ beforeAll(async () => {
  create function world_v2.reject_authoritative_history_mutation()returns trigger language plpgsql as $$begin raise exception 'IMMUTABLE_HISTORY';end;$$;`);
   await db.exec(
     'alter table world_v2.opening_seed enable row level security;alter table world_v2.opening_seed force row level security;alter table world_v2.runtime_opening_admission enable row level security;alter table world_v2.runtime_opening_admission force row level security',
+  );
+  // Reuse the actual PUBLIC metadata policies: even an independent owner
+  // admission policy cannot make their referenced-table ACLs disappear.
+  // No seat/actor rows or runtime-reader metadata privileges are fabricated.
+  const bindingSql = await read(
+    'database/proposals/runtime-read-binding-storage.sql',
+  );
+  for (const name of [
+    'runtime_read_seat_current_subject_select',
+    'runtime_opening_admission_current_subject_select',
+  ]) {
+    const start = bindingSql.indexOf('create policy ' + name + ' ');
+    if (start < 0) throw Error('ACTUAL_BINDING_POLICY_REQUIRED:' + name);
+    const end = bindingSql.indexOf('\n);', start);
+    if (end < 0) throw Error('ACTUAL_BINDING_POLICY_END_REQUIRED:' + name);
+    await db.exec(bindingSql.slice(start, end + 3));
+  }
+  await db.exec(
+    'alter table world_v2.runtime_read_seat enable row level security;alter table world_v2.runtime_read_seat force row level security',
   );
   for (const p of [
     'captain-operating-custody',
@@ -224,6 +249,31 @@ describe('Captain release exact registry and fixed bounded mixed source', () => 
         ),
       });
     await release();
+    expect(
+      (
+        await db.query(
+          "select has_column_privilege('world_v2_captain_source_owner','world_v2.runtime_read_seat','world_id','SELECT')world,has_column_privilege('world_v2_captain_source_owner','world_v2.runtime_read_seat','auth_subject','SELECT')subject,has_column_privilege('world_v2_captain_source_owner','world_v2.runtime_read_seat','seat_ref','SELECT')other,has_table_privilege('world_v2_captain_source_owner','world_v2.runtime_read_seat','SELECT')whole,has_any_column_privilege('world_v2_admission_release','world_v2.runtime_read_seat','SELECT')release,has_any_column_privilege('world_v2_captain_source_reader','world_v2.runtime_read_seat','SELECT')reader,(rolcanlogin or rolsuper or rolbypassrls or rolcreatedb or rolcreaterole or rolreplication)unsafe from pg_roles where rolname='world_v2_captain_source_owner'",
+        )
+      ).rows,
+    ).toEqual([
+      {
+        world: true,
+        subject: true,
+        other: false,
+        whole: false,
+        release: false,
+        reader: false,
+        unsafe: false,
+      },
+    ]);
+    expect(
+      (
+        await db.query(
+          'select * from world_v2.read_captain_new_scenario_opening_scope($1,$2,$3)',
+          [w, f, adm],
+        )
+      ).rows,
+    ).toEqual([{ seed_id: s, seed_fingerprint: f, admission_ref: adm }]);
     expect(
       await readbackAdoptedCaptainNewScenarioFrom(executor, policy, candidate),
     ).toMatchObject({ status: 'NOT_PUBLISHED', publicationCount: 0 });
@@ -621,10 +671,19 @@ describe('Captain release exact registry and fixed bounded mixed source', () => 
     expect(normalized(canonicalSerialize(decoded.frames))).toEqual(
       normalized(SourceCore.canonicalSerialize(frames)),
     );
+    await admin();
+    await db.exec(
+      "insert into world_v2.central_bank_omo_original values('CB_HOST_TEST_ONLY')",
+    );
+    await db.query(
+      'insert into world_v2.central_bank_omo_adoption values($1,$2,$3,$4,$5)',
+      ['CB_HOST_TEST_ONLY', world, country, fp, worldAdmission],
+    );
     for (const [office, role] of [
       ['SOCIAL', 'world_v2_social_source_reader'],
       ['FINANCE', 'world_v2_finance_budget_source_reader'],
       ['TREASURY_FX', 'world_v2_day_one_fx_source_reader'],
+      ['CB_OMO', 'world_v2_cb_omo_source_reader'],
     ] as const) {
       await admin();
       await db.exec(
@@ -662,6 +721,21 @@ describe('Captain release exact registry and fixed bounded mixed source', () => 
         }),
       ).rejects.toThrow('CURRENT_HOST_SOURCE');
     }
+    await admin();
+    await db.exec(
+      "insert into world_v2.central_bank_omo_revocation values('CB_HOST_TEST_ONLY','SOURCE');set session authorization captain_history_cb_omo;set role world_v2_cb_omo_source_reader",
+    );
+    await expect(
+      readPostwarCaptainHistoryOriginalsFrom(executor, {
+        worldId: world,
+        hostCountryId: country,
+        officeId: 'CB_OMO',
+        seedFingerprint: fp,
+        admissionRef: worldAdmission,
+        expectedHead: { worldVersion: '3', eventSequence: '3' },
+        frames: decoded.frames,
+      }),
+    ).rejects.toThrow('CAPTAIN_HISTORY_CURRENT_HOST_SOURCE_REQUIRED');
     await admin();
   });
   it('rejects immutable conflicts and current source/admission revocation', async () => {

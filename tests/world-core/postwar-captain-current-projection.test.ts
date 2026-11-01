@@ -85,7 +85,22 @@ function fixture() {
       pageHash: hash,
       returnedRowsHash: hash,
       hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
-      sourcePointer: { table: 'captain_operating_original' },
+      sourcePointer: {
+        table: 'captain_operating_original',
+        schemaVersion: 'postwar-captain-current-source-pointer-v2',
+        canonicalSeedSha256: 'c'.repeat(64),
+        canonicalSeedParent: {
+          documentRef: 'PARENT_TEST_ONLY',
+          documentSha256: 'e'.repeat(64),
+          sourceVersion: fp,
+        },
+        lastCaptainEvent: {
+          eventId: 'EVENT_TEST_ONLY_ORIGIN',
+          eventFingerprint: fp,
+          worldVersion: '1',
+          eventSequence: '1',
+        },
+      },
     },
     page: { offset: 0, limit: 25, returned: 7, total: 7, nextOffset: null },
     rows_text: raw,
@@ -123,6 +138,29 @@ describe('Captain current fixed small-page adapter', () => {
     expect(r.source.originWorldVersion).toBe('1');
     expect(r.rows).toHaveLength(7);
     expect(f.queryCount()).toBe(2);
+  });
+  it('accepts admitted zero-origin capital without fabricating a Captain event and rejects pointer drift', async () => {
+    const f = fixture();
+    f.row.source.originWorldVersion = '0';
+    f.row.source.originEventSequence = '0';
+    f.row.source.currentCaptainCoverage.originWorldVersion = '0';
+    f.row.source.currentCaptainCoverage.originEventSequence = '0';
+    // This vector proves wire validation only; actual genesis is SQL/native.
+    (f.row.source.sourcePointer as Record<string, unknown>).lastCaptainEvent =
+      null;
+    const page = await store.readPageFrom(f.tx, { worldId: 'WORLD_TEST_ONLY' });
+    expect(page.status).toBe('PAGE');
+    f.row.source.sourcePointer.canonicalSeedSha256 = 'f'.repeat(64);
+    await expect(
+      store.readPageFrom(f.tx, { worldId: 'WORLD_TEST_ONLY' }),
+    ).rejects.toThrow('CANONICAL_PARENT');
+    f.row.source.sourcePointer.canonicalSeedSha256 = 'c'.repeat(64);
+    (f.row.source.sourcePointer as Record<string, unknown>).lastCaptainEvent = {
+      eventId: 'EVENT_FABRICATED_ZERO_ORIGIN',
+    };
+    await expect(
+      store.readPageFrom(f.tx, { worldId: 'WORLD_TEST_ONLY' }),
+    ).rejects.toThrow('ZERO_ORIGIN');
   });
   it('rejects corrupted same-head bytes and cross-country projection rows', async () => {
     const f = fixture();

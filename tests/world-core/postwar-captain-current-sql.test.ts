@@ -198,6 +198,7 @@ beforeAll(async () => {
  create role world_v2_admission_release nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;
  create table world_v2.opening_seed(world_id text,seed_id text unique,seed_fingerprint text,unique(world_id,seed_fingerprint));
  create table world_v2.world_head(world_id text primary key,world_version bigint,event_sequence bigint);
+ create table world_v2.runtime_read_seat(seat_ref text,world_id text,auth_subject uuid,country_id text,office_id text,team_id text,authorization_revision text);
  create table world_v2.runtime_opening_admission(world_id text,admission_ref text unique,seed_id text,seed_fingerprint text,model_version text,replay_binding text,admitted_at_real timestamptz);
  create table world_v2.runtime_admission_publication_permit(authorization_id text,authorization_sha256 text,world_id text,seed_id text,seed_fingerprint text,model_version text,replay_binding text,valid_from timestamptz,valid_until timestamptz);
  create table world_v2.runtime_admission_publication_revocation(authorization_id text);
@@ -519,6 +520,19 @@ create table world_v2.postwar_office_projection_revocation(
         [ref, world, country, office, rows.length, raw, sha(raw)],
       );
     }
+  // Exact public header shape: it deliberately has NO canonical_seed_sha256.
+  // This tiny fixed seat is TEST_ONLY transport metadata, not native authority.
+  await db.exec(`create role captain_current_test_reader login nosuperuser nobypassrls;
+ grant world_v2_postwar_projection_reader to captain_current_test_reader;
+ create function world_v2.read_postwar_office_projection_seats(p_world text)
+ returns table(world_id text,country_id text,office_id text,auth_subject text,team_id text,authorization_revision text,scope_key text,seat_ref text,admission_ref text,seed_id text,seed_fingerprint text,model_version text,replay_binding text,source_bundle_sha256 text,world_version text,event_sequence text)
+ language sql security definer set search_path=pg_catalog as $$
+ select set_config('econmind.postwar_projection_world',p_world,true);
+ select h.world_id,'COUNTRY_01','CAPTAIN',current_setting('request.jwt.claim.sub',true),'TEAM_TEST_ONLY','REV_TEST_ONLY','OFFICE_434F554E5452595F3031_4341505441494E','SEAT_TEST_ONLY',a.admission_ref,a.seed_id,a.seed_fingerprint,a.model_version,a.replay_binding,repeat('a',64),h.world_version::text,h.event_sequence::text from world_v2.world_head h join world_v2.runtime_opening_admission a using(world_id)where h.world_id=p_world
+ $$;
+ alter function world_v2.read_postwar_office_projection_seats(text)owner to world_v2_postwar_projection_owner;
+ revoke all on function world_v2.read_postwar_office_projection_seats(text)from public;
+ grant execute on function world_v2.read_postwar_office_projection_seats(text)to world_v2_postwar_projection_reader;`);
   await persist(
     await f.budgetFrame(
       'SET_ENVELOPE',
@@ -531,6 +545,28 @@ create table world_v2.postwar_office_projection_revocation(
 afterAll(async () => {
   await db?.close();
 });
+async function readCurrentPage() {
+  await admin();
+  await db.exec(
+    'set session authorization captain_current_test_reader;begin isolation level repeatable read read only',
+  );
+  try {
+    await db.query("select set_config('request.jwt.claim.sub',$1,true)", [
+      '11111111-1111-4111-8111-111111111111',
+    ]);
+    const r = await db.query<Record<string, unknown>>(
+      'select * from world_v2.read_postwar_captain_current_page($1,0,25,null)',
+      [world],
+    );
+    await db.exec('commit');
+    return r.rows[0]!;
+  } catch (error) {
+    await db.exec('rollback');
+    throw error;
+  } finally {
+    await admin();
+  }
+}
 describe('Captain current exact reducer and complete mixed prefix SQL', () => {
   it('publishes admitted origin0 after a full foreign Budget prefix before the first Captain allocation', async () => {
     await admin();
@@ -545,6 +581,19 @@ describe('Captain current exact reducer and complete mixed prefix SQL', () => {
       origin_world_version: 0,
       origin_event_sequence: 0,
     });
+    const page = await readCurrentPage();
+    expect(
+      (page.source as Record<string, unknown>).sourcePointer,
+    ).toMatchObject({
+      schemaVersion: 'postwar-captain-current-source-pointer-v2',
+      lastCaptainEvent: null,
+    });
+    expect(page.status).toBe('PAGE');
+    expect(page.source).toMatchObject({
+      canonicalSeedSha256: 'b'.repeat(64),
+      originWorldVersion: '0',
+      originEventSequence: '0',
+    });
     const rows = JSON.parse(r.rows[0]!.rows_text as string);
     expect(rows[0]).toMatchObject({
       balance: '40',
@@ -554,6 +603,103 @@ describe('Captain current exact reducer and complete mixed prefix SQL', () => {
     });
   });
 
+  it('rejects missing/tampered canonical pointers and cross-country/seed parents without opening raw source', async () => {
+    await admin();
+    const pointer = (
+      await db.query<{ source_pointer: Record<string, unknown> }>(
+        'select source_pointer from world_v2.postwar_captain_current_document where world_id=$1 and world_version=1',
+        [world],
+      )
+    ).rows[0]!.source_pointer;
+    await db.exec(
+      'set session authorization world_v2_postwar_projection_owner;begin read only',
+    );
+    try {
+      await db.query(
+        "select set_config('econmind.postwar_projection_world',$1,true)",
+        [world],
+      );
+      const check = async (
+        p: unknown = pointer,
+        c = country,
+        seed = f.f.seed.seedId,
+      ) => {
+        const r = await db.query<{ readable: boolean }>(
+          'select coalesce(world_v2.postwar_captain_current_parent_readable($1,$2,$3,$4,$5,$6::jsonb),false)readable',
+          [world, c, seed, f.f.seed.fingerprint, admission, JSON.stringify(p)],
+        );
+        return r.rows[0]!.readable;
+      };
+      expect(await check()).toBe(true);
+      expect(await check({})).toBe(false);
+      expect(
+        await check({ ...pointer, canonicalSeedSha256: '0'.repeat(64) }),
+      ).toBe(false);
+      const parent = pointer.canonicalSeedParent as Record<string, unknown>;
+      expect(
+        await check({
+          ...pointer,
+          canonicalSeedParent: { ...parent, documentSha256: '0'.repeat(64) },
+        }),
+      ).toBe(false);
+      expect(
+        await check({
+          ...pointer,
+          canonicalSeedParent: { ...parent, documentRef: 'MISSING_PARENT' },
+        }),
+      ).toBe(false);
+      expect(await check(pointer, 'COUNTRY_02')).toBe(false);
+      expect(
+        await check(
+          pointer,
+          country,
+          'SEED_TEST_ONLY_DIFFERENT' as typeof f.f.seed.seedId,
+        ),
+      ).toBe(false);
+    } finally {
+      await db.exec('rollback');
+      await admin();
+    }
+  });
+  it('refuses contradictory immutable-parent canonical pins instead of choosing one hash', async () => {
+    await admin();
+    const pointer = (
+      await db.query<{ source_pointer: Record<string, unknown> }>(
+        'select source_pointer from world_v2.postwar_captain_current_document where world_id=$1 and world_version=1',
+        [world],
+      )
+    ).rows[0]!.source_pointer;
+    const parent = pointer.canonicalSeedParent as { documentRef: string };
+    await db.exec(
+      'set session authorization world_v2_postwar_projection_owner;begin',
+    );
+    try {
+      await db.query(
+        "select set_config('econmind.postwar_projection_world',$1,true)",
+        [world],
+      );
+      await db.query(
+        "insert into world_v2.postwar_office_projection_document select 'CONFLICT_PARENT_TEST_ONLY',world_id,country_id,office_id,dataset||'_CONFLICT',projection_version,$2,source_revision,admission_ref,seed_id,seed_fingerprint,repeat('0',64),source_bundle_sha256,source_id,source_payload_hash,source_pointer,model_version,replay_binding,world_version,event_sequence,document_sha256,total_rows,page_count,generated_at from world_v2.postwar_office_projection_document where document_ref=$1",
+        [parent.documentRef, hash('CONFLICT_PARENT_TEST_ONLY')],
+      );
+      const r = await db.query<{ readable: boolean }>(
+        'select world_v2.postwar_captain_current_parent_readable($1,$2,$3,$4,$5,$6::jsonb)readable',
+        [
+          world,
+          country,
+          f.f.seed.seedId,
+          f.f.seed.fingerprint,
+          admission,
+          JSON.stringify(pointer),
+        ],
+      );
+      expect(r.rows[0]!.readable).toBe(false);
+    } finally {
+      await db.exec('rollback');
+      await admin();
+    }
+    expect((await readCurrentPage()).status).toBe('PAGE');
+  });
   it('independently rederives Core allocation including source/preparation hashes and rejects changed totals', async () => {
     const frame = testOnlyCaptainFrame({
         fixture: f,
@@ -601,6 +747,18 @@ describe('Captain current exact reducer and complete mixed prefix SQL', () => {
       generated: '0',
       spent: '0',
     });
+    const actualPage = await readCurrentPage();
+    expect(actualPage.status).toBe('PAGE');
+    expect(
+      (actualPage.source as Record<string, unknown>).sourcePointer,
+    ).toMatchObject({
+      lastCaptainEvent: {
+        eventId: frames.at(-1)!.events.at(-1)!.eventId,
+        worldVersion: '2',
+        eventSequence: '2',
+      },
+    });
+    await db.exec('set session authorization captain_current_test_publisher');
     const bad = JSON.parse(assertion());
     bad.capitalStateHash = 'sha256:' + 'f'.repeat(64);
     await expect(

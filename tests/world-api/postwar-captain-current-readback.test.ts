@@ -102,6 +102,14 @@ function fixture() {
     hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
     sourcePointer: {
       classification: 'TEST_ONLY_PROTOCOL_NO_NATIVE_PUBLICATION',
+      schemaVersion: 'postwar-captain-current-source-pointer-v2',
+      canonicalSeedSha256: raw,
+      canonicalSeedParent: {
+        documentRef: 'PARENT_TEST_ONLY',
+        documentSha256: raw,
+        sourceVersion: hash,
+      },
+      lastCaptainEvent: null,
     },
   };
   const pool = {

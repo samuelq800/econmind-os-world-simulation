@@ -46,6 +46,8 @@ import {
   type AuthoritativeEvent,
 } from '../events/event.js';
 import { createAuthoritativeTransition } from './receipt.js';
+import { valueCentralBankDayOneForeignRegister } from '../finance/central-bank-day-one-valuation.js';
+import type { PostwarDayOneFxQuoteData } from '../finance/postwar-day-one-treasury-fx.js';
 
 export const CENTRAL_BANK_OMO_COMMAND = 'CORE_CENTRAL_BANK_OMO_V1' as const;
 export const CENTRAL_BANK_OMO_CAPABILITY =
@@ -100,6 +102,8 @@ export interface CentralBankOmoSourceFacts {
     readonly sourceRef: string;
     readonly worldVersion: string;
   };
+  /** Independently adopted first-day denomination view. No extra posting. */
+  readonly valuationQuote?: PostwarDayOneFxQuoteData;
 }
 
 export interface CentralBankOmoSource {
@@ -246,12 +250,34 @@ function reconcileSnapshot(input: {
   ownerRef: string;
   source: {
     readonly financialState: FinancialLedgerState;
-    readonly facts: Pick<CentralBankOmoSourceFacts, 'worldId' | 'countryId'>;
+    readonly facts: Pick<CentralBankOmoSourceFacts, 'worldId' | 'countryId'> &
+      Partial<
+        Pick<CentralBankOmoSourceFacts, 'valuationQuote' | 'currentSimTime'>
+      >;
   };
+  readonly sha256Hex?: Sha256Hex;
 }): Readonly<Record<string, FinancialAccount>> {
   const { snapshot, accounts, fields, source, ownerRef } = input;
   keys(accounts, Object.keys(fields));
   const mapped = new Set<string>();
+  const valuation =
+    source.facts.valuationQuote === undefined
+      ? null
+      : valueCentralBankDayOneForeignRegister({
+          financial: source.financialState,
+          quote: source.facts.valuationQuote,
+          ownerRef,
+          simTime: SimTime.fromTicks(source.facts.currentSimTime ?? '0'),
+          sha256Hex:
+            input.sha256Hex ?? invalid('valuation quote digest required'),
+        });
+  if (
+    valuation &&
+    (valuation.countryId !== source.facts.countryId ||
+      valuation.localCurrency !== snapshot.currency)
+  )
+    invalid('same country/LC foreign valuation required');
+  for (const entry of valuation?.entries ?? []) mapped.add(entry.accountId);
   const result: Record<string, FinancialAccount> = {};
   const snapshotRecord = snapshot as unknown as Record<
     string,
@@ -285,7 +311,18 @@ function reconcileSnapshot(input: {
       accountClass === 'LIABILITY' || accountClass === 'EQUITY'
         ? Money.from('0', account.currency).subtract(declared)
         : declared;
-    if (!signed.amount.eq(posted.amount))
+    const assetField = 'bankRef' in snapshot ? 'settlementCash' : 'otherAssets';
+    const addition =
+      valuation === null
+        ? Money.from('0', account.currency)
+        : field === assetField
+          ? Money.from(valuation.assetAddition.amount, account.currency)
+          : field === 'equity'
+            ? Money.from('0', account.currency).subtract(
+                Money.from(valuation.equityAddition.amount, account.currency),
+              )
+            : Money.from('0', account.currency);
+    if (!signed.amount.eq(posted.add(addition).amount))
       invalid('snapshot differs from authoritative posted position');
     mapped.add(account.accountId);
     result[field] = account;
@@ -311,6 +348,8 @@ export function assertCentralBankOmoOpeningOriginal(input: {
   readonly centralBank: CentralBankOmoSourceFacts['centralBank'];
   readonly bankAccounts: CentralBankOmoSourceFacts['bankAccounts'];
   readonly centralBankAccounts: CentralBankOmoSourceFacts['centralBankAccounts'];
+  readonly valuationQuote?: PostwarDayOneFxQuoteData;
+  readonly sha256Hex?: Sha256Hex;
 }): void {
   if (
     !isAuthoritativeFinancialLedgerState(input.financialState) ||
@@ -336,7 +375,13 @@ export function assertCentralBankOmoOpeningOriginal(input: {
   ]);
   const source = {
     financialState: input.financialState,
-    facts: { worldId: input.worldId, countryId: input.countryId },
+    facts: {
+      worldId: input.worldId,
+      countryId: input.countryId,
+      ...(input.valuationQuote === undefined
+        ? {}
+        : { valuationQuote: input.valuationQuote }),
+    },
   };
   const bank = reconcileSnapshot({
     snapshot: input.bank,
@@ -344,6 +389,7 @@ export function assertCentralBankOmoOpeningOriginal(input: {
     fields: BANK_FIELDS,
     ownerRef: input.bank.bankRef,
     source,
+    ...(input.sha256Hex === undefined ? {} : { sha256Hex: input.sha256Hex }),
   });
   const central = reconcileSnapshot({
     snapshot: input.centralBank,
@@ -351,6 +397,7 @@ export function assertCentralBankOmoOpeningOriginal(input: {
     fields: CB_FIELDS,
     ownerRef: input.centralBank.centralBankRef,
     source,
+    ...(input.sha256Hex === undefined ? {} : { sha256Hex: input.sha256Hex }),
   });
   const asset = bank.reservesAtCentralBank!,
     liability = central.commercialBankReserves!;
@@ -543,6 +590,7 @@ export function validateCentralBankOmoSource(input: {
     'centralBankAccounts',
     'holdings',
     'quote',
+    ...(Object.hasOwn(facts, 'valuationQuote') ? ['valuationQuote'] : []),
   ]);
   if (
     typeof facts.currentEventSequence !== 'string' ||
@@ -591,6 +639,7 @@ export function validateCentralBankOmoSource(input: {
     fields: BANK_FIELDS,
     ownerRef: facts.bank.bankRef,
     source: stableSource,
+    sha256Hex,
   });
   const cbAccounts = reconcileSnapshot({
     snapshot: facts.centralBank,
@@ -598,6 +647,7 @@ export function validateCentralBankOmoSource(input: {
     fields: CB_FIELDS,
     ownerRef: facts.centralBank.centralBankRef,
     source: stableSource,
+    sha256Hex,
   });
   const reserveAsset = bankAccounts.reservesAtCentralBank!;
   const reserveLiability = cbAccounts.commercialBankReserves!;
@@ -752,6 +802,7 @@ export function prepareCentralBankOmoTransition(input: {
     fields: BANK_FIELDS,
     ownerRef: checked.facts.bank.bankRef,
     source: { ...source, financialState: financial.state },
+    sha256Hex,
   });
   reconcileSnapshot({
     snapshot: checked.kernel.centralBank,
@@ -759,6 +810,7 @@ export function prepareCentralBankOmoTransition(input: {
     fields: CB_FIELDS,
     ownerRef: checked.facts.centralBank.centralBankRef,
     source: { ...source, financialState: financial.state },
+    sha256Hex,
   });
   return Object.freeze({
     event,

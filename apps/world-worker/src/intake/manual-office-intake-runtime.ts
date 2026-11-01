@@ -98,7 +98,18 @@ export function createFinanceSocialManualOfficeIntakeRuntime(
 ): ManualOfficeIntakeRuntime {
   const fixed = readFinanceSocialSourceBinding(binding);
   return constructManualOfficeIntakeRuntime(
-    { ...fixed, workerDatabase: fixed.database },
+    {
+      ...fixed,
+      workerDatabase: fixed.database,
+      ...(fixed.formalBinding
+        ? {
+            productionBinding: fixed.formalBinding,
+            productionHost: createProductionWorldCommandHost(
+              fixed.formalBinding,
+            ),
+          }
+        : {}),
+    },
     binding,
   );
 }
@@ -213,7 +224,17 @@ function constructManualOfficeIntakeRuntime(
           environment: construction.environment,
           officeReaders: construction.readers,
         });
-  const runtime = Object.freeze({ consumer });
+  const runtime = Object.freeze({
+    consumer: input.productionHost
+      ? Object.freeze({
+          ...consumer,
+          async stop() {
+            await input.productionHost!.stop();
+            await consumer.stop();
+          },
+        })
+      : consumer,
+  });
   constructions.set(runtime, construction);
   return runtime;
 }
@@ -414,7 +435,8 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
   if (commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND)
     return (
       !!construction &&
-      !construction.productionBinding &&
+      (!construction.productionBinding ||
+        !!construction.financeSocialBinding) &&
       isPostwarDayOneFxRuntime(construction.readers.treasuryFx)
     );
   if (
@@ -434,7 +456,7 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
       )
     );
   }
-  if (construction?.productionBinding)
+  if (construction?.productionBinding && !construction.financeSocialBinding)
     return (
       commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND &&
       productionFinanceCommandExecutionBlocker(

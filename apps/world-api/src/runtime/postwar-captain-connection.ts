@@ -28,7 +28,7 @@ export interface PostwarCaptainHandleRequest {
   readonly signal?: AbortSignal;
 }
 export interface PostwarCaptainConnection {
-  readonly environment: 'local' | 'ci' | null;
+  readonly environment: 'local' | 'ci' | 'staging' | 'production' | null;
   readonly transportOrigins: readonly string[];
   readonly status: 'EXPLICIT_MANUAL_CAPTAIN_CONNECTION' | 'NOT_CONNECTED';
   handleCommand(input: PostwarCaptainHandleRequest): Promise<{
@@ -71,7 +71,16 @@ export function createPostwarCaptainConnection(
   if (!c && shared) throw Error('CAPTAIN_EXACT_HTTP_CONFIGURATION_REQUIRED');
   const ports = shared;
   const environment = shared?.environment;
-  if (ports && !['local', 'ci'].includes(environment ?? ''))
+  // Formal transports borrow only the privately issued shared controller.
+  // An environment label or a standalone local controller is never a permit.
+  if (
+    ports &&
+    !['local', 'ci'].includes(environment ?? '') &&
+    !(
+      shared?.formalBinding &&
+      ['staging', 'production'].includes(environment ?? '')
+    )
+  )
     throw Error('CAPTAIN_LOCAL_CI_ONLY');
   if (
     c &&
@@ -174,11 +183,13 @@ export function createPostwarCaptainConnection(
     }
   }
   return Object.freeze({
-    environment: ports
-      ? environment === 'ci'
+    environment: shared
+      ? shared.environment
+      : ports && environment === 'ci'
         ? ('ci' as const)
-        : ('local' as const)
-      : null,
+        : ports && environment === 'local'
+          ? ('local' as const)
+          : null,
     status: c
       ? ('EXPLICIT_MANUAL_CAPTAIN_CONNECTION' as const)
       : ('NOT_CONNECTED' as const),

@@ -12,11 +12,20 @@ import {
   parseNarrowTreasuryGcuTransferTerms,
   parseWorldDecimal,
   Money,
+  SimTime,
+  shipNarrowTreasuryGcuTransfer,
+  deliverNarrowTreasuryGcuTransfer,
   isAuthorizedOfficeContext,
   reauthorizeOfficeCapability,
   isCommitAuthorizationProof,
   reauthorizeCommitAuthorizationProof,
   createReservationPosting,
+  type InventoryLedgerState,
+  type FinancialLedgerState,
+  createWorldWriterCommitAssertion,
+  parseWorldWriterLease,
+  parseNarrowTreasuryGcuShipmentTerms,
+  parseNarrowTreasuryGcuDeliveryTerms,
   type CanonicalCommand,
   type AuthoritativeTransition,
   type AuthorizedOfficeContext,
@@ -32,7 +41,10 @@ import {
 } from '@econmind/core';
 import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
 import { parsePostwarDayOneFxQuoteData } from '@econmind/core/postwar-day-one-treasury-fx';
-import { replayPreparedFinanceSocialFxLedger } from '@econmind/core/finance-social-prepared-ledger';
+import {
+  prepareFinanceSocialLedgerFromOpening,
+  replayPreparedFinanceSocialFxLedger,
+} from '@econmind/core/finance-social-prepared-ledger';
 import { decodeBoundedPostwarCanonicalPrefix } from './bounded-postwar-canonical-prefix.js';
 import { decodeBoundedPostwarJournal } from './bounded-postwar-fx-postings.js';
 import {
@@ -45,6 +57,7 @@ import {
   type PostwarFinanceSocialRuntimeConnection,
 } from '../runtime-preparation/finance-social-runtime-connection.js';
 import { readPostwarSocialRuntimeFinancialReplayBase } from '../runtime-preparation/social-runtime-connection.js';
+import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
 import type { SqlExecutor } from './sql-database.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
@@ -81,6 +94,8 @@ function freeze<T>(v: T): T {
 const ports = new WeakSet<object>();
 export const POSTWAR_NARROW_TRADE_CURRENT_SOURCE_PURPOSE =
   'POSTWAR_NARROW_TRADE_CURRENT_SOURCE_RECHECK_V1' as const;
+export const POSTWAR_NARROW_TRADE_AUTOMATIC_SOURCE_QUERY =
+  'select * from world_v2.read_postwar_narrow_trade_automatic_source($1,$2,$3,$4::timestamptz,$5)';
 export const POSTWAR_NARROW_TRADE_CURRENT_SOURCE_QUERY =
   'select * from world_v2.read_postwar_narrow_trade_current_source($1,$2,$3,$4,$5::uuid,$6,$7)';
 export const POSTWAR_NARROW_TRADE_CURRENT_SESSION_QUERY = `select current_user as role_name,r.rolsuper,r.rolbypassrls,r.rolcreatedb,r.rolcreaterole,r.rolreplication,current_setting('transaction_isolation')as isolation,current_setting('transaction_read_only')as read_only,pg_backend_pid()::text as backend_pid,(select virtualxid::text from pg_locks where pid=pg_backend_pid()and locktype='virtualxid'and granted limit 1)as virtual_xid,pg_has_role(current_user,'world_v2_postwar_narrow_trade_source','MEMBER')as reader_member,pg_has_role(current_user,'world_v2_postwar_narrow_trade_current_owner','MEMBER')as owner_member from pg_roles r where r.rolname=current_user`;
@@ -174,6 +189,9 @@ const families = new Set([
   'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
   'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1',
   POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+  'CORE_GOODS_TRANSFER_V1',
+  'CORE_GOODS_SHIPMENT_V1',
+  'CORE_GOODS_DELIVERY_V1',
 ]);
 /** Inert protocol decoder. Unknown or inventory-affecting prefix fails closed;
  * it does not issue a source/authority capability. */
@@ -298,23 +316,24 @@ function replay(
   }
   if (quotes.length !== originals.length)
     invalid('unexpected/missing historical quote original');
+  const replayed = replayPreparedFinanceSocialFxLedger({
+    prepared: b.prepared,
+    frames: prefix.frames,
+    socialCountries: b.document.countries.map((c) => ({
+      countryId: c.countryId,
+      state: c.state,
+      offers: c.offers,
+    })),
+    openingEncumbrances: projectPostwarOpeningFinancialEncumbrances(b.funding),
+    fxOriginals: originals,
+    expectedHead: prefix.head,
+    sha256Hex: sha,
+  });
   return {
     prefix,
-    financial: replayPreparedFinanceSocialFxLedger({
-      prepared: b.prepared,
-      frames: prefix.frames,
-      socialCountries: b.document.countries.map((c) => ({
-        countryId: c.countryId,
-        state: c.state,
-        offers: c.offers,
-      })),
-      openingEncumbrances: projectPostwarOpeningFinancialEncumbrances(
-        b.funding,
-      ),
-      fxOriginals: originals,
-      expectedHead: prefix.head,
-      sha256Hex: sha,
-    }).financial,
+    financial: replayed.financial,
+    inventory: replayed.inventory,
+    goods: replayed.narrowGoodsTransfers,
   };
 }
 /** Only genuine Core opening DATA is retained. This separate path supports H0
@@ -332,6 +351,7 @@ const openingPreparations = new WeakMap<
     canonicalSeedSha256: string;
     admissionRef: string;
     financial: ReturnType<typeof rebuildV08LedgersFromLineage>['financial'];
+    prepared: ReturnType<typeof prepareFinanceSocialLedgerFromOpening>;
     governments: readonly Readonly<{ countryId: string; ownerId: string }>[];
   }>
 >();
@@ -350,10 +370,11 @@ export function preparePostwarNarrowTradeOpening(
       JSON.parse(canonicalSerialize(input.seed)),
       sha,
     ),
-    financial = rebuildV08LedgersFromLineage({
+    reconstructed = rebuildV08LedgersFromLineage({
       seed,
       sha256Hex: sha,
-    }).financial;
+    });
+  const financial = reconstructed.financial;
   const fs = seed.sources.filter(
     (s) =>
       row(JSON.parse(s.canonicalPayload)).schemaVersion ===
@@ -380,10 +401,43 @@ export function preparePostwarNarrowTradeOpening(
       canonicalSeedSha256: sha(canonicalSerialize(intent)),
       admissionRef: input.admissionRef,
       financial,
+      prepared: prepareFinanceSocialLedgerFromOpening(reconstructed, sha),
       governments,
     }),
   );
   return token;
+}
+/** Explicit independent Goods-only opening DATA. Foreign committed domains
+ * remain unsupported without a genuine prepared Social/shared original. */
+const goodsPreparations = new WeakSet<object>();
+export function preparePostwarNarrowTradeGoodsOpening(
+  input: Parameters<typeof preparePostwarNarrowTradeOpening>[0],
+): Readonly<PostwarNarrowTradeOpeningPreparation> {
+  const token = preparePostwarNarrowTradeOpening(input);
+  goodsPreparations.add(token);
+  return token;
+}
+export interface PostwarNarrowTradeAutomaticReadBinding {
+  readonly schemaVersion: 'postwar-narrow-trade-automatic-binding-v1';
+  readonly commandFingerprint: string;
+  readonly observedAtReal: string;
+  readonly head: DecisionResultHead;
+  readonly workerId: string;
+  readonly seedId: string;
+  readonly seedFingerprint: string;
+  readonly admissionRef: string;
+  readonly prefixFingerprint: string;
+  readonly transferFingerprint: string;
+  readonly inventoryFingerprint: string;
+  readonly financialFingerprint: string;
+}
+export interface PostwarNarrowTradeAutomaticPreparation {
+  readonly transferCommand: CanonicalCommand;
+  readonly inventory: Readonly<InventoryLedgerState>;
+  readonly financial: Readonly<FinancialLedgerState>;
+  readonly source: Readonly<import('@econmind/core').InventoryAccount>;
+  readonly binding: Readonly<PostwarNarrowTradeAutomaticReadBinding>;
+  readonly commitAssertion: import('@econmind/core').WorldWriterCommitAssertion;
 }
 const issuedCurrentSources = new WeakMap<object, string>();
 export function isPostwarNarrowTradeCurrentSource(
@@ -414,6 +468,14 @@ export interface PostwarNarrowTradeCurrentSource {
       observedAtReal: string;
     }>,
   ): Promise<PostwarNarrowTradeCurrentResult>;
+  inspectAutomaticFrom(
+    tx: SqlExecutor,
+    input: Readonly<{
+      command: CanonicalCommand;
+      workerId: string;
+      observedAtReal: string;
+    }>,
+  ): Promise<Readonly<PostwarNarrowTradeAutomaticPreparation>>;
   readonly sourceCommitProtectionPort: Readonly<PostwarNarrowTradeSourceCommitProtectionPort>;
 }
 /** A private-issued shared instance supplies only its genuine immutable DATA
@@ -425,6 +487,11 @@ export function createPostwarNarrowTradeCurrentSource(
   } & (
     | Readonly<{
         sharedConnection: Readonly<PostwarFinanceSocialRuntimeConnection>;
+      }>
+    | Readonly<{
+        goodsOpeningPreparation: Readonly<PostwarNarrowTradeOpeningPreparation>;
+        workerId: string;
+        clock: DurableConsumptionClock;
       }>
     | Readonly<{
         openingPreparation: Readonly<PostwarNarrowTradeOpeningPreparation>;
@@ -448,7 +515,11 @@ export function createPostwarNarrowTradeCurrentSource(
   const opening =
     'openingPreparation' in configuration
       ? openingPreparations.get(configuration.openingPreparation)
-      : undefined;
+      : 'goodsOpeningPreparation' in configuration &&
+          goodsPreparations.has(configuration.goodsOpeningPreparation)
+        ? openingPreparations.get(configuration.goodsOpeningPreparation)
+        : undefined;
+  const goodsOnly = 'goodsOpeningPreparation' in configuration;
   if (!connection && !opening)
     invalid('genuine Core opening preparation required');
   const world = connection
@@ -553,7 +624,11 @@ export function createPostwarNarrowTradeCurrentSource(
       r.admission_ref !== (baseline?.pins.admissionRef ?? opening!.admissionRef)
     )
       invalid('actual admission differs from immutable preparation');
-    if (opening && (r.world_version !== '0' || r.event_sequence !== '0'))
+    if (
+      opening &&
+      !goodsOnly &&
+      (r.world_version !== '0' || r.event_sequence !== '0')
+    )
       invalid(
         'REPLAY_UNAVAILABLE: genuine opening-only preparation supports H0 only',
       );
@@ -563,12 +638,15 @@ export function createPostwarNarrowTradeCurrentSource(
       r.canonical_seed_sha256 !== opening.canonicalSeedSha256
     )
       invalid('actual sealed canonical seed SHA differs');
-    const { prefix, financial } = baseline
+    const { prefix, financial, inventory } = baseline
       ? replay(baseline, r, world)
-      : {
-          prefix: decodePostwarNarrowTradeCurrentPrefix(r, world),
-          financial: opening!.financial,
-        };
+      : goodsOnly
+        ? replayGoodsOnly(r)
+        : {
+            prefix: decodePostwarNarrowTradeCurrentPrefix(r, world),
+            financial: opening!.financial,
+            inventory: undefined,
+          };
     const head = { worldId: world, ...prefix.head };
     if (
       command.expectedWorldVersion !== head.worldVersion ||
@@ -578,7 +656,26 @@ export function createPostwarNarrowTradeCurrentSource(
     const missing: PostwarNarrowTradeCurrentMissing[] = [];
     if (r.stock_status !== 'SEALED_ADMITTED_OPENING')
       missing.push('ADMITTED_OPENING_STOCK');
-    const stocks = rows(r.stock),
+    if (prefix.head.worldVersion !== '0' && !inventory)
+      invalid('REPLAY_UNAVAILABLE: genuine current inventory base required');
+    // The sealed opening document is provenance, never current stock after a
+    // movement. Complete Core replay determines every current inventory balance.
+    const stocks = inventory
+        ? inventory.balances
+            .filter(
+              (b) =>
+                b.account.countryId === t.sellerCountryId &&
+                b.account.batchId === t.assetSource.batchId &&
+                b.account.bucket === 'AVAILABLE',
+            )
+            .map((b) => ({
+              account: b.account,
+              quantity: {
+                amount: b.quantity.amount.toFixed(),
+                unit: b.quantity.unit,
+              },
+            }))
+        : rows(r.stock),
       stock = stocks[0],
       a = stock ? row(stock.account) : null;
     if (
@@ -740,6 +837,251 @@ export function createPostwarNarrowTradeCurrentSource(
       },
     });
   }
+  function replayGoodsOnly(r: Row) {
+    const prefix = decodePostwarNarrowTradeCurrentPrefix(r, world);
+    if (
+      !opening ||
+      prefix.frames.some(
+        (f) =>
+          ![
+            'CORE_GOODS_TRANSFER_V1',
+            'CORE_GOODS_SHIPMENT_V1',
+            'CORE_GOODS_DELIVERY_V1',
+          ].includes(f.command.commandType),
+      )
+    )
+      invalid(
+        'REPLAY_UNAVAILABLE: independent paired opening supports Goods-only prefix',
+      );
+    const current = replayPreparedFinanceSocialFxLedger({
+      prepared: opening.prepared,
+      frames: prefix.frames,
+      socialCountries: [],
+      openingEncumbrances: [],
+      fxOriginals: [],
+      expectedHead: prefix.head,
+      sha256Hex: sha,
+    });
+    return {
+      prefix,
+      financial: current.financial,
+      inventory: current.inventory,
+      goods: current.narrowGoodsTransfers,
+    };
+  }
+  const inspectAutomaticFrom: PostwarNarrowTradeCurrentSource['inspectAutomaticFrom'] =
+    async (tx, input) => {
+      const c = validateCanonicalCommand(input.command, sha),
+        at = input.observedAtReal,
+        shared = connection
+          ? readPostwarFinanceSocialRuntimeBinding(connection)
+          : undefined,
+        holder =
+          shared?.workerId ??
+          ('workerId' in configuration ? configuration.workerId : undefined),
+        clock =
+          shared?.clock ??
+          ('clock' in configuration ? configuration.clock : undefined);
+      const nowSim = clock
+        ? SimTime.fromTicks(await clock.simTime(world))
+        : undefined;
+      if (
+        !holder ||
+        !clock ||
+        holder !== input.workerId ||
+        c.worldId !== world ||
+        c.officeId !== null ||
+        !['CORE_GOODS_SHIPMENT_V1', 'CORE_GOODS_DELIVERY_V1'].includes(
+          c.commandType,
+        ) ||
+        c.expectedWorldVersion === null ||
+        new Date(at).toISOString() !== at ||
+        !nowSim ||
+        c.simTime.ticks > nowSim.ticks
+      )
+        invalid(
+          'fixed automatic Goods worker, due Command and server time required',
+        );
+      const identity = await session(tx);
+      const leaseRow = await tx.query<Row>(
+        'select world_id,holder_id,fencing_token::text,acquired_at_real,renewed_at_real,lease_expires_at_real from world_v2.world_writer_lease where world_id=$1 for share',
+        [world],
+      );
+      if (leaseRow.rows.length !== 1)
+        invalid('actual automatic lease required');
+      const l = leaseRow.rows[0]!,
+        stamp = (v: unknown) => (v instanceof Date ? v.toISOString() : text(v)),
+        lease = parseWorldWriterLease({
+          schemaVersion: 'world-writer-lease-v1',
+          worldId: text(l.world_id),
+          holderId: text(l.holder_id),
+          fencingToken: text(l.fencing_token),
+          acquiredAtReal: stamp(l.acquired_at_real),
+          renewedAtReal: stamp(l.renewed_at_real),
+          expiresAtReal: stamp(l.lease_expires_at_real),
+        });
+      if (
+        lease.holderId !== holder ||
+        lease.renewedAtReal > at ||
+        lease.expiresAtReal <= at
+      )
+        invalid('actual current automatic lease differs');
+      const response = await tx.query<Row>(
+        POSTWAR_NARROW_TRADE_AUTOMATIC_SOURCE_QUERY,
+        [world, c.commandId, holder, at, nowSim!.toCanonicalValue()],
+      );
+      if (response.rows.length !== 1)
+        invalid('one complete fixed automatic source required');
+      const r = response.rows[0]!,
+        baseline = shared
+          ? consumePreparedPostwarSocialFinancialReplayBase(
+              readPostwarSocialRuntimeFinancialReplayBase(
+                shared.socialConnection,
+                world,
+              ),
+            )
+          : undefined;
+      if (
+        r.seed_id !== (baseline?.pins.seedRef ?? opening?.seedId) ||
+        r.seed_fingerprint !==
+          (baseline?.pins.contentHash ?? opening?.seedFingerprint) ||
+        r.admission_ref !==
+          (baseline?.pins.admissionRef ?? opening?.admissionRef) ||
+        (opening && r.canonical_seed_sha256 !== opening.canonicalSeedSha256)
+      )
+        invalid('automatic actual admitted opening differs');
+      const replayed = baseline
+          ? replay(baseline, r, world)
+          : replayGoodsOnly(r),
+        { prefix, financial, inventory } = replayed;
+      if (
+        !inventory ||
+        c.expectedWorldVersion !== prefix.head.worldVersion ||
+        prefix.frames.some((f) => f.command.simTime.ticks > c.simTime.ticks)
+      )
+        invalid('automatic exact complete current inventory/head required');
+      const payload = row(JSON.parse(c.canonicalPayload)),
+        entry = replayed.goods?.find(
+          (g) => g.transfer.commandId === payload.transferCommandId,
+        );
+      if (
+        !entry ||
+        entry.delivered ||
+        payload.transferFingerprint !== entry.transfer.fingerprint
+      )
+        invalid('actual unfinished committed Goods obligation required');
+      let source: import('@econmind/core').InventoryAccount;
+      if (c.commandType === 'CORE_GOODS_SHIPMENT_V1') {
+        const terms = parseNarrowTreasuryGcuShipmentTerms({
+          shipmentCommand: c,
+          transferCommand: entry.transfer,
+          sha256Hex: sha,
+        });
+        if (
+          entry.shipmentId !== null ||
+          replayed.goods?.some((g) => g.shipmentId === terms.shipmentId)
+        )
+          invalid('obligation already shipped or duplicate shipment identity');
+        source = one(
+          inventory.balances
+            .filter((b) => same(b.account, entry.reservation))
+            .map((b) => b.account),
+        );
+      } else {
+        const terms = parseNarrowTreasuryGcuDeliveryTerms({
+          deliveryCommand: c,
+          transferCommand: entry.transfer,
+          sha256Hex: sha,
+        });
+        if (entry.shipmentId !== terms.shipmentId)
+          invalid('actual committed shipment differs');
+        // The committed payment policy is BUYER_TREASURY_GCU. Core's generic
+        // movement primitive does not confer government control over another
+        // domestic owner's cash. Reuse the same actual GOV roster as Reserve.
+        const transferTerms = parseNarrowTreasuryGcuTransferTerms(
+          entry.transfer,
+        );
+        const governments = [
+          ...new Set(
+            baseline
+              ? baseline.document.inputs.fundingAccounts
+                  .filter(
+                    (f) =>
+                      f.countryId === transferTerms.buyerCountryId &&
+                      f.payerRole === 'GOV',
+                  )
+                  .map((f) => f.payerEntityId)
+              : opening!.governments
+                  .filter((g) => g.countryId === transferTerms.buyerCountryId)
+                  .map((g) => g.ownerId),
+          ),
+        ];
+        const cash = (owner: string, country: string) =>
+          financial.accounts.filter(
+            (a) =>
+              a.ownerId === owner &&
+              a.countryId === country &&
+              a.accountClass === 'CASH' &&
+              a.currency === 'GCU' &&
+              a.claimId === null &&
+              a.counterpartyEntityId === null,
+          );
+        const buyer =
+            governments.length === 1
+              ? cash(governments[0]!, transferTerms.buyerCountryId)
+              : [],
+          seller = cash(
+            transferTerms.assetSource.titleHolderId,
+            transferTerms.sellerCountryId,
+          );
+        if (
+          buyer.length !== 1 ||
+          seller.length !== 1 ||
+          terms.buyerTreasuryAccountId !== buyer[0]!.accountId ||
+          terms.sellerSettlementAccountId !== seller[0]!.accountId ||
+          terms.destination.titleHolderId !== buyer[0]!.ownerId
+        )
+          invalid(
+            'automatic actual GOV treasury and original seller-title accounts required',
+          );
+
+        source = one(
+          inventory.balances
+            .filter(
+              (b) =>
+                b.account.shipmentId === entry.shipmentId &&
+                b.account.bucket === 'IN_TRANSIT',
+            )
+            .map((b) => b.account),
+        );
+      }
+      if ((await session(tx)) !== identity)
+        invalid('automatic source transaction lifetime changed');
+      return freeze({
+        transferCommand: entry.transfer,
+        source,
+        inventory,
+        financial,
+        commitAssertion: createWorldWriterCommitAssertion(
+          lease,
+          c.expectedWorldVersion,
+        ),
+        binding: {
+          schemaVersion: 'postwar-narrow-trade-automatic-binding-v1',
+          commandFingerprint: c.fingerprint,
+          observedAtReal: at,
+          head: { worldId: world, ...prefix.head },
+          workerId: holder,
+          seedId: text(r.seed_id),
+          seedFingerprint: text(r.seed_fingerprint),
+          admissionRef: text(r.admission_ref),
+          prefixFingerprint: hash(prefix.frames),
+          transferFingerprint: entry.transfer.fingerprint,
+          inventoryFingerprint: hash(inventory),
+          financialFingerprint: hash(financial),
+        },
+      });
+    };
   const inspectCommitFrom: PostwarNarrowTradeCurrentSource['inspectCommitFrom'] =
     async (tx, input) => {
       const c = input.command,
@@ -773,6 +1115,151 @@ export function createPostwarNarrowTradeCurrentSource(
         if (active.has(tx))
           invalid('nonreentrant same-executor cutoff required');
         const { command: c, commitAuthorization: p, transition: t } = request;
+        if (
+          ['CORE_GOODS_SHIPMENT_V1', 'CORE_GOODS_DELIVERY_V1'].includes(
+            c.commandType,
+          )
+        ) {
+          if (
+            request.phase !== 'BEFORE_EVENTS' ||
+            request.purpose !== POSTWAR_NARROW_TRADE_CURRENT_SOURCE_PURPOSE ||
+            p !== null ||
+            c.officeId !== null ||
+            request.inventoryPostings.length !== 1
+          )
+            invalid('fixed automatic Goods source cutoff required');
+          validateAuthoritativeTransition(t);
+          if (
+            t.commandId !== c.commandId ||
+            t.commandFingerprint !== c.fingerprint ||
+            t.worldId !== world ||
+            t.events.length !== 1 ||
+            t.worldVersionBefore !== request.currentHead.worldVersion
+          )
+            invalid('exact automatic Goods transition required');
+          active.add(tx);
+          try {
+            const binding = row(request.readBinding),
+              prepared = await inspectAutomaticFrom(tx, {
+                command: c,
+                workerId: text(binding.workerId),
+                observedAtReal: request.observedAtReal,
+              });
+            if (
+              !same(prepared.binding, request.readBinding) ||
+              !same(prepared.binding.head, request.currentHead)
+            )
+              invalid('automatic Goods source changed before commit');
+            const posting = request.inventoryPostings[0]!;
+            if (posting.schemaVersion !== 'inventory-posting-v1')
+              invalid('automatic narrow inventory movement required');
+            const event = t.events[0]!;
+            let expected: import('@econmind/core').InventoryPosting;
+            if (c.commandType === 'CORE_GOODS_SHIPMENT_V1') {
+              if (request.financialPostingBatches.length !== 0)
+                invalid('shipment has no financial effect');
+              const terms = parseNarrowTreasuryGcuShipmentTerms({
+                shipmentCommand: c,
+                transferCommand: prepared.transferCommand,
+                sha256Hex: sha,
+              });
+              if (
+                event.eventType !== 'NARROW_TREASURY_GCU_SHIPPED_V1' ||
+                !same(JSON.parse(event.canonicalPayload), {
+                  schemaVersion: 'narrow-treasury-gcu-shipment-event-v1',
+                  shipmentId: terms.shipmentId,
+                  transferCommandId: prepared.transferCommand.commandId,
+                  transferFingerprint: prepared.transferCommand.fingerprint,
+                })
+              )
+                invalid('exact automatic shipment event required');
+              expected = shipNarrowTreasuryGcuTransfer({
+                shipmentCommand: c,
+                transferCommand: prepared.transferCommand,
+                inventoryState: prepared.inventory,
+                source: prepared.source,
+                postingId: posting.postingId,
+                transition: t,
+                causationEventIds: t.eventIds,
+                sha256Hex: sha,
+              }).posting;
+            } else {
+              const batch = request.financialPostingBatches[0],
+                terms = parseNarrowTreasuryGcuDeliveryTerms({
+                  deliveryCommand: c,
+                  transferCommand: prepared.transferCommand,
+                  sha256Hex: sha,
+                });
+              if (
+                request.financialPostingBatches.length !== 1 ||
+                !batch ||
+                batch.legs.length !== 2
+              )
+                invalid('exact automatic delivery settlement required');
+              if (
+                event.eventType !== 'NARROW_TREASURY_GCU_DELIVERED_V1' ||
+                !same(JSON.parse(event.canonicalPayload), {
+                  schemaVersion: 'narrow-treasury-gcu-delivery-event-v1',
+                  shipmentId: terms.shipmentId,
+                  transferCommandId: prepared.transferCommand.commandId,
+                  transferFingerprint: prepared.transferCommand.fingerprint,
+                })
+              )
+                invalid('exact automatic delivery event required');
+              const buyer = one(
+                  prepared.financial.accounts.filter(
+                    (a) => a.accountId === terms.buyerTreasuryAccountId,
+                  ),
+                ),
+                seller = one(
+                  prepared.financial.accounts.filter(
+                    (a) => a.accountId === terms.sellerSettlementAccountId,
+                  ),
+                );
+              const buyerLeg = batch.legs.find(
+                  (l) => l.account.accountId === buyer.accountId,
+                ),
+                sellerLeg = batch.legs.find(
+                  (l) => l.account.accountId === seller.accountId,
+                );
+              if (!buyerLeg || !sellerLeg)
+                invalid('exact delivery buyer/seller legs required');
+              const derived = deliverNarrowTreasuryGcuTransfer({
+                deliveryCommand: c,
+                transferCommand: prepared.transferCommand,
+                inventoryState: prepared.inventory,
+                financialState: prepared.financial,
+                source: prepared.source,
+                inventoryPostingId: posting.postingId,
+                financialBatchId: batch.batchId,
+                buyerTreasuryLegId: buyerLeg.legId,
+                sellerSettlementLegId: sellerLeg.legId,
+                buyerTreasury: buyer,
+                sellerSettlement: seller,
+                transition: t,
+                causationEventIds: t.eventIds,
+                sha256Hex: sha,
+              });
+              if (!same(derived.settlement, batch))
+                invalid(
+                  'automatic delivery financial legs differ from actual source',
+                );
+              expected = derived.posting;
+            }
+            if (!same(expected, posting))
+              invalid('automatic Goods inventory differs from actual source');
+            return freeze({
+              status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+              purpose: POSTWAR_NARROW_TRADE_CURRENT_SOURCE_PURPOSE,
+              commandFingerprint: c.fingerprint,
+              currentHead: { ...request.currentHead },
+              readBindingFingerprint: hash(request.readBinding),
+              protectionMode: 'HELD_SOURCE_GUARDS',
+            });
+          } finally {
+            active.delete(tx);
+          }
+        }
         if (
           request.phase !== 'BEFORE_EVENTS' ||
           request.purpose !== POSTWAR_NARROW_TRADE_CURRENT_SOURCE_PURPOSE ||
@@ -877,6 +1364,7 @@ export function createPostwarNarrowTradeCurrentSource(
   ports.add(sourceCommitProtectionPort);
   const source: Readonly<PostwarNarrowTradeCurrentSource> = Object.freeze({
     sourceCommitProtectionPort,
+    inspectAutomaticFrom,
     inspectCommitFrom,
     async inspectFrom(
       tx: SqlExecutor,

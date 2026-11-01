@@ -19,7 +19,7 @@ import {
 } from '@econmind/core/finance-budget-native';
 import { replayPreparedPostwarFinanceSocialFxFrom } from './prepared-postwar-finance-social-fx-replay.js';
 import {
-  prepareFinanceSocialLedger,
+  prepareFinanceSocialLedgerFromOpening,
   replayPreparedFinanceSocialLedger,
   type PreparedFinanceSocialLedger,
 } from '@econmind/core/finance-social-prepared-ledger';
@@ -262,11 +262,15 @@ export async function preparePostwarSocialSource(input: {
           registrations.set(country.countryId, canonicalSerialize(r));
         }
         if (!registrations.size) invalid('CANONICAL_COUNTRIES_REQUIRED');
-        const financial = rebuildV08LedgersFromLineage({
+        const reconstructed = rebuildV08LedgersFromLineage({
           seed,
           sha256Hex: sha,
-        }).financial;
-        const ledger = prepareFinanceSocialLedger(financial);
+        });
+        const financial = reconstructed.financial;
+        const ledger = prepareFinanceSocialLedgerFromOpening(
+          reconstructed,
+          sha,
+        );
         return Object.freeze({
           pins,
           modelVersion: c.modelVersion,

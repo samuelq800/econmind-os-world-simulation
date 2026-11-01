@@ -292,7 +292,7 @@ describe('fixed postwar narrow reservation candidate/Atomic integration', () => 
           commitAuthorization: f.c.proof,
           observedAtReal: f.c.at,
         }),
-      ).rejects.toThrow('NARROW_CURRENT_REPLAY_UNAVAILABLE_INVENTORY_EFFECT');
+      ).rejects.toThrow('genuine opening-only preparation supports H0 only');
       await f.reset();
       const r = await f.db.query<{
         world_version: string;

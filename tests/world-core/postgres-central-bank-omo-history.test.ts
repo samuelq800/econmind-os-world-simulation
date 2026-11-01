@@ -1,8 +1,14 @@
 /** Actual Atomic CB history + actual fixed-role SQL reads. Host source rows
  * below are explicitly TEST_ONLY metadata fixtures, not Finance/FX/Captain
- * policy admission or evidence of an executable cross-domain Core replay. */
+ * policy admission or cross-domain command submission. FX/Captain readers
+ * additionally feed these actual originals and full SQL prefix into Core. */
 import { readFile } from 'node:fs/promises';
 import { describe, it, expect } from 'vitest';
+import * as C from '@econmind/core';
+import {
+  prepareFinanceSocialLedger,
+  replayPreparedFinanceSocialFxLedger,
+} from '@econmind/core/finance-social-prepared-ledger';
 import {
   createCentralBankOmoAtomicFixture,
   cbAtomicTestSha,
@@ -10,6 +16,7 @@ import {
 import { DurableV08LedgerLineageReader } from '../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.js';
 import {
   readCentralBankOmoCommittedOriginalsFrom,
+  readCentralBankOmoMixedReplayOriginalsFrom,
   type CentralBankOmoHistoricalFrame,
 } from '../../apps/world-worker/src/persistence/postgres-central-bank-omo-history.js';
 import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
@@ -145,6 +152,50 @@ create table world_v2.captain_source_publication_registry(world_id text,country_
         expect(data.countries[0]?.frames[0]?.commandFingerprint).toBe(
           f.command.fingerprint,
         );
+        if (officeId === 'TREASURY_FX' || officeId === 'CAPTAIN') {
+          const originals = await run(role, (tx) =>
+            readCentralBankOmoMixedReplayOriginalsFrom(tx, {
+              ...base,
+              officeId,
+              sourceMetadata: f.seed.sources.map((s) => ({
+                sourceId: s.sourceId,
+                payloadHash: s.payloadHash,
+              })),
+            }),
+          );
+          const opening = C.rebuildV08LedgersFromLineage({
+            seed: f.seed,
+            sha256Hex: cbAtomicTestSha,
+          }).financial;
+          const replayed = replayPreparedFinanceSocialFxLedger({
+            prepared: prepareFinanceSocialLedger(opening),
+            frames: lineage.transitions.map((frame) => ({
+              ...frame,
+              events: frame.transition.events,
+            })),
+            socialCountries: [],
+            openingEncumbrances: [],
+            fxOriginals: [],
+            omoOriginals: originals,
+            expectedHead: base.expectedHead,
+            sha256Hex: cbAtomicTestSha,
+          });
+          const actual = C.rebuildV08LedgersFromLineage({
+            seed: f.seed,
+            transitions: lineage.transitions,
+            sha256Hex: cbAtomicTestSha,
+          }).financial;
+          expect(C.canonicalSerialize(replayed.financial)).toBe(
+            C.canonicalSerialize(actual),
+          );
+          expect(
+            replayed.omoCountries?.[0]?.holdings.find(
+              (h) => h.holderRef === f.original.bank.bankRef,
+            )?.carryingValue,
+          ).toBe('98.75');
+          const clone = { ...opening };
+          expect(() => prepareFinanceSocialLedger(clone)).toThrow();
+        }
       }
       await expect(
         run('world_v2_finance_budget_source_reader', (tx) =>

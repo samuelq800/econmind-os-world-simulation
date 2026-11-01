@@ -18,6 +18,7 @@ import {
   validateCentralBankOmoSource,
   centralBankOmoSourceHash,
   parseWorldWriterLease,
+  SimTime,
   createWorldWriterCommitAssertion,
   validateCanonicalCommand,
   isCommitAuthorizationProof,
@@ -68,6 +69,8 @@ import {
 import { consumePreparedPostwarSocialFinancialReplayBase } from './prepared-postwar-social-source.js';
 import { projectPostwarOpeningFinancialEncumbrances } from './prepared-postwar-finance-social-fx-replay.js';
 import { readPostwarBeneficialHousingRentMixedOriginalsForSocialBase } from './postwar-beneficial-housing-rent-mixed-source.js';
+import { readCentralBankOmoMixedHistoryFrom } from './postwar-central-bank-omo-mixed-history.js';
+import { projectCentralBankDayOneValuedSnapshot } from '@econmind/core/central-bank-day-one-valuation';
 
 export const CENTRAL_BANK_OMO_SOURCE_PURPOSE =
   'CENTRAL_BANK_OMO_SOURCE_RECHECK_V1' as const;
@@ -144,7 +147,12 @@ function freeze<T>(v: T): T {
 }
 type Financial = ReturnType<typeof rebuildV08LedgersFromLineage>['financial'];
 interface Prepared {
+  readonly seedId: string;
   readonly seedFingerprint: string;
+  readonly sourceMetadata: readonly {
+    readonly sourceId: string;
+    readonly payloadHash: string;
+  }[];
   readonly rawSHA256: string;
   readonly financial: Financial;
   readonly mixedLedger: PreparedFinanceSocialLedger;
@@ -169,6 +177,7 @@ function trace(
 function snapshots(
   original: CentralBankOmoLockedOriginals,
   financial: Financial,
+  simTime = '0',
 ) {
   const update = <T extends object>(
     template: T,
@@ -195,13 +204,34 @@ function snapshots(
     }
     return result as T;
   };
-  return {
-    bank: update(original.original.bank, original.original.bankAccounts),
-    centralBank: update(
+  const bank = update(original.original.bank, original.original.bankAccounts),
+    centralBank = update(
       original.original.centralBank,
       original.original.centralBankAccounts,
     ),
-  };
+    q = original.original.valuationQuote;
+  return q === undefined
+    ? { bank, centralBank }
+    : {
+        bank: projectCentralBankDayOneValuedSnapshot({
+          financial,
+          quote: q,
+          ownerRef: bank.bankRef,
+          simTime: SimTime.fromTicks(simTime),
+          snapshot: bank,
+          assetField: 'settlementCash',
+          sha256Hex: sha,
+        }),
+        centralBank: projectCentralBankDayOneValuedSnapshot({
+          financial,
+          quote: q,
+          ownerRef: centralBank.centralBankRef,
+          simTime: SimTime.fromTicks(simTime),
+          snapshot: centralBank,
+          assetField: 'otherAssets',
+          sha256Hex: sha,
+        }),
+      };
 }
 function sourceFrom(
   original: CentralBankOmoLockedOriginals,
@@ -218,11 +248,14 @@ function sourceFrom(
     currentSimTime: simTime,
     currentEventSequence: sequence,
     domesticTreasuryRef: o.domesticTreasuryRef,
-    ...snapshots(original, financial),
+    ...snapshots(original, financial, simTime),
     bankAccounts: o.bankAccounts,
     centralBankAccounts: o.centralBankAccounts,
     holdings,
     quote: original.quote,
+    ...(o.valuationQuote === undefined
+      ? {}
+      : { valuationQuote: o.valuationQuote }),
   };
   return { facts, trace: trace(facts, original), financialState: financial };
 }
@@ -511,6 +544,25 @@ export function createPostwarCentralBankOmoRuntime(config: {
         original.sourceClass !== 'ADMITTED_ORIGINAL')
     )
       invalid('EXACT_INDEPENDENT_SOURCE_ADOPTION_REQUIRED');
+    const valuationQuote = original.original.valuationQuote;
+    const sourceMetadata = prepared.sourceMetadata;
+    if (
+      valuationQuote !== undefined &&
+      (valuationQuote.seedFingerprint !== prepared.seedFingerprint ||
+        [
+          [
+            valuationQuote.financialSourceId,
+            valuationQuote.financialSourcePayloadHash,
+          ],
+          [valuationQuote.gcuSourceId, valuationQuote.gcuSourcePayloadHash],
+        ].some(
+          ([sourceId, payloadHash]) =>
+            sourceMetadata.filter(
+              (s) => s.sourceId === sourceId && s.payloadHash === payloadHash,
+            ).length !== 1,
+        ))
+    )
+      invalid('EXACT_OPENING_VALUATION_SOURCE_PINS_REQUIRED');
     const openingSnapshots = snapshots(original, prepared.financial);
     if (
       !same(openingSnapshots.bank, original.original.bank) ||
@@ -630,9 +682,36 @@ export function createPostwarCentralBankOmoRuntime(config: {
       if (!host.quotes.some((q) => q.quoteRef === original.quote.quoteRef))
         host.quotes.push(original.quote);
     } else origins.push({ ...original.original, quotes: [original.quote] });
+    for (const origin of origins) {
+      const q = origin.valuationQuote;
+      if (
+        q !== undefined &&
+        [
+          [q.financialSourceId, q.financialSourcePayloadHash],
+          [q.gcuSourceId, q.gcuSourcePayloadHash],
+        ].some(
+          ([id, hash]) =>
+            base.sourceMetadata.filter(
+              (s) => s.sourceId === id && s.payloadHash === hash,
+            ).length !== 1,
+        )
+      )
+        invalid('EXACT_HISTORICAL_VALUATION_SOURCE_PINS_REQUIRED');
+    }
     const beneficialHousingRentReceipts = b
       ? readPostwarBeneficialHousingRentMixedOriginalsForSocialBase(b)
       : undefined;
+    const foreignOriginals = await readCentralBankOmoMixedHistoryFrom(tx, {
+      worldId: config.worldId,
+      countryId: config.countryId,
+      seedId: base.seedId,
+      seedFingerprint: base.seedFingerprint,
+      admissionRef: original.binding.admissionRef,
+      expectedHead: decoded.head,
+      frames: decoded.frames,
+      openingFinancial: base.financial,
+      sourceMetadata: base.sourceMetadata,
+    });
     const result = replayPreparedFinanceSocialFxLedger({
       prepared: b?.prepared ?? base.mixedLedger,
       frames: decoded.frames,
@@ -645,7 +724,7 @@ export function createPostwarCentralBankOmoRuntime(config: {
       openingEncumbrances: b
         ? projectPostwarOpeningFinancialEncumbrances(b.funding)
         : [],
-      fxOriginals: [],
+      ...foreignOriginals,
       omoOriginals: origins,
       ...(beneficialHousingRentReceipts === undefined
         ? {}
@@ -835,7 +914,13 @@ export function createPostwarCentralBankOmoRuntime(config: {
         sha256Hex: sha,
       }).financial;
       const next = {
+        seedId: seed.seedId,
         seedFingerprint: fingerprint,
+        sourceMetadata: Object.freeze(
+          seed.sources.map((s) =>
+            Object.freeze({ sourceId: s.sourceId, payloadHash: s.payloadHash }),
+          ),
+        ),
         rawSHA256,
         financial,
         mixedLedger: prepareFinanceSocialLedger(financial),

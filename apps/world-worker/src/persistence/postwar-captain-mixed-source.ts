@@ -4,6 +4,7 @@
 import { createHash } from 'node:crypto';
 import {
   canonicalSerialize,
+  CENTRAL_BANK_OMO_COMMAND,
   type CanonicalCommand,
   type FinancialAccount,
   type CaptainPoliticalCapitalReplayState,
@@ -29,6 +30,7 @@ import type {
 import type { SqlExecutor } from './sql-database.js';
 import { readPostwarBeneficialHousingRentMixedOriginalsForSocialBase } from './postwar-beneficial-housing-rent-mixed-source.js';
 import { decodeDurableCanonicalCommandRow } from './durable-v08-ledger-lineage-reader.js';
+import { readCentralBankOmoMixedReplayOriginalsFrom } from './postgres-central-bank-omo-history.js';
 export interface PostwarCaptainMixedSource {
   readonly kind: 'POSTWAR_CAPTAIN_GENUINE_MIXED_SOURCE';
 }
@@ -308,6 +310,23 @@ export async function readPostwarCaptainMixedSourceFrom(
     })),
     openingEncumbrances: projectPostwarOpeningFinancialEncumbrances(b.funding),
     fxOriginals,
+    ...(prefix.frames.some(
+      (f) => f.command.commandType === CENTRAL_BANK_OMO_COMMAND,
+    )
+      ? {
+          omoOriginals: await readCentralBankOmoMixedReplayOriginalsFrom(tx, {
+            worldId: c.worldId,
+            hostCountryId: c.countryId,
+            officeId: 'CAPTAIN',
+            seedFingerprint: b.pins.contentHash,
+            admissionRef: b.pins.admissionRef,
+            expectedHead: prefix.head,
+            frames: prefix.frames,
+            mode: input.mode,
+            sourceMetadata: b.sourceMetadata,
+          }),
+        }
+      : {}),
     captainCountries: originals.map((p) => ({
       countryId: p.adoption.countryId,
       capital: (

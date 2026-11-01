@@ -32,11 +32,11 @@ do $$declare t text;begin
  end loop;
  -- Optional domain installations remain closed until their real source
  -- tables/roles exist. No fallback, caller source record or role enrollment.
- foreach t in array array['social_operating_source_registration','social_operating_source_revocation','finance_budget_policy_original','finance_budget_policy_revocation']loop
+ foreach t in array array['social_operating_source_registration','social_operating_source_revocation','finance_budget_policy_original','finance_budget_policy_revocation','central_bank_omo_adoption','central_bank_omo_revocation','central_bank_omo_original']loop
   if to_regclass('world_v2.'||t)is not null then
    execute format('grant select on world_v2.%I to world_v2_day_one_fx_history_owner',t);
-   if t in('social_operating_source_registration','finance_budget_policy_original')then
-    execute format('grant update(%I)on world_v2.%I to world_v2_day_one_fx_history_owner',case t when 'social_operating_source_registration'then 'registration_ref'else 'policy_ref'end,t);
+   if t in('social_operating_source_registration','finance_budget_policy_original','central_bank_omo_adoption')then
+    execute format('grant update(%I)on world_v2.%I to world_v2_day_one_fx_history_owner',case t when 'social_operating_source_registration'then 'registration_ref'when 'central_bank_omo_adoption'then 'adoption_ref'else 'policy_ref'end,t);
     execute format('create policy fx_history_host_read on world_v2.%I for select to world_v2_day_one_fx_history_owner using(current_user=''world_v2_day_one_fx_history_owner''and world_id=current_setting(''econmind.fx_history_world'',true))',t);
     execute format('create policy fx_history_host_read_fence on world_v2.%I as restrictive for select to world_v2_day_one_fx_history_owner using(current_user=''world_v2_day_one_fx_history_owner''and world_id=current_setting(''econmind.fx_history_world'',true))',t);
     execute format('create policy fx_history_host_lock on world_v2.%I for update to world_v2_day_one_fx_history_owner using(current_user=''world_v2_day_one_fx_history_owner''and world_id=current_setting(''econmind.fx_history_world'',true))with check(false)',t);
@@ -50,12 +50,12 @@ language plpgsql security definer set search_path=pg_catalog as $$
 declare effective name;required name;role_id oid;a world_v2.runtime_opening_admission%rowtype;permit world_v2.runtime_admission_publication_permit%rowtype;
  h record;host_ref text;s record;q record;e record;c record;begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
- required:=case p_office when 'SOCIAL'then 'world_v2_social_source_reader'when 'FINANCE'then case when p_purpose='TREASURY_FX_SOURCE_REPLAY'then 'world_v2_day_one_fx_source_reader'else 'world_v2_finance_budget_source_reader'end else null end;
+ required:=case p_office when 'SOCIAL'then 'world_v2_social_source_reader'when 'FINANCE'then case when p_purpose='TREASURY_FX_SOURCE_REPLAY'then 'world_v2_day_one_fx_source_reader'else 'world_v2_finance_budget_source_reader'end when 'CENTRAL_BANK'then case when p_purpose='CB_OMO_SOURCE_REPLAY'then 'world_v2_cb_omo_source_reader'else null end else null end;
  select oid into role_id from pg_roles where rolname=required;
  if required is null or role_id is null or not pg_has_role(effective,role_id,'MEMBER')or
  exists(select 1 from pg_roles x where x.rolname=effective and(x.rolsuper or x.rolbypassrls or x.rolcreatedb or x.rolcreaterole or x.rolreplication))or
- exists(select 1 from pg_roles x where x.rolname in('world_v2_day_one_fx_history_owner','world_v2_day_one_fx_source_owner','world_v2_day_one_fx_source_publisher','world_v2_social_source_owner','world_v2_social_source_publisher','world_v2_finance_budget_source_owner','world_v2_finance_budget_source_publisher')and pg_has_role(effective,x.oid,'MEMBER'))then raise exception 'FX_HISTORY_FIXED_SOURCE_READER_REQUIRED'using errcode='42501';end if;
- if p_purpose is null or p_purpose not in('SOURCE_REPLAY','TREASURY_FX_SOURCE_REPLAY')or(p_purpose='TREASURY_FX_SOURCE_REPLAY'and p_office<>'FINANCE')or p_world is null or p_world!~'^[A-Z][A-Z0-9_]*$'or
+ exists(select 1 from pg_roles x where x.rolname in('world_v2_day_one_fx_history_owner','world_v2_day_one_fx_source_owner','world_v2_day_one_fx_source_publisher','world_v2_social_source_owner','world_v2_social_source_publisher','world_v2_finance_budget_source_owner','world_v2_finance_budget_source_publisher','world_v2_cb_omo_source_owner','world_v2_cb_omo_source_publisher')and pg_has_role(effective,x.oid,'MEMBER'))then raise exception 'FX_HISTORY_FIXED_SOURCE_READER_REQUIRED'using errcode='42501';end if;
+ if p_purpose is null or p_purpose not in('SOURCE_REPLAY','TREASURY_FX_SOURCE_REPLAY','CB_OMO_SOURCE_REPLAY')or(p_purpose='TREASURY_FX_SOURCE_REPLAY'and p_office<>'FINANCE')or(p_purpose='CB_OMO_SOURCE_REPLAY'and p_office<>'CENTRAL_BANK')or p_world is null or p_world!~'^[A-Z][A-Z0-9_]*$'or
  p_host_country is null or p_host_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or p_source_country is null or p_source_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or
  p_seed_fingerprint is null or p_seed_fingerprint!~'^sha256:[a-f0-9]{64}$'or p_admission_ref is null or p_event_id is null or
  p_event_payload_hash is null or p_event_payload_hash!~'^sha256:[a-f0-9]{64}$'or p_quote_ref is null or p_quote_sha256 is null or p_quote_sha256!~'^[a-f0-9]{64}$'then raise exception 'FX_HISTORY_EXACT_REPLAY_SCOPE_REQUIRED'using errcode='22023';end if;
@@ -69,6 +69,10 @@ declare effective name;required name;role_id oid;a world_v2.runtime_opening_admi
  if p_purpose='TREASURY_FX_SOURCE_REPLAY'then
   select x.registration_ref into host_ref from world_v2.postwar_day_one_fx_source_original x where x.world_id=p_world and x.seed_id=a.seed_id and x.seed_fingerprint=p_seed_fingerprint and x.admission_ref=p_admission_ref for share;
   if not found or not exists(select 1 from world_v2.postwar_day_one_fx_quote_original x where x.world_id=p_world and x.country_id=p_host_country)then raise exception 'FX_HISTORY_CURRENT_HOST_SOURCE_REQUIRED'using errcode='55000';end if;
+ elsif p_office='CENTRAL_BANK'then
+  if to_regclass('world_v2.central_bank_omo_adoption')is null or to_regclass('world_v2.central_bank_omo_revocation')is null or to_regclass('world_v2.central_bank_omo_original')is null then raise exception 'FX_HISTORY_CURRENT_HOST_SOURCE_REQUIRED'using errcode='55000';end if;
+  select x.adoption_ref into host_ref from world_v2.central_bank_omo_adoption x where x.world_id=p_world and x.country_id=p_host_country and x.seed_fingerprint=p_seed_fingerprint and x.admission_ref=p_admission_ref and exists(select 1 from world_v2.central_bank_omo_original o where o.adoption_ref=x.adoption_ref)for share;
+  if not found or exists(select 1 from world_v2.central_bank_omo_revocation x where x.adoption_ref=host_ref and x.resource_ref='SOURCE')then raise exception 'FX_HISTORY_CURRENT_HOST_SOURCE_REVOKED'using errcode='55000';end if;
  elsif p_office='SOCIAL'then
   if to_regclass('world_v2.social_operating_source_registration')is null or to_regclass('world_v2.social_operating_source_revocation')is null then raise exception 'FX_HISTORY_CURRENT_HOST_SOURCE_REQUIRED'using errcode='55000';end if;
   select x.registration_ref into host_ref from world_v2.social_operating_source_registration x where x.world_id=p_world and x.country_id=p_host_country and x.seed_fingerprint=p_seed_fingerprint and x.admission_ref=p_admission_ref for share;
@@ -95,7 +99,7 @@ end;$$;
 alter function world_v2.read_postwar_day_one_fx_committed_quote(text,text,text,text,text,text,text,text,text,text,text)owner to world_v2_day_one_fx_history_owner;
 revoke all on function world_v2.read_postwar_day_one_fx_committed_quote(text,text,text,text,text,text,text,text,text,text,text)from public;
 do $$declare r text;begin
- foreach r in array array['world_v2_social_source_reader','world_v2_finance_budget_source_reader','world_v2_day_one_fx_source_reader']loop
+ foreach r in array array['world_v2_social_source_reader','world_v2_finance_budget_source_reader','world_v2_day_one_fx_source_reader','world_v2_cb_omo_source_reader']loop
   if exists(select 1 from pg_roles where rolname=r)then
    execute format('grant execute on function world_v2.read_postwar_day_one_fx_committed_quote(text,text,text,text,text,text,text,text,text,text,text)to %I',r);
   end if;

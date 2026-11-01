@@ -15,6 +15,7 @@ import {
 } from '@econmind/core';
 import type { CentralBankOmoOriginal } from './postgres-central-bank-omo-originals.js';
 import type { SqlExecutor } from './sql-database.js';
+import { assertCentralBankOmoValuationQuoteScope } from './postgres-central-bank-omo-originals.js';
 export const CENTRAL_BANK_OMO_HISTORY_PROPOSAL =
   'database/proposals/central-bank-omo-history-read.sql';
 export const CENTRAL_BANK_OMO_HISTORY_QUERY =
@@ -206,6 +207,7 @@ export async function readCentralBankOmoCommittedOriginalsFrom(
       r.original_sha256,
       262144,
     );
+    assertCentralBankOmoValuationQuoteScope(original);
     if (
       original.schemaVersion !== 'central-bank-omo-original-v1' ||
       original.worldId !== input.worldId ||
@@ -294,4 +296,41 @@ export async function readCentralBankOmoCommittedOriginalsFrom(
     head: { ...input.expectedHead },
     countries,
   });
+}
+/** Fixed historical DATA plus exact genuine-opening source pins. Callers
+ * retain their own private H0 brand and current host source/actor locks. */
+export async function readCentralBankOmoMixedReplayOriginalsFrom(
+  tx: SqlExecutor,
+  input: Parameters<typeof readCentralBankOmoCommittedOriginalsFrom>[1] & {
+    readonly sourceMetadata: readonly {
+      readonly sourceId: string;
+      readonly payloadHash: string;
+    }[];
+  },
+) {
+  const history = await readCentralBankOmoCommittedOriginalsFrom(tx, input);
+  for (const c of history.countries) {
+    const q = c.original.valuationQuote;
+    if (
+      q !== undefined &&
+      [
+        [q.financialSourceId, q.financialSourcePayloadHash],
+        [q.gcuSourceId, q.gcuSourcePayloadHash],
+      ].some(
+        ([id, hash]) =>
+          input.sourceMetadata.filter(
+            (s) => s.sourceId === id && s.payloadHash === hash,
+          ).length !== 1,
+      )
+    )
+      invalid('EXACT_GENUINE_OPENING_VALUATION_SOURCE_PINS_REQUIRED');
+  }
+  return Object.freeze(
+    history.countries.map((c) =>
+      Object.freeze({
+        ...c.original,
+        quotes: Object.freeze(c.quotes.map((q) => q.quote)),
+      }),
+    ),
+  );
 }
