@@ -82,6 +82,30 @@ export const REGISTERED_FINAL_NATIVE_SQL_ORDER = Object.freeze([
   'world-command-execution-registration',
   'postwar-source-revocation-fence',
 ]);
+// The initializer needs only these source-custody proposals before publishing
+// H0 originals. Their relative order always comes from the SAME full plan;
+// notably FX originals precede Finance's mixed-source/table declarations.
+const childSourceNames = new Set([
+  'finance-budget-custody',
+  'finance-budget-capacity-source',
+  'finance-budget-mixed-source',
+  'social-operating-custody',
+  'postwar-social-startup-seed-header',
+  'postwar-beneficial-housing-rent-custody',
+  'postwar-beneficial-rent-social-publication',
+  'captain-operating-custody',
+  'postwar-captain-source-publication',
+  'postwar-captain-mixed-read',
+  'postwar-day-one-fx-custody',
+  'postwar-finance-social-source-publication',
+]);
+export const REGISTERED_FINAL_CHILD_SOURCE_SQL_ORDER = Object.freeze(
+  REGISTERED_FINAL_NATIVE_SQL_ORDER.filter((name) =>
+    childSourceNames.has(name),
+  ),
+);
+if (REGISTERED_FINAL_CHILD_SOURCE_SQL_ORDER.length !== childSourceNames.size)
+  throw Error('CHILD_SOURCE_PROPOSAL_OUTSIDE_FIXED_FULL_PLAN');
 export const REGISTERED_FINAL_NATIVE_SQL_EXCLUSIONS = Object.freeze([
   Object.freeze({
     name: 'isolated-world-clock',

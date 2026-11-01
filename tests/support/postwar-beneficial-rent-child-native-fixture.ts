@@ -7,6 +7,7 @@ import { createReadStream } from 'node:fs';
 import { promisify } from 'node:util';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { REGISTERED_FINAL_CHILD_SOURCE_SQL_ORDER } from '../../tools/office-connection/registered-final-native-sql.mjs';
 import { Pool } from 'pg';
 import {
   createOpeningSeed,
@@ -264,20 +265,8 @@ async function runChildRehearsal(
     );
     clone = await clonePostwarNativeReference(marker, 'rent_child_acceptance');
     await stage('INSTALL_EXACT_SOURCE_PROPOSALS_IN_NEW_CHILD_CLONE');
-    for (const file of [
-      'database/proposals/finance-budget-custody.sql',
-      'database/proposals/finance-budget-capacity-source.sql',
-      'database/proposals/finance-budget-mixed-source.sql',
-      'database/proposals/social-operating-custody.sql',
-      'database/proposals/postwar-social-startup-seed-header.sql',
-      'database/proposals/postwar-beneficial-housing-rent-custody.sql',
-      'database/proposals/postwar-beneficial-rent-social-publication.sql',
-      'database/proposals/captain-operating-custody.sql',
-      'database/proposals/postwar-captain-source-publication.sql',
-      'database/proposals/postwar-captain-mixed-read.sql',
-      'database/proposals/postwar-day-one-fx-custody.sql',
-      'database/proposals/postwar-finance-social-source-publication.sql',
-    ]) {
+    for (const name of REGISTERED_FINAL_CHILD_SOURCE_SQL_ORDER) {
+      const file = 'database/proposals/' + name + '.sql';
       const sql = await readFile(path.join(input.repositoryRoot, file), 'utf8');
       await clone.installer.query(sql);
       installedSql.push({ path: file, sha256: sha(sql) });
