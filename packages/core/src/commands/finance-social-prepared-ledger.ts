@@ -9,6 +9,11 @@ import {
   parseFinancialLedgerSnapshot,
   type FinancialLedgerState,
 } from '../finance/financial-ledger.js';
+import type { InventoryLedgerState } from '../inventory/inventory-ledger.js';
+import {
+  reconcileV08LedgerSnapshots,
+  type RebuiltV08Ledgers,
+} from '../opening/opening-seed.js';
 import { inheritProductionDepositInstruments } from '../finance/production-deposit-funding.js';
 import {
   authorizeFinancialLedgerState,
@@ -26,6 +31,7 @@ import {
   readFinanceNativeBudgetMixedFinancialState,
   type FinanceSocialFxOpeningEncumbrance,
   type FinanceSocialFxOriginal,
+  type FinanceSocialOmoOriginal,
   type FinanceSocialFxCurrentTreasuryBalance,
   type FinanceNativeBudgetMixedPrefixResult,
   type FinanceNativeBudgetCanonicalFrame,
@@ -40,7 +46,10 @@ export interface PreparedFinanceSocialLedger {
 }
 const bases = new WeakMap<
   PreparedFinanceSocialLedger,
-  Readonly<FinancialLedgerState>
+  Readonly<{
+    financial: Readonly<FinancialLedgerState>;
+    opening?: Readonly<RebuiltV08Ledgers>;
+  }>
 >();
 function invalid(reason: string): never {
   throw new DomainError(
@@ -56,7 +65,25 @@ export function prepareFinanceSocialLedger(
   if (!isAuthoritativeFinancialLedgerState(base) || base.worldVersion !== '0')
     invalid('genuine H0 financial base required');
   const token = Object.freeze({}) as PreparedFinanceSocialLedger;
-  bases.set(token, base);
+  bases.set(token, Object.freeze({ financial: base }));
+  return token;
+}
+/** Genuine Core paired reconstruction only. An independently genuine inventory
+ * from another same-world seed cannot be attached to this financial base. The
+ * full seed/raw source is not retained; each request still checks actual pins. */
+export function prepareFinanceSocialLedgerFromOpening(
+  opening: Readonly<RebuiltV08Ledgers>,
+  sha256Hex: Sha256Hex,
+): PreparedFinanceSocialLedger {
+  reconcileV08LedgerSnapshots({ reconstructed: opening, sha256Hex });
+  if (
+    opening.worldVersion !== '0' ||
+    opening.financial.worldVersion !== '0' ||
+    opening.inventory.worldVersion !== '0'
+  )
+    invalid('genuine paired H0 reconstruction required');
+  const token = prepareFinanceSocialLedger(opening.financial);
+  bases.set(token, Object.freeze({ financial: opening.financial, opening }));
   return token;
 }
 export function replayPreparedFinanceSocialLedger(input: {
@@ -69,7 +96,8 @@ export function replayPreparedFinanceSocialLedger(input: {
   }>;
   readonly sha256Hex: Sha256Hex;
 }): Readonly<FinancialLedgerState> {
-  const base = bases.get(input.prepared);
+  const preparedBase = bases.get(input.prepared);
+  const base = preparedBase?.financial;
   if (!base || input.frames.length > 256)
     invalid('genuine preparation and bounded complete prefix required');
   // The existing private evidence validates domain effects, all countries,
@@ -154,18 +182,24 @@ export function replayPreparedFinanceSocialLedger(input: {
 }
 
 export type {
+  FinanceSocialOmoOriginal,
   FinanceSocialFxOpeningEncumbrance,
   FinanceSocialFxOriginal,
   FinanceSocialFxCurrentTreasuryBalance,
 } from './finance-budget-native.js';
 export interface PreparedFinanceSocialFxReplayResult {
+  readonly beneficialHousingRentOrigins?: FinanceNativeBudgetMixedPrefixResult['beneficialHousingRentOrigins'];
+  readonly omoCountries?: FinanceNativeBudgetMixedPrefixResult['omoCountries'];
   readonly financial: Readonly<FinancialLedgerState>;
+  readonly inventory?: Readonly<InventoryLedgerState>;
+  readonly narrowGoodsTransfers?: FinanceNativeBudgetMixedPrefixResult['narrowGoodsTransfers'];
   readonly mixedPrefixEvidence: FinanceNativeBudgetMixedPrefixEvidence;
   readonly budgetState: FinanceNativeBudgetMixedPrefixResult['budgetState'];
   readonly socialCountries: FinanceNativeBudgetMixedPrefixResult['socialCountries'];
   readonly socialReservations: FinanceNativeBudgetMixedPrefixResult['socialReservations'];
   readonly budgetEncumbrances: FinanceNativeBudgetMixedPrefixResult['budgetEncumbrances'];
   readonly checkpoints: FinanceNativeBudgetMixedPrefixResult['checkpoints'];
+  readonly captainCountries?: FinanceNativeBudgetMixedPrefixResult['captainCountries'];
   readonly currentTreasuryBalances: readonly FinanceSocialFxCurrentTreasuryBalance[];
   readonly frameHashes: readonly string[];
 }
@@ -177,22 +211,41 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   readonly socialCountries: Parameters<
     typeof prepareFinanceNativeBudgetMixedPrefix
   >[0]['socialCountries'];
+  readonly captainCountries?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['captainCountries'];
   readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
   readonly fxOriginals: readonly FinanceSocialFxOriginal[];
+  readonly omoOriginals?: readonly FinanceSocialOmoOriginal[];
+  readonly beneficialHousingRentReceipts?: Parameters<
+    typeof prepareFinanceNativeBudgetFinancialReplay
+  >[0]['beneficialHousingRentReceipts'];
   readonly expectedHead: {
     readonly worldVersion: string;
     readonly eventSequence: string;
   };
   readonly sha256Hex: Sha256Hex;
 }): PreparedFinanceSocialFxReplayResult {
-  const base = bases.get(input.prepared);
+  const preparedBase = bases.get(input.prepared);
+  const base = preparedBase?.financial;
   if (!base || input.frames.length > 256)
     invalid('genuine H0 preparation and bounded complete prefix required');
   const financialReplay = prepareFinanceNativeBudgetFinancialReplay(
     {
       financial: base,
+      ...(preparedBase?.opening === undefined
+        ? {}
+        : { opening: preparedBase.opening }),
       openingEncumbrances: input.openingEncumbrances,
       fxOriginals: input.fxOriginals,
+      ...(input.beneficialHousingRentReceipts === undefined
+        ? {}
+        : {
+            beneficialHousingRentReceipts: input.beneficialHousingRentReceipts,
+          }),
+      ...(input.omoOriginals === undefined
+        ? {}
+        : { omoOriginals: input.omoOriginals }),
     },
     input.sha256Hex,
   );
@@ -202,6 +255,9 @@ export function replayPreparedFinanceSocialFxLedger(input: {
       frames: input.frames,
       socialCountries: input.socialCountries,
       financialReplay,
+      ...(input.captainCountries === undefined
+        ? {}
+        : { captainCountries: input.captainCountries }),
     },
     input.sha256Hex,
   );
@@ -224,6 +280,21 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   });
   return Object.freeze({
     financial,
+    ...(result.inventoryState === undefined
+      ? {}
+      : { inventory: result.inventoryState }),
+    ...(result.narrowGoodsTransfers === undefined
+      ? {}
+      : { narrowGoodsTransfers: result.narrowGoodsTransfers }),
+    ...(result.beneficialHousingRentOrigins === undefined
+      ? {}
+      : { beneficialHousingRentOrigins: result.beneficialHousingRentOrigins }),
+    ...(result.omoCountries === undefined
+      ? {}
+      : { omoCountries: result.omoCountries }),
+    ...(result.captainCountries === undefined
+      ? {}
+      : { captainCountries: result.captainCountries }),
     mixedPrefixEvidence: evidence,
     budgetState: result.budgetState,
     socialCountries: result.socialCountries,

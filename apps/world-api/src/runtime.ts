@@ -38,9 +38,12 @@ import {
 import {
   createPostwarFinanceNodeRoute,
   createPostwarOfficeNodeRoute,
+  createPostwarOfficeReadNodeRoute,
 } from './runtime/postwar-finance-node-route.js';
+import type { ExplicitReadPreparationConfig } from './runtime-preparation/explicit-read-preparation-config.js';
 import type { PostwarFinanceConnection } from './runtime/postwar-finance-connection.js';
 import type { PostwarSocialConnection } from './runtime/postwar-social-connection.js';
+import type { PostwarCaptainConnection } from './runtime/postwar-captain-connection.js';
 import type { PostwarTreasuryFxConnection } from './runtime/postwar-treasury-fx-connection.js';
 import {
   readPostwarFinanceSocialApiConnection,
@@ -158,15 +161,24 @@ function createApiServer(
   postwarSocialConnection?: PostwarSocialConnection,
   postwarTreasuryFxConnection?: PostwarTreasuryFxConnection,
   sharedConsumerConfigured = false,
+  postwarCaptainConnection?: PostwarCaptainConnection,
+  postwarReadConfiguration?: ExplicitReadPreparationConfig,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
   let allDataVerifiedAt = 0;
   let allDataProbe: Promise<boolean> | undefined;
+  const officeReadRoute = postwarReadConfiguration
+    ? createPostwarOfficeReadNodeRoute(postwarReadConfiguration)
+    : undefined;
   const financeRoute =
+    postwarCaptainConnection !== undefined ||
     postwarSocialConnection !== undefined ||
     postwarTreasuryFxConnection !== undefined
       ? createPostwarOfficeNodeRoute({
+          ...(postwarCaptainConnection
+            ? { captain: postwarCaptainConnection }
+            : {}),
           ...(postwarSocialConnection
             ? { social: postwarSocialConnection }
             : {}),
@@ -294,6 +306,16 @@ function createApiServer(
           ...(requestFetch === undefined ? {} : { fetch: requestFetch }),
         });
   const server = createServer((request, response) => {
+    if (officeReadRoute?.matches(request)) {
+      void officeReadRoute.handle(request, response).catch(() => {
+        if (!response.headersSent && !response.destroyed)
+          sendJson(request, response, 503, {
+            ok: false,
+            error: { code: 'UPSTREAM_UNAVAILABLE' },
+          });
+      });
+      return;
+    }
     if (financeRoute?.matches(request)) {
       void financeRoute.handle(request, response).catch(() => {
         if (!response.headersSent && !response.destroyed)
@@ -438,8 +460,19 @@ function createApiServer(
     stopReadiness: () => {
       ready = false;
       financeRoute?.stopAccepting();
+      officeReadRoute?.stopAccepting();
     },
-    drainFinance: () => financeRoute?.drain(),
+    drainFinance: async () => {
+      const drained = await Promise.allSettled([
+        officeReadRoute?.drain(),
+        financeRoute?.drain(),
+      ]);
+      const failures = drained.flatMap((result) =>
+        result.status === 'rejected' ? [result.reason] : [],
+      );
+      if (failures.length)
+        throw new AggregateError(failures, 'OFFICE_HTTP_DRAIN_UNCONFIRMED');
+    },
   };
 }
 
@@ -540,6 +573,8 @@ export async function startApiRuntime(
       shared?.social ?? dependencies.postwarSocialConnection,
       shared?.treasuryFx ?? dependencies.postwarTreasuryFxConnection,
       shared !== undefined,
+      shared?.captain,
+      shared?.readConfiguration,
     );
   } catch (error) {
     return failStartupAfterCleanup(error, [

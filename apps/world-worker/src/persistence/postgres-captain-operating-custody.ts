@@ -12,6 +12,7 @@ import type {
   CaptainOperatingOriginal,
   CaptainOperatingSourceCustodyPort,
 } from './captain-operating-source-custody.js';
+import type { PostwarCaptainMixedSource } from './postwar-captain-mixed-source.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import { createCaptainRuntimeSnapshotReader } from './captain-runtime-snapshot-reader.js';
 
@@ -194,6 +195,7 @@ export function createPostgresCaptainOperatingCustody(configuration: {
 /** Explicit server composition only; no listener, queue claim or World start. */
 export function createPostgresCaptainRuntimeSnapshotReader(configuration: {
   readonly database: SqlDatabase;
+  readonly mixedSource?: PostwarCaptainMixedSource;
   readonly workerId: string;
   readonly mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
 }) {

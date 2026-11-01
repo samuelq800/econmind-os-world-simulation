@@ -1,4 +1,11 @@
 import {
+  POSTWAR_CAPTAIN_CURRENT_NATURE,
+  POSTWAR_CAPTAIN_CURRENT_DATASET,
+  POSTWAR_CAPTAIN_CURRENT_BUCKETS,
+  parsePostwarCaptainCurrentCoverage,
+  parsePostwarCaptainPoliticalCapitalRow,
+} from '@econmind/core/postwar-captain-current-contract';
+import {
   POSTWAR_SOCIAL_MIXED_CURRENT_NATURE,
   parsePostwarSocialMixedCoverage,
   parsePostwarSocialMixedStateBinding,
@@ -43,7 +50,11 @@ export const officeDatasets: Readonly<Record<string, readonly string[]>> =
     ],
     INDUSTRY: ['opening-inventory-entries', 'regional-source-capacity'],
     TRADE: ['opening-inventory-entries'],
-    CAPTAIN: ['regional-source-capacity', 'public-service-summary'],
+    CAPTAIN: [
+      POSTWAR_CAPTAIN_CURRENT_DATASET,
+      'regional-source-capacity',
+      'public-service-summary',
+    ],
   });
 export interface RuntimePage {
   readonly status: 'PAGE' | 'EMPTY';
@@ -429,6 +440,37 @@ export function createPostwarRuntimeClient(
           (source.dataNature ===
             'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
             source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE);
+        const currentCaptain =
+          source.dataNature === POSTWAR_CAPTAIN_CURRENT_NATURE &&
+          c.identity.officeId === 'CAPTAIN' &&
+          dataset === POSTWAR_CAPTAIN_CURRENT_DATASET &&
+          source.worldVersion !== '0' &&
+          source.eventSequence !== '0';
+        if (dataset === POSTWAR_CAPTAIN_CURRENT_DATASET && !currentCaptain)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentCaptain) {
+          const coverage = parsePostwarCaptainCurrentCoverage(
+            source.currentCaptainCoverage,
+          );
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            coverage.originWorldVersion !== source.originWorldVersion ||
+            coverage.originEventSequence !== source.originEventSequence ||
+            page.total !== POSTWAR_CAPTAIN_CURRENT_BUCKETS.length
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          const capitals = rows.map(parsePostwarCaptainPoliticalCapitalRow);
+          if (
+            capitals.some((v) => v.countryId !== c.identity.countryId) ||
+            new Set(capitals.map((v) => v.bucket)).size !== capitals.length ||
+            new Set(capitals.map((v) => v.capitalRef)).size > 1
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentCaptainCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const financialOffice = ['FINANCE', 'CENTRAL_BANK'].includes(
           c.identity.officeId,
         );
@@ -444,7 +486,13 @@ export function createPostwarRuntimeClient(
           historical &&
           c.identity.officeId !== 'SOCIAL' &&
           !['ledger-balances', 'treasury-capacity'].includes(dataset);
-        if (!opening && !currentSocial && !financialCurrent && !historicalFacts)
+        if (
+          !opening &&
+          !currentSocial &&
+          !currentCaptain &&
+          !financialCurrent &&
+          !historicalFacts
+        )
           throw Error('UNPROVEN_CURRENT_DATA_KIND');
         if (source.dataNature === POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE) {
           const office = c.identity.officeId;

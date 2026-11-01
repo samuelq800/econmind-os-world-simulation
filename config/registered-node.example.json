@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "registered-postwar-node-v1",
+  "environment": "staging",
+  "workerId": "WORKER_REPLACE",
+  "executionRegistrationRef": "EXECUTION_REPLACE",
+  "port": 4101,
+  "seedPath": "/run/econmind/opening-seed.json",
+  "seedFileSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "roles": {
+    "source": "replace_source_reader",
+    "intake": "replace_intake",
+    "worker": "replace_worker",
+    "actor": "replace_actor_reader"
+  },
+  "countries": [
+    {
+      "countryId": "COUNTRY_REPLACE",
+      "expectedRawSourceSHA256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "read": {
+    "modelVersion": "world-v2-foundation-1",
+    "readerRole": "replace_bounded_reader",
+    "authorizationPublisherRole": "replace_authorization_publisher",
+    "endpointPins": {
+      "origin": "https://api.example.invalid",
+      "projectionPath": "/v1/postwar-office-runtime",
+      "finalLookupPath": "/v1/final-receipt",
+      "deploymentRef": "DEPLOYMENT_REPLACE"
+    },
+    "admittedWorldPins": {
+      "worldId": "WORLD_REPLACE",
+      "seedRef": "SEED_REPLACE",
+      "admissionRef": "ADMISSION_REPLACE",
+      "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "minimumWorldVersion": "0"
+    },
+    "auth": {
+      "projectRef": "vimksjrhaxdpnkvgsavz",
+      "expectedIssuer": "https://vimksjrhaxdpnkvgsavz.supabase.co/auth/v1",
+      "jwksUrl": "https://vimksjrhaxdpnkvgsavz.supabase.co/auth/v1/.well-known/jwks.json",
+      "audience": "authenticated"
+    },
+    "routeOptions": {
+      "allowedOrigins": ["https://web.example.invalid"]
+    }
+  }
+}

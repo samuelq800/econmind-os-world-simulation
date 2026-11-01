@@ -19,6 +19,7 @@ import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/pos
 import { createPostwarMixedCurrentProjectionSource } from '../../apps/world-worker/src/persistence/postwar-mixed-current-projection-publication.js';
 import { publishPostwarMixedFinancialCurrentFrom } from '../../apps/world-worker/src/persistence/postwar-mixed-financial-current-publication.js';
 import { createPostwarOfficeRuntimeFetchHandler } from '../../apps/world-api/src/runtime-preparation/postwar-office-runtime-fetch-handler.js';
+import type { ExplicitReadPreparationConfig } from '../../apps/world-api/src/runtime-preparation/explicit-read-preparation-config.js';
 import {
   createPostwarRuntimeClient,
   type RuntimePage,
@@ -505,8 +506,7 @@ export async function installCfcMixedCurrentReadbackFrom(
         });
       },
     };
-    const handler = createPostwarOfficeRuntimeFetchHandler({
-      pool: observedReadPool,
+    const readConfiguration: Omit<ExplicitReadPreparationConfig, 'pool'> = {
       readerRole: fixture.readRole,
       authorizationPublisherRole:
         fixture.marker.roles.authorizationPublisherRole,
@@ -536,6 +536,11 @@ export async function installCfcMixedCurrentReadbackFrom(
         },
       },
       routeOptions: { allowedOrigins: ['https://pages-test.example'] },
+    };
+    Object.freeze(readConfiguration);
+    const handler = createPostwarOfficeRuntimeFetchHandler({
+      ...readConfiguration,
+      pool: observedReadPool,
     });
     const token = (subject = fixture.marker.subject) => {
       const now = Math.floor(Date.now() / 1000),
@@ -627,6 +632,8 @@ export async function installCfcMixedCurrentReadbackFrom(
     return Object.freeze({
       classification: 'ACTUAL_TEST_ONLY_CFC_CURRENT_NOT_PRODUCTION' as const,
       source,
+      publicationDatabase,
+      readConfiguration,
       installed,
       metrics,
       onlineQueries,

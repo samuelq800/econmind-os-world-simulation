@@ -14,7 +14,9 @@ import { FINANCE_NATIVE_BUDGET_EVENT_TYPES } from '@econmind/core/finance-budget
 import { decodeDurableCanonicalCommandRow } from './durable-v08-ledger-lineage-reader.js';
 import {
   readBoundedPostwarJournalFrom,
+  decodeBoundedPostwarJournal,
   decodeBoundedPostwarFinancialPostings,
+  decodeBoundedPostwarInventoryPostings,
   type BoundedPostwarCanonicalFrame,
 } from './bounded-postwar-fx-postings.js';
 import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
@@ -50,6 +52,18 @@ const integer = (v: unknown): string => {
 const timestamp = (v: unknown) =>
   v instanceof Date ? v.toISOString() : text(v);
 const socialTypes = new Map([
+  ['NARROW_TREASURY_GCU_RESERVED_V1', 'CORE_GOODS_TRANSFER_V1'],
+  ['NARROW_TREASURY_GCU_SHIPPED_V1', 'CORE_GOODS_SHIPMENT_V1'],
+  ['NARROW_TREASURY_GCU_DELIVERED_V1', 'CORE_GOODS_DELIVERY_V1'],
+  ['CENTRAL_BANK_OMO_SETTLED_V1', 'CORE_CENTRAL_BANK_OMO_V1'],
+  [
+    'POSTWAR_BENEFICIAL_HOUSING_RENT_SETTLED_V1',
+    'POSTWAR_BENEFICIAL_HOUSING_RENT_V1',
+  ],
+  [
+    'CAPTAIN_POLITICAL_CAPITAL_ALLOCATED_V1',
+    'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+  ],
   [
     'SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1',
     'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
@@ -68,14 +82,31 @@ export async function readBoundedPostwarCanonicalPrefixFrom(
     readonly officeId: 'SOCIAL' | 'FINANCE';
   },
 ) {
-  const limit = BOUNDED_POSTWAR_PREFIX_LIMITS;
   const response = await tx.query<Record<string, unknown>>(
     'select * from world_v2.read_postwar_bounded_prefix($1,$2,$3)',
     [input.worldId, input.countryId, input.officeId],
   );
-  const value = response.rows[0];
+  if (response.rows.length !== 1) invalid('one complete fixed prefix required');
+  const journal = await readBoundedPostwarJournalFrom(tx, input);
+  return decodeBoundedPostwarCanonicalPrefix({
+    worldId: input.worldId,
+    prefixRow: response.rows[0],
+    journal,
+  });
+}
+/** Decodes inert data obtained by a fixed, independently authorized domain
+ * getter. The result is not an admission or a commit/source capability. */
+export function decodeBoundedPostwarCanonicalPrefix(input: {
+  readonly worldId: string;
+  readonly prefixRow: unknown;
+  readonly journal: Awaited<ReturnType<typeof readBoundedPostwarJournalFrom>>;
+}) {
+  const limit = BOUNDED_POSTWAR_PREFIX_LIMITS;
+  const raw = input.prefixRow;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    invalid('complete fixed prefix response required');
+  const value = raw as Record<string, unknown>;
   if (
-    response.rows.length !== 1 ||
     !value ||
     !Array.isArray(value.events) ||
     !Array.isArray(value.commands) ||
@@ -142,15 +173,19 @@ export async function readBoundedPostwarCanonicalPrefixFrom(
       invalid('unique actual committed receipt required');
     receipts.set(id, r);
   }
-  const postings = await readBoundedPostwarJournalFrom(tx, {
-    worldId: input.worldId,
-    countryId: input.countryId,
-    officeId: input.officeId,
+  // A typed DTO is not trusted byte/count evidence. Recompute from all rows.
+  const supplied = input.journal;
+  const postings = decodeBoundedPostwarJournal({
+    world_version: supplied?.head?.worldVersion,
+    event_sequence: supplied?.head?.eventSequence,
+    financial_batch_count: supplied?.financialBatchCount,
+    inventory_posting_count: supplied?.inventoryPostingCount,
+    financial_batches: supplied?.rows,
+    inventory_postings: supplied?.inventoryRows,
   });
   if (
     postings.head.worldVersion !== integer(head.world_version) ||
-    postings.head.eventSequence !== integer(head.event_sequence) ||
-    postings.inventoryPostingCount !== '0'
+    postings.head.eventSequence !== integer(head.event_sequence)
   )
     invalid(
       'journal differs from held current head or unsupported inventory effect',
@@ -254,9 +289,18 @@ export async function readBoundedPostwarCanonicalPrefixFrom(
         transition,
         rows: postings.rows,
       }),
-      inventoryPostings: [],
+      inventoryPostings: decodeBoundedPostwarInventoryPostings({
+        command: group.command,
+        transition,
+        rows: postings.inventoryRows,
+      }),
     });
   }
+  if (
+    frames.reduce((n, f) => n + f.inventoryPostings.length, 0) !==
+    postings.inventoryRows.length
+  )
+    invalid('inventory set differs from complete canonical prefix');
   if (
     frames.reduce((n, f) => n + f.financialPostingBatches.length, 0) !==
     postings.rows.length

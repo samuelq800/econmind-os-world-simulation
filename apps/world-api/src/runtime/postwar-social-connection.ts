@@ -93,7 +93,9 @@ export interface PostwarSocialPreflightResult {
 export interface PostwarSocialConnection {
   readonly classification: 'SOCIAL_SERVER_DEPENDENCIES_INSTALLED_NOT_RUNTIME_ACCEPTANCE';
   readonly preparationMode:
-    'LOCAL_CI_PREPARED_INTAKE' | 'PRODUCTION_SOURCE_PREFLIGHT_ONLY';
+    | 'LOCAL_CI_PREPARED_INTAKE'
+    | 'REGISTERED_SHARED_PREPARED_INTAKE'
+    | 'PRODUCTION_SOURCE_PREFLIGHT_ONLY';
   /** Finite preparation verifies actual startup data against genuine DB pins.
    * No caller Ready, source registration,
    * lease acquisition, consumer start or clock advance. Required before HTTP. */
@@ -274,6 +276,10 @@ export function createPostwarSocialConnection(
   });
   const preflight = createSourceOwnedExecutorComposition(binding);
   const local = c.environment === 'local' || c.environment === 'ci';
+  const formalShared = Boolean(
+    shared?.formalBinding &&
+    (c.environment === 'staging' || c.environment === 'production'),
+  );
   const runtime =
     shared?.runtime ??
     (local
@@ -354,7 +360,9 @@ export function createPostwarSocialConnection(
       'SOCIAL_SERVER_DEPENDENCIES_INSTALLED_NOT_RUNTIME_ACCEPTANCE' as const,
     preparationMode: local
       ? ('LOCAL_CI_PREPARED_INTAKE' as const)
-      : ('PRODUCTION_SOURCE_PREFLIGHT_ONLY' as const),
+      : formalShared
+        ? ('REGISTERED_SHARED_PREPARED_INTAKE' as const)
+        : ('PRODUCTION_SOURCE_PREFLIGHT_ONLY' as const),
     get preparedRuntime() {
       return sourcePrepared && !shared ? runtime : null;
     },
@@ -383,7 +391,13 @@ export function createPostwarSocialConnection(
       });
       return preparing;
     },
-    productionGates: gates,
+    productionGates: formalShared
+      ? Object.freeze([
+          'REGISTERED_EXECUTION_CONTROL_CURRENTNESS_CHECKED_PER_REQUEST_AND_TRANSACTION',
+          'ACTUAL_ADMISSION_SOURCE_REGISTRATIONS_AND_CURRENT_AUTHORITY_MUST_EXIST',
+          'EXPLICIT_FINITE_CONSUMPTION_ONLY_NO_AUTOMATIC_CLOCK_START',
+        ])
+      : gates,
     transportOrigins,
     handleCommand(
       request: PostwarSocialCommandHandleRequest,
@@ -406,7 +420,8 @@ export function createPostwarSocialConnection(
         },
       });
       if (phase !== 'OPEN') return fail('NOT_CONNECTED');
-      if (!local) return fail('SOCIAL_PRODUCTION_RECOVERY_NOT_INSTALLED');
+      if (!local && !formalShared)
+        return fail('SOCIAL_PRODUCTION_RECOVERY_NOT_INSTALLED');
       try {
         const parsed = parseRecoveryRequest(
           JSON.parse(canonicalSerialize(request.request)),
@@ -431,7 +446,8 @@ export function createPostwarSocialConnection(
       request: PostwarSocialCommandHandleRequest,
     ): Promise<SocialCommandServiceResult> {
       if (phase !== 'OPEN') return failure('NOT_CONNECTED');
-      if (!local) return failure('SOCIAL_PRODUCTION_EXECUTION_NOT_INSTALLED');
+      if (!local && !formalShared)
+        return failure('SOCIAL_PRODUCTION_EXECUTION_NOT_INSTALLED');
       try {
         const raw: unknown = JSON.parse(canonicalSerialize(request.request));
         if (

@@ -846,7 +846,7 @@ describe('complete bounded mixed prefix / mock transport, real Core semantics', 
     );
     data.head.event_sequence = '257';
     await expect(t.read()).rejects.toThrow(
-      'complete bounded prefix count and actual head required',
+      'complete bounded journal and actual head required',
     );
   });
   it('recomputes Social effects rather than treating their zero postings as no-effect', async () => {

@@ -13,13 +13,22 @@ import {
   isPostwarFinanceSocialRuntimeConnection,
   hasPreparedPostwarFinanceSocialTreasuryFx,
   readFinanceSocialSourceBinding,
+  createProductionPostwarFinanceSocialRuntimeConnection,
 } from '../../apps/world-worker/src/runtime-preparation/finance-social-runtime-connection.js';
+import {
+  createServerCommandHostBinding,
+  productionFinanceCommandExecutionBlocker,
+} from '../../apps/world-worker/src/runtime-preparation/production-world-command-host.js';
+import { createRegisteredWorldExecutionClock } from '../../apps/world-worker/src/time/registered-world-execution-state.js';
 import {
   createPostgresFinanceBudgetWorldCapacitySource,
   createPostgresFinanceBudgetCapacitySource,
 } from '../../apps/world-worker/src/persistence/postgres-finance-budget-capacity-source.js';
 import { isBoundedFinanceBudgetIntakeRuntime } from '../../apps/world-worker/src/intake/prepared-finance-budget-intake-runtime.js';
-import { boundManualOfficeIntakeRuntime } from '../../apps/world-worker/src/intake/manual-office-intake-runtime.js';
+import {
+  boundManualOfficeIntakeRuntime,
+  createRegisteredFinanceManualOfficeIntakeRuntime,
+} from '../../apps/world-worker/src/intake/manual-office-intake-runtime.js';
 import { OFFICE_COMMAND_CURRENT_BINDING_QUERY } from '../../apps/world-worker/src/intake/postgres-office-command-intake.js';
 let openingAdoption: OfficialLabourSocialOpeningAdoption;
 beforeAll(async () => {
@@ -79,6 +88,81 @@ function fixtures(worldId: string) {
   };
 }
 describe('fixed Finance/Social single World issuer', () => {
+  it('requires a genuine formal DB Clock and preserves the old local gate, with no startup SQL/consumption', async () => {
+    const f = fixtures('WORLD_FORMAL_SHARED_FIXED');
+    const makeBinding = (
+      clock:
+        typeof f.clock | ReturnType<typeof createRegisteredWorldExecutionClock>,
+    ) =>
+      createServerCommandHostBinding({
+        worldId: f.social.worldId,
+        workerId: f.social.workerId,
+        seedRef: 'SEED_FORMAL_SHARED_TEST',
+        contentHash: 'sha256:' + 'a'.repeat(64),
+        admissionRef: 'ADMISSION_FORMAL_SHARED_TEST',
+        modelVersion: 'TEST_ONLY_MODEL',
+        intakePool: f.intake.pool,
+        sourcePool: f.worker.pool,
+        readerRole: 'formal_shared_reader',
+        authorizationPublisherRole: 'formal_shared_authorization_publisher',
+        workerDatabase: f.social.database,
+        clock,
+        resolveActorId: async () => null,
+        readers: f.social.readers,
+        financeCapacitySource: f.input.capacitySource,
+        socialRuntimeConnection: f.social,
+      });
+    expect(() =>
+      createPostwarFinanceSocialRuntimeConnection({
+        ...f.input,
+        environment: 'production' as never,
+      }),
+    ).toThrow('LOCAL_CI_ONLY');
+    expect(() =>
+      createProductionPostwarFinanceSocialRuntimeConnection({
+        binding: makeBinding(f.clock),
+        environment: 'production',
+      }),
+    ).toThrow('EXACT_SERVER_CLOCK');
+    const clock = createRegisteredWorldExecutionClock({
+      database: f.social.database,
+      worldId: f.social.worldId,
+      workerId: f.social.workerId,
+      registrationRef: 'REGISTRATION_FORMAL_SHARED_TEST',
+    });
+    const connection = createProductionPostwarFinanceSocialRuntimeConnection({
+      binding: makeBinding(clock),
+      environment: 'production',
+    });
+    try {
+      const ports = readPostwarFinanceSocialRuntimeBinding(connection);
+      expect(ports.formalBinding).not.toBeNull();
+      expect(ports.environment).toBe('production');
+      expect(ports.clock).toBe(clock);
+      expect(ports.workerPool).toBe(f.worker.pool);
+      expect(ports.runtime.consumer.state()).toBe('PREPARED');
+      expect(f.worker.queries).toEqual([]);
+      expect(f.intake.queries).toEqual([]);
+      expect(
+        productionFinanceCommandExecutionBlocker(ports.formalBinding),
+      ).toBeNull();
+      expect(() =>
+        createRegisteredFinanceManualOfficeIntakeRuntime(ports.formalBinding!),
+      ).toThrow('FORMAL_SHARED_SINGLE_CONSUMER_REQUIRED');
+      expect(() => ports.runtime.consumer.startPreparation()).toThrow(
+        'Production finite consumer',
+      );
+      expect(await ports.runtime.consumer.consumeOnce()).toMatchObject({
+        status: 'BLOCKED',
+        reason: 'FORMAL_EXECUTION_CURRENT_REGISTRATION_REQUIRED',
+      });
+      expect(f.worker.queries.some((q) => q.includes('command_queue'))).toBe(
+        false,
+      );
+    } finally {
+      await connection.stop();
+    }
+  });
   it('constructs one genuine runtime with exact shared pool/clock identity and no SQL/start', async () => {
     const f = fixtures('WORLD_SHARED_IDENTITY'),
       connection = createPostwarFinanceSocialRuntimeConnection(f.input),

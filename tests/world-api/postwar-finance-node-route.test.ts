@@ -136,7 +136,10 @@ describe('explicit Finance installation on standard Node API', () => {
       const aggregate = failure as AggregateError;
       expect(aggregate.errors).toHaveLength(2);
       expect(aggregate.errors[0]).toMatchObject({ code: 'EADDRINUSE' });
-      expect(aggregate.errors[1]).toBe(f.stopFailure);
+      expect(aggregate.errors[1]).toBeInstanceOf(AggregateError);
+      expect(aggregate.errors[1].message).toBe('OFFICE_HTTP_DRAIN_UNCONFIRMED');
+      expect(aggregate.errors[1].errors).toHaveLength(1);
+      expect(aggregate.errors[1].errors[0]).toBe(f.stopFailure);
       expect(aggregate.cause).toBe(aggregate.errors[0]);
       expect(f.stop).toHaveBeenCalledTimes(1);
       expect(f.pool.end).toHaveBeenCalledTimes(1);
@@ -192,7 +195,10 @@ describe('explicit Finance installation on standard Node API', () => {
         message: 'world-api did not acquire a TCP address',
       });
       expect(aggregate.errors[1]).toBe(closeFailure);
-      expect(aggregate.errors[2]).toBe(f.stopFailure);
+      expect(aggregate.errors[2]).toBeInstanceOf(AggregateError);
+      expect(aggregate.errors[2].message).toBe('OFFICE_HTTP_DRAIN_UNCONFIRMED');
+      expect(aggregate.errors[2].errors).toHaveLength(1);
+      expect(aggregate.errors[2].errors[0]).toBe(f.stopFailure);
       expect(aggregate.cause).toBe(aggregate.errors[0]);
       expect(f.stop).toHaveBeenCalledTimes(1);
       expect(f.pool.end).toHaveBeenCalledTimes(1);

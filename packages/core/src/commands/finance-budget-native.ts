@@ -1,7 +1,49 @@
 /** Native ordinary Finance-administration budget bookkeeping. No payment,
  * source admission, source publication or TEST_ONLY evidence promotion. The
  * Worker must protect actual policy/originals and source cutoff through commit. */
+import {
+  CAPTAIN_POLITICAL_CAPITAL_COMMAND,
+  CAPTAIN_POLITICAL_CAPITAL_EVENT,
+  createCaptainPoliticalCapitalReplayOrigin,
+  replayCaptainPoliticalCapitalAllocation,
+  type CaptainPoliticalCapitalReplayState,
+} from './captain-political-capital-allocation.js';
+import type { PoliticalCapitalSnapshot } from '../engine-kernels/captain-strategy-governance-preparation.js';
+import {
+  CENTRAL_BANK_OMO_COMMAND,
+  CENTRAL_BANK_OMO_EVENT,
+  assertCentralBankOmoOpeningOriginal,
+  prepareCentralBankOmoTransition,
+  type CentralBankOmoSourceFacts,
+  type OmoSecurityHolding,
+} from './central-bank-open-market-operation.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
+import {
+  POSTWAR_NARROW_GOODS_TYPES,
+  replayPostwarNarrowGoodsFrame,
+  type PostwarNarrowGoodsReplayEntry,
+} from '../transfers/postwar-narrow-trade-mixed-replay.js';
+import {
+  parseInventoryLedgerSnapshot,
+  type InventoryLedgerState,
+} from '../inventory/inventory-ledger.js';
+import {
+  reconcileV08LedgerSnapshots,
+  type RebuiltV08Ledgers,
+} from '../opening/opening-seed.js';
+import { authorizeInventoryLedgerState } from '../opening/ledger-authority.js';
+import {
+  BENEFICIAL_HOUSING_RENT_COMMAND,
+  type BeneficialHousingReclassificationReceipt,
+} from '../finance/beneficial-housing-rent.js';
+import {
+  createBeneficialHousingRentMixedReplayOrigins,
+  replayBeneficialHousingRentMixedFrame,
+  synchronizeBeneficialHousingRentMixedReplayOrigins,
+  type BeneficialHousingRentMixedReplayOrigin,
+} from './beneficial-housing-rent-mixed-replay.js';
+
+import { projectCentralBankDayOneValuedSnapshot } from '../finance/central-bank-day-one-valuation.js';
 import { Money } from '../numeric/money.js';
 import { canonicalDecimal } from '../numeric/world-decimal.js';
 import {
@@ -186,7 +228,19 @@ export interface FinanceNativeBudgetMixedSocialCountry {
     };
   }[];
 }
+export interface FinanceNativeBudgetMixedCaptainCountry {
+  readonly countryId: string;
+  readonly state: CaptainPoliticalCapitalReplayState;
+}
 export interface FinanceNativeBudgetMixedPrefixResult {
+  readonly inventoryState?: Readonly<InventoryLedgerState>;
+  readonly narrowGoodsTransfers?: readonly PostwarNarrowGoodsReplayEntry[];
+  readonly beneficialHousingRentOrigins?: readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[];
+  readonly omoCountries?: readonly {
+    readonly countryId: string;
+    readonly holdings: readonly OmoSecurityHolding[];
+  }[];
+  readonly captainCountries?: readonly FinanceNativeBudgetMixedCaptainCountry[];
   readonly budgetState: FinanceNativeBudgetState;
   readonly budgetEncumbrances: readonly FinanceNativeBudgetCapacityEncumbrance[];
   readonly socialCountries: readonly FinanceNativeBudgetMixedSocialCountry[];
@@ -524,6 +578,21 @@ export interface FinanceSocialFxOriginal {
   readonly bankSettlementLiability: FinancialAccount;
   readonly bankGcuAsset: FinancialAccount;
 }
+/** Immutable register/quote DATA. The genuine H0 ledger is independently
+ * required; these records grant no issuer, custody or current trading right. */
+export interface FinanceSocialOmoOriginal {
+  readonly valuationQuote?: NonNullable<
+    CentralBankOmoSourceFacts['valuationQuote']
+  >;
+  readonly countryId: string;
+  readonly domesticTreasuryRef: string;
+  readonly bank: CentralBankOmoSourceFacts['bank'];
+  readonly centralBank: CentralBankOmoSourceFacts['centralBank'];
+  readonly bankAccounts: CentralBankOmoSourceFacts['bankAccounts'];
+  readonly centralBankAccounts: CentralBankOmoSourceFacts['centralBankAccounts'];
+  readonly holdings: readonly OmoSecurityHolding[];
+  readonly quotes: readonly CentralBankOmoSourceFacts['quote'][];
+}
 export interface FinanceSocialFxCurrentTreasuryBalance {
   readonly countryId: string;
   readonly accountId: string;
@@ -540,21 +609,39 @@ const financialReplayBases = new WeakMap<
   FinanceNativeBudgetFinancialReplayBase,
   {
     readonly financial: Readonly<FinancialLedgerState>;
+    readonly inventory?: Readonly<InventoryLedgerState>;
     readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
     readonly fxOriginals: ReadonlyMap<string, FinanceSocialFxOriginal>;
+    readonly omoOriginals: ReadonlyMap<string, FinanceSocialOmoOriginal>;
+    readonly beneficialHousingRentOrigins?: readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[];
   }
 >();
 export function prepareFinanceNativeBudgetFinancialReplay(
   input: {
     readonly financial: Readonly<FinancialLedgerState>;
+    readonly opening?: Readonly<RebuiltV08Ledgers>;
     readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
     readonly fxOriginals: readonly FinanceSocialFxOriginal[];
+    readonly omoOriginals?: readonly FinanceSocialOmoOriginal[];
+    readonly beneficialHousingRentReceipts?: readonly Readonly<BeneficialHousingReclassificationReceipt>[];
   },
   sha: Sha256Hex,
 ): FinanceNativeBudgetFinancialReplayBase {
   const base = input.financial;
   if (!isAuthoritativeFinancialLedgerState(base) || base.worldVersion !== '0')
     invalid('GENUINE_H0_FINANCIAL_REPLAY_BASE_REQUIRED');
+  if (input.opening !== undefined) {
+    reconcileV08LedgerSnapshots({
+      reconstructed: input.opening,
+      sha256Hex: sha,
+    });
+    if (
+      input.opening.financial !== base ||
+      input.opening.worldVersion !== '0' ||
+      input.opening.inventory.worldVersion !== '0'
+    )
+      invalid('EXACT_GENUINE_PAIRED_H0_LEDGER_BASE_REQUIRED');
+  }
   const seen = new Set<string>(),
     totals = new Map<string, Money>();
   const opening = input.openingEncumbrances.map((r) => {
@@ -615,10 +702,57 @@ export function prepareFinanceNativeBudgetFinancialReplay(
     originals.set(q.quoteRef, freeze({ ...r, quote: q }));
   }
   const token = Object.freeze({}) as FinanceNativeBudgetFinancialReplayBase;
+  const omoOriginals = new Map<string, FinanceSocialOmoOriginal>();
+  if ((input.omoOriginals?.length ?? 0) > 70)
+    invalid('BOUNDED_OMO_COUNTRY_ORIGINALS_REQUIRED');
+  for (const original of input.omoOriginals ?? []) {
+    if (
+      !ref(original.countryId) ||
+      omoOriginals.has(original.countryId) ||
+      !Array.isArray(original.quotes) ||
+      !original.quotes.length ||
+      original.quotes.length > 256
+    )
+      invalid('UNIQUE_COMPLETE_OMO_ORIGINAL_REQUIRED');
+    assertCentralBankOmoOpeningOriginal({
+      financialState: base,
+      worldId: base.worldId,
+      ...original,
+      sha256Hex: sha,
+    });
+    const quotes = new Set<string>();
+    for (const quote of original.quotes) {
+      if (
+        !ref(quote.quoteRef) ||
+        quotes.has(quote.quoteRef) ||
+        quote.issuerRef !== original.domesticTreasuryRef ||
+        quote.currency !== original.bank.currency ||
+        !integer(quote.worldVersion) ||
+        !integer(quote.validAtSimTime)
+      )
+        invalid('UNIQUE_EXACT_OMO_QUOTE_ORIGINAL_REQUIRED');
+      quotes.add(quote.quoteRef);
+    }
+    omoOriginals.set(original.countryId, freeze({ ...original }));
+  }
+  const beneficialHousingRentOrigins =
+    input.beneficialHousingRentReceipts === undefined
+      ? undefined
+      : createBeneficialHousingRentMixedReplayOrigins({
+          financial: base,
+          receipts: input.beneficialHousingRentReceipts,
+        });
   financialReplayBases.set(token, {
+    ...(beneficialHousingRentOrigins === undefined
+      ? {}
+      : { beneficialHousingRentOrigins }),
     financial: base,
+    ...(input.opening === undefined
+      ? {}
+      : { inventory: input.opening.inventory }),
     openingEncumbrances: Object.freeze(opening),
     fxOriginals: originals,
+    omoOriginals,
   });
   return token;
 }
@@ -692,6 +826,11 @@ export function prepareFinanceNativeBudgetMixedPrefix(
     readonly worldId: string;
     readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
     readonly financialReplay?: FinanceNativeBudgetFinancialReplayBase;
+    /** Immutable original DATA; no default capital, callback or admission flag. */
+    readonly captainCountries?: readonly {
+      readonly countryId: string;
+      readonly capital: PoliticalCapitalSnapshot;
+    }[];
     readonly socialCountries: readonly {
       readonly countryId: string;
       readonly state: SocialEmploymentServiceState;
@@ -711,7 +850,37 @@ export function prepareFinanceNativeBudgetMixedPrefix(
     invalid('GENUINE_SAME_WORLD_FINANCIAL_REPLAY_REQUIRED');
   if (financialReplay && input.frames.length > 256)
     invalid('BOUNDED_COMPLETE_FINANCIAL_PREFIX_REQUIRED');
+  const captainEnabled = input.captainCountries !== undefined;
+  if (
+    captainEnabled &&
+    (!input.captainCountries!.length ||
+      input.captainCountries!.length > 70 ||
+      input.frames.length > 256)
+  )
+    invalid('BOUNDED_EXPLICIT_CAPTAIN_ORIGINALS_REQUIRED');
+  const captains = new Map<string, CaptainPoliticalCapitalReplayState>();
+  for (const original of input.captainCountries ?? []) {
+    if (captains.has(original.countryId))
+      invalid('UNIQUE_CAPTAIN_COUNTRY_ORIGINAL_REQUIRED');
+    captains.set(
+      original.countryId,
+      createCaptainPoliticalCapitalReplayOrigin({
+        worldId: input.worldId,
+        ...original,
+      }),
+    );
+  }
   let financial = financialReplay?.financial;
+  let inventory = financialReplay?.inventory;
+  let goodsEntries: ReadonlyMap<string, PostwarNarrowGoodsReplayEntry> =
+    new Map();
+  let rentOrigins = financialReplay?.beneficialHousingRentOrigins;
+  const omoHoldings = new Map<string, readonly OmoSecurityHolding[]>(
+    [...(financialReplay?.omoOriginals ?? [])].map(([countryId, original]) => [
+      countryId,
+      original.holdings,
+    ]),
+  );
   let budget: FinanceNativeBudgetState = {
     worldId: input.worldId,
     worldVersion: '0',
@@ -774,11 +943,18 @@ export function prepareFinanceNativeBudgetMixedPrefix(
     )
       invalid('COMPLETE_UNIQUE_ORDERED_MIXED_PREFIX_REQUIRED');
     if (
-      frame.inventoryPostings.length !== 0 ||
+      (frame.inventoryPostings.length !== 0 &&
+        !(
+          inventory && POSTWAR_NARROW_GOODS_TYPES.includes(command.commandType)
+        )) ||
       (frame.financialPostingBatches.length !== 0 &&
         !(
           financialReplay &&
-          command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+          (command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND ||
+            command.commandType === CENTRAL_BANK_OMO_COMMAND ||
+            (inventory && command.commandType === 'CORE_GOODS_DELIVERY_V1') ||
+            (command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND &&
+              rentOrigins !== undefined))
         ))
     )
       invalid('UNSUPPORTED_MIXED_PREFIX_POSTING_EFFECT');
@@ -798,7 +974,7 @@ export function prepareFinanceNativeBudgetMixedPrefix(
       transition,
       receipt: frame.receipt,
     });
-    if (financialReplay) {
+    if (financialReplay || captainEnabled) {
       const canonicalReceipt = createFinalCommandReceipt({
         command,
         transition,
@@ -853,6 +1029,174 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         previous.countryId !== p.scope.countryId
       )
         invalid('BUDGET_LINE_DIFFERS_FROM_REAL_CAPACITY_ACCOUNT');
+    } else if (POSTWAR_NARROW_GOODS_TYPES.includes(command.commandType)) {
+      if (!inventory || !financial)
+        invalid('GENUINE_PREPARED_INVENTORY_AND_FINANCIAL_REQUIRED');
+      const reduced = replayPostwarNarrowGoodsFrame({
+        frame,
+        inventory,
+        financial,
+        entries: goodsEntries,
+        sha256Hex: sha,
+      });
+      inventory = reduced.inventory;
+      financial = reduced.financial;
+      goodsEntries = reduced.entries;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events[0]!.sequence,
+      });
+    } else if (command.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND) {
+      const current = captains.get(command.countryId);
+      const event = frame.events[0];
+      if (!current || !captainEnabled)
+        invalid('CAPTAIN_COUNTRY_ORIGINAL_REQUIRED');
+      if (
+        !event ||
+        frame.events.length !== 1 ||
+        event.eventType !== CAPTAIN_POLITICAL_CAPITAL_EVENT
+      )
+        invalid('EXACT_CAPTAIN_EVENT_REQUIRED');
+      const payload = JSON.parse(event.canonicalPayload);
+      if (!same(parseCanonicalCommand(payload.command, sha), command))
+        invalid('CAPTAIN_EMBEDDED_CANONICAL_COMMAND_DIFFERS');
+      const state = replayCaptainPoliticalCapitalAllocation({
+        state: current,
+        event,
+        sha256Hex: sha,
+      });
+      captains.set(command.countryId, state);
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: event.sequence,
+      });
+    } else if (command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND) {
+      if (!financialReplay || !financial || rentOrigins === undefined)
+        invalid('RENT_REQUIRES_GENUINE_PREPARED_FINANCIAL_AND_RIGHTS_ORIGINS');
+      const reduced = replayBeneficialHousingRentMixedFrame({
+        origins: rentOrigins,
+        financial,
+        frame,
+        sha256Hex: sha,
+      });
+      financial = reduced.financial;
+      rentOrigins = reduced.origins;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events[0]!.sequence,
+      });
+    } else if (command.commandType === CENTRAL_BANK_OMO_COMMAND) {
+      if (!financialReplay || !financial)
+        invalid('OMO_REQUIRES_GENUINE_PREPARED_FINANCIAL_BASE');
+      const original = financialReplay.omoOriginals.get(command.countryId),
+        event = frame.events[0];
+      if (
+        !original ||
+        !event ||
+        frame.events.length !== 1 ||
+        event.eventType !== CENTRAL_BANK_OMO_EVENT ||
+        frame.financialPostingBatches.length !== 1
+      )
+        invalid('EXACT_OMO_ORIGIN_EVENT_AND_POSTING_REQUIRED');
+      const payload = JSON.parse(event.canonicalPayload) as {
+        source?: { quote?: { quoteRef?: string } };
+        trace: import('./central-bank-open-market-operation.js').CentralBankOmoSource['trace'];
+      };
+      const quote = original.quotes.find(
+        (q) => q.quoteRef === payload.source?.quote?.quoteRef,
+      );
+      if (!quote) invalid('IMMUTABLE_HISTORICAL_OMO_QUOTE_REQUIRED');
+      const currentSnapshot = <T extends object>(
+        template: T,
+        accounts: Readonly<Record<string, string>>,
+      ): T => {
+        const snapshot = { ...template } as Record<string, unknown>;
+        for (const [field, id] of Object.entries(accounts)) {
+          const account = financial!.accounts.find((a) => a.accountId === id);
+          if (!account) invalid('OMO_REGISTERED_ACCOUNT_ABSENT');
+          const balance =
+            financial!.positions.find((p) => p.account.accountId === id)
+              ?.netDebitBalance ?? Money.from('0', account.currency);
+          snapshot[field] = {
+            amount: canonicalDecimal(
+              account.accountClass === 'LIABILITY' ||
+                account.accountClass === 'EQUITY'
+                ? balance.amount.negated()
+                : balance.amount,
+            ),
+            currency: account.currency,
+          };
+        }
+        return snapshot as T;
+      };
+      const facts: CentralBankOmoSourceFacts = {
+        worldId: input.worldId,
+        countryId: original.countryId,
+        worldVersion: financial.worldVersion,
+        currentSimTime: command.simTime.toCanonicalValue(),
+        currentEventSequence: budget.eventSequence,
+        domesticTreasuryRef: original.domesticTreasuryRef,
+        bank: original.valuationQuote
+          ? projectCentralBankDayOneValuedSnapshot({
+              snapshot: currentSnapshot(original.bank, original.bankAccounts),
+              financial,
+              quote: original.valuationQuote,
+              ownerRef: original.bank.bankRef,
+              simTime: command.simTime,
+              assetField: 'settlementCash',
+              sha256Hex: sha,
+            })
+          : currentSnapshot(original.bank, original.bankAccounts),
+        centralBank: original.valuationQuote
+          ? projectCentralBankDayOneValuedSnapshot({
+              snapshot: currentSnapshot(
+                original.centralBank,
+                original.centralBankAccounts,
+              ),
+              financial,
+              quote: original.valuationQuote,
+              ownerRef: original.centralBank.centralBankRef,
+              simTime: command.simTime,
+              assetField: 'otherAssets',
+              sha256Hex: sha,
+            })
+          : currentSnapshot(original.centralBank, original.centralBankAccounts),
+        ...(original.valuationQuote === undefined
+          ? {}
+          : { valuationQuote: original.valuationQuote }),
+        bankAccounts: original.bankAccounts,
+        centralBankAccounts: original.centralBankAccounts,
+        holdings: omoHoldings.get(original.countryId)!,
+        quote,
+      };
+      const stored = frame.financialPostingBatches[0] as { batchId?: unknown };
+      if (!stored || typeof stored !== 'object' || !ref(stored.batchId))
+        invalid('ACTUAL_OMO_FINANCIAL_BATCH_REQUIRED');
+      const expected = prepareCentralBankOmoTransition({
+        command,
+        source: { facts, trace: payload.trace, financialState: financial },
+        eventId: event.eventId,
+        eventSequence: event.sequence,
+        financialBatchId: stored.batchId,
+        observedAtReal: event.recordedAtReal,
+        sha256Hex: sha,
+      });
+      if (
+        !same(expected.event, event) ||
+        !same(expected.transition, transition) ||
+        !same([expected.posting], frame.financialPostingBatches)
+      )
+        invalid('CANONICAL_OMO_EVENT_OR_FINANCIAL_POSTING_DIFFERS');
+      financial = expected.financial.state;
+      omoHoldings.set(original.countryId, expected.holdingsAfter);
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: event.sequence,
+      });
     } else if (
       command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
     ) {
@@ -1041,8 +1385,36 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         eventSequence: event.sequence,
       });
     }
+    // Every frame above has been fully reduced with canonical group/receipt/
+    // posting checks. Only here may Core project an unchanged Captain domain
+    // through a known inert sibling frame; Worker callers cannot rebase it.
+    for (const [countryId, state] of captains)
+      captains.set(
+        countryId,
+        freeze({
+          ...state,
+          worldVersion: budget.worldVersion,
+          lastEventSequence: budget.eventSequence,
+        }),
+      );
+    // This is after complete real sibling reduction, never a caller no-effect flag.
+    if (inventory && inventory.worldVersion !== transition.worldVersionAfter)
+      inventory = authorizeInventoryLedgerState(
+        parseInventoryLedgerSnapshot({
+          ...inventory,
+          worldVersion: transition.worldVersionAfter,
+        }),
+      );
     if (financial)
       financial = financialAtVersion(financial, transition.worldVersionAfter);
+    // Domain synchronization follows actual full sibling reduction only. It
+    // cannot establish a no-effect classification or omit a financial batch.
+    if (financial && rentOrigins !== undefined)
+      rentOrigins = synchronizeBeneficialHousingRentMixedReplayOrigins({
+        origins: rentOrigins,
+        financial,
+        sha256Hex: sha,
+      });
     if (financial && financialReplay) {
       const accounts = new Map<string, FinancialAccount>(
         financial.accounts.map((a) => [a.accountId, a]),
@@ -1138,9 +1510,34 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         });
     }
   const result = freeze({
+    ...(inventory === undefined
+      ? {}
+      : {
+          inventoryState: inventory,
+          narrowGoodsTransfers: [...goodsEntries.values()],
+        }),
+    ...(rentOrigins === undefined
+      ? {}
+      : { beneficialHousingRentOrigins: rentOrigins }),
+    ...(omoHoldings.size
+      ? {
+          omoCountries: [...omoHoldings].map(([countryId, holdings]) => ({
+            countryId,
+            holdings,
+          })),
+        }
+      : {}),
     ...(financial === undefined
       ? {}
       : { financialState: financial, currentTreasuryBalances }),
+    ...(captainEnabled
+      ? {
+          captainCountries: [...captains].map(([countryId, state]) => ({
+            countryId,
+            state,
+          })),
+        }
+      : {}),
     budgetState: budget,
     budgetEncumbrances: [...caps.values()],
     socialCountries,
@@ -1152,15 +1549,14 @@ export function prepareFinanceNativeBudgetMixedPrefix(
   const evidence = Object.freeze({}) as FinanceNativeBudgetMixedPrefixEvidence;
   mixedPrefixes.set(evidence, {
     worldId: input.worldId,
-    framesHash: financialReplay
-      ? completeFrameHash(input.frames, sha)
-      : frameHash(input.frames, sha),
-    ...(financialReplay === undefined
+    framesHash:
+      financialReplay || captainEnabled
+        ? completeFrameHash(input.frames, sha)
+        : frameHash(input.frames, sha),
+    ...(!financialReplay && !captainEnabled
       ? {}
-      : {
-          completeFrames: true as const,
-          financialBase: financialReplay.financial,
-        }),
+      : { completeFrames: true as const }),
+    ...(financialReplay ? { financialBase: financialReplay.financial } : {}),
     result,
   });
   return evidence;

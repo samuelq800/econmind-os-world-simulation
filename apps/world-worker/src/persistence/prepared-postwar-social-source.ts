@@ -17,10 +17,9 @@ import {
   prepareFinanceNativeBudgetMixedPrefix,
   type FinanceNativeBudgetMixedPrefixEvidence,
 } from '@econmind/core/finance-budget-native';
-import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
 import { replayPreparedPostwarFinanceSocialFxFrom } from './prepared-postwar-finance-social-fx-replay.js';
 import {
-  prepareFinanceSocialLedger,
+  prepareFinanceSocialLedgerFromOpening,
   replayPreparedFinanceSocialLedger,
   type PreparedFinanceSocialLedger,
 } from '@econmind/core/finance-social-prepared-ledger';
@@ -263,11 +262,15 @@ export async function preparePostwarSocialSource(input: {
           registrations.set(country.countryId, canonicalSerialize(r));
         }
         if (!registrations.size) invalid('CANONICAL_COUNTRIES_REQUIRED');
-        const financial = rebuildV08LedgersFromLineage({
+        const reconstructed = rebuildV08LedgersFromLineage({
           seed,
           sha256Hex: sha,
-        }).financial;
-        const ledger = prepareFinanceSocialLedger(financial);
+        });
+        const financial = reconstructed.financial;
+        const ledger = prepareFinanceSocialLedgerFromOpening(
+          reconstructed,
+          sha,
+        );
         return Object.freeze({
           pins,
           modelVersion: c.modelVersion,
@@ -392,7 +395,10 @@ export async function readPreparedPostwarSocialLineageFrom(input: {
   );
   const prefix = await readBoundedPostwarSocialFramesFrom(input);
   const fxReplay = prefix.frames.some(
-    (f) => f.command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+    (f) =>
+      f.financialPostingBatches.length !== 0 ||
+      f.inventoryPostings.length !== 0 ||
+      f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
   )
     ? await replayPreparedPostwarFinanceSocialFxFrom({
         executor: input.executor,

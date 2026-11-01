@@ -42,6 +42,13 @@ import type {
   OfficeOperatingSourceCustodyScope,
 } from './office-operating-source-commit-protection.js';
 
+import {
+  isPostwarCaptainMixedSource,
+  readPostwarCaptainMixedSourceFrom,
+  readPostwarCaptainDurableCommandFrom,
+  type PostwarCaptainMixedSource,
+} from './postwar-captain-mixed-source.js';
+import type { ValidatedCanonicalLineageData } from './validated-canonical-lineage.js';
 const digest = (value: string) =>
   createHash('sha256').update(value).digest('hex');
 function invalid(reason: string): never {
@@ -190,6 +197,7 @@ export function createCaptainRuntimeSnapshotReader(input: {
   readonly database: SqlDatabase;
   readonly workerId: string;
   readonly custody: CaptainOperatingSourceCustodyPort;
+  readonly mixedSource?: PostwarCaptainMixedSource;
 }) {
   if (
     !['TEST_ONLY_LOCAL', 'OFFICIAL_RUNTIME'].includes(input.mode) ||
@@ -199,6 +207,11 @@ export function createCaptainRuntimeSnapshotReader(input: {
     typeof input.custody.withProtectedAdmittedOriginalsFrom !== 'function'
   )
     invalid('explicit server mode and real custody dependency required');
+  if (
+    input.mixedSource !== undefined &&
+    !isPostwarCaptainMixedSource(input.mixedSource)
+  )
+    invalid('genuine mixed source required');
   const mode = input.mode,
     workerId = input.workerId,
     database = input.database,
@@ -228,11 +241,17 @@ export function createCaptainRuntimeSnapshotReader(input: {
     executor: SqlExecutor,
     command: CanonicalCommand,
   ) => {
-    const durable = await lineageReader.readCommandFrom(
-      executor,
-      command.worldId,
-      command.commandId,
-    );
+    const durable = input.mixedSource
+      ? await readPostwarCaptainDurableCommandFrom(executor, {
+          worldId: command.worldId,
+          commandId: command.commandId,
+          commandFingerprint: command.fingerprint,
+        })
+      : await lineageReader.readCommandFrom(
+          executor,
+          command.worldId,
+          command.commandId,
+        );
     if (canonicalSerialize(durable) !== canonicalSerialize(command))
       invalid('durable canonical command mismatch');
   };
@@ -332,30 +351,35 @@ export function createCaptainRuntimeSnapshotReader(input: {
           lease.renewedAtReal > observedAtReal
         )
           invalid('lease world/observation mismatch');
-        return withValidatedCanonicalLineageFrom(
-          { reader: lineageReader, executor, worldId: command.worldId },
-          async (view) => {
-            const lineage = readValidatedCanonicalLineageFrom(executor, view);
-            if (
-              lineage.seed.seedId !== genesis.seedId ||
-              lineage.seed.fingerprint !== genesis.seedFingerprint ||
-              lineage.headWorldVersion !== command.expectedWorldVersion
-            )
-              invalid(
-                'admitted genesis/current head differs from canonical lineage',
-              );
-            let state: CaptainPoliticalCapitalReplayState = {
-              worldId: command.worldId,
-              countryId: command.countryId,
-              worldVersion: '0',
-              lastEventSequence: '0',
-              capital: genesis.capital,
-              applied: [],
-            };
-            let predecessorSnapshotHash: string | null = null;
-            const eventRefs: string[] = [];
-            // Deliberately bounded taxonomy: unknown or other-country effects deny.
-            // A future reviewed shared taxonomy may classify inert sibling events.
+        const build = async (
+          lineage: Pick<
+            ValidatedCanonicalLineageData,
+            'headWorldVersion' | 'headEventSequence' | 'transitions'
+          > & { seed: { seedId: string; fingerprint: string } },
+          mixed?: Awaited<ReturnType<typeof readPostwarCaptainMixedSourceFrom>>,
+        ) => {
+          if (
+            lineage.seed.seedId !== genesis.seedId ||
+            lineage.seed.fingerprint !== genesis.seedFingerprint ||
+            lineage.headWorldVersion !== command.expectedWorldVersion
+          )
+            invalid(
+              'admitted genesis/current head differs from canonical lineage',
+            );
+          let state: CaptainPoliticalCapitalReplayState = mixed?.state ?? {
+            worldId: command.worldId,
+            countryId: command.countryId,
+            worldVersion: '0',
+            lastEventSequence: '0',
+            capital: genesis.capital,
+            applied: [],
+          };
+          let predecessorSnapshotHash: string | null =
+            mixed?.predecessorSnapshotHash ?? null;
+          const eventRefs: string[] = [...(mixed?.eventRefs ?? [])];
+          // Legacy standalone remains strict. The explicit genuine mixed source
+          // already validated EVERY ordered command/event/receipt/posting in Core.
+          if (!mixed)
             for (const transition of lineage.transitions)
               for (const event of transition.transition.events) {
                 if (
@@ -375,93 +399,107 @@ export function createCaptainRuntimeSnapshotReader(input: {
                 ).source.trace.snapshot.snapshotHash;
                 eventRefs.push(event.eventId);
               }
-            if (
-              state.worldVersion !== lineage.headWorldVersion ||
-              state.lastEventSequence !== lineage.headEventSequence
-            )
-              invalid(
-                'domain replay cursor does not reach complete canonical head',
-              );
-            const identity = digest(
-              canonicalSerialize({
-                commandId: command.commandId,
-                fingerprint: command.fingerprint,
-              }),
-            ).slice(0, 32);
-            const trace: FoundationTraceRequest = {
-              traceRef: `TRACE_CAPTAIN_${identity}`,
-              calculationVersion: genesis.semanticRevision,
-              snapshot: {
-                lineageRef: command.worldId,
-                sourceVersion: `WORLD_VERSION_${lineage.headWorldVersion}`,
-                snapshotRef: `CAPTAIN_SNAPSHOT_${identity}`,
-                snapshotHash: '0'.repeat(64),
-                predecessorSnapshotHash,
-              },
-              snapshotAt: {
-                amount: command.simTime.toCanonicalValue(),
-                unit: 'sim_millisecond',
-              },
-            };
-            const facts = (t: FoundationTraceRequest) => ({
-              capitalFact: createFoundationFact({
-                trace: t,
-                factRef: `CAPTAIN_REPLAY_${identity}`,
-                sourceRef: captured.genesis.sourceRef,
-                predecessorFactRefs: [captured.genesis.factRef, ...eventRefs],
-                payload: state.capital,
-              }),
-              reasonFact: createFoundationFact({
-                trace: t,
-                factRef: captured.reason.factRef,
-                sourceRef: captured.reason.sourceRef,
-                predecessorFactRefs: captured.reason.predecessorFactRefs,
-                payload: reason.reason,
-              }),
-            });
-            const scope = {
-              worldId: command.worldId,
-              countryId: command.countryId,
-              worldVersion: lineage.headWorldVersion,
-              lastEventSequence: lineage.headEventSequence,
-            };
-            const boundTrace = {
-              ...trace,
-              snapshot: {
-                ...trace.snapshot,
-                snapshotHash: captainPoliticalCapitalSourceHash(
-                  { ...scope, ...facts(trace) },
-                  digest,
-                ),
-              },
-            };
-            const snapshot = inert({
-              ...scope,
-              trace: boundTrace,
-              ...facts(boundTrace),
-            });
-            // Existing kernel validates all quantities, conservation and actual reason.
-            prepareCaptainPoliticalCapitalEvent({
-              command,
-              source: snapshot,
-              eventId: `CAPTAIN_VALIDATE_${identity.toUpperCase()}`,
-              recordedAtReal: observedAtReal,
-              sha256Hex: digest,
-            });
-            return consume({
-              sourceRead: Object.freeze({
-                kind: 'READ' as const,
-                snapshot,
-                lease,
-              }),
-              originals: canonicalSerialize(captured),
-              sourceBinding: sourceBindingFor(
-                captured,
-                command.worldId,
-                command.countryId,
+          if (
+            state.worldVersion !== lineage.headWorldVersion ||
+            state.lastEventSequence !== lineage.headEventSequence
+          )
+            invalid(
+              'domain replay cursor does not reach complete canonical head',
+            );
+          const identity = digest(
+            canonicalSerialize({
+              commandId: command.commandId,
+              fingerprint: command.fingerprint,
+            }),
+          ).slice(0, 32);
+          const trace: FoundationTraceRequest = {
+            traceRef: `TRACE_CAPTAIN_${identity}`,
+            calculationVersion: genesis.semanticRevision,
+            snapshot: {
+              lineageRef: command.worldId,
+              sourceVersion: `WORLD_VERSION_${lineage.headWorldVersion}`,
+              snapshotRef: `CAPTAIN_SNAPSHOT_${identity}`,
+              snapshotHash: '0'.repeat(64),
+              predecessorSnapshotHash,
+            },
+            snapshotAt: {
+              amount: command.simTime.toCanonicalValue(),
+              unit: 'sim_millisecond',
+            },
+          };
+          const facts = (t: FoundationTraceRequest) => ({
+            capitalFact: createFoundationFact({
+              trace: t,
+              factRef: `CAPTAIN_REPLAY_${identity}`,
+              sourceRef: captured.genesis.sourceRef,
+              predecessorFactRefs: [captured.genesis.factRef, ...eventRefs],
+              payload: state.capital,
+            }),
+            reasonFact: createFoundationFact({
+              trace: t,
+              factRef: captured.reason.factRef,
+              sourceRef: captured.reason.sourceRef,
+              predecessorFactRefs: captured.reason.predecessorFactRefs,
+              payload: reason.reason,
+            }),
+          });
+          const scope = {
+            worldId: command.worldId,
+            countryId: command.countryId,
+            worldVersion: lineage.headWorldVersion,
+            lastEventSequence: lineage.headEventSequence,
+          };
+          const boundTrace = {
+            ...trace,
+            snapshot: {
+              ...trace.snapshot,
+              snapshotHash: captainPoliticalCapitalSourceHash(
+                { ...scope, ...facts(trace) },
+                digest,
               ),
-            });
-          },
+            },
+          };
+          const snapshot = inert({
+            ...scope,
+            trace: boundTrace,
+            ...facts(boundTrace),
+          });
+          // Existing kernel validates all quantities, conservation and actual reason.
+          prepareCaptainPoliticalCapitalEvent({
+            command,
+            source: snapshot,
+            eventId: `CAPTAIN_VALIDATE_${identity.toUpperCase()}`,
+            recordedAtReal: observedAtReal,
+            sha256Hex: digest,
+          });
+          return consume({
+            sourceRead: Object.freeze({
+              kind: 'READ' as const,
+              snapshot,
+              lease,
+            }),
+            originals: canonicalSerialize(captured),
+            sourceBinding: sourceBindingFor(
+              captured,
+              command.worldId,
+              command.countryId,
+            ),
+          });
+        };
+        if (input.mixedSource) {
+          const mixed = await readPostwarCaptainMixedSourceFrom(executor, {
+            binding: input.mixedSource,
+            command,
+            genesis: captured.genesis,
+            reason: captured.reason,
+            mode,
+          });
+          return build({ ...mixed, transitions: [] }, mixed);
+        }
+        return withValidatedCanonicalLineageFrom(
+          { reader: lineageReader, executor, worldId: command.worldId },
+          async (view) =>
+            build(readValidatedCanonicalLineageFrom(executor, view)),
         );
       },
     );
@@ -533,11 +571,17 @@ export function createCaptainRuntimeSnapshotReader(input: {
     async read(request: Readonly<CaptainPoliticalCapitalRuntimeReadRequest>) {
       const copied = captureRequest(request);
       return database.transaction(async (executor) => {
-        const command = await lineageReader.readCommandFrom(
-          executor,
-          copied.worldId,
-          copied.commandId,
-        );
+        const command = input.mixedSource
+          ? await readPostwarCaptainDurableCommandFrom(executor, {
+              worldId: copied.worldId,
+              commandId: copied.commandId,
+              commandFingerprint: copied.commandFingerprint,
+            })
+          : await lineageReader.readCommandFrom(
+              executor,
+              copied.worldId,
+              copied.commandId,
+            );
         assertRequestMatchesCommand(copied, command);
         return (await prepareFrom(executor, command, copied.observedAtReal))
           .sourceRead;

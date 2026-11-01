@@ -587,6 +587,19 @@ function capitalSnapshot(
   });
 }
 
+/** Pure validation of supplied original DATA. No opening quantity is defaulted,
+ * and no source/admission, caller authority or runtime state is issued. */
+export function validatePoliticalCapitalSnapshot(
+  value: PoliticalCapitalSnapshot,
+): PoliticalCapitalSnapshot {
+  const checked = capitalSnapshot(value, 'capital');
+  if (canonicalSerialize(value) !== canonicalSerialize(checked))
+    kernelInvalid(
+      'Political capital original must use exact canonical fields and quantities',
+    );
+  return checked;
+}
+
 function replaceBucket(
   snapshot: PoliticalCapitalSnapshot,
   target: PoliticalCapitalBucket,

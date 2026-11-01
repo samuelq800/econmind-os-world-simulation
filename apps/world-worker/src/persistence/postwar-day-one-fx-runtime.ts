@@ -4,6 +4,7 @@
 import { createHash } from 'node:crypto';
 import {
   DomainError,
+  CENTRAL_BANK_OMO_COMMAND,
   DOMAIN_ERROR_CODES,
   canonicalHashInput,
   canonicalSerialize,
@@ -66,6 +67,8 @@ import type {
   AtomicTransitionDraft,
 } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import { readPostwarBeneficialHousingRentMixedOriginalsForDatabase } from './postwar-beneficial-housing-rent-mixed-source.js';
+import { readCentralBankOmoMixedReplayOriginalsFrom } from './postgres-central-bank-omo-history.js';
 export const DAY_ONE_FX_SOURCE_PURPOSE =
   'POSTWAR_DAY_ONE_TREASURY_FX_SOURCE_RECHECK_V1' as const;
 export interface DayOneFxSourceCommitRequest {
@@ -121,6 +124,7 @@ export const isPostwarDayOneFxRuntime = (
   v: unknown,
 ): v is PostwarDayOneFxRuntime =>
   typeof v === 'object' && v !== null && issuedRuntimes.has(v);
+import { readPostwarCaptainHistoryOriginalsFrom } from './postwar-captain-history-originals.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
 const same = (a: unknown, b: unknown) =>
@@ -237,6 +241,7 @@ export function createPostwarDayOneFxRuntime(config: {
   readonly workerId: string;
   readonly workerRole: string;
   readonly worldId: string;
+  readonly omoOriginalMode?: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
 }): PostwarDayOneFxRuntime {
   if (
     !/^[a-z][a-z0-9_]{0,62}$/u.test(config.workerRole) ||
@@ -259,6 +264,10 @@ export function createPostwarDayOneFxRuntime(config: {
       financialAccounts: readonly FinancialAccount[];
       social: PostwarSocialEmploymentStateDocument;
       funding: readonly PostwarGenesisFunding[];
+      sourceMetadata: readonly {
+        readonly sourceId: string;
+        readonly payloadHash: string;
+      }[];
     } | null = null,
     closed = false,
     preparing = false;
@@ -437,8 +446,31 @@ export function createPostwarDayOneFxRuntime(config: {
         });
     }
     const frames = history.frames;
+    const captainCountries = frames.some(
+      (f) => f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+    )
+      ? await readPostwarCaptainHistoryOriginalsFrom(tx, {
+          worldId: command.worldId,
+          hostCountryId: command.countryId,
+          officeId: 'TREASURY_FX',
+          seedFingerprint: p.policy.seedFingerprint,
+          admissionRef: original.admissionRef,
+          expectedHead: history.head,
+          frames,
+        })
+      : undefined;
+    const beneficialHousingRentReceipts =
+      readPostwarBeneficialHousingRentMixedOriginalsForDatabase({
+        database,
+        worldId: command.worldId,
+        seedId: original.seedId,
+        seedFingerprint: original.seedFingerprint,
+      });
     const mixed = replayPreparedFinanceSocialFxLedger({
       prepared: p.ledger,
+      ...(beneficialHousingRentReceipts === undefined
+        ? {}
+        : { beneficialHousingRentReceipts }),
       frames,
       socialCountries: p.social.countries.map((c) => ({
         countryId: c.countryId,
@@ -453,6 +485,22 @@ export function createPostwarDayOneFxRuntime(config: {
         currency: f.currency,
       })),
       fxOriginals,
+      ...(frames.some((f) => f.command.commandType === CENTRAL_BANK_OMO_COMMAND)
+        ? {
+            omoOriginals: await readCentralBankOmoMixedReplayOriginalsFrom(tx, {
+              worldId: command.worldId,
+              hostCountryId: command.countryId,
+              officeId: 'TREASURY_FX',
+              seedFingerprint: p.policy.seedFingerprint,
+              admissionRef: original.admissionRef,
+              expectedHead: history.head,
+              frames,
+              mode: config.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
+              sourceMetadata: p.sourceMetadata,
+            }),
+          }
+        : {}),
+      ...(captainCountries === undefined ? {} : { captainCountries }),
       expectedHead: {
         worldVersion: history.head.worldVersion,
         eventSequence: history.head.eventSequence,
@@ -821,6 +869,14 @@ export function createPostwarDayOneFxRuntime(config: {
           policy,
           ledger: prepareFinanceSocialLedger(financial),
           financialAccounts: financial.accounts,
+          sourceMetadata: Object.freeze(
+            input.seed.sources.map((s) =>
+              Object.freeze({
+                sourceId: s.sourceId,
+                payloadHash: s.payloadHash,
+              }),
+            ),
+          ),
           social: opening.socialEmployment,
           funding: opening.facts.funding,
         });

@@ -244,6 +244,7 @@ export function createPostwarSocialRuntimeConnection(
     source: preparedSource,
     world,
     workerPool,
+    workerRole: input.workerRole,
     runtimes,
     ownership,
     countryIds: Object.freeze([...openingScope.countryIds]),
@@ -256,6 +257,7 @@ const issuedConnections = new WeakMap<
     source: PreparedPostwarSocialSource;
     world: string;
     workerPool: Pool;
+    workerRole: string;
     runtimes: Set<ManualOfficeIntakeRuntime>;
     ownership: { shared: FinanceSocialSourceBinding | null };
     countryIds: readonly string[];
@@ -304,11 +306,16 @@ export function readPostwarSocialRuntimeFinancialReplayBase(
 /** Server-only transport ownership metadata, not credentials or source facts. */
 export function readPostwarSocialRuntimeConnectionResources(
   value: Readonly<PostwarSocialRuntimeConnection>,
-): Readonly<{ workerPool: Pool; countryIds: readonly string[] }> {
+): Readonly<{
+  workerPool: Pool;
+  workerRole: string;
+  countryIds: readonly string[];
+}> {
   const data = issuedConnections.get(value);
   if (!data) throw Error('GENUINE_SOCIAL_RUNTIME_CONNECTION_REQUIRED');
   return Object.freeze({
     workerPool: data.workerPool,
+    workerRole: data.workerRole,
     countryIds: data.countryIds,
   });
 }

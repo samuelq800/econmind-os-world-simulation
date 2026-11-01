@@ -33,7 +33,7 @@ export interface PostwarTreasuryFxHandleRequest {
   readonly signal?: AbortSignal;
 }
 export interface PostwarTreasuryFxConnection {
-  readonly environment: 'local' | 'ci' | null;
+  readonly environment: 'local' | 'ci' | 'staging' | 'production' | null;
   readonly transportOrigins: readonly string[];
   readonly status: 'EXPLICIT_MANUAL_TREASURY_FX_CONNECTION' | 'NOT_CONNECTED';
   handleCommand(input: PostwarTreasuryFxHandleRequest): Promise<{
@@ -101,7 +101,16 @@ export function createPostwarTreasuryFxConnection(
   const ports = shared ?? standalone;
   const environment =
     shared?.environment ?? standalone?.environment.ECONMIND_ENV;
-  if (ports && !['local', 'ci'].includes(environment ?? ''))
+  // Formal transports borrow only the privately issued shared controller.
+  // An environment label or a standalone local controller is never a permit.
+  if (
+    ports &&
+    !['local', 'ci'].includes(environment ?? '') &&
+    !(
+      shared?.formalBinding &&
+      ['staging', 'production'].includes(environment ?? '')
+    )
+  )
     throw Error('TREASURY_FX_LOCAL_CI_ONLY');
   if (
     c &&
@@ -205,11 +214,13 @@ export function createPostwarTreasuryFxConnection(
     }
   }
   return Object.freeze({
-    environment: ports
-      ? environment === 'ci'
+    environment: shared
+      ? shared.environment
+      : ports && environment === 'ci'
         ? ('ci' as const)
-        : ('local' as const)
-      : null,
+        : ports && environment === 'local'
+          ? ('local' as const)
+          : null,
     status: c
       ? ('EXPLICIT_MANUAL_TREASURY_FX_CONNECTION' as const)
       : ('NOT_CONNECTED' as const),

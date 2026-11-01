@@ -233,12 +233,17 @@ export async function readBoundedMixedOfficeHistoryFrom(input: {
       sourceRef: text(row.source_ref),
     });
   }
-  const hasFx = frames.some(
-    (f) => f.command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+  const requiresFinancialReplay = frames.some(
+    (f) =>
+      f.financialPostingBatches.length !== 0 ||
+      f.inventoryPostings.length !== 0 ||
+      f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
   );
-  if (hasFx && !input.preparedSocialConnection)
-    invalid('genuine prepared H0 baseline required for FX financial effects');
-  const baseline = hasFx
+  if (requiresFinancialReplay && !input.preparedSocialConnection)
+    invalid(
+      'genuine prepared H0 baseline required for complete monetary/Captain effects',
+    );
+  const baseline = requiresFinancialReplay
     ? readPostwarSocialRuntimeFinancialReplayBase(
         input.preparedSocialConnection!,
         input.worldId,

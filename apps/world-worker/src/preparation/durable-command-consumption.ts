@@ -1,9 +1,14 @@
 import { createHash } from 'node:crypto';
 import {
+  reserveRegisteredWorldFiniteConsumer,
+  releaseRegisteredWorldFiniteConsumer,
+} from '../time/registered-world-execution-state.js';
+import {
   DOMAIN_ERROR_CODES,
   DomainError,
   SimTime,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
+  CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   canonicalSerialize,
@@ -42,10 +47,13 @@ import {
 import { isFinanceBudgetNativeCommitGuard } from '../persistence/postgres-finance-budget-custody.js';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
 import { isPostwarSocialMatchSourceCommitProtectionPort } from '../persistence/postwar-social-match-runtime.js';
+import { isPostwarCaptainSourceCommitProtectionPort } from '../persistence/postwar-captain-runtime.js';
+import { isPreparedPostwarSocialRuntimeConnection } from '../runtime-preparation/social-runtime-connection.js';
 
 import {
   registeredFinanceCommandHostDependencies,
   productionFinanceCommandExecutionBlocker,
+  assertProductionFinanceExecutionCurrent,
   type ServerCommandHostBinding,
 } from '../runtime-preparation/production-world-command-host.js';
 import {
@@ -213,7 +221,7 @@ export function createFinanceSocialCommandConsumptionPreparation(
   binding: FinanceSocialSourceBinding,
 ) {
   const d = readFinanceSocialSourceBinding(binding);
-  assertLocalPreparationEnvironment(d.environment);
+  if (!d.formalBinding) assertLocalPreparationEnvironment(d.environment);
   return createDurableCommandConsumer(
     {
       database: d.database,
@@ -224,8 +232,10 @@ export function createFinanceSocialCommandConsumptionPreparation(
       environment: d.environment,
       officeReaders: d.readers,
     },
-    null,
+    d.formalBinding,
     d.readers.treasuryFx ? 'FINANCE_SOCIAL_FX' : 'FINANCE_SOCIAL',
+    null,
+    binding,
   );
 }
 /** Explicit finite server composition. No environment substitution, loop,
@@ -234,6 +244,8 @@ export function createProductionFinanceCommandConsumption(
   binding: ServerCommandHostBinding,
 ) {
   const d = registeredFinanceCommandHostDependencies(binding);
+  if (d.sharedSourceBinding)
+    throw Error('FORMAL_SHARED_SINGLE_CONSUMER_REQUIRED');
   return createDurableCommandConsumer(
     {
       database: d.workerDatabase,
@@ -255,6 +267,7 @@ function createDurableCommandConsumer(
     | 'FINANCE_SOCIAL'
     | 'FINANCE_SOCIAL_FX' = 'LEGACY_GENERIC',
   treasuryFxBinding: PostwarTreasuryFxSourceBinding | null = null,
+  financeSocialBinding: FinanceSocialSourceBinding | null = null,
 ) {
   const world = worldId(input.worldId);
   const holder = workerId(input.workerId);
@@ -544,6 +557,11 @@ function createDurableCommandConsumer(
     if (serverBinding) {
       const reason = productionFinanceCommandExecutionBlocker(serverBinding);
       if (reason) return blocked(reason);
+      try {
+        await assertProductionFinanceExecutionCurrent(serverBinding);
+      } catch {
+        return blocked('FORMAL_EXECUTION_CURRENT_REGISTRATION_REQUIRED');
+      }
     }
     if (clock === null) return blocked('SERVER_CLOCK_NOT_BOUND');
     let selectedId: string | null = null;
@@ -558,7 +576,7 @@ function createDurableCommandConsumer(
                   claimed_by, claim_fencing_token::text
              from world_v2.command_queue
             where world_id=$1 and queue_state in ('PENDING','CLAIMED')
-              ${serverBinding ? "and command_id in(select s.command_id from world_v2.command_submission s where s.world_id=$1 and s.command_type='CORE_FINANCE_BUDGET_APPROPRIATION_V1'and s.office_id='FINANCE')" : ''}
+              ${serverBinding && !financeSocialBinding ? "and command_id in(select s.command_id from world_v2.command_submission s where s.world_id=$1 and s.command_type='CORE_FINANCE_BUDGET_APPROPRIATION_V1'and s.office_id='FINANCE')" : ''}
               and available_at_sim_time <= $2::bigint
             order by available_at_sim_time, priority_rank, command_id limit 1`,
           [world, simTime.toCanonicalValue()],
@@ -582,8 +600,29 @@ function createDurableCommandConsumer(
       // Keep the real global queue head. Never add an Office WHERE clause,
       // skip an unsupported head, alter its expected version, or invoke a
       // source/claim/legacy goods branch for an uninstalled family.
+      // Only the private fixed issuer may add Captain to this same consumer.
+      // A structural reader/guard or another generic consumer is insufficient.
+      const captainInstalled =
+        financeSocialBinding !== null &&
+        command.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND &&
+        isPostwarCaptainSourceCommitProtectionPort(
+          officeReaders.captainNative?.sourceCommitProtectionPort,
+        );
+      if (
+        captainInstalled &&
+        !isPreparedPostwarSocialRuntimeConnection(
+          readFinanceSocialSourceBinding(financeSocialBinding!)
+            .socialConnection,
+          world,
+        )
+      )
+        return blocked(
+          'FINANCE_SOCIAL_CAPTAIN_SOURCE_NOT_PREPARED',
+          command.commandId,
+        );
       if (
         familyBoundary !== 'LEGACY_GENERIC' &&
+        !captainInstalled &&
         !FINANCE_SOCIAL_COMMAND_FAMILIES.has(command.commandType) &&
         !(
           familyBoundary === 'FINANCE_SOCIAL_FX' &&
@@ -596,6 +635,7 @@ function createDurableCommandConsumer(
         );
       if (
         serverBinding &&
+        !financeSocialBinding &&
         (command.commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND ||
           command.officeId !== 'FINANCE')
       )
@@ -702,6 +742,12 @@ function createDurableCommandConsumer(
             : {
                 dayOneFxSourceCommitProtectionPort:
                   composition.dayOneFxSourceCommitProtectionPort,
+              }),
+          ...(composition.centralBankOmoSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                centralBankOmoSourceCommitProtectionPort:
+                  composition.centralBankOmoSourceCommitProtectionPort,
               }),
           ...(composition.captainSourceCommitProtectionPort === undefined
             ? {}
@@ -817,6 +863,9 @@ function createDurableCommandConsumer(
     }
   }
 
+  const serverConsumerOwner = Object.freeze({});
+  if (serverBinding && clock)
+    reserveRegisteredWorldFiniteConsumer(clock, serverConsumerOwner);
   return Object.freeze({
     preparationStatus: DURABLE_COMMAND_CONSUMPTION_STATUS,
     state: () => lifecycle,
@@ -854,6 +903,8 @@ function createDurableCommandConsumer(
       stopping = (async () => {
         await active;
         lifecycle = 'STOPPED';
+        if (serverBinding && clock)
+          releaseRegisteredWorldFiniteConsumer(clock, serverConsumerOwner);
       })();
       return stopping;
     },
