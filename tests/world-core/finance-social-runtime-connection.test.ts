@@ -88,6 +88,64 @@ function fixtures(worldId: string) {
   };
 }
 describe('fixed Finance/Social single World issuer', () => {
+  it('rejects Industry installation without a distinct derived-source database before reserving the World', async () => {
+    const f = fixtures('WORLD_SHARED_INDUSTRY_DATABASE');
+    for (const publicationDatabase of [undefined, f.social.database])
+      expect(() =>
+        createPostwarFinanceSocialRuntimeConnection({
+          ...f.input,
+          industry: { sourceContext: {} as never },
+          ...(publicationDatabase ? { publicationDatabase } : {}),
+        }),
+      ).toThrow('INDUSTRY_SEPARATE_PUBLICATION_DATABASE_REQUIRED');
+    expect(f.worker.queries).toEqual([]);
+    const c = createPostwarFinanceSocialRuntimeConnection(f.input);
+    expect(readPostwarFinanceSocialRuntimeBinding(c).industry).toBeNull();
+    await c.stop();
+  });
+  it('rejects CB duplicate/foreign country and Trade worker substitution before reserving a consumer or issuing SQL', async () => {
+    const f = fixtures('WORLD_SHARED_OPTIONAL_SOURCE_SCOPE');
+    for (const countryIds of [[], ['COUNTRY_01', 'COUNTRY_01'], ['COUNTRY_99']])
+      expect(() =>
+        createPostwarFinanceSocialRuntimeConnection({
+          ...f.input,
+          centralBankOmo: {
+            workerRole: 'worker_shared_test',
+            mode: 'OFFICIAL_RUNTIME',
+            countryIds,
+          },
+        }),
+      ).toThrow('CB_EXACT_FINITE');
+    expect(() =>
+      createPostwarFinanceSocialRuntimeConnection({
+        ...f.input,
+        trade: { workerRole: 'other_trade_worker' },
+      }),
+    ).toThrow('TRADE_EXACT_WORKER');
+    expect(f.worker.queries).toEqual([]);
+    expect(f.intake.queries).toEqual([]);
+    const c = createPostwarFinanceSocialRuntimeConnection({
+      ...f.input,
+      centralBankOmo: {
+        workerRole: 'worker_shared_test',
+        mode: 'OFFICIAL_RUNTIME',
+        countryIds: ['COUNTRY_01', 'COUNTRY_02'],
+      },
+      trade: { workerRole: 'worker_shared_test' },
+      beneficialRent: {
+        workerRole: 'worker_shared_test',
+        clockBindingRef: 'CLOCK_TEST_ONLY_RENT',
+      },
+    });
+    const ports = readPostwarFinanceSocialRuntimeBinding(c);
+    expect(ports.trade?.database).toBe(ports.database);
+    expect(ports.centralBankOmo?.countryIds).toEqual([
+      'COUNTRY_01',
+      'COUNTRY_02',
+    ]);
+    expect(f.worker.queries).toEqual([]);
+    await c.stop();
+  });
   it('requires a genuine formal DB Clock and preserves the old local gate, with no startup SQL/consumption', async () => {
     const f = fixtures('WORLD_FORMAL_SHARED_FIXED');
     const makeBinding = (
@@ -133,10 +191,15 @@ describe('fixed Finance/Social single World issuer', () => {
     const connection = createProductionPostwarFinanceSocialRuntimeConnection({
       binding: makeBinding(clock),
       environment: 'production',
+      beneficialRent: {
+        workerRole: 'worker_shared_test',
+        clockBindingRef: 'CLOCK_TEST_ONLY_RENT',
+      },
     });
     try {
       const ports = readPostwarFinanceSocialRuntimeBinding(connection);
       expect(ports.formalBinding).not.toBeNull();
+      expect(ports.beneficialRent).not.toBeNull();
       expect(ports.environment).toBe('production');
       expect(ports.clock).toBe(clock);
       expect(ports.workerPool).toBe(f.worker.pool);

@@ -139,10 +139,20 @@ describe('W1 Office private DOM lifecycle / shipped view and bounded transport',
     expect(s.f.commands).toHaveLength(0);
   });
   it.each(['industry', 'trade'] as const)(
-    'unsupported %s creates no private shell',
+    'unsupported or mismatched %s binding creates no private shell',
     (role) => {
       const s = setup(role);
-      expect(s.connect()).toBe('MISSING');
+      const binding =
+        role === 'trade'
+          ? {
+              ...s.f.binding,
+              read: {
+                ...s.f.binding.read,
+                identity: { ...s.f.binding.read.identity, officeId: 'FINANCE' },
+              },
+            }
+          : s.f.binding;
+      expect(s.connect(s.f, binding)).toBe('MISSING');
       s.flush();
       expect(privateNodes(s.doc)).toEqual([]);
       expect(s.f.f.calls).toHaveLength(0);
@@ -349,7 +359,7 @@ describe('W1 Office private DOM lifecycle / shipped view and bounded transport',
     expect(s.dialog()!.open).toBe(true);
     expect(s.api.getState().status).toBe('REVIEWED');
   });
-  it('UNKNOWN fingerprint input is explicitly wiped on retirement without replay', async () => {
+  it('UNKNOWN recovers without asking for a fingerprint and wipes original intent on retirement without replay', async () => {
     const s = setup();
     s.connect();
     s.open();
@@ -362,13 +372,17 @@ describe('W1 Office private DOM lifecycle / shipped view and bounded transport',
     });
     s.click('confirm');
     await expect.poll(() => s.api.getState().status).toBe('UNKNOWN');
-    const fingerprint = s
-      .dialog()!
-      .all()
-      .find((el) => el.tag === 'input')! as HostElement & { value: string };
-    fingerprint.value = s.f.f.lookup.commandFingerprint;
+    expect(
+      s
+        .dialog()!
+        .all()
+        .some((el) => el.tag === 'input'),
+    ).toBe(false);
+    const original = draft(s);
+    original.value = JSON.stringify(s.f.request);
     s.f.f.invalidate();
-    expect(fingerprint.value).toBe('');
+    expect(original.value).toBe('');
+    expect(s.api.getState().intent).toBeNull();
     expect(privateNodes(s.doc)).toEqual([]);
     expect(s.f.commands).toHaveLength(1);
   });

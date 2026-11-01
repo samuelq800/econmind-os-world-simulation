@@ -1,3 +1,15 @@
+import {
+  createPostwarIndustryConnection,
+  type PostwarIndustryConnection,
+} from './postwar-industry-connection.js';
+import {
+  createPostwarCentralBankConnection,
+  type PostwarCentralBankConnection,
+} from './postwar-central-bank-connection.js';
+import {
+  createPostwarTradeConnection,
+  type PostwarTradeConnection,
+} from './postwar-trade-connection.js';
 /** Explicit local/CI Node owner. HTTP borrowers share one privately issued
  * Worker runtime. This owner never starts a loop or discovers credentials. */
 import { canonicalSerialize, type OpeningSeed } from '@econmind/core';
@@ -40,6 +52,10 @@ export interface PostwarFinanceSocialApiConnectionInput {
   /** Offline Core seed, verified against live SQL header/source pins by Worker.
    * Server startup only; never an HTTP field or online-reader privilege. */
   readonly socialStartupSeed?: Readonly<OpeningSeed>;
+  /** Genuine server-owned child proof; never a JSON flag or HTTP field. */
+  readonly socialStartupBeneficialHousingRentSource?: Parameters<
+    PostwarFinanceSocialRuntimeConnection['prepare']
+  >[0]['startupBeneficialHousingRentSource'];
   /** Actual server-held opening/policy/receipt inputs for the fixed FX source.
    * Never accepted from HTTP and never substituted with a readiness flag. */
   readonly treasuryFxPreparation?: Parameters<
@@ -61,6 +77,9 @@ export interface PostwarFinanceSocialApiConnection {
 export interface PostwarFinanceSocialApiPorts {
   readonly readConfiguration?: ExplicitReadPreparationConfig;
   readonly captain?: Readonly<PostwarCaptainConnection>;
+  readonly centralBank?: Readonly<PostwarCentralBankConnection>;
+  readonly trade?: Readonly<PostwarTradeConnection>;
+  readonly industry?: Readonly<PostwarIndustryConnection>;
   readonly finance: Readonly<PostwarFinanceConnection>;
   readonly social: Readonly<PostwarSocialConnection>;
   readonly treasuryFx?: Readonly<PostwarTreasuryFxConnection>;
@@ -110,6 +129,9 @@ export async function createPostwarFinanceSocialApiConnection(
     ...new Set([c.boundedReadPool, c.intakePool, c.sourcePool, c.workerPool]),
   ];
   let captain: Readonly<PostwarCaptainConnection> | undefined;
+  let centralBank: Readonly<PostwarCentralBankConnection> | undefined;
+  let trade: Readonly<PostwarTradeConnection> | undefined;
+  let industry: Readonly<PostwarIndustryConnection> | undefined;
   let finance: Readonly<PostwarFinanceConnection> | undefined;
   let social: Readonly<PostwarSocialConnection> | undefined;
   let treasuryFx: Readonly<PostwarTreasuryFxConnection> | undefined;
@@ -124,6 +146,9 @@ export async function createPostwarFinanceSocialApiConnection(
       // borrower calls this owner or stops its shared Worker/source/pools.
       const drains = await Promise.allSettled([
         Promise.resolve().then(() => captain?.stop()),
+        Promise.resolve().then(() => centralBank?.stop()),
+        Promise.resolve().then(() => trade?.stop()),
+        Promise.resolve().then(() => industry?.stop()),
         Promise.resolve().then(() => finance?.stop()),
         Promise.resolve().then(() => social?.stop()),
         Promise.resolve().then(() => treasuryFx?.stop()),
@@ -173,6 +198,7 @@ export async function createPostwarFinanceSocialApiConnection(
       binding,
       input.treasuryFxPreparation,
       input.socialStartupSeed,
+      input.socialStartupBeneficialHousingRentSource,
     );
     finance = createPostwarFinanceConnection(
       {
@@ -210,6 +236,21 @@ export async function createPostwarFinanceSocialApiConnection(
         },
         binding,
       );
+    const domainHttp = {
+      readPool: c.boundedReadPool,
+      readerRole: c.boundedReaderRole,
+      intakeRole: c.intakeRole,
+      authorizationPublisherRole: c.authorizationPublisherRole,
+      admittedWorldPins: c.admittedWorldPins,
+      auth: c.auth,
+      resolveActorId: c.resolveActorId,
+      allowedOrigins: c.allowedOrigins ?? [],
+    };
+    if (ports.centralBankOmo)
+      centralBank = createPostwarCentralBankConnection(domainHttp, binding);
+    if (ports.trade) trade = createPostwarTradeConnection(domainHttp, binding);
+    if (ports.industry)
+      industry = createPostwarIndustryConnection(domainHttp, binding);
     if (ports.treasuryFx)
       treasuryFx = createPostwarTreasuryFxConnection(
         {
@@ -228,6 +269,9 @@ export async function createPostwarFinanceSocialApiConnection(
     // same complete cleanup as failed preparation/listen, before installation.
     createPostwarOfficeCommandFetchHandler({
       ...(captain ? { captain } : {}),
+      ...(centralBank ? { centralBank } : {}),
+      ...(trade ? { trade } : {}),
+      ...(industry ? { industry } : {}),
       finance,
       social,
       ...(treasuryFx ? { treasuryFx } : {}),
@@ -260,6 +304,9 @@ export async function createPostwarFinanceSocialApiConnection(
       Object.freeze({
         ...(readConfiguration ? { readConfiguration } : {}),
         ...(captain ? { captain } : {}),
+        ...(centralBank ? { centralBank } : {}),
+        ...(trade ? { trade } : {}),
+        ...(industry ? { industry } : {}),
         finance,
         social,
         ...(treasuryFx ? { treasuryFx } : {}),

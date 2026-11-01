@@ -98,6 +98,11 @@ export function createPostwarCaptainCurrentPublisher(input: {
             financial = derivePostwarMixedFinancialCurrentFrom(tx, token),
             social = derivePostwarMixedSocialCurrentFrom(tx, token);
           return input.publicationDatabase.transaction(async (pub) => {
+            const paged = 'pageProof' in f.coverage;
+            if (paged)
+              await pub.query(
+                'set transaction isolation level repeatable read',
+              );
             if (
               f.captainOriginalStatus !== 'PRESENT' &&
               f.captainOriginalStatus !== 'NO_REGISTERED_CAPTAIN_ORIGINAL'
@@ -107,16 +112,22 @@ export function createPostwarCaptainCurrentPublisher(input: {
               throw Error('CAPTAIN_CURRENT_REGISTERED_ORIGINAL_REQUIRED');
             const cap = captain
               ? await pub.query<Record<string, unknown>>(
-                  'select * from world_v2.publish_postwar_captain_current($1,$2,$3)',
+                  paged
+                    ? 'select * from world_v2.publish_postwar_paged_captain_current($1,$2,$3)'
+                    : 'select * from world_v2.publish_postwar_captain_current($1,$2,$3)',
                   [f.head.worldId, countryId, captain.assertion],
                 )
               : { rows: [] };
             const fin = await pub.query<Record<string, unknown>>(
-              'select * from world_v2.publish_postwar_mixed_financial_current($1,$2,$3)',
+              paged
+                ? 'select * from world_v2.publish_postwar_paged_financial_current($1,$2,$3)'
+                : 'select * from world_v2.publish_postwar_mixed_financial_current($1,$2,$3)',
               [f.head.worldId, countryId, financial.assertion],
             );
             const soc = await pub.query<Record<string, unknown>>(
-              'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',
+              paged
+                ? 'select * from world_v2.publish_postwar_paged_social_current($1,$2,$3)'
+                : 'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',
               [f.head.worldId, countryId, social],
             );
             if (
@@ -153,10 +164,16 @@ export function createPostwarCaptainCurrentPublisher(input: {
     },
     publishCountry(countryId: string) {
       return input.source.withCaptainSnapshot(countryId, async (tx, token) => {
-        const d = derivePostwarCaptainCurrentFrom(tx, token);
+        const d = derivePostwarCaptainCurrentFrom(tx, token),
+          facts = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token),
+          paged = facts.coverage.pageProof !== undefined;
         return input.publicationDatabase.transaction(async (pub) => {
+          if (paged)
+            await pub.query('set transaction isolation level repeatable read');
           const r = await pub.query<Record<string, unknown>>(
-            'select * from world_v2.publish_postwar_captain_current($1,$2,$3)',
+            paged
+              ? 'select * from world_v2.publish_postwar_paged_captain_current($1,$2,$3)'
+              : 'select * from world_v2.publish_postwar_captain_current($1,$2,$3)',
             [input.source.worldId, countryId, d.assertion],
           );
           if (r.rows.length !== 1 || r.rows[0]?.country_id !== countryId)

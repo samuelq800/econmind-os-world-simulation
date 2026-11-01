@@ -1,9 +1,16 @@
+import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import type { PostwarIndustryConnection } from './postwar-industry-connection.js';
+import { INDUSTRY_PRODUCTION_COMMAND } from '@econmind/core/industry-production-command';
+import type { PostwarCentralBankConnection } from './postwar-central-bank-connection.js';
+import type { PostwarTradeConnection } from './postwar-trade-connection.js';
 /** Fixed Finance/Social/Treasury-FX transport, never a general handler registry. Request
  * selectors choose one installed service; they confer no identity or source
  * authority. The selected service still verifies JWT and current SQL bindings. */
 import {
   AUTHENTICATED_COMMAND_RECOVERY_PATH,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
+  CENTRAL_BANK_OMO_COMMAND,
+  NARROW_TREASURY_GCU_COMMAND_TYPE,
   AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
@@ -41,6 +48,9 @@ function decode(recovering: boolean, body: unknown) {
 }
 export interface PostwarOfficeCommandConnections {
   readonly captain?: PostwarCaptainConnection;
+  readonly centralBank?: PostwarCentralBankConnection;
+  readonly trade?: PostwarTradeConnection;
+  readonly industry?: PostwarIndustryConnection;
   readonly finance?: PostwarFinanceConnection;
   readonly social?: PostwarSocialConnection;
   readonly treasuryFx?: PostwarTreasuryFxConnection;
@@ -48,12 +58,18 @@ export interface PostwarOfficeCommandConnections {
 export function createPostwarOfficeCommandFetchHandler(
   input: PostwarOfficeCommandConnections,
 ) {
-  const captain = input.captain,
+  const industry = input.industry,
+    centralBank = input.centralBank,
+    trade = input.trade,
+    captain = input.captain,
     finance = input.finance,
     social = input.social,
     treasuryFx = input.treasuryFx;
   const origins = new Set([
     ...(captain?.transportOrigins ?? []),
+    ...(centralBank?.transportOrigins ?? []),
+    ...(trade?.transportOrigins ?? []),
+    ...(industry?.transportOrigins ?? []),
     ...(finance?.transportOrigins ?? []),
     ...(social?.transportOrigins ?? []),
     ...(treasuryFx?.transportOrigins ?? []),
@@ -163,23 +179,34 @@ export function createPostwarOfficeCommandFetchHandler(
           }
           const { request: parsed, selector } = decoded;
           const target =
-            selector.officeId === 'CAPTAIN' &&
-            selector.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND
-              ? captain
-              : selector.officeId === 'FINANCE' &&
-                  selector.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND
-                ? finance
-                : selector.officeId === 'FINANCE' &&
-                    selector.commandType ===
-                      POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
-                  ? treasuryFx
-                  : selector.officeId === 'SOCIAL' &&
-                      [
-                        SOCIAL_POSITION_OFFER_CREATE_COMMAND,
-                        SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
-                      ].some((f) => f === selector.commandType)
-                    ? social
-                    : undefined;
+            selector.officeId === 'INDUSTRY' &&
+            (selector.commandType === INDUSTRY_PRODUCTION_COMMAND ||
+              selector.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND)
+              ? industry
+              : selector.officeId === 'CENTRAL_BANK' &&
+                  selector.commandType === CENTRAL_BANK_OMO_COMMAND
+                ? centralBank
+                : selector.officeId === 'TRADE' &&
+                    selector.commandType === NARROW_TREASURY_GCU_COMMAND_TYPE
+                  ? trade
+                  : selector.officeId === 'CAPTAIN' &&
+                      selector.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND
+                    ? captain
+                    : selector.officeId === 'FINANCE' &&
+                        selector.commandType ===
+                          FINANCE_BUDGET_APPROPRIATION_COMMAND
+                      ? finance
+                      : selector.officeId === 'FINANCE' &&
+                          selector.commandType ===
+                            POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+                        ? treasuryFx
+                        : selector.officeId === 'SOCIAL' &&
+                            [
+                              SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+                              SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+                            ].some((f) => f === selector.commandType)
+                          ? social
+                          : undefined;
           if (!target || target.transportOrigins.length === 0)
             return fail(503, 'OFFICE_CONNECTION_NOT_INSTALLED');
           if (!target.transportOrigins.includes(origin)) {
@@ -243,6 +270,21 @@ export function createPostwarOfficeCommandFetchHandler(
         // Borrowers drain before Social closes the owned pools.
         // No consumer is started by this mux.
         const errors: unknown[] = [];
+        try {
+          await centralBank?.stop();
+        } catch (e) {
+          errors.push(e);
+        }
+        try {
+          await industry?.stop();
+        } catch (e) {
+          errors.push(e);
+        }
+        try {
+          await trade?.stop();
+        } catch (e) {
+          errors.push(e);
+        }
         try {
           await captain?.stop();
         } catch (e) {

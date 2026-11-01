@@ -1,4 +1,46 @@
+import {
+  createPostwarIndustryOperatingWageRuntime,
+  type PostwarIndustryOperatingWageRuntime,
+} from '../persistence/postwar-industry-operating-wage-runtime.js';
+import { requirePostwarSocialRuntimePagedReplay } from './social-runtime-connection.js';
+import {
+  createPostwarIndustryWorkRuntime,
+  type PostwarIndustryWorkRuntime,
+} from '../persistence/postwar-industry-work-runtime.js';
+import {
+  createPostwarIndustryRunRuntime,
+  type PostwarIndustryRunRuntime,
+} from '../persistence/postwar-industry-run-runtime.js';
+import { createPostwarIndustryIntakeAuthorizationPool } from '../persistence/postwar-industry-intake-authorization.js';
+import { requirePostwarSocialSourceRevocationFence } from '../persistence/postwar-social-position-runtime.js';
+import {
+  createPostwarIndustryRuntime,
+  type PostwarIndustryRuntime,
+  type PostwarIndustryPreparedRun,
+} from '../persistence/postwar-industry-runtime.js';
+import type { PostwarPhysicalSourceContext } from '../preparation/postwar-physical-service-receipt.js';
+import { createPostwarMixedCurrentProjectionSource } from '../persistence/postwar-mixed-current-projection-publication.js';
+import {
+  createPostwarBeneficialHousingRentRuntimeForSharedSource,
+  type PostwarBeneficialHousingRentRuntime,
+} from '../persistence/postwar-beneficial-housing-rent-runtime.js';
+import { createPostwarBeneficialRentPreparationController } from './postwar-beneficial-rent-preparation.js';
+import type { PreparedBeneficialHousingRentSource } from '../persistence/postwar-beneficial-housing-rent-source.js';
 import { createManualOfficeAuthorizationTransactionDatabase } from '../persistence/manual-office-authorization-transaction-scope.js';
+import {
+  createPostwarCentralBankOmoWorldRuntime,
+  type PostwarCentralBankOmoWorldRuntime,
+} from '../persistence/postwar-central-bank-omo-world-runtime.js';
+import {
+  createPostwarCentralBankIntakeAuthorizationPool,
+  createPostwarCentralBankAuthorizationDatabase,
+} from '../persistence/postwar-central-bank-intake-authorization.js';
+import {
+  createPostwarNarrowTradeSharedDatabase,
+  createPostwarNarrowTradeSharedRuntime,
+  type PostwarNarrowTradeSharedRuntime,
+} from '../preparation/postwar-narrow-trade-shared-runtime.js';
+import { createPostwarNarrowTradeIntakeAuthorizationPool } from '../persistence/postwar-narrow-trade-intake-authorization.js';
 import {
   createServerCommandHostBinding,
   registeredFinanceCommandHostDependencies,
@@ -92,6 +134,23 @@ export function readFinanceSocialSourceBinding(
   return data;
 }
 export interface PostwarFinanceSocialRuntimeConnectionInput {
+  readonly industry?: {
+    readonly sourceContext: PostwarPhysicalSourceContext;
+    /** Separate existing Industry publisher principal; never reader enrollment. */
+    readonly publicationDatabase?: SqlDatabase;
+    readonly preparedRuns?: readonly Readonly<PostwarIndustryPreparedRun>[];
+  };
+  readonly industryLabour?: { readonly enabled: true };
+  readonly beneficialRent?: {
+    readonly workerRole: string;
+    readonly clockBindingRef: string;
+  };
+  readonly centralBankOmo?: {
+    readonly workerRole: string;
+    readonly countryIds: readonly string[];
+    readonly mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
+  };
+  readonly trade?: { readonly workerRole: string };
   readonly socialConnection: Readonly<PostwarSocialRuntimeConnection>;
   readonly capacitySource: PostgresFinanceBudgetCapacitySource;
   readonly intakePool: Pick<Pool, 'connect'>;
@@ -109,6 +168,11 @@ export interface PostwarFinanceSocialRuntimeConnectionInput {
   };
 }
 export interface PostwarFinanceSocialRuntimePorts {
+  readonly industryRun: Readonly<PostwarIndustryRunRuntime> | null;
+  readonly industry: Readonly<PostwarIndustryRuntime> | null;
+  readonly beneficialRent: Readonly<PostwarBeneficialHousingRentRuntime> | null;
+  readonly centralBankOmo: Readonly<PostwarCentralBankOmoWorldRuntime> | null;
+  readonly trade: Readonly<PostwarNarrowTradeSharedRuntime> | null;
   readonly formalBinding: ServerCommandHostBinding | null;
   readonly worldId: string;
   readonly workerId: string;
@@ -139,6 +203,12 @@ export interface PostwarFinanceSocialRuntimeConnection {
   ): Promise<void>;
   /** Complete the fixed FX source first so a host can release its large seed. */
   prepareTreasuryFx(opening: PostwarDayOneFxPreparationInput): Promise<void>;
+  publishDueIndustryWork(
+    scope: Parameters<PostwarIndustryWorkRuntime['publishDueWork']>[0],
+  ): ReturnType<PostwarIndustryWorkRuntime['publishDueWork']>;
+  publishIndustryDueWage(
+    scope: Parameters<PostwarIndustryOperatingWageRuntime['publishDue']>[0],
+  ): ReturnType<PostwarIndustryOperatingWageRuntime['publishDue']>;
   startPreparation(): void;
   consumeOnce(): Promise<PostwarOfficeConsumptionStep>;
   /** Derived retry only: the fixed helper reloads the actual permanent FINAL. */
@@ -189,6 +259,23 @@ export function createPostwarFinanceSocialRuntimeConnection(
   return constructFinanceSocialRuntimeConnection(input);
 }
 export interface ProductionPostwarFinanceSocialRuntimeConnectionInput {
+  readonly industry?: {
+    readonly sourceContext: PostwarPhysicalSourceContext;
+    /** Separate existing Industry publisher principal; never reader enrollment. */
+    readonly publicationDatabase?: SqlDatabase;
+    readonly preparedRuns?: readonly Readonly<PostwarIndustryPreparedRun>[];
+  };
+  readonly industryLabour?: { readonly enabled: true };
+  readonly beneficialRent?: {
+    readonly workerRole: string;
+    readonly clockBindingRef: string;
+  };
+  readonly centralBankOmo?: {
+    readonly workerRole: string;
+    readonly countryIds: readonly string[];
+    readonly mode: 'OFFICIAL_RUNTIME';
+  };
+  readonly trade?: { readonly workerRole: string };
   readonly binding: ServerCommandHostBinding;
   readonly environment: 'staging' | 'production';
   readonly publicationDatabase?: SqlDatabase;
@@ -216,7 +303,8 @@ export function createProductionPostwarFinanceSocialRuntimeConnection(
     clock.database !== social.database ||
     clock.worldId !== d.worldId ||
     clock.workerId !== d.workerId ||
-    (input.captain && input.captain.mode !== 'OFFICIAL_RUNTIME')
+    (input.captain && input.captain.mode !== 'OFFICIAL_RUNTIME') ||
+    (input.centralBankOmo && input.centralBankOmo.mode !== 'OFFICIAL_RUNTIME')
   )
     throw Error('FORMAL_SHARED_EXACT_SERVER_CLOCK_DATABASE_BINDING_REQUIRED');
   return constructFinanceSocialRuntimeConnection(
@@ -231,6 +319,11 @@ export function createProductionPostwarFinanceSocialRuntimeConnection(
         : {}),
       ...(input.treasuryFx ? { treasuryFx: input.treasuryFx } : {}),
       ...(input.captain ? { captain: input.captain } : {}),
+      ...(input.centralBankOmo ? { centralBankOmo: input.centralBankOmo } : {}),
+      ...(input.trade ? { trade: input.trade } : {}),
+      ...(input.industry ? { industry: input.industry } : {}),
+      ...(input.industryLabour ? { industryLabour: input.industryLabour } : {}),
+      ...(input.beneficialRent ? { beneficialRent: input.beneficialRent } : {}),
     },
     input.binding,
   );
@@ -263,6 +356,27 @@ function constructFinanceSocialRuntimeConnection(
   )
     throw Error('FINANCE_SOCIAL_EXACT_COUNTRY_SCOPE_REQUIRED');
   if (
+    input.centralBankOmo &&
+    (input.centralBankOmo.workerRole !== resources.workerRole ||
+      !['OFFICIAL_RUNTIME', 'TEST_ONLY_LOCAL'].includes(
+        input.centralBankOmo.mode,
+      ) ||
+      input.centralBankOmo.countryIds.length === 0 ||
+      new Set(input.centralBankOmo.countryIds).size !==
+        input.centralBankOmo.countryIds.length ||
+      input.centralBankOmo.countryIds.some(
+        (c) => !resources.countryIds.includes(c),
+      ))
+  )
+    throw Error('SHARED_CB_EXACT_FINITE_COUNTRY_ROLE_REQUIRED');
+  if (
+    input.beneficialRent &&
+    input.beneficialRent.workerRole !== resources.workerRole
+  )
+    throw Error('SHARED_RENT_EXACT_WORKER_ROLE_REQUIRED');
+  if (input.trade && input.trade.workerRole !== resources.workerRole)
+    throw Error('SHARED_TRADE_EXACT_WORKER_ROLE_REQUIRED');
+  if (
     typeof input.intakePool?.connect !== 'function' ||
     input.intakePool === resources.workerPool
   )
@@ -279,6 +393,17 @@ function constructFinanceSocialRuntimeConnection(
         input.captain.workerRole !== input.treasuryFx.workerRole))
   )
     throw Error('FINANCE_SOCIAL_CAPTAIN_EXACT_WORKER_ROLE_REQUIRED');
+  if (
+    input.industryLabour &&
+    (input.industryLabour.enabled !== true || !input.publicationDatabase)
+  )
+    throw Error('INDUSTRY_LABOUR_EXPLICIT_DERIVED_PUBLISHER_REQUIRED');
+  if (
+    input.industry &&
+    (!input.publicationDatabase ||
+      input.publicationDatabase === social.database)
+  )
+    throw Error('INDUSTRY_SEPARATE_PUBLICATION_DATABASE_REQUIRED');
   if (worldOwners.has(world))
     throw Error('FINANCE_SOCIAL_WORLD_CONSUMER_ALREADY_BOUND');
   const reservation = Object.freeze({});
@@ -305,26 +430,42 @@ function constructFinanceSocialRuntimeConnection(
       : executionDatabase;
     const financeDatabase =
       createFinanceBudgetAuthorizationDatabase(fxDatabase);
-    const database = createManualOfficeAuthorizationTransactionDatabase(
-      input.captain
-        ? createPostwarCaptainAuthorizationDatabase(financeDatabase)
-        : financeDatabase,
-    );
+    const captainDatabase = input.captain
+      ? createPostwarCaptainAuthorizationDatabase(financeDatabase)
+      : financeDatabase;
+    const centralBankDatabase = input.centralBankOmo
+      ? createPostwarCentralBankAuthorizationDatabase(captainDatabase)
+      : captainDatabase;
+    const officeDatabase =
+      createManualOfficeAuthorizationTransactionDatabase(centralBankDatabase);
+    const database = input.trade
+      ? createPostwarNarrowTradeSharedDatabase(officeDatabase, world)
+      : officeDatabase;
     const socialIntake = createSocialIntakeAuthorizationPool(input.intakePool);
     const financeIntake = createFinanceBudgetIntakeAuthorizationPool(
       input.treasuryFx
         ? createPostwarDayOneFxIntakeAuthorizationPool(socialIntake)
         : socialIntake,
     );
-    const intakePool = input.captain
+    const captainIntake = input.captain
       ? createPostwarCaptainIntakeAuthorizationPool(financeIntake)
       : financeIntake;
+    const centralBankIntake = input.centralBankOmo
+      ? createPostwarCentralBankIntakeAuthorizationPool(captainIntake)
+      : captainIntake;
+    const tradeIntake = input.trade
+      ? createPostwarNarrowTradeIntakeAuthorizationPool(centralBankIntake)
+      : centralBankIntake;
+    const intakePool = input.industry
+      ? createPostwarIndustryIntakeAuthorizationPool(tradeIntake)
+      : tradeIntake;
     const treasuryFx = input.treasuryFx
       ? createPostwarDayOneFxRuntime({
           database,
           worldId: world,
           workerId: social.workerId,
           workerRole: input.treasuryFx.workerRole,
+          mixedSocialConnection: social,
         })
       : null;
     const budget = createPostgresFinanceBudgetNativeRuntime({
@@ -348,11 +489,86 @@ function constructFinanceSocialRuntimeConnection(
           }),
         })
       : null;
-    const readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
+    const centralBankOmo = input.centralBankOmo
+      ? createPostwarCentralBankOmoWorldRuntime({
+          database,
+          worldId: world,
+          workerId: social.workerId,
+          workerRole: input.centralBankOmo.workerRole,
+          mode: input.centralBankOmo.mode,
+          countryIds: Object.freeze([...input.centralBankOmo.countryIds]),
+          mixedSocialConnection: social,
+          clock: input.clock,
+          workerPool: resources.workerPool,
+        })
+      : null;
+    const trade = input.trade
+      ? createPostwarNarrowTradeSharedRuntime({
+          environment: input.environment,
+          database,
+          socialConnection: social,
+          clock: input.clock,
+          workerRole: input.trade.workerRole,
+        })
+      : null;
+    const industrySource = input.industry
+      ? createPostwarMixedCurrentProjectionSource({
+          historyMode: 'PAGED_COMPLETE_V1',
+          socialConnection: social,
+          worldId: world,
+          workerRole: resources.workerRole,
+          publicationDatabase: input.publicationDatabase!,
+        })
+      : null;
+    const industry =
+      input.industry && industrySource
+        ? createPostwarIndustryRuntime({
+            worldId: world,
+            database,
+            socialConnection: social,
+            mixedSource: industrySource,
+            sourceContext: input.industry.sourceContext,
+            ...(input.industry.preparedRuns
+              ? { preparedRuns: input.industry.preparedRuns }
+              : {}),
+          })
+        : null;
+    const industryWork = input.industry
+      ? createPostwarIndustryWorkRuntime({
+          database,
+          socialConnection: social,
+          ...(input.industry.publicationDatabase
+            ? {
+                publication: {
+                  database: input.industry.publicationDatabase,
+                  clock: Object.freeze({
+                    nowReal: () => input.clock.nowReal(),
+                    simTime: () => input.clock.simTime(world),
+                  }),
+                },
+              }
+            : {}),
+        })
+      : null;
+    const industryRun = input.industry
+      ? createPostwarIndustryRunRuntime({ database, socialConnection: social })
+      : null;
+    let readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
       ...social.readers,
       financeBudget: budget,
+      ...(industry ? { industry } : {}),
+      ...(industryRun ? { industryRun } : {}),
+      ...(industryWork ? { industryWork } : {}),
       ...(treasuryFx ? { treasuryFx } : {}),
       ...(captain ? { captainNative: captain } : {}),
+      ...(centralBankOmo ? { centralBankNative: centralBankOmo } : {}),
+      ...(trade
+        ? {
+            tradeReservation: trade.reservation,
+            tradeAutomatic: trade.automatic,
+            tradeSource: trade.source,
+          }
+        : {}),
     });
     sources.set(
       token,
@@ -371,6 +587,37 @@ function constructFinanceSocialRuntimeConnection(
         socialConnection: social,
       }),
     );
+    const industryOperatingWage = input.industry
+      ? createPostwarIndustryOperatingWageRuntime({
+          sharedBinding: token,
+          ...(input.industry?.publicationDatabase
+            ? { publicationDatabase: input.industry.publicationDatabase }
+            : {}),
+        })
+      : null;
+    if (industryOperatingWage) {
+      readers = Object.freeze({ ...readers, industryOperatingWage });
+      sources.set(
+        token,
+        Object.freeze({ ...readFinanceSocialSourceBinding(token), readers }),
+      );
+    }
+    const beneficialRent = input.beneficialRent
+      ? createPostwarBeneficialHousingRentRuntimeForSharedSource({
+          sharedBinding: token,
+          clockBindingRef: input.beneficialRent.clockBindingRef,
+        })
+      : null;
+    if (beneficialRent) {
+      readers = Object.freeze({
+        ...readers,
+        beneficialHousingRent: beneficialRent,
+      });
+      sources.set(
+        token,
+        Object.freeze({ ...readFinanceSocialSourceBinding(token), readers }),
+      );
+    }
     const formalBinding = d
       ? createServerCommandHostBinding({
           ...d,
@@ -394,6 +641,12 @@ function constructFinanceSocialRuntimeConnection(
           formalBinding,
         }),
       );
+    const rentPreparation = beneficialRent
+      ? createPostwarBeneficialRentPreparationController({
+          sharedBinding: token,
+          runtime: beneficialRent,
+        })
+      : null;
     reservePostwarSocialRuntimeForSharedConsumer(social, token);
     reserved = true;
     const issued = formalBinding
@@ -407,6 +660,7 @@ function constructFinanceSocialRuntimeConnection(
           workerRole: resources.workerRole,
           socialConnection: social,
           publicationDatabase: input.publicationDatabase,
+          ...(input.industryLabour ? { industryLabour: true as const } : {}),
         })
       : null;
     let combinedActive: Promise<PostwarOfficeConsumptionStep> | null = null;
@@ -416,6 +670,7 @@ function constructFinanceSocialRuntimeConnection(
     let fxPrepared = false;
     let fxPreparing: Promise<void> | null = null;
     let fxPreparationPin: string | null = null;
+    let fxSourcePreparation: PreparedBeneficialHousingRentSource | undefined;
     const requireLive = () => {
       if (stopped || stopping || !sources.has(token))
         throw Error('FINANCE_SOCIAL_RUNTIME_RETIRED');
@@ -427,6 +682,7 @@ function constructFinanceSocialRuntimeConnection(
         (treasuryFx !== null && !fxPrepared)
       )
         throw Error('FINANCE_SOCIAL_SOURCE_NOT_PREPARED');
+      rentPreparation?.assertPrepared();
     };
     const prepareTreasuryFx = async (
       opening: PostwarDayOneFxPreparationInput,
@@ -443,6 +699,12 @@ function constructFinanceSocialRuntimeConnection(
       );
       if (fxPreparationPin !== null && fxPreparationPin !== pin)
         throw Error('FINANCE_SOCIAL_FX_PREPARATION_PINS_CHANGED');
+      if (
+        fxPreparing &&
+        fxSourcePreparation !== opening.startupBeneficialHousingRentSource
+      )
+        throw Error('FINANCE_SOCIAL_FX_PREPARATION_PROOF_CHANGED');
+      fxSourcePreparation = opening.startupBeneficialHousingRentSource;
       fxPreparationPin = pin;
       fxPreparing ??= treasuryFx.prepare(opening).then(() => {
         fxPrepared = true;
@@ -468,10 +730,38 @@ function constructFinanceSocialRuntimeConnection(
           if (fxOpening) await prepareTreasuryFx(fxOpening);
           // Hosts controlling peak memory can call prepareTreasuryFx first,
           // release their raw seed, then call prepare without an FX argument.
-          await social.prepare(configuration);
+          if (rentPreparation)
+            await rentPreparation.prepare(configuration, fxSourcePreparation);
+          else {
+            if (
+              configuration.startupBeneficialHousingRentSource ||
+              fxSourcePreparation
+            )
+              throw Error('FINANCE_SOCIAL_CHILD_PROOF_REQUIRES_RENT_OWNER');
+            await social.prepare(configuration);
+          }
+          if (centralBankOmo) await centralBankOmo.prepareFromSocial();
+          if (industry) await industry.prepare();
           requireLive();
         },
         prepareTreasuryFx,
+        publishDueIndustryWork(
+          scope: Parameters<PostwarIndustryWorkRuntime['publishDueWork']>[0],
+        ) {
+          requirePrepared();
+          if (!industryWork) throw Error('INDUSTRY_WORK_RUNTIME_NOT_INSTALLED');
+          return industryWork.publishDueWork(scope);
+        },
+        publishIndustryDueWage(
+          scope: Parameters<
+            PostwarIndustryOperatingWageRuntime['publishDue']
+          >[0],
+        ) {
+          requirePrepared();
+          if (!industryOperatingWage)
+            throw Error('INDUSTRY_WAGE_RUNTIME_NOT_INSTALLED');
+          return industryOperatingWage.publishDue(scope);
+        },
         startPreparation() {
           requirePrepared();
           runtime.consumer.startPreparation();
@@ -538,6 +828,14 @@ function constructFinanceSocialRuntimeConnection(
             await publication?.close();
             if (fxPreparing) await Promise.allSettled([fxPreparing]);
             await treasuryFx?.close();
+            await centralBankOmo?.close();
+            await industryOperatingWage?.close();
+            await industryWork?.close();
+            await industryRun?.close();
+            await industry?.close();
+            await industrySource?.close();
+            await rentPreparation?.close();
+            fxSourcePreparation = undefined;
             releasePostwarSocialRuntimeForSharedConsumer(social, token);
             sources.delete(token);
             await social.close();
@@ -563,6 +861,11 @@ function constructFinanceSocialRuntimeConnection(
         formalBinding,
         runtime,
         budget: issued.budget,
+        centralBankOmo,
+        industry,
+        industryRun,
+        beneficialRent,
+        trade,
         treasuryFx,
         captain,
         publication,
@@ -570,6 +873,8 @@ function constructFinanceSocialRuntimeConnection(
         financeCountryIds: scope.countryIds,
       }),
     );
+    requirePostwarSocialSourceRevocationFence(social.database, world);
+    requirePostwarSocialRuntimePagedReplay(social, world);
     connectionSources.set(connection, token);
     worldOwners.set(world, connection);
     return connection;

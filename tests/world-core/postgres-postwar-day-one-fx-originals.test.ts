@@ -207,4 +207,90 @@ describe('first-day FX bounded custody SQL candidate', () => {
       await db.close();
     }
   });
+  it('recognizes only the two pinned separately admitted openings and still requires real quote custody', async () => {
+    const db = new PGlite();
+    const world = 'WORLD_POSTWAR_GCU_OPENING_20261029_V1';
+    const seedId = 'SEED_POSTWAR_GCU_OPENING_20261029_V1';
+    const parent =
+      'sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274';
+    const child =
+      'sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a';
+    try {
+      await db.exec(base);
+      await db.exec(
+        await readFile(
+          new URL(
+            '../../database/proposals/postwar-day-one-fx-custody.sql',
+            import.meta.url,
+          ),
+          'utf8',
+        ),
+      );
+      for (const [fingerprint, revoked, expected] of [
+        [parent, false, 'FX_REGISTERED_SOURCE_REQUIRED'],
+        [child, false, 'FX_REGISTERED_SOURCE_REQUIRED'],
+        [
+          'sha256:' + 'f'.repeat(64),
+          false,
+          'FX_ACTUAL_NEW_WORLD_ADMISSION_REQUIRED',
+        ],
+        [child, true, 'FX_ADMISSION_REVOKED_OR_MISSING'],
+      ] as const) {
+        await db.exec('begin');
+        try {
+          const replay = '{"modelVersion":"MODEL_TEST_ONLY"}';
+          await db.query('insert into world_v2.world_head values($1,0,0)', [
+            world,
+          ]);
+          await db.query(
+            'insert into world_v2.opening_seed values($1,$2,$3,$4,$5)',
+            [
+              world,
+              seedId,
+              fingerprint,
+              replay,
+              '{"metadataFixtureOnly":true}',
+            ],
+          );
+          await db.query(
+            "insert into world_v2.runtime_opening_admission values($1,$2,$3,$4,'MODEL_TEST_ONLY',$5,'2026-11-01T00:00:00Z')",
+            [world, seedId, fingerprint, 'ADMISSION_' + 'A'.repeat(64), replay],
+          );
+          await db.query(
+            "insert into world_v2.runtime_admission_publication_permit values('AUTH_TEST_ONLY',$1,$2,$3,$4,'MODEL_TEST_ONLY',$5,'2026-01-01','2027-01-01')",
+            ['a'.repeat(64), world, seedId, fingerprint, replay],
+          );
+          if (revoked)
+            await db.exec(
+              "insert into world_v2.runtime_admission_publication_revocation values('AUTH_TEST_ONLY')",
+            );
+          await db.exec('set local role world_v2_day_one_fx_source_reader');
+          await expect(
+            db.query(
+              'select * from world_v2.lock_postwar_day_one_fx_original($1,$2,$3,$4,clock_timestamp())',
+              [world, 'COUNTRY_01', fingerprint, 'QUOTE_TEST_ONLY'],
+            ),
+          ).rejects.toThrow(expected);
+        } finally {
+          await db.exec('rollback');
+        }
+      }
+      expect(
+        (
+          await db.query(
+            'select * from world_v2.postwar_day_one_fx_source_original',
+          )
+        ).rows,
+      ).toEqual([]);
+      expect(
+        (
+          await db.query(
+            'select * from world_v2.postwar_day_one_fx_quote_original',
+          )
+        ).rows,
+      ).toEqual([]);
+    } finally {
+      await db.close();
+    }
+  });
 });

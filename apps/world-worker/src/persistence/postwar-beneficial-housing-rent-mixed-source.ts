@@ -275,7 +275,12 @@ export async function replayPostwarBeneficialHousingRentPagedFrom(input: {
   countryId: string;
   admissionRef: string;
   head: { worldVersion: string; eventSequence: string };
-}) {
+}): Promise<{
+  financial: PreparedFinanceSocialFxReplayResult['financial'];
+  beneficialHousingRentOrigins: PreparedFinanceSocialFxReplayResult['beneficialHousingRentOrigins'];
+  maxCommandSimTimeTicks: string;
+  pageChainFingerprint: string;
+}> {
   const a = byRentRuntime.get(input.runtime);
   if (!a) invalid('GENUINE_SHARED_PAGED_ASSOCIATION_REQUIRED');
   const { shared, b, rent } = read(a);

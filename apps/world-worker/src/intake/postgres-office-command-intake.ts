@@ -1,3 +1,4 @@
+import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
 import {
   buildManualOfficeCommandIntent,
   decodeStoredManualOfficeCommand,
@@ -117,6 +118,11 @@ export function parseManualOfficeCommandRequest(
       row.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND) ||
     (row.officeId === 'CENTRAL_BANK' &&
       row.commandType === CENTRAL_BANK_OMO_COMMAND) ||
+    (row.officeId === 'INDUSTRY' &&
+      (row.commandType === 'CORE_INDUSTRY_PRODUCTION_V1' ||
+        row.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND)) ||
+    (row.officeId === 'TRADE' &&
+      row.commandType === 'CORE_GOODS_TRANSFER_V1') ||
     (row.officeId === 'SOCIAL' &&
       (row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
         row.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)) ||
@@ -135,6 +141,14 @@ export function manualOfficeCommandCapability(request: {
   readonly commandType: string;
 }) {
   const { officeId: office, commandType: family } = request;
+  if (
+    office === 'INDUSTRY' &&
+    (family === 'CORE_INDUSTRY_PRODUCTION_V1' ||
+      family === INDUSTRY_RUN_SCHEDULE_COMMAND)
+  )
+    return 'INDUSTRY_PRODUCTION' as const;
+  if (office === 'TRADE' && family === 'CORE_GOODS_TRANSFER_V1')
+    return 'TRADE_CONTRACTS' as const;
   if (office === 'CAPTAIN' && family === CAPTAIN_POLITICAL_CAPITAL_COMMAND)
     return CAPTAIN_POLITICAL_CAPITAL_CAPABILITY;
   if (office === 'CENTRAL_BANK' && family === CENTRAL_BANK_OMO_COMMAND)

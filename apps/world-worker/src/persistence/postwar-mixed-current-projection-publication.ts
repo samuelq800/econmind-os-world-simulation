@@ -17,13 +17,25 @@ import {
   type PostwarSocialRuntimeConnection,
 } from '../runtime-preparation/social-runtime-connection.js';
 import { consumePreparedPostwarSocialFinancialReplayBase } from './prepared-postwar-social-source.js';
-import { createPostwarSocialSourceRoleScope } from './postwar-social-position-runtime.js';
+import {
+  createPostwarSocialSourceRoleScope,
+  requirePostwarSocialSourceRevocationFence,
+} from './postwar-social-position-runtime.js';
 import { lockRegisteredSourceFrom } from './postgres-social-operating-custody.js';
 import { readBoundedPostwarSocialFramesFrom } from './bounded-postwar-social-lineage.js';
 import { replayPreparedPostwarFinanceSocialFxFrom } from './prepared-postwar-finance-social-fx-replay.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type { PostwarSocialEmploymentStateDocument } from '../preparation/postwar-social-employment-state.js';
 import type { PreparedFinanceSocialFxReplayResult } from '@econmind/core/finance-social-prepared-ledger';
+import type { FinanceSocialReplayContinuationView } from '@econmind/core/finance-social-replay-continuation';
+import {
+  readPostwarPagedFinanceSocialReplayFrom,
+  releasePostwarPagedFinanceSocialReplay,
+} from './postwar-paged-finance-social-replay.js';
+import {
+  readPostwarPagedCurrentProof,
+  type PostwarCurrentPageProof,
+} from './postwar-paged-current-proof.js';
 
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
@@ -32,6 +44,7 @@ export interface PostwarMixedCurrentProjectionSnapshot {
   readonly [snapshot]: true;
 }
 export interface PostwarMixedCurrentProjectionCoverage {
+  readonly pageProof?: Readonly<PostwarCurrentPageProof>;
   readonly prefixFingerprint: string;
   readonly knownEffectsFingerprint: string;
   readonly coveredThroughEventId: string;
@@ -69,7 +82,12 @@ export interface PostwarMixedCurrentProjectionFacts {
   readonly captainOriginalStatus?:
     'NO_REGISTERED_CAPTAIN_ORIGINAL' | 'PRESENT' | 'REVOKED';
   readonly document: PostwarSocialEmploymentStateDocument;
-  readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+  readonly historyMode: 'BOUNDED_COMPLETE_V1' | 'PAGED_COMPLETE_V1';
+  /** Null explicitly means verified page-chain state, NOT an empty or partial
+   * full prefix. Legacy full-frame consumers must branch or reject it. */
+  readonly frames: readonly FinanceNativeBudgetCanonicalFrame[] | null;
+  readonly pagedReplay?: Readonly<FinanceSocialReplayContinuationView>;
+  readonly lastSocialCommandTypes?: Readonly<Record<string, string>>;
   readonly coverage: Readonly<PostwarMixedCurrentProjectionCoverage>;
 }
 const snapshots = new WeakMap<
@@ -100,7 +118,7 @@ export function derivePostwarMixedSocialCurrentFrom(
   const lifecycle = countries[0]!.lifecycle,
     employment = lifecycle.employment;
   const origin = f.frames
-    .filter(
+    ?.filter(
       (frame) =>
         frame.command.countryId === f.countryId &&
         [
@@ -110,14 +128,17 @@ export function derivePostwarMixedSocialCurrentFrom(
         ].includes(frame.command.commandType),
     )
     .at(-1);
+  const lastSocialType =
+    f.frames === null
+      ? f.lastSocialCommandTypes?.[f.countryId]
+      : origin?.command.commandType;
   return canonicalSerialize({
     coverage: f.coverage,
     head: f.head,
     seedPins: f.seedPins,
     employmentStateHash: hash(employment),
     materializationHash:
-      origin?.command.commandType ===
-      'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'
+      lastSocialType === 'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'
         ? hash(lifecycle)
         : hash(employment),
     positionsHash: hash(employment.labour.positions),
@@ -158,14 +179,21 @@ export function createPostwarMixedCurrentProjectionSource(config: {
   readonly worldId: string;
   readonly workerRole: string;
   readonly publicationDatabase: SqlDatabase;
+  /** Fixed server release profile; no SQL-existence/error fallback. */
+  readonly historyMode?: 'BOUNDED_COMPLETE_V1' | 'PAGED_COMPLETE_V1';
 }): Readonly<PostwarMixedCurrentProjectionSource> {
   const world = worldId(config.worldId),
-    social = config.socialConnection;
+    social = config.socialConnection,
+    historyMode = config.historyMode ?? 'BOUNDED_COMPLETE_V1';
+  if (!['BOUNDED_COMPLETE_V1', 'PAGED_COMPLETE_V1'].includes(historyMode))
+    throw Error('FIXED_MIXED_CURRENT_HISTORY_MODE_REQUIRED');
   if (
     !isPostwarSocialRuntimeConnection(social, world) ||
     config.publicationDatabase === social.database
   )
     throw Error('GENUINE_SOURCE_AND_SEPARATE_PUBLICATION_DATABASE_REQUIRED');
+  if (historyMode === 'PAGED_COMPLETE_V1')
+    requirePostwarSocialSourceRevocationFence(social.database, world);
   const roles = createPostwarSocialSourceRoleScope({
     workerRole: config.workerRole,
   });
@@ -197,8 +225,11 @@ export function createPostwarMixedCurrentProjectionSource(config: {
         b = consumePreparedPostwarSocialFinancialReplayBase(baseline);
       if (!b.document.countries.some((c) => c.countryId === country))
         throw Error('ACTUAL_ADOPTED_COUNTRY_REQUIRED');
-      return social.database.transaction((tx) =>
-        roles.withSourceReaderFrom(tx, async () => {
+      return social.database.transaction(async (tx) => {
+        // The issued Social database starts RR and, for the paged profile,
+        // takes the versioned revocation fence before any H/source snapshot.
+        // Do not try to change isolation after that first protected query.
+        return roles.withSourceReaderFrom(tx, async () => {
           const locked = await lockRegisteredSourceFrom(tx, world, country),
             r = locked.rows[0];
           if (
@@ -208,6 +239,86 @@ export function createPostwarMixedCurrentProjectionSource(config: {
             r.admission_ref !== b.pins.admissionRef
           )
             throw Error('ACTUAL_CURRENT_SOURCE_PINS_REQUIRED');
+          if (historyMode === 'PAGED_COMPLETE_V1') {
+            const paged = await readPostwarPagedFinanceSocialReplayFrom({
+              executor: tx,
+              baseline,
+              worldId: world,
+              hostCountryId: country,
+              officeId: 'SOCIAL',
+              seedId: b.pins.seedRef,
+              seedFingerprint: b.pins.contentHash,
+              admissionRef: b.pins.admissionRef,
+              ...(purpose === 'CAPTAIN_CURRENT'
+                ? { captainCountryId: country, requireCaptain }
+                : {}),
+            });
+            try {
+              const view = paged.view,
+                replay = view.result,
+                checked = readPostwarPagedCurrentProof(paged.currentProof),
+                lastId = checked.coverage.coveredThroughEventId,
+                lastFingerprint =
+                  checked.coverage.coveredThroughEventFingerprint;
+              if (
+                BigInt(view.head.worldVersion) <= 0n ||
+                lastId === null ||
+                lastFingerprint === null ||
+                !replay.financialState
+              )
+                throw Error('COMPLETE_POSITIVE_PAGED_PREFIX_REQUIRED');
+              const coverage = Object.freeze({
+                  ...checked.coverage,
+                  coveredThroughEventId: lastId,
+                  coveredThroughEventFingerprint: lastFingerprint,
+                }),
+                facts: Readonly<PostwarMixedCurrentProjectionFacts> =
+                  Object.freeze({
+                    countryId: country,
+                    head: Object.freeze({ worldId: world, ...view.head }),
+                    seedPins: Object.freeze({
+                      worldId: world,
+                      seedId: b.pins.seedRef,
+                      seedFingerprint: b.pins.contentHash,
+                      admissionRef: b.pins.admissionRef,
+                    }),
+                    financial: replay.financialState,
+                    shared: Object.freeze({
+                      budget: Object.freeze({
+                        state: replay.budgetState,
+                        encumbrances: replay.budgetEncumbrances,
+                      }),
+                      social: Object.freeze({
+                        countries: replay.socialCountries,
+                        reservations: replay.socialReservations,
+                      }),
+                    }),
+                    ...(replay.captainCountries === undefined
+                      ? {}
+                      : { captainCountries: replay.captainCountries }),
+                    ...(paged.captainOriginalStatus === undefined
+                      ? {}
+                      : { captainOriginalStatus: paged.captainOriginalStatus }),
+                    document: b.document,
+                    historyMode: 'PAGED_COMPLETE_V1',
+                    frames: null,
+                    pagedReplay: view,
+                    lastSocialCommandTypes: checked.lastSocialCommandTypes,
+                    coverage,
+                  }),
+                value = Object.freeze(
+                  {},
+                ) as PostwarMixedCurrentProjectionSnapshot;
+              snapshots.set(value, { executor: tx, facts });
+              try {
+                return await consume(tx, value);
+              } finally {
+                snapshots.delete(value);
+              }
+            } finally {
+              releasePostwarPagedFinanceSocialReplay(paged);
+            }
+          }
           const bounded = await readBoundedPostwarSocialFramesFrom({
             executor: tx,
             database: social.database,
@@ -299,6 +410,7 @@ export function createPostwarMixedCurrentProjectionSource(config: {
                 ? {}
                 : { captainCountries: replay.captainCountries }),
               document: b.document,
+              historyMode: 'BOUNDED_COMPLETE_V1',
               frames,
               coverage,
             });
@@ -311,8 +423,8 @@ export function createPostwarMixedCurrentProjectionSource(config: {
           } finally {
             snapshots.delete(value);
           }
-        }),
-      );
+        });
+      });
     });
   };
   const source: Readonly<PostwarMixedCurrentProjectionSource> = Object.freeze({
@@ -346,8 +458,15 @@ export function createPostwarMixedCurrentProjectionSource(config: {
         const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token),
           assertion = derivePostwarMixedSocialCurrentFrom(tx, token);
         return config.publicationDatabase.transaction(async (pub) => {
+          const paged = f.historyMode === 'PAGED_COMPLETE_V1';
+          if (paged !== (f.coverage.pageProof !== undefined))
+            throw Error('EXACT_CURRENT_HISTORY_PROFILE_REQUIRED');
+          if (paged)
+            await pub.query('set transaction isolation level repeatable read');
           const result = await pub.query(
-            'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',
+            paged
+              ? 'select * from world_v2.publish_postwar_paged_social_current($1,$2,$3)'
+              : 'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',
             [world, f.countryId, assertion],
           );
           if (result.rows.length !== 2)

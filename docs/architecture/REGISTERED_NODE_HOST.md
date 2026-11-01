@@ -56,8 +56,12 @@ Its current simulation time comes from that registration, not wall time or an
 operator-provided callback. Transactions hold and recheck the control record.
 
 Default process startup leaves the consumer unstarted. A separately controlled
-server integration may call the returned service's explicit `consumer` methods;
-there is no public HTTP administrative execution endpoint. These methods retain
+server integration may call the returned service's `consumer.consumeOnce()` for
+one finite step. Formal consumers remain `PREPARED` between such steps and
+recheck the real execution registration on every call. `startPreparation()` is
+a local/CI activation API and is deliberately rejected by formal consumers;
+do not invoke it to start a registered host. There is no public HTTP
+administrative execution endpoint. These methods retain
 the same FIFO consumer and writer lease. Process-level uniqueness supplements,
 and does not replace, database writer fencing.
 
@@ -80,7 +84,44 @@ back application artifacts only after checking compatibility with committed
 events; use append-only control/identity revocation when required. Never reset a
 World, delete authoritative history or run an automatic down migration.
 
-The current entry assembles Finance, Social, Treasury FX and Captain. Additional
-Trade, Industry and Central Bank operation installation and their browser chains
-must be separately evidenced; their isolated Core/SQL tests do not imply that
-this entry serves every office operation.
+The entry assembles Finance, Social, Treasury FX and Captain. Optional fixed
+`install: { "centralBankOmo": true, "trade": true }` configuration also installs
+Central Bank OMO and narrow Treasury-GCU Trade borrowers on that same consumer.
+Omitting this object leaves these two families uninstalled. Installation grants
+no source or command authority: the existing admitted securities, quotations,
+trade originals, three-party approvals and exact role bindings are still
+required. No security, quote, route, mandate or opening balance is synthesized.
+The Central Bank country set is the explicit `countries` list, with no default
+country fallback. Automatic Trade shipment/delivery uses the same global FIFO;
+it is not a user-submit command family or a second consumer.
+
+Industry installation and actual browser/real-database operation chains remain
+separate acceptance requirements. Protocol routing tests or isolated Core/SQL
+tests do not establish that every office operation is connected.
+
+### Industry task publication
+
+When `install.industry` is enabled, the host also requires
+`WORLD_NODE_INDUSTRY_PUBLICATION_DATABASE_URL`, configured directly in the
+platform secret store. It must use a distinct, reviewed Industry publisher
+principal; the host does not create credentials, grant membership, or reuse the
+read/worker/current-projection publisher principal. Its pool has the same TLS
+verification, two-connection maximum, timeouts and joined shutdown as the other
+pools. Without Industry installation the binding is neither read nor opened.
+
+`publishDueIndustryWork({countryId, facilityId, runId})` is an explicit finite
+server operation on the issued shared connection. It derives work from the
+actual committed schedule, current employees, existing bookings and registered
+server clock, then queues one canonical automatic command. It recovers an
+existing publication first. It does not start Clock, start a consumer loop or
+turn a schedule into completed work. The same FIFO consumer and atomic cutoff
+execute the queued command. Deployment still requires the selected SQL, role
+enrollment review and actual source publication; a configured URL is not proof
+of readiness.
+
+`publishIndustryDueWage({countryId, facilityId, runId})` uses the same separate
+Industry publisher binding for an explicit finite task based on actual committed
+WORK. It accepts no amount, actor override or caller clock. Wage settlement uses
+the shared FIFO and fixed current-source cutoff; scheduling a wage task does not
+prove payment or production. Existing publication/FINAL recovery precedes new
+issuance. These task issuers are server methods, not browser command families.

@@ -104,7 +104,7 @@ export async function readCentralBankOmoCommittedOriginalsFrom(
     readonly worldId: string;
     readonly hostCountryId: string;
     readonly officeId:
-      'FINANCE' | 'SOCIAL' | 'TREASURY_FX' | 'CAPTAIN' | 'CB_OMO';
+      'FINANCE' | 'SOCIAL' | 'TREASURY_FX' | 'CAPTAIN' | 'CB_OMO' | 'TRADE';
     readonly seedFingerprint: string;
     readonly admissionRef: string;
     readonly expectedHead: Readonly<{

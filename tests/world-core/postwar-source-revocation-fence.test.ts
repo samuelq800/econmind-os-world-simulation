@@ -46,14 +46,14 @@ beforeAll(async () => {
  insert into world_v2.world_head values('WORLD_FENCE_TEST_ONLY',0,0);`);
   await db.exec(await sql('captain-operating-custody'));
   await db.exec(
-    'create role world_v2_social_source_publisher nologin nosuperuser nobypassrls;create role world_v2_social_source_owner nologin nosuperuser nobypassrls;create role world_v2_industry_source_owner nologin nosuperuser nobypassrls;create role world_v2_social_source_reader nologin nosuperuser nobypassrls;grant usage on schema world_v2 to world_v2_social_source_publisher,world_v2_social_source_owner',
+    'create role world_v2_social_source_publisher nologin nosuperuser nobypassrls;create role world_v2_social_source_owner nologin nosuperuser nobypassrls;create role world_v2_industry_source_owner nologin nosuperuser nobypassrls;create role world_v2_industry_source_publisher nologin nosuperuser nobypassrls;create role world_v2_social_source_reader nologin nosuperuser nobypassrls;grant usage on schema world_v2 to world_v2_social_source_publisher,world_v2_social_source_owner',
   );
   await db.exec(await sql('postwar-source-revocation-fence'));
   await db.exec(
     "create role fence_test_publisher login nosuperuser nobypassrls;grant world_v2_social_source_publisher to fence_test_publisher;create function world_v2.test_only_nested_fence(p_world text)returns void language sql security definer set search_path=pg_catalog as 'select world_v2.lock_postwar_source_revocation_fences(p_world)';alter function world_v2.test_only_nested_fence(text)owner to world_v2_social_source_owner;revoke all on function world_v2.test_only_nested_fence(text)from public;grant execute on function world_v2.test_only_nested_fence(text)to world_v2_social_source_publisher",
   );
   await db.exec(
-    "create role fence_test_social login nosuperuser nobypassrls;grant world_v2_social_source_reader to fence_test_social;grant usage on schema world_v2 to world_v2_social_source_reader,world_v2_industry_source_owner;create function world_v2.test_only_industry_nested_fence(p_world text)returns void language sql security definer set search_path=pg_catalog as 'select world_v2.lock_postwar_source_revocation_fences(p_world)';alter function world_v2.test_only_industry_nested_fence(text)owner to world_v2_industry_source_owner;revoke all on function world_v2.test_only_industry_nested_fence(text)from public;grant execute on function world_v2.test_only_industry_nested_fence(text)to world_v2_social_source_reader",
+    "create role fence_test_social login nosuperuser nobypassrls;grant world_v2_social_source_reader to fence_test_social;grant usage on schema world_v2 to world_v2_social_source_reader,world_v2_industry_source_owner;create function world_v2.test_only_industry_nested_fence(p_world text)returns void language sql security definer set search_path=pg_catalog as 'select world_v2.lock_postwar_source_revocation_fences(p_world)';alter function world_v2.test_only_industry_nested_fence(text)owner to world_v2_industry_source_owner;revoke all on function world_v2.test_only_industry_nested_fence(text)from public;grant execute on function world_v2.test_only_industry_nested_fence(text)to world_v2_social_source_reader,world_v2_industry_source_publisher;create role fence_test_industry_pub login nosuperuser nobypassrls;grant world_v2_industry_source_publisher to fence_test_industry_pub;grant usage on schema world_v2 to world_v2_industry_source_publisher",
   );
   await db.exec(
     'create role fence_test_reader login nosuperuser nobypassrls nocreatedb nocreaterole noreplication;grant world_v2_captain_source_reader to fence_test_reader',
@@ -181,6 +181,25 @@ it('allows the genuine Social reader effective role through the inaccessible Ind
       )
     ).rows,
   ).toEqual([{ owner_member: false, raw: false }]);
+});
+it('allows only the explicit Industry publisher fixed guard without borrowing Reader or owner membership', async () => {
+  await db.exec(
+    'set session authorization fence_test_industry_pub;begin isolation level repeatable read;set local role world_v2_industry_source_publisher',
+  );
+  try {
+    await tx.query('select world_v2.test_only_industry_nested_fence($1)', [
+      world,
+    ]);
+  } finally {
+    await db.exec('rollback;reset role;set session authorization postgres');
+  }
+  expect(
+    (
+      await db.query(
+        "select pg_has_role('fence_test_industry_pub','world_v2_industry_source_owner','MEMBER') owner_member,pg_has_role('fence_test_industry_pub','world_v2_social_source_reader','MEMBER') reader_member,has_table_privilege('fence_test_industry_pub','world_v2.postwar_source_revocation_fence','SELECT') raw",
+      )
+    ).rows,
+  ).toEqual([{ owner_member: false, reader_member: false, raw: false }]);
 });
 it('rejects moving current metadata between Worlds rather than fencing only the new identity', async () => {
   await db.query(

@@ -1,3 +1,14 @@
+import { readPostwarBeneficialHousingRentChildOperatingView } from './postwar-beneficial-housing-rent-child-view.js';
+import type { PreparedBeneficialHousingRentSource } from './postwar-beneficial-housing-rent-source.js';
+import {
+  isPostwarSocialRuntimeConnection,
+  readPostwarSocialRuntimeConnectionResources,
+  type PostwarSocialRuntimeConnection,
+} from '../runtime-preparation/social-runtime-connection.js';
+import {
+  readPagedFromPreparedSocialBaseOnHeldExecutor,
+  releasePostwarPagedFinanceSocialReplay,
+} from './postwar-paged-finance-social-replay.js';
 /** Fixed local/CI Treasury-FX source. JSON quotes and opening data are never
  * admission or actor authority. Every fresh use locks the registered original,
  * current complete durable prefix, and current Treasury entitlement. */
@@ -97,6 +108,7 @@ export interface DayOneFxSourceCommitProtectionPort {
   ): Promise<Readonly<DayOneFxSourceCommitAudit>>;
 }
 export interface PostwarDayOneFxPreparationInput {
+  readonly startupBeneficialHousingRentSource?: PreparedBeneficialHousingRentSource;
   readonly seed: OpeningSeed;
   readonly policyBytes: string;
   readonly userReceiptBytes: string;
@@ -242,7 +254,19 @@ export function createPostwarDayOneFxRuntime(config: {
   readonly workerRole: string;
   readonly worldId: string;
   readonly omoOriginalMode?: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
+  readonly mixedSocialConnection?: Readonly<PostwarSocialRuntimeConnection>;
 }): PostwarDayOneFxRuntime {
+  if (
+    config.mixedSocialConnection &&
+    (!isPostwarSocialRuntimeConnection(
+      config.mixedSocialConnection,
+      config.worldId,
+    ) ||
+      readPostwarSocialRuntimeConnectionResources(config.mixedSocialConnection)
+        .workerRole !== config.workerRole ||
+      config.mixedSocialConnection.workerId !== config.workerId)
+  )
+    invalid('EXACT_GENUINE_SHARED_SOCIAL_BASE_REQUIRED');
   if (
     !/^[a-z][a-z0-9_]{0,62}$/u.test(config.workerRole) ||
     [
@@ -315,12 +339,266 @@ export function createPostwarDayOneFxRuntime(config: {
       original.seedFingerprint !== p.policy.seedFingerprint
     )
       invalid('REGISTERED_ORIGINAL_DIFFERS_FROM_VERIFIED_SOURCE');
-    const history = await readPostwarDayOneFxHistoryFrom({
-      executor: tx,
-      database,
-      worldId: command.worldId,
-      expectedWorldVersion: command.expectedWorldVersion,
-    });
+    const replayContext = await (async () => {
+      if (config.mixedSocialConnection) {
+        const paged = await readPagedFromPreparedSocialBaseOnHeldExecutor(tx, {
+          socialConnection: config.mixedSocialConnection,
+          worldId: command.worldId,
+          hostCountryId: command.countryId,
+          expectedHead: original.head,
+          omoOriginalMode: config.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
+        });
+        try {
+          if (
+            paged.seedPins.seedId !== original.seedId ||
+            paged.seedPins.seedFingerprint !== original.seedFingerprint ||
+            paged.seedPins.admissionRef !== original.admissionRef ||
+            !paged.view.result.financialState
+          )
+            invalid('PAGED_SHARED_BASE_DIFFERS_FROM_REAL_FX_SOURCE');
+          return {
+            mode: 'PAGED_COMPLETE_V1' as const,
+            head: { worldId: command.worldId, ...paged.view.head },
+            mixed: {
+              financial: paged.view.result.financialState,
+              budgetEncumbrances: paged.view.result.budgetEncumbrances,
+              socialReservations: paged.view.result.socialReservations,
+            },
+            prefixFingerprint: paged.metadata.prefixFingerprint,
+            maxCommandSimTimeTicks: paged.metadata.maxCommandSimTimeTicks,
+            reservationBasis: {
+              schemaVersion: 'fx-paged-prefix-reservation-basis-v1',
+              worldId: command.worldId,
+              seedFingerprint: original.seedFingerprint,
+              head: paged.view.head,
+              pageChainFingerprint: paged.metadata.pageChainFingerprint,
+            },
+          };
+        } finally {
+          releasePostwarPagedFinanceSocialReplay(paged);
+        }
+      }
+      const history = await readPostwarDayOneFxHistoryFrom({
+        executor: tx,
+        database,
+        worldId: command.worldId,
+        expectedWorldVersion: command.expectedWorldVersion,
+      });
+      if (
+        !same(original.head, {
+          worldVersion: history.head.worldVersion,
+          eventSequence: history.head.eventSequence,
+        })
+      )
+        invalid('ACTUAL_SOURCE_HEAD_MISMATCH');
+      if (
+        history.frames.some(
+          (f) => f.command.simTime.ticks > command.simTime.ticks,
+        )
+      )
+        invalid('COMMAND_PRECEDES_ACTUAL_PREFIX');
+      // Every committed frame is retained. Each historical FX original is read
+      // from the real fixed custody witness; a startup quote is only immutable
+      // data and cannot establish historical registration or current permission.
+      const fxOriginals: FinanceSocialFxOriginal[] = [];
+      for (const frame of history.frames) {
+        if (
+          frame.command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+        )
+          continue;
+        const event = frame.events[0];
+        if (
+          !event ||
+          frame.events.length !== 1 ||
+          event.eventType !== POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT
+        )
+          invalid('EXACT_COMMITTED_FX_EVENT_REQUIRED');
+        const payload = JSON.parse(frame.command.canonicalPayload) as Record<
+          string,
+          unknown
+        >;
+        if (
+          typeof payload.quoteRef !== 'string' ||
+          typeof payload.expectedQuoteSha256 !== 'string'
+        )
+          invalid('HISTORICAL_QUOTE_IDENTITY_REQUIRED');
+        const historical =
+          await readPostwarDayOneFxCommittedQuoteForTreasuryFrom(tx, {
+            worldId: command.worldId,
+            hostCountryId: command.countryId,
+            sourceCountryId: frame.command.countryId,
+            seedFingerprint: p.policy.seedFingerprint,
+            admissionRef: original.admissionRef,
+            eventId: event.eventId,
+            eventPayloadHash: event.payloadHash,
+            quoteRef: payload.quoteRef,
+            quoteSha256: payload.expectedQuoteSha256,
+          });
+        const q = one(
+          p.policy.quotes.filter(
+            (q) => q.countryId === frame.command.countryId,
+          ),
+          'HISTORICAL_VERIFIED_COUNTRY_REQUIRED',
+        );
+        if (
+          !same(historical.quote, q) ||
+          !same(historical.observedHead, {
+            worldVersion: history.head.worldVersion,
+            eventSequence: history.head.eventSequence,
+          }) ||
+          historical.trace.commandId !== frame.command.commandId ||
+          historical.trace.commandFingerprint !== frame.command.fingerprint ||
+          historical.trace.seedId !== original.seedId ||
+          historical.trace.hostSourceRef !== original.registrationRef ||
+          historical.trace.worldVersion !== event.worldVersion ||
+          historical.trace.eventSequence !== event.sequence
+        )
+          invalid('ACTUAL_HISTORICAL_QUOTE_PREFIX_OR_SOURCE_DIFFERS');
+        const asset = (owner: string) =>
+          one(
+            p.financialAccounts.filter(
+              (a) =>
+                a.worldId === q.worldId &&
+                a.countryId === q.countryId &&
+                a.ownerId === owner &&
+                a.accountClass === 'ASSET' &&
+                a.counterpartyEntityId === q.centralBankEntityId &&
+                a.currency === q.localCurrency &&
+                a.claimId !== null,
+            ),
+            'EXACT_ORIGINAL_HISTORICAL_CLAIM_ASSET_REQUIRED',
+          );
+        const mirror = (a: FinancialAccount) =>
+          one(
+            p.financialAccounts.filter(
+              (b) =>
+                b.worldId === q.worldId &&
+                b.countryId === q.countryId &&
+                b.ownerId === q.centralBankEntityId &&
+                b.accountClass === 'LIABILITY' &&
+                b.counterpartyEntityId === a.ownerId &&
+                b.currency === q.localCurrency &&
+                b.claimId === a.claimId,
+            ),
+            'EXACT_ORIGINAL_HISTORICAL_CLAIM_MIRROR_REQUIRED',
+          );
+        const treasuryAsset = asset(q.governmentEntityId),
+          bankSettlementAsset = asset(q.bankEntityId);
+        const bankGcuAsset = one(
+          p.financialAccounts.filter(
+            (a) =>
+              a.accountId === q.dealerGcuAccountId &&
+              a.countryId === q.countryId &&
+              a.ownerId === q.bankEntityId &&
+              a.accountClass === 'CASH' &&
+              a.currency === 'GCU',
+          ),
+          'EXACT_ORIGINAL_BANK_GCU_REQUIRED',
+        );
+        const seen = fxOriginals.find((o) => o.quote.quoteRef === q.quoteRef);
+        if (seen) {
+          if (!same(seen.quote, q))
+            invalid('IMMUTABLE_HISTORICAL_QUOTE_CHANGED');
+        } else
+          fxOriginals.push({
+            quote: q,
+            treasuryAsset,
+            treasuryLiability: mirror(treasuryAsset),
+            bankSettlementAsset,
+            bankSettlementLiability: mirror(bankSettlementAsset),
+            bankGcuAsset,
+          });
+      }
+      const frames = history.frames;
+      const captainCountries = frames.some(
+        (f) =>
+          f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+      )
+        ? await readPostwarCaptainHistoryOriginalsFrom(tx, {
+            worldId: command.worldId,
+            hostCountryId: command.countryId,
+            officeId: 'TREASURY_FX',
+            seedFingerprint: p.policy.seedFingerprint,
+            admissionRef: original.admissionRef,
+            expectedHead: history.head,
+            frames,
+          })
+        : undefined;
+      const beneficialHousingRentReceipts =
+        readPostwarBeneficialHousingRentMixedOriginalsForDatabase({
+          database,
+          worldId: command.worldId,
+          seedId: original.seedId,
+          seedFingerprint: original.seedFingerprint,
+        });
+      const mixed = replayPreparedFinanceSocialFxLedger({
+        prepared: p.ledger,
+        ...(beneficialHousingRentReceipts === undefined
+          ? {}
+          : { beneficialHousingRentReceipts }),
+        frames,
+        socialCountries: p.social.countries.map((c) => ({
+          countryId: c.countryId,
+          state: c.state,
+          offers: c.offers,
+        })),
+        openingEncumbrances: p.funding.map((f) => ({
+          reference: f.fundingId,
+          accountId: f.accountId,
+          amount: Money.from(f.ceilingAmount, f.currency).toCanonicalValue()
+            .amount,
+          currency: f.currency,
+        })),
+        fxOriginals,
+        ...(frames.some(
+          (f) => f.command.commandType === CENTRAL_BANK_OMO_COMMAND,
+        )
+          ? {
+              omoOriginals: await readCentralBankOmoMixedReplayOriginalsFrom(
+                tx,
+                {
+                  worldId: command.worldId,
+                  hostCountryId: command.countryId,
+                  officeId: 'TREASURY_FX',
+                  seedFingerprint: p.policy.seedFingerprint,
+                  admissionRef: original.admissionRef,
+                  expectedHead: history.head,
+                  frames,
+                  mode: config.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
+                  sourceMetadata: p.sourceMetadata,
+                },
+              ),
+            }
+          : {}),
+        ...(captainCountries === undefined ? {} : { captainCountries }),
+        expectedHead: {
+          worldVersion: history.head.worldVersion,
+          eventSequence: history.head.eventSequence,
+        },
+        sha256Hex: sha,
+      });
+
+      return {
+        mode: 'BOUNDED_COMPLETE_V1' as const,
+        head: history.head,
+        mixed,
+        prefixFingerprint: hash(history.frames),
+        maxCommandSimTimeTicks: history.frames
+          .reduce(
+            (n, f) =>
+              f.command.simTime.ticks > n ? f.command.simTime.ticks : n,
+            0n,
+          )
+          .toString(),
+        reservationBasis: history.frames.map((x) => ({
+          command: x.command,
+          transition: x.transition,
+          receipt: x.receipt,
+        })),
+      };
+    })();
+    const history = { head: replayContext.head },
+      mixed = replayContext.mixed;
     if (
       !same(original.head, {
         worldVersion: history.head.worldVersion,
@@ -328,185 +606,8 @@ export function createPostwarDayOneFxRuntime(config: {
       })
     )
       invalid('ACTUAL_SOURCE_HEAD_MISMATCH');
-    if (
-      history.frames.some(
-        (f) => f.command.simTime.ticks > command.simTime.ticks,
-      )
-    )
+    if (command.simTime.ticks < BigInt(replayContext.maxCommandSimTimeTicks))
       invalid('COMMAND_PRECEDES_ACTUAL_PREFIX');
-    // Every committed frame is retained. Each historical FX original is read
-    // from the real fixed custody witness; a startup quote is only immutable
-    // data and cannot establish historical registration or current permission.
-    const fxOriginals: FinanceSocialFxOriginal[] = [];
-    for (const frame of history.frames) {
-      if (
-        frame.command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
-      )
-        continue;
-      const event = frame.events[0];
-      if (
-        !event ||
-        frame.events.length !== 1 ||
-        event.eventType !== POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_EVENT
-      )
-        invalid('EXACT_COMMITTED_FX_EVENT_REQUIRED');
-      const payload = JSON.parse(frame.command.canonicalPayload) as Record<
-        string,
-        unknown
-      >;
-      if (
-        typeof payload.quoteRef !== 'string' ||
-        typeof payload.expectedQuoteSha256 !== 'string'
-      )
-        invalid('HISTORICAL_QUOTE_IDENTITY_REQUIRED');
-      const historical = await readPostwarDayOneFxCommittedQuoteForTreasuryFrom(
-        tx,
-        {
-          worldId: command.worldId,
-          hostCountryId: command.countryId,
-          sourceCountryId: frame.command.countryId,
-          seedFingerprint: p.policy.seedFingerprint,
-          admissionRef: original.admissionRef,
-          eventId: event.eventId,
-          eventPayloadHash: event.payloadHash,
-          quoteRef: payload.quoteRef,
-          quoteSha256: payload.expectedQuoteSha256,
-        },
-      );
-      const q = one(
-        p.policy.quotes.filter((q) => q.countryId === frame.command.countryId),
-        'HISTORICAL_VERIFIED_COUNTRY_REQUIRED',
-      );
-      if (
-        !same(historical.quote, q) ||
-        !same(historical.observedHead, {
-          worldVersion: history.head.worldVersion,
-          eventSequence: history.head.eventSequence,
-        }) ||
-        historical.trace.commandId !== frame.command.commandId ||
-        historical.trace.commandFingerprint !== frame.command.fingerprint ||
-        historical.trace.seedId !== original.seedId ||
-        historical.trace.hostSourceRef !== original.registrationRef ||
-        historical.trace.worldVersion !== event.worldVersion ||
-        historical.trace.eventSequence !== event.sequence
-      )
-        invalid('ACTUAL_HISTORICAL_QUOTE_PREFIX_OR_SOURCE_DIFFERS');
-      const asset = (owner: string) =>
-        one(
-          p.financialAccounts.filter(
-            (a) =>
-              a.worldId === q.worldId &&
-              a.countryId === q.countryId &&
-              a.ownerId === owner &&
-              a.accountClass === 'ASSET' &&
-              a.counterpartyEntityId === q.centralBankEntityId &&
-              a.currency === q.localCurrency &&
-              a.claimId !== null,
-          ),
-          'EXACT_ORIGINAL_HISTORICAL_CLAIM_ASSET_REQUIRED',
-        );
-      const mirror = (a: FinancialAccount) =>
-        one(
-          p.financialAccounts.filter(
-            (b) =>
-              b.worldId === q.worldId &&
-              b.countryId === q.countryId &&
-              b.ownerId === q.centralBankEntityId &&
-              b.accountClass === 'LIABILITY' &&
-              b.counterpartyEntityId === a.ownerId &&
-              b.currency === q.localCurrency &&
-              b.claimId === a.claimId,
-          ),
-          'EXACT_ORIGINAL_HISTORICAL_CLAIM_MIRROR_REQUIRED',
-        );
-      const treasuryAsset = asset(q.governmentEntityId),
-        bankSettlementAsset = asset(q.bankEntityId);
-      const bankGcuAsset = one(
-        p.financialAccounts.filter(
-          (a) =>
-            a.accountId === q.dealerGcuAccountId &&
-            a.countryId === q.countryId &&
-            a.ownerId === q.bankEntityId &&
-            a.accountClass === 'CASH' &&
-            a.currency === 'GCU',
-        ),
-        'EXACT_ORIGINAL_BANK_GCU_REQUIRED',
-      );
-      const seen = fxOriginals.find((o) => o.quote.quoteRef === q.quoteRef);
-      if (seen) {
-        if (!same(seen.quote, q)) invalid('IMMUTABLE_HISTORICAL_QUOTE_CHANGED');
-      } else
-        fxOriginals.push({
-          quote: q,
-          treasuryAsset,
-          treasuryLiability: mirror(treasuryAsset),
-          bankSettlementAsset,
-          bankSettlementLiability: mirror(bankSettlementAsset),
-          bankGcuAsset,
-        });
-    }
-    const frames = history.frames;
-    const captainCountries = frames.some(
-      (f) => f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
-    )
-      ? await readPostwarCaptainHistoryOriginalsFrom(tx, {
-          worldId: command.worldId,
-          hostCountryId: command.countryId,
-          officeId: 'TREASURY_FX',
-          seedFingerprint: p.policy.seedFingerprint,
-          admissionRef: original.admissionRef,
-          expectedHead: history.head,
-          frames,
-        })
-      : undefined;
-    const beneficialHousingRentReceipts =
-      readPostwarBeneficialHousingRentMixedOriginalsForDatabase({
-        database,
-        worldId: command.worldId,
-        seedId: original.seedId,
-        seedFingerprint: original.seedFingerprint,
-      });
-    const mixed = replayPreparedFinanceSocialFxLedger({
-      prepared: p.ledger,
-      ...(beneficialHousingRentReceipts === undefined
-        ? {}
-        : { beneficialHousingRentReceipts }),
-      frames,
-      socialCountries: p.social.countries.map((c) => ({
-        countryId: c.countryId,
-        state: c.state,
-        offers: c.offers,
-      })),
-      openingEncumbrances: p.funding.map((f) => ({
-        reference: f.fundingId,
-        accountId: f.accountId,
-        amount: Money.from(f.ceilingAmount, f.currency).toCanonicalValue()
-          .amount,
-        currency: f.currency,
-      })),
-      fxOriginals,
-      ...(frames.some((f) => f.command.commandType === CENTRAL_BANK_OMO_COMMAND)
-        ? {
-            omoOriginals: await readCentralBankOmoMixedReplayOriginalsFrom(tx, {
-              worldId: command.worldId,
-              hostCountryId: command.countryId,
-              officeId: 'TREASURY_FX',
-              seedFingerprint: p.policy.seedFingerprint,
-              admissionRef: original.admissionRef,
-              expectedHead: history.head,
-              frames,
-              mode: config.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
-              sourceMetadata: p.sourceMetadata,
-            }),
-          }
-        : {}),
-      ...(captainCountries === undefined ? {} : { captainCountries }),
-      expectedHead: {
-        worldVersion: history.head.worldVersion,
-        eventSequence: history.head.eventSequence,
-      },
-      sha256Hex: sha,
-    });
     const financial = mixed.financial;
     const reservations = (
       q: PostwarDayOneFxQuoteData,
@@ -605,11 +706,7 @@ export function createPostwarDayOneFxRuntime(config: {
         quote,
         a,
         financial.worldVersion,
-        history.frames.map((x) => ({
-          command: x.command,
-          transition: x.transition,
-          receipt: x.receipt,
-        })),
+        replayContext.reservationBasis,
       );
     const draft = calculatePostwarDayOneTreasuryFx(
       {
@@ -623,7 +720,10 @@ export function createPostwarDayOneFxRuntime(config: {
       sha,
     );
     const binding = freeze({
-      schemaVersion: 'postwar-day-one-fx-read-binding-v1',
+      schemaVersion:
+        replayContext.mode === 'PAGED_COMPLETE_V1'
+          ? 'postwar-day-one-fx-read-binding-v2'
+          : 'postwar-day-one-fx-read-binding-v1',
       commandFingerprint: command.fingerprint,
       currentHead: history.head,
       registrationRef: original.registrationRef,
@@ -631,7 +731,13 @@ export function createPostwarDayOneFxRuntime(config: {
       seedFingerprint: original.seedFingerprint,
       sourceRevision: original.sourceRevision,
       quoteSha256: quote.quoteSha256,
-      prefixFingerprint: hash(history.frames),
+      prefixFingerprint: replayContext.prefixFingerprint,
+      ...(replayContext.mode === 'PAGED_COMPLETE_V1'
+        ? {
+            historyMode: 'PAGED_COMPLETE_V1',
+            pageChainFingerprint: replayContext.prefixFingerprint,
+          }
+        : {}),
       encumbrancesHash: hash(encumbrances),
       accountsHash: hash(a),
       draftFingerprint: draft.fingerprint,
@@ -859,7 +965,12 @@ export function createPostwarDayOneFxRuntime(config: {
         const policy = createPostwarDayOneFxPolicy(input);
         if (policy.worldId !== config.worldId)
           invalid('STARTUP_WORLD_MISMATCH');
-        const opening = readPostwarOperatingGenesisFromSeed(input.seed);
+        const opening = input.startupBeneficialHousingRentSource
+          ? readPostwarBeneficialHousingRentChildOperatingView({
+              seed: input.seed,
+              preparation: input.startupBeneficialHousingRentSource,
+            }).parentView
+          : readPostwarOperatingGenesisFromSeed(input.seed);
         if (!opening.socialEmployment) invalid('REAL_SOCIAL_OPENING_REQUIRED');
         const financial = rebuildV08LedgersFromLineage({
           seed: input.seed,

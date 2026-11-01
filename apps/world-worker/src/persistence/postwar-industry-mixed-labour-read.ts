@@ -8,18 +8,15 @@ import {
   type PostwarIndustryLabourScope,
 } from './postwar-industry-labour-source.js';
 import {
-  consumePostwarMixedCurrentProjectionSnapshotFrom,
   isPostwarMixedCurrentProjectionSource,
   type PostwarMixedCurrentProjectionCoverage,
   type PostwarMixedCurrentProjectionSource,
 } from './postwar-mixed-current-projection-publication.js';
 import {
   isPostwarSocialRuntimeConnection,
-  readPostwarSocialRuntimeFinancialReplayBase,
   type PostwarSocialRuntimeConnection,
 } from '../runtime-preparation/social-runtime-connection.js';
-import { consumePreparedPostwarSocialFinancialReplayBase } from './prepared-postwar-social-source.js';
-import { replayPreparedPostwarFinanceSocialFxFrom } from './prepared-postwar-finance-social-fx-replay.js';
+import { readPostwarIndustryMixedCurrentEvidenceFrom } from './postwar-industry-mixed-current-evidence.js';
 
 export interface PostwarIndustryMixedLabourReadout {
   readonly classification: 'CURRENT_EMPLOYMENT_DATA_NOT_PRODUCTION_AUTHORITY';
@@ -103,54 +100,25 @@ export function createPostwarIndustryMixedLabourReader(config: {
           throw Error('INDUSTRY_EXACT_WORLD_SCOPE_REQUIRED');
         const country = countryId(scope.countryId);
         return source.withSnapshot(country, async (executor, snapshot) => {
-          const facts = consumePostwarMixedCurrentProjectionSnapshotFrom(
+          const checked = await readPostwarIndustryMixedCurrentEvidenceFrom(
               executor,
               snapshot,
-            ),
-            baseline = readPostwarSocialRuntimeFinancialReplayBase(
               social,
-              world,
             ),
-            b = consumePreparedPostwarSocialFinancialReplayBase(baseline);
-          // Two genuine instances in the same World still cannot substitute
-          // each other's preparation. The live snapshot must retain this exact
-          // immutable E03 original, and every SQL/current-admission pin agrees.
-          if (
-            facts.document !== b.document ||
-            facts.countryId !== country ||
-            facts.head.worldId !== world ||
-            facts.seedPins.worldId !== world ||
-            facts.seedPins.seedId !== b.pins.seedRef ||
-            facts.seedPins.seedFingerprint !== b.pins.contentHash ||
-            facts.seedPins.admissionRef !== b.pins.admissionRef
-          )
+            facts = checked.facts;
+          if (facts.countryId !== country)
             throw Error('INDUSTRY_EXACT_LIVE_PREPARED_SOURCE_REQUIRED');
-          // Snapshot DATA deliberately exposes no transferable Core proof.
-          // Reuse the fixed replay in this same held transaction to obtain the
-          // genuine evidence consumed by the existing pure facility join.
-          const replay = await replayPreparedPostwarFinanceSocialFxFrom({
-            executor,
-            baseline,
-            worldId: world,
-            hostCountryId: country,
-            officeId: 'SOCIAL',
-            seedId: facts.seedPins.seedId,
-            seedFingerprint: facts.seedPins.seedFingerprint,
-            admissionRef: facts.seedPins.admissionRef,
-            frames: facts.frames,
-            expectedHead: facts.head,
-          });
           return Object.freeze({
             head: facts.head,
             seedPins: facts.seedPins,
-            sourceRevision: b.document.sourceRevision,
-            sourceChecksumsSha256: b.document.inputs.sourceChecksumsSha256,
+            sourceRevision: facts.document.sourceRevision,
+            sourceChecksumsSha256: facts.document.inputs.sourceChecksumsSha256,
             coverage: facts.coverage,
             readout: projectPostwarIndustryMixedLabourReadout({
               scope,
-              originals: b.document.inputs,
-              evidence: replay.mixedPrefixEvidence,
-              frames: facts.frames,
+              originals: facts.document.inputs,
+              evidence: checked.evidence,
+              frames: checked.evidenceFrames,
               head: facts.head,
             }),
           });

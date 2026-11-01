@@ -8,6 +8,7 @@ const fixture = vi.hoisted(() => ({
   readCommand: vi.fn(),
   readReceipt: vi.fn(),
   publish: vi.fn(),
+  industryPublish: vi.fn(),
   close: vi.fn(),
   queries: [] as string[],
   publisherRole: 'test_publisher',
@@ -39,6 +40,14 @@ vi.mock(
     }),
   }),
 );
+vi.mock(
+  '../../apps/world-worker/src/persistence/postwar-industry-labour-current-publication.js',
+  () => ({
+    createPostwarIndustryLabourCurrentPublisher: () => ({
+      publishCountry: fixture.industryPublish,
+    }),
+  }),
+);
 import { createPostwarOfficePublicationController } from '../../apps/world-worker/src/persistence/postwar-office-publication-controller.js';
 const world = 'WORLD_TEST';
 const command = {
@@ -59,7 +68,7 @@ const step = {
   source: 'NEW_FINAL',
   receipt,
 } as unknown as Extract<DurableConsumptionStep, { status: 'PROCESSED' }>;
-function controller() {
+function controller(industryLabour = false) {
   const database = {
     async query(sql: string) {
       fixture.queries.push(sql);
@@ -82,6 +91,7 @@ function controller() {
   return createPostwarOfficePublicationController({
     worldId: world,
     database,
+    ...(industryLabour ? { industryLabour: true as const } : {}),
     workerRole: 'test_worker',
     publicationDatabase: {
       ...database,
@@ -119,6 +129,10 @@ beforeEach(() => {
     captain: [{}],
     financial: Array.from({ length: 10 }, () => ({})),
     social: [{}, {}],
+  });
+  fixture.industryPublish.mockResolvedValue({
+    head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+    documents: [{}],
   });
   fixture.close.mockResolvedValue(undefined);
 });
@@ -176,6 +190,44 @@ describe('fixed post-commit derived publication', () => {
     expect(
       fixture.queries.some((sql) => /\b(insert|update|delete)\b/iu.test(sql)),
     ).toBe(false);
+    await c.close();
+  });
+  it('publishes explicitly installed Industry headcount at the same head and counts actual documents', async () => {
+    const c = controller(true);
+    expect(await c.retryCommitted(command.commandId)).toMatchObject({
+      status: 'PUBLISHED',
+      documentCount: 14,
+      industryLabour: 'PUBLISHED',
+    });
+    expect(fixture.industryPublish).toHaveBeenCalledWith('COUNTRY_02', {
+      worldId: world,
+      worldVersion: '3',
+      eventSequence: '4',
+    });
+    await c.close();
+  });
+  it('retains the FINAL on partial page failure and retries without accepting a mismatched head', async () => {
+    const c = controller(true);
+    fixture.industryPublish.mockRejectedValueOnce(
+      Error('INDUSTRY_SCOPE_MISSING'),
+    );
+    const first = await c.afterCommitted(step);
+    expect(first).toMatchObject({
+      status: 'PROCESSED',
+      receipt: step.receipt,
+      derivedPublication: { status: 'UNAVAILABLE' },
+    });
+    fixture.industryPublish.mockResolvedValueOnce({
+      head: { worldId: world, worldVersion: '4', eventSequence: '5' },
+      documents: [{}],
+    });
+    expect((await c.retryCommitted(command.commandId)).status).toBe(
+      'UNAVAILABLE',
+    );
+    expect((await c.retryCommitted(command.commandId)).status).toBe(
+      'PUBLISHED',
+    );
+    expect(fixture.readReceipt).toHaveBeenCalledTimes(3);
     await c.close();
   });
   it('does not infer a country or committed outcome from the caller receipt', async () => {

@@ -1,7 +1,8 @@
-/** Fixed Workers-compatible source adapter. Reconstruction reads one sealed
- * small row plus the complete bounded zero-posting Budget prefix (or the
- * explicit supported Budget/Social mixed mode). No whole
- * opening payload, process-local H0 preparation, Ready flag or new authority. */
+/** Fixed capacity source adapter. Independent Workers-compatible modes read
+ * the sealed small source and their complete bounded supported prefix. The
+ * explicitly bound shared host reuses its genuine paired Social H0 baseline
+ * and same-transaction complete pages. Neither path accepts a Ready flag,
+ * caller ledger/state or new source/commit authority. */
 import { createHash } from 'node:crypto';
 import {
   DomainError,
@@ -11,6 +12,8 @@ import {
   countryId as canonicalCountryId,
   worldId as canonicalWorldId,
   validateCanonicalCommand,
+  canonicalSerialize,
+  Money,
   type CanonicalCommand,
 } from '@econmind/core';
 import {
@@ -27,8 +30,15 @@ import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import {
   isPostwarSocialRuntimeConnection,
   readPostwarSocialRuntimeConnectionResources,
+  readPostwarSocialRuntimeFinancialReplayBase,
   type PostwarSocialRuntimeConnection,
 } from '../runtime-preparation/social-runtime-connection.js';
+import { consumePreparedPostwarSocialFinancialReplayBase } from './prepared-postwar-social-source.js';
+import { readPreparedFinanceSocialOpening } from '@econmind/core/finance-social-prepared-ledger';
+import {
+  readPagedFromPreparedSocialBaseOnHeldExecutor,
+  releasePostwarPagedFinanceSocialReplay,
+} from './postwar-paged-finance-social-replay.js';
 declare const capacitySource: unique symbol;
 export interface PostgresFinanceBudgetCapacitySource {
   readonly [capacitySource]: true;
@@ -301,6 +311,158 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
     p.canonicalSeedSha256 !== 'sha256:' + row.canonical_seed_sha256
   )
     invalid('sealed source differs from actual admitted policy');
+  if (replayBinding !== undefined) {
+    const b = consumePreparedPostwarSocialFinancialReplayBase(
+        readPostwarSocialRuntimeFinancialReplayBase(
+          replayBinding.social,
+          c.worldId,
+        ),
+      ),
+      opening = readPreparedFinanceSocialOpening(b.prepared),
+      allocations = b.funding
+        .filter((f) => f.accountId === p.treasury.assetAccount.accountId)
+        .sort((a, b) => a.fundingId.localeCompare(b.fundingId));
+    if (
+      opening.seedId !== p.seedId ||
+      opening.seedFingerprint !== p.seedFingerprint ||
+      b.pins.admissionRef !== p.admissionRef ||
+      b.sourceMetadata.filter((s) => s.sourceId === p.financialSourceId)
+        .length !== 1
+    )
+      invalid('genuine paired source differs from sealed opening');
+    for (const [account, amount, negative] of [
+      [p.treasury.assetAccount, p.treasury.assetAmount, false],
+      [p.treasury.liabilityAccount, p.treasury.liabilityAmount, true],
+    ] as const) {
+      const positions = opening.financial.positions.filter(
+          (x) => x.account.accountId === account.accountId,
+        ),
+        expected = Money.from(amount, account.currency);
+      if (
+        positions.length !== 1 ||
+        canonicalSerialize(positions[0]!.account) !==
+          canonicalSerialize(account) ||
+        !positions[0]!.netDebitBalance.amount.equals(
+          negative ? expected.amount.negated() : expected.amount,
+        )
+      )
+        invalid(
+          'actual H0 TGA or reciprocal claim differs from sealed capacity',
+        );
+    }
+    let total = Money.from('0', p.treasury.assetAccount.currency);
+    for (const f of allocations) {
+      if (
+        f.countryId !== c.countryId ||
+        f.payerEntityId !== p.governmentEntityId ||
+        f.currency !== total.currency
+      )
+        invalid('opening funding differs from exact actual treasury scope');
+      total = total.add(Money.from(f.ceilingAmount, f.currency));
+    }
+    let recordsHash = 'sha256:' + sha(canonicalSerialize(allocations));
+    if (recordsHash !== p.openingFunding.recordsSha256) {
+      // The original SQL publisher retained the PostgreSQL jsonb-text digest;
+      // the newer fixed manifest publisher retains canonical JSON instead.
+      // Re-encode the very same genuine H0 records, without substituting rows,
+      // rounding amounts or accepting a caller-supplied hash/representation.
+      const encoded = await tx.query<{ sha256: string }>(
+        "select encode(sha256(convert_to($1::jsonb::text,'UTF8')),'hex') as sha256",
+        [canonicalSerialize(allocations)],
+      );
+      if (
+        encoded.rows.length !== 1 ||
+        !/^[a-f0-9]{64}$/u.test(encoded.rows[0]?.sha256 ?? '')
+      )
+        invalid('exact original SQL funding representation required');
+      recordsHash = 'sha256:' + encoded.rows[0]!.sha256;
+    }
+    if (
+      String(allocations.length) !== p.openingFunding.recordCount ||
+      recordsHash !== p.openingFunding.recordsSha256 ||
+      total.toCanonicalValue().amount !== p.openingFunding.totalAmount
+    )
+      invalid('complete unique opening funding differs from sealed capacity');
+    const paged = await readPagedFromPreparedSocialBaseOnHeldExecutor(tx, {
+      socialConnection: replayBinding.social,
+      worldId: c.worldId,
+      hostCountryId: c.countryId,
+    });
+    try {
+      if (
+        paged.seedPins.seedFingerprint !== p.seedFingerprint ||
+        paged.seedPins.admissionRef !== p.admissionRef ||
+        paged.view.head.worldVersion !== c.expectedWorldVersion ||
+        !paged.view.result.financialState ||
+        c.simTime.ticks < BigInt(paged.metadata.maxCommandSimTimeTicks)
+      )
+        invalid('actual paged prefix/source/head differs from current command');
+      const reservations = paged.view.result.socialReservations.filter(
+        (r) =>
+          r.countryId === c.countryId ||
+          r.accountId === p.treasury.assetAccount.accountId,
+      );
+      for (const r of reservations)
+        if (
+          r.countryId !== c.countryId ||
+          r.accountId !== p.treasury.assetAccount.accountId ||
+          r.employerId !== p.governmentEntityId ||
+          r.currency !== p.treasury.assetAccount.currency
+        )
+          invalid('mixed reservation differs from exact treasury scope');
+      const encumbrances = Object.freeze([
+        Object.freeze({
+          reference:
+            'OPENING_FUNDING_TOTAL_' +
+            p.openingFunding.recordsSha256.slice(7).toUpperCase(),
+          accountId: p.treasury.assetAccount.accountId,
+          amount: p.openingFunding.totalAmount,
+          currency: p.treasury.assetAccount.currency,
+        }),
+        ...reservations.map((r) =>
+          Object.freeze({
+            reference: r.reservationId,
+            accountId: r.accountId,
+            amount: r.amount,
+            currency: r.currency,
+          }),
+        ),
+      ]);
+      return Object.freeze({
+        policy: input.policy,
+        financialState: paged.view.result.financialState,
+        mixedPrefixEvidence: paged.view.lastPage.evidence,
+        frames: null,
+        pagedPrefix: Object.freeze({
+          evidence: paged.view.lastPage.evidence,
+          lastPageFrames: paged.view.lastPage.frames,
+        }),
+        binding: Object.freeze({
+          seedRef: p.seedId,
+          seedFingerprint: p.seedFingerprint,
+          admissionRef: p.admissionRef,
+          financialSourceId: p.financialSourceId,
+          originalsSHA256: p.financialOriginalsSha256,
+          policyHash: hash(input.policy),
+          treasuryAccountId: p.treasury.assetAccount.accountId,
+          treasuryClaimId: p.treasury.assetAccount.claimId!,
+          openingEncumbranceHash: hash(encumbrances),
+          capacityProjectionFingerprint: hash(p),
+          mixedSourceBindingsFingerprint: hash({
+            schemaVersion: 'finance-paged-source-bindings-v1',
+            seedPins: paged.seedPins,
+            sourceMetadata: b.sourceMetadata,
+            pageChainFingerprint: paged.metadata.pageChainFingerprint,
+          }),
+        }),
+        openingEncumbrances: encumbrances,
+        worldVersion: paged.view.head.worldVersion,
+        eventSequence: paged.view.head.eventSequence,
+      });
+    } finally {
+      releasePostwarPagedFinanceSocialReplay(paged);
+    }
+  }
   const mixed =
     config.historyMode === 'BUDGET_SOCIAL'
       ? await readBoundedMixedOfficeHistoryFrom({
@@ -313,9 +475,6 @@ export async function readPostgresFinanceBudgetCapacitySourceFrom(input: {
           observedAtReal: input.observedAtReal,
           envelopeRef: input.policy.envelopeRef,
           effectivePeriodRef: input.policy.effectivePeriodRef,
-          ...(replayBinding
-            ? { preparedSocialConnection: replayBinding.social }
-            : {}),
           sourcePins: {
             seedId: p.seedId,
             seedFingerprint: p.seedFingerprint,

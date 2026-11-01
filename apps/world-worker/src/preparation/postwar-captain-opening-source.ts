@@ -9,6 +9,7 @@ import {
   POLITICAL_CAPITAL_BUCKETS,
   validatePoliticalCapitalSnapshot,
   type PoliticalCapitalSnapshot,
+  type OpeningSeed,
 } from '@econmind/core';
 import {
   createCaptainSourcePublicationPacket,
@@ -21,6 +22,8 @@ import {
   type PostwarSocialRuntimeConnection,
 } from '../runtime-preparation/social-runtime-connection.js';
 import type { SqlExecutor } from '../persistence/sql-database.js';
+import { readPostwarBeneficialHousingRentChildOperatingView } from '../persistence/postwar-beneficial-housing-rent-child-view.js';
+import type { PreparedBeneficialHousingRentSource } from '../persistence/postwar-beneficial-housing-rent-source.js';
 export const CAPTAIN_OPENING_POLICY_SHA256 =
   '9d5731f10ad8b6f647569b0f13f3199383c9056c84fb20be77c2f2629164f152';
 export const CAPTAIN_OPENING_RECEIPT_SHA256 =
@@ -303,6 +306,58 @@ export async function withAdoptedCaptainNewScenarioFrom<T>(
       seedFingerprint: b.pins.contentHash,
       worldAdmissionRef: b.pins.admissionRef,
       countryIds: b.document.countries.map((c) => c.countryId),
+    }),
+    scope = { executor: tx, active: true };
+  scopes.set(candidate, scope);
+  try {
+    return await consume(candidate);
+  } finally {
+    scope.active = false;
+    scopes.delete(candidate);
+  }
+}
+/** Fixed new child world only. Recomputes every packet ID, genesis hash and
+ * child/admission binding from the actual verified roster and existing adopted
+ * policy. It never edits/relabels parent packets or resets a started World. */
+export async function withAdoptedBeneficialChildCaptainNewScenarioFrom<T>(
+  tx: SqlExecutor,
+  input: {
+    readonly policy: AdoptedCaptainOpeningPolicy;
+    readonly seed: Readonly<OpeningSeed>;
+    readonly preparation: PreparedBeneficialHousingRentSource;
+    readonly worldAdmissionRef: string;
+  },
+  consume: (candidate: Readonly<AdoptedCaptainOpeningCandidate>) => Promise<T>,
+): Promise<T> {
+  const child = readPostwarBeneficialHousingRentChildOperatingView(input),
+    b = child.binding,
+    document = child.parentView.socialEmployment;
+  if (
+    b.childFingerprint !==
+      'sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a' ||
+    !document ||
+    child.parentView.seedFingerprint !== b.parentFingerprint
+  )
+    invalid('FIXED_COMPLETE_CHILD_AND_UNCHANGED_PARENT_ROSTER_REQUIRED');
+  const h = await tx.query<Record<string, unknown>>(
+      'select * from world_v2.read_captain_new_scenario_opening_scope($1,$2,$3)',
+      [b.worldId, b.childFingerprint, input.worldAdmissionRef],
+    ),
+    r = h.rows[0];
+  if (
+    h.rows.length !== 1 ||
+    !r ||
+    r.seed_id !== b.seedId ||
+    r.seed_fingerprint !== b.childFingerprint ||
+    r.admission_ref !== input.worldAdmissionRef
+  )
+    invalid('ACTUAL_NEW_CHILD_SCENARIO_SCOPE_REQUIRED');
+  const candidate = createAdoptedCaptainOpeningCandidate(input.policy, {
+      worldId: b.worldId,
+      seedId: b.seedId,
+      seedFingerprint: b.childFingerprint,
+      worldAdmissionRef: input.worldAdmissionRef,
+      countryIds: document.countries.map((c) => c.countryId),
     }),
     scope = { executor: tx, active: true };
   scopes.set(candidate, scope);

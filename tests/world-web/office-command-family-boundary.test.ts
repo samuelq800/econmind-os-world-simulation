@@ -65,11 +65,12 @@ function envelope(officeId: string, commandType: string) {
   };
 }
 
-describe('browser manual Office transport permits only the six registered manual families', () => {
+describe('browser manual Office transport permits only the seven registered manual families', () => {
   it('retains exact readonly family types without enabling any automatic family', () => {
     expectTypeOf(officeFamilies).toEqualTypeOf<{
       readonly CAPTAIN: readonly ['CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'];
       readonly CENTRAL_BANK: readonly ['CORE_CENTRAL_BANK_OMO_V1'];
+      readonly TRADE: readonly ['CORE_GOODS_TRANSFER_V1'];
       readonly SOCIAL: readonly [
         'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
         'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
@@ -84,9 +85,10 @@ describe('browser manual Office transport permits only the six registered manual
       'CENTRAL_BANK',
       'FINANCE',
       'SOCIAL',
+      'TRADE',
     ]);
   });
-  it.each(['CAPTAIN', 'CENTRAL_BANK', 'SOCIAL', 'FINANCE'] as const)(
+  it.each(['CAPTAIN', 'CENTRAL_BANK', 'SOCIAL', 'FINANCE', 'TRADE'] as const)(
     'still parses the existing %s transport',
     (office) => {
       const value = envelope(office, officeFamilies[office][0]);

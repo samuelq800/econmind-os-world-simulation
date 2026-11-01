@@ -31,7 +31,7 @@ language plpgsql security definer set search_path=pg_catalog as $$
 declare effective name;required name;h world_v2.world_head%rowtype;a world_v2.runtime_opening_admission%rowtype;permit world_v2.runtime_admission_publication_permit%rowtype;
  host text;origin world_v2.central_bank_omo_adoption%rowtype;stored world_v2.central_bank_omo_original%rowtype;packets jsonb:='[]'::jsonb;quotes jsonb;refs jsonb;n bigint;bytes bigint:=0;parties bigint;begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
- required:=case p_office when 'FINANCE'then 'world_v2_finance_budget_source_reader'when 'SOCIAL'then 'world_v2_social_source_reader'when 'TREASURY_FX'then 'world_v2_day_one_fx_source_reader'when 'CAPTAIN'then 'world_v2_captain_source_reader'when 'CB_OMO'then 'world_v2_cb_omo_source_reader'else null end;
+ required:=case p_office when 'FINANCE'then 'world_v2_finance_budget_source_reader'when 'SOCIAL'then 'world_v2_social_source_reader'when 'TREASURY_FX'then 'world_v2_day_one_fx_source_reader'when 'CAPTAIN'then 'world_v2_captain_source_reader'when 'CB_OMO'then 'world_v2_cb_omo_source_reader'when 'TRADE'then 'world_v2_postwar_narrow_trade_source'else null end;
  if required is null or to_regrole(required)is null or not pg_has_role(effective,required,'MEMBER')or exists(select 1 from pg_roles r where r.rolname=effective and(r.rolsuper or r.rolbypassrls or r.rolcreaterole or r.rolcreatedb or r.rolreplication))or exists(select 1 from pg_roles r where r.rolname in('world_v2_day_one_fx_history_owner','world_v2_cb_omo_source_owner','world_v2_cb_omo_source_publisher','world_v2_finance_budget_source_owner','world_v2_finance_budget_source_publisher','world_v2_social_source_owner','world_v2_social_source_publisher','world_v2_day_one_fx_source_owner','world_v2_day_one_fx_source_publisher','world_v2_captain_source_owner')and pg_has_role(effective,r.oid,'MEMBER'))then raise exception 'CB_OMO_HISTORY_FIXED_HOST_READER_REQUIRED'using errcode='42501';end if;
  if p_world is null or p_host_country is null or p_world!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'or p_host_country!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'or p_version is null or p_sequence is null or p_version!~'^(0|[1-9][0-9]*)$'or p_sequence!~'^(0|[1-9][0-9]*)$'then raise exception 'CB_OMO_HISTORY_EXACT_SCOPE_REQUIRED'using errcode='22023';end if;
  perform set_config('econmind.fx_history_world',p_world,true);
@@ -42,7 +42,10 @@ declare effective name;required name;h world_v2.world_head%rowtype;a world_v2.ru
  select * into permit from world_v2.runtime_admission_publication_permit x where x.world_id=p_world and x.seed_id=a.seed_id and x.seed_fingerprint=p_seed and x.model_version=a.model_version and x.replay_binding=a.replay_binding and 'ADMISSION_'||upper(x.authorization_sha256)=p_admission and a.admitted_at_real>=x.valid_from and a.admitted_at_real<x.valid_until for share;
  if not found or exists(select 1 from world_v2.runtime_admission_publication_revocation x where x.authorization_id=permit.authorization_id)then raise exception 'CB_OMO_HISTORY_WORLD_ADMISSION_REVOKED'using errcode='55000';end if;
  -- These are current HOST source guards, not delegated Central Bank authority.
- if p_office='FINANCE'then
+ if p_office='TRADE'then
+  perform world_v2.assert_postwar_narrow_trade_history_host(p_world,p_host_country,p_seed,p_admission,h.world_version::text,h.event_sequence::text);
+  host:='HELD_TRADE_SOURCE_NOT_AUTHORITY';
+ elsif p_office='FINANCE'then
   select x.policy_ref into host from world_v2.finance_budget_policy_original x where x.world_id=p_world and x.country_id=p_host_country and x.seed_fingerprint=p_seed and x.admission_ref=p_admission and not exists(select 1 from world_v2.finance_budget_policy_revocation r where r.policy_ref=x.policy_ref)order by x.policy_ref limit 1 for share;
  elsif p_office='SOCIAL'then
   select x.registration_ref into host from world_v2.social_operating_source_registration x where x.world_id=p_world and x.country_id=p_host_country and x.seed_fingerprint=p_seed and x.admission_ref=p_admission and not exists(select 1 from world_v2.social_operating_source_revocation r where r.registration_ref=x.registration_ref)for share;
@@ -83,4 +86,5 @@ alter function world_v2.read_central_bank_omo_committed_originals(text,text,text
 revoke all on function world_v2.read_central_bank_omo_committed_originals(text,text,text,text,text,text,text)from public;
 grant execute on function world_v2.read_central_bank_omo_committed_originals(text,text,text,text,text,text,text)to world_v2_finance_budget_source_reader,world_v2_social_source_reader,world_v2_day_one_fx_source_reader,world_v2_captain_source_reader,world_v2_cb_omo_source_reader;
 revoke create on schema world_v2 from world_v2_day_one_fx_history_owner;
+-- Trade EXEC enrollment is deliberately supplied only by postwar-narrow-trade-history-read.sql.
 commit;

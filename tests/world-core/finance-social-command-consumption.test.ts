@@ -40,6 +40,7 @@ function harness(
   type = 'UNKNOWN_TEST_ONLY_ECONOMY',
   forcedWorld?: string,
   withFx = false,
+  withOptionalOffices = false,
 ) {
   const world = forcedWorld ?? `WORLD_TEST_ONLY_FIXED_CONSUMER_${++serial}`;
   const makeCommand = (commandType: string, suffix: string) =>
@@ -54,11 +55,16 @@ function harness(
         authSubject: '11111111-1111-4111-8111-111111111111',
         officeId:
           commandType === 'CORE_GOODS_DELIVERY_V1' ||
-          commandType === 'CORE_GOODS_SHIPMENT_V1'
+          commandType === 'CORE_GOODS_SHIPMENT_V1' ||
+          commandType === 'POSTWAR_BENEFICIAL_HOUSING_RENT_V1'
             ? null
             : commandType.startsWith('CAPTAIN_')
               ? 'CAPTAIN'
-              : 'FINANCE',
+              : commandType === 'CORE_CENTRAL_BANK_OMO_V1'
+                ? 'CENTRAL_BANK'
+                : commandType === 'CORE_GOODS_TRANSFER_V1'
+                  ? 'TRADE'
+                  : 'FINANCE',
         commandType,
         expectedWorldVersion: '0',
         simTime: '10',
@@ -140,6 +146,20 @@ function harness(
       simTime: vi.fn(async () => '10'),
     }),
     environment: 'ci' as const,
+    ...(withOptionalOffices
+      ? {
+          centralBankOmo: {
+            workerRole: 'fixture_shared_boundary_worker',
+            countryIds: ['COUNTRY_01', 'COUNTRY_02'],
+            mode: 'OFFICIAL_RUNTIME' as const,
+          },
+          trade: { workerRole: 'fixture_shared_boundary_worker' },
+          beneficialRent: {
+            workerRole: 'fixture_shared_boundary_worker',
+            clockBindingRef: 'CLOCK_TEST_ONLY_RENT',
+          },
+        }
+      : {}),
     ...(withFx
       ? { treasuryFx: { workerRole: 'fixture_shared_boundary_worker' } }
       : {}),
@@ -174,6 +194,63 @@ function harness(
 }
 afterEach(() => vi.restoreAllMocks());
 describe('fixed Finance/Social global FIFO boundary', () => {
+  it.each([
+    'CORE_CENTRAL_BANK_OMO_V1',
+    'CORE_GOODS_TRANSFER_V1',
+    'CORE_GOODS_SHIPMENT_V1',
+    'CORE_GOODS_DELIVERY_V1',
+    'POSTWAR_BENEFICIAL_HOUSING_RENT_V1',
+  ])(
+    'installs fixed %s in the same consumer but refuses unprepared originals without skipping its queue head',
+    async (type) => {
+      const oldReserve = vi.spyOn(
+          reservation,
+          'createLocalNarrowReservationWorker',
+        ),
+        oldShip = vi.spyOn(
+          shipment,
+          'createSqlNarrowTreasuryGcuShipmentCandidateFactory',
+        ),
+        oldDelivery = vi.spyOn(
+          delivery,
+          'createSqlNarrowTreasuryGcuDeliveryCandidateFactory',
+        );
+      const h = harness(type, undefined, false, true);
+      try {
+        expect(h.statements).toEqual([]);
+        expect(h.ports.trade?.database).toBe(h.ports.database);
+        expect(h.ports.trade?.reservation.database).toBe(h.ports.database);
+        expect(h.ports.trade?.automatic.database).toBe(h.ports.database);
+        expect(h.ports.centralBankOmo?.countryIds).toEqual([
+          'COUNTRY_01',
+          'COUNTRY_02',
+        ]);
+        const consumer = h.ports.runtime.consumer;
+        consumer.startPreparation(); // TEST_ONLY local lifecycle, no source prepare.
+        expect(await consumer.consumeOnce()).toEqual({
+          status: 'BLOCKED',
+          reason: 'FINANCE_SOCIAL_SOURCE_NOT_PREPARED',
+          commandId: h.first.commandId,
+        });
+        expect(h.read.mock.calls.map((c) => c[2])).toEqual([h.first.commandId]);
+        expect(
+          h.statements.filter((s) =>
+            s.sql.includes('from world_v2.command_queue'),
+          ),
+        ).toHaveLength(1);
+        expect(
+          h.statements.some((s) =>
+            /^\s*(insert|update|delete)\b/iu.test(s.sql),
+          ),
+        ).toBe(false);
+        expect(oldReserve).not.toHaveBeenCalled();
+        expect(oldShip).not.toHaveBeenCalled();
+        expect(oldDelivery).not.toHaveBeenCalled();
+      } finally {
+        await h.connection.stop();
+      }
+    },
+  );
   it('requires the genuine combined issuer and keeps the exact manual/Finance identities', async () => {
     expect(() =>
       createFinanceSocialCommandConsumptionPreparation(
@@ -225,9 +302,11 @@ describe('fixed Finance/Social global FIFO boundary', () => {
   it.each(
     [
       'UNKNOWN_TEST_ONLY_ECONOMY',
+      'CORE_CENTRAL_BANK_OMO_V1',
       'CORE_GOODS_TRANSFER_V1',
       'CORE_GOODS_SHIPMENT_V1',
       'CORE_GOODS_DELIVERY_V1',
+      'POSTWAR_BENEFICIAL_HOUSING_RENT_V1',
       'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
     ].flatMap((type) => [false, true].map((withFx) => ({ type, withFx }))),
   )(

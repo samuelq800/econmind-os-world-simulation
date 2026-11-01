@@ -1,9 +1,17 @@
-/** Offline fixed-cfc derivation. No request facts, policy issuance, admission
+/** Offline fixed-parent/verified-child derivation. No request facts, policy issuance, admission
  * signing, raw-seed reader grant or economic write is accepted here. */
 import { createHash } from 'node:crypto';
 import * as C from '@econmind/core';
 import { readPostwarOperatingGenesisFromSeed } from '../preparation/postwar-operating-genesis-adoption.js';
-import { readPostwarFinancialOfficeOriginalsFromSeed } from '../preparation/postwar-financial-office-originals.js';
+import {
+  readPostwarFinancialOfficeOriginalsFromSeed,
+  validatePostwarFinancialOfficeOriginalDocument,
+} from '../preparation/postwar-financial-office-originals.js';
+import { readPostwarBeneficialHousingRentChildOperatingView } from './postwar-beneficial-housing-rent-child-view.js';
+import {
+  consumeBeneficialHousingRentSource,
+  type PreparedBeneficialHousingRentSource,
+} from './postwar-beneficial-housing-rent-source.js';
 import { validatePostwarSocialEmploymentStateDocument } from '../preparation/postwar-social-employment-state.js';
 import {
   POSTWAR_DAY_ONE_FX_RETAINED_SOURCES,
@@ -30,6 +38,14 @@ export interface PostwarFinanceSocialSourceDerivation {
   readonly countries: readonly PostwarFinanceSocialCountryPublication[];
 }
 const derived = new WeakSet<object>();
+/** Same privately issued immutable DATA object only; never source admission,
+ * publication permission or a JSON-manifest-to-authority conversion. */
+export function readPostwarFinanceSocialSourceDerivation(
+  value: PostwarFinanceSocialSourceDerivation,
+): Readonly<PostwarFinanceSocialSourceDerivation> {
+  if (!derived.has(value)) invalid('ISSUED_DERIVATION_REQUIRED');
+  return value;
+}
 /** Bounded-memory SHA of the genuine immutable seed intent, byte-identical to
  * Core canonicalSerialize. Large embedded JSON strings are escaped in chunks;
  * domain values still use Core's real serializer, never caller adapters. */
@@ -94,7 +110,6 @@ export function derivePostwarFinanceSocialSources(
     seed.seedId !== 'SEED_POSTWAR_GCU_OPENING_20261029_V1'
   )
     invalid('FIXED_ADOPTED_CORE_SEED_REQUIRED');
-  const canonicalSeedSha256 = hashPostwarFinanceSocialSeedIntent(seed);
   // Constructor identity alone is insufficient: Core constructors support DI digests.
   if (seed.fingerprint !== 'sha256:' + shaSeedFingerprint(seed))
     invalid('ACTUAL_SEED_FINGERPRINT_REQUIRED');
@@ -107,13 +122,73 @@ export function derivePostwarFinanceSocialSources(
   )
     invalid('EXACT_FOUR_SOURCE_PINS_REQUIRED');
   const view = readPostwarOperatingGenesisFromSeed(seed);
+  return deriveCountrySources(
+    seed,
+    view,
+    readPostwarFinancialOfficeOriginalsFromSeed(seed),
+    retainedSources,
+  );
+}
+/** Fixed known child only, from the existing complete private Core proof.
+ * Parent source bytes/fingerprint remain unchanged. Child TGA/capacity/source
+ * envelopes are newly derived and must obtain a separate actual admission. */
+export function derivePostwarBeneficialChildFinanceSocialSources(input: {
+  readonly seed: C.OpeningSeed;
+  readonly preparation: PreparedBeneficialHousingRentSource;
+}): PostwarFinanceSocialSourceDerivation {
+  const proof = consumeBeneficialHousingRentSource(input.preparation),
+    seed = input.seed;
+  if (
+    seed.fingerprint !==
+      'sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a' ||
+    proof.parentSeedFingerprint !== POSTWAR_DAY_ONE_FX_SEED_FINGERPRINT ||
+    proof.seedFingerprint !== seed.fingerprint ||
+    proof.receipts.length !== 70
+  )
+    invalid('FIXED_COMPLETE_BENEFICIAL_CHILD_PROOF_REQUIRED');
+  const child = readPostwarBeneficialHousingRentChildOperatingView(input),
+    view = child.parentView;
+  if (
+    view.seedFingerprint !== proof.parentSeedFingerprint ||
+    !view.financialOfficeOriginalsDocument
+  )
+    invalid('UNCHANGED_ACTUAL_PARENT_FINANCIAL_ORIGINALS_REQUIRED');
+  const delta = new Set(proof.receipts.map((r) => r.supplementalSourceId)),
+    retained = Object.fromEntries(
+      seed.sources
+        .filter((s) => !delta.has(s.sourceId))
+        .map((s) => [s.sourceId, s.payloadHash]),
+    );
+  if (
+    C.canonicalSerialize(retained) !==
+    C.canonicalSerialize(POSTWAR_DAY_ONE_FX_RETAINED_SOURCES)
+  )
+    invalid('EXACT_RETAINED_FOUR_SOURCE_PINS_REQUIRED');
+  return deriveCountrySources(
+    seed,
+    view,
+    validatePostwarFinancialOfficeOriginalDocument(
+      view.financialOfficeOriginalsDocument,
+      seed,
+    ),
+    Object.fromEntries(seed.sources.map((s) => [s.sourceId, s.payloadHash])),
+    proof.openingFinancial,
+  );
+}
+function deriveCountrySources(
+  seed: C.OpeningSeed,
+  view: ReturnType<typeof readPostwarOperatingGenesisFromSeed>,
+  financial: ReturnType<typeof readPostwarFinancialOfficeOriginalsFromSeed>,
+  retainedSources: Readonly<Record<string, string>>,
+  actualChildFinancial?: Readonly<C.FinancialLedgerState>,
+): PostwarFinanceSocialSourceDerivation {
+  const canonicalSeedSha256 = hashPostwarFinanceSocialSeedIntent(seed);
   if (!view.socialEmployment || !view.financialOfficeOriginalsDocument)
     invalid('FULL_OPERATING_AND_FINANCIAL_ORIGINALS_REQUIRED');
   const financialOriginalsDocument = view.financialOfficeOriginalsDocument;
   const document = validatePostwarSocialEmploymentStateDocument(
     view.socialEmployment,
   );
-  const financial = readPostwarFinancialOfficeOriginalsFromSeed(seed);
   const operating = seed.sources.filter(
     (s) => s.sourceId === 'SOURCE_POSTWAR_OPERATING_V1',
   );
@@ -220,6 +295,25 @@ export function derivePostwarFinanceSocialSources(
           l.amount.amount.equals(asset.amount.amount),
       );
       if (mirrors.length !== 1) invalid('EXACT_RECIPROCAL_TGA_REQUIRED');
+      if (actualChildFinancial) {
+        for (const [leg, negative] of [
+          [asset, false],
+          [mirrors[0]!, true],
+        ] as const) {
+          const p = actualChildFinancial.positions.filter(
+            (p) => p.account.accountId === leg.account.accountId,
+          );
+          if (
+            p.length !== 1 ||
+            C.canonicalSerialize(p[0]!.account) !==
+              C.canonicalSerialize(leg.account) ||
+            !p[0]!.netDebitBalance.amount.equals(
+              negative ? leg.amount.amount.negated() : leg.amount.amount,
+            )
+          )
+            invalid('ACTUAL_CHILD_TGA_OR_RECIPROCAL_BALANCE_CHANGED');
+        }
+      }
       const allocations = [...view.facts.funding]
         .filter((f) => f.accountId === asset.account.accountId)
         .sort((a, b) => a.fundingId.localeCompare(b.fundingId));

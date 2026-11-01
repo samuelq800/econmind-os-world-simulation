@@ -86,6 +86,22 @@ export function prepareFinanceSocialLedgerFromOpening(
   bases.set(token, Object.freeze({ financial: opening.financial, opening }));
   return token;
 }
+/** Return only the same genuine paired H0 object held by this private data
+ * preparation. No JSON snapshot, independently paired ledger or supplied head
+ * is accepted. This is immutable DATA, never source/currentness authority. */
+export function readPreparedFinanceSocialOpening(
+  prepared: PreparedFinanceSocialLedger,
+): Readonly<RebuiltV08Ledgers> {
+  const opening = bases.get(prepared)?.opening;
+  if (
+    !opening ||
+    opening.worldVersion !== '0' ||
+    opening.financial.worldVersion !== '0' ||
+    opening.inventory.worldVersion !== '0'
+  )
+    invalid('genuine paired H0 preparation required');
+  return opening;
+}
 export function replayPreparedFinanceSocialLedger(input: {
   readonly prepared: PreparedFinanceSocialLedger;
   readonly mixedPrefixEvidence: FinanceNativeBudgetMixedPrefixEvidence;
@@ -188,6 +204,8 @@ export type {
   FinanceSocialFxCurrentTreasuryBalance,
 } from './finance-budget-native.js';
 export interface PreparedFinanceSocialFxReplayResult {
+  readonly industryWorkState?: FinanceNativeBudgetMixedPrefixResult['industryWorkState'];
+  readonly industryWageState?: FinanceNativeBudgetMixedPrefixResult['industryWageState'];
   readonly beneficialHousingRentOrigins?: FinanceNativeBudgetMixedPrefixResult['beneficialHousingRentOrigins'];
   readonly omoCountries?: FinanceNativeBudgetMixedPrefixResult['omoCountries'];
   readonly financial: Readonly<FinancialLedgerState>;
@@ -211,6 +229,12 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   readonly socialCountries: Parameters<
     typeof prepareFinanceNativeBudgetMixedPrefix
   >[0]['socialCountries'];
+  readonly industryWorkSources?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['industryWorkSources'];
+  readonly industryWageSources?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['industryWageSources'];
   readonly captainCountries?: Parameters<
     typeof prepareFinanceNativeBudgetMixedPrefix
   >[0]['captainCountries'];
@@ -255,6 +279,12 @@ export function replayPreparedFinanceSocialFxLedger(input: {
       frames: input.frames,
       socialCountries: input.socialCountries,
       financialReplay,
+      ...(input.industryWorkSources === undefined
+        ? {}
+        : { industryWorkSources: input.industryWorkSources }),
+      ...(input.industryWageSources === undefined
+        ? {}
+        : { industryWageSources: input.industryWageSources }),
       ...(input.captainCountries === undefined
         ? {}
         : { captainCountries: input.captainCountries }),
@@ -292,6 +322,12 @@ export function replayPreparedFinanceSocialFxLedger(input: {
     ...(result.omoCountries === undefined
       ? {}
       : { omoCountries: result.omoCountries }),
+    ...(result.industryWorkState === undefined
+      ? {}
+      : { industryWorkState: result.industryWorkState }),
+    ...(result.industryWageState === undefined
+      ? {}
+      : { industryWageState: result.industryWageState }),
     ...(result.captainCountries === undefined
       ? {}
       : { captainCountries: result.captainCountries }),

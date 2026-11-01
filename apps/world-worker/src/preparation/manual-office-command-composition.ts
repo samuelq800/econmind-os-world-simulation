@@ -1,4 +1,34 @@
+import type { PostwarIndustryOperatingWageRuntime } from '../persistence/postwar-industry-operating-wage-runtime.js';
+import type { PostwarIndustryWorkRuntime } from '../persistence/postwar-industry-work-runtime.js';
+import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  isPostwarIndustryRunRuntime,
+  type PostwarIndustryRunRuntime,
+  type IndustryRunSourceCommitProtectionPort,
+} from '../persistence/postwar-industry-run-runtime.js';
+import {
+  INDUSTRY_PRODUCTION_COMMAND,
+  INDUSTRY_PRODUCTION_CAPABILITY,
+} from '@econmind/core/industry-production-command';
+import {
+  isPreparedPostwarIndustryRuntime,
+  PostwarIndustryRuntimeMissing,
+  type PostwarIndustryRuntime,
+} from '../persistence/postwar-industry-runtime.js';
+import type { IndustryProductionCutoffGuard } from '../persistence/industry-production-source-cutoff.js';
+import type { PostwarBeneficialHousingRentRuntime } from '../persistence/postwar-beneficial-housing-rent-runtime.js';
 import { MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY } from '../persistence/manual-office-authorization-sql.js';
+import { CentralBankOmoOriginalsMissing } from '../persistence/postgres-central-bank-omo-originals.js';
+import {
+  isPostwarNarrowTradeReservationRuntime,
+  type PostwarNarrowTradeReservationRuntime,
+} from './postwar-narrow-trade-reservation-candidate.js';
+import { type PostwarNarrowTradeAutomaticRuntime } from './postwar-narrow-trade-shipment-delivery-candidates.js';
+import {
+  isPostwarNarrowTradeCurrentSource,
+  PostwarNarrowTradeCurrentSourceMissing,
+  type PostwarNarrowTradeCurrentSource,
+} from '../persistence/postwar-narrow-trade-current-source.js';
 import {
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_CAPABILITY,
@@ -81,6 +111,14 @@ import {
 /** Server constructor dependencies only. No request snapshot, prebuilt draft,
  * caller candidateFactory, readiness registry or automatic publisher port. */
 export interface ManualOfficeRuntimeReaders {
+  readonly industryOperatingWage?: Readonly<PostwarIndustryOperatingWageRuntime> | null;
+  readonly industryWork?: Readonly<PostwarIndustryWorkRuntime> | null;
+  readonly industryRun?: Readonly<PostwarIndustryRunRuntime> | null;
+  readonly industry?: Readonly<PostwarIndustryRuntime> | null;
+  readonly beneficialHousingRent?: Readonly<PostwarBeneficialHousingRentRuntime> | null;
+  readonly tradeReservation?: Readonly<PostwarNarrowTradeReservationRuntime> | null;
+  readonly tradeAutomatic?: Readonly<PostwarNarrowTradeAutomaticRuntime> | null;
+  readonly tradeSource?: Readonly<PostwarNarrowTradeCurrentSource> | null;
   readonly centralBankNative?: PostwarCentralBankOmoRuntime | null;
   readonly treasuryFx?: ReturnType<typeof createPostwarDayOneFxRuntime> | null;
   /** Automatic source is a separate fixed publisher path, never a browser intent. */
@@ -106,6 +144,13 @@ export interface ManualOfficeRuntimeReaders {
 
 export function manualOfficeCapability(command: CanonicalCommand) {
   switch (command.commandType) {
+    case INDUSTRY_RUN_SCHEDULE_COMMAND:
+    case INDUSTRY_PRODUCTION_COMMAND:
+      return command.officeId === 'INDUSTRY'
+        ? INDUSTRY_PRODUCTION_CAPABILITY
+        : null;
+    case 'CORE_GOODS_TRANSFER_V1':
+      return command.officeId === 'TRADE' ? ('TRADE_CONTRACTS' as const) : null;
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND:
       return command.officeId === 'CAPTAIN'
         ? CAPTAIN_POLITICAL_CAPITAL_CAPABILITY
@@ -216,12 +261,16 @@ export function createManualOfficeCommandComposition(input: {
   readonly readers: ManualOfficeRuntimeReaders;
 }): {
   readonly factory: AtomicTransitionCandidateFactory;
+  readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
+  readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
   readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
   readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
   readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
   readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
   readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
+  readonly narrowTransferApprovalGuard?: PostwarNarrowTradeReservationRuntime['narrowTransferApprovalGuard'];
+  readonly postwarNarrowTradeSourceCommitProtectionPort?: PostwarNarrowTradeCurrentSource['sourceCommitProtectionPort'];
   assertSourceBeforeClaim(observedAtReal: string): Promise<void>;
 } | null {
   const command = input.command,
@@ -229,6 +278,88 @@ export function createManualOfficeCommandComposition(input: {
   const cap = manualOfficeCapability(command);
   if (cap === null) invalid('Manual factory requires a supported family');
   switch (command.commandType) {
+    case INDUSTRY_RUN_SCHEDULE_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.industryRun;
+      if (
+        !isPostwarIndustryRunRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryRunSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (at) =>
+          runtime.assertSourceBeforeClaim(command, at),
+      };
+    }
+    case INDUSTRY_PRODUCTION_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.industry;
+      if (
+        !isPreparedPostwarIndustryRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryProductionCutoffGuard: runtime.cutoffGuard,
+        async assertSourceBeforeClaim() {
+          const actual = await runtime.inspect(command);
+          if (
+            actual.preparedRun !== 'EXACT_GENUINE_CORE_DATA' ||
+            actual.missing.length
+          )
+            throw new PostwarIndustryRuntimeMissing(
+              actual.missing.length
+                ? actual.missing
+                : ['GENUINE_PREPARED_RUN_MISSING'],
+            );
+        },
+      };
+    }
+    case 'CORE_GOODS_TRANSFER_V1': {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.tradeReservation,
+        source = input.readers.tradeSource;
+      if (
+        !isPostwarNarrowTradeReservationRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.workerId !== input.workerId ||
+        runtime.database !== input.database ||
+        !isPostwarNarrowTradeCurrentSource(source, command.worldId)
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        narrowTransferApprovalGuard: runtime.narrowTransferApprovalGuard,
+        postwarNarrowTradeSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        async assertSourceBeforeClaim(observedAtReal) {
+          await input.database.transaction(async (tx) => {
+            await tx.query('set transaction isolation level repeatable read');
+            const authorization = await authorizeManualOfficeCommand({
+              database: input.database,
+              command,
+            });
+            const result = await source.inspectFrom(tx, {
+              command,
+              authorization,
+              observedAtReal,
+            });
+            if (result.kind === 'MISSING')
+              throw new PostwarNarrowTradeCurrentSourceMissing(result);
+            await runtime.narrowTransferApprovalGuard.assertCurrent(tx, {
+              command,
+              observedAtReal,
+            });
+          });
+        },
+      };
+    }
     case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND: {
       validateManualOfficeCommandIntent(command);
       const runtime = input.readers.treasuryFx;
@@ -471,7 +602,10 @@ export function createManualOfficeCommandComposition(input: {
 
 export function isManualOfficeSourceMissing(error: unknown): boolean {
   return (
+    error instanceof PostwarIndustryRuntimeMissing ||
     error instanceof CaptainPoliticalCapitalSourceMissing ||
+    error instanceof PostwarNarrowTradeCurrentSourceMissing ||
+    error instanceof CentralBankOmoOriginalsMissing ||
     error instanceof SocialOperatingStateMissingError
   );
 }

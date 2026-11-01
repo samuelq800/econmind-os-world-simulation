@@ -65,30 +65,43 @@ as zero inventory, or converting a proposed construction/extraction plan into
 an operational asset. Existing raw inventory disclosure remains denied. The
 new consumer does not weaken any of these boundaries.
 
-## Exact Trade gaps
+## Trade: narrow Treasury GCU path and remaining catalog scope
 
-`apps/world-api/src/read-models/trade-contract-read-projection.ts` already
-provides a pure, typed receipt/ledger result adapter. It explicitly declares
-`PREPARATION_ONLY`; its query helper leaves authorization, persistence and
-transport to future owners. Its useful existing inputs are
-`FinalCommittedReceiptEvidence` and `TradeContractLedgerChangeFact`, with exact
-money/quantity strings and receipt/event/posting/source references. It does not
-accept Foundation candidates as committed ledger facts.
+Updated against `ae7c37fca1a76b979192ab356eb257aeb1b3e622` plus the isolated
+2026-11-01 follow-up. This is not adoption or deployment approval.
 
-| Connection segment  | Existing implementation                                     | Missing concrete dependency                                                                                                                                                            |
-| ------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Form to command     | Static catalog fields and local Trade rehearsal             | Reviewed command DTO/family and source-backed parser-to-command mapping for each intended action; `ManualOfficeCommandFamily` currently has no Trade family.                           |
-| Actual terms/source | Pure trade/logistics and international-contract foundations | Adopted operating terms/rights/control/route sources with current custody; proposal JSON and Foundation results are insufficient.                                                      |
-| Execution           | Generic atomic repository exists                            | A fixed Trade factory/sole consumer that obtains real source snapshots and produces authorized events/postings, plus idempotent queue/receipt handling and cooperating source cutoffs. |
-| Read projection     | Pure `TradeContractReadProjectionInput` exists              | An authorized database reader supplying durable matching final receipt and ledger-change facts; an installed query route/DTO and scope-filtered publication contract.                  |
-| Browser result      | Generic FINAL/projection clients exist                      | Exact reviewed action/final lookup identity and a matching Trade projection consumer; browser refresh and independent reload against durable database evidence.                        |
+`ManualOfficeCommandFamily` now includes `CORE_GOODS_TRANSFER_V1` for
+`TRADE_CONTRACTS`. The fixed source reads admitted originals and the complete
+mixed prefix; genuine paired opening inventory/financial data supports actual
+Reserve → automatic Ship → Delivery replay and the existing two-leg GCU
+settlement. The automatic source verifies due/claim/lease/head and the committed
+obligation, without requiring the original user to remain in office. Treasury
+payment requires the actual unique GOV cash account; another domestic owner's
+cash is not government authority. Owner mandate, route, three signatures,
+source custody and Atomic cutoff remain necessary.
 
-The local staged Trade workflow is narrower: host-prepared inventory
-reservation with existing inspect/signature/admission checks. It does not
-perform payment, shipping, delivery or the catalog's import/export/contract
-actions. It cannot be relabeled as the general Trade connector. The shared
-34-dataset reader remains useful public selected-source evidence and never
-becomes the authoritative source of an executed order or contract.
+The follow-up adds a fixed internal Trade source/factory container to the sole
+shared consumer, authenticated standard submit/recovery wiring, and the shipped
+browser's manual Reserve transport. Browser UNKNOWN recovery sends the exact
+original request without requiring a fingerprint or resubmitting. It uses the
+actual bounded page client and keeps current authorized head, source origin,
+queue acknowledgement and durable FINAL separate. An unavailable current
+publication cannot become an action-completion claim. Automatic Ship/Delivery
+are not browser command families.
+
+Evidence is limited: Core and isolated embedded-PostgreSQL tests exercise the
+narrow economic/Atomic path; client tests and real Chromium use explicitly
+synthetic protocol responses, with an actual unconfigured API rejection case.
+Those are not formal Trade source admission, an actual backend browser sale,
+or coverage of the 28-module Trade catalog. The reusable browser probe can read
+an independently running isolated backend without stubbing its responses.
+
+Remaining concrete boundaries include adopted OP mandate/route/cash facts,
+actual shared-consumer authenticated HTTP/browser acceptance, and publication
+of current inventory/settlement and catalog-specific contract results. The
+older staged inspect/sign/bind workflow remains distinct from general import,
+export and international-contract operations. `trade-contract-read-projection`
+preparation results and selected-source datasets are not committed contracts.
 
 ## Verification and next implementation boundary
 
@@ -113,6 +126,9 @@ protected-source accessor for an identified real source deployment, followed by
 the existing publisher's native positive/rollback/revocation read tests. Until
 those interfaces and sources exist, the diagnostic consumer provides executable
 dependency and result checks without pretending to install the source.
-For Trade, first select one existing action's authorized source and settle its
-command/ledger/receipt contract before adding transport or a browser submit
-port. Applicable Constitution and independent-review gates remain in force.
+Trade already has a fixed Reserve HTTP/Recovery transport and sole-consumer
+Reserve/Ship/Delivery factories with the narrow Treasury GCU contract. The
+current follow-up connects genuine Captain/OMO/Rent historical originals to
+complete Trade replay; its targeted evidence does not establish an admitted OP
+mandate, route, production deployment or a real backend browser sale. Applicable
+Constitution and independent-review gates remain in force.

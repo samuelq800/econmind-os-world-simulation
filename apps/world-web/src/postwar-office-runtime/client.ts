@@ -1,4 +1,15 @@
 import {
+  INDUSTRY_RUN_PARAMETERS_DATASET,
+  parseIndustryRunParameterRow,
+} from '@econmind/core/postwar-industry-run-parameters-contract';
+import {
+  POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
+  POSTWAR_INDUSTRY_LABOUR_OPENING_NATURE,
+  POSTWAR_INDUSTRY_LABOUR_CURRENT_NATURE,
+  parsePostwarIndustryLabourCurrentCoverage,
+  parsePostwarIndustryLabourCurrentRow,
+} from '@econmind/core/postwar-industry-labour-current-contract';
+import {
   POSTWAR_CAPTAIN_CURRENT_NATURE,
   POSTWAR_CAPTAIN_CURRENT_DATASET,
   POSTWAR_CAPTAIN_CURRENT_BUCKETS,
@@ -48,7 +59,12 @@ export const officeDatasets: Readonly<Record<string, readonly string[]>> =
       'opening-financial-legs',
       'ledger-balances',
     ],
-    INDUSTRY: ['opening-inventory-entries', 'regional-source-capacity'],
+    INDUSTRY: [
+      INDUSTRY_RUN_PARAMETERS_DATASET,
+      POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
+      'opening-inventory-entries',
+      'regional-source-capacity',
+    ],
     TRADE: ['opening-inventory-entries'],
     CAPTAIN: [
       POSTWAR_CAPTAIN_CURRENT_DATASET,
@@ -471,6 +487,77 @@ export function createPostwarRuntimeClient(
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
         } else if (source.currentCaptainCoverage !== undefined)
           throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (dataset === INDUSTRY_RUN_PARAMETERS_DATASET) {
+          const pointer = row(source.sourcePointer),
+            parameters = rows.map(parseIndustryRunParameterRow);
+          if (
+            c.identity.officeId !== 'INDUSTRY' ||
+            !historical ||
+            !observedHeadMatches(source, authority) ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            pointer?.rowOrigin !==
+              'world_v2.postwar_industry_first_day_source.source_text' ||
+            pointer.rowBinding !== 'sourceRef+sourceRawSha256' ||
+            parameters.some((p) => p.countryId !== c.identity.countryId) ||
+            new Set(parameters.map((p) => p.facilityId)).size !==
+              parameters.length ||
+            source.currentFinancialCoverage !== undefined
+          )
+            throw Error('INDUSTRY_RUN_PARAMETER_SCOPE_MISMATCH');
+        }
+        const currentIndustry =
+          c.identity.officeId === 'INDUSTRY' &&
+          dataset === POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET &&
+          [
+            POSTWAR_INDUSTRY_LABOUR_OPENING_NATURE,
+            POSTWAR_INDUSTRY_LABOUR_CURRENT_NATURE,
+          ].some((nature) => nature === source.dataNature);
+        if (
+          dataset === POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET &&
+          !currentIndustry
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentIndustry) {
+          const coverage = parsePostwarIndustryLabourCurrentCoverage(
+              source.currentIndustryLabourCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            selection = row(pointer?.selection),
+            labour = rows.map(parsePostwarIndustryLabourCurrentRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            source.dataNature !==
+              (coverage.globalWorldVersion === '0'
+                ? POSTWAR_INDUSTRY_LABOUR_OPENING_NATURE
+                : POSTWAR_INDUSTRY_LABOUR_CURRENT_NATURE) ||
+            !pointer ||
+            pointer.path !==
+              '/carrier/socialEmployment/inputs/sourcePositions' ||
+            !canonicalId(pointer.sourceId) ||
+            !hash(pointer.sourcePayloadHash) ||
+            typeof pointer.canonicalSeedSha256 !== 'string' ||
+            !/^[a-f0-9]{64}$/u.test(pointer.canonicalSeedSha256) ||
+            selection?.countryId !== c.identity.countryId ||
+            selection.sourceBucket !== 'INDUSTRY' ||
+            selection.employerRole !== 'OP' ||
+            labour.some(
+              (r) =>
+                r.countryId !== c.identity.countryId ||
+                (coverage.globalWorldVersion === '0' &&
+                  r.currentEmployedCount !== r.openingFilledCount),
+            ) ||
+            new Set(labour.map((r) => r.positionId)).size !== labour.length ||
+            source.currentFinancialCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentIndustryLabourCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const financialOffice = ['FINANCE', 'CENTRAL_BANK'].includes(
           c.identity.officeId,
         );
@@ -490,6 +577,7 @@ export function createPostwarRuntimeClient(
           !opening &&
           !currentSocial &&
           !currentCaptain &&
+          !currentIndustry &&
           !financialCurrent &&
           !historicalFacts
         )

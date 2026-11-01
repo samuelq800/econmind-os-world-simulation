@@ -22,6 +22,7 @@ import {
 } from '@econmind/core';
 import {
   readSocialCanonicalLineageFrom,
+  readPreparedSocialPagedLineage,
   type PostwarSocialReplayLineage,
   type SocialCanonicalLineageView,
 } from './prepared-postwar-social-source.js';
@@ -473,11 +474,13 @@ export function bindSocialEmploymentSourceInputFrom(
     original[0]!.payloadHash !== g.socialSourcePayloadHash
   )
     invalid('original opening source identity required');
-  const prefix = objectHash({
-    worldId: lineage.worldId,
-    seedFingerprint: lineage.seed.fingerprint,
-    transitions: lineage.transitions,
-  });
+  const prefix =
+    readPreparedSocialPagedLineage(lineage)?.metadata.prefixFingerprint ??
+    objectHash({
+      worldId: lineage.worldId,
+      seedFingerprint: lineage.seed.fingerprint,
+      transitions: lineage.transitions,
+    });
   if (h.completePrefixBinding !== prefix)
     invalid('complete actual prefix fingerprint mismatch');
   if (

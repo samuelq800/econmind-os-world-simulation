@@ -23,6 +23,8 @@ import {
   replayPreparedFinanceSocialLedger,
   type PreparedFinanceSocialLedger,
 } from '@econmind/core/finance-social-prepared-ledger';
+import { readPostwarBeneficialHousingRentChildOperatingView } from './postwar-beneficial-housing-rent-child-view.js';
+import type { PreparedBeneficialHousingRentSource } from './postwar-beneficial-housing-rent-source.js';
 import { readPostwarSocialStartupSeedFrom } from './postwar-social-startup-seed.js';
 import { WorldOpeningSeedStore } from './opening-seed-store.js';
 import {
@@ -44,6 +46,12 @@ import {
 } from './validated-canonical-lineage.js';
 import type { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import {
+  readPostwarPagedFinanceSocialReplayFrom,
+  releasePostwarPagedFinanceSocialReplay,
+  type PostwarPagedFinanceSocialReplay,
+} from './postwar-paged-finance-social-replay.js';
+import { readPostwarPagedCurrentProof } from './postwar-paged-current-proof.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 function invalid(reason: string): never {
   throw new DomainError(
@@ -55,7 +63,7 @@ type SourceMetadata = Pick<
   OpeningSource,
   'sourceId' | 'payloadHash' | 'locator'
 >;
-export interface PostwarSocialReplayLineage {
+interface PostwarSocialReplayLineageBase {
   readonly worldId: string;
   readonly seed: Pick<
     OpeningSeed,
@@ -64,8 +72,42 @@ export interface PostwarSocialReplayLineage {
   readonly headWorldVersion: string;
   readonly headEventSequence: string;
   readonly ledgers: Readonly<{ financial: Readonly<FinancialLedgerState> }>;
-  readonly transitions: ValidatedCanonicalLineageData['transitions'];
   readonly mixedPrefixEvidence?: FinanceNativeBudgetMixedPrefixEvidence;
+}
+export type PostwarSocialReplayLineage = PostwarSocialReplayLineageBase &
+  (
+    | {
+        readonly historyMode?: 'BOUNDED_COMPLETE_V1';
+        readonly transitions: ValidatedCanonicalLineageData['transitions'];
+      }
+    | { readonly historyMode: 'PAGED_COMPLETE_V1'; readonly transitions: null }
+  );
+export type PreparedSocialPagedLineageFacts = Pick<
+  PostwarPagedFinanceSocialReplay,
+  'view' | 'metadata' | 'seedPins'
+> & {
+  readonly knownEffectsFingerprint: string;
+};
+const pagedLineages = new WeakMap<
+  object,
+  Readonly<PreparedSocialPagedLineageFacts>
+>();
+/** Private prepared-lineage correspondence, never a caller-provided cursor or
+ * an all-history array. Original/currentness locks remain on the held executor. */
+export function readPreparedSocialPagedLineage(
+  lineage: PostwarSocialReplayLineage,
+): Readonly<PreparedSocialPagedLineageFacts> | undefined {
+  if (lineage.historyMode !== 'PAGED_COMPLETE_V1') return undefined;
+  const value = pagedLineages.get(lineage);
+  if (
+    !value ||
+    !issuedLineages.has(lineage) ||
+    value.view.head.worldVersion !== lineage.headWorldVersion ||
+    value.view.head.eventSequence !== lineage.headEventSequence ||
+    value.view.result.financialState !== lineage.ledgers.financial
+  )
+    invalid('GENUINE_COMPLETE_PAGED_LINEAGE_REQUIRED');
+  return value;
 }
 export interface PostwarSocialPreparationPins {
   readonly worldId: string;
@@ -80,6 +122,9 @@ export interface PostwarSocialSourcePreparationInput {
   /** Server-only actual Core opening DATA, normally shared with FX startup.
    * Never an HTTP DTO or an assertion of admission/readiness. */
   readonly startupSeed?: Readonly<OpeningSeed>;
+  /** Optional genuine full-family child DATA proof. Its parent view retains
+   * the parent's fingerprint; SQL pins and ledgers remain the actual child. */
+  readonly startupBeneficialHousingRentSource?: PreparedBeneficialHousingRentSource;
 }
 declare const preparedSocial: unique symbol;
 export interface PreparedPostwarSocialSource {
@@ -99,8 +144,18 @@ interface Base {
   readonly retainedDocumentBytes: number;
 }
 interface Slot {
+  paged?: true;
   base?: Base;
   inflight?: Promise<void>;
+}
+/** Fixed server composition selects complete pages on an issued preparation;
+ * it cannot prepare DATA, admit a source or authorize an action. */
+export function requirePreparedPostwarSocialPagedReplay(
+  preparation: PreparedPostwarSocialSource,
+): void {
+  const slot = slots.get(preparation);
+  if (!slot) invalid('GENUINE_PREPARATION_REQUIRED');
+  slot.paged = true;
 }
 const slots = new WeakMap<PreparedPostwarSocialSource, Slot>();
 const issuedLineages = new WeakMap<object, Base>();
@@ -137,6 +192,8 @@ export async function preparePostwarSocialSource(input: {
   if (!slot) invalid('GENUINE_PREPARATION_REQUIRED');
   const c = input.configuration,
     pins = Object.freeze({ ...c.admittedWorldPins });
+  if (c.startupBeneficialHousingRentSource && !c.startupSeed)
+    invalid('BENEFICIAL_CHILD_REQUIRES_EXPLICIT_STARTUP_SEED');
   if (
     !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(c.observedAtReal) ||
     new Date(c.observedAtReal).toISOString() !== c.observedAtReal
@@ -216,7 +273,12 @@ export async function preparePostwarSocialSource(input: {
           seed.replayBinding.modelVersion !== c.modelVersion
         )
           invalid('ACTUAL_IMMUTABLE_SEED_PINS_DIFFER');
-        const view = readPostwarOperatingGenesisFromSeed(seed);
+        const view = c.startupBeneficialHousingRentSource
+          ? readPostwarBeneficialHousingRentChildOperatingView({
+              seed,
+              preparation: c.startupBeneficialHousingRentSource,
+            }).parentView
+          : readPostwarOperatingGenesisFromSeed(seed);
         if (!view.socialEmployment) invalid('ACTUAL_FULL_E03_REQUIRED');
         const document = validatePostwarSocialEmploymentStateDocument(
           view.socialEmployment,
@@ -393,6 +455,47 @@ export async function readPreparedPostwarSocialLineageFrom(input: {
     registration.rows[0],
     input.countryId,
   );
+  if (slots.get(input.preparation)?.paged) {
+    const paged = await readPostwarPagedFinanceSocialReplayFrom({
+      executor: input.executor,
+      baseline: readPreparedPostwarSocialFinancialReplayBase(input.preparation),
+      worldId: input.worldId,
+      hostCountryId: input.countryId,
+      officeId: 'SOCIAL',
+      seedId: b.pins.seedRef,
+      seedFingerprint: b.pins.contentHash,
+      admissionRef: b.pins.admissionRef,
+    });
+    try {
+      if (!paged.view.complete || !paged.view.result.financialState)
+        invalid('COMPLETE_PAGED_FINANCIAL_LINEAGE_REQUIRED');
+      const lineage: PostwarSocialReplayLineage = Object.freeze({
+        historyMode: 'PAGED_COMPLETE_V1',
+        worldId: input.worldId,
+        seed: b.seed,
+        headWorldVersion: paged.view.head.worldVersion,
+        headEventSequence: paged.view.head.eventSequence,
+        ledgers: Object.freeze({ financial: paged.view.result.financialState }),
+        mixedPrefixEvidence: paged.view.lastPage.evidence,
+        transitions: null,
+      });
+      issuedLineages.set(lineage, b);
+      pagedLineages.set(
+        lineage,
+        Object.freeze({
+          view: paged.view,
+          metadata: paged.metadata,
+          seedPins: paged.seedPins,
+          knownEffectsFingerprint: readPostwarPagedCurrentProof(
+            paged.currentProof,
+          ).coverage.knownEffectsFingerprint,
+        }),
+      );
+      return lineage;
+    } finally {
+      releasePostwarPagedFinanceSocialReplay(paged);
+    }
+  }
   const prefix = await readBoundedPostwarSocialFramesFrom(input);
   const fxReplay = prefix.frames.some(
     (f) =>

@@ -39,6 +39,7 @@ import {
   createPostgresSocialOperatingOriginalReader,
 } from './postgres-social-operating-custody.js';
 import { replayPostwarSocialEmploymentLineage } from './postwar-social-employment-lineage.js';
+import { readPreparedSocialPagedLineage } from './prepared-postwar-social-source.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import {
@@ -459,11 +460,17 @@ export function createPostwarSocialPositionRuntime(configuration: {
         'opening wage/funding/service source expired after its initial simulation day',
       );
     if (
-      lineage.transitions.some((t) =>
-        t.transition.events.some(
-          (e) => e.simTime.ticks > command.simTime.ticks,
-        ),
-      )
+      lineage.transitions === null
+        ? command.simTime.ticks <
+          BigInt(
+            readPreparedSocialPagedLineage(lineage)!.metadata
+              .maxCommandSimTimeTicks,
+          )
+        : lineage.transitions.some((t) =>
+            t.transition.events.some(
+              (e) => e.simTime.ticks > command.simTime.ticks,
+            ),
+          )
     )
       invalid('command precedes actual committed prefix');
     const intent = parseSocialPositionOfferCreateIntent(
@@ -588,7 +595,9 @@ export function createPostwarSocialPositionRuntime(configuration: {
       admissionRef: String(registration.admission_ref),
       sourceId: source.source.sourceId,
       sourcePayloadHash: source.source.payloadHash,
-      completePrefixFingerprint: hash(lineage.transitions),
+      completePrefixFingerprint:
+        readPreparedSocialPagedLineage(lineage)?.metadata.prefixFingerprint ??
+        hash(lineage.transitions),
       lifecycleStateHash: hash(country.lifecycle),
       readFactsHash: hash(facts),
       socialAuthorization: {

@@ -9,8 +9,11 @@ import {
 } from '@econmind/core';
 import {
   POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
+  POSTWAR_FINANCIAL_PAGED_COVERAGE_SCHEMA,
+  POSTWAR_PAGED_CURRENT_REDUCER,
   POSTWAR_FINANCIAL_MIXED_REDUCER,
   POSTWAR_EXTENDED_CURRENT_REDUCER,
+  POSTWAR_RENT_CURRENT_REDUCER,
   parsePostwarFinancialMixedCoverage,
   parsePostwarMixedFinancialBalanceRow,
   parsePostwarMixedTreasuryCapacityRow,
@@ -28,6 +31,8 @@ const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
 export const POSTWAR_MIXED_FINANCIAL_PUBLISH_QUERY =
   'select * from world_v2.publish_postwar_mixed_financial_current($1,$2,$3)';
+export const POSTWAR_PAGED_MIXED_FINANCIAL_PUBLISH_QUERY =
+  'select * from world_v2.publish_postwar_paged_financial_current($1,$2,$3)';
 export interface PostwarMixedFinancialCurrentRows {
   readonly FINANCE: Readonly<{
     'ledger-balances': readonly PostwarMixedFinancialBalanceRow[];
@@ -47,6 +52,8 @@ export function derivePostwarMixedFinancialCurrentFrom(
 }> {
   const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token),
     country = f.countryId;
+  if ((f.frames === null) !== 'pageProof' in f.coverage)
+    throw Error('GENUINE_COMPLETE_HISTORY_PROOF_REQUIRED');
   if (
     f.financial.worldId !== f.head.worldId ||
     f.financial.worldVersion !== f.head.worldVersion
@@ -213,17 +220,29 @@ export function derivePostwarMixedFinancialCurrentFrom(
   });
   const coverage = parsePostwarFinancialMixedCoverage(
     {
-      schemaVersion: POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
-      reducerVersion: f.frames.some((frame) =>
-        [
-          'CORE_CENTRAL_BANK_OMO_V1',
-          'CORE_GOODS_TRANSFER_V1',
-          'CORE_GOODS_SHIPMENT_V1',
-          'CORE_GOODS_DELIVERY_V1',
-        ].includes(frame.command.commandType),
-      )
-        ? POSTWAR_EXTENDED_CURRENT_REDUCER
-        : POSTWAR_FINANCIAL_MIXED_REDUCER,
+      schemaVersion:
+        f.frames === null
+          ? POSTWAR_FINANCIAL_PAGED_COVERAGE_SCHEMA
+          : POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
+      reducerVersion:
+        f.frames === null
+          ? POSTWAR_PAGED_CURRENT_REDUCER
+          : f.frames.some(
+                (frame) =>
+                  frame.command.commandType ===
+                  'POSTWAR_BENEFICIAL_HOUSING_RENT_V1',
+              )
+            ? POSTWAR_RENT_CURRENT_REDUCER
+            : f.frames.some((frame) =>
+                  [
+                    'CORE_CENTRAL_BANK_OMO_V1',
+                    'CORE_GOODS_TRANSFER_V1',
+                    'CORE_GOODS_SHIPMENT_V1',
+                    'CORE_GOODS_DELIVERY_V1',
+                  ].includes(frame.command.commandType),
+                )
+              ? POSTWAR_EXTENDED_CURRENT_REDUCER
+              : POSTWAR_FINANCIAL_MIXED_REDUCER,
       countryId: country,
       coverageRef:
         'MIXED_FINANCIAL_' +
@@ -264,8 +283,15 @@ export async function publishPostwarMixedFinancialCurrentFrom(input: {
     const facts = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token),
       derived = derivePostwarMixedFinancialCurrentFrom(tx, token);
     return input.publicationDatabase.transaction(async (publication) => {
+      const paged = 'pageProof' in facts.coverage;
+      if (paged)
+        await publication.query(
+          'set transaction isolation level repeatable read',
+        );
       const result = await publication.query(
-        POSTWAR_MIXED_FINANCIAL_PUBLISH_QUERY,
+        paged
+          ? POSTWAR_PAGED_MIXED_FINANCIAL_PUBLISH_QUERY
+          : POSTWAR_MIXED_FINANCIAL_PUBLISH_QUERY,
         [facts.head.worldId, facts.countryId, derived.assertion],
       );
       if (

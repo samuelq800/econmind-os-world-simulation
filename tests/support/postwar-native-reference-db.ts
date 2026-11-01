@@ -13,6 +13,11 @@ import {
   countryId,
   officeId,
 } from '@econmind/core';
+import { readPostwarBeneficialHousingRentChildOperatingView } from '../../apps/world-worker/src/persistence/postwar-beneficial-housing-rent-child-view.js';
+import {
+  consumeBeneficialHousingRentSource,
+  type PreparedBeneficialHousingRentSource,
+} from '../../apps/world-worker/src/persistence/postwar-beneficial-housing-rent-source.js';
 import { readPostwarOperatingGenesisFromSeed } from '../../apps/world-worker/src/preparation/postwar-operating-genesis-adoption.js';
 import { WorldOpeningSeedStore } from '../../apps/world-worker/src/persistence/opening-seed-store.js';
 import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
@@ -235,8 +240,13 @@ export async function createPostwarNativeReferenceDatabase(
     repositoryRoot: string;
     evidenceDirectory: string;
     seedFile: string;
+    /** Fixed full-family DATA proof only, never custom validation/admission. */
+    beneficialRentSource?: PreparedBeneficialHousingRentSource;
   }>,
 ): Promise<PostwarNativeReferenceMarker> {
+  const beneficial = input.beneficialRentSource
+    ? consumeBeneficialHousingRentSource(input.beneficialRentSource)
+    : undefined;
   if (!input.evidenceDirectory.startsWith('/workspace/.cloud-setup/evidence/'))
     throw Error('REFERENCE_EVIDENCE_ROOT_DENIED');
   const existingPath = path.join(input.evidenceDirectory, 'reference-db.json');
@@ -245,6 +255,13 @@ export async function createPostwarNativeReferenceDatabase(
     const existing = await loadPostwarNativeReferenceMarker(existingPath);
     if (!existing.baselineSealed || existing.seedFile !== input.seedFile)
       throw Error('REFERENCE_EXISTING_INSTANCE_REQUIRES_REPAIR_NOT_REBUILD');
+    if (
+      beneficial &&
+      (existing.worldId !== beneficial.worldId ||
+        existing.seedId !== beneficial.seedId ||
+        existing.seedFingerprint !== beneficial.seedFingerprint)
+    )
+      throw Error('REFERENCE_EXISTING_EXACT_BENEFICIAL_CHILD_DIFFERS');
     const check = pool(existing, 'postgres');
     try {
       const state = await check.query(
@@ -530,7 +547,22 @@ export async function createPostwarNativeReferenceDatabase(
       await phase('CURRENT_CORE_PARSE_AND_ACTUAL_OPERATING_SOURCE_VALIDATION');
       const sourceFile = await readFile(input.seedFile, 'utf8');
       const seed = parseOpeningSeed(JSON.parse(sourceFile), hash);
-      const operating = readPostwarOperatingGenesisFromSeed(seed);
+      const child = input.beneficialRentSource
+        ? readPostwarBeneficialHousingRentChildOperatingView({
+            seed,
+            preparation: input.beneficialRentSource,
+          })
+        : null;
+      const operating = child
+        ? child.parentView
+        : readPostwarOperatingGenesisFromSeed(seed);
+      if (child) {
+        verification.beneficialChildCoreProofActuallyValidated = true;
+        verification.beneficialParentFingerprint =
+          child.binding.parentFingerprint;
+        verification.beneficialChildFingerprint =
+          child.binding.childFingerprint;
+      }
       if (
         operating.facts.regions.length !== 122 ||
         operating.socialEmployment?.countries.length !== 70

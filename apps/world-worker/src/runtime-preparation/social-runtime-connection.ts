@@ -9,6 +9,7 @@ import {
   retirePreparedPostwarSocialSource,
   type PreparedPostwarSocialSource,
   preparePostwarSocialSource,
+  requirePreparedPostwarSocialPagedReplay,
   type PostwarSocialSourcePreparationInput,
 } from '../persistence/prepared-postwar-social-source.js';
 export type { PostwarSocialSourcePreparationInput } from '../persistence/prepared-postwar-social-source.js';
@@ -301,6 +302,17 @@ export function readPostwarSocialRuntimeFinancialReplayBase(
   if (!binding || binding.world !== world)
     throw Error('GENUINE_SOCIAL_FINANCIAL_REPLAY_CONNECTION_REQUIRED');
   return readPreparedPostwarSocialFinancialReplayBase(binding.source);
+}
+/** Fixed shared-host profile. No source preparation/readiness or authority is
+ * manufactured, and copied/foreign/retired connections cannot select it. */
+export function requirePostwarSocialRuntimePagedReplay(
+  value: Readonly<PostwarSocialRuntimeConnection>,
+  world: string,
+): void {
+  const binding = issuedConnections.get(value);
+  if (!binding || binding.world !== world)
+    throw Error('GENUINE_SOCIAL_PAGED_REPLAY_CONNECTION_REQUIRED');
+  requirePreparedPostwarSocialPagedReplay(binding.source);
 }
 
 /** Server-only transport ownership metadata, not credentials or source facts. */

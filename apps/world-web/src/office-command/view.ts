@@ -1,4 +1,9 @@
 import {
+  INDUSTRY_RUN_PARAMETERS_DATASET,
+  parseIndustryRunParameterRow,
+} from '@econmind/core/postwar-industry-run-parameters-contract';
+import { renderIndustryRunForm } from '../industry-run/form.js';
+import {
   createOfficeCommandController,
   type OfficeCommandBinding,
 } from './controller.js';
@@ -119,7 +124,10 @@ export function installOfficeCommand(
       : undefined;
     clearPrivateContent(dialog);
     dialog.append(
-      node('h2', 'Manual Office intent — Captain / Central Bank / Social'),
+      node(
+        'h2',
+        'Manual Office intent — Captain / Central Bank / Finance / Industry / Trade / Social',
+      ),
     );
     const status = node(
       'p',
@@ -137,18 +145,33 @@ export function installOfficeCommand(
     dialog.append(
       node(
         'p',
-        'Only a current server-authorized seat can submit. Industry / Finance / Trade are not supported by this command port. Queue acknowledgement, including FINALIZED, is not an economic commit.',
+        'Only a current server-authorized seat can submit an installed manual family. Industry supports a source-bound RUN plan; an acknowledgement does not establish work, wages or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
       ),
     );
+    if (currentView()?.role === 'industry') {
+      const rows =
+        state.runParametersPage?.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
+          ? state.runParametersPage.rows.map(parseIndustryRunParameterRow)
+          : [];
+      dialog.append(
+        renderIndustryRunForm(
+          document,
+          rows,
+          state.canStage,
+          (draft) =>
+            active(owner, lifetime, dialog!) && owner.stageIndustryRun(draft),
+        ),
+      );
+    }
     const draft = document.createElement('textarea');
     draft.setAttribute('aria-label', 'Original manual Office request JSON');
     draft.dataset.officeCommandDraft = '';
     draft.value = state.intent ? JSON.stringify(state.intent, null, 2) : '';
-    draft.disabled = !state.canStage;
+    draft.disabled = !state.canStage && !state.canRestoreOriginal;
     dialog.append(
       node(
         'p',
-        'Read the current authorized projection, then paste an explicit original public DTO: requestId, world/country/office, command family, commandId, idempotencyKey, expectedWorldVersion and payload. No IDs or economic terms are generated here.',
+        'For a new command, read the current projection and load an explicit public request. To recover after a page reload, paste the exact submitted request and choose recovery only; its old head is retained and it cannot be submitted again. No IDs or economic terms are generated here.',
       ),
       draft,
     );
@@ -160,6 +183,18 @@ export function installOfficeCommand(
           owner.stage(null);
         }
       }),
+      button(
+        'Restore submitted request for recovery only',
+        'restore',
+        state.canRestoreOriginal,
+        () => {
+          try {
+            owner.restoreOriginalForRecovery(JSON.parse(draft.value));
+          } catch {
+            owner.restoreOriginalForRecovery(null);
+          }
+        },
+      ),
     );
     if (state.intent)
       dialog.append(node('pre', JSON.stringify(state.intent, null, 2)));
@@ -174,27 +209,37 @@ export function installOfficeCommand(
       dialog.append(
         node(
           'p',
-          'Write outcome unknown. Do not resubmit. Only recover by the original command/key/fingerprint from the authorized workflow.',
+          state.status === 'UNKNOWN'
+            ? 'Write outcome unknown. Do not resubmit. Recover with the exact original request; a fingerprint is not required.'
+            : 'The command is registered. Read its original server status; this does not replay the command.',
         ),
-      );
-      const fingerprint = document.createElement('input');
-      fingerprint.setAttribute('aria-label', 'Original command fingerprint');
-      dialog.append(
-        fingerprint,
         button(
-          'Bind original FINAL reference — no replay',
+          'Recover original server status — no replay',
           'recover',
           state.canRecover,
-          () => {
-            if (state.intent)
-              owner.recoverLookup({
-                commandId: state.intent.request.commandId,
-                idempotencyKey: state.intent.request.idempotencyKey,
-                commandFingerprint: fingerprint.value,
-              });
-          },
+          () => owner.recoverOriginal(),
         ),
       );
+    }
+    if (state.runtimePage) {
+      const page = state.runtimePage;
+      dialog.append(
+        node(
+          'p',
+          `Verified authorized World head ${page.authority.readback.worldVersion} · ${page.dataset} · ${page.status} · ${page.page.returned} rows`,
+        ),
+        node(
+          'p',
+          `Source ${page.source.sourceVersion} · Origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)} · ${String(page.source.dataNature)}. Source rows are not a grant or a source preflight.`,
+        ),
+      );
+      if (state.receipt)
+        dialog.append(
+          node(
+            'p',
+            'Durable receipt and authorized page are separate evidence. No action completion is inferred without a matching current result.',
+          ),
+        );
     }
     if (state.receipt)
       dialog.append(
@@ -216,7 +261,7 @@ export function installOfficeCommand(
             'Original command DecisionResult is not correlated or the receipt did not commit. No decision completion claimed.',
           ),
         );
-    } else if (state.receipt)
+    } else if (state.receipt && !state.runtimePage)
       dialog.append(
         node(
           'p',

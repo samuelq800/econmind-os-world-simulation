@@ -79,6 +79,34 @@
     "./production-water-consumption": {
       "types": "./dist/inventory/production-water-consumption.d.ts",
       "default": "./dist/inventory/production-water-consumption.js"
+    },
+    "./authenticated-command-recovery-contract": {
+      "types": "./dist/commands/authenticated-command-recovery-contract.d.ts",
+      "default": "./dist/commands/authenticated-command-recovery-contract.js"
+    },
+    "./postwar-industry-labour-current-contract": {
+      "types": "./dist/read-models/postwar-industry-labour-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-labour-current-contract.js"
+    },
+    "./finance-social-replay-continuation": {
+      "types": "./dist/commands/finance-social-replay-continuation.d.ts",
+      "default": "./dist/commands/finance-social-replay-continuation.js"
+    },
+    "./industry-first-day-work": {
+      "types": "./dist/industry/industry-first-day-work.d.ts",
+      "default": "./dist/industry/industry-first-day-work.js"
+    },
+    "./industry-operating-wage-payment": {
+      "types": "./dist/commands/industry-operating-wage-payment.d.ts",
+      "default": "./dist/commands/industry-operating-wage-payment.js"
+    },
+    "./postwar-industry-run-parameters-contract": {
+      "types": "./dist/read-models/postwar-industry-run-parameters-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-run-parameters-contract.js"
+    },
+    "./industry-paid-work-production": {
+      "types": "./dist/commands/industry-paid-work-production.d.ts",
+      "default": "./dist/commands/industry-paid-work-production.js"
     }
   },
   "scripts": {

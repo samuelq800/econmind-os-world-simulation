@@ -62,6 +62,7 @@ import {
   withSocialCanonicalLineageFrom,
   socialOriginalAt,
   socialDocumentForLineage,
+  readPreparedSocialPagedLineage,
   type PreparedPostwarSocialSource,
   type SocialCanonicalLineageView,
 } from './prepared-postwar-social-source.js';
@@ -381,11 +382,8 @@ function assertOriginalOrigin(
     const effective = original.effectivity as Row;
     if (
       canonicalSerialize(effective.fromHead) !==
-        canonicalSerialize({
-          worldVersion: event.worldVersion,
-          eventSequence: event.sequence,
-        }) ||
-      effective.fromSimTime !== event.simTime.toCanonicalValue()
+        canonicalSerialize(event.fromHead) ||
+      effective.fromSimTime !== event.fromSimTime
     )
       invalid(
         'committed offer effectivity precedes or differs from its real publication',
@@ -918,6 +916,8 @@ function validateCapturedSocialOriginalsFrom(
  * Admit only the exact single-Event correspondence proved by the real constructor.
  * Scan the whole prefix before any reducer runs, including foreign-country events. */
 function productionEventIds(lineage: BoundSocialSourceData['lineage']) {
+  if (lineage.transitions === null)
+    invalid('legacy production scan requires complete bounded frames');
   const ids = new Set(
     lineage.transitions.flatMap(({ transition }) =>
       transition.events
@@ -956,20 +956,26 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
   readFactsHash: CanonicalSha256;
 }> {
   const { data, lineage, command } = verified.bound;
-  const hasPositionEvents = lineage.transitions.some((entry) =>
-    entry.transition.events.some(
-      (event) => event.eventType === SOCIAL_POSITION_OFFER_CREATED_EVENT,
-    ),
-  );
+  const paged = readPreparedSocialPagedLineage(lineage);
+  const hasPositionEvents = paged
+    ? paged.view.result.socialCountries.some((c) => c.offerOrigins.length > 0)
+    : lineage.transitions!.some((entry) =>
+        entry.transition.events.some(
+          (event) => event.eventType === SOCIAL_POSITION_OFFER_CREATED_EVENT,
+        ),
+      );
   if (
     data.historyCoverage.taxonomyRevision !==
-    (hasPositionEvents ? 'SOCIAL_SOURCE_EFFECTS_V2' : TAXONOMY)
+    (paged
+      ? 'SOCIAL_SOURCE_EFFECTS_PAGED_V3'
+      : hasPositionEvents
+        ? 'SOCIAL_SOURCE_EFFECTS_V2'
+        : TAXONOMY)
   )
     invalid('unsupported domain effect taxonomy');
-  const productionIds = productionEventIds(lineage);
-  const currentDocument = hasPositionEvents
-    ? socialDocumentForLineage(lineage)
-    : undefined;
+  const productionIds = paged ? new Set<string>() : productionEventIds(lineage);
+  const currentDocument =
+    paged || hasPositionEvents ? socialDocumentForLineage(lineage) : undefined;
   if (hasPositionEvents && !currentDocument)
     invalid(
       'actual admitted full E03 is required for position lifecycle replay',
@@ -1050,58 +1056,65 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
           // every country's Social group. Validate each historical PLAN against
           // its own immutable source body and its actual Core predecessor,
           // then crop the fully replayed state to this country's source scope.
-          for (const entry of lineage.transitions) {
-            for (const event of entry.transition.events) {
-              if (event.eventType !== SOCIAL_SERVICE_PLAN_EVENT) continue;
-              const payload = JSON.parse(event.canonicalPayload) as Row;
-              const historical = parseCanonicalCommand(payload.command, digest);
-              const parsed = parseSocialEmploymentServiceCommand(
-                historical,
-                digest,
-              );
-              const checkpoint = currentLifecycle.checkpoints.find(
-                (c) => c.eventId === event.eventId,
-              );
-              const country = currentDocument.countries.find(
-                (c) => c.countryId === entry.command.countryId,
-              );
-              if (
-                parsed.kind !== 'PLAN' ||
-                !checkpoint ||
-                !country ||
-                checkpoint.countryId !== country.countryId
-              )
-                invalid(
-                  'actual complete-prefix historical PLAN checkpoint required',
+          // Every paged PLAN has already passed this same physical-original
+          // assertion at its exact Core predecessor on the page that held it.
+          // Replaying only the last page here would omit earlier validation.
+          if (lineage.transitions !== null)
+            for (const entry of lineage.transitions) {
+              for (const event of entry.transition.events) {
+                if (event.eventType !== SOCIAL_SERVICE_PLAN_EVENT) continue;
+                const payload = JSON.parse(event.canonicalPayload) as Row;
+                const historical = parseCanonicalCommand(
+                  payload.command,
+                  digest,
                 );
-              const bodies = country.physicalOriginalBodies.filter(
-                (body) =>
-                  body.locationId === parsed.intent.locationId &&
-                  body.dayIndex === parsed.intent.dueDayIndex &&
-                  body.pools.some(
-                    (pool) =>
-                      pool.poolId === parsed.intent.servicePoolId &&
-                      pool.skill === parsed.intent.skill,
-                  ),
-              );
-              if (bodies.length !== 1)
-                missing(
-                  'historical PLAN actual country physical body absent/ambiguous',
+                const parsed = parseSocialEmploymentServiceCommand(
+                  historical,
+                  digest,
                 );
-              assertSocialPhysicalAttemptEnvelope({
-                command: historical,
-                state: checkpoint.beforeEmployment,
-                readFacts:
-                  payload.readFacts as unknown as SocialEmploymentReadFacts,
-                sourceEnvelope: {
-                  ...bodies[0]!,
-                  headWorldVersion: entry.transition.worldVersionBefore,
-                  headEventSequence: (BigInt(event.sequence) - 1n).toString(),
-                },
-                sha256Hex: digest,
-              });
+                const checkpoint = currentLifecycle.checkpoints?.find(
+                  (c) => c.eventId === event.eventId,
+                );
+                const country = currentDocument.countries.find(
+                  (c) => c.countryId === entry.command.countryId,
+                );
+                if (
+                  parsed.kind !== 'PLAN' ||
+                  !checkpoint ||
+                  !country ||
+                  checkpoint.countryId !== country.countryId
+                )
+                  invalid(
+                    'actual complete-prefix historical PLAN checkpoint required',
+                  );
+                const bodies = country.physicalOriginalBodies.filter(
+                  (body) =>
+                    body.locationId === parsed.intent.locationId &&
+                    body.dayIndex === parsed.intent.dueDayIndex &&
+                    body.pools.some(
+                      (pool) =>
+                        pool.poolId === parsed.intent.servicePoolId &&
+                        pool.skill === parsed.intent.skill,
+                    ),
+                );
+                if (bodies.length !== 1)
+                  missing(
+                    'historical PLAN actual country physical body absent/ambiguous',
+                  );
+                assertSocialPhysicalAttemptEnvelope({
+                  command: historical,
+                  state: checkpoint.beforeEmployment,
+                  readFacts:
+                    payload.readFacts as unknown as SocialEmploymentReadFacts,
+                  sourceEnvelope: {
+                    ...bodies[0]!,
+                    headWorldVersion: entry.transition.worldVersionBefore,
+                    headEventSequence: (BigInt(event.sequence) - 1n).toString(),
+                  },
+                  sha256Hex: digest,
+                });
+              }
             }
-          }
           const country = currentLifecycle.countries.find(
             (c) => c.countryId === data.scope.countryId,
           );
@@ -1126,7 +1139,10 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
           seed,
           binding,
           registry: createReplayReducerRegistry({ binding, reducers }),
-          transitions: lineage.transitions.map((v) => v.transition),
+          transitions:
+            lineage.transitions === null
+              ? invalid('paged replay requires actual current country state')
+              : lineage.transitions.map((v) => v.transition),
           sha256Hex: digest,
         });
   if (
@@ -1287,7 +1303,12 @@ function governingBindingData(
       openingVersion: '0',
       completePrefixFingerprint:
         bound.data.historyCoverage.completePrefixBinding,
-      receiptSetFingerprint: hash(lineage.transitions.map((v) => v.receipt)),
+      // PAGED_V3 binds the complete ordered receipt-containing effects chain;
+      // legacy V1/V2 keeps its original full-array receipt-set fingerprint.
+      receiptSetFingerprint:
+        lineage.transitions === null
+          ? readPreparedSocialPagedLineage(lineage)!.knownEffectsFingerprint
+          : hash(lineage.transitions.map((v) => v.receipt)),
       taxonomyRevision: bound.data.historyCoverage.taxonomyRevision,
     },
     sourceAuthorityBinding: {
@@ -1485,11 +1506,17 @@ export function createSocialEmploymentRuntimeSnapshotReader(
         )
           invalid('actual current lineage differs from supplied head');
         if (
-          lineage.transitions.some((entry) =>
-            entry.transition.events.some(
-              (event) => event.simTime.ticks > command.simTime.ticks,
-            ),
-          )
+          lineage.transitions === null
+            ? command.simTime.ticks <
+              BigInt(
+                readPreparedSocialPagedLineage(lineage)!.metadata
+                  .maxCommandSimTimeTicks,
+              )
+            : lineage.transitions.some((entry) =>
+                entry.transition.events.some(
+                  (event) => event.simTime.ticks > command.simTime.ticks,
+                ),
+              )
         )
           invalid('command SimTime precedes the actual committed prefix');
         const request = snapshotRequest(command, lineage);

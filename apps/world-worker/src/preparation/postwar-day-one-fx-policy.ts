@@ -1,3 +1,5 @@
+import { restoreVerifiedBeneficialHousingRentParent } from '../persistence/postwar-beneficial-housing-rent-child-view.js';
+import type { PreparedBeneficialHousingRentSource } from '../persistence/postwar-beneficial-housing-rent-source.js';
 /** Approved generated first-day bank quote policy. Quotes grant no funds,
  * currentness, OP mandate, SQL role, activation or production admission. */
 import { createHash } from 'node:crypto';
@@ -34,6 +36,7 @@ export interface PostwarDayOneFxPolicy {
  * contract. Planning trade-price/freight files never enter this producer. */
 export function createPostwarDayOneFxPolicy(input: {
   readonly seed: OpeningSeed;
+  readonly startupBeneficialHousingRentSource?: PreparedBeneficialHousingRentSource;
   readonly policyBytes: string;
   readonly userReceiptBytes: string;
 }): PostwarDayOneFxPolicy {
@@ -51,7 +54,13 @@ export function createPostwarDayOneFxPolicy(input: {
     user.authority !== 'EXPLICIT_USER_ANSWER_IN_THIS_TASK'
   )
     throw Error('POSTWAR_DAY_ONE_FX_ACTUAL_USER_ADOPTION_REQUIRED');
-  const family = verifyPostwarGcuBankOpeningSeed(input.seed),
+  const parentSeed = input.startupBeneficialHousingRentSource
+    ? restoreVerifiedBeneficialHousingRentParent({
+        seed: input.seed,
+        preparation: input.startupBeneficialHousingRentSource,
+      })
+    : input.seed;
+  const family = verifyPostwarGcuBankOpeningSeed(parentSeed),
     originals = readPostwarFinancialOfficeOriginalsFromSeed(family.seed);
   const financial = family.seed.sources.find(
     (s) => s.sourceId === originals.financialSourceId,
@@ -89,7 +98,7 @@ export function createPostwarDayOneFxPolicy(input: {
         schemaVersion: 'postwar-day-one-fx-quote-v1',
         policyVersion: POSTWAR_DAY_ONE_FX_POLICY_VERSION,
         worldId: family.seed.worldId,
-        seedFingerprint: family.seed.fingerprint,
+        seedFingerprint: input.seed.fingerprint,
         countryId: country.countryId,
         localCurrency: country.localCurrency,
         localCurrencyPerGcu: country.openingFx.localCurrencyPerGcu,
@@ -123,7 +132,7 @@ export function createPostwarDayOneFxPolicy(input: {
     provenanceKind: 'GENERATED_POLICY' as const,
     status: 'PROJECT_POLICY_ADOPTED_NOT_RUNTIME_ADMITTED' as const,
     worldId: family.seed.worldId,
-    seedFingerprint: family.seed.fingerprint,
+    seedFingerprint: input.seed.fingerprint,
     quotes: Object.freeze(quotes),
     policyBytes: input.policyBytes,
     userReceiptBytes: input.userReceiptBytes,
@@ -135,10 +144,17 @@ export function createPostwarDayOneFxPolicy(input: {
 }
 export function verifyPostwarDayOneFxPolicy(input: {
   readonly seed: OpeningSeed;
+  readonly startupBeneficialHousingRentSource?: PreparedBeneficialHousingRentSource;
   readonly candidate: PostwarDayOneFxPolicy;
 }): PostwarDayOneFxPolicy {
   const expected = createPostwarDayOneFxPolicy({
     seed: input.seed,
+    ...(input.startupBeneficialHousingRentSource
+      ? {
+          startupBeneficialHousingRentSource:
+            input.startupBeneficialHousingRentSource,
+        }
+      : {}),
     policyBytes: input.candidate.policyBytes,
     userReceiptBytes: input.candidate.userReceiptBytes,
   });

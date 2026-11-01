@@ -1,6 +1,20 @@
-import { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
-export { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
+import {
+  POSTWAR_EXTENDED_CURRENT_REDUCER,
+  POSTWAR_RENT_CURRENT_REDUCER,
+  POSTWAR_PAGED_CURRENT_REDUCER,
+  parsePostwarCurrentPageProof,
+  type PostwarCurrentPageProof,
+} from './postwar-extended-current-reducer.js';
+export {
+  POSTWAR_EXTENDED_CURRENT_REDUCER,
+  POSTWAR_RENT_CURRENT_REDUCER,
+  POSTWAR_PAGED_CURRENT_REDUCER,
+  parsePostwarCurrentPageProof,
+  type PostwarCurrentPageProof,
+} from './postwar-extended-current-reducer.js';
 /** Browser-safe DATA wire. A validated shape is never source/actor authority. */
+export const POSTWAR_SOCIAL_PAGED_COVERAGE_SCHEMA =
+  'postwar-social-current-page-chain-coverage-v4' as const;
 export const POSTWAR_SOCIAL_MIXED_CURRENT_NATURE =
   'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX' as const;
 export const POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA =
@@ -8,10 +22,15 @@ export const POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA =
 export const POSTWAR_SOCIAL_MIXED_REDUCER =
   'POSTWAR_SOCIAL_FINANCE_FX_COMPLETE_PREFIX_V3' as const;
 export interface PostwarSocialMixedCoverage {
-  readonly schemaVersion: typeof POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA;
+  readonly schemaVersion:
+    | typeof POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA
+    | typeof POSTWAR_SOCIAL_PAGED_COVERAGE_SCHEMA;
   readonly reducerVersion:
     | typeof POSTWAR_SOCIAL_MIXED_REDUCER
-    | typeof POSTWAR_EXTENDED_CURRENT_REDUCER;
+    | typeof POSTWAR_EXTENDED_CURRENT_REDUCER
+    | typeof POSTWAR_RENT_CURRENT_REDUCER
+    | typeof POSTWAR_PAGED_CURRENT_REDUCER;
+  readonly pageProof?: Readonly<PostwarCurrentPageProof>;
   readonly countryId: string;
   readonly coverageRef: string;
   readonly globalWorldVersion: string;
@@ -65,6 +84,7 @@ export function parsePostwarSocialMixedCoverage(
   scope: { countryId: string; worldVersion: string; eventSequence: string },
 ): PostwarSocialMixedCoverage {
   const c = object(value);
+  const paged = c.schemaVersion === POSTWAR_SOCIAL_PAGED_COVERAGE_SCHEMA;
   exact(c, [
     'schemaVersion',
     'reducerVersion',
@@ -81,14 +101,18 @@ export function parsePostwarSocialMixedCoverage(
     'financialPostingCount',
     'financialBatchCount',
     'financialPostingsFingerprint',
+    ...(paged ? ['pageProof'] : []),
     'employmentStateHash',
     'materializationHash',
     'stateOrigin',
   ]);
   if (
-    c.schemaVersion !== POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA ||
-    (c.reducerVersion !== POSTWAR_SOCIAL_MIXED_REDUCER &&
-      c.reducerVersion !== POSTWAR_EXTENDED_CURRENT_REDUCER) ||
+    (!paged && c.schemaVersion !== POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA) ||
+    (paged
+      ? c.reducerVersion !== POSTWAR_PAGED_CURRENT_REDUCER
+      : c.reducerVersion !== POSTWAR_SOCIAL_MIXED_REDUCER &&
+        c.reducerVersion !== POSTWAR_EXTENDED_CURRENT_REDUCER &&
+        c.reducerVersion !== POSTWAR_RENT_CURRENT_REDUCER) ||
     c.countryId !== scope.countryId ||
     !id(c.countryId) ||
     !id(c.coverageRef) ||
@@ -131,7 +155,16 @@ export function parsePostwarSocialMixedCoverage(
       (origin === 0n ? 'ADMITTED_OPENING_SOURCE' : 'COMMITTED_MATERIALIZATION')
   )
     invalid('CURRENT_AND_ORIGIN_MUST_BE_DISTINCT');
-  return Object.freeze({ ...c }) as unknown as PostwarSocialMixedCoverage;
+  const pageProof = paged
+    ? parsePostwarCurrentPageProof(c.pageProof, {
+        worldVersion: scope.worldVersion,
+        eventSequence: scope.eventSequence,
+      })
+    : undefined;
+  return Object.freeze({
+    ...c,
+    ...(pageProof === undefined ? {} : { pageProof }),
+  }) as unknown as PostwarSocialMixedCoverage;
 }
 export function parsePostwarSocialMixedStateBinding(
   value: unknown,

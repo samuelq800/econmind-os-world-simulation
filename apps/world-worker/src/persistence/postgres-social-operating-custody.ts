@@ -25,6 +25,7 @@ import {
 import {
   readPreparedPostwarSocialLineageFrom,
   readPreparedSocialOriginals,
+  readPreparedSocialPagedLineage,
   type PreparedPostwarSocialSource,
   type PostwarSocialReplayLineage,
 } from './prepared-postwar-social-source.js';
@@ -742,16 +743,20 @@ export function createPostgresSocialOperatingCustody(configuration: {
             worldVersion: lineage.headWorldVersion,
             eventSequence: lineage.headEventSequence,
           },
-          taxonomyRevision: fullLifecycle.countries.some(
-            (c) => c.offerOrigins.length > 0,
-          )
-            ? 'SOCIAL_SOURCE_EFFECTS_V2'
-            : 'SOCIAL_SOURCE_EFFECTS_V1',
-          completePrefixBinding: hash({
-            worldId: seed.worldId,
-            seedFingerprint: seed.fingerprint,
-            transitions: lineage.transitions,
-          }),
+          taxonomyRevision:
+            lineage.transitions === null
+              ? 'SOCIAL_SOURCE_EFFECTS_PAGED_V3'
+              : fullLifecycle.countries.some((c) => c.offerOrigins.length > 0)
+                ? 'SOCIAL_SOURCE_EFFECTS_V2'
+                : 'SOCIAL_SOURCE_EFFECTS_V1',
+          completePrefixBinding:
+            readPreparedSocialPagedLineage(lineage)?.metadata
+              .prefixFingerprint ??
+            hash({
+              worldId: seed.worldId,
+              seedFingerprint: seed.fingerprint,
+              transitions: lineage.transitions,
+            }),
           sourceRevisionSet: records.map((r) => ({
             recordId: r.recordId,
             revision: r.revision,

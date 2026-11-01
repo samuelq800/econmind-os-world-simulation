@@ -1,3 +1,6 @@
+import type { IndustryOperatingWageSourceCommitProtectionPort } from './persistence/postwar-industry-operating-wage-runtime.js';
+import type { IndustryWorkSourceCommitProtectionPort } from './persistence/postwar-industry-work-runtime.js';
+import type { IndustryRunSourceCommitProtectionPort } from './persistence/postwar-industry-run-runtime.js';
 import {
   DOMAIN_ERROR_CODES,
   DomainError,
@@ -233,6 +236,9 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
   readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
   readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
+  readonly industryOperatingWageSourceCommitProtectionPort?: IndustryOperatingWageSourceCommitProtectionPort;
+  readonly industryWorkSourceCommitProtectionPort?: IndustryWorkSourceCommitProtectionPort;
+  readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
   readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
   readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
   readonly postwarNarrowTradeSourceCommitProtectionPort?: PostwarNarrowTradeSourceCommitProtectionPort;
@@ -260,6 +266,24 @@ export function createAuthoritativeWorkerExecution(input: {
       : {
           beneficialHousingRentSourceCommitProtectionPort:
             input.beneficialHousingRentSourceCommitProtectionPort,
+        }),
+    ...(input.industryOperatingWageSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          industryOperatingWageSourceCommitProtectionPort:
+            input.industryOperatingWageSourceCommitProtectionPort,
+        }),
+    ...(input.industryWorkSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          industryWorkSourceCommitProtectionPort:
+            input.industryWorkSourceCommitProtectionPort,
+        }),
+    ...(input.industryRunSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          industryRunSourceCommitProtectionPort:
+            input.industryRunSourceCommitProtectionPort,
         }),
     ...(input.industryProductionCutoffGuard === undefined
       ? {}

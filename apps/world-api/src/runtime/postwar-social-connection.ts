@@ -170,9 +170,16 @@ export function createPostwarSocialConnection(
     PostwarFinanceSocialRuntimeConnection['prepare']
   >[1],
   startupSeed?: Readonly<OpeningSeed>,
+  startupBeneficialHousingRentSource?: Parameters<
+    PostwarFinanceSocialRuntimeConnection['prepare']
+  >[0]['startupBeneficialHousingRentSource'],
 ): Readonly<PostwarSocialConnection> {
   if (sharedFxPreparation !== undefined && !sharedConnection)
     throw Error('SOCIAL_FX_PREPARATION_REQUIRES_GENUINE_SHARED_BINDING');
+  if (startupBeneficialHousingRentSource && (!sharedConnection || !startupSeed))
+    throw Error('SOCIAL_CHILD_PROOF_REQUIRES_SHARED_OWNER_AND_SEED');
+  let socialStartupBeneficialHousingRentSource =
+    startupBeneficialHousingRentSource;
   let fxPreparation = sharedFxPreparation;
   let socialStartupSeed = startupSeed;
   const c = Object.freeze({
@@ -375,6 +382,12 @@ export function createPostwarSocialConnection(
           admittedWorldPins: c.admittedWorldPins,
           modelVersion: c.modelVersion,
           ...(socialStartupSeed ? { startupSeed: socialStartupSeed } : {}),
+          ...(socialStartupBeneficialHousingRentSource
+            ? {
+                startupBeneficialHousingRentSource:
+                  socialStartupBeneficialHousingRentSource,
+              }
+            : {}),
         };
         try {
           if (sharedConnection)
@@ -385,6 +398,7 @@ export function createPostwarSocialConnection(
           // large startup input and may not retain it through online requests.
           fxPreparation = undefined;
           socialStartupSeed = undefined;
+          socialStartupBeneficialHousingRentSource = undefined;
         }
         if (phase !== 'OPEN') throw Error('SOCIAL_PREPARATION_RETIRED');
         sourcePrepared = true;
@@ -506,6 +520,7 @@ export function createPostwarSocialConnection(
       phase = 'STOPPING';
       fxPreparation = undefined;
       socialStartupSeed = undefined;
+      socialStartupBeneficialHousingRentSource = undefined;
       for (const controller of active.values()) controller.abort();
       stopping = (async () => {
         const errors: unknown[] = [];

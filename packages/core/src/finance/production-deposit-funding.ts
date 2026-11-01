@@ -3,6 +3,10 @@
 import { canonicalSerialize } from '../serialization/canonical.js';
 import type { Sha256Hex } from '../commands/command.js';
 import { Money } from '../numeric/money.js';
+import {
+  aggregateBeneficialHousingLiquidClaim,
+  type BeneficialHousingReclassificationReceipt,
+} from './beneficial-housing-rent.js';
 import { DomainError, DOMAIN_ERROR_CODES } from '../errors.js';
 import {
   isValidatedOpeningSeed,
@@ -25,6 +29,14 @@ interface DepositInstrument {
   readonly liability: FinancialAccount;
 }
 const instruments = new WeakMap<object, readonly DepositInstrument[]>();
+const openingBeneficialSources = new WeakMap<
+  object,
+  ReadonlyMap<string, string>
+>();
+const beneficialRecipients = new WeakMap<
+  object,
+  readonly BeneficialHousingReclassificationReceipt[]
+>();
 const seedInstruments = new WeakMap<
   OpeningSeed,
   readonly DepositInstrument[]
@@ -87,6 +99,18 @@ export function bindOpeningProductionDepositInstruments(
     invalid(
       'Production deposit proof requires genuine opening seed and opening ledger',
     );
+  openingBeneficialSources.set(
+    state,
+    new Map(
+      seed.sources
+        .filter(
+          (s) =>
+            s.sourceVersion === 'POSTWAR_BENEFICIAL_HOUSING_V1' &&
+            s.sourceKind === 'DOCUMENTED_ASSUMPTION',
+        )
+        .map((s) => [s.sourceId, s.canonicalPayload]),
+    ),
+  );
   const cached = seedInstruments.get(seed);
   if (cached) {
     instruments.set(state, cached);
@@ -211,10 +235,20 @@ export function bindOpeningProductionDepositInstruments(
             l[0]!.counterpartLegId !== a[0]!.legId ||
             !a[0]!.amount.amount.equals(amount.amount) ||
             !l[0]!.amount.amount.equals(amount.amount) ||
-            !balance(state, asset).amount.equals(amount.amount) ||
             !balance(state, liability).amount.equals(amount.amount.negated())
           )
             invalid('Production deposit original source pair/value differs');
+          // A child may have reclassified the legal HH asset into genuine
+          // beneficial accounts. Never recognize that zero parent as spendable;
+          // its recipient proof is installed separately from a genuine receipt.
+          if (!balance(state, asset).amount.equals(amount.amount)) {
+            if (
+              kind === 'HOUSEHOLD_BANK_DEPOSIT' &&
+              balance(state, asset).amount.isZero()
+            )
+              continue;
+            invalid('Production deposit opening asset value differs');
+          }
           found.push(
             Object.freeze({
               kind,
@@ -254,11 +288,132 @@ export function inheritProductionDepositInstruments(
     invalid(
       'Production deposit classification needs genuine same-world lineage',
     );
+  const originals = openingBeneficialSources.get(parent);
+  if (originals) openingBeneficialSources.set(state, originals);
+  const children = beneficialRecipients.get(parent);
+  if (children) beneficialRecipients.set(state, children);
   const source = instruments.get(parent);
   if (source) {
     instruments.set(state, source);
   }
 }
+/** Install data classification from a genuine Core-verified child receipt.
+ * This grants no source admission, command authority or work qualification. */
+export function bindBeneficialProductionDepositRecipients(
+  state: FinancialLedgerState,
+  receipt: BeneficialHousingReclassificationReceipt,
+): void {
+  aggregateBeneficialHousingLiquidClaim(state, receipt);
+  const original = openingBeneficialSources
+    .get(state)
+    ?.get(receipt.supplementalSourceId);
+  const expected = {
+    classification:
+      'GENERATED_POLICY_BENEFICIAL_PARTITION_NOT_NEW_LEGAL_CLAIMS',
+    schemaVersion: 'beneficial-housing-genesis-rights.v1',
+    parentSeedFingerprint: receipt.parentSeedFingerprint,
+    allocationId: receipt.allocationId,
+    policyRef: receipt.policyRef,
+    sourcePopulationRef: receipt.sourcePopulationRef,
+    countryId: receipt.countryId,
+    householdEntityId: receipt.householdEntityId,
+    originalAccount: receipt.originalAccount,
+    originalAmount: receipt.originalAmount,
+    originalSourceId: receipt.originalSourceId,
+    counterpartLiabilityAccount: receipt.counterpartLiabilityAccount,
+    regions: receipt.regions,
+    groups: receipt.groups,
+    pools: receipt.pools,
+    leases: receipt.leases,
+    subaccounts: receipt.subaccounts,
+    rentPaidAtOpening: '0',
+    rentAccruedAtOpening: '0',
+  };
+  if (original !== canonicalSerialize(expected))
+    invalid(
+      'Beneficial receipt differs from exact genuine opening source bytes',
+    );
+  const known = instruments.get(state);
+  if (
+    !known?.some(
+      (p) =>
+        p.kind === 'OPERATOR_BANK_DEPOSIT' &&
+        p.asset.countryId === receipt.countryId &&
+        p.liability.ownerId === receipt.counterpartLiabilityAccount.ownerId &&
+        p.asset.currency === receipt.originalAccount.currency,
+    )
+  )
+    invalid('Beneficial recipient needs actual same-bank original OP deposit');
+  const prior = beneficialRecipients.get(state) ?? [];
+  const existing = prior.find((r) => r.countryId === receipt.countryId);
+  if (existing && !same(existing, receipt))
+    invalid('Beneficial recipient country classification differs');
+  if (!existing)
+    beneficialRecipients.set(state, Object.freeze([...prior, receipt]));
+}
+
+/** Exact source account data, not a payment/work/permission issuer. */
+export function readProductionWageDepositAccounts(input: {
+  readonly financial: FinancialLedgerState;
+  readonly countryId: string;
+  readonly operatorId: string;
+  readonly householdAccountId: string;
+}): Readonly<{
+  payerAsset: FinancialAccount;
+  payerLiability: FinancialAccount;
+  payeeAsset: FinancialAccount;
+  payeeLiability: FinancialAccount;
+}> {
+  const known = instruments.get(input.financial);
+  const payer = known?.find(
+    (p) =>
+      p.kind === 'OPERATOR_BANK_DEPOSIT' &&
+      p.asset.countryId === input.countryId &&
+      p.asset.ownerId === input.operatorId,
+  );
+  if (!payer) invalid('Actual original employer bank deposit required');
+  mirrored(input.financial, payer);
+  const household = known?.find(
+    (p) =>
+      p.kind === 'HOUSEHOLD_BANK_DEPOSIT' &&
+      p.asset.countryId === input.countryId &&
+      p.asset.accountId === input.householdAccountId &&
+      p.liability.ownerId === payer.liability.ownerId,
+  );
+  if (household) {
+    mirrored(input.financial, household);
+    return Object.freeze({
+      payerAsset: payer.asset,
+      payerLiability: payer.liability,
+      payeeAsset: household.asset,
+      payeeLiability: household.liability,
+    });
+  }
+  const receipt = beneficialRecipients
+    .get(input.financial)
+    ?.find(
+      (r) =>
+        r.countryId === input.countryId &&
+        r.counterpartLiabilityAccount.ownerId === payer.liability.ownerId &&
+        r.subaccounts.some(
+          (s) => s.account.accountId === input.householdAccountId,
+        ),
+    );
+  if (!receipt)
+    invalid(
+      'Actual household deposit or genuine beneficial recipient required',
+    );
+  aggregateBeneficialHousingLiquidClaim(input.financial, receipt);
+  return Object.freeze({
+    payerAsset: payer.asset,
+    payerLiability: payer.liability,
+    payeeAsset: receipt.subaccounts.find(
+      (s) => s.account.accountId === input.householdAccountId,
+    )!.account,
+    payeeLiability: receipt.counterpartLiabilityAccount,
+  });
+}
+
 /** Recognizes a PAID batch only, never a budget/reservation or arbitrary ASSET.
  * Narrow supported settlement: same-bank original deposit transfer with both
  * liability mirrors, or an explicit expense paid to that bank's revenue. */
@@ -319,6 +474,66 @@ export function isSettledOriginalProductionDeposit(input: {
     liability[0]!.counterpartyAccountId === remaining[0]!.account.accountId
   )
     return true;
+  const child = beneficialRecipients
+    .get(financial)
+    ?.find(
+      (r) =>
+        r.countryId === payer.asset.countryId &&
+        r.counterpartLiabilityAccount.ownerId === payer.liability.ownerId &&
+        remaining.some((l) => same(l.account, r.counterpartLiabilityAccount)),
+    );
+  if (child) {
+    aggregateBeneficialHousingLiquidClaim(financial, child);
+    const mirror = remaining.filter((l) =>
+      same(l.account, child.counterpartLiabilityAccount),
+    );
+    if (
+      mirror.length !== 1 ||
+      mirror[0]!.direction !== 'CREDIT' ||
+      !same(mirror[0]!.amount, payment.amount) ||
+      mirror[0]!.counterpartyAccountId !== payer.liability.accountId ||
+      liability[0]!.counterpartyAccountId !==
+        child.counterpartLiabilityAccount.accountId
+    )
+      invalid(
+        'Beneficial recipient needs exact aggregate liability settlement',
+      );
+    const assets = remaining.filter(
+      (l) =>
+        l.direction === 'DEBIT' &&
+        child.subaccounts.some((s) => same(s.account, l.account)),
+    );
+    if (
+      !assets.length ||
+      new Set(assets.map((a) => a.account.accountId)).size !== assets.length ||
+      remaining.length !== 1 + 2 * assets.length
+    )
+      invalid('Beneficial recipient needs unique complete asset/income pairs');
+    let total = Money.from('0', payment.amount.currency);
+    for (const asset of assets) {
+      if (!asset.amount.amount.isPositive())
+        invalid('Beneficial wage must be positive');
+      const income = remaining.filter(
+        (r) =>
+          r.direction === 'CREDIT' &&
+          r.account.accountClass === 'REVENUE' &&
+          r.account.ownerId === child.householdEntityId &&
+          r.account.countryId === payer.asset.countryId &&
+          r.account.currency === payment.amount.currency &&
+          r.account.claimId === null &&
+          r.account.counterpartyEntityId === null &&
+          same(r.amount, asset.amount) &&
+          r.account.accountId === asset.counterpartyAccountId &&
+          r.counterpartyAccountId === asset.account.accountId,
+      );
+      if (income.length !== 1)
+        invalid('Beneficial asset/income settlement differs');
+      total = total.add(asset.amount);
+    }
+    if (!same(total, payment.amount))
+      invalid('Beneficial total wage differs from actual employer payment');
+    return true;
+  }
   if (remaining.length !== 3)
     invalid(
       'Production deposit settlement requires complete actual recipient and issuer legs',

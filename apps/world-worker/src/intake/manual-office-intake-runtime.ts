@@ -1,8 +1,13 @@
+import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import { isPostwarIndustryRunRuntime } from '../persistence/postwar-industry-run-runtime.js';
+import { isPreparedPostwarIndustryRuntime } from '../persistence/postwar-industry-runtime.js';
 import {
   readFinanceSocialSourceBinding,
   type FinanceSocialSourceBinding,
 } from '../runtime-preparation/finance-social-runtime-connection.js';
 import { createHash } from 'node:crypto';
+import { isPostwarCentralBankOmoRuntime } from '../persistence/postwar-central-bank-omo-runtime.js';
+import { isPostwarNarrowTradeReservationRuntime } from '../preparation/postwar-narrow-trade-reservation-candidate.js';
 import type { Pool } from 'pg';
 import {
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
@@ -425,6 +430,44 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
 ): boolean {
   if (!runtime) return false;
   const construction = constructions.get(runtime as ManualOfficeIntakeRuntime);
+  if (commandType === INDUSTRY_RUN_SCHEDULE_COMMAND) {
+    if (!construction?.financeSocialBinding) return false;
+    const fixed = readFinanceSocialSourceBinding(
+      construction.financeSocialBinding,
+    );
+    const run = construction.readers.industryRun;
+    return (
+      isPreparedPostwarSocialRuntimeConnection(
+        fixed.socialConnection,
+        construction.worldId,
+      ) &&
+      isPostwarIndustryRunRuntime(run) &&
+      run.worldId === construction.worldId &&
+      run.database === construction.workerDatabase
+    );
+  }
+  if (commandType === 'CORE_INDUSTRY_PRODUCTION_V1')
+    return (
+      !!construction?.financeSocialBinding &&
+      isPreparedPostwarIndustryRuntime(construction.readers.industry) &&
+      construction.readers.industry.database === construction.workerDatabase
+    );
+  if (commandType === 'CORE_GOODS_TRANSFER_V1')
+    return (
+      !!construction?.financeSocialBinding &&
+      isPostwarNarrowTradeReservationRuntime(
+        construction.readers.tradeReservation,
+      ) &&
+      construction.readers.tradeReservation.database ===
+        construction.workerDatabase
+    );
+  if (
+    commandType === 'CORE_CENTRAL_BANK_OMO_V1' &&
+    construction?.financeSocialBinding
+  )
+    return isPostwarCentralBankOmoRuntime(
+      construction.readers.centralBankNative,
+    );
   if (construction?.treasuryFxBinding) {
     readPostwarTreasuryFxSourceBinding(construction.treasuryFxBinding);
     return (

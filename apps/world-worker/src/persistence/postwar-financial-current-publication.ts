@@ -63,6 +63,10 @@ export async function publishPostwarFinancialCurrentProjectionFrom(
           replayPostwarSharedOfficePrefix({ lineage, document }),
         ),
         lock = locks.rows[0]!;
+      if (shared.frames === null)
+        throw Error(
+          'PAGED_COMPLETE_PREFIX_REQUIRES_VERSIONED_CURRENT_PUBLISHER',
+        );
       if (
         shared.head.worldVersion !== lock.world_version ||
         shared.head.eventSequence !== lock.event_sequence ||

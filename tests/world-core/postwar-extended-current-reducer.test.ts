@@ -4,6 +4,7 @@ import {
   parsePostwarFinancialMixedCoverage,
   POSTWAR_FINANCIAL_MIXED_REDUCER,
   POSTWAR_EXTENDED_CURRENT_REDUCER,
+  POSTWAR_RENT_CURRENT_REDUCER,
 } from '../../packages/core/src/read-models/postwar-financial-mixed-current-contract.js';
 import {
   parsePostwarSocialMixedCoverage,
@@ -75,6 +76,10 @@ describe('explicit complete Goods/OMO prefix wire discriminator', () => {
         parse({ ...value, reducerVersion: POSTWAR_EXTENDED_CURRENT_REDUCER })
           .reducerVersion,
       ).toBe(POSTWAR_EXTENDED_CURRENT_REDUCER);
+      expect(
+        parse({ ...value, reducerVersion: POSTWAR_RENT_CURRENT_REDUCER })
+          .reducerVersion,
+      ).toBe(POSTWAR_RENT_CURRENT_REDUCER);
       for (const reducerVersion of [
         'READY',
         'POSTWAR_SKIP_INVENTORY_V2',

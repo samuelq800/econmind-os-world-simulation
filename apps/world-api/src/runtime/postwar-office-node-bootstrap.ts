@@ -36,6 +36,7 @@ export interface PostwarOfficeNodeBootstrapInput {
   /** Actual server-held Core seed; startup uses the metadata-only SQL header,
    * never a raw-seed grant to the online reader. */
   readonly startupSeed: Readonly<OpeningSeed>;
+  readonly startupBeneficialHousingRentSource?: PostwarFinanceSocialApiConnectionInput['socialStartupBeneficialHousingRentSource'];
   readonly treasuryFx?: Readonly<{
     readonly preparation: NonNullable<
       PostwarFinanceSocialApiConnectionInput['treasuryFxPreparation']
@@ -48,6 +49,17 @@ export interface PostwarOfficeNodeBootstrapInput {
   /** Borrowed separate publisher DB; caller ends that pool after shutdown.
    * No pool/credential is discovered and no publication occurs by default. */
   readonly publicationDatabase?: PostwarFinanceSocialRuntimePorts['database'];
+  readonly centralBankOmo?: {
+    readonly countryIds: readonly string[];
+    readonly mode: 'TEST_ONLY_LOCAL' | 'OFFICIAL_RUNTIME';
+  };
+  readonly trade?: { readonly enabled: true };
+  /** Genuine server-held source/finite prepared runs; never HTTP JSON. */
+  readonly industry?: Parameters<
+    typeof createPostwarFinanceSocialRuntimeConnection
+  >[0]['industry'];
+  readonly industryLabour?: { readonly enabled: true };
+  readonly beneficialRent?: { readonly clockBindingRef: string };
   /** Same admitted pins/auth and bounded pool; checked by the fixed API owner. */
   readonly read?: PostwarFinanceSocialApiConnectionInput['read'];
   readonly financeAllowedOrigins?: readonly string[];
@@ -191,11 +203,36 @@ export async function startPostwarOfficeNodeBootstrap(
       ...(input.captain
         ? { captain: { workerRole: c.workerRole, mode: input.captain.mode } }
         : {}),
+      ...(input.centralBankOmo
+        ? {
+            centralBankOmo: {
+              ...input.centralBankOmo,
+              workerRole: c.workerRole,
+            },
+          }
+        : {}),
+      ...(input.trade ? { trade: { workerRole: c.workerRole } } : {}),
+      ...(input.industry ? { industry: input.industry } : {}),
+      ...(input.industryLabour ? { industryLabour: input.industryLabour } : {}),
+      ...(input.beneficialRent
+        ? {
+            beneficialRent: {
+              workerRole: c.workerRole,
+              clockBindingRef: input.beneficialRent.clockBindingRef,
+            },
+          }
+        : {}),
     });
     owner = await createPostwarFinanceSocialApiConnection({
       binding,
       social,
       socialStartupSeed: input.startupSeed,
+      ...(input.startupBeneficialHousingRentSource
+        ? {
+            socialStartupBeneficialHousingRentSource:
+              input.startupBeneficialHousingRentSource,
+          }
+        : {}),
       ...(input.read ? { read: input.read } : {}),
       ...(input.treasuryFx
         ? { treasuryFxPreparation: input.treasuryFx.preparation }

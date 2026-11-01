@@ -1,3 +1,11 @@
+import {
+  INDUSTRY_RUN_PARAMETERS_DATASET,
+  parseIndustryRunParameterRow,
+} from '@econmind/core/postwar-industry-run-parameters-contract';
+import {
+  buildIndustryRunRequest,
+  type IndustryRunDraft,
+} from '../industry-run/form.js';
 import type {
   AuthenticatedOfficeCommandRequestDto,
   ManualOfficeQueueAcknowledgementDto,
@@ -21,6 +29,12 @@ import {
   type OfficeProjectionView,
 } from '../office-projection/model.js';
 import { createOfficeCommandClient } from './client.js';
+import { createOfficeRecoveryClient } from './recovery-client.js';
+import {
+  createPostwarRuntimeClient,
+  POSTWAR_RUNTIME_SCHEMA,
+  type RuntimePage,
+} from '../postwar-office-runtime/client.js';
 import {
   officeFamilies,
   parseOfficeIntent,
@@ -53,6 +67,7 @@ type Status =
   | 'READY_TO_READ'
   | 'READING'
   | 'CURRENT'
+  | 'CURRENT_AUTHORIZED_HEAD'
   | 'REVIEW_REQUIRED'
   | 'REVIEWED'
   | 'SUBMITTING'
@@ -85,6 +100,17 @@ export function createOfficeCommandController(
       }
     : null;
   const reader = b ? createProductionReadClient(b.read, options) : null,
+    runtimeReader =
+      b?.read.identity.projectionVersion === POSTWAR_RUNTIME_SCHEMA
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    industryRunReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    recoverer = b
+      ? createOfficeRecoveryClient(b.endpoint, b.read, options)
+      : null,
     writer = b ? createOfficeCommandClient(b.endpoint, b.read, options) : null;
   const requestId = options.requestId ?? (() => crypto.randomUUID()),
     listeners = new Set<() => void>();
@@ -96,6 +122,8 @@ export function createOfficeCommandController(
     stop: (() => void) | null = null;
   let status: Status = b ? 'READY_TO_READ' : 'MISSING',
     code: string | null = b ? null : 'OFFICE_BINDING_MISSING_OR_UNSUPPORTED';
+  let runtimePage: RuntimePage | null = null;
+  let runParametersPage: RuntimePage | null = null;
   let model: OfficeProjectionModel | null = null,
     intent: AuthenticatedOfficeCommandRequestDto | null = null,
     acknowledgement: ManualOfficeQueueAcknowledgementDto | null = null,
@@ -106,6 +134,8 @@ export function createOfficeCommandController(
   let submitCode: string | null = null;
   // Local presentation metadata only; never source freshness or authority.
   let lastAuthorizedReadAtClient: string | null = null;
+  const currentHead = () =>
+    runtimePage?.authority.readback ?? model?.head ?? null;
   const notify = () => {
     for (const fn of [...listeners]) fn();
   };
@@ -116,12 +146,17 @@ export function createOfficeCommandController(
     status = reason === 'DENIED' ? 'DENIED' : 'MISSING';
     code = reason;
     model = null;
+    runtimePage = null;
+    runParametersPage = null;
     intent = null;
     acknowledgement = null;
     lookup = null;
     receipt = null;
     lastAuthorizedReadAtClient = null;
     reader?.disconnect();
+    runtimeReader?.disconnect();
+    industryRunReader?.disconnect();
+    recoverer?.disconnect();
     writer?.disconnect();
     const cleanup = stop;
     stop = null;
@@ -166,6 +201,8 @@ export function createOfficeCommandController(
       return;
     }
     model = null;
+    runtimePage = null;
+    runParametersPage = null;
     status = 'UNAVAILABLE';
     code = reason;
   }
@@ -187,8 +224,69 @@ export function createOfficeCommandController(
   async function read() {
     if (!b || !reader) return;
     model = null;
+    runtimePage = null;
+    runParametersPage = null;
     status = 'READING';
     notify();
+    if (runtimeReader) {
+      const dataset =
+        b.read.identity.officeId === 'INDUSTRY'
+          ? 'industry-labour-current'
+          : b.read.identity.officeId === 'CENTRAL_BANK'
+            ? 'ledger-balances'
+            : b.read.identity.officeId === 'TRADE'
+              ? 'opening-inventory-entries'
+              : b.read.identity.officeId === 'SOCIAL'
+                ? 'positions'
+                : b.read.identity.officeId === 'CAPTAIN'
+                  ? 'political-capital-current'
+                  : 'ledger-balances';
+      const result = await runtimeReader.readPage(dataset, requestId());
+      if (!checkLiveness()) return;
+      if (result.status !== 'PAGE' && result.status !== 'EMPTY') {
+        fail(result.status);
+        return;
+      }
+      if (BigInt(result.authority.readback.worldVersion) < BigInt(floor)) {
+        fail('STALE');
+        return;
+      }
+      floor = result.authority.readback.worldVersion;
+      runtimePage = result;
+      if (industryRunReader) {
+        const parameters = await industryRunReader.readPage(
+          INDUSTRY_RUN_PARAMETERS_DATASET,
+          requestId(),
+        );
+        if (!checkLiveness()) return;
+        if (parameters.status === 'DENIED') {
+          disconnect('DENIED');
+          return;
+        }
+        if (parameters.status === 'PAGE' || parameters.status === 'EMPTY') {
+          if (
+            parameters.authority.readback.worldVersion !==
+              result.authority.readback.worldVersion ||
+            parameters.authority.readback.eventSequence !==
+              result.authority.readback.eventSequence
+          ) {
+            fail('STALE');
+            return;
+          }
+          runParametersPage = parameters;
+        }
+      }
+      try {
+        lastAuthorizedReadAtClient = new Date().toISOString();
+      } catch {
+        lastAuthorizedReadAtClient = null;
+      }
+      code = receipt ? null : submitCode;
+      status = receipt
+        ? 'FINAL_VERIFIED'
+        : (submitStatus ?? 'CURRENT_AUTHORIZED_HEAD');
+      return;
+    }
     const r = await reader.readProjection(requestId());
     if (!checkLiveness()) return;
     if (r.status !== 'PROJECTION') {
@@ -214,6 +312,116 @@ export function createOfficeCommandController(
     code = receipt ? null : submitCode;
     status = receipt ? 'FINAL_VERIFIED' : (submitStatus ?? 'CURRENT');
   }
+  async function recoverOriginal() {
+    if (
+      !b ||
+      !recoverer ||
+      !intent ||
+      !attempted ||
+      receipt ||
+      (!outcomeUnknown && !lookup)
+    )
+      return;
+    status = 'LOOKING_UP_FINAL';
+    code = null;
+    notify();
+    const result = await recoverer.recover(
+      intent,
+      requestId(),
+      lookup?.commandFingerprint,
+    );
+    if (!checkLiveness()) return;
+    if (result.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (result.status === 'PENDING') {
+      lookup = {
+        commandId: result.state.commandId,
+        idempotencyKey: result.state.idempotencyKey,
+        commandFingerprint: result.state.commandFingerprint,
+      };
+      outcomeUnknown = false;
+      status = 'QUEUE_ACK';
+      code = 'RECOVERY_PENDING';
+      submitStatus = status;
+      submitCode = code;
+      return;
+    }
+    if (result.status === 'FINAL') {
+      receipt = Object.freeze({
+        ...result.receipt,
+        eventIds: Object.freeze([...result.receipt.eventIds]),
+      });
+      lookup = {
+        commandId: result.receipt.commandId,
+        idempotencyKey: result.receipt.idempotencyKey,
+        commandFingerprint: result.receipt.commandFingerprint,
+      };
+      outcomeUnknown = false;
+      if (
+        result.receipt.worldVersionAfter !== null &&
+        BigInt(result.receipt.worldVersionAfter) > BigInt(floor)
+      )
+        floor = result.receipt.worldVersionAfter;
+      await read();
+      return;
+    }
+    status = outcomeUnknown ? 'UNKNOWN' : 'QUEUE_ACK';
+    code =
+      ('code' in result ? result.code : undefined) ?? 'RECOVERY_UNAVAILABLE';
+    submitStatus = status;
+    submitCode = code;
+  }
+  function restoreOriginalForRecovery(value: unknown) {
+    // An explicit original is query identity only. Unlike staging a new intent,
+    // its expected head may precede the current authorized projection.
+    if (!b || busy || attempted || receipt || !checkLiveness()) return false;
+    const original = parseOfficeIntent(value, b.read);
+    if (
+      !original ||
+      (currentHead() &&
+        BigInt(original.request.expectedWorldVersion) >
+          BigInt(currentHead()!.worldVersion))
+    ) {
+      intent = null;
+      status = 'UNAVAILABLE';
+      code = 'ORIGINAL_RECOVERY_SCOPE_OR_HEAD_MISMATCH';
+      notify();
+      return false;
+    }
+    intent = original;
+    acknowledgement = null;
+    lookup = null;
+    attempted = true;
+    outcomeUnknown = true;
+    submitStatus = 'UNKNOWN';
+    submitCode = 'ORIGINAL_REQUEST_RESTORED_FOR_RECOVERY_ONLY';
+    status = submitStatus;
+    code = submitCode;
+    notify();
+    return true;
+  }
+  function stageIntent(value: unknown) {
+    if (!b || busy || attempted || !checkLiveness()) return false;
+    const next = parseOfficeIntent(value, b.read);
+    if (
+      !next ||
+      !currentHead() ||
+      next.request.expectedWorldVersion !== currentHead()!.worldVersion
+    ) {
+      intent = null;
+      status = 'UNAVAILABLE';
+      code = 'INTENT_OR_CURRENT_VERSION_MISMATCH';
+      notify();
+      return false;
+    }
+    intent = next;
+    status = 'REVIEW_REQUIRED';
+    code = null;
+    notify();
+    return true;
+  }
   return Object.freeze({
     disconnect,
     checkLiveness,
@@ -233,6 +441,18 @@ export function createOfficeCommandController(
           : null,
         receipt,
         acknowledgement,
+        runtimePage: runtimePage
+          ? (JSON.parse(JSON.stringify(runtimePage)) as RuntimePage)
+          : null,
+        runParametersPage: runParametersPage
+          ? (JSON.parse(JSON.stringify(runParametersPage)) as RuntimePage)
+          : null,
+        currentHead: currentHead()
+          ? {
+              worldVersion: currentHead()!.worldVersion,
+              eventSequence: currentHead()!.eventSequence,
+            }
+          : null,
         lastAuthorizedReadAtClient,
         intent: intent
           ? (JSON.parse(
@@ -240,12 +460,24 @@ export function createOfficeCommandController(
             ) as AuthenticatedOfficeCommandRequestDto)
           : null,
         canRead: !retired && !busy,
-        canStage: !retired && !busy && !attempted && !!model,
-        canReview: !retired && !busy && !attempted && !!intent && !!model,
+        canStage: !retired && !busy && !attempted && !!currentHead(),
+        canRestoreOriginal: !retired && !busy && !attempted && !receipt,
+        canReview:
+          !retired && !busy && !attempted && !!intent && !!currentHead(),
         canConfirm:
-          !retired && !busy && !attempted && status === 'REVIEWED' && !!model,
+          !retired &&
+          !busy &&
+          !attempted &&
+          status === 'REVIEWED' &&
+          !!currentHead(),
         canLookupFinal: !retired && !busy && !!lookup,
-        canRecover: !retired && !busy && outcomeUnknown && !lookup,
+        canRecover:
+          !retired &&
+          !busy &&
+          attempted &&
+          !!intent &&
+          !receipt &&
+          (outcomeUnknown || !!lookup),
         completion:
           status === 'FINAL_VERIFIED' &&
           receipt?.outcome === 'COMMITTED' &&
@@ -264,25 +496,38 @@ export function createOfficeCommandController(
       operation(async () => {
         await read();
       }),
-    stage(value: unknown) {
-      if (!b || busy || attempted || !checkLiveness()) return false;
-      const next = parseOfficeIntent(value, b.read);
+    stage: stageIntent,
+    restoreOriginalForRecovery,
+    stageIndustryRun(draft: IndustryRunDraft) {
       if (
-        !next ||
-        !model ||
-        next.request.expectedWorldVersion !== model.head.worldVersion
-      ) {
-        intent = null;
-        status = 'UNAVAILABLE';
-        code = 'INTENT_OR_CURRENT_VERSION_MISMATCH';
-        notify();
+        !b ||
+        !checkLiveness() ||
+        runParametersPage?.dataset !== INDUSTRY_RUN_PARAMETERS_DATASET ||
+        !currentHead()
+      )
+        return false;
+      try {
+        const source = runParametersPage.rows
+          .map(parseIndustryRunParameterRow)
+          .find((row) => row.facilityId === draft.facilityId);
+        if (!source) return false;
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildIndustryRunRequest({
+            row: source,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: currentHead()!.worldVersion,
+            requestId: requestId(),
+            commandId: 'INDUSTRY_RUN_' + id,
+            idempotencyKey: 'INDUSTRY_RUN_KEY_' + id,
+            runId: 'INDUSTRY_PLAN_' + id,
+          }),
+        );
+      } catch {
         return false;
       }
-      intent = next;
-      status = 'REVIEW_REQUIRED';
-      code = null;
-      notify();
-      return true;
     },
     review() {
       if (
@@ -290,8 +535,8 @@ export function createOfficeCommandController(
         busy ||
         attempted ||
         !intent ||
-        !model ||
-        intent.request.expectedWorldVersion !== model.head.worldVersion
+        !currentHead() ||
+        intent.request.expectedWorldVersion !== currentHead()!.worldVersion
       )
         return false;
       status = 'REVIEWED';
@@ -303,10 +548,10 @@ export function createOfficeCommandController(
         if (
           !writer ||
           !intent ||
-          !model ||
+          !currentHead() ||
           attempted ||
           status !== 'REVIEWED' ||
-          intent.request.expectedWorldVersion !== model.head.worldVersion
+          intent.request.expectedWorldVersion !== currentHead()!.worldVersion
         )
           return;
         attempted = true;
@@ -358,8 +603,13 @@ export function createOfficeCommandController(
       notify();
       return true;
     },
+    recoverOriginal: () => operation(recoverOriginal),
     lookupAndRefresh: () =>
       operation(async () => {
+        if (runtimeReader) {
+          await recoverOriginal();
+          return;
+        }
         if (!reader || !lookup) return;
         model = null;
         receipt = null;

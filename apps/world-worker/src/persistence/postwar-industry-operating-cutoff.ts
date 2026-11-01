@@ -7,6 +7,7 @@ import {
   bindAuthoritativeTransition,
   productionConsumptionEventPayload,
   PRODUCTION_SETTLED_EVENT_TYPE,
+  assertProductionOpeningBasisScope,
 } from '@econmind/core';
 import {
   assertProductionWaterConsumptionCommitBinding,
@@ -27,6 +28,7 @@ import {
   type IndustryOperatingReceiptRequirement,
 } from './postwar-industry-current-source.js';
 import type { SqlExecutor } from './sql-database.js';
+import { readPostwarIndustryFirstDaySourceFrom } from './postwar-industry-first-day-source.js';
 import type { IndustryOperatingReceiptKind } from './postwar-industry-operating-receipts.js';
 import {
   prepareIndustrySettledPaymentData,
@@ -102,12 +104,20 @@ export function industryOperatingRequirementsForCandidate(
     ['MAINTENANCE', 'maintenanceAppliedRef'],
     ['TECHNOLOGY_RIGHT', 'technologyRightRef'],
     ['OPERATING_PERMISSION', 'operatingPermissionRef'],
-  ] as const)
+  ] as const) {
+    const reference = op[key];
+    if (reference === null) {
+      if (key === 'maintenanceAppliedRef' && op.openingServiceability) continue;
+      if (key === 'technologyRightRef' && op.baselineTechnologyNonrequirement)
+        continue;
+      invalid('EXPLICIT_OPENING_BASIS_REQUIRED_FOR_NULL_REFERENCE');
+    }
     add(
       kind,
-      op[key],
-      canonicalSerialize({ facilityRef: op.facilityRef, [key]: op[key] }),
+      reference,
+      canonicalSerialize({ facilityRef: op.facilityRef, [key]: reference }),
     );
+  }
   if (
     transition.events.some(
       (x) => x.eventType === PRODUCTION_WATER_CONSUMED_EVENT,
@@ -209,6 +219,42 @@ export function createPostwarIndustryOperatingCutoffGuard(
             canonicalSerialize(request.posting.evidence.operating.payload)
         )
           invalid('EXACT_ACTUAL_PAYMENT_SCOPE_REQUIRED');
+        const op = request.posting.evidence.operating.payload;
+        if (op.openingServiceability || op.baselineTechnologyNonrequirement) {
+          const firstDay = await readPostwarIndustryFirstDaySourceFrom(tx, {
+            worldId: request.command.worldId,
+            countryId: request.command.countryId,
+            facilityId: op.facilityRef,
+            head: request.expectedHead,
+            expectedPins: {
+              seedId: data.seed.seedId,
+              seedFingerprint: data.seed.fingerprint,
+              admissionRef: payment.admissionRef,
+            },
+          });
+          if (!firstDay) invalid('ADOPTED_OPENING_SOURCE_NOT_REGISTERED');
+          const expected = {
+            worldId: request.command.worldId,
+            countryId: request.command.countryId,
+            facilityRef: op.facilityRef,
+            operatorId: op.operatorId,
+            seedId: data.seed.seedId,
+            seedFingerprint: data.seed.fingerprint,
+          };
+          for (const basis of [
+            op.openingServiceability,
+            op.baselineTechnologyNonrequirement,
+          ])
+            if (basis) {
+              assertProductionOpeningBasisScope(basis, expected);
+              if (
+                basis.sourceRef !== firstDay.sourceRef ||
+                basis.sourceRawSha256 !== firstDay.rawSha256 ||
+                firstDay.data.operatorId !== op.operatorId
+              )
+                invalid('ACTUAL_OPENING_ORIGINAL_DIFFERS');
+            }
+        }
         const remaining = Object.freeze({
           ...requirements,
           requirements: Object.freeze(

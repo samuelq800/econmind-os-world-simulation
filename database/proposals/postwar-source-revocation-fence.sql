@@ -97,7 +97,7 @@ declare effective name;allowed boolean:=false;n text;begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
  if p_world is null or p_world!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'then raise exception 'REVOCATION_FENCE_EXACT_WORLD_REQUIRED'using errcode='22023';end if;
  if exists(select 1 from pg_roles where rolname=effective and(rolsuper or rolbypassrls or rolcreatedb or rolcreaterole or rolreplication))or pg_has_role(effective,'world_v2_revocation_fence_owner','MEMBER')then raise exception 'REVOCATION_FENCE_FIXED_READER_REQUIRED'using errcode='42501';end if;
- foreach n in array array['world_v2_social_source_reader','world_v2_finance_budget_source_reader','world_v2_day_one_fx_source_reader','world_v2_captain_source_reader','world_v2_cb_omo_source_reader','world_v2_postwar_narrow_trade_source','world_v2_industry_source_reader','world_v2_postwar_projection_publisher','world_v2_social_source_publisher']loop
+ foreach n in array array['world_v2_social_source_reader','world_v2_finance_budget_source_reader','world_v2_day_one_fx_source_reader','world_v2_captain_source_reader','world_v2_cb_omo_source_reader','world_v2_postwar_narrow_trade_source','world_v2_industry_source_reader','world_v2_postwar_projection_publisher','world_v2_social_source_publisher','world_v2_industry_source_publisher']loop
   if to_regrole(n)is not null and pg_has_role(effective,n,'MEMBER')then allowed:=true;end if;
  end loop;
  if not allowed then raise exception 'REVOCATION_FENCE_FIXED_READER_REQUIRED'using errcode='42501';end if;
@@ -111,7 +111,7 @@ declare effective name;allowed boolean:=false;n text;begin
 end;$$;
 alter function world_v2.lock_postwar_source_revocation_fences(text)owner to world_v2_revocation_fence_owner;
 revoke all on function world_v2.lock_postwar_source_revocation_fences(text)from public;
-do $$declare n text;begin foreach n in array array['world_v2_social_source_reader','world_v2_finance_budget_source_reader','world_v2_day_one_fx_source_reader','world_v2_captain_source_reader','world_v2_cb_omo_source_reader','world_v2_postwar_narrow_trade_source','world_v2_industry_source_reader','world_v2_postwar_projection_publisher','world_v2_social_source_publisher']loop
+do $$declare n text;begin foreach n in array array['world_v2_social_source_reader','world_v2_finance_budget_source_reader','world_v2_day_one_fx_source_reader','world_v2_captain_source_reader','world_v2_cb_omo_source_reader','world_v2_postwar_narrow_trade_source','world_v2_industry_source_reader','world_v2_postwar_projection_publisher','world_v2_social_source_publisher','world_v2_industry_source_publisher']loop
  if to_regrole(n)is not null then execute format('grant execute on function world_v2.lock_postwar_source_revocation_fences(text)to %I',n);end if;
 end loop;end;$$;
 do $$declare n text;begin foreach n in array array['world_v2_postwar_projection_owner','world_v2_social_source_owner','world_v2_industry_source_owner']loop if to_regrole(n)is not null then execute format('grant execute on function world_v2.lock_postwar_source_revocation_fences(text)to %I',n);end if;end loop;end;$$;

@@ -16,7 +16,11 @@ import {
   validatePostwarSocialEmploymentStateDocument,
   type PostwarSocialEmploymentStateDocument,
 } from '../preparation/postwar-social-employment-state.js';
-import type { PostwarSocialReplayLineage } from './prepared-postwar-social-source.js';
+import {
+  readPreparedSocialPagedLineage,
+  preparedSocialDocumentFor,
+  type PostwarSocialReplayLineage,
+} from './prepared-postwar-social-source.js';
 const digest = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), digest);
 const issuedPrefixes = new WeakSet<object>();
@@ -32,22 +36,33 @@ export function replayPostwarSharedOfficePrefix(input: {
   readonly document: PostwarSocialEmploymentStateDocument;
 }) {
   const { lineage } = input;
-  const document = validatePostwarSocialEmploymentStateDocument(input.document);
+  const paged = readPreparedSocialPagedLineage(lineage);
+  const original = paged ? preparedSocialDocumentFor(lineage) : undefined;
+  if (paged && (!original || input.document !== original))
+    throw Error(
+      'POSTWAR_SHARED_PREFIX:EXACT_PREPARED_ORIGINAL_DOCUMENT_REQUIRED',
+    );
+  const document =
+    original ?? validatePostwarSocialEmploymentStateDocument(input.document);
   if (
     document.inputs.worldId !== lineage.worldId ||
     document.inputs.seedId !== lineage.seed.seedId
   )
     throw Error('POSTWAR_SHARED_PREFIX:REAL_ORIGINAL_WORLD_SEED_REQUIRED');
-  const frames = lineage.transitions.map((t) => ({
-    ...t,
-    events: t.transition.events,
-  }));
+  const frames =
+    lineage.transitions === null
+      ? null
+      : lineage.transitions.map((t) => ({
+          ...t,
+          events: t.transition.events,
+        }));
   const evidence =
+    paged?.view.lastPage.evidence ??
     lineage.mixedPrefixEvidence ??
     prepareFinanceNativeBudgetMixedPrefix(
       {
         worldId: lineage.worldId,
-        frames,
+        frames: frames!,
         socialCountries: document.countries.map((c) => ({
           countryId: c.countryId,
           state: c.state,
@@ -56,12 +71,14 @@ export function replayPostwarSharedOfficePrefix(input: {
       },
       digest,
     );
-  const result = readFinanceNativeBudgetMixedPrefix(
-    evidence,
-    lineage.worldId,
-    frames,
-    digest,
-  );
+  const result =
+    paged?.view.result ??
+    readFinanceNativeBudgetMixedPrefix(
+      evidence,
+      lineage.worldId,
+      frames!,
+      digest,
+    );
   if (
     result.budgetState.worldVersion !== lineage.headWorldVersion ||
     result.budgetState.eventSequence !== lineage.headEventSequence
@@ -135,15 +152,20 @@ export function replayPostwarSharedOfficePrefix(input: {
     if (total.amount.greaterThan(position.netDebitBalance.amount))
       throw Error('POSTWAR_SHARED_PREFIX:GLOBAL_FISCAL_CAPACITY_OVERBOOKED');
   }
-  const prefixFingerprint = hash({
-    worldId: lineage.worldId,
-    seedFingerprint: lineage.seed.fingerprint,
-    headWorldVersion: lineage.headWorldVersion,
-    headEventSequence: lineage.headEventSequence,
-    frames,
-  });
+  const prefixFingerprint =
+    paged?.metadata.prefixFingerprint ??
+    hash({
+      worldId: lineage.worldId,
+      seedFingerprint: lineage.seed.fingerprint,
+      headWorldVersion: lineage.headWorldVersion,
+      headEventSequence: lineage.headEventSequence,
+      frames,
+    });
   const shared = freeze({
     classification: 'CORE_VALIDATED_MIXED_PREFIX_NOT_AUTHORITY' as const,
+    historyMode: paged
+      ? ('PAGED_COMPLETE_V1' as const)
+      : ('BOUNDED_COMPLETE_V1' as const),
     head: {
       worldId: lineage.worldId,
       worldVersion: lineage.headWorldVersion,
@@ -163,26 +185,31 @@ export function replayPostwarSharedOfficePrefix(input: {
     },
     social: {
       countries: result.socialCountries,
-      checkpoints: result.checkpoints,
+      checkpoints: paged ? null : result.checkpoints,
       reservations: result.socialReservations,
     },
     // Full group identities remain visible to consumers; no hidden event filter.
-    frames: frames.map((frame) => ({
-      commandId: frame.command.commandId,
-      countryId: frame.command.countryId,
-      commandType: frame.command.commandType,
-      transitionFingerprint: hash(frame.transition),
-      receiptFingerprint: hash(frame.receipt),
-      eventFingerprints: frame.events.map((e) => e.fingerprint),
-      worldVersionBefore: frame.transition.worldVersionBefore,
-      worldVersionAfter: frame.transition.worldVersionAfter,
-      events: frame.events.map((e) => ({
-        eventId: e.eventId,
-        fingerprint: e.fingerprint,
-        sequence: e.sequence,
-        worldVersion: e.worldVersion,
-      })),
-    })),
+    frames:
+      frames === null
+        ? null
+        : frames.map((frame) => ({
+            commandId: frame.command.commandId,
+            countryId: frame.command.countryId,
+            commandType: frame.command.commandType,
+            transitionFingerprint: hash(frame.transition),
+            receiptFingerprint: hash(frame.receipt),
+            eventFingerprints: frame.events.map((e) => e.fingerprint),
+            worldVersionBefore: frame.transition.worldVersionBefore,
+            worldVersionAfter: frame.transition.worldVersionAfter,
+            events: frame.events.map((e) => ({
+              eventId: e.eventId,
+              fingerprint: e.fingerprint,
+              sequence: e.sequence,
+              worldVersion: e.worldVersion,
+            })),
+          })),
+    ...(paged ? { lastSocialOrigins: paged.metadata.lastSocialOrigins } : {}),
+    knownEffectsFingerprint: paged?.knownEffectsFingerprint ?? hash(frames),
     sourceFootprints: document.countries.map((c) => {
       const ids = new Set(
         document.inputs.labour.positions
@@ -241,12 +268,16 @@ export function deriveCurrentSocialCountryEvidence(
   if (countries.length !== 1)
     throw Error('POSTWAR_SHARED_PREFIX:EXACT_COUNTRY_REQUIRED');
   const country = countries[0]!;
-  const origin = result.frames
-    .filter(
-      (f) =>
-        f.countryId === countryId && f.commandType.startsWith('CORE_SOCIAL_'),
-    )
-    .at(-1);
+  const origin =
+    result.frames === null
+      ? result.lastSocialOrigins?.[countryId]
+      : result.frames
+          .filter(
+            (f) =>
+              f.countryId === countryId &&
+              f.commandType.startsWith('CORE_SOCIAL_'),
+          )
+          .at(-1);
   const originEvent = origin?.events.at(-1) ?? null;
   return freeze({
     countryId,
@@ -290,7 +321,7 @@ export function deriveCurrentSocialCountryEvidence(
       ].sort(),
       source: result.sourceFootprints.find((f) => f.countryId === countryId),
     },
-    knownEffectsFingerprint: hash(result.frames),
+    knownEffectsFingerprint: result.knownEffectsFingerprint,
     classification:
       'DERIVED_COMPLETE_CORE_REPLAY_NOT_SOURCE_ADMISSION' as const,
   });

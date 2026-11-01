@@ -4,7 +4,10 @@
 import { createHash } from 'node:crypto';
 import { DomainError, DOMAIN_ERROR_CODES, worldId } from '@econmind/core';
 import { observeCurrentMaterialization } from './current-materialization-observation.js';
-import type { PostwarSocialReplayLineage } from './prepared-postwar-social-source.js';
+import {
+  readPreparedSocialPagedLineage,
+  type PostwarSocialReplayLineage,
+} from './prepared-postwar-social-source.js';
 import type { SqlExecutor } from './sql-database.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 function invalid(reason: string): never {
@@ -17,8 +20,19 @@ export async function observePostwarSocialMaterialization(input: {
   readonly executor: SqlExecutor;
   readonly lineage: Pick<
     PostwarSocialReplayLineage,
-    'worldId' | 'headWorldVersion' | 'transitions'
-  >;
+    'worldId' | 'headWorldVersion'
+  > &
+    (
+      | {
+          readonly transitions: NonNullable<
+            PostwarSocialReplayLineage['transitions']
+          >;
+        }
+      | Extract<
+          PostwarSocialReplayLineage,
+          { readonly historyMode: 'PAGED_COMPLETE_V1' }
+        >
+    );
   readonly countryId: string;
   readonly kind: 'POSITION' | 'SERVICE';
 }) {
@@ -32,14 +46,46 @@ export async function observePostwarSocialMaterialization(input: {
       ? ['SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1']
       : ['SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1', 'SOCIAL_JOB_MATCH_SETTLED_V1'],
   );
-  const latest = l.transitions
-    .filter((t) => t.command.countryId === input.countryId)
-    .flatMap((t) =>
-      t.transition.events
-        .filter((e) => matching.has(e.eventType))
-        .map((event) => ({ entry: t, event })),
-    )
-    .at(-1);
+  const paged =
+    l.transitions === null ? readPreparedSocialPagedLineage(l) : undefined;
+  const latest =
+    l.transitions === null
+      ? null
+      : l.transitions
+          .filter((t) => t.command.countryId === input.countryId)
+          .flatMap((t) =>
+            t.transition.events
+              .filter((e) => matching.has(e.eventType))
+              .map((event) => ({ entry: t, event })),
+          )
+          .at(-1);
+  const expected =
+    paged?.metadata.socialMaterializations[input.countryId]?.[input.kind] ??
+    (latest
+      ? (() => {
+          const payload: unknown = JSON.parse(latest.event.canonicalPayload);
+          if (
+            payload === null ||
+            typeof payload !== 'object' ||
+            Array.isArray(payload)
+          )
+            invalid('CANONICAL_ORIGIN_PAYLOAD_REQUIRED');
+          const afterStateHash = (payload as Readonly<Record<string, unknown>>)
+            .afterStateHash;
+          if (
+            latest.entry.receipt.outcome !== 'COMMITTED' ||
+            latest.event.causationCommandId !==
+              latest.entry.command.commandId ||
+            typeof afterStateHash !== 'string'
+          )
+            invalid('CACHE_DIFFERS_FROM_LAST_CANONICAL_DOMAIN_EVENT');
+          return {
+            sourceCommandId: latest.entry.command.commandId,
+            worldVersion: latest.event.worldVersion,
+            afterStateHash,
+          };
+        })()
+      : null);
   const bounded = await input.executor.query<{ bounded: boolean }>(
     'select coalesce(bool_and(octet_length(canonical_payload)<=1048576),true) as bounded from world_v2.current_materialization where world_id=$1 and materialization_key=$2',
     [l.worldId, key],
@@ -53,22 +99,14 @@ export async function observePostwarSocialMaterialization(input: {
     expectedWorldVersion: l.headWorldVersion,
     sha256Hex: sha,
   });
-  if (!latest) {
+  if (!expected) {
     if (observation.valueWorldVersion !== null)
       invalid('CACHE_WITHOUT_CANONICAL_DOMAIN_ORIGIN');
     return observation;
   }
-  const payload: unknown = JSON.parse(latest.event.canonicalPayload);
-  if (payload === null || typeof payload !== 'object' || Array.isArray(payload))
-    invalid('CANONICAL_ORIGIN_PAYLOAD_REQUIRED');
-  const afterStateHash = (payload as Readonly<Record<string, unknown>>)
-    .afterStateHash;
   if (
-    latest.entry.receipt.outcome !== 'COMMITTED' ||
-    latest.event.causationCommandId !== latest.entry.command.commandId ||
-    observation.valueWorldVersion !== latest.event.worldVersion ||
-    typeof afterStateHash !== 'string' ||
-    observation.payloadHash !== afterStateHash ||
+    observation.valueWorldVersion !== expected.worldVersion ||
+    observation.payloadHash !== expected.afterStateHash ||
     observation.canonicalPayload === null
   )
     invalid('CACHE_DIFFERS_FROM_LAST_CANONICAL_DOMAIN_EVENT');
@@ -78,7 +116,7 @@ export async function observePostwarSocialMaterialization(input: {
   );
   if (
     source.rows.length !== 1 ||
-    source.rows[0]?.source_command_id !== latest.entry.command.commandId
+    source.rows[0]?.source_command_id !== expected.sourceCommandId
   )
     invalid('CACHE_SOURCE_COMMAND_DIFFERS_FROM_COMMITTED_ORIGIN');
   // Observe helper already hashes the exact canonical payload; matching the

@@ -1,3 +1,4 @@
+import type { PreparedBeneficialHousingRentSource } from './postwar-beneficial-housing-rent-source.js';
 /** Fixed approved first-day quote custody. Publication derives all originals
  * from the actual new-World seed; a reader/DTO/Ready flag cannot publish. */
 import { createHash } from 'node:crypto';
@@ -29,6 +30,12 @@ export const POSTWAR_DAY_ONE_FX_CUSTODY_PROPOSAL =
   'database/proposals/postwar-day-one-fx-custody.sql';
 export const POSTWAR_DAY_ONE_FX_SEED_FINGERPRINT =
   'sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274';
+/** Exact offline-validated new-scenario child; never an existing-World upgrade. */
+export const POSTWAR_DAY_ONE_FX_BENEFICIAL_CHILD_FINGERPRINT =
+  'sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a';
+const supportedOpening = (fingerprint: string) =>
+  fingerprint === POSTWAR_DAY_ONE_FX_SEED_FINGERPRINT ||
+  fingerprint === POSTWAR_DAY_ONE_FX_BENEFICIAL_CHILD_FINGERPRINT;
 export const POSTWAR_DAY_ONE_FX_RETAINED_SOURCES = Object.freeze({
   POSTWAR_SUPPLY_SOURCE_02C3D68F539B5E945DFA99AA9BC4536FC4ACAD34:
     'sha256:3df2e5ffc29cf305fd6dd735551cf37caa87e4fddcad619fdbf17beaa208a799',
@@ -77,7 +84,7 @@ export async function lockPostwarDayOneFxOriginalFrom(
     readonly observedAtReal: string;
   },
 ): Promise<Readonly<PostwarDayOneFxLockedOriginal>> {
-  if (input.seedFingerprint !== POSTWAR_DAY_ONE_FX_SEED_FINGERPRINT)
+  if (!supportedOpening(input.seedFingerprint))
     invalid('FIXED_ADOPTED_NEW_WORLD_REQUIRED');
   const result = await tx
     .query(POSTWAR_DAY_ONE_FX_ORIGINAL_LOCK_QUERY, [
@@ -146,18 +153,27 @@ export async function lockPostwarDayOneFxOriginalFrom(
 export async function publishPostwarDayOneFxOriginals(input: {
   readonly database: SqlDatabase;
   readonly seed: OpeningSeed;
+  readonly startupBeneficialHousingRentSource?: PreparedBeneficialHousingRentSource;
   readonly policyBytes: string;
   readonly userReceiptBytes: string;
 }) {
   const policy = createPostwarDayOneFxPolicy(input);
-  if (policy.seedFingerprint !== POSTWAR_DAY_ONE_FX_SEED_FINGERPRINT)
+  if (!supportedOpening(policy.seedFingerprint))
     invalid('FIXED_ADOPTED_NEW_WORLD_REQUIRED');
   const retainedSources = Object.fromEntries(
     input.seed.sources.map((s) => [s.sourceId, s.payloadHash]),
   );
   if (
-    canonicalSerialize(retainedSources) !==
-    canonicalSerialize(POSTWAR_DAY_ONE_FX_RETAINED_SOURCES)
+    Object.entries(POSTWAR_DAY_ONE_FX_RETAINED_SOURCES).some(
+      ([key, value]) => retainedSources[key] !== value,
+    ) ||
+    Object.keys(retainedSources).length !==
+      (policy.seedFingerprint === POSTWAR_DAY_ONE_FX_SEED_FINGERPRINT
+        ? 4
+        : 74) ||
+    (policy.seedFingerprint ===
+      POSTWAR_DAY_ONE_FX_BENEFICIAL_CHILD_FINGERPRINT &&
+      !input.startupBeneficialHousingRentSource)
   )
     invalid('EXACT_FOUR_SOURCE_ORIGINALS_REQUIRED');
   const { fingerprint: _fingerprint, ...intent } = input.seed;

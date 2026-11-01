@@ -30,6 +30,12 @@ import {
 } from './postwar-captain-history-originals.js';
 import { readCentralBankOmoCommittedOriginalsFrom } from './postgres-central-bank-omo-history.js';
 import { readPostwarBeneficialHousingRentMixedOriginalsForSocialBase } from './postwar-beneficial-housing-rent-mixed-source.js';
+import {
+  readPostwarPagedCaptainHistoryOriginalsFrom,
+  readPostwarPagedOmoHistoryOriginalsFrom,
+} from './postwar-paged-office-history-originals.js';
+import { readPostwarIndustryRunPageOriginalsFrom } from './postwar-industry-run-originals.js';
+import { readPostwarIndustryOperatingWagePageOriginalsFrom } from './postwar-industry-operating-wage-originals.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 function invalid(reason: string): never {
   throw new DomainError(
@@ -64,7 +70,7 @@ export function projectPostwarOpeningFinancialEncumbrances(
     ),
   );
 }
-export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
+export interface PreparedPostwarFinanceSocialFxReplayRequest {
   readonly executor: SqlExecutor;
   readonly baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>;
   readonly worldId: string;
@@ -79,15 +85,52 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
   readonly seedFingerprint: string;
   readonly admissionRef: string;
   readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+  readonly pageBoundary?: Readonly<{
+    fromHead: { readonly worldVersion: string; readonly eventSequence: string };
+    throughHead: {
+      readonly worldVersion: string;
+      readonly eventSequence: string;
+    };
+  }>;
   readonly expectedHead: Readonly<{
     worldVersion: string;
     eventSequence: string;
   }>;
-}): Promise<
-  PreparedFinanceSocialFxReplayResult & {
-    readonly captainOriginalStatus?: PostwarCaptainOriginalStatus;
-  }
-> {
+}
+export interface PreparedPostwarFinanceSocialFxPageOriginals {
+  readonly industryWorkSources?: NonNullable<
+    Parameters<
+      typeof replayPreparedFinanceSocialFxLedger
+    >[0]['industryWorkSources']
+  >;
+  readonly industryWageSources?: NonNullable<
+    Parameters<
+      typeof replayPreparedFinanceSocialFxLedger
+    >[0]['industryWageSources']
+  >;
+  readonly fxOriginals: Parameters<
+    typeof replayPreparedFinanceSocialFxLedger
+  >[0]['fxOriginals'];
+  readonly captainCountries?: NonNullable<
+    Parameters<
+      typeof replayPreparedFinanceSocialFxLedger
+    >[0]['captainCountries']
+  >;
+  readonly omoOriginals?: NonNullable<
+    Parameters<typeof replayPreparedFinanceSocialFxLedger>[0]['omoOriginals']
+  >;
+  readonly beneficialHousingRentReceipts?: NonNullable<
+    Parameters<
+      typeof replayPreparedFinanceSocialFxLedger
+    >[0]['beneficialHousingRentReceipts']
+  >;
+  readonly captainOriginalStatus?: PostwarCaptainOriginalStatus;
+}
+/** Same fixed original getters and lock semantics, scoped to one complete
+ * canonical page. No frame is interpreted as inert or removed from Core replay. */
+export async function readPreparedPostwarFinanceSocialFxPageOriginalsFrom(
+  input: PreparedPostwarFinanceSocialFxReplayRequest,
+): Promise<Readonly<PreparedPostwarFinanceSocialFxPageOriginals>> {
   const b = consumePreparedPostwarSocialFinancialReplayBase(input.baseline);
   if (
     b.pins.worldId !== input.worldId ||
@@ -230,10 +273,36 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
     expectedHead: input.expectedHead,
     frames: input.frames,
   };
+  const pagedScope =
+    input.pageBoundary === undefined
+      ? undefined
+      : ({
+          ...scope,
+          ...input.pageBoundary,
+          sourceMetadata: b.sourceMetadata,
+          mode: input.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
+        } as const);
+  const pagedCaptain =
+    pagedScope !== undefined &&
+    (input.captainCountryId !== undefined ||
+      input.frames.some(
+        (f) =>
+          f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+      ))
+      ? await readPostwarPagedCaptainHistoryOriginalsFrom(
+          input.executor,
+          pagedScope,
+        )
+      : undefined;
   const current =
     input.captainCountryId === undefined
       ? null
-      : await readPostwarCaptainCurrentOriginalsFrom(input.executor, scope);
+      : pagedCaptain !== undefined
+        ? {
+            status: pagedCaptain.captainOriginalStatus,
+            captainCountries: pagedCaptain.captainCountries,
+          }
+        : await readPostwarCaptainCurrentOriginalsFrom(input.executor, scope);
   if (current?.status === 'REVOKED') invalid('CAPTAIN_CURRENT_SOURCE_REVOKED');
   if (
     current?.status === 'NO_REGISTERED_CAPTAIN_ORIGINAL' &&
@@ -246,6 +315,7 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
   )
     invalid('CAPTAIN_CURRENT_REGISTERED_GENESIS_REQUIRED');
   const selected =
+    pagedCaptain?.captainCountries ??
     current?.captainCountries ??
     (input.frames.some(
       (f) => f.command.commandType === 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
@@ -253,18 +323,52 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
       ? await readPostwarCaptainHistoryOriginalsFrom(input.executor, scope)
       : undefined);
   const captainCountries = selected?.length ? selected : undefined;
-  const omoHistory = input.frames.some(
+  const hasOmo = input.frames.some(
     (f) => f.command.commandType === CENTRAL_BANK_OMO_COMMAND,
-  )
-    ? await readCentralBankOmoCommittedOriginalsFrom(input.executor, {
-        ...scope,
-        mode: input.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
-      })
-    : undefined;
+  );
+  const omoHistory =
+    hasOmo && pagedScope === undefined
+      ? await readCentralBankOmoCommittedOriginalsFrom(input.executor, {
+          ...scope,
+          mode: input.omoOriginalMode ?? 'OFFICIAL_RUNTIME',
+        })
+      : undefined;
+  const omoOriginals =
+    hasOmo && pagedScope !== undefined
+      ? await readPostwarPagedOmoHistoryOriginalsFrom(
+          input.executor,
+          pagedScope,
+        )
+      : omoHistory?.countries.map((c) => ({
+          ...c.original,
+          quotes: c.quotes.map((q) => q.quote),
+        }));
   const beneficialHousingRentReceipts =
     readPostwarBeneficialHousingRentMixedOriginalsForSocialBase(input.baseline);
-  for (const country of omoHistory?.countries ?? []) {
-    const q = country.original.valuationQuote;
+  const industry = await readPostwarIndustryRunPageOriginalsFrom(
+    input.executor,
+    {
+      baseline: input.baseline,
+      worldId: input.worldId,
+      hostCountryId: input.hostCountryId,
+      officeId: input.officeId,
+      expectedHead: input.expectedHead,
+      frames: input.frames,
+    },
+  );
+  const wage = await readPostwarIndustryOperatingWagePageOriginalsFrom(
+    input.executor,
+    {
+      baseline: input.baseline,
+      worldId: input.worldId,
+      hostCountryId: input.hostCountryId,
+      officeId: input.officeId,
+      expectedHead: input.expectedHead,
+      frames: input.frames,
+    },
+  );
+  for (const original of omoOriginals ?? []) {
+    const q = original.valuationQuote;
     if (
       q !== undefined &&
       [
@@ -279,32 +383,73 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(input: {
     )
       invalid('historical OMO valuation differs from genuine H0 source hashes');
   }
-  const result = replayPreparedFinanceSocialFxLedger({
-    prepared: b.prepared,
-    frames: input.frames,
-    socialCountries: b.document.countries.map((c) => ({
-      countryId: c.countryId,
-      state: c.state,
-      offers: c.offers,
-    })),
-    openingEncumbrances: projectPostwarOpeningFinancialEncumbrances(b.funding),
+  return Object.freeze({
     fxOriginals: originals,
+    ...(industry.industryWorkSources.length === 0
+      ? {}
+      : { industryWorkSources: industry.industryWorkSources }),
+    ...(wage.industryWageSources.length === 0
+      ? {}
+      : { industryWageSources: wage.industryWageSources }),
     ...(captainCountries === undefined ? {} : { captainCountries }),
-    ...(omoHistory === undefined
+    ...(omoOriginals === undefined
       ? {}
       : {
-          omoOriginals: omoHistory.countries.map((c) => ({
-            ...c.original,
-            quotes: c.quotes.map((q) => q.quote),
-          })),
+          omoOriginals,
         }),
     ...(beneficialHousingRentReceipts === undefined
       ? {}
       : { beneficialHousingRentReceipts }),
-    expectedHead: input.expectedHead,
-    sha256Hex: sha,
+    ...(current === null ? {} : { captainOriginalStatus: current.status }),
   });
-  return current
-    ? Object.freeze({ ...result, captainOriginalStatus: current.status })
-    : result;
+}
+/** Legacy bounded complete-prefix entry remains compatible. The paged source
+ * consumes the same fixed originals above with the Core private continuation. */
+export async function replayPreparedPostwarFinanceSocialFxFrom(
+  input: PreparedPostwarFinanceSocialFxReplayRequest,
+): Promise<
+  PreparedFinanceSocialFxReplayResult & {
+    readonly captainOriginalStatus?: PostwarCaptainOriginalStatus;
+  }
+> {
+  const b = consumePreparedPostwarSocialFinancialReplayBase(input.baseline),
+    facts = await readPreparedPostwarFinanceSocialFxPageOriginalsFrom(input),
+    result = replayPreparedFinanceSocialFxLedger({
+      prepared: b.prepared,
+      frames: input.frames,
+      socialCountries: b.document.countries.map((c) => ({
+        countryId: c.countryId,
+        state: c.state,
+        offers: c.offers,
+      })),
+      openingEncumbrances: projectPostwarOpeningFinancialEncumbrances(
+        b.funding,
+      ),
+      fxOriginals: facts.fxOriginals,
+      ...(facts.industryWorkSources === undefined
+        ? {}
+        : { industryWorkSources: facts.industryWorkSources }),
+      ...(facts.industryWageSources === undefined
+        ? {}
+        : { industryWageSources: facts.industryWageSources }),
+      ...(facts.captainCountries === undefined
+        ? {}
+        : { captainCountries: facts.captainCountries }),
+      ...(facts.omoOriginals === undefined
+        ? {}
+        : { omoOriginals: facts.omoOriginals }),
+      ...(facts.beneficialHousingRentReceipts === undefined
+        ? {}
+        : {
+            beneficialHousingRentReceipts: facts.beneficialHousingRentReceipts,
+          }),
+      expectedHead: input.expectedHead,
+      sha256Hex: sha,
+    });
+  return facts.captainOriginalStatus === undefined
+    ? result
+    : Object.freeze({
+        ...result,
+        captainOriginalStatus: facts.captainOriginalStatus,
+      });
 }

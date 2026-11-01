@@ -17,6 +17,24 @@ import {
   type CentralBankOmoSourceFacts,
   type OmoSecurityHolding,
 } from './central-bank-open-market-operation.js';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_FIRST_DAY_WORK_COMMAND,
+  createIndustryFirstDayWorkState,
+  extendIndustryFirstDayWorkSources,
+  replayIndustryFirstDayRunFrame,
+  readIndustryFirstDayWorkState,
+  readIndustryCompletedWork,
+  type IndustryFirstDayWorkSiteSource,
+  type IndustryFirstDayWorkState,
+} from '../industry/industry-first-day-work.js';
+import {
+  INDUSTRY_OPERATING_WAGE_COMMAND,
+  createIndustryOperatingWageState,
+  replayIndustryOperatingWagePayment,
+  type IndustryOperatingWageSource,
+  type IndustryOperatingWageState,
+} from './industry-operating-wage-payment.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
   POSTWAR_NARROW_GOODS_TYPES,
@@ -241,6 +259,8 @@ export interface FinanceNativeBudgetMixedPrefixResult {
     readonly holdings: readonly OmoSecurityHolding[];
   }[];
   readonly captainCountries?: readonly FinanceNativeBudgetMixedCaptainCountry[];
+  readonly industryWorkState?: IndustryFirstDayWorkState;
+  readonly industryWageState?: Readonly<IndustryOperatingWageState>;
   readonly budgetState: FinanceNativeBudgetState;
   readonly budgetEncumbrances: readonly FinanceNativeBudgetCapacityEncumbrance[];
   readonly socialCountries: readonly FinanceNativeBudgetMixedSocialCountry[];
@@ -267,6 +287,7 @@ const mixedPrefixes = new WeakMap<
     readonly completeFrames?: true;
     readonly financialBase?: Readonly<FinancialLedgerState>;
     readonly result: Readonly<FinanceNativeBudgetMixedPrefixResult>;
+    readonly foldState: MixedPrefixFoldState;
   }
 >();
 interface FinanceNativeBudgetSourceBase {
@@ -278,14 +299,26 @@ interface FinanceNativeBudgetSourceBase {
     readonly amount: string;
     readonly currency: string;
   }[];
-  /** Complete canonical budget prefix from genuine H0. Unknown non-budget
-   * intervening work is refused until its budget effect is explicitly replayed. */
-  readonly frames: readonly FinanceNativeBudgetFrame[];
   readonly worldVersion: string;
   readonly eventSequence: string;
   readonly mixedPrefixEvidence?: FinanceNativeBudgetMixedPrefixEvidence;
 }
 export type FinanceNativeBudgetSource = FinanceNativeBudgetSourceBase &
+  (
+    | {
+        readonly frames: readonly FinanceNativeBudgetFrame[];
+        readonly pagedPrefix?: never;
+      }
+    | {
+        readonly frames: null;
+        readonly pagedPrefix: Readonly<{
+          readonly evidence: FinanceNativeBudgetMixedPrefixEvidence;
+          /** Last-page bytes bind the privately accumulated full fold; these are
+           * explicitly not an all-history frame array or an H0 replacement. */
+          readonly lastPageFrames: readonly FinanceNativeBudgetCanonicalFrame[];
+        }>;
+      }
+  ) &
   (
     | {
         readonly financialState: FinancialLedgerState;
@@ -609,6 +642,7 @@ const financialReplayBases = new WeakMap<
   FinanceNativeBudgetFinancialReplayBase,
   {
     readonly financial: Readonly<FinancialLedgerState>;
+    readonly seedFingerprint?: string;
     readonly inventory?: Readonly<InventoryLedgerState>;
     readonly openingEncumbrances: readonly FinanceSocialFxOpeningEncumbrance[];
     readonly fxOriginals: ReadonlyMap<string, FinanceSocialFxOriginal>;
@@ -616,6 +650,43 @@ const financialReplayBases = new WeakMap<
     readonly beneficialHousingRentOrigins?: readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[];
   }
 >();
+type MixedFinancialReplayData = NonNullable<
+  ReturnType<typeof financialReplayBases.get>
+>;
+interface MixedSocialCountryCursor {
+  countryId: string;
+  lifecycle: SocialPositionOfferLifecycleState;
+  offerOrigins: FinanceNativeBudgetMixedSocialCountry['offerOrigins'][number][];
+}
+/** In-process deterministic data only. It is issued by the same existing fold,
+ * not reconstructed from a snapshot DTO, a supplied head or a database cache. */
+interface MixedPrefixFoldState {
+  readonly industryWorkState: IndustryFirstDayWorkState | undefined;
+  readonly industryWageState: Readonly<IndustryOperatingWageState> | undefined;
+  readonly industryWageSources: ReadonlyMap<
+    string,
+    IndustryOperatingWageSource
+  >;
+  readonly financialReplay: MixedFinancialReplayData | undefined;
+  readonly captainEnabled: boolean;
+  readonly captains: ReadonlyMap<string, CaptainPoliticalCapitalReplayState>;
+  readonly financial: Readonly<FinancialLedgerState> | undefined;
+  readonly inventory: Readonly<InventoryLedgerState> | undefined;
+  readonly goodsEntries: ReadonlyMap<string, PostwarNarrowGoodsReplayEntry>;
+  readonly rentOrigins:
+    readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[] | undefined;
+  readonly omoHoldings: ReadonlyMap<string, readonly OmoSecurityHolding[]>;
+  readonly budget: FinanceNativeBudgetState;
+  readonly countries: ReadonlyMap<string, MixedSocialCountryCursor>;
+  readonly positionCountries: ReadonlyMap<string, string>;
+  readonly poolCountries: ReadonlyMap<string, string>;
+  readonly caps: ReadonlyMap<string, FinanceNativeBudgetCapacityEncumbrance>;
+  readonly commandIds: ReadonlySet<string>;
+  readonly keys: ReadonlySet<string>;
+  readonly eventIds: ReadonlySet<string>;
+  readonly lastSimTime: bigint;
+  readonly originalReferences: ReadonlyMap<string, string>;
+}
 export function prepareFinanceNativeBudgetFinancialReplay(
   input: {
     readonly financial: Readonly<FinancialLedgerState>;
@@ -740,6 +811,9 @@ export function prepareFinanceNativeBudgetFinancialReplay(
       ? undefined
       : createBeneficialHousingRentMixedReplayOrigins({
           financial: base,
+          ...(input.opening === undefined
+            ? {}
+            : { seedFingerprint: input.opening.seedFingerprint }),
           receipts: input.beneficialHousingRentReceipts,
         });
   financialReplayBases.set(token, {
@@ -749,7 +823,10 @@ export function prepareFinanceNativeBudgetFinancialReplay(
     financial: base,
     ...(input.opening === undefined
       ? {}
-      : { inventory: input.opening.inventory }),
+      : {
+          inventory: input.opening.inventory,
+          seedFingerprint: input.opening.seedFingerprint,
+        }),
     openingEncumbrances: Object.freeze(opening),
     fxOriginals: originals,
     omoOriginals,
@@ -821,28 +898,168 @@ export function readFinanceNativeBudgetMixedPrefix(
 /** Whole ordered canonical groups only. The existing Budget/Social reducers
  * establish effects; no caller no-effect classification or filtered/rebased
  * budget prefix exists. All foreign families remain unsupported. */
+export interface FinanceNativeBudgetMixedPrefixInput {
+  readonly worldId: string;
+  readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+  readonly industryWorkSources?: readonly IndustryFirstDayWorkSiteSource[];
+  readonly industryWageSources?: readonly IndustryOperatingWageSource[];
+  readonly financialReplay?: FinanceNativeBudgetFinancialReplayBase;
+  /** Immutable original DATA; no default capital, callback or admission flag. */
+  readonly captainCountries?: readonly {
+    readonly countryId: string;
+    readonly capital: PoliticalCapitalSnapshot;
+  }[];
+  readonly socialCountries: readonly {
+    readonly countryId: string;
+    readonly state: SocialEmploymentServiceState;
+    readonly offers: readonly SocialEmploymentWageOffer[];
+  }[];
+}
 export function prepareFinanceNativeBudgetMixedPrefix(
+  input: FinanceNativeBudgetMixedPrefixInput,
+  sha: Sha256Hex,
+): FinanceNativeBudgetMixedPrefixEvidence {
+  return foldFinanceNativeBudgetMixedPrefix(input, sha);
+}
+/** Continuation data is recoverable only from privately issued complete Core
+ * evidence. Caller-supplied domain state/version cannot enter this seam. */
+export function continueFinanceNativeBudgetMixedPrefix(
   input: {
+    readonly previous: FinanceNativeBudgetMixedPrefixEvidence;
     readonly worldId: string;
     readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
     readonly financialReplay?: FinanceNativeBudgetFinancialReplayBase;
-    /** Immutable original DATA; no default capital, callback or admission flag. */
-    readonly captainCountries?: readonly {
-      readonly countryId: string;
-      readonly capital: PoliticalCapitalSnapshot;
-    }[];
-    readonly socialCountries: readonly {
-      readonly countryId: string;
-      readonly state: SocialEmploymentServiceState;
-      readonly offers: readonly SocialEmploymentWageOffer[];
-    }[];
+    readonly captainCountries?: FinanceNativeBudgetMixedPrefixInput['captainCountries'];
+    readonly industryWorkSources?: FinanceNativeBudgetMixedPrefixInput['industryWorkSources'];
+    readonly industryWageSources?: FinanceNativeBudgetMixedPrefixInput['industryWageSources'];
   },
   sha: Sha256Hex,
 ): FinanceNativeBudgetMixedPrefixEvidence {
+  const issued = mixedPrefixes.get(input.previous);
+  if (
+    !issued ||
+    issued.worldId !== input.worldId ||
+    !issued.completeFrames ||
+    !issued.foldState.financialReplay?.inventory
+  )
+    invalid('GENUINE_PAIRED_COMPLETE_PREFIX_CONTINUATION_REQUIRED');
+  const originalReferences = new Map(issued.foldState.originalReferences);
+  const retainOriginal = (reference: string, value: unknown) => {
+    const fingerprint = hash(value, sha),
+      previous = originalReferences.get(reference);
+    if (previous !== undefined && previous !== fingerprint)
+      invalid('CONTINUATION_IMMUTABLE_ORIGINAL_REFERENCE_CHANGED');
+    originalReferences.set(reference, fingerprint);
+  };
+  let financialReplay = issued.foldState.financialReplay;
+  const omoHoldings = new Map(issued.foldState.omoHoldings),
+    captains = new Map(issued.foldState.captains);
+  if (input.financialReplay !== undefined) {
+    const incoming = financialReplayBases.get(input.financialReplay);
+    if (
+      !incoming ||
+      !financialReplay ||
+      incoming.financial !== financialReplay.financial ||
+      incoming.inventory !== financialReplay.inventory ||
+      !same(incoming.openingEncumbrances, financialReplay.openingEncumbrances)
+    )
+      invalid('CONTINUATION_EXACT_GENUINE_H0_ORIGINALS_REQUIRED');
+    const fxOriginals = new Map(financialReplay.fxOriginals),
+      omoOriginals = new Map(financialReplay.omoOriginals);
+    for (const [ref, original] of incoming.fxOriginals) {
+      retainOriginal('FX:' + ref, original);
+      fxOriginals.set(ref, original);
+    }
+    for (const [countryId, original] of incoming.omoOriginals) {
+      retainOriginal('OMO:' + countryId, { ...original, quotes: [] });
+      for (const quote of original.quotes)
+        retainOriginal('OMO_QUOTE:' + countryId + ':' + quote.quoteRef, quote);
+      // Actual holdings are carried forward. The page only supplies the
+      // immutable H0 source plus this page's genuine quote facts.
+      if (!omoHoldings.has(countryId))
+        omoHoldings.set(countryId, original.holdings);
+      omoOriginals.set(countryId, original);
+    }
+    if (omoOriginals.size > 70)
+      invalid('BOUNDED_OMO_COUNTRY_ORIGINALS_REQUIRED');
+    financialReplay = { ...financialReplay, fxOriginals, omoOriginals };
+  }
+  if ((input.captainCountries?.length ?? 0) > 70)
+    invalid('BOUNDED_EXPLICIT_CAPTAIN_ORIGINALS_REQUIRED');
+  for (const original of input.captainCountries ?? []) {
+    retainOriginal('CAPTAIN:' + original.countryId, original.capital);
+    if (!captains.has(original.countryId)) {
+      const origin = createCaptainPoliticalCapitalReplayOrigin({
+        worldId: input.worldId,
+        ...original,
+      });
+      // A missing country could not have produced a previous Captain frame:
+      // that would already have failed the same complete fold. Prior frames
+      // were genuinely reduced siblings, so Core may synchronize this origin.
+      captains.set(
+        original.countryId,
+        freeze({
+          ...origin,
+          worldVersion: issued.foldState.budget.worldVersion,
+          lastEventSequence: issued.foldState.budget.eventSequence,
+        }),
+      );
+    }
+  }
+  if (captains.size > 70)
+    invalid('BOUNDED_EXPLICIT_CAPTAIN_ORIGINALS_REQUIRED');
+  let industryWorkState = issued.foldState.industryWorkState;
+  if (input.industryWorkSources?.length) {
+    for (const value of input.industryWorkSources) {
+      if (
+        value.seedFingerprint !== financialReplay?.seedFingerprint ||
+        value.worldId !== input.worldId
+      )
+        invalid('INDUSTRY_EXACT_GENUINE_PAIRED_H0_SOURCE_REQUIRED');
+      retainOriginal(
+        'INDUSTRY_WORK:' + value.countryId + ':' + value.facilityId,
+        value,
+      );
+    }
+    industryWorkState = industryWorkState
+      ? extendIndustryFirstDayWorkSources(
+          industryWorkState,
+          input.industryWorkSources,
+        )
+      : createIndustryFirstDayWorkState(input.industryWorkSources);
+  }
+  const industryWageSources = new Map(issued.foldState.industryWageSources);
+  for (const value of input.industryWageSources ?? []) {
+    const key = value.countryId + '\0' + value.facilityId + '\0' + value.runId;
+    retainOriginal('INDUSTRY_WAGE:' + key, value);
+    industryWageSources.set(key, value);
+  }
+  const prior: MixedPrefixFoldState = {
+    ...issued.foldState,
+    industryWorkState,
+    industryWageSources,
+    financialReplay,
+    omoHoldings,
+    captains,
+    originalReferences,
+    captainEnabled: issued.foldState.captainEnabled || captains.size > 0,
+  };
+  return foldFinanceNativeBudgetMixedPrefix(
+    { worldId: input.worldId, frames: input.frames, socialCountries: [] },
+    sha,
+    prior,
+  );
+}
+function foldFinanceNativeBudgetMixedPrefix(
+  input: FinanceNativeBudgetMixedPrefixInput,
+  sha: Sha256Hex,
+  prior?: MixedPrefixFoldState,
+): FinanceNativeBudgetMixedPrefixEvidence {
   const financialReplay =
-    input.financialReplay === undefined
+    prior?.financialReplay ??
+    (input.financialReplay === undefined
       ? undefined
-      : financialReplayBases.get(input.financialReplay);
+      : financialReplayBases.get(input.financialReplay));
   if (
     input.financialReplay !== undefined &&
     (!financialReplay || financialReplay.financial.worldId !== input.worldId)
@@ -850,16 +1067,123 @@ export function prepareFinanceNativeBudgetMixedPrefix(
     invalid('GENUINE_SAME_WORLD_FINANCIAL_REPLAY_REQUIRED');
   if (financialReplay && input.frames.length > 256)
     invalid('BOUNDED_COMPLETE_FINANCIAL_PREFIX_REQUIRED');
-  const captainEnabled = input.captainCountries !== undefined;
   if (
+    (input.industryWorkSources?.length ?? 0) > 2048 ||
+    (input.industryWageSources?.length ?? 0) > 4096
+  )
+    invalid('BOUNDED_INDUSTRY_ORIGINALS_REQUIRED');
+  let industryWorkState =
+    prior?.industryWorkState ??
+    (input.industryWorkSources?.length
+      ? createIndustryFirstDayWorkState(input.industryWorkSources)
+      : undefined);
+  const industryWageSources = new Map<string, IndustryOperatingWageSource>(
+    prior?.industryWageSources,
+  );
+  for (const value of prior ? [] : (input.industryWageSources ?? [])) {
+    const key = value.countryId + '\0' + value.facilityId + '\0' + value.runId;
+    if (industryWageSources.has(key))
+      invalid('UNIQUE_INDUSTRY_WAGE_ORIGINAL_REQUIRED');
+    industryWageSources.set(key, value);
+  }
+  if (
+    industryWorkState &&
+    (!financialReplay?.inventory ||
+      !financialReplay.seedFingerprint ||
+      (input.industryWorkSources ?? []).some(
+        (value) => value.seedFingerprint !== financialReplay.seedFingerprint,
+      ))
+  )
+    invalid('INDUSTRY_EXACT_GENUINE_PAIRED_H0_SOURCE_REQUIRED');
+  let industryWageState = prior?.industryWageState;
+  if (
+    industryWorkState &&
+    !industryWageState &&
+    financialReplay?.seedFingerprint
+  )
+    industryWageState = createIndustryOperatingWageState({
+      financial: financialReplay.financial,
+      seedFingerprint: financialReplay.seedFingerprint,
+    });
+  // The opening reservation is an account aggregate. Only actually paid,
+  // genuinely replayed wage releases reduce that exact immutable reference.
+  // Recompute from the original amount on each frame; never release a carry.
+  const currentOpeningEncumbrances = () => {
+    if (!financialReplay) return [];
+    const originals = new Map(
+      financialReplay.openingEncumbrances.map((r) => [r.reference, r]),
+    );
+    const released = new Map<string, Money>();
+    const seen = new Set<string>();
+    for (const r of industryWageState?.reservationReleases ?? []) {
+      const original = originals.get(r.openingEncumbranceRef);
+      if (
+        !original ||
+        original.accountId !== r.accountId ||
+        original.currency !== r.currency ||
+        seen.has(r.reservationId)
+      )
+        invalid('EXACT_OPENING_WAGE_RESERVATION_RELEASE_REQUIRED');
+      seen.add(r.reservationId);
+      const amount = Money.from(r.amount, r.currency);
+      if (amount.amount.isNegative()) invalid('NEGATIVE_OPENING_WAGE_RELEASE');
+      released.set(
+        original.reference,
+        (released.get(original.reference) ?? Money.from('0', r.currency)).add(
+          amount,
+        ),
+      );
+    }
+    return financialReplay.openingEncumbrances.map((r) => {
+      const paid = released.get(r.reference) ?? Money.from('0', r.currency);
+      const remaining = Money.from(r.amount, r.currency).subtract(paid);
+      if (remaining.amount.isNegative())
+        invalid('WAGE_RELEASE_EXCEEDS_OPENING_RESERVATION');
+      return { ...r, amount: canonicalDecimal(remaining.amount) };
+    });
+  };
+  const captainEnabled =
+    prior?.captainEnabled ?? input.captainCountries !== undefined;
+  if (
+    !prior &&
     captainEnabled &&
     (!input.captainCountries!.length ||
       input.captainCountries!.length > 70 ||
       input.frames.length > 256)
   )
     invalid('BOUNDED_EXPLICIT_CAPTAIN_ORIGINALS_REQUIRED');
-  const captains = new Map<string, CaptainPoliticalCapitalReplayState>();
-  for (const original of input.captainCountries ?? []) {
+  const captains = new Map<string, CaptainPoliticalCapitalReplayState>(
+    prior?.captains,
+  );
+  const originalReferences = new Map(prior?.originalReferences);
+  if (!prior) {
+    for (const value of input.industryWorkSources ?? [])
+      originalReferences.set(
+        'INDUSTRY_WORK:' + value.countryId + ':' + value.facilityId,
+        hash(value, sha),
+      );
+    for (const [key, value] of industryWageSources)
+      originalReferences.set('INDUSTRY_WAGE:' + key, hash(value, sha));
+    for (const [ref, original] of financialReplay?.fxOriginals ?? [])
+      originalReferences.set('FX:' + ref, hash(original, sha));
+    for (const [countryId, original] of financialReplay?.omoOriginals ?? []) {
+      originalReferences.set(
+        'OMO:' + countryId,
+        hash({ ...original, quotes: [] }, sha),
+      );
+      for (const quote of original.quotes)
+        originalReferences.set(
+          'OMO_QUOTE:' + countryId + ':' + quote.quoteRef,
+          hash(quote, sha),
+        );
+    }
+    for (const original of input.captainCountries ?? [])
+      originalReferences.set(
+        'CAPTAIN:' + original.countryId,
+        hash(original.capital, sha),
+      );
+  }
+  for (const original of prior ? [] : (input.captainCountries ?? [])) {
     if (captains.has(original.countryId))
       invalid('UNIQUE_CAPTAIN_COUNTRY_ORIGINAL_REQUIRED');
     captains.set(
@@ -870,34 +1194,36 @@ export function prepareFinanceNativeBudgetMixedPrefix(
       }),
     );
   }
-  let financial = financialReplay?.financial;
-  let inventory = financialReplay?.inventory;
+  let financial = prior?.financial ?? financialReplay?.financial;
+  let inventory = prior?.inventory ?? financialReplay?.inventory;
   let goodsEntries: ReadonlyMap<string, PostwarNarrowGoodsReplayEntry> =
-    new Map();
-  let rentOrigins = financialReplay?.beneficialHousingRentOrigins;
+    new Map(prior?.goodsEntries);
+  let rentOrigins =
+    prior?.rentOrigins ?? financialReplay?.beneficialHousingRentOrigins;
   const omoHoldings = new Map<string, readonly OmoSecurityHolding[]>(
-    [...(financialReplay?.omoOriginals ?? [])].map(([countryId, original]) => [
-      countryId,
-      original.holdings,
-    ]),
+    prior?.omoHoldings ??
+      [...(financialReplay?.omoOriginals ?? [])].map(
+        ([countryId, original]) => [countryId, original.holdings],
+      ),
   );
-  let budget: FinanceNativeBudgetState = {
+  let budget: FinanceNativeBudgetState = prior?.budget ?? {
     worldId: input.worldId,
     worldVersion: '0',
     eventSequence: '0',
     envelopes: [],
   };
-  const countries = new Map<
-    string,
-    {
-      countryId: string;
-      lifecycle: SocialPositionOfferLifecycleState;
-      offerOrigins: FinanceNativeBudgetMixedSocialCountry['offerOrigins'][number][];
-    }
-  >();
-  const positionCountries = new Map<string, string>(),
-    poolCountries = new Map<string, string>();
-  for (const c of input.socialCountries) {
+  const countries = new Map<string, MixedSocialCountryCursor>(
+    [...(prior?.countries ?? [])].map(([id, country]) => [
+      id,
+      {
+        ...country,
+        offerOrigins: [...country.offerOrigins],
+      },
+    ]),
+  );
+  const positionCountries = new Map<string, string>(prior?.positionCountries),
+    poolCountries = new Map<string, string>(prior?.poolCountries);
+  for (const c of prior ? [] : input.socialCountries) {
     if (countries.has(c.countryId) || c.state.worldId !== input.worldId)
       invalid('UNIQUE_SAME_WORLD_SOCIAL_ORIGINALS_REQUIRED');
     for (const p of c.state.labour.positions) {
@@ -925,13 +1251,15 @@ export function prepareFinanceNativeBudgetMixedPrefix(
       offerOrigins: [],
     });
   }
-  const caps = new Map<string, FinanceNativeBudgetCapacityEncumbrance>();
+  const caps = new Map<string, FinanceNativeBudgetCapacityEncumbrance>(
+    prior?.caps,
+  );
   const checkpoints: FinanceNativeBudgetMixedPrefixResult['checkpoints'][number][] =
     [];
-  const commandIds = new Set<string>(),
-    keys = new Set<string>(),
-    eventIds = new Set<string>();
-  let lastSimTime = 0n;
+  const commandIds = new Set<string>(prior?.commandIds),
+    keys = new Set<string>(prior?.keys),
+    eventIds = new Set<string>(prior?.eventIds);
+  let lastSimTime = prior?.lastSimTime ?? 0n;
   for (const frame of input.frames) {
     const command = validateCanonicalCommand(frame.command, sha);
     if (
@@ -952,6 +1280,9 @@ export function prepareFinanceNativeBudgetMixedPrefix(
           financialReplay &&
           (command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND ||
             command.commandType === CENTRAL_BANK_OMO_COMMAND ||
+            (command.commandType === INDUSTRY_OPERATING_WAGE_COMMAND &&
+              industryWorkState !== undefined &&
+              industryWageState !== undefined) ||
             (inventory && command.commandType === 'CORE_GOODS_DELIVERY_V1') ||
             (command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND &&
               rentOrigins !== undefined))
@@ -999,7 +1330,76 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         invalid('COMPLETE_UNIQUE_MIXED_EVENT_SEQUENCE_REQUIRED');
       eventIds.add(event.eventId);
     }
-    if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND) {
+    if (
+      command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+      command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND
+    ) {
+      if (!industryWorkState)
+        invalid('ACTUAL_INDUSTRY_WORK_ORIGINALS_REQUIRED');
+      industryWorkState = replayIndustryFirstDayRunFrame(
+        { state: industryWorkState, frame },
+        sha,
+      ).state;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events.at(-1)!.sequence,
+      });
+    } else if (command.commandType === INDUSTRY_OPERATING_WAGE_COMMAND) {
+      if (!industryWorkState || !industryWageState || !financial)
+        invalid('ACTUAL_INDUSTRY_WORK_AND_FINANCIAL_REQUIRED');
+      const payload = JSON.parse(command.canonicalPayload) as {
+        workEventId?: unknown;
+        workEventFingerprint?: unknown;
+      };
+      const selected = readIndustryFirstDayWorkState(
+        industryWorkState,
+      ).completedWorks.filter((token) => {
+        const w = readIndustryCompletedWork(token);
+        return (
+          w.frame.events[0]?.eventId === payload.workEventId &&
+          w.frame.events[0]?.fingerprint === payload.workEventFingerprint
+        );
+      });
+      if (selected.length !== 1)
+        invalid('EXACT_ACTUAL_COMPLETED_WORK_REQUIRED');
+      const work = selected[0]!,
+        data = readIndustryCompletedWork(work).data,
+        key = data.countryId + '\0' + data.facilityId + '\0' + data.runId,
+        source = industryWageSources.get(key);
+      if (
+        !source ||
+        source.seedFingerprint !== financialReplay?.seedFingerprint
+      )
+        invalid('ACTUAL_INDUSTRY_WAGE_SOURCE_REQUIRED');
+      const beneficiary = financialReplay.beneficialHousingRentOrigins?.find(
+        (o) => o.receipt.countryId === source.countryId,
+      )?.receipt;
+      const paid = replayIndustryOperatingWagePayment({
+        command,
+        source,
+        work,
+        state: industryWageState,
+        financial,
+        ...(beneficiary === undefined
+          ? {}
+          : { beneficialReceipt: beneficiary }),
+        sha256Hex: sha,
+        step: {
+          command,
+          transition,
+          financialPostingBatches: frame.financialPostingBatches,
+          inventoryPostings: [],
+        },
+      });
+      industryWageState = paid.state;
+      financial = paid.financial;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events.at(-1)!.sequence,
+      });
+    } else if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND) {
       budget = replayBudgetFrame(budget, frame, sha);
       const body = JSON.parse(frame.events[0]!.canonicalPayload) as {
         payload: BudgetPayload;
@@ -1235,7 +1635,7 @@ export function prepareFinanceNativeBudgetMixedPrefix(
       };
       let treasuryReserved = Money.from('0', q.localCurrency),
         bankReserved = Money.from('0', 'GCU');
-      for (const r of financialReplay.openingEncumbrances) {
+      for (const r of currentOpeningEncumbrances()) {
         if (r.accountId === original.treasuryAsset.accountId)
           treasuryReserved = treasuryReserved.add(
             Money.from(r.amount, r.currency),
@@ -1455,7 +1855,7 @@ export function prepareFinanceNativeBudgetMixedPrefix(
           (amounts.get(id) ?? Money.from('0', currency)).add(value),
         );
       };
-      for (const r of financialReplay.openingEncumbrances)
+      for (const r of currentOpeningEncumbrances())
         reserve(r.reference, r.accountId, r.currency, r.amount);
       for (const r of caps.values())
         reserve(
@@ -1510,6 +1910,8 @@ export function prepareFinanceNativeBudgetMixedPrefix(
         });
     }
   const result = freeze({
+    ...(industryWorkState === undefined ? {} : { industryWorkState }),
+    ...(industryWageState === undefined ? {} : { industryWageState }),
     ...(inventory === undefined
       ? {}
       : {
@@ -1557,6 +1959,29 @@ export function prepareFinanceNativeBudgetMixedPrefix(
       ? {}
       : { completeFrames: true as const }),
     ...(financialReplay ? { financialBase: financialReplay.financial } : {}),
+    foldState: {
+      industryWorkState,
+      industryWageState,
+      industryWageSources,
+      financialReplay,
+      captainEnabled,
+      captains,
+      financial,
+      inventory,
+      goodsEntries,
+      rentOrigins,
+      omoHoldings,
+      budget,
+      countries,
+      positionCountries,
+      poolCountries,
+      caps,
+      commandIds,
+      keys,
+      eventIds,
+      lastSimTime,
+      originalReferences,
+    },
     result,
   });
   return evidence;
@@ -1605,21 +2030,39 @@ export function evaluateFinanceNativeBudgetSource(input: {
   const { command, source, sha256Hex: sha } = input,
     p = payload(command, sha);
   checkedPolicy(command, p, source.policy, source.binding, sha);
+  const paged = source.frames === null ? source.pagedPrefix : undefined,
+    witnessFrames = paged?.lastPageFrames ?? source.frames,
+    evidence = paged?.evidence ?? source.mixedPrefixEvidence,
+    pagedMeta =
+      paged === undefined ? undefined : mixedPrefixes.get(paged.evidence);
   if (
-    source.frames.some(
-      (frame) =>
+    !Array.isArray(witnessFrames) ||
+    (paged !== undefined &&
+      (!pagedMeta?.completeFrames ||
+        !pagedMeta.foldState.financialReplay?.inventory ||
+        pagedMeta.worldId !== command.worldId ||
+        (source.mixedPrefixEvidence !== undefined &&
+          source.mixedPrefixEvidence !== paged.evidence)))
+  )
+    invalid('GENUINE_COMPLETE_PAGED_BUDGET_SOURCE_REQUIRED');
+  if (
+    (pagedMeta !== undefined &&
+      command.simTime.ticks < pagedMeta.foldState.lastSimTime) ||
+    witnessFrames.some(
+      (frame: FinanceNativeBudgetFrame) =>
         frame.command.simTime.ticks > command.simTime.ticks ||
         frame.events.some(
-          (event) => event.simTime.ticks > command.simTime.ticks,
+          (event: FinanceNativeBudgetFrame['events'][number]) =>
+            event.simTime.ticks > command.simTime.ticks,
         ),
     )
   )
     invalid('COMMAND_PRECEDES_ACTUAL_PREFIX');
   const before = replayFinanceNativeBudgetHistory(
     command.worldId,
-    source.frames,
+    witnessFrames,
     sha,
-    source.mixedPrefixEvidence,
+    evidence,
   );
   if (
     before.worldVersion !== command.expectedWorldVersion ||
@@ -1628,12 +2071,12 @@ export function evaluateFinanceNativeBudgetSource(input: {
   )
     invalid('ACTUAL_CANONICAL_SOURCE_HEAD_REQUIRED');
   const mixed =
-    source.mixedPrefixEvidence === undefined
+    evidence === undefined
       ? undefined
       : readFinanceNativeBudgetMixedPrefix(
-          source.mixedPrefixEvidence,
+          evidence,
           command.worldId,
-          source.frames,
+          witnessFrames,
           sha,
         );
   if (
@@ -1785,7 +2228,11 @@ export function evaluateFinanceNativeBudgetSource(input: {
   )
     invalid('INSUFFICIENT_UNENCUMBERED_FISCAL_CAPACITY');
   if (
-    source.frames.some(
+    (pagedMeta !== undefined &&
+      (pagedMeta.foldState.commandIds.has(command.commandId) ||
+        (command.idempotencyKey !== null &&
+          pagedMeta.foldState.keys.has(command.idempotencyKey)))) ||
+    witnessFrames.some(
       (f) =>
         f.command.commandId === command.commandId ||
         f.command.idempotencyKey === command.idempotencyKey,

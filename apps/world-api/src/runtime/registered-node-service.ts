@@ -1,10 +1,9 @@
+import { loadPostwarIndustryRuntimeSourceContext } from '@econmind/world-worker/postwar-industry-runtime-source';
 /** Fixed deployment assembly. Credentials are platform environment bindings;
  * the configuration file contains only reviewed identities and immutable pins. */
-import { createHash } from 'node:crypto';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Pool } from 'pg';
-import { parseOpeningSeed } from '@econmind/core';
 import {
   createPostwarSocialRuntimeConnection,
   loadPostwarSocialConnectionOpeningAdoption,
@@ -17,7 +16,10 @@ import {
   createRegisteredWorldExecutionClock,
   createServerCommandHostBinding,
 } from '@econmind/world-worker/runtime-command-host';
-import { createProductionPostwarFinanceSocialRuntimeConnection } from '@econmind/world-worker/finance-social-runtime-connection';
+import {
+  createProductionPostwarFinanceSocialRuntimeConnection,
+  type PostwarFinanceSocialRuntimeConnection,
+} from '@econmind/world-worker/finance-social-runtime-connection';
 import { createPostgresWorldActorResolver } from '../integration/postgres-world-actor-registry.js';
 import { startRegisteredPostwarOfficeNodeBootstrap } from './registered-postwar-office-node-bootstrap.js';
 import { ownedPool } from './postwar-office-node-bootstrap.js';
@@ -25,9 +27,10 @@ import {
   parseRegisteredNodeConfiguration,
   registeredNodeDatabaseUrls,
 } from './registered-node-configuration.js';
-
-const sha = (bytes: string | Buffer) =>
-  createHash('sha256').update(bytes).digest('hex');
+import {
+  loadRegisteredNodeStartupArtifacts,
+  retireRegisteredNodeRentSourceAfterDrain,
+} from './registered-node-beneficial-rent-loader.js';
 
 export async function startConfiguredRegisteredNodeService(input: {
   readonly repositoryRoot: string;
@@ -39,34 +42,20 @@ export async function startConfiguredRegisteredNodeService(input: {
   );
   if (input.environment.ECONMIND_ENV !== c.environment)
     throw Error('NODE_EXACT_ENVIRONMENT_REQUIRED');
-  const urls = registeredNodeDatabaseUrls(input.environment);
-  if ((await stat(c.seedPath)).size > 256 * 1024 * 1024)
-    throw Error('NODE_SEED_ARTIFACT_TOO_LARGE');
-  const bytes = await readFile(c.seedPath);
-  if (sha(bytes) !== c.seedFileSha256)
-    throw Error('NODE_SEED_FILE_HASH_MISMATCH');
-  const seed = parseOpeningSeed(JSON.parse(bytes.toString('utf8')), sha);
-  if (seed.worldId !== c.read.admittedWorldPins.worldId)
-    throw Error('NODE_SEED_WORLD_MISMATCH');
-  const [openingAdoption, policyBytes, userReceiptBytes] = await Promise.all([
-    loadPostwarSocialConnectionOpeningAdoption(input.repositoryRoot),
-    readFile(
-      path.join(
-        input.repositoryRoot,
-        'config/postwar-genesis/day-one-fx.v1.json',
-      ),
-      'utf8',
-    ),
-    readFile(
-      path.join(
-        input.repositoryRoot,
-        'docs/governance/owner-inputs/2026-10-29/DAY_ONE_FX_USER_ADOPTION.original.json',
-      ),
-      'utf8',
-    ),
-  ]);
-  const pool = (connectionString: string) =>
-    ownedPool(
+  const urls = registeredNodeDatabaseUrls(input.environment, {
+    industryPublisher: c.install?.industry === true,
+  });
+  const loaded = await loadRegisteredNodeStartupArtifacts({
+    seedPath: c.seedPath,
+    seedFileSha256: c.seedFileSha256,
+    worldId: c.read.admittedWorldPins.worldId,
+    ...(c.beneficialRent ? { beneficialRent: c.beneficialRent } : {}),
+  });
+  const seed = loaded.seed,
+    rentSource = loaded.beneficialRentSource;
+  const createdPools: ReturnType<typeof ownedPool>[] = [];
+  const pool = (connectionString: string) => {
+    const owned = ownedPool(
       new Pool({
         connectionString,
         ssl: { rejectUnauthorized: true },
@@ -76,12 +65,8 @@ export async function startConfiguredRegisteredNodeService(input: {
         application_name: 'econmind-registered-node',
       }),
     );
-  const pools = {
-    read: pool(urls.read),
-    intake: pool(urls.intake),
-    source: pool(urls.source),
-    worker: pool(urls.worker),
-    publication: pool(urls.publication),
+    createdPools.push(owned);
+    return owned;
   };
   let source:
     ReturnType<typeof createPostwarSocialRuntimeConnection> | undefined;
@@ -92,30 +77,77 @@ export async function startConfiguredRegisteredNodeService(input: {
     | Awaited<ReturnType<typeof startRegisteredPostwarOfficeNodeBootstrap>>
     | undefined;
   let closing: Promise<void> | undefined;
+  let proofExposedToOwner = false;
   const shutdown = (): Promise<void> => {
     closing ??= (async () => {
       const errors: unknown[] = [];
+      let drained = !binding;
       for (const stop of [
         () => node?.shutdown(),
-        () => binding?.stop(),
-        () => source?.close(),
+        async () => {
+          if (binding) {
+            await binding.stop();
+            drained = true;
+          } else await source?.close();
+        },
       ])
         try {
           await stop();
         } catch (error) {
           errors.push(error);
         }
-      const ended = await Promise.allSettled(
-        Object.values(pools).map((p) => p.end()),
-      );
-      for (const result of ended)
-        if (result.status === 'rejected') errors.push(result.reason);
+      if (drained) {
+        const ended = await Promise.allSettled(
+          createdPools.map((p) => p.end()),
+        );
+        for (const result of ended)
+          if (result.status === 'rejected') errors.push(result.reason);
+      }
+      if (rentSource && (drained || !proofExposedToOwner)) {
+        try {
+          retireRegisteredNodeRentSourceAfterDrain(rentSource);
+        } catch (error) {
+          errors.push(error);
+        }
+      }
       if (errors.length)
         throw new AggregateError(errors, 'CONFIGURED_NODE_CLEANUP_UNCONFIRMED');
     })();
     return closing;
   };
   try {
+    const industryContext = c.install?.industry
+      ? await loadPostwarIndustryRuntimeSourceContext(input.repositoryRoot)
+      : undefined;
+    const [openingAdoption, policyBytes, userReceiptBytes] = await Promise.all([
+      industryContext
+        ? Promise.resolve(industryContext.labourSocial)
+        : loadPostwarSocialConnectionOpeningAdoption(input.repositoryRoot),
+      readFile(
+        path.join(
+          input.repositoryRoot,
+          'config/postwar-genesis/day-one-fx.v1.json',
+        ),
+        'utf8',
+      ),
+      readFile(
+        path.join(
+          input.repositoryRoot,
+          'docs/governance/owner-inputs/2026-10-29/DAY_ONE_FX_USER_ADOPTION.original.json',
+        ),
+        'utf8',
+      ),
+    ]);
+    const pools = {
+      read: pool(urls.read),
+      intake: pool(urls.intake),
+      source: pool(urls.source),
+      worker: pool(urls.worker),
+      publication: pool(urls.publication),
+      industryPublication: urls.industryPublication
+        ? pool(urls.industryPublication)
+        : null,
+    };
     source = createPostwarSocialRuntimeConnection({
       worldId: seed.worldId,
       workerId: c.workerId,
@@ -164,7 +196,43 @@ export async function startConfiguredRegisteredNodeService(input: {
       publicationDatabase: new PostgresSqlDatabase(pools.publication),
       treasuryFx: { workerRole: c.roles.worker },
       captain: { workerRole: c.roles.worker, mode: 'OFFICIAL_RUNTIME' },
+      ...(c.install?.centralBankOmo
+        ? {
+            centralBankOmo: {
+              workerRole: c.roles.worker,
+              countryIds: c.countries.map((v) => v.countryId),
+              mode: 'OFFICIAL_RUNTIME' as const,
+            },
+          }
+        : {}),
+      ...(c.install?.trade ? { trade: { workerRole: c.roles.worker } } : {}),
+      ...(industryContext
+        ? {
+            industry: {
+              sourceContext: industryContext,
+              ...(pools.industryPublication
+                ? {
+                    publicationDatabase: new PostgresSqlDatabase(
+                      pools.industryPublication,
+                    ),
+                  }
+                : {}),
+            },
+          }
+        : {}),
+      ...(c.install?.industryLabour || c.install?.industry
+        ? { industryLabour: { enabled: true as const } }
+        : {}),
+      ...(c.beneficialRent
+        ? {
+            beneficialRent: {
+              workerRole: c.roles.worker,
+              clockBindingRef: c.beneficialRent.clockBindingRef,
+            },
+          }
+        : {}),
     });
+    proofExposedToOwner = rentSource !== undefined;
     node = await startRegisteredPostwarOfficeNodeBootstrap({
       binding,
       api: {
@@ -194,26 +262,66 @@ export async function startConfiguredRegisteredNodeService(input: {
         allowedOrigins: c.read.routeOptions.allowedOrigins,
       },
       socialStartupSeed: seed,
-      treasuryFxPreparation: { seed, policyBytes, userReceiptBytes },
+      ...(rentSource
+        ? { socialStartupBeneficialHousingRentSource: rentSource }
+        : {}),
+      treasuryFxPreparation: {
+        seed,
+        policyBytes,
+        userReceiptBytes,
+        ...(rentSource
+          ? { startupBeneficialHousingRentSource: rentSource }
+          : {}),
+      },
       read: c.read,
       financeAllowedOrigins: c.read.routeOptions.allowedOrigins,
     });
-    const started = node;
+    const started = node,
+      shared = binding;
     return Object.freeze({
       ...started,
       ready: () => !closing && started.ready(),
+      publishDueIndustryWork(
+        scope: Readonly<{
+          countryId: string;
+          facilityId: string;
+          runId: string;
+        }>,
+      ): ReturnType<
+        PostwarFinanceSocialRuntimeConnection['publishDueIndustryWork']
+      > {
+        if (closing || !started.ready())
+          throw Error('CONFIGURED_NODE_NOT_READY');
+        return shared.publishDueIndustryWork(scope);
+      },
+      publishIndustryDueWage(
+        scope: Readonly<{
+          countryId: string;
+          facilityId: string;
+          runId: string;
+        }>,
+      ): ReturnType<
+        PostwarFinanceSocialRuntimeConnection['publishIndustryDueWage']
+      > {
+        if (closing || !started.ready())
+          throw Error('CONFIGURED_NODE_NOT_READY');
+        return shared.publishIndustryDueWage(scope);
+      },
       shutdown,
     });
   } catch (error) {
+    const cleanupErrors: unknown[] = [];
     try {
       await shutdown();
     } catch (cleanup) {
-      throw new AggregateError(
-        [error, cleanup],
-        'CONFIGURED_NODE_STARTUP_AND_CLEANUP_FAILED',
-        { cause: cleanup },
-      );
+      cleanupErrors.push(cleanup);
     }
+    if (cleanupErrors.length)
+      throw new AggregateError(
+        [error, ...cleanupErrors],
+        'CONFIGURED_NODE_STARTUP_AND_CLEANUP_FAILED',
+        { cause: error },
+      );
     throw error;
   }
 }

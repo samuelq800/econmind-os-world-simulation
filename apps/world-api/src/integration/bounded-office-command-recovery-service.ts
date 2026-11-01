@@ -28,6 +28,12 @@ export const POSTWAR_OFFICE_RECOVERY_BINDING_READ_QUERY =
 export function boundedOfficeRecoveryBindingQuery(
   mode: AuthenticatedOfficeCommandServiceConfig['recoveryBindingMode'],
 ): string {
+  if (mode === 'POSTWAR_INDUSTRY_READ_ONLY_V1')
+    return 'select * from world_v2.read_postwar_industry_recovery_binding($1,$2::uuid,$3,$4,$5,$6,$7,$8)';
+  if (mode === 'POSTWAR_TRADE_READ_ONLY_V1')
+    return 'select * from world_v2.read_postwar_trade_recovery_binding($1,$2::uuid,$3,$4,$5,$6,$7,$8)';
+  if (mode === 'POSTWAR_CENTRAL_BANK_READ_ONLY_V1')
+    return 'select * from world_v2.read_postwar_central_bank_recovery_binding($1,$2::uuid,$3,$4,$5,$6,$7,$8)';
   if (mode === 'POSTWAR_CAPTAIN_READ_ONLY_V1')
     return 'select * from world_v2.read_postwar_captain_recovery_binding($1,$2::uuid,$3,$4,$5,$6,$7,$8)';
   return mode === 'POSTWAR_READ_ONLY_V1'

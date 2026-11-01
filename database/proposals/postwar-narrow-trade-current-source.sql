@@ -138,7 +138,9 @@ declare effective name;begin
  perform set_config('econmind.narrow_current_world',p_world,true);
  perform 1 from world_v2.world_head h where h.world_id=p_world for share;
  if not found then raise exception 'NARROW_AUTH_ACTUAL_HEAD_REQUIRED'using errcode='55000';end if;
- return query select a.auth_subject::text,a.world_id,a.country_id,a.office_id,a.capability,a.team_id,a.authorization_version from world_v2.current_commit_authorization a where a.world_id=p_world and a.auth_subject=p_subject and a.country_id=p_country and a.office_id=p_office and a.capability=p_capability and a.active for share;
+ return query select a.auth_subject::text,a.world_id,a.country_id,a.office_id,a.capability,a.team_id,a.authorization_version from world_v2.current_commit_authorization a where a.world_id=p_world and a.auth_subject=p_subject and a.country_id=p_country and a.office_id=p_office and a.capability=p_capability and a.active
+ and not exists(select 1 from world_v2.current_commit_authorization other where other.world_id=a.world_id and other.auth_subject=a.auth_subject and other.active
+   and(other.country_id is distinct from a.country_id or other.team_id is distinct from a.team_id or other.authorization_version is distinct from a.authorization_version))for share;
 end;$$;
 alter function world_v2.lock_postwar_narrow_trade_current_authorization(text,uuid,text,text,text)owner to world_v2_postwar_narrow_trade_current_owner;
 revoke all on function world_v2.lock_postwar_narrow_trade_current_authorization(text,uuid,text,text,text)from public;

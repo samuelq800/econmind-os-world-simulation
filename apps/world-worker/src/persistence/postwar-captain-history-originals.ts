@@ -110,7 +110,8 @@ async function readOriginalsFrom(
   tx: SqlExecutor,
   input: PostwarCaptainHistoryScope & {
     readonly hostCountryId: string;
-    readonly officeId: 'SOCIAL' | 'FINANCE' | 'TREASURY_FX' | 'CB_OMO';
+    readonly officeId:
+      'SOCIAL' | 'FINANCE' | 'TREASURY_FX' | 'CB_OMO' | 'TRADE';
     readonly expectedHead: {
       readonly worldVersion: string;
       readonly eventSequence: string;

@@ -1,3 +1,25 @@
+import { INDUSTRY_OPERATING_WAGE_COMMAND } from '@econmind/core/industry-operating-wage-payment';
+import {
+  INDUSTRY_OPERATING_WAGE_SOURCE_PURPOSE,
+  isPostwarIndustryOperatingWageSourceCommitProtectionPort,
+  type IndustryOperatingWageSourceCommitProtectionPort,
+  type IndustryOperatingWageSourceCommitRequest,
+} from './postwar-industry-operating-wage-runtime.js';
+import { INDUSTRY_FIRST_DAY_WORK_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_WORK_SOURCE_PURPOSE,
+  isPostwarIndustryWorkSourceCommitProtectionPort,
+  type IndustryWorkSourceCommitProtectionPort,
+  type IndustryWorkSourceCommitRequest,
+} from './postwar-industry-work-runtime.js';
+import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SOURCE_PURPOSE,
+  isPostwarIndustryRunSourceCommitProtectionPort,
+  type IndustryRunSourceCommitProtectionPort,
+  type IndustryRunSourceCommitRequest,
+} from './postwar-industry-run-runtime.js';
+import { isPostwarIndustryRuntimeCutoffGuard } from './postwar-industry-runtime.js';
 import { types as nodeTypes } from 'node:util';
 import {
   DOMAIN_ERROR_CODES,
@@ -983,6 +1005,9 @@ export class AtomicTransitionRepository {
   readonly #sha256Hex: Sha256Hex;
   readonly #faultInjector: AtomicCommitFaultInjector;
   readonly #narrowTransferApprovalGuard: AtomicNarrowTransferApprovalGuard | null;
+  readonly #industryOperatingWageSourceCommitProtectionPort: IndustryOperatingWageSourceCommitProtectionPort | null;
+  readonly #industryWorkSourceCommitProtectionPort: IndustryWorkSourceCommitProtectionPort | null;
+  readonly #industryRunSourceCommitProtectionPort: IndustryRunSourceCommitProtectionPort | null;
   readonly #sourceCommitProtectionPort: SourceCommitProtectionPort | null;
   readonly #industryProductionCutoffGuard: IndustryProductionCutoffGuard | null;
   readonly #socialPositionSourceCommitProtectionPort: SocialPositionSourceCommitProtectionPort | null;
@@ -1002,6 +1027,9 @@ export class AtomicTransitionRepository {
     readonly faultInjector?: AtomicCommitFaultInjector;
     readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
     readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
+    readonly industryOperatingWageSourceCommitProtectionPort?: IndustryOperatingWageSourceCommitProtectionPort;
+    readonly industryWorkSourceCommitProtectionPort?: IndustryWorkSourceCommitProtectionPort;
+    readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
     readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
     readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
     readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
@@ -1021,6 +1049,39 @@ export class AtomicTransitionRepository {
       invalid(
         'Day-one Treasury FX source port must be issued by its fixed native runtime',
       );
+    if (
+      input.industryRunSourceCommitProtectionPort !== undefined &&
+      !isPostwarIndustryRunSourceCommitProtectionPort(
+        input.industryRunSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'Industry RUN source guard must come from the fixed live runtime',
+      );
+    if (
+      input.industryWorkSourceCommitProtectionPort !== undefined &&
+      !isPostwarIndustryWorkSourceCommitProtectionPort(
+        input.industryWorkSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'Industry WORK source guard must come from the fixed live runtime',
+      );
+    if (
+      input.industryOperatingWageSourceCommitProtectionPort !== undefined &&
+      !isPostwarIndustryOperatingWageSourceCommitProtectionPort(
+        input.industryOperatingWageSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'Industry WAGE source guard must come from the fixed live runtime',
+      );
+    this.#industryOperatingWageSourceCommitProtectionPort =
+      input.industryOperatingWageSourceCommitProtectionPort ?? null;
+    this.#industryWorkSourceCommitProtectionPort =
+      input.industryWorkSourceCommitProtectionPort ?? null;
+    this.#industryRunSourceCommitProtectionPort =
+      input.industryRunSourceCommitProtectionPort ?? null;
     this.#dayOneFxSourceCommitProtectionPort =
       input.dayOneFxSourceCommitProtectionPort ?? null;
     if (
@@ -1287,6 +1348,21 @@ export class AtomicTransitionRepository {
             candidate,
             head,
           );
+        await this.#assertIndustryRunSourceCurrent(
+          transaction,
+          candidate,
+          head,
+        );
+        await this.#assertIndustryWorkSourceCurrent(
+          transaction,
+          candidate,
+          head,
+        );
+        await this.#assertIndustryOperatingWageSourceCurrent(
+          transaction,
+          candidate,
+          head,
+        );
         await this.#faultInjector.hit('BEFORE_EVENTS');
         await this.#insertEvents(transaction, candidate, head.eventSequence);
         await this.#faultInjector.hit('AFTER_EVENTS');
@@ -1362,6 +1438,171 @@ export class AtomicTransitionRepository {
     return Object.freeze({ source, receipt, transition: candidate.transition });
   }
 
+  async #assertIndustryRunSourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    if (candidate.command.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND) return;
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding,
+      port = this.#industryRunSourceCommitProtectionPort;
+    if (
+      !isPostwarIndustryRunSourceCommitProtectionPort(port) ||
+      candidate.authorityKind !== 'DISCRETIONARY_USER' ||
+      candidate.command.officeId !== 'INDUSTRY' ||
+      !isCommitAuthorizationProof(candidate.commitAuthorization) ||
+      captured.captureFailed ||
+      captured.canonicalData === null ||
+      candidate.financialPostingBatches.length !== 0 ||
+      candidate.inventoryPostings.length !== 0 ||
+      candidate.currentMaterializations.length !== 0 ||
+      candidate.outboxMessages.length !== 0
+    )
+      invalid(
+        'Fresh Industry RUN requires its live fixed guard, authorization and exact schedule-only effects',
+      );
+    const request: Readonly<IndustryRunSourceCommitRequest> = Object.freeze({
+      phase: 'BEFORE_EVENTS',
+      purpose: INDUSTRY_RUN_SOURCE_PURPOSE,
+      command: candidate.command,
+      transition: candidate.transition,
+      currentHead: Object.freeze({
+        worldId: candidate.command.worldId,
+        ...head,
+      }),
+      observedAtReal: candidate.observedAtReal,
+      readBinding: JSON.parse(captured.canonicalData) as unknown,
+      commitAuthorization: candidate.commitAuthorization,
+      financialPostingBatches: candidate.financialPostingBatches,
+      inventoryPostings: candidate.inventoryPostings,
+    });
+    const audit = await port.assertCurrentFrom(transaction, request);
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: request.purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(request.readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    if (canonicalSerialize(audit) !== canonicalSerialize(expected))
+      invalid('Industry RUN fixed source audit differs');
+  }
+
+  async #assertIndustryWorkSourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    if (candidate.command.commandType !== INDUSTRY_FIRST_DAY_WORK_COMMAND)
+      return;
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding,
+      port = this.#industryWorkSourceCommitProtectionPort;
+    if (
+      !isPostwarIndustryWorkSourceCommitProtectionPort(port) ||
+      candidate.authorityKind !== 'VERSIONED_AUTOMATIC' ||
+      candidate.command.officeId !== null ||
+      candidate.commitAuthorization !== null ||
+      captured.captureFailed ||
+      captured.canonicalData === null ||
+      candidate.financialPostingBatches.length !== 0 ||
+      candidate.inventoryPostings.length !== 0 ||
+      candidate.currentMaterializations.length !== 0 ||
+      candidate.outboxMessages.length !== 0
+    )
+      invalid(
+        'Fresh Industry WORK requires its live fixed guard, authorization and exact work-only effects',
+      );
+    const request: Readonly<IndustryWorkSourceCommitRequest> = Object.freeze({
+      phase: 'BEFORE_EVENTS',
+      purpose: INDUSTRY_WORK_SOURCE_PURPOSE,
+      command: candidate.command,
+      transition: candidate.transition,
+      currentHead: Object.freeze({
+        worldId: candidate.command.worldId,
+        ...head,
+      }),
+      observedAtReal: candidate.observedAtReal,
+      readBinding: JSON.parse(captured.canonicalData) as unknown,
+      commitAuthorization: candidate.commitAuthorization,
+      financialPostingBatches: candidate.financialPostingBatches,
+      inventoryPostings: candidate.inventoryPostings,
+    });
+    const audit = await port.assertCurrentFrom(transaction, request);
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: request.purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(request.readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    if (canonicalSerialize(audit) !== canonicalSerialize(expected))
+      invalid('Industry WORK fixed source audit differs');
+  }
+
+  async #assertIndustryOperatingWageSourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    if (candidate.command.commandType !== INDUSTRY_OPERATING_WAGE_COMMAND)
+      return;
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding,
+      port = this.#industryOperatingWageSourceCommitProtectionPort;
+    if (
+      !isPostwarIndustryOperatingWageSourceCommitProtectionPort(port) ||
+      candidate.authorityKind !== 'VERSIONED_AUTOMATIC' ||
+      candidate.command.officeId !== null ||
+      candidate.commitAuthorization !== null ||
+      captured.captureFailed ||
+      captured.canonicalData === null ||
+      candidate.inventoryPostings.length !== 0 ||
+      candidate.currentMaterializations.length !== 0 ||
+      candidate.outboxMessages.length !== 0
+    )
+      invalid(
+        'Fresh Industry WAGE requires its live fixed guard, authorization and exact actual wage settlement effects',
+      );
+    const request: Readonly<IndustryOperatingWageSourceCommitRequest> =
+      Object.freeze({
+        phase: 'BEFORE_EVENTS',
+        purpose: INDUSTRY_OPERATING_WAGE_SOURCE_PURPOSE,
+        command: candidate.command,
+        transition: candidate.transition,
+        currentHead: Object.freeze({
+          worldId: candidate.command.worldId,
+          ...head,
+        }),
+        observedAtReal: candidate.observedAtReal,
+        readBinding: JSON.parse(captured.canonicalData) as unknown,
+        commitAuthorization: candidate.commitAuthorization,
+        financialPostingBatches: candidate.financialPostingBatches,
+        inventoryPostings: candidate.inventoryPostings,
+        currentMaterializations: candidate.currentMaterializations,
+      });
+    const audit = await port.assertCurrentFrom(transaction, request);
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: request.purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(request.readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    if (canonicalSerialize(audit) !== canonicalSerialize(expected))
+      invalid('Industry WAGE fixed source audit differs');
+  }
+
   async #assertIndustryProductionCurrent(
     transaction: SqlExecutor,
     candidate: PrivateAtomicTransitionCandidate,
@@ -1391,6 +1632,9 @@ export class AtomicTransitionRepository {
           this.#industryProductionCutoffGuard,
         ) &&
         !isPostwarIndustryOperatingCutoffGuard(
+          this.#industryProductionCutoffGuard,
+        ) &&
+        !isPostwarIndustryRuntimeCutoffGuard(
           this.#industryProductionCutoffGuard,
         )
       )

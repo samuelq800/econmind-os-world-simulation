@@ -164,6 +164,21 @@ export function decodeBoundedPostwarFinancialPostings(input: {
   const rows = input.rows.filter(
     (r) => r.causation_command_id === input.command.commandId,
   );
+  if (input.command.commandType === 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1') {
+    if (rows.length !== 1) invalid('exact one operating-wage batch required');
+    const batch = decodeDurableFinancialPostingBatch({
+      ...input,
+      row: rows[0]!,
+      sha256Hex: sha,
+    });
+    if (
+      batch.legs.length < 6 ||
+      batch.legs.length > 512 ||
+      batch.legs.length % 2 !== 0
+    )
+      invalid('exact paired operating-wage journal required');
+    return Object.freeze([batch]);
+  }
   if (input.command.commandType === CENTRAL_BANK_OMO_COMMAND) {
     if (rows.length !== 1) invalid('exact one OMO LC batch required');
     const batch = decodeDurableFinancialPostingBatch({

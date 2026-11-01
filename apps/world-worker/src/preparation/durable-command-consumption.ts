@@ -1,4 +1,20 @@
+import { INDUSTRY_OPERATING_WAGE_COMMAND } from '@econmind/core/industry-operating-wage-payment';
+import { isPostwarIndustryOperatingWageRuntime } from '../persistence/postwar-industry-operating-wage-runtime.js';
+import { INDUSTRY_FIRST_DAY_WORK_COMMAND } from '@econmind/core/industry-first-day-work';
+import { isPostwarIndustryWorkRuntime } from '../persistence/postwar-industry-work-runtime.js';
+import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import { isPostwarIndustryRunRuntime } from '../persistence/postwar-industry-run-runtime.js';
+import { BENEFICIAL_HOUSING_RENT_COMMAND } from '@econmind/core';
+import {
+  isPostwarBeneficialHousingRentRuntime,
+  readPostwarBeneficialHousingRentRuntimeResources,
+} from '../persistence/postwar-beneficial-housing-rent-runtime.js';
 import { createHash } from 'node:crypto';
+import { CENTRAL_BANK_OMO_COMMAND } from '@econmind/core';
+import { isPostwarCentralBankOmoRuntime } from '../persistence/postwar-central-bank-omo-runtime.js';
+import { isPostwarNarrowTradeReservationRuntime } from './postwar-narrow-trade-reservation-candidate.js';
+import { isPostwarNarrowTradeAutomaticRuntime } from './postwar-narrow-trade-shipment-delivery-candidates.js';
+import { isPostwarNarrowTradeCurrentSource } from '../persistence/postwar-narrow-trade-current-source.js';
 import {
   reserveRegisteredWorldFiniteConsumer,
   releaseRegisteredWorldFiniteConsumer,
@@ -371,6 +387,22 @@ function createDurableCommandConsumer(
       command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
       command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
       !(
+        command.commandType === INDUSTRY_OPERATING_WAGE_COMMAND &&
+        isPostwarIndustryOperatingWageRuntime(
+          officeReaders.industryOperatingWage,
+        )
+      ) &&
+      !(
+        command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND &&
+        isPostwarIndustryWorkRuntime(officeReaders.industryWork)
+      ) &&
+      !(
+        command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND &&
+        isPostwarBeneficialHousingRentRuntime(
+          officeReaders.beneficialHousingRent,
+        )
+      ) &&
+      !(
         command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND &&
         isPostwarSocialMatchSourceCommitProtectionPort(
           officeReaders.socialMatch?.sourceCommitProtectionPort,
@@ -383,7 +415,9 @@ function createDurableCommandConsumer(
         ? 'Shipment'
         : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
           ? 'Social MATCH'
-          : 'Delivery';
+          : command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND
+            ? 'Beneficial rent'
+            : 'Delivery';
     await input.database.transaction(async (transaction) => {
       // Follow atomic/intake submission-before-lease/head lock order. Never
       // take the queue lock in the selector and then wait for a submission.
@@ -402,7 +436,11 @@ function createDurableCommandConsumer(
       // claim and again under held source guards at Atomic's commit cutoff.
       // Its queue writer reads lease/head metadata only; it has no raw seed
       // access. Goods retain their existing lineage source protocol.
-      const isMatch = command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND;
+      const isMatch =
+        command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND ||
+        command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND ||
+        command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND ||
+        command.commandType === INDUSTRY_OPERATING_WAGE_COMMAND;
       const lease = isMatch
         ? await leaseFrom(transaction, at)
         : await checkSource(transaction, durable, at);
@@ -608,6 +646,54 @@ function createDurableCommandConsumer(
         isPostwarCaptainSourceCommitProtectionPort(
           officeReaders.captainNative?.sourceCommitProtectionPort,
         );
+      const centralBankInstalled =
+        financeSocialBinding !== null &&
+        command.commandType === CENTRAL_BANK_OMO_COMMAND &&
+        isPostwarCentralBankOmoRuntime(officeReaders.centralBankNative);
+      const industryWageRuntime = officeReaders.industryOperatingWage;
+      const industryWageInstalled =
+        financeSocialBinding !== null &&
+        command.commandType === INDUSTRY_OPERATING_WAGE_COMMAND &&
+        isPostwarIndustryOperatingWageRuntime(industryWageRuntime) &&
+        industryWageRuntime.worldId === world;
+      const industryWorkRuntime = officeReaders.industryWork;
+      const industryWorkInstalled =
+        financeSocialBinding !== null &&
+        command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND &&
+        isPostwarIndustryWorkRuntime(industryWorkRuntime) &&
+        industryWorkRuntime.database === input.database &&
+        industryWorkRuntime.worldId === world;
+      const industryRunInstalled =
+        financeSocialBinding !== null &&
+        command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND &&
+        isPostwarIndustryRunRuntime(officeReaders.industryRun) &&
+        officeReaders.industryRun.database === input.database &&
+        officeReaders.industryRun.worldId === world;
+      const rentRuntime = officeReaders.beneficialHousingRent;
+      const rentInstalled =
+        financeSocialBinding !== null &&
+        command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND &&
+        isPostwarBeneficialHousingRentRuntime(rentRuntime) &&
+        readPostwarBeneficialHousingRentRuntimeResources(rentRuntime, world)
+          .database === input.database &&
+        readPostwarBeneficialHousingRentRuntimeResources(rentRuntime, world)
+          .workerId === holder &&
+        readPostwarBeneficialHousingRentRuntimeResources(rentRuntime, world)
+          .clock === clock;
+      const tradeInstalled =
+        financeSocialBinding !== null &&
+        [
+          'CORE_GOODS_TRANSFER_V1',
+          'CORE_GOODS_SHIPMENT_V1',
+          'CORE_GOODS_DELIVERY_V1',
+        ].includes(command.commandType) &&
+        isPostwarNarrowTradeCurrentSource(officeReaders.tradeSource, world) &&
+        isPostwarNarrowTradeReservationRuntime(
+          officeReaders.tradeReservation,
+        ) &&
+        isPostwarNarrowTradeAutomaticRuntime(officeReaders.tradeAutomatic) &&
+        officeReaders.tradeReservation.database === input.database &&
+        officeReaders.tradeAutomatic.database === input.database;
       if (
         captainInstalled &&
         !isPreparedPostwarSocialRuntimeConnection(
@@ -621,8 +707,28 @@ function createDurableCommandConsumer(
           command.commandId,
         );
       if (
+        (centralBankInstalled ||
+          tradeInstalled ||
+          rentInstalled ||
+          industryRunInstalled ||
+          industryWorkInstalled ||
+          industryWageInstalled) &&
+        !isPreparedPostwarSocialRuntimeConnection(
+          readFinanceSocialSourceBinding(financeSocialBinding!)
+            .socialConnection,
+          world,
+        )
+      )
+        return blocked('FINANCE_SOCIAL_SOURCE_NOT_PREPARED', command.commandId);
+      if (
         familyBoundary !== 'LEGACY_GENERIC' &&
         !captainInstalled &&
+        !centralBankInstalled &&
+        !tradeInstalled &&
+        !rentInstalled &&
+        !industryRunInstalled &&
+        !industryWorkInstalled &&
+        !industryWageInstalled &&
         !FINANCE_SOCIAL_COMMAND_FAMILIES.has(command.commandType) &&
         !(
           familyBoundary === 'FINANCE_SOCIAL_FX' &&
@@ -646,7 +752,13 @@ function createDurableCommandConsumer(
           command.officeId !== 'FINANCE')
       )
         return blocked('TREASURY_FX_FAMILY_NOT_INSTALLED', command.commandId);
-      const manualCapability = manualOfficeCapability(command);
+      // Legacy generic Goods reservation retains its original fixed worker;
+      // only the private shared installation enables the new manual branch.
+      const manualCapability =
+        command.commandType === 'CORE_GOODS_TRANSFER_V1' &&
+        !financeSocialBinding
+          ? null
+          : manualOfficeCapability(command);
       const matchRuntime = officeReaders.socialMatch;
       const socialMatch =
         command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND &&
@@ -659,6 +771,10 @@ function createDurableCommandConsumer(
         command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
         command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
         !socialMatch &&
+        !rentInstalled &&
+        !industryRunInstalled &&
+        !industryWorkInstalled &&
+        !industryWageInstalled &&
         manualCapability === null
       )
         return blocked('UNSUPPORTED_COMMAND', command.commandId);
@@ -678,6 +794,151 @@ function createDurableCommandConsumer(
         return blocked('COMMAND_NOT_DUE', command.commandId);
       if (row.queue_state === 'CLAIMED' && row.claimed_by !== holder)
         return blocked('CLAIM_REQUIRES_REVIEWED_RECOVERY', command.commandId);
+      if (industryWageInstalled && industryWageRuntime) {
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: industryWageRuntime.candidateFactory,
+          industryOperatingWageSourceCommitProtectionPort:
+            industryWageRuntime.sourceCommitProtectionPort,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        await industryWageRuntime.assertSourceBeforeClaim({
+          command,
+          observedAtReal: at,
+        });
+        await claimAutomatic(command, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'VERSIONED_AUTOMATIC',
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
+      if (industryWorkInstalled && industryWorkRuntime) {
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: industryWorkRuntime.candidateFactory,
+          industryWorkSourceCommitProtectionPort:
+            industryWorkRuntime.sourceCommitProtectionPort,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        await claimAutomatic(command, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'VERSIONED_AUTOMATIC',
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
+      if (tradeInstalled && command.commandType !== 'CORE_GOODS_TRANSFER_V1') {
+        const automatic = officeReaders.tradeAutomatic!,
+          source = officeReaders.tradeSource!;
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory:
+            command.commandType === 'CORE_GOODS_SHIPMENT_V1'
+              ? automatic.shipmentCandidateFactory
+              : automatic.deliveryCandidateFactory,
+          postwarNarrowTradeSourceCommitProtectionPort:
+            automatic.sourceCommitProtectionPort,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        await input.database.transaction(async (tx) => {
+          await tx.query('set transaction isolation level repeatable read');
+          await source.inspectAutomaticFrom(tx, {
+            command,
+            workerId: holder,
+            observedAtReal: at,
+          });
+        });
+        await claimAutomatic(command, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'VERSIONED_AUTOMATIC',
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
+      if (rentInstalled && rentRuntime) {
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: rentRuntime.candidateFactory,
+          beneficialHousingRentSourceCommitProtectionPort:
+            rentRuntime.sourceCommitProtectionPort,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        await rentRuntime.assertSourceBeforeClaim({
+          command,
+          observedAtReal: at,
+        });
+        await claimAutomatic(command, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'VERSIONED_AUTOMATIC',
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
       if (socialMatch) {
         const execution = createAuthoritativeWorkerExecution({
           database: input.database,
@@ -737,6 +998,31 @@ function createDurableCommandConsumer(
           workerId: holder,
           sha256Hex: input.sha256Hex,
           candidateFactory: composition.factory,
+          ...(composition.industryRunSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                industryRunSourceCommitProtectionPort:
+                  composition.industryRunSourceCommitProtectionPort,
+              }),
+          ...(composition.industryProductionCutoffGuard === undefined
+            ? {}
+            : {
+                industryProductionCutoffGuard:
+                  composition.industryProductionCutoffGuard,
+              }),
+          ...(composition.narrowTransferApprovalGuard === undefined
+            ? {}
+            : {
+                narrowTransferApprovalGuard:
+                  composition.narrowTransferApprovalGuard,
+              }),
+          ...(composition.postwarNarrowTradeSourceCommitProtectionPort ===
+          undefined
+            ? {}
+            : {
+                postwarNarrowTradeSourceCommitProtectionPort:
+                  composition.postwarNarrowTradeSourceCommitProtectionPort,
+              }),
           ...(composition.dayOneFxSourceCommitProtectionPort === undefined
             ? {}
             : {

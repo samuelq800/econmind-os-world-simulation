@@ -109,8 +109,8 @@ returns table(world_version text,event_sequence text,seed_fingerprint text,admis
 language plpgsql security definer set search_path=pg_catalog as $$
 declare effective name;required name;h record;a world_v2.runtime_opening_admission%rowtype;host text;host_adoption text;host_registry record;n bigint;b bigint;packets jsonb;begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
- required:=case p_office when 'SOCIAL'then 'world_v2_social_source_reader'when 'FINANCE'then 'world_v2_finance_budget_source_reader'when 'TREASURY_FX'then 'world_v2_day_one_fx_source_reader'when 'CB_OMO'then 'world_v2_cb_omo_source_reader'else null end;
- if required is null or effective<>required or exists(select 1 from pg_roles x where x.rolname=session_user and(x.rolsuper or x.rolbypassrls or x.rolcreatedb or x.rolcreaterole or x.rolreplication))or pg_has_role(session_user,'world_v2_captain_source_owner','MEMBER')or(p_office='CB_OMO'and exists(select 1 from pg_roles x where x.rolname in('world_v2_cb_omo_source_owner','world_v2_cb_omo_source_publisher')and pg_has_role(session_user,x.oid,'MEMBER')))then raise exception 'CAPTAIN_HISTORY_FIXED_HOST_READER_REQUIRED'using errcode='42501';end if;
+ required:=case p_office when 'SOCIAL'then 'world_v2_social_source_reader'when 'FINANCE'then 'world_v2_finance_budget_source_reader'when 'TREASURY_FX'then 'world_v2_day_one_fx_source_reader'when 'CB_OMO'then 'world_v2_cb_omo_source_reader'when 'TRADE'then 'world_v2_postwar_narrow_trade_source'else null end;
+ if required is null or(case when p_office='TRADE'then not pg_has_role(effective,required,'MEMBER')else effective<>required end)or exists(select 1 from pg_roles x where x.rolname=session_user and(x.rolsuper or x.rolbypassrls or x.rolcreatedb or x.rolcreaterole or x.rolreplication))or pg_has_role(session_user,'world_v2_captain_source_owner','MEMBER')or(p_office='CB_OMO'and exists(select 1 from pg_roles x where x.rolname in('world_v2_cb_omo_source_owner','world_v2_cb_omo_source_publisher')and pg_has_role(session_user,x.oid,'MEMBER')))then raise exception 'CAPTAIN_HISTORY_FIXED_HOST_READER_REQUIRED'using errcode='42501';end if;
  if p_world is null or p_host_country is null or p_host_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or p_expected is null or p_expected!~'^(0|[1-9][0-9]*)$'then raise exception 'CAPTAIN_HISTORY_EXACT_SCOPE_REQUIRED'using errcode='22023';end if;
  perform set_config('econmind.captain_world',p_world,true);
  select x.world_version,x.event_sequence into h from world_v2.world_head x where x.world_id=p_world for share;
@@ -118,7 +118,10 @@ declare effective name;required name;h record;a world_v2.runtime_opening_admissi
  select * into a from world_v2.runtime_opening_admission x where x.world_id=p_world and x.seed_fingerprint=p_fp and x.admission_ref=p_admission;
  if not found then raise exception 'CAPTAIN_HISTORY_ADMISSION_REQUIRED'using errcode='55000';end if;
  perform world_v2.captain_publication_admission(p_world,a.seed_id,p_fp,p_admission);
- if p_office='SOCIAL'then
+ if p_office='TRADE'then
+  perform world_v2.assert_postwar_narrow_trade_history_host(p_world,p_host_country,p_fp,p_admission,h.world_version::text,h.event_sequence::text);
+  host:='HELD_TRADE_SOURCE_NOT_AUTHORITY';
+ elsif p_office='SOCIAL'then
   select x.registration_ref into host from world_v2.social_operating_source_registration x where x.world_id=p_world and x.country_id=p_host_country and x.seed_fingerprint=p_fp and x.admission_ref=p_admission for share;
   if not found or exists(select 1 from world_v2.social_operating_source_revocation x where x.registration_ref=host)then raise exception 'CAPTAIN_HISTORY_CURRENT_HOST_SOURCE_REQUIRED'using errcode='55000';end if;
  elsif p_office='CB_OMO'then
@@ -156,4 +159,5 @@ revoke all on function world_v2.read_postwar_captain_history_originals(text,text
 grant execute on function world_v2.read_postwar_captain_history_originals(text,text,text,text,text,text)to world_v2_social_source_reader,world_v2_finance_budget_source_reader,world_v2_day_one_fx_source_reader;
 do $$begin if exists(select 1 from pg_roles where rolname='world_v2_cb_omo_source_reader')then grant execute on function world_v2.read_postwar_captain_history_originals(text,text,text,text,text,text)to world_v2_cb_omo_source_reader;end if;end;$$;
 revoke create on schema world_v2 from world_v2_captain_source_owner;
+-- Trade EXEC enrollment is deliberately supplied only by postwar-narrow-trade-history-read.sql.
 commit;

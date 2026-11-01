@@ -1,3 +1,6 @@
+import type { PostwarIndustryConnection } from './runtime/postwar-industry-connection.js';
+import type { PostwarCentralBankConnection } from './runtime/postwar-central-bank-connection.js';
+import type { PostwarTradeConnection } from './runtime/postwar-trade-connection.js';
 import {
   createServer,
   type IncomingMessage,
@@ -163,6 +166,9 @@ function createApiServer(
   sharedConsumerConfigured = false,
   postwarCaptainConnection?: PostwarCaptainConnection,
   postwarReadConfiguration?: ExplicitReadPreparationConfig,
+  postwarCentralBankConnection?: PostwarCentralBankConnection,
+  postwarTradeConnection?: PostwarTradeConnection,
+  postwarIndustryConnection?: PostwarIndustryConnection,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
@@ -173,9 +179,19 @@ function createApiServer(
     : undefined;
   const financeRoute =
     postwarCaptainConnection !== undefined ||
+    postwarCentralBankConnection !== undefined ||
+    postwarTradeConnection !== undefined ||
+    postwarIndustryConnection !== undefined ||
     postwarSocialConnection !== undefined ||
     postwarTreasuryFxConnection !== undefined
       ? createPostwarOfficeNodeRoute({
+          ...(postwarCentralBankConnection
+            ? { centralBank: postwarCentralBankConnection }
+            : {}),
+          ...(postwarTradeConnection ? { trade: postwarTradeConnection } : {}),
+          ...(postwarIndustryConnection
+            ? { industry: postwarIndustryConnection }
+            : {}),
           ...(postwarCaptainConnection
             ? { captain: postwarCaptainConnection }
             : {}),
@@ -196,6 +212,42 @@ function createApiServer(
     financeRoute === undefined
       ? {}
       : {
+          ...(postwarCaptainConnection
+            ? {
+                postwarCaptain: {
+                  routeInstalled: true,
+                  configured:
+                    postwarCaptainConnection.status ===
+                    'EXPLICIT_MANUAL_CAPTAIN_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(postwarCentralBankConnection
+            ? {
+                postwarCentralBank: {
+                  routeInstalled: true,
+                  configured:
+                    postwarCentralBankConnection.status ===
+                    'EXPLICIT_MANUAL_CENTRAL_BANK_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(postwarTradeConnection
+            ? {
+                postwarTrade: {
+                  routeInstalled: true,
+                  configured:
+                    postwarTradeConnection.status ===
+                    'EXPLICIT_MANUAL_TRADE_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
           ...(postwarTreasuryFxConnection
             ? {
                 postwarTreasuryFx: {
@@ -575,6 +627,9 @@ export async function startApiRuntime(
       shared !== undefined,
       shared?.captain,
       shared?.readConfiguration,
+      shared?.centralBank,
+      shared?.trade,
+      shared?.industry,
     );
   } catch (error) {
     return failStartupAfterCleanup(error, [

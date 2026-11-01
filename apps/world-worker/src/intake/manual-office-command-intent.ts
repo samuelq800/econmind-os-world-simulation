@@ -1,3 +1,11 @@
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  parseIndustryRunScheduleIntent,
+} from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_PRODUCTION_COMMAND,
+  parseIndustryProductionIntent,
+} from '@econmind/core/industry-production-command';
 import { createHash } from 'node:crypto';
 import {
   COMMAND_SCHEMA_VERSION,
@@ -12,6 +20,7 @@ import {
   parseCanonicalCommand,
   parseCaptainPoliticalCapitalAllocation,
   parseCentralBankOmoIntent,
+  parseNarrowTreasuryGcuTransferTerms,
   parseSocialEmploymentServiceCommand,
   parseBudgetSourcePayload,
   validateCanonicalCommand,
@@ -80,6 +89,7 @@ export function decodeStoredManualOfficeCommand(
   )
     conflict();
   if (
+    original.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
     original.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
     original.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
   )
@@ -101,6 +111,23 @@ export function validateManualOfficeCommandIntent(
 ): void {
   validateCanonicalCommand(command, sha);
   switch (command.commandType) {
+    case INDUSTRY_RUN_SCHEDULE_COMMAND:
+      if (command.idempotencyKey === null) invalid();
+      parseIndustryRunScheduleIntent(command, sha);
+      return;
+    case INDUSTRY_PRODUCTION_COMMAND:
+      if (command.idempotencyKey === null) invalid();
+      parseIndustryProductionIntent(command, sha);
+      return;
+    case 'CORE_GOODS_TRANSFER_V1':
+      if (
+        command.officeId !== 'TRADE' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseNarrowTreasuryGcuTransferTerms(command);
+      return;
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND:
       if (command.officeId !== 'CAPTAIN') invalid();
       parseCaptainPoliticalCapitalAllocation(command, sha);

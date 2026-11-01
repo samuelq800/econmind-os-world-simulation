@@ -239,6 +239,21 @@ function evidence(v: unknown): ProductionConsumptionEvidence {
     'costPerOutput',
   ])
     rate(r[name]);
+  const operatingPayload = industryClosedRecord(e.operating, [
+    'snapshot',
+    'observedAt',
+    'factRef',
+    'sourceRef',
+    'predecessorFactRefs',
+    'canonicalPayload',
+    'payload',
+  ]);
+  const body = operatingPayload.payload;
+  const optionalBasisKeys = [
+    'maintenanceBasis',
+    'openingServiceability',
+    'baselineTechnologyNonrequirement',
+  ].filter((k) => !!body && typeof body === 'object' && Object.hasOwn(body, k));
   const op = fact(e.operating, [
     'worldId',
     'worldVersion',
@@ -253,6 +268,7 @@ function evidence(v: unknown): ProductionConsumptionEvidence {
     'fundingFingerprint',
     'costLegId',
     'settledCost',
+    ...optionalBasisKeys,
   ]);
   industryClosedRecord(op.settledCost, ['amount', 'currency']);
   industryClosedRecord(e.output, accountKeys);

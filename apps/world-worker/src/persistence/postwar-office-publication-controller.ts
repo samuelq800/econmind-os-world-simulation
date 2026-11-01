@@ -9,6 +9,7 @@ import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import { createPostwarMixedCurrentProjectionSource } from './postwar-mixed-current-projection-publication.js';
 import { createPostwarCaptainCurrentPublisher } from './postwar-captain-current-publication.js';
 import type { SqlDatabase } from './sql-database.js';
+import { createPostwarIndustryLabourCurrentPublisher } from './postwar-industry-labour-current-publication.js';
 
 export type PostwarDerivedPublicationResult =
   | Readonly<{
@@ -22,6 +23,7 @@ export type PostwarDerivedPublicationResult =
       }>;
       documentCount: number;
       captain: 'PUBLISHED' | 'NO_REGISTERED_ORIGINAL';
+      industryLabour?: 'PUBLISHED';
     }>
   | Readonly<{
       status: 'UNAVAILABLE';
@@ -39,6 +41,7 @@ export function createPostwarOfficePublicationController(input: {
   readonly socialConnection: Readonly<PostwarSocialRuntimeConnection>;
   /** Explicit borrowed publisher identity; no credentials or pool discovered. */
   readonly publicationDatabase: SqlDatabase;
+  readonly industryLabour?: true;
 }) {
   const world = worldId(input.worldId);
   if (!/^[a-z][a-z0-9_]{0,62}$/u.test(input.workerRole))
@@ -52,11 +55,19 @@ export function createPostwarOfficePublicationController(input: {
     worldId: world,
     workerRole: input.workerRole,
     publicationDatabase: input.publicationDatabase,
+    historyMode: 'PAGED_COMPLETE_V1',
   });
   const publisher = createPostwarCaptainCurrentPublisher({
     source,
     publicationDatabase: input.publicationDatabase,
   });
+  const industryPublisher = input.industryLabour
+    ? createPostwarIndustryLabourCurrentPublisher({
+        source,
+        socialConnection: input.socialConnection,
+        publicationDatabase: input.publicationDatabase,
+      })
+    : null;
   let closed = false;
   let closing: Promise<void> | undefined;
   const pending = new Set<Promise<unknown>>();
@@ -143,6 +154,15 @@ export function createPostwarOfficePublicationController(input: {
           command.countryId,
           { requireCaptain: command.officeId === 'CAPTAIN' },
         );
+        const industry = await industryPublisher?.publishCountry(
+          command.countryId,
+          result.head,
+        );
+        if (
+          industry &&
+          canonicalSerialize(industry.head) !== canonicalSerialize(result.head)
+        )
+          throw Error('INDUSTRY_EXPECTED_PUBLICATION_HEAD_MISMATCH');
         return Object.freeze({
           status: 'PUBLISHED',
           commandId,
@@ -151,7 +171,9 @@ export function createPostwarOfficePublicationController(input: {
           documentCount:
             result.captain.length +
             result.financial.length +
-            result.social.length,
+            result.social.length +
+            (industry?.documents.length ?? 0),
+          ...(industry ? { industryLabour: 'PUBLISHED' as const } : {}),
           captain: result.captain.length
             ? 'PUBLISHED'
             : 'NO_REGISTERED_ORIGINAL',

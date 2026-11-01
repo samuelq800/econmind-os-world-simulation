@@ -5,10 +5,12 @@ import {
   canonicalSerialize,
   type SocialPositionOfferLifecycleState,
   type SocialEmploymentServiceState,
-  type AuthoritativeEvent,
 } from '@econmind/core';
 import type { PostwarSocialEmploymentStateDocument } from '../preparation/postwar-social-employment-state.js';
-import type { PostwarSocialReplayLineage } from './prepared-postwar-social-source.js';
+import {
+  readPreparedSocialPagedLineage,
+  type PostwarSocialReplayLineage,
+} from './prepared-postwar-social-source.js';
 import { replayPostwarSharedOfficePrefix } from './postwar-shared-office-prefix.js';
 function invalid(reason: string): never {
   throw Error(`POSTWAR_SOCIAL_LINEAGE:${reason}`);
@@ -34,6 +36,7 @@ export function replayPostwarSocialEmploymentLineage(input: {
   const shared = replayPostwarSharedOfficePrefix(input);
   return Object.freeze({
     classification: 'FULL_PREFIX_REPLAY_DATA_NOT_AUTHORITY' as const,
+    historyMode: shared.historyMode,
     countries: shared.social.countries,
     checkpoints: shared.social.checkpoints,
     budgetEncumbrances: shared.budget.encumbrances,
@@ -49,7 +52,44 @@ export function assertSocialPositionOfferEventOriginal(input: {
   readonly pointer: string;
   readonly value: unknown;
   readonly countryId: string;
-}): Readonly<AuthoritativeEvent> {
+}): Readonly<{
+  fromHead: Readonly<{ worldVersion: string; eventSequence: string }>;
+  fromSimTime: string;
+}> {
+  const paged = readPreparedSocialPagedLineage(input.lineage);
+  if (paged) {
+    const country = paged.view.result.socialCountries.find(
+        (c) => c.countryId === input.countryId,
+      ),
+      origins =
+        country?.offerOrigins.filter(
+          (o) =>
+            o.eventId === input.eventId &&
+            o.payloadHash === input.payloadHash &&
+            o.pointer === input.pointer,
+        ) ?? [];
+    if (origins.length !== 1)
+      invalid(
+        'committed offer origin absent/ambiguous in genuine complete fold',
+      );
+    const origin = origins[0]!,
+      offers = country!.lifecycle.offers.filter(
+        (o) => o.positionId === origin.positionId,
+      );
+    if (
+      offers.length !== 1 ||
+      canonicalSerialize(offers[0]) !== canonicalSerialize(input.value)
+    )
+      invalid('offer differs from actual Core-verified committed payload');
+    // This is effectivity DATA from the exact stored event already reduced by
+    // Core, not a reconstructed AuthoritativeEvent or a caller source proof.
+    return Object.freeze({
+      fromHead: origin.fromHead,
+      fromSimTime: origin.fromSimTime,
+    });
+  }
+  if (input.lineage.transitions === null)
+    invalid('genuine paged lineage required');
   const matches = input.lineage.transitions
     .flatMap((entry) =>
       entry.transition.events.map((event) => ({
@@ -75,7 +115,13 @@ export function assertSocialPositionOfferEventOriginal(input: {
     canonicalSerialize(input.value)
   )
     invalid('offer differs from actual committed event payload');
-  return event;
+  return Object.freeze({
+    fromHead: Object.freeze({
+      worldVersion: event.worldVersion,
+      eventSequence: event.sequence,
+    }),
+    fromSimTime: event.simTime.toCanonicalValue(),
+  });
 }
 export type PostwarSocialCountryLifecycle = Readonly<{
   countryId: string;

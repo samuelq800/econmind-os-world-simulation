@@ -1,4 +1,6 @@
 import { assertPostwarCurrentSocialMatchPlan } from './postwar-social-match-current-plan.js';
+import { assertPostwarCurrentPagedSocialMatchPlan } from './postwar-social-paged-match-plan.js';
+import { readPreparedSocialPagedLineage } from './prepared-postwar-social-source.js';
 import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
 import type { CurrentMaterializationObservation } from './current-materialization-observation.js';
 import type { PreparedPostwarSocialSource } from './prepared-postwar-social-source.js';
@@ -241,16 +243,42 @@ export function createPostwarSocialMatchRuntime(configuration: {
       ),
     );
     const { lineage, document, grant, publication } = original;
-    const planEntry = lineage.transitions.find(
-      (e) => e.command.commandId === parsed.intent.planCommandId,
-    );
+    const paged = readPreparedSocialPagedLineage(lineage),
+      pagedPlan = paged
+        ? assertPostwarCurrentPagedSocialMatchPlan({
+            worldId: command.worldId,
+            countryId: command.countryId,
+            head: {
+              worldVersion: lineage.headWorldVersion,
+              eventSequence: lineage.headEventSequence,
+            },
+            latestCommandSimTime: BigInt(paged.metadata.maxCommandSimTimeTicks),
+            socialCountries: paged.view.result.socialCountries,
+            planCommandId: parsed.intent.planCommandId,
+            requirePending: true,
+          })
+        : null;
+    const planEntry =
+      lineage.transitions === null
+        ? null
+        : lineage.transitions.find(
+            (e) => e.command.commandId === parsed.intent.planCommandId,
+          );
+    const planCommand = pagedPlan?.command ?? planEntry?.command,
+      planReceiptFingerprint =
+        paged?.metadata.pendingSocialPlanReceiptFingerprints[
+          parsed.intent.planCommandId
+        ] ?? (planEntry ? hash(planEntry.receipt) : undefined);
     if (
-      !planEntry ||
-      planEntry.receipt.outcome !== 'COMMITTED' ||
-      planEntry.command.fingerprint !== parsed.intent.planFingerprint ||
-      planEntry.command.countryId !== command.countryId ||
+      !planCommand ||
+      !planReceiptFingerprint ||
+      (planEntry !== null &&
+        planEntry !== undefined &&
+        planEntry.receipt.outcome !== 'COMMITTED') ||
+      planCommand.fingerprint !== parsed.intent.planFingerprint ||
+      planCommand.countryId !== command.countryId ||
       command.expectedWorldVersion !== lineage.headWorldVersion ||
-      command.simTime.ticks !== planEntry.command.simTime.ticks ||
+      command.simTime.ticks !== planCommand.simTime.ticks ||
       command.simTime.ticks >= 86400000n ||
       parsed.intent.dueDayIndex !== '0' ||
       grant.rule_version !== SOCIAL_JOB_MATCH_RULE_VERSION ||
@@ -262,19 +290,20 @@ export function createPostwarSocialMatchRuntime(configuration: {
       invalid(
         'canonical PLAN, actual publisher, day-zero boundary or publication differs',
       );
-    const plan = parseSocialEmploymentServiceCommand(planEntry.command, digest);
+    const plan = parseSocialEmploymentServiceCommand(planCommand, digest);
     if (plan.kind !== 'PLAN') invalid('actual original PLAN required');
     const replay = replayPostwarSocialEmploymentLineage({ document, lineage });
-    assertPostwarCurrentSocialMatchPlan({
-      frames: lineage.transitions.map((t) => ({
-        ...t,
-        events: t.transition.events,
-      })),
-      socialCountries: replay.countries,
-      countryId: command.countryId,
-      planCommandId: parsed.intent.planCommandId,
-      requirePending: true,
-    });
+    if (lineage.transitions !== null)
+      assertPostwarCurrentSocialMatchPlan({
+        frames: lineage.transitions.map((t) => ({
+          ...t,
+          events: t.transition.events,
+        })),
+        socialCountries: replay.countries,
+        countryId: command.countryId,
+        planCommandId: parsed.intent.planCommandId,
+        requirePending: true,
+      });
     const country = replay.countries.find(
         (c) => c.countryId === command.countryId,
       ),
@@ -338,9 +367,11 @@ export function createPostwarSocialMatchRuntime(configuration: {
       registration: original.registration,
       publisher: grant,
       publication,
-      originalPlanFingerprint: planEntry.command.fingerprint,
-      originalPlanReceiptFingerprint: hash(planEntry.receipt),
-      completePrefixFingerprint: hash(lineage.transitions),
+      originalPlanFingerprint: planCommand.fingerprint,
+      originalPlanReceiptFingerprint: planReceiptFingerprint,
+      completePrefixFingerprint:
+        paged?.metadata.prefixFingerprint ?? hash(lineage.transitions),
+      ...(paged ? { historyMode: 'PAGED_COMPLETE_V1' } : {}),
       stateHash: hash(state),
       readFactsHash: hash(readFacts),
       physicalBodyHash: physical.immutableBodyHash,
@@ -373,7 +404,11 @@ export function createPostwarSocialMatchRuntime(configuration: {
       });
       return freeze({
         status: 'REPLAYED' as const,
-        provenance: 'TEST_ONLY' as const,
+        // deriveFrom has held the actual source/admission/permit and one-shot
+        // publisher locks, replayed the complete canonical prefix in Core and
+        // checked the immutable PLAN/physical original. This is admitted DATA,
+        // not a claim of Owner approval, actor or automatic execution authority.
+        provenance: 'ADMITTED_OPENING_AND_EVENTS' as const,
         openingSeedHash: fresh.binding.seedFingerprint,
         worldId: input.command.worldId,
         headWorldVersion: fresh.head.worldVersion,
@@ -387,7 +422,9 @@ export function createPostwarSocialMatchRuntime(configuration: {
   });
   const source = new SqlSocialJobMatchCandidateSource({
     ...configuration,
-    mode: 'TEST_ONLY_LOCAL',
+    // This fixed factory has no simulated/test-only reader fallback. Missing
+    // actual originals/publication still fail before any snapshot is issued.
+    mode: 'OFFICIAL_RUNTIME',
     sha256Hex: digest,
     snapshotReader,
     automaticAuthority: {

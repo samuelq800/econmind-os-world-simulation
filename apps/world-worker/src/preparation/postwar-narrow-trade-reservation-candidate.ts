@@ -40,6 +40,7 @@ import {
   type PostwarNarrowTradeCurrentSource,
   type PostwarNarrowTradeSourceCommitProtectionPort,
 } from '../persistence/postwar-narrow-trade-current-source.js';
+import { MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY } from '../persistence/manual-office-authorization-sql.js';
 import {
   WORKER_CURRENT_AUTHORIZATION_LOCK_QUERY,
   WORKER_REVOKED_AUTHORIZATION_LOCK_QUERY,
@@ -72,6 +73,14 @@ const currentAuth =
   'select * from world_v2.lock_postwar_narrow_trade_current_authorization($1,$2::uuid,$3,$4,$5)';
 const revokedAuth =
   'select present as "?column?" from world_v2.lock_postwar_narrow_trade_revoked_authorization($1,$2::uuid,$3,$4)';
+const authorizationDatabases = new WeakMap<object, string>();
+const authorizationWrappers = new WeakMap<
+  object,
+  Map<string, Readonly<SqlDatabase>>
+>();
+export const NARROW_TRADE_MANUAL_CLAIM_AUTHORIZATION_LOCK_QUERY = `select team_id,authorization_version from world_v2.current_commit_authorization
+         where world_id=$1 and auth_subject=$2::uuid and country_id=$3 and office_id=$4
+           and capability=$5 and active for share`;
 /** No fabricated rows, table DML, role switching or fallback privilege. Direct
  * reads made by an existing authorization resolver inside this transaction use
  * its held executor, rather than acquiring a second conflicting connection. */
@@ -79,30 +88,58 @@ export function createPostwarNarrowTradeAuthorizationDatabase(
   database: SqlDatabase,
   scope: Readonly<{ worldId: string }>,
 ): Readonly<SqlDatabase> {
-  const world = worldId(scope.worldId),
-    held = new AsyncLocalStorage<SqlExecutor>();
+  const world = worldId(scope.worldId);
+  if (
+    !database ||
+    typeof database.query !== 'function' ||
+    typeof database.transaction !== 'function'
+  )
+    invalid('fixed borrowed SQL database required');
+  const priorWorld = authorizationDatabases.get(database);
+  if (priorWorld) {
+    if (priorWorld !== world)
+      invalid('exact issued Trade database World required');
+    return database;
+  }
+  const prior = authorizationWrappers.get(database)?.get(world);
+  if (prior) return prior;
+  const held = new AsyncLocalStorage<{
+    executor: SqlExecutor;
+    active: boolean;
+  }>();
   const bind = (tx: SqlExecutor): SqlExecutor => ({
     async query<Row extends object>(
       statement: string,
       parameters: readonly unknown[] = [],
     ) {
       const exactWorld = parameters[0] === world;
+      const trade =
+        parameters[3] === 'TRADE' && parameters[4] === 'TRADE_CONTRACTS';
       const pair =
-        (parameters[3] === 'TRADE' && parameters[4] === 'TRADE_CONTRACTS') ||
+        trade ||
         (parameters[3] === 'FINANCE' && parameters[4] === 'FINANCE_TREASURY');
       if (
         exactWorld &&
         parameters.length === 5 &&
-        pair &&
-        (statement === WORKER_CURRENT_AUTHORIZATION_LOCK_QUERY ||
-          statement === NARROW_APPROVAL_AUTHORIZATION_LOCK_QUERY)
-      )
-        return tx.query<Row>(
-          statement === NARROW_APPROVAL_AUTHORIZATION_LOCK_QUERY
-            ? 'select authorization_version from world_v2.lock_postwar_narrow_trade_current_authorization($1,$2::uuid,$3,$4,$5)'
-            : currentAuth,
-          parameters,
-        );
+        parameters.every((v) => typeof v === 'string')
+      ) {
+        if (statement === NARROW_APPROVAL_AUTHORIZATION_LOCK_QUERY && pair)
+          return tx.query<Row>(
+            'select authorization_version from world_v2.lock_postwar_narrow_trade_current_authorization($1,$2::uuid,$3,$4,$5)',
+            parameters,
+          );
+        if (trade && statement === WORKER_CURRENT_AUTHORIZATION_LOCK_QUERY)
+          return tx.query<Row>(currentAuth, parameters);
+        if (
+          trade &&
+          (statement === MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY ||
+            statement === NARROW_TRADE_MANUAL_CLAIM_AUTHORIZATION_LOCK_QUERY)
+        )
+          return tx.query<Row>(
+            'select team_id,authorization_version from world_v2.lock_postwar_narrow_trade_current_authorization($1,$2::uuid,$3,$4,$5)',
+            parameters,
+          );
+      }
       if (
         exactWorld &&
         parameters.length === 4 &&
@@ -113,22 +150,45 @@ export function createPostwarNarrowTradeAuthorizationDatabase(
       return tx.query<Row>(statement, parameters);
     },
   });
-  return Object.freeze({
+  const wrapped: Readonly<SqlDatabase> = Object.freeze({
     query: <Row extends object>(
       statement: string,
       parameters: readonly unknown[] = [],
-    ) => bind(held.getStore() ?? database).query<Row>(statement, parameters),
+    ) => {
+      const scope = held.getStore();
+      if (scope && !scope.active)
+        return Promise.reject(
+          Error('NARROW_AUTHORIZATION_TRANSACTION_SCOPE_RETIRED'),
+        );
+      return bind(scope?.executor ?? database).query<Row>(
+        statement,
+        parameters,
+      );
+    },
     transaction: <T>(consume: (tx: SqlExecutor) => Promise<T>) => {
       if (held.getStore())
-        return Promise.reject(
-          new Error('NARROW_NESTED_TRANSACTION_NOT_ALLOWED'),
-        );
+        return Promise.reject(Error('NARROW_NESTED_TRANSACTION_NOT_ALLOWED'));
       return database.transaction((tx) => {
-        const bound = bind(tx);
-        return held.run(bound, () => consume(bound));
+        const bound = bind(tx),
+          scope = { executor: bound, active: true };
+        return held.run(scope, async () => {
+          try {
+            return await consume(bound);
+          } finally {
+            scope.active = false;
+          }
+        });
       });
     },
   });
+  authorizationDatabases.set(wrapped, world);
+  let worlds = authorizationWrappers.get(database);
+  if (!worlds) {
+    worlds = new Map();
+    authorizationWrappers.set(database, worlds);
+  }
+  worlds.set(world, wrapped);
+  return wrapped;
 }
 export interface PostwarNarrowTradeReservationRuntime {
   readonly worldId: string;

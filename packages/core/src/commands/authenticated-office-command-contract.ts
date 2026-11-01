@@ -17,6 +17,9 @@ export const FINANCE_BUDGET_APPROPRIATION_COMMAND =
 export type ManualOfficeCommandFamily =
   | 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'
   | 'CORE_CENTRAL_BANK_OMO_V1'
+  | 'CORE_GOODS_TRANSFER_V1'
+  | 'CORE_INDUSTRY_PRODUCTION_V1'
+  | 'CORE_INDUSTRY_RUN_SCHEDULE_V1'
   | 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1'
   | 'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'
   | typeof FINANCE_BUDGET_APPROPRIATION_COMMAND
@@ -25,7 +28,8 @@ export type ManualOfficeCommandFamily =
 export interface ManualOfficeCommandRequestDto {
   readonly worldId: string;
   readonly countryId: string;
-  readonly officeId: 'CAPTAIN' | 'CENTRAL_BANK' | 'SOCIAL' | 'FINANCE';
+  readonly officeId:
+    'CAPTAIN' | 'CENTRAL_BANK' | 'SOCIAL' | 'FINANCE' | 'TRADE' | 'INDUSTRY';
   readonly commandType: ManualOfficeCommandFamily;
   readonly commandId: string;
   readonly idempotencyKey: string;

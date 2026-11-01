@@ -80,6 +80,82 @@ describe('explicit registered host configuration, without network or credentials
     if (reason === 'bad-hash') c.seedFileSha256 = 'unknown';
     expect(() => parseRegisteredNodeConfiguration(JSON.stringify(c))).toThrow();
   });
+  it('requires explicit boolean installation choices without granting source authority', () => {
+    const config = {
+      ...configuration(),
+      install: { centralBankOmo: true, trade: false },
+    };
+    const parsed = parseRegisteredNodeConfiguration(JSON.stringify(config));
+    expect(parsed.install).toEqual(config.install);
+    expect(Object.isFrozen(parsed.install)).toBe(true);
+    expect(
+      parseRegisteredNodeConfiguration(
+        JSON.stringify({
+          ...config,
+          install: { ...config.install, industry: true },
+        }),
+      ).install?.industry,
+    ).toBe(true);
+    expect(
+      parseRegisteredNodeConfiguration(
+        JSON.stringify({
+          ...config,
+          install: { ...config.install, industryLabour: true },
+        }),
+      ).install?.industryLabour,
+    ).toBe(true);
+    expect(() =>
+      parseRegisteredNodeConfiguration(
+        JSON.stringify({
+          ...config,
+          install: { ...config.install, industryLabour: 'true' },
+        }),
+      ),
+    ).toThrow();
+    for (const install of [
+      { trade: true },
+      { centralBankOmo: 'true', trade: false },
+      { centralBankOmo: true, trade: true, industry: 'true' },
+      {
+        centralBankOmo: true,
+        trade: true,
+        industry: true,
+        industryLabour: false,
+      },
+      { centralBankOmo: true, trade: true, arbitraryOffice: true },
+    ])
+      expect(() =>
+        parseRegisteredNodeConfiguration(
+          JSON.stringify({ ...configuration(), install }),
+        ),
+      ).toThrow();
+  });
+  it('accepts only the exact optional rent artifact segment without restoring caller proofs', () => {
+    const beneficialRent = {
+      parentSeedPath: '/reviewed/parent.json',
+      parentSeedFileSha256: 'd'.repeat(64),
+      receiptsPath: '/reviewed/receipts.json',
+      receiptsFileSha256: 'e'.repeat(64),
+      clockBindingRef: 'CLOCK_RENT_REVIEWED',
+    };
+    const c = parseRegisteredNodeConfiguration(
+      JSON.stringify({ ...configuration(), beneficialRent }),
+    );
+    expect(c.beneficialRent).toEqual(beneficialRent);
+    expect(Object.isFrozen(c.beneficialRent)).toBe(true);
+    for (const value of [
+      undefined,
+      { ...beneficialRent, proof: {} },
+      { ...beneficialRent, parentSeedPath: 'relative.json' },
+      { ...beneficialRent, clockBindingRef: '' },
+      { ...beneficialRent, receiptsFileSha256: 'unknown' },
+    ])
+      expect(() =>
+        parseRegisteredNodeConfiguration(
+          JSON.stringify({ ...configuration(), beneficialRent: value ?? null }),
+        ),
+      ).toThrow();
+  });
   it('requires each named binding and never echoes provider credentials', () => {
     expect(() => registeredNodeDatabaseUrls({})).toThrow(
       'NODE_DATABASE_BINDING_REQUIRED:WORLD_NODE_READ_DATABASE_URL',
@@ -89,6 +165,43 @@ describe('explicit registered host configuration, without network or credentials
         WORLD_NODE_READ_DATABASE_URL: 'TEST_ONLY_PASSWORD',
       }),
     ).toThrow('NODE_DATABASE_BINDING_REQUIRED:WORLD_NODE_READ_DATABASE_URL');
+  });
+  it('requires a separate Industry publisher binding only when that installation is selected', () => {
+    const environment = Object.fromEntries(
+      Object.entries(REGISTERED_NODE_DATABASE_VARIABLES).map(([key, name]) => [
+        name,
+        `postgresql://test_${key}:TEST_ONLY@db.example.org/test_only`,
+      ]),
+    );
+    expect(
+      registeredNodeDatabaseUrls(environment).industryPublication,
+    ).toBeUndefined();
+    expect(() =>
+      registeredNodeDatabaseUrls(environment, { industryPublisher: true }),
+    ).toThrow(
+      'NODE_DATABASE_BINDING_REQUIRED:WORLD_NODE_INDUSTRY_PUBLICATION_DATABASE_URL',
+    );
+    environment.WORLD_NODE_INDUSTRY_PUBLICATION_DATABASE_URL =
+      environment.WORLD_NODE_PUBLICATION_DATABASE_URL!;
+    expect(() =>
+      registeredNodeDatabaseUrls(environment, { industryPublisher: true }),
+    ).toThrow('NODE_DISTINCT_DATABASE_PRINCIPALS_REQUIRED');
+    environment.WORLD_NODE_INDUSTRY_PUBLICATION_DATABASE_URL =
+      'postgresql://test_industry:TEST_ONLY@db.example.org/test_only?sslmode=disable';
+    expect(() =>
+      registeredNodeDatabaseUrls(environment, { industryPublisher: true }),
+    ).toThrow(
+      'NODE_VERIFIED_TLS_DATABASE_BINDING_REQUIRED:WORLD_NODE_INDUSTRY_PUBLICATION_DATABASE_URL',
+    );
+    environment.WORLD_NODE_INDUSTRY_PUBLICATION_DATABASE_URL =
+      'postgresql://test_industry:TEST_ONLY@db.example.org/test_only';
+    expect(
+      registeredNodeDatabaseUrls(environment, { industryPublisher: true })
+        .industryPublication,
+    ).toBe(environment.WORLD_NODE_INDUSTRY_PUBLICATION_DATABASE_URL);
+    expect(
+      registeredNodeDatabaseUrls(environment).industryPublication,
+    ).toBeUndefined();
   });
   it('requires distinct principals and rejects TLS query overrides', () => {
     const environment = Object.fromEntries(

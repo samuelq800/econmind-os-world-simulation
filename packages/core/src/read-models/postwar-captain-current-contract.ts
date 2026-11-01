@@ -1,7 +1,21 @@
-import { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
-export { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
+import {
+  POSTWAR_EXTENDED_CURRENT_REDUCER,
+  POSTWAR_RENT_CURRENT_REDUCER,
+  POSTWAR_PAGED_CURRENT_REDUCER,
+  parsePostwarCurrentPageProof,
+  type PostwarCurrentPageProof,
+} from './postwar-extended-current-reducer.js';
+export {
+  POSTWAR_EXTENDED_CURRENT_REDUCER,
+  POSTWAR_RENT_CURRENT_REDUCER,
+  POSTWAR_PAGED_CURRENT_REDUCER,
+  parsePostwarCurrentPageProof,
+  type PostwarCurrentPageProof,
+} from './postwar-extended-current-reducer.js';
 /** Browser-safe wire validation only. These records grant no source admission,
  * political capital, command authority or currentness by themselves. */
+export const POSTWAR_CAPTAIN_PAGED_COVERAGE_SCHEMA =
+  'postwar-captain-current-page-chain-coverage-v2' as const;
 export const POSTWAR_CAPTAIN_CURRENT_NATURE =
   'ADMITTED_CURRENT_POLITICAL_CAPITAL_MIXED_PREFIX' as const;
 export const POSTWAR_CAPTAIN_CURRENT_DATASET =
@@ -31,10 +45,15 @@ export interface PostwarCaptainPoliticalCapitalRow {
   readonly allocationNature: 'REALLOCATION_NOT_GENERATION_OR_SPENDING';
 }
 export interface PostwarCaptainCurrentCoverage {
-  readonly schemaVersion: 'postwar-captain-current-prefix-coverage-v1';
+  readonly schemaVersion:
+    | 'postwar-captain-current-prefix-coverage-v1'
+    | typeof POSTWAR_CAPTAIN_PAGED_COVERAGE_SCHEMA;
   readonly reducerVersion:
     | 'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1'
-    | typeof POSTWAR_EXTENDED_CURRENT_REDUCER;
+    | typeof POSTWAR_EXTENDED_CURRENT_REDUCER
+    | typeof POSTWAR_RENT_CURRENT_REDUCER
+    | typeof POSTWAR_PAGED_CURRENT_REDUCER;
+  readonly pageProof?: Readonly<PostwarCurrentPageProof>;
   readonly countryId: string;
   readonly coverageRef: string;
   readonly prefixFingerprint: string;
@@ -118,6 +137,12 @@ export function parsePostwarCaptainPoliticalCapitalRow(
 export function parsePostwarCaptainCurrentCoverage(
   value: unknown,
 ): Readonly<PostwarCaptainCurrentCoverage> {
+  const paged =
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    (value as Record<string, unknown>).schemaVersion ===
+      POSTWAR_CAPTAIN_PAGED_COVERAGE_SCHEMA;
   const r = record(value, [
     'schemaVersion',
     'reducerVersion',
@@ -132,16 +157,21 @@ export function parsePostwarCaptainCurrentCoverage(
     'financialPostingCount',
     'financialBatchCount',
     'financialPostingsFingerprint',
+    ...(paged ? ['pageProof'] : []),
     'capitalStateHash',
     'originalPacketSha256',
     'originWorldVersion',
     'originEventSequence',
   ]);
   if (
-    r.schemaVersion !== 'postwar-captain-current-prefix-coverage-v1' ||
-    (r.reducerVersion !==
-      'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1' &&
-      r.reducerVersion !== POSTWAR_EXTENDED_CURRENT_REDUCER) ||
+    (!paged &&
+      r.schemaVersion !== 'postwar-captain-current-prefix-coverage-v1') ||
+    (paged
+      ? r.reducerVersion !== POSTWAR_PAGED_CURRENT_REDUCER
+      : r.reducerVersion !==
+          'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1' &&
+        r.reducerVersion !== POSTWAR_EXTENDED_CURRENT_REDUCER &&
+        r.reducerVersion !== POSTWAR_RENT_CURRENT_REDUCER) ||
     typeof r.countryId !== 'string' ||
     !/^COUNTRY_(?:0[1-9]|[1-6][0-9]|70)$/u.test(r.countryId) ||
     !id(r.coverageRef) ||
@@ -175,7 +205,14 @@ export function parsePostwarCaptainCurrentCoverage(
     r.globalEventSequence === '0'
   )
     invalid('EXACT_ORIGIN_AND_CURRENT_HEAD_REQUIRED');
+  const pageProof = paged
+    ? parsePostwarCurrentPageProof(r.pageProof, {
+        worldVersion: String(r.globalWorldVersion),
+        eventSequence: String(r.globalEventSequence),
+      })
+    : undefined;
   return Object.freeze({
     ...r,
+    ...(pageProof === undefined ? {} : { pageProof }),
   }) as unknown as Readonly<PostwarCaptainCurrentCoverage>;
 }
