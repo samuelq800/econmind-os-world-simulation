@@ -3,6 +3,16 @@
  * locks are mandatory before every calculation and again in Atomic's same tx.
  * No source, lease, clock, consumer, grant or production registration is created.
  */
+import {
+  readFinanceSocialSourceBinding,
+  type FinanceSocialSourceBinding,
+} from '../runtime-preparation/finance-social-runtime-connection.js';
+import { readPostwarSocialRuntimeConnectionResources } from '../runtime-preparation/social-runtime-connection.js';
+import {
+  readRegisteredWorldExecutionFrom,
+  registeredWorldExecutionClockScope,
+  type RegisteredWorldExecutionState,
+} from '../time/registered-world-execution-state.js';
 import { createHash } from 'node:crypto';
 import {
   BENEFICIAL_HOUSING_RENT_COMMAND,
@@ -50,12 +60,16 @@ import {
   BENEFICIAL_RENT_SOURCE_READER,
   lockBeneficialRentHeaderFrom,
   lockBeneficialRentOriginalFrom,
+  lockBeneficialRentPagedOriginalFrom,
   invalidBeneficialRentSource as invalid,
   exactRentText as text,
 } from './postgres-postwar-beneficial-housing-rent-originals.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
-import { replayPostwarBeneficialHousingRentMixedFrom } from './postwar-beneficial-housing-rent-mixed-source.js';
+import {
+  replayPostwarBeneficialHousingRentMixedFrom,
+  replayPostwarBeneficialHousingRentPagedFrom,
+} from './postwar-beneficial-housing-rent-mixed-source.js';
 export const BENEFICIAL_HOUSING_RENT_SOURCE_PURPOSE =
   'POSTWAR_BENEFICIAL_HOUSING_RENT_SOURCE_RECHECK_V1' as const;
 export interface BeneficialHousingRentSourceCommitRequest {
@@ -87,6 +101,19 @@ export interface BeneficialHousingRentSourceCommitProtectionPort {
 }
 const ports = new WeakSet<object>(),
   runtimes = new WeakSet<object>();
+const preparationOwners = new WeakMap<
+  PreparedBeneficialHousingRentSource,
+  object
+>();
+/** Cleanup-only ownership diagnostic. True includes an entered transfer still
+ * draining. It proves no admission/currentness/execution authority. Loaders
+ * must not retire a token while its actual runtime owns or is reserving it. */
+export function hasPostwarBeneficialHousingRentSourceOwner(
+  preparation: PreparedBeneficialHousingRentSource,
+): boolean {
+  return preparationOwners.has(preparation);
+}
+
 const runtimeSources = new WeakMap<
   object,
   {
@@ -159,6 +186,12 @@ export interface PostwarBeneficialHousingRentRuntime {
   readonly candidateFactory: AtomicTransitionCandidateFactory;
   readonly sourceCommitProtectionPort: BeneficialHousingRentSourceCommitProtectionPort;
   prepare(input: PostwarBeneficialHousingRentPreparation): Promise<void>;
+  /** Transfer a live privately issued DATA token after the same fresh SQL
+   * child-header/admission checks. On success this runtime owns retirement;
+   * Social may borrow it until the unified owner drains and closes runtime. */
+  prepareFromVerifiedSource(
+    preparation: PreparedBeneficialHousingRentSource,
+  ): Promise<void>;
   assertSourceBeforeClaim(input: {
     readonly command: CanonicalCommand;
     readonly observedAtReal: string;
@@ -335,20 +368,75 @@ function replay(
     invalid('COMPLETE_FINANCIAL_HEAD_REQUIRED');
   return { financial, states, lastSim };
 }
-export function createPostwarBeneficialHousingRentRuntime(config: {
+interface RentRuntimeTransport {
   readonly database: SqlDatabase;
   readonly worldId: string;
   readonly workerId: string;
   readonly workerRole: string;
-  readonly environment: 'local' | 'ci';
   readonly clock: DurableConsumptionClock;
   readonly clockBindingRef: string;
-}): Readonly<PostwarBeneficialHousingRentRuntime> {
-  const world = worldId(config.worldId),
-    withReader = roleScope(config.workerRole);
+}
+export function createPostwarBeneficialHousingRentRuntime(
+  config: RentRuntimeTransport & {
+    readonly environment: 'local' | 'ci';
+  },
+): Readonly<PostwarBeneficialHousingRentRuntime> {
   if (config.environment !== 'local' && config.environment !== 'ci')
     invalid('FORMAL_CLOCK_SOURCE_CONTROL_NOT_REGISTERED');
+  return constructRentRuntime(config, null);
+}
+/** Genuine shared issuer only. Formal mode derives from the private binding,
+ * never an environment override or caller clock callback. Actual durable
+ * registration remains a fresh same-transaction prerequisite on every use. */
+export function createPostwarBeneficialHousingRentRuntimeForSharedSource(input: {
+  readonly sharedBinding: FinanceSocialSourceBinding;
+  readonly clockBindingRef: string;
+}): Readonly<PostwarBeneficialHousingRentRuntime> {
+  const d = readFinanceSocialSourceBinding(input.sharedBinding);
+  const resources = readPostwarSocialRuntimeConnectionResources(
+    d.socialConnection,
+  );
+  const environment = d.environment.ECONMIND_ENV;
+  const scope = registeredWorldExecutionClockScope(d.clock);
+  if (!['local', 'ci', 'staging', 'production'].includes(String(environment)))
+    invalid('EXACT_SHARED_HOST_ENVIRONMENT_REQUIRED');
+  if (
+    (environment === 'staging' || environment === 'production') &&
+    (!scope ||
+      scope.database !== d.socialConnection.database ||
+      scope.worldId !== d.worldId ||
+      scope.workerId !== d.workerId)
+  )
+    invalid('GENUINE_REGISTERED_SHARED_CLOCK_REQUIRED');
+  if (
+    scope &&
+    (scope.database !== d.socialConnection.database ||
+      scope.worldId !== d.worldId ||
+      scope.workerId !== d.workerId)
+  )
+    invalid('EXACT_SHARED_REGISTERED_TRANSPORT_REQUIRED');
+  return constructRentRuntime(
+    {
+      database: d.database,
+      worldId: d.worldId,
+      workerId: d.workerId,
+      workerRole: resources.workerRole,
+      clock: d.clock,
+      clockBindingRef: text(input.clockBindingRef),
+    },
+    scope ? d.clock : null,
+    true,
+  );
+}
+function constructRentRuntime(
+  config: RentRuntimeTransport,
+  registeredClock: DurableConsumptionClock | null,
+  paged = false,
+): Readonly<PostwarBeneficialHousingRentRuntime> {
+  const world = worldId(config.worldId),
+    withReader = roleScope(config.workerRole);
   let prepared: PreparedBeneficialHousingRentSource | undefined,
+    preparing = false,
     closed = false,
     closing: Promise<void> | undefined;
   const pending = new Set<Promise<unknown>>(),
@@ -367,23 +455,63 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
     if (!prepared) invalid('SOURCE_NOT_PREPARED');
     return consumeBeneficialHousingRentSource(prepared);
   };
+  async function registeredFrom(
+    tx: SqlExecutor,
+    b: BeneficialHousingRentSourceData,
+  ): Promise<Readonly<RegisteredWorldExecutionState> | null> {
+    if (!registeredClock) return null;
+    const state = await readRegisteredWorldExecutionFrom(tx, registeredClock);
+    if (
+      state.worldId !== world ||
+      state.workerId !== config.workerId ||
+      state.consumerRole !== config.workerRole ||
+      state.seedId !== b.seedId ||
+      state.seedFingerprint !== b.seedFingerprint ||
+      state.clockSourceRef !== config.clockBindingRef
+    )
+      invalid('ACTUAL_REGISTERED_CHILD_CLOCK_CONTROL_REQUIRED');
+    return state;
+  }
+  function registeredAdmission(
+    state: Readonly<RegisteredWorldExecutionState> | null,
+    admission: unknown,
+  ): void {
+    if (state && state.admissionRef !== admission)
+      invalid('ACTUAL_REGISTERED_CHILD_ADMISSION_REQUIRED');
+  }
   async function currentFrom(
     tx: SqlExecutor,
     countryId: string,
     b: BeneficialHousingRentSourceData,
-    prefix: ReturnType<typeof decodeBoundedPostwarCanonicalPrefix>,
+    prefix:
+      | ReturnType<typeof decodeBoundedPostwarCanonicalPrefix>
+      | { head: { worldVersion: string; eventSequence: string }; frames: null },
     admissionRef?: string,
   ) {
     if (!prepared) invalid('SOURCE_NOT_PREPARED');
-    const mixed = await replayPostwarBeneficialHousingRentMixedFrom({
-      runtime,
-      preparation: prepared,
-      executor: tx,
-      countryId,
-      prefix,
-      ...(admissionRef === undefined ? {} : { admissionRef }),
-    });
-    if (!mixed) return replay(b, prefix);
+    const mixed =
+      prefix.frames === null
+        ? await replayPostwarBeneficialHousingRentPagedFrom({
+            runtime,
+            preparation: prepared,
+            executor: tx,
+            countryId,
+            head: prefix.head,
+            admissionRef: text(admissionRef),
+          })
+        : await replayPostwarBeneficialHousingRentMixedFrom({
+            runtime,
+            preparation: prepared,
+            executor: tx,
+            countryId,
+            prefix,
+            ...(admissionRef === undefined ? {} : { admissionRef }),
+          });
+    if (!mixed) {
+      if (prefix.frames === null)
+        invalid('GENUINE_SHARED_PAGED_REPLAY_REQUIRED');
+      return { ...replay(b, prefix), prefixFingerprint: hash(prefix.frames) };
+    }
     const origins = mixed.beneficialHousingRentOrigins;
     if (
       !origins ||
@@ -402,7 +530,14 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
     return {
       financial: mixed.financial,
       states: new Map(origins.map((o) => [o.countryId, o.state])),
-      lastSim: prefix.frames.at(-1)?.command.simTime.ticks ?? 0n,
+      lastSim:
+        'maxCommandSimTimeTicks' in mixed
+          ? BigInt(mixed.maxCommandSimTimeTicks)
+          : (prefix.frames!.at(-1)?.command.simTime.ticks ?? 0n),
+      prefixFingerprint:
+        'pageChainFingerprint' in mixed
+          ? mixed.pageChainFingerprint
+          : hash(prefix.frames),
     };
   }
   async function derive(
@@ -413,12 +548,21 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
     const p = intent(command),
       b = base();
     if (p.command.worldId !== world) invalid('EXACT_WORLD_REQUIRED');
-    const clockSim = await config.clock.simTime(world);
+    const registered = await registeredFrom(tx, b);
+    // The genuine DB clock is read from this held transaction. Calling its
+    // public simTime() here would acquire a second connection/lose the lock.
+    const clockSim = registered
+      ? registered.simTime
+      : await config.clock.simTime(world);
     SimTime.fromTicks(clockSim);
     if (clockSim !== p.command.simTime.toCanonicalValue())
       invalid('EXACT_BOUND_HOST_CLOCK_REQUIRED');
     const read = await withReader(tx, async () => {
-      const original = await lockBeneficialRentOriginalFrom(tx, {
+      const original = await (
+        paged
+          ? lockBeneficialRentPagedOriginalFrom
+          : lockBeneficialRentOriginalFrom
+      )(tx, {
         worldId: world,
         countryId: p.command.countryId,
         commandId: p.command.commandId,
@@ -440,11 +584,14 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
         original.receiptFingerprint !== p.receiptFingerprint
       )
         invalid('EXACT_PUBLISHED_CLOCK_AND_RIGHTS_REQUIRED');
-      const prefix = decodeBoundedPostwarCanonicalPrefix({
-        worldId: world,
-        prefixRow: original.prefixRow,
-        journal: decodeBoundedPostwarJournal(original.journal),
-      });
+      const prefix =
+        'prefixRow' in original && 'journal' in original
+          ? decodeBoundedPostwarCanonicalPrefix({
+              worldId: world,
+              prefixRow: original.prefixRow,
+              journal: decodeBoundedPostwarJournal(original.journal),
+            })
+          : { head: original.head, frames: null };
       if (
         !same(prefix.head, original.head) ||
         p.command.expectedWorldVersion !== original.head.worldVersion
@@ -452,6 +599,7 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
         invalid('EXACT_HELD_CURRENT_HEAD_REQUIRED');
       return { original, prefix };
     });
+    registeredAdmission(registered, read.original.admissionRef);
     const current = await currentFrom(
         tx,
         p.command.countryId,
@@ -525,7 +673,9 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
     if (applied.outcome !== 'APPLIED' || !applied.posting)
       invalid('FRESH_CORE_RENT_POSTING_REQUIRED');
     const binding = freeze({
-      schemaVersion: 'beneficial-housing-rent-source-binding-v1',
+      schemaVersion: paged
+        ? 'beneficial-housing-rent-page-chain-source-binding-v2'
+        : 'beneficial-housing-rent-source-binding-v1',
       purpose: BENEFICIAL_HOUSING_RENT_SOURCE_PURPOSE,
       commandFingerprint: p.command.fingerprint,
       head,
@@ -539,7 +689,7 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
       clockBindingRef: read.original.clockBindingRef,
       workerId: config.workerId,
       clockSimTime: clockSim,
-      completePrefixFingerprint: hash(read.prefix.frames),
+      completePrefixFingerprint: current.prefixFingerprint,
       financialBeforeHash: hash(current.financial),
       stateBeforeHash: hash(state),
     });
@@ -669,32 +819,59 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
       );
     },
   });
+  async function installPreparation(
+    obtain: () => PreparedBeneficialHousingRentSource,
+    ownsNewToken: boolean,
+  ): Promise<void> {
+    if (prepared || preparing) invalid('SOURCE_ALREADY_PREPARED');
+    preparing = true;
+    let token: PreparedBeneficialHousingRentSource | undefined;
+    let reserved = false,
+      transferred = false;
+    try {
+      token = obtain();
+      const b = consumeBeneficialHousingRentSource(token);
+      if (b.worldId !== world) invalid('EXACT_WORLD_REQUIRED');
+      if (preparationOwners.has(token))
+        invalid('VERIFIED_SOURCE_ALREADY_OWNED');
+      preparationOwners.set(token, runtime);
+      reserved = true;
+      await config.database.transaction(async (tx) => {
+        const registered = await registeredFrom(tx, b);
+        const row = await withReader(tx, () =>
+          lockBeneficialRentHeaderFrom(tx, world, b.receipts[0]!.countryId),
+        );
+        checkBase(b, row);
+        registeredAdmission(registered, row.admission_ref);
+      });
+      if (closed) invalid('RUNTIME_RETIRED_DURING_PREPARATION');
+      prepared = token;
+      transferred = true;
+    } finally {
+      preparing = false;
+      if (token && !transferred) {
+        if (reserved && preparationOwners.get(token) === runtime)
+          preparationOwners.delete(token);
+        // A caller's borrowed token remains live if transfer never succeeded.
+        if (ownsNewToken) retireBeneficialHousingRentSource(token);
+      }
+    }
+  }
   const runtime: Readonly<PostwarBeneficialHousingRentRuntime> = Object.freeze({
     candidateFactory,
     sourceCommitProtectionPort: port,
     prepare(input: PostwarBeneficialHousingRentPreparation): Promise<void> {
-      return run(async () => {
-        if (prepared) invalid('SOURCE_ALREADY_PREPARED');
-        const token = prepareBeneficialHousingRentSource(input);
-        try {
-          const b = consumeBeneficialHousingRentSource(token);
-          if (b.worldId !== world) invalid('EXACT_WORLD_REQUIRED');
-          await config.database.transaction((tx) =>
-            withReader(tx, async () => {
-              const row = await lockBeneficialRentHeaderFrom(
-                tx,
-                world,
-                b.receipts[0]!.countryId,
-              );
-              checkBase(b, row);
-            }),
-          );
-          if (closed) invalid('RUNTIME_RETIRED_DURING_PREPARATION');
-          prepared = token;
-        } finally {
-          if (prepared !== token) retireBeneficialHousingRentSource(token);
-        }
-      });
+      return run(() =>
+        installPreparation(
+          () => prepareBeneficialHousingRentSource(input),
+          true,
+        ),
+      );
+    },
+    prepareFromVerifiedSource(
+      preparation: PreparedBeneficialHousingRentSource,
+    ): Promise<void> {
+      return run(() => installPreparation(() => preparation, false));
     },
     assertSourceBeforeClaim(
       input: Parameters<
@@ -715,24 +892,47 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
       return run(() =>
         config.database.transaction(async (tx) => {
           const b = base();
+          const registered = await registeredFrom(tx, b);
           const { row, prefix } = await withReader(tx, async () => {
             const r = await tx.query<Record<string, unknown>>(
-              'select * from world_v2.read_postwar_beneficial_rent_current($1,$2)',
+              paged
+                ? 'select * from world_v2.read_postwar_beneficial_rent_paged_current($1,$2)'
+                : 'select * from world_v2.read_postwar_beneficial_rent_current($1,$2)',
               [world, input.countryId],
             );
             if (r.rows.length !== 1)
               invalid('REGISTERED_ADMITTED_SOURCE_MISSING');
             const row = r.rows[0]!;
             checkBase(b, row);
-            const prefix = decodeBoundedPostwarCanonicalPrefix({
-              worldId: world,
-              prefixRow: row.prefix,
-              journal: decodeBoundedPostwarJournal(row.journal),
-            });
+            if (
+              paged &&
+              row.history_mode !== 'GENUINE_SHARED_PAGED_CORE_REPLAY_REQUIRED'
+            )
+              invalid('EXACT_PAGED_RENT_SCOPE_REQUIRED');
+            const prefix = paged
+              ? {
+                  head: {
+                    worldVersion: text(row.world_version),
+                    eventSequence: text(row.event_sequence),
+                  },
+                  frames: null,
+                }
+              : decodeBoundedPostwarCanonicalPrefix({
+                  worldId: world,
+                  prefixRow: row.prefix,
+                  journal: decodeBoundedPostwarJournal(row.journal),
+                });
             return { row, prefix };
           });
+          registeredAdmission(registered, row.admission_ref);
           // Restore the actual worker before any fixed sibling-source delegation.
-          const current = await currentFrom(tx, input.countryId, b, prefix),
+          const current = await currentFrom(
+              tx,
+              input.countryId,
+              b,
+              prefix,
+              paged ? text(row.admission_ref) : undefined,
+            ),
             rights = b.receipts.find((r) => r.countryId === input.countryId);
           if (
             !rights ||
@@ -764,7 +964,10 @@ export function createPostwarBeneficialHousingRentRuntime(config: {
       if (closing) return closing;
       closed = true;
       closing = Promise.allSettled([...pending]).then(() => {
-        if (prepared) retireBeneficialHousingRentSource(prepared);
+        if (prepared) {
+          preparationOwners.delete(prepared);
+          retireBeneficialHousingRentSource(prepared);
+        }
         prepared = undefined;
       });
       return closing;

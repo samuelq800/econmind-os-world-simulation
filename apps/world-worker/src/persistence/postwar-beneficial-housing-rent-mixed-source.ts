@@ -1,3 +1,7 @@
+import {
+  readPagedFromPreparedSocialBaseOnHeldExecutor,
+  releasePostwarPagedFinanceSocialReplay,
+} from './postwar-paged-finance-social-replay.js';
 /** Fixed shared-host association of live, independently prepared H0 DATA.
  * Historical rent originals do not become current rent/source/Clock authority.
  * New rent commands still require the real publication + source guard; every
@@ -261,4 +265,57 @@ export function releasePostwarBeneficialHousingRentMixedSource(input: {
   if (worlds)
     for (const [id, value] of worlds) if (value === a) worlds.delete(id);
   byRentRuntime.delete(input.rent);
+}
+
+/** Fixed paged alternative. No fallback to a standalone or partial prefix. */
+export async function replayPostwarBeneficialHousingRentPagedFrom(input: {
+  runtime: Readonly<PostwarBeneficialHousingRentRuntime>;
+  preparation: PreparedBeneficialHousingRentSource;
+  executor: SqlExecutor;
+  countryId: string;
+  admissionRef: string;
+  head: { worldVersion: string; eventSequence: string };
+}) {
+  const a = byRentRuntime.get(input.runtime);
+  if (!a) invalid('GENUINE_SHARED_PAGED_ASSOCIATION_REQUIRED');
+  const { shared, b, rent } = read(a);
+  if (
+    consumeBeneficialHousingRentSource(input.preparation) !== rent ||
+    input.admissionRef !== b.pins.admissionRef ||
+    !b.document.countries.some((c) => c.countryId === input.countryId)
+  )
+    invalid('EXACT_LIVE_CHILD_PREPARATION_AND_ADMISSION_REQUIRED');
+  const result = await readPagedFromPreparedSocialBaseOnHeldExecutor(
+    input.executor,
+    {
+      socialConnection: shared.socialConnection,
+      worldId: a.worldId,
+      hostCountryId: input.countryId,
+      expectedHead: input.head,
+      omoOriginalMode:
+        shared.environment.ECONMIND_ENV === 'local' ||
+        shared.environment.ECONMIND_ENV === 'ci'
+          ? 'TEST_ONLY_LOCAL'
+          : 'OFFICIAL_RUNTIME',
+    },
+  );
+  try {
+    if (
+      result.seedPins.seedId !== rent.seedId ||
+      result.seedPins.seedFingerprint !== rent.seedFingerprint ||
+      result.seedPins.admissionRef !== input.admissionRef
+    )
+      invalid('EXACT_PAGED_CHILD_PINS_REQUIRED');
+    if (!result.view.result.financialState)
+      invalid('COMPLETE_PAGED_FINANCIAL_REQUIRED');
+    return {
+      financial: result.view.result.financialState,
+      beneficialHousingRentOrigins:
+        result.view.result.beneficialHousingRentOrigins,
+      maxCommandSimTimeTicks: result.metadata.maxCommandSimTimeTicks,
+      pageChainFingerprint: result.metadata.pageChainFingerprint,
+    };
+  } finally {
+    releasePostwarPagedFinanceSocialReplay(result);
+  }
 }

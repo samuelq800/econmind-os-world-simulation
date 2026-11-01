@@ -98,7 +98,12 @@ export async function lockBeneficialRentOriginalFrom(
   ]);
   if (r.rows.length !== 1)
     invalidBeneficialRentSource('REGISTERED_ADMITTED_SOURCE_MISSING');
-  const row = r.rows[0]!;
+  return decodeLockedOriginal(r.rows[0]!, input);
+}
+function decodeLockedOriginal(
+  row: Record<string, unknown>,
+  input: { worldId: string; commandFingerprint: string },
+): Readonly<BeneficialRentLockedSource> {
   const uint = (v: unknown) => {
     const s = exactRentText(v);
     if (!/^(?:0|[1-9]\d*)$/u.test(s))
@@ -133,4 +138,35 @@ export async function lockBeneficialRentOriginalFrom(
   )
     invalidBeneficialRentSource('EXACT_PUBLICATION_SCOPE_REQUIRED');
   return data;
+}
+
+export async function lockBeneficialRentPagedOriginalFrom(
+  tx: SqlExecutor,
+  input: Parameters<typeof lockBeneficialRentOriginalFrom>[1],
+): Promise<
+  Readonly<Omit<BeneficialRentLockedSource, 'prefixRow' | 'journal'>>
+> {
+  const r = await fixedQuery(
+    tx,
+    'select * from world_v2.lock_postwar_beneficial_rent_paged_original($1,$2,$3,$4,$5::timestamptz)',
+    [
+      input.worldId,
+      input.countryId,
+      input.commandId,
+      input.commandFingerprint,
+      input.observedAtReal,
+    ],
+  );
+  if (
+    r.rows.length !== 1 ||
+    r.rows[0]!.history_mode !== 'GENUINE_SHARED_PAGED_CORE_REPLAY_REQUIRED'
+  )
+    invalidBeneficialRentSource('REGISTERED_PAGED_SOURCE_MISSING');
+  const { prefixRow, journal, ...original } = decodeLockedOriginal(
+    r.rows[0]!,
+    input,
+  );
+  void prefixRow;
+  void journal;
+  return Object.freeze(original);
 }

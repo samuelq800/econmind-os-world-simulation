@@ -870,3 +870,88 @@ describe('TEST_ONLY fixed SQL rent custody and Root Atomic execution', () => {
     }
   });
 });
+
+describe('paged rent custody metadata (TEST_ONLY SQL, separate from full shared replay)', () => {
+  it('keeps real publication, country, head and revocation checks without returning or pretending to replay history', async () => {
+    const f = await embeddedFixture();
+    try {
+      await f.db.exec(
+        await readFile(
+          'database/proposals/postwar-beneficial-rent-paged-custody.sql',
+          'utf8',
+        ),
+      );
+      const { lockBeneficialRentPagedOriginalFrom } =
+        await import('../../apps/world-worker/src/persistence/postgres-postwar-beneficial-housing-rent-originals.js');
+      const read = () =>
+        f.database.transaction(async (tx) => {
+          await tx.query(
+            'set local role world_v2_beneficial_rent_source_reader',
+          );
+          return lockBeneficialRentPagedOriginalFrom(tx, {
+            worldId: world,
+            countryId: 'COUNTRY_01',
+            commandId: f.command.commandId,
+            commandFingerprint: f.command.fingerprint,
+            observedAtReal: at,
+          });
+        });
+      const before = await read();
+      expect(before.head).toEqual({ worldVersion: '0', eventSequence: '0' });
+      expect(before.workerId).toBe(worker);
+      expect(before).not.toHaveProperty('prefixRow');
+      expect(before).not.toHaveProperty('journal');
+      await expect(
+        f.database.transaction(async (tx) => {
+          await tx.query(
+            'set local role world_v2_beneficial_rent_source_reader',
+          );
+          return lockBeneficialRentPagedOriginalFrom(tx, {
+            worldId: world,
+            countryId: 'COUNTRY_02',
+            commandId: f.command.commandId,
+            commandFingerprint: f.command.fingerprint,
+            observedAtReal: at,
+          });
+        }),
+      ).rejects.toThrow('REGISTERED_PAGED_SOURCE_MISSING');
+      await expect(
+        f.database.transaction(async (tx) => {
+          await tx.query(
+            'set local role world_v2_beneficial_rent_source_reader',
+          );
+          return lockBeneficialRentPagedOriginalFrom(tx, {
+            worldId: world,
+            countryId: 'COUNTRY_01',
+            commandId: f.command.commandId,
+            commandFingerprint: f.command.fingerprint,
+            observedAtReal: '2026-11-01T00:00:00.000Z',
+          });
+        }),
+      ).rejects.toThrow('REGISTERED_PAGED_SOURCE_MISSING');
+      expect(
+        (await f.execution.executeQueuedCommand(f.input)).receipt.outcome,
+      ).toBe('COMMITTED');
+      const rows = await f.database.transaction(async (tx) => {
+        await tx.query('set local role world_v2_beneficial_rent_source_reader');
+        return tx.query<Record<string, unknown>>(
+          'select * from world_v2.read_postwar_beneficial_rent_paged_current($1,$2)',
+          [world, 'COUNTRY_01'],
+        );
+      });
+      expect(rows.rows[0]).toMatchObject({
+        world_version: '1',
+        event_sequence: '1',
+        admission_ref: before.admissionRef,
+        history_mode: 'GENUINE_SHARED_PAGED_CORE_REPLAY_REQUIRED',
+      });
+      expect(rows.rows[0]).not.toHaveProperty('prefix');
+      await f.revoke();
+      await expect(read()).rejects.toThrow('REGISTERED_PAGED_SOURCE_MISSING');
+      expect((await f.counts()).events).toBe(1);
+    } finally {
+      await f.runtime.close();
+      await f.db.close();
+    }
+  });
+});

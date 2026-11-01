@@ -56,7 +56,17 @@ import {
   readPostwarFinanceSocialRuntimeBinding,
   type PostwarFinanceSocialRuntimeConnection,
 } from '../runtime-preparation/finance-social-runtime-connection.js';
-import { readPostwarSocialRuntimeFinancialReplayBase } from '../runtime-preparation/social-runtime-connection.js';
+import {
+  isPostwarSocialRuntimeConnection,
+  readPostwarSocialRuntimeConnectionResources,
+  type PostwarSocialRuntimeConnection,
+  readPostwarSocialRuntimeFinancialReplayBase,
+} from '../runtime-preparation/social-runtime-connection.js';
+import {
+  readPagedFromPreparedSocialBaseOnHeldExecutor,
+  releasePostwarPagedFinanceSocialReplay,
+} from './postwar-paged-finance-social-replay.js';
+import { readPostwarNarrowTradeHistoryOriginalsFrom } from './postwar-narrow-trade-history-originals.js';
 import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
 import type { SqlExecutor } from './sql-database.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -98,6 +108,10 @@ export const POSTWAR_NARROW_TRADE_AUTOMATIC_SOURCE_QUERY =
   'select * from world_v2.read_postwar_narrow_trade_automatic_source($1,$2,$3,$4::timestamptz,$5)';
 export const POSTWAR_NARROW_TRADE_CURRENT_SOURCE_QUERY =
   'select * from world_v2.read_postwar_narrow_trade_current_source($1,$2,$3,$4,$5::uuid,$6,$7)';
+export const POSTWAR_NARROW_TRADE_CURRENT_PAGED_SCOPE_QUERY =
+  'select * from world_v2.read_postwar_narrow_trade_current_paged_scope($1,$2,$3,$4,$5::uuid,$6,$7)';
+export const POSTWAR_NARROW_TRADE_AUTOMATIC_PAGED_SCOPE_QUERY =
+  'select * from world_v2.read_postwar_narrow_trade_automatic_paged_scope($1,$2,$3,$4::timestamptz,$5)';
 export const POSTWAR_NARROW_TRADE_CURRENT_SESSION_QUERY = `select current_user as role_name,r.rolsuper,r.rolbypassrls,r.rolcreatedb,r.rolcreaterole,r.rolreplication,current_setting('transaction_isolation')as isolation,current_setting('transaction_read_only')as read_only,pg_backend_pid()::text as backend_pid,(select virtualxid::text from pg_locks where pid=pg_backend_pid()and locktype='virtualxid'and granted limit 1)as virtual_xid,pg_has_role(current_user,'world_v2_postwar_narrow_trade_source','MEMBER')as reader_member,pg_has_role(current_user,'world_v2_postwar_narrow_trade_current_owner','MEMBER')as owner_member from pg_roles r where r.rolname=current_user`;
 export interface PostwarNarrowTradeSourceCommitRequest {
   readonly phase: 'BEFORE_EVENTS';
@@ -192,8 +206,11 @@ const families = new Set([
   'CORE_GOODS_TRANSFER_V1',
   'CORE_GOODS_SHIPMENT_V1',
   'CORE_GOODS_DELIVERY_V1',
+  'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+  'CORE_CENTRAL_BANK_OMO_V1',
+  'POSTWAR_BENEFICIAL_HOUSING_RENT_V1',
 ]);
-/** Inert protocol decoder. Unknown or inventory-affecting prefix fails closed;
+/** Inert protocol decoder. Unknown or incomplete inventory prefix fails closed;
  * it does not issue a source/authority capability. */
 export function decodePostwarNarrowTradeCurrentPrefix(
   value: unknown,
@@ -217,10 +234,13 @@ function one<T>(values: readonly T[]): T {
     invalid('exact immutable financial account required');
   return values[0]!;
 }
-function replay(
+async function replay(
+  tx: SqlExecutor,
+  hostCountryId: string,
   baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>,
   value: Row,
   worldId: string,
+  mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL',
 ) {
   const b = consumePreparedPostwarSocialFinancialReplayBase(baseline);
   const prefix = decodePostwarNarrowTradeCurrentPrefix(value, worldId);
@@ -316,7 +336,16 @@ function replay(
   }
   if (quotes.length !== originals.length)
     invalid('unexpected/missing historical quote original');
+  const history = await readPostwarNarrowTradeHistoryOriginalsFrom(tx, {
+    baseline,
+    mode,
+    worldId,
+    hostCountryId,
+    frames: prefix.frames,
+    expectedHead: prefix.head,
+  });
   const replayed = replayPreparedFinanceSocialFxLedger({
+    ...history,
     prepared: b.prepared,
     frames: prefix.frames,
     socialCountries: b.document.countries.map((c) => ({
@@ -335,6 +364,75 @@ function replay(
     inventory: replayed.inventory,
     goods: replayed.narrowGoodsTransfers,
   };
+}
+/** A complete cumulative Core result, never a last page relabelled as history.
+ * The rights/lease RPC must have succeeded first on this exact transaction. */
+async function replayPaged(
+  tx: SqlExecutor,
+  socialConnection: Readonly<PostwarSocialRuntimeConnection>,
+  hostCountryId: string,
+  value: Row,
+  worldId: string,
+  mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL',
+) {
+  const head = pagedScopeHead(value);
+  const result = await readPagedFromPreparedSocialBaseOnHeldExecutor(tx, {
+    socialConnection,
+    worldId,
+    hostCountryId,
+    expectedHead: head,
+    omoOriginalMode: mode,
+  });
+  try {
+    const {
+      financialState: financial,
+      inventoryState: inventory,
+      narrowGoodsTransfers: goods,
+    } = result.view.result;
+    if (!financial || !inventory)
+      invalid('complete paged financial and inventory state required');
+    if (
+      result.seedPins.seedId !== value.seed_id ||
+      result.seedPins.seedFingerprint !== value.seed_fingerprint ||
+      result.seedPins.admissionRef !== value.admission_ref
+    )
+      invalid('paged replay and actual Trade custody pins differ');
+    return {
+      prefix: {
+        head,
+        frames: null,
+        maxCommandSimTimeTicks: result.metadata.maxCommandSimTimeTicks,
+        pageChainFingerprint: result.metadata.pageChainFingerprint,
+      },
+      financial,
+      inventory,
+      goods,
+    };
+  } finally {
+    releasePostwarPagedFinanceSocialReplay(result);
+  }
+}
+function pagedScopeHead(value: Row) {
+  if (
+    value.history_mode !== 'GENUINE_SHARED_PAGED_CORE_REPLAY_REQUIRED' ||
+    typeof value.world_version !== 'string' ||
+    !/^(0|[1-9]\d*)$/u.test(value.world_version) ||
+    typeof value.event_sequence !== 'string' ||
+    !/^(0|[1-9]\d*)$/u.test(value.event_sequence)
+  )
+    invalid('exact actual paged custody head required');
+  return {
+    worldVersion: value.world_version,
+    eventSequence: value.event_sequence,
+  };
+}
+type CurrentPrefix =
+  | ReturnType<typeof decodePostwarNarrowTradeCurrentPrefix>
+  | Awaited<ReturnType<typeof replayPaged>>['prefix'];
+function prefixHasFutureCommand(prefix: CurrentPrefix, ticks: bigint): boolean {
+  return prefix.frames === null
+    ? BigInt(prefix.maxCommandSimTimeTicks) > ticks
+    : prefix.frames.some((f) => f.command.simTime.ticks > ticks);
 }
 /** Only genuine Core opening DATA is retained. This separate path supports H0
  * only; it cannot claim a complete Social/mixed source without real E03 data. */
@@ -418,7 +516,9 @@ export function preparePostwarNarrowTradeGoodsOpening(
   return token;
 }
 export interface PostwarNarrowTradeAutomaticReadBinding {
-  readonly schemaVersion: 'postwar-narrow-trade-automatic-binding-v1';
+  readonly schemaVersion:
+    | 'postwar-narrow-trade-automatic-binding-v1'
+    | 'postwar-narrow-trade-automatic-page-chain-binding-v2';
   readonly commandFingerprint: string;
   readonly observedAtReal: string;
   readonly head: DecisionResultHead;
@@ -481,22 +581,70 @@ export interface PostwarNarrowTradeCurrentSource {
 /** A private-issued shared instance supplies only its genuine immutable DATA
  * baseline. Every use still reads actual Trade authority, H, admission, sealed
  * stock, independently admitted rights and the complete prefix in this tx. */
+export type PostwarNarrowTradeCurrentSourceConfiguration = {
+  readonly runtimeRole: string;
+  readonly historyMode?: 'PAGED';
+} & (
+  | Readonly<{
+      sharedConnection: Readonly<PostwarFinanceSocialRuntimeConnection>;
+    }>
+  | Readonly<{
+      goodsOpeningPreparation: Readonly<PostwarNarrowTradeOpeningPreparation>;
+      workerId: string;
+      clock: DurableConsumptionClock;
+    }>
+  | Readonly<{
+      openingPreparation: Readonly<PostwarNarrowTradeOpeningPreparation>;
+    }>
+);
 export function createPostwarNarrowTradeCurrentSource(
-  configuration: {
-    readonly runtimeRole: string;
-  } & (
+  configuration: PostwarNarrowTradeCurrentSourceConfiguration,
+): Readonly<PostwarNarrowTradeCurrentSource> {
+  if ('socialConnection' in configuration)
+    invalid('use the fixed genuine Social internal constructor');
+  return constructPostwarNarrowTradeCurrentSource(configuration);
+}
+/** Internal fixed composition: no shared consumer must already exist. This
+ * issues source DATA factories only; current SQL, signatures and Atomic guards
+ * still establish their own authority on every actual use. */
+export function createPostwarNarrowTradeCurrentSourceFromSocial(
+  input: Readonly<{
+    socialConnection: Readonly<PostwarSocialRuntimeConnection>;
+    runtimeRole: string;
+    clock: DurableConsumptionClock;
+    environment?: 'local' | 'ci' | 'staging' | 'production';
+    historyMode?: 'PAGED';
+  }>,
+): Readonly<PostwarNarrowTradeCurrentSource> {
+  const environment = input.environment ?? 'production';
+  if (!['local', 'ci', 'staging', 'production'].includes(environment))
+    invalid('fixed server runtime environment required');
+  const social = input.socialConnection;
+  if (!isPostwarSocialRuntimeConnection(social, social?.worldId))
+    invalid('genuine fixed Social connection required');
+  const resources = readPostwarSocialRuntimeConnectionResources(social);
+  if (resources.workerRole !== input.runtimeRole)
+    invalid('same genuine Social worker role required');
+  if (
+    !Object.isFrozen(input.clock) ||
+    typeof Object.getOwnPropertyDescriptor(input.clock, 'nowReal')?.value !==
+      'function' ||
+    typeof Object.getOwnPropertyDescriptor(input.clock, 'simTime')?.value !==
+      'function'
+  )
+    invalid('same immutable server clock required');
+  return constructPostwarNarrowTradeCurrentSource({ ...input, environment });
+}
+function constructPostwarNarrowTradeCurrentSource(
+  configuration:
+    | PostwarNarrowTradeCurrentSourceConfiguration
     | Readonly<{
-        sharedConnection: Readonly<PostwarFinanceSocialRuntimeConnection>;
-      }>
-    | Readonly<{
-        goodsOpeningPreparation: Readonly<PostwarNarrowTradeOpeningPreparation>;
-        workerId: string;
+        socialConnection: Readonly<PostwarSocialRuntimeConnection>;
+        runtimeRole: string;
         clock: DurableConsumptionClock;
-      }>
-    | Readonly<{
-        openingPreparation: Readonly<PostwarNarrowTradeOpeningPreparation>;
-      }>
-  ),
+        environment?: 'local' | 'ci' | 'staging' | 'production';
+        historyMode?: 'PAGED';
+      }>,
 ): Readonly<PostwarNarrowTradeCurrentSource> {
   const role = configuration.runtimeRole;
   if (
@@ -512,6 +660,10 @@ export function createPostwarNarrowTradeCurrentSource(
     invalid('fixed unprivileged runtime role required');
   const connection =
     'sharedConnection' in configuration ? configuration.sharedConnection : null;
+  const fixedSocial =
+    'socialConnection' in configuration ? configuration.socialConnection : null;
+  const fixedClock =
+    'socialConnection' in configuration ? configuration.clock : undefined;
   const opening =
     'openingPreparation' in configuration
       ? openingPreparations.get(configuration.openingPreparation)
@@ -519,12 +671,37 @@ export function createPostwarNarrowTradeCurrentSource(
           goodsPreparations.has(configuration.goodsOpeningPreparation)
         ? openingPreparations.get(configuration.goodsOpeningPreparation)
         : undefined;
+  const paged = configuration.historyMode === 'PAGED';
+  if (paged && !connection && !fixedSocial)
+    invalid('paged replay requires a genuine shared Social baseline');
   const goodsOnly = 'goodsOpeningPreparation' in configuration;
-  if (!connection && !opening)
+  if (!connection && !fixedSocial && !opening)
     invalid('genuine Core opening preparation required');
   const world = connection
     ? readPostwarFinanceSocialRuntimeBinding(connection).worldId
-    : opening!.worldId;
+    : (fixedSocial?.worldId ?? opening!.worldId);
+  const actualSocial = () => {
+    if (connection) return readPostwarFinanceSocialRuntimeBinding(connection);
+    if (!fixedSocial) return undefined;
+    if (!isPostwarSocialRuntimeConnection(fixedSocial, world))
+      invalid('fixed Social source connection is retired');
+    return {
+      worldId: world,
+      workerId: fixedSocial.workerId,
+      socialConnection: fixedSocial,
+      clock: fixedClock!,
+    };
+  };
+  const historyMode = (): 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL' => {
+    const environment = connection
+      ? readPostwarFinanceSocialRuntimeBinding(connection).environment
+      : 'socialConnection' in configuration
+        ? (configuration.environment ?? 'production')
+        : 'production';
+    return environment === 'local' || environment === 'ci'
+      ? 'TEST_ONLY_LOCAL'
+      : 'OFFICIAL_RUNTIME';
+  };
   const active = new WeakSet<object>();
   const session = async (tx: SqlExecutor) => {
     const result = await tx.query<Row>(
@@ -575,10 +752,11 @@ export function createPostwarNarrowTradeCurrentSource(
       new Date(observedAtReal).toISOString() !== observedAtReal
     )
       invalid('exact current Trade scope and time required');
-    const baseline = connection
+    const shared = actualSocial();
+    const baseline = shared
       ? consumePreparedPostwarSocialFinancialReplayBase(
           readPostwarSocialRuntimeFinancialReplayBase(
-            readPostwarFinanceSocialRuntimeBinding(connection).socialConnection,
+            shared.socialConnection,
             world,
           ),
         )
@@ -587,7 +765,9 @@ export function createPostwarNarrowTradeCurrentSource(
     let response;
     try {
       response = await tx.query<Row>(
-        POSTWAR_NARROW_TRADE_CURRENT_SOURCE_QUERY,
+        paged
+          ? POSTWAR_NARROW_TRADE_CURRENT_PAGED_SCOPE_QUERY
+          : POSTWAR_NARROW_TRADE_CURRENT_SOURCE_QUERY,
         [
           world,
           t.sellerCountryId,
@@ -638,8 +818,45 @@ export function createPostwarNarrowTradeCurrentSource(
       r.canonical_seed_sha256 !== opening.canonicalSeedSha256
     )
       invalid('actual sealed canonical seed SHA differs');
+    const decoded = paged
+      ? { head: pagedScopeHead(r), frames: null }
+      : decodePostwarNarrowTradeCurrentPrefix(r, world);
+    if (
+      baseline &&
+      rows(r.rights).length === 0 &&
+      (paged ||
+        decoded.frames?.some((f) =>
+          [
+            'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+            'CORE_CENTRAL_BANK_OMO_V1',
+            'POSTWAR_BENEFICIAL_HOUSING_RENT_V1',
+          ].includes(f.command.commandType),
+        ))
+    ) {
+      if ((await session(tx)) !== identity)
+        invalid('transaction lifetime changed');
+      return freeze({
+        kind: 'MISSING',
+        missing: [
+          'SELLER_OWNER_TRANSFER_MANDATE',
+          'ADMITTED_CROSS_BORDER_ROUTE',
+        ],
+        head: { worldId: world, ...decoded.head },
+        submitted: false,
+        queued: false,
+      });
+    }
     const { prefix, financial, inventory } = baseline
-      ? replay(baseline, r, world)
+      ? paged
+        ? await replayPaged(
+            tx,
+            shared!.socialConnection,
+            t.sellerCountryId,
+            r,
+            world,
+            historyMode(),
+          )
+        : await replay(tx, t.sellerCountryId, baseline, r, world, historyMode())
       : goodsOnly
         ? replayGoodsOnly(r)
         : {
@@ -650,7 +867,7 @@ export function createPostwarNarrowTradeCurrentSource(
     const head = { worldId: world, ...prefix.head };
     if (
       command.expectedWorldVersion !== head.worldVersion ||
-      prefix.frames.some((f) => f.command.simTime.ticks > command.simTime.ticks)
+      prefixHasFutureCommand(prefix, command.simTime.ticks)
     )
       invalid('candidate precedes/differs from actual prefix');
     const missing: PostwarNarrowTradeCurrentMissing[] = [];
@@ -873,9 +1090,7 @@ export function createPostwarNarrowTradeCurrentSource(
     async (tx, input) => {
       const c = validateCanonicalCommand(input.command, sha),
         at = input.observedAtReal,
-        shared = connection
-          ? readPostwarFinanceSocialRuntimeBinding(connection)
-          : undefined,
+        shared = actualSocial(),
         holder =
           shared?.workerId ??
           ('workerId' in configuration ? configuration.workerId : undefined),
@@ -927,7 +1142,9 @@ export function createPostwarNarrowTradeCurrentSource(
       )
         invalid('actual current automatic lease differs');
       const response = await tx.query<Row>(
-        POSTWAR_NARROW_TRADE_AUTOMATIC_SOURCE_QUERY,
+        paged
+          ? POSTWAR_NARROW_TRADE_AUTOMATIC_PAGED_SCOPE_QUERY
+          : POSTWAR_NARROW_TRADE_AUTOMATIC_SOURCE_QUERY,
         [world, c.commandId, holder, at, nowSim!.toCanonicalValue()],
       );
       if (response.rows.length !== 1)
@@ -951,13 +1168,22 @@ export function createPostwarNarrowTradeCurrentSource(
       )
         invalid('automatic actual admitted opening differs');
       const replayed = baseline
-          ? replay(baseline, r, world)
+          ? paged
+            ? await replayPaged(
+                tx,
+                shared!.socialConnection,
+                c.countryId,
+                r,
+                world,
+                historyMode(),
+              )
+            : await replay(tx, c.countryId, baseline, r, world, historyMode())
           : replayGoodsOnly(r),
         { prefix, financial, inventory } = replayed;
       if (
         !inventory ||
         c.expectedWorldVersion !== prefix.head.worldVersion ||
-        prefix.frames.some((f) => f.command.simTime.ticks > c.simTime.ticks)
+        prefixHasFutureCommand(prefix, c.simTime.ticks)
       )
         invalid('automatic exact complete current inventory/head required');
       const payload = row(JSON.parse(c.canonicalPayload)),
@@ -1067,7 +1293,10 @@ export function createPostwarNarrowTradeCurrentSource(
           c.expectedWorldVersion,
         ),
         binding: {
-          schemaVersion: 'postwar-narrow-trade-automatic-binding-v1',
+          schemaVersion:
+            prefix.frames === null
+              ? 'postwar-narrow-trade-automatic-page-chain-binding-v2'
+              : 'postwar-narrow-trade-automatic-binding-v1',
           commandFingerprint: c.fingerprint,
           observedAtReal: at,
           head: { worldId: world, ...prefix.head },
@@ -1075,7 +1304,10 @@ export function createPostwarNarrowTradeCurrentSource(
           seedId: text(r.seed_id),
           seedFingerprint: text(r.seed_fingerprint),
           admissionRef: text(r.admission_ref),
-          prefixFingerprint: hash(prefix.frames),
+          prefixFingerprint:
+            prefix.frames === null
+              ? prefix.pageChainFingerprint
+              : hash(prefix.frames),
           transferFingerprint: entry.transfer.fingerprint,
           inventoryFingerprint: hash(inventory),
           financialFingerprint: hash(financial),
