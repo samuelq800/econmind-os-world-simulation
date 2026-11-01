@@ -1,3 +1,4 @@
+import { readPostwarPagedCaptainHistoryOriginalsFrom } from '../../apps/world-worker/src/persistence/postwar-paged-office-history-originals.js';
 /** Isolated SQL mechanism with explicit TEST_ONLY adoption/header rows.
  * This proves the empty exact registry and ACL, not Owner admission/signature,
  * native concurrency, official initial capital or a production installation. */
@@ -679,6 +680,14 @@ describe('Captain release exact registry and fixed bounded mixed source', () => 
       'insert into world_v2.central_bank_omo_adoption values($1,$2,$3,$4,$5)',
       ['CB_HOST_TEST_ONLY', world, country, fp, worldAdmission],
     );
+    await db.exec(
+      'create role world_v2_day_one_fx_history_owner nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication',
+    );
+    await db.exec(
+      await read(
+        'database/proposals/postwar-paged-office-history-originals.sql',
+      ),
+    );
     for (const [office, role] of [
       ['SOCIAL', 'world_v2_social_source_reader'],
       ['FINANCE', 'world_v2_finance_budget_source_reader'],
@@ -702,6 +711,44 @@ describe('Captain release exact registry and fixed bounded mixed source', () => 
         frames: decoded.frames,
       });
       expect(origins).toEqual([testOnlyCaptainOriginal()]);
+      if (office === 'SOCIAL' || office === 'FINANCE') {
+        await db.exec('begin isolation level repeatable read');
+        try {
+          for (const [from, through] of [
+            [0, 1],
+            [1, 3],
+          ] as const) {
+            const page = await readPostwarPagedCaptainHistoryOriginalsFrom(
+              executor,
+              {
+                worldId: world,
+                hostCountryId: country,
+                officeId: office,
+                seedFingerprint: fp,
+                admissionRef: worldAdmission,
+                expectedHead: { worldVersion: '3', eventSequence: '3' },
+                fromHead: {
+                  worldVersion: String(from),
+                  eventSequence: String(from),
+                },
+                throughHead: {
+                  worldVersion: String(through),
+                  eventSequence: String(through),
+                },
+                frames: decoded.frames.slice(from, through),
+                sourceMetadata: [],
+                mode: 'TEST_ONLY_LOCAL',
+              },
+            );
+            expect(page.captainCountries).toEqual(origins);
+            expect(page.captainOriginalStatus).toBe('PRESENT');
+          }
+          await db.exec('commit');
+        } catch (error) {
+          await db.exec('rollback');
+          throw error;
+        }
+      }
       const replay = f.replay(frames);
       expect(replay.budgetState.worldVersion).toBe('3');
       expect(
