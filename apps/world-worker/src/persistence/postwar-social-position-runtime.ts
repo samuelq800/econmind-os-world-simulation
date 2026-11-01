@@ -1,3 +1,4 @@
+import { lockPostwarSourceRevocationFencesFrom } from './postwar-source-revocation-fence.js';
 import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
 import type { PreparedPostwarSocialSource } from './prepared-postwar-social-source.js';
 /** Fixed local/host construction for lawful GOV position + offer creation.
@@ -214,17 +215,50 @@ function capturedCommand(command: CanonicalCommand) {
     invalid('exact funded Social position command required');
   return c;
 }
+const sourceFencedDatabases = new WeakMap<
+  SqlDatabase,
+  { worldId: string | null }
+>();
+/** Fixed server composition only: require an installed versioned source fence
+ * without changing the private database identity or starting any transaction.
+ * There is no disable path or caller-provided query/role/callback. */
+export function requirePostwarSocialSourceRevocationFence(
+  database: SqlDatabase,
+  worldId: string,
+): void {
+  const profile = sourceFencedDatabases.get(database);
+  if (
+    !profile ||
+    !/^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$/u.test(worldId) ||
+    (profile.worldId !== null && profile.worldId !== worldId)
+  )
+    invalid('genuine same-World source database fence required');
+  profile.worldId = worldId;
+}
 /** Stable outer transaction only. The actual writer role is unchanged. */
 export function createPostwarSocialPositionRuntimeDatabase(
   database: SqlDatabase,
   configuration: { readonly workerRole: string },
 ): SqlDatabase {
   const roles = createPostwarSocialSourceRoleScope(configuration);
-  return Object.freeze({
-    query: database.query.bind(database),
+  const profile = { worldId: null as string | null };
+  const wrapped: SqlDatabase = Object.freeze({
+    query: <Row extends object>(
+      statement: string,
+      args?: readonly unknown[],
+    ) =>
+      profile.worldId === null
+        ? database.query<Row>(statement, args)
+        : wrapped.transaction((tx) => tx.query<Row>(statement, args)),
     transaction: <Result>(consume: (tx: SqlExecutor) => Promise<Result>) =>
       database.transaction(async (tx) => {
         await tx.query('set transaction isolation level repeatable read');
+        if (profile.worldId !== null) {
+          const fencedWorld = profile.worldId;
+          await roles.withSourceReaderFrom(tx, () =>
+            lockPostwarSourceRevocationFencesFrom(tx, { worldId: fencedWorld }),
+          );
+        }
         const scoped: SqlExecutor = Object.freeze({
           async query<Row extends object>(
             statement: string,
@@ -279,6 +313,8 @@ export function createPostwarSocialPositionRuntimeDatabase(
         return consume(scoped);
       }),
   });
+  sourceFencedDatabases.set(wrapped, profile);
+  return wrapped;
 }
 
 /** Fixed host role delegation, not a GRANT. The source reader never receives

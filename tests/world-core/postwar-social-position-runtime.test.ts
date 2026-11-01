@@ -11,6 +11,7 @@ import {
   isPostwarSocialPositionSourceCommitProtectionPort,
   createPostwarSocialSourceRoleScope,
   createPostwarSocialPositionRuntimeDatabase,
+  requirePostwarSocialSourceRevocationFence,
   SOCIAL_POSITION_SOURCE_PURPOSE,
   type SocialPositionSourceCommitRequest,
 } from '../../apps/world-worker/src/persistence/postwar-social-position-runtime.js';
@@ -369,4 +370,92 @@ describe('fixed funded position source runtime boundaries', () => {
     ).rejects.toThrow('genuine Social commit proof');
     expect(f.queries).toHaveLength(0);
   });
+});
+
+/** Transport ordering only; native dual-session evidence is separate. */
+describe('shared source fence outer transaction ordering', () => {
+  for (const fail of [false, true])
+    it(
+      fail
+        ? 'propagates serialization failure before caller and never retries'
+        : 'fences before caller while retaining exact wrapper identity and role',
+      async () => {
+        const statements: string[] = [];
+        let role = 'fixture_social_writer',
+          consumed = 0;
+        const failure = Object.assign(Error('serialization conflict'), {
+          code: '40001',
+        });
+        const tx: SqlExecutor = {
+          async query<Row extends object>(sql: string) {
+            statements.push(sql);
+            if (sql.startsWith('set local role ')) {
+              role = sql.slice('set local role '.length);
+              return { rows: [], rowCount: 0 };
+            }
+            if (sql.startsWith('select current_user as role_name'))
+              return {
+                rows: [
+                  {
+                    role_name: role,
+                    rolsuper: false,
+                    rolbypassrls: false,
+                    rolcreaterole: false,
+                    rolcreatedb: false,
+                    rolreplication: false,
+                    source_member: true,
+                    owner_member: false,
+                    publisher_member: false,
+                  },
+                ] as unknown as Row[],
+                rowCount: 1,
+              };
+            if (
+              sql ===
+              'select world_v2.lock_postwar_source_revocation_fences($1)'
+            ) {
+              if (fail) throw failure;
+              return { rows: [{}] as Row[], rowCount: 1 };
+            }
+            return { rows: [], rowCount: 0 };
+          },
+        };
+        const db = createPostwarSocialPositionRuntimeDatabase(
+          { query: tx.query, transaction: async (op) => op(tx) },
+          { workerRole: 'fixture_social_writer' },
+        );
+        requirePostwarSocialSourceRevocationFence(db, 'WORLD_TEST');
+        requirePostwarSocialSourceRevocationFence(db, 'WORLD_TEST');
+        expect(() =>
+          requirePostwarSocialSourceRevocationFence(db, 'OTHER_WORLD'),
+        ).toThrow('same-World');
+        expect(() =>
+          requirePostwarSocialSourceRevocationFence({ ...db }, 'WORLD_TEST'),
+        ).toThrow('genuine');
+        const operation = db.transaction(async (scoped) => {
+          consumed++;
+          expect(role).toBe('fixture_social_writer');
+          await scoped.query('select test_only_consumer');
+        });
+        if (fail) await expect(operation).rejects.toBe(failure);
+        else await operation;
+        expect(consumed).toBe(fail ? 0 : 1);
+        expect(role).toBe('fixture_social_writer');
+        expect(statements[0]).toBe(
+          'set transaction isolation level repeatable read',
+        );
+        expect(
+          statements.filter(
+            (s) =>
+              s === 'select world_v2.lock_postwar_source_revocation_fences($1)',
+          ),
+        ).toHaveLength(1);
+        if (!fail)
+          expect(
+            statements.indexOf(
+              'select world_v2.lock_postwar_source_revocation_fences($1)',
+            ),
+          ).toBeLessThan(statements.indexOf('select test_only_consumer'));
+      },
+    );
 });
