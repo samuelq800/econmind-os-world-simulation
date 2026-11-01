@@ -11,6 +11,7 @@ const fixture = vi.hoisted(() => ({
   close: vi.fn(),
   queries: [] as string[],
   publisherRole: 'test_publisher',
+  executionControlLockRequired: false,
 }));
 vi.mock(
   '../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.js',
@@ -62,6 +63,11 @@ function controller() {
   const database = {
     async query(sql: string) {
       fixture.queries.push(sql);
+      if (fixture.executionControlLockRequired && /read only/iu.test(sql))
+        throw Object.assign(
+          Error('FOR SHARE cannot run in a read-only transaction'),
+          { code: '25006' },
+        );
       return {
         rowCount: 1,
         rows: [
@@ -104,6 +110,7 @@ function controller() {
 beforeEach(() => {
   vi.clearAllMocks();
   fixture.publisherRole = 'test_publisher';
+  fixture.executionControlLockRequired = false;
   fixture.queries.length = 0;
   fixture.readCommand.mockResolvedValue(command);
   fixture.readReceipt.mockResolvedValue(receipt);
@@ -149,9 +156,26 @@ describe('fixed post-commit derived publication', () => {
       fixture.queries.every(
         (sql) =>
           sql.startsWith('select ') ||
-          sql === 'set transaction isolation level repeatable read read only',
+          sql === 'set transaction isolation level repeatable read',
       ),
     ).toBe(true);
+    await c.close();
+  });
+  it('allows the formal execution-control SHARE lock while retrying only durable readback', async () => {
+    fixture.executionControlLockRequired = true;
+    const c = controller();
+    expect(await c.retryCommitted(command.commandId)).toMatchObject({
+      status: 'PUBLISHED',
+      documentCount: 13,
+    });
+    expect(fixture.readCommand).toHaveBeenCalledOnce();
+    expect(fixture.readReceipt).toHaveBeenCalledOnce();
+    expect(fixture.queries[0]).toBe(
+      'set transaction isolation level repeatable read',
+    );
+    expect(
+      fixture.queries.some((sql) => /\b(insert|update|delete)\b/iu.test(sql)),
+    ).toBe(false);
     await c.close();
   });
   it('does not infer a country or committed outcome from the caller receipt', async () => {

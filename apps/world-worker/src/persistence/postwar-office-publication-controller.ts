@@ -102,11 +102,12 @@ export function createPostwarOfficePublicationController(input: {
             throw Error('EXACT_SEPARATE_DERIVED_PUBLISHER_REQUIRED');
         });
         const command = await input.database.transaction(async (tx) => {
-          await tx.query(
-            'set transaction isolation level repeatable read read only',
-          );
-          // Immutable command/FINAL readback only. Source/H locks and the full
-          // Core replay are acquired afresh by the fixed publisher afterward.
+          await tx.query('set transaction isolation level repeatable read');
+          // Immutable command/FINAL readback only. A formal database guard
+          // retains its existing execution-control SHARE lock; PostgreSQL
+          // rejects that lock in a READ ONLY transaction. This fixed read
+          // sequence performs no business writes and retains all guard checks.
+          // Source/H locks and Core replay are acquired afresh afterward.
           const identity = await tx.query<{
             role_name: string;
             rolsuper: boolean;
