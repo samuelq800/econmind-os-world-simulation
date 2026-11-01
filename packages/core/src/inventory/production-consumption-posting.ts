@@ -1,3 +1,8 @@
+import {
+  assertProductionOperatingBasis,
+  type ProductionOperatingBasisFields,
+} from './production-operating-basis.js';
+export * from './production-operating-basis.js';
 import { isSettledOriginalProductionDeposit } from '../finance/production-deposit-funding.js';
 import {
   canonicalSha256,
@@ -69,14 +74,12 @@ export interface ProductionRecipe {
 }
 
 /** These source bindings are not authorization grants. The Worker still owns admission. */
-export interface ProductionOperatingEvidence {
+export interface ProductionOperatingEvidence extends ProductionOperatingBasisFields {
   readonly worldId: InventoryAccount['worldId'];
   readonly worldVersion: string;
   readonly facilityRef: string;
   readonly operatorId: InventoryAccount['titleHolderId'];
   readonly operatorClassification: 'OP';
-  readonly maintenanceAppliedRef: string;
-  readonly technologyRightRef: string;
   readonly operatingPermissionRef: string;
   readonly costSourceRef: string;
   readonly fundingBatchId: FinancialPostingBatchId;
@@ -170,13 +173,23 @@ export function productionConsumptionEventPayload(
   )
     invalid('Production needs the same operational OP facility and recipe');
   legalEntityId(op.operatorId);
-  for (const key of [
-    'maintenanceAppliedRef',
-    'technologyRightRef',
-    'operatingPermissionRef',
-    'costSourceRef',
-  ] as const)
+  for (const key of ['operatingPermissionRef', 'costSourceRef'] as const)
     ref(op[key], key);
+  assertProductionOperatingBasis({
+    operating: op,
+    scope: {
+      worldId: op.worldId,
+      countryId: evidence.output.countryId,
+      facilityRef: op.facilityRef,
+      operatorId: op.operatorId,
+    },
+    snapshotAt: evidence.input.trace.snapshotAt,
+    operatingDuration: evidence.input.capacity.payload.operatingDuration,
+    recipeFactRef: evidence.recipe.factRef,
+    recipeSourceRef: evidence.recipe.sourceRef,
+    recipeCanonicalPayload: evidence.recipe.canonicalPayload,
+    productivity: evidence.input.capacity.payload.productivity,
+  });
   if (
     !result.actualOutput ||
     !Quantity.from(
