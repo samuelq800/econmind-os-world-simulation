@@ -1,20 +1,21 @@
 -- Candidate bounded DATA-only journal read. Depends on
 -- postwar-day-one-fx-history-read.sql (its inaccessible, non-BYPASSRLS owner).
 -- No new role/membership or direct table privilege for operational readers.
--- Full bounded financial batch set; inventory effects remain unsupported.
+-- Full bounded financial AND inventory journal DATA. Only the fixed Core
+-- domain replay may interpret these bytes; this getter grants no authority.
 begin;
 grant create on schema world_v2 to world_v2_day_one_fx_history_owner;
 grant select(world_id,batch_id,causation_command_id,canonical_payload,batch_fingerprint)on world_v2.financial_posting_batch to world_v2_day_one_fx_history_owner;
-grant select(world_id)on world_v2.inventory_posting to world_v2_day_one_fx_history_owner;
+grant select(world_id,posting_id,causation_command_id,canonical_payload,posting_fingerprint)on world_v2.inventory_posting to world_v2_day_one_fx_history_owner;
 create policy postwar_bounded_journal_read on world_v2.financial_posting_batch for select to world_v2_day_one_fx_history_owner using(current_user='world_v2_day_one_fx_history_owner'and world_id=current_setting('econmind.fx_history_world',true));
 create policy postwar_bounded_journal_fence on world_v2.financial_posting_batch as restrictive for select to world_v2_day_one_fx_history_owner using(current_user='world_v2_day_one_fx_history_owner'and world_id=current_setting('econmind.fx_history_world',true));
 create policy postwar_bounded_journal_read on world_v2.inventory_posting for select to world_v2_day_one_fx_history_owner using(current_user='world_v2_day_one_fx_history_owner'and world_id=current_setting('econmind.fx_history_world',true));
 create policy postwar_bounded_journal_fence on world_v2.inventory_posting as restrictive for select to world_v2_day_one_fx_history_owner using(current_user='world_v2_day_one_fx_history_owner'and world_id=current_setting('econmind.fx_history_world',true));
 create function world_v2.read_postwar_bounded_journal(p_world text,p_host_country text,p_office text)
-returns table(world_version text,event_sequence text,financial_batch_count text,inventory_posting_count text,financial_batches jsonb)
+returns table(world_version text,event_sequence text,financial_batch_count text,inventory_posting_count text,financial_batches jsonb,inventory_postings jsonb)
 language plpgsql security definer set search_path=pg_catalog as $$
 declare effective name;required name;role_id oid;a world_v2.runtime_opening_admission%rowtype;permit world_v2.runtime_admission_publication_permit%rowtype;
- h record;host_ref text;batch_count bigint;inventory_count bigint;batch_bytes bigint;max_bytes integer;batches jsonb;
+ h record;host_ref text;batch_count bigint;inventory_count bigint;batch_bytes bigint;inventory_bytes bigint;max_bytes integer;max_inventory_bytes integer;batches jsonb;inventory jsonb;
 begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
  required:=case p_office when 'SOCIAL'then 'world_v2_social_source_reader'when 'FINANCE'then 'world_v2_finance_budget_source_reader'else null end;
@@ -46,13 +47,15 @@ begin
  -- writers must take its exclusive CAS lock; no row can be silently skipped.
  select count(*),coalesce(sum(octet_length(x.canonical_payload)),0),coalesce(max(octet_length(x.canonical_payload)),0)
  into batch_count,batch_bytes,max_bytes from world_v2.financial_posting_batch x where x.world_id=p_world;
- select count(*)into inventory_count from world_v2.inventory_posting x where x.world_id=p_world;
- if inventory_count<>0 then raise exception 'JOURNAL_UNSUPPORTED_INVENTORY_EFFECT'using errcode='55000';end if;
- if batch_count>512 or max_bytes>65536 or batch_bytes>1048576 then raise exception 'JOURNAL_BOUNDED_CAPACITY_EXCEEDED'using errcode='54000';end if;
+ select count(*),coalesce(sum(octet_length(x.canonical_payload)),0),coalesce(max(octet_length(x.canonical_payload)),0)
+ into inventory_count,inventory_bytes,max_inventory_bytes from world_v2.inventory_posting x where x.world_id=p_world;
+ if batch_count>512 or inventory_count>256 or max_bytes>65536 or max_inventory_bytes>65536 or batch_bytes+inventory_bytes>1048576 then raise exception 'JOURNAL_BOUNDED_CAPACITY_EXCEEDED'using errcode='54000';end if;
  select coalesce(jsonb_agg(jsonb_build_object('causation_command_id',x.causation_command_id,'canonical_payload',x.canonical_payload,'fingerprint',x.batch_fingerprint)order by x.batch_id),'[]'::jsonb)
  into batches from world_v2.financial_posting_batch x where x.world_id=p_world;
- if jsonb_array_length(batches)<>batch_count then raise exception 'JOURNAL_COMPLETE_BATCH_SET_REQUIRED'using errcode='55000';end if;
- return query select h.world_version::text,h.event_sequence::text,batch_count::text,inventory_count::text,batches;
+ select coalesce(jsonb_agg(jsonb_build_object('causation_command_id',x.causation_command_id,'canonical_payload',x.canonical_payload,'fingerprint',x.posting_fingerprint)order by x.posting_id),'[]'::jsonb)
+ into inventory from world_v2.inventory_posting x where x.world_id=p_world;
+ if jsonb_array_length(batches)<>batch_count or jsonb_array_length(inventory)<>inventory_count then raise exception 'JOURNAL_COMPLETE_BATCH_SET_REQUIRED'using errcode='55000';end if;
+ return query select h.world_version::text,h.event_sequence::text,batch_count::text,inventory_count::text,batches,inventory;
 end;$$;
 alter function world_v2.read_postwar_bounded_journal(text,text,text)owner to world_v2_day_one_fx_history_owner;
 revoke all on function world_v2.read_postwar_bounded_journal(text,text,text)from public;

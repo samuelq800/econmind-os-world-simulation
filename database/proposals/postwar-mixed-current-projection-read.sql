@@ -98,14 +98,17 @@ alter function world_v2.postwar_mixed_current_batch(text,text,text)owner to worl
 create function world_v2.postwar_mixed_current_prefix(p_world text)
 returns table(prefix_fingerprint text,effects_fingerprint text,last_event_id text,last_event_fingerprint text,budget_envelopes jsonb,financial_posting_count text,financial_batch_count text,financial_postings_fingerprint text)
 language plpgsql security definer set search_path=pg_catalog as $$
-declare br record;batches jsonb;all_batches jsonb:='[]';total_batches bigint:=0;total_legs bigint:=0;actual_batch_count bigint;h record;a record;r record;c record;e record;command jsonb;event jsonb;events jsonb;transition jsonb;receipt jsonb;ep jsonb;first_body jsonb;frames jsonb:='[]';meta jsonb:='[]';wv bigint:=0;seq bigint:=0;bytes bigint:=0;seed_fp text;intent jsonb;policy jsonb;binding jsonb;before_state jsonb;after_state jsonb;env jsonb;next_env jsonb;envelopes jsonb:='[]';captains jsonb:='{}';fund jsonb;event_index integer;expected_type text;expected_count integer;amount numeric;line_total numeric;
+declare inv record;inventory jsonb;inventory_count bigint;inventory_total bigint;total_inventory bigint:=0;omos jsonb:='{}';body jsonb;br record;batches jsonb;all_batches jsonb:='[]';total_batches bigint:=0;total_legs bigint:=0;actual_batch_count bigint;h record;a record;r record;c record;e record;command jsonb;event jsonb;events jsonb;transition jsonb;receipt jsonb;ep jsonb;first_body jsonb;frames jsonb:='[]';meta jsonb:='[]';wv bigint:=0;seq bigint:=0;bytes bigint:=0;seed_fp text;intent jsonb;policy jsonb;binding jsonb;before_state jsonb;after_state jsonb;env jsonb;next_env jsonb;envelopes jsonb:='[]';captains jsonb:='{}';fund jsonb;event_index integer;expected_type text;expected_count integer;amount numeric;line_total numeric;
 begin
  perform set_config('econmind.postwar_projection_world',p_world,true);
  if not exists(select 1 from world_v2.postwar_social_prefix_scope where world_id=p_world)then raise exception 'MIXED_IMMUTABLE_SCOPES_REQUIRED'using errcode='55000';end if;
  select * into strict a from world_v2.postwar_projection_admission_header(p_world);
  select * into strict h from world_v2.world_head x where x.world_id=p_world;
  if h.world_version<1 or h.world_version>256 or h.event_sequence>256 then raise exception 'FINANCIAL_PREFIX_CAPACITY_EXCEEDED'using errcode='54000';end if;
- if(select count(*)from world_v2.command_receipt x where x.world_id=p_world and x.outcome='COMMITTED')<>h.world_version or(select count(*)from world_v2.authoritative_event x where x.world_id=p_world)<>h.event_sequence or exists(select 1 from world_v2.inventory_posting x where x.world_id=p_world)then raise exception 'FINANCIAL_PREFIX_INCOMPLETE_OR_POSTING_DOMAIN_UNAVAILABLE'using errcode='55000';end if;
+ if(select count(*)from world_v2.command_receipt x where x.world_id=p_world and x.outcome='COMMITTED')<>h.world_version or(select count(*)from world_v2.authoritative_event x where x.world_id=p_world)<>h.event_sequence then raise exception 'FINANCIAL_PREFIX_INCOMPLETE_OR_POSTING_DOMAIN_UNAVAILABLE'using errcode='55000';end if;
+ select count(*)into inventory_total from world_v2.inventory_posting x where x.world_id=p_world;
+ if inventory_total>256 then raise exception 'MIXED_INVENTORY_CAPACITY_EXCEEDED'using errcode='54000';end if;
+ if inventory_total>0 and to_regprocedure('world_v2.postwar_mixed_goods_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)')is null then raise exception 'MIXED_GOODS_EFFECTS_EXTENSION_REQUIRED'using errcode='55000';end if;
  for r in select * from world_v2.command_receipt x where x.world_id=p_world and x.outcome='COMMITTED'order by x.world_version_after loop
   select * into strict c from world_v2.command_submission x where x.world_id=p_world and x.command_id=r.command_id;
   if r.schema_version<>'command-receipt-v2'or r.reason_code is not null or r.world_version_before<>wv or r.world_version_after<>wv+1 or c.expected_world_version is distinct from wv or r.transition_id<>c.command_id or r.command_fingerprint<>c.command_fingerprint or r.sim_time<>c.sim_time or r.idempotency_key is distinct from c.idempotency_key then raise exception 'FINANCIAL_PREFIX_RECEIPT_GAP'using errcode='55000';end if;
@@ -134,7 +137,7 @@ begin
     select jsonb_agg(case when x->'scope'->>'envelopeRef'=intent->'scope'->>'envelopeRef'then next_env else x end order by n)into envelopes from jsonb_array_elements(envelopes)with ordinality q(x,n);
    end if;
    after_state:=jsonb_build_object('worldId',p_world,'worldVersion',r.world_version_after::text,'eventSequence',(seq+expected_count)::text,'envelopes',envelopes);
-  elsif c.command_type not in('CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1','POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1','CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1','CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1')then raise exception 'FINANCIAL_UNKNOWN_DOMAIN_UNAVAILABLE'using errcode='55000';end if;
+  elsif c.command_type not in('CORE_CENTRAL_BANK_OMO_V1','CORE_GOODS_TRANSFER_V1','CORE_GOODS_SHIPMENT_V1','CORE_GOODS_DELIVERY_V1','CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1','POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1','CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1','CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1')then raise exception 'FINANCIAL_UNKNOWN_DOMAIN_UNAVAILABLE'using errcode='55000';end if;
   if jsonb_array_length(r.event_ids)<>expected_count then raise exception 'FINANCIAL_COMPLETE_EVENT_GROUP_REQUIRED'using errcode='55000';end if;
   events:='[]';first_body:=null;event_index:=0;
   for e in select x.* from world_v2.authoritative_event x join jsonb_array_elements_text(r.event_ids)with ordinality ids(id,n)on x.event_id=ids.id where x.world_id=p_world order by ids.n loop
@@ -151,6 +154,9 @@ begin
     captains:=jsonb_set(captains,array[c.country_id],world_v2.postwar_mixed_captain_group(p_world,command,event,captains->c.country_id));
    elsif c.command_type='POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'then
     if c.office_id is distinct from 'FINANCE'or e.event_type<>'POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_V1'then raise exception 'MIXED_FX_EXACT_FAMILY_REQUIRED'using errcode='23514';end if;
+   elsif c.command_type in('CORE_CENTRAL_BANK_OMO_V1','CORE_GOODS_TRANSFER_V1','CORE_GOODS_SHIPMENT_V1','CORE_GOODS_DELIVERY_V1')then
+    expected_type:=case c.command_type when'CORE_CENTRAL_BANK_OMO_V1'then'CENTRAL_BANK_OMO_SETTLED_V1'when'CORE_GOODS_TRANSFER_V1'then'NARROW_TREASURY_GCU_RESERVED_V1'when'CORE_GOODS_SHIPMENT_V1'then'NARROW_TREASURY_GCU_SHIPPED_V1'else'NARROW_TREASURY_GCU_DELIVERED_V1'end;
+    if e.event_type is distinct from expected_type then raise exception 'MIXED_EXTENDED_EXACT_EVENT_FAMILY_REQUIRED'using errcode='23514';end if;
    elsif ep->'command'is distinct from(command-'canonicalPayload'-'fingerprint'-'payloadHash')||jsonb_build_object('payload',intent)or not world_v2.postwar_social_prefix_effect_scoped(p_world,c.country_id,e.event_type,command,ep,e.event_sequence)then raise exception 'FINANCIAL_SOCIAL_SCOPE_EFFECT_INVALID'using errcode='23514';end if;
    events:=events||jsonb_build_array(event);last_event_id:=e.event_id;last_event_fingerprint:=e.event_fingerprint;event_index:=event_index+1;
   end loop;
@@ -159,17 +165,36 @@ begin
   receipt:=jsonb_build_object('schemaVersion',r.schema_version,'worldId',p_world,'commandId',r.command_id,'idempotencyKey',r.idempotency_key,'commandFingerprint',r.command_fingerprint,'outcome',r.outcome,'reasonCode',r.reason_code,'transitionId',r.transition_id,'worldVersionBefore',r.world_version_before::text,'worldVersionAfter',r.world_version_after::text,'simTime',r.sim_time::text,'eventIds',r.event_ids,'recordedAtReal',to_char(r.recorded_at_real at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'));
   batches:='[]';
   select count(*)into actual_batch_count from world_v2.financial_posting_batch x where x.world_id=p_world and x.causation_command_id=c.command_id;
-  if c.command_type='POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'then
-   if actual_batch_count<>2 then raise exception 'MIXED_EXACT_TWO_FX_BATCHES_REQUIRED'using errcode='55000';end if;
+  if c.command_type in('POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1','CORE_CENTRAL_BANK_OMO_V1','CORE_GOODS_DELIVERY_V1')then
+   if c.command_type='POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'and actual_batch_count<>2 then raise exception 'MIXED_EXACT_TWO_FX_BATCHES_REQUIRED'using errcode='55000';end if;
+   if c.command_type<>'POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'and actual_batch_count<>1 then raise exception 'MIXED_EXTENDED_EXACT_SINGLE_BATCH_REQUIRED'using errcode='55000';end if;
    for br in select x.* from world_v2.financial_posting_batch x where x.world_id=p_world and x.causation_command_id=c.command_id order by case when x.settlement_currency='GCU'then 1 else 0 end,x.batch_id loop
     if br.world_version_before<>r.world_version_before or br.world_version_after<>r.world_version_after or br.sim_time<>r.sim_time or br.event_ids<>r.event_ids or br.transition_binding is distinct from world_v2.canonical_json(br.canonical_payload::jsonb->'transitionBinding')or br.settlement_currency is distinct from br.canonical_payload::jsonb->>'settlementCurrency'then raise exception 'MIXED_CANONICAL_BATCH_BINDING_INVALID'using errcode='23514';end if;
     bytes:=bytes+octet_length(br.canonical_payload);if bytes>8388608 then raise exception 'MIXED_COMPLETE_PREFIX_BYTES_EXCEEDED'using errcode='54000';end if;
     batches:=batches||jsonb_build_array(world_v2.postwar_mixed_current_batch(br.canonical_payload,br.batch_fingerprint,br.batch_id));total_batches:=total_batches+1;total_legs:=total_legs+jsonb_array_length(br.canonical_payload::jsonb->'legs');
    end loop;
-   if not world_v2.postwar_mixed_fx_group(p_world,command,transition,events->0,batches,envelopes)then raise exception 'MIXED_EXACT_FX_EFFECTS_INVALID'using errcode='23514';end if;
+   if c.command_type='POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'and not world_v2.postwar_mixed_fx_group(p_world,command,transition,events->0,batches,envelopes)then raise exception 'MIXED_EXACT_FX_EFFECTS_INVALID'using errcode='23514';end if;
   elsif actual_batch_count<>0 then raise exception 'MIXED_FINANCIAL_EFFECT_OUTSIDE_FX'using errcode='55000';end if;
+  inventory:='[]';inventory_count:=0;
+  if inventory_total>0 then
+   select count(*)into inventory_count from world_v2.inventory_posting x where x.world_id=p_world and x.causation_command_id=c.command_id;
+   if(c.command_type in('CORE_GOODS_TRANSFER_V1','CORE_GOODS_SHIPMENT_V1','CORE_GOODS_DELIVERY_V1')and inventory_count<>1)or(c.command_type not in('CORE_GOODS_TRANSFER_V1','CORE_GOODS_SHIPMENT_V1','CORE_GOODS_DELIVERY_V1')and inventory_count<>0)then raise exception 'MIXED_EXACT_INVENTORY_GROUP_REQUIRED'using errcode='23514';end if;
+   for inv in select * from world_v2.inventory_posting x where x.world_id=p_world and x.causation_command_id=c.command_id order by x.posting_id loop
+    if octet_length(inv.canonical_payload)>65536 then raise exception 'MIXED_INVENTORY_ROW_BOUNDED'using errcode='54000';end if;body:=inv.canonical_payload::jsonb;
+    if body?'fingerprint'or inv.canonical_payload is distinct from world_v2.canonical_json(body)or body->>'postingId'is distinct from inv.posting_id or inv.posting_fingerprint is distinct from'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||inv.canonical_payload,'UTF8')),'hex')or inv.world_version_before<>r.world_version_before or inv.world_version_after<>r.world_version_after or inv.sim_time<>r.sim_time or inv.event_ids<>r.event_ids or inv.operation is distinct from body->>'operation'or inv.transition_binding is distinct from world_v2.canonical_json(body->'transitionBinding')then raise exception 'MIXED_EXACT_CANONICAL_INVENTORY_REQUIRED'using errcode='23514';end if;
+    bytes:=bytes+octet_length(inv.canonical_payload);if bytes>8388608 then raise exception 'MIXED_COMPLETE_PREFIX_BYTES_EXCEEDED'using errcode='54000';end if;
+    inventory:=inventory||jsonb_build_array(body||jsonb_build_object('fingerprint',inv.posting_fingerprint));total_inventory:=total_inventory+1;
+   end loop;
+  end if;
+  if c.command_type='CORE_CENTRAL_BANK_OMO_V1'then
+   if to_regprocedure('world_v2.postwar_mixed_omo_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)')is null then raise exception 'MIXED_OMO_EFFECTS_EXTENSION_REQUIRED'using errcode='55000';end if;
+   omos:=jsonb_set(omos,array[c.country_id],world_v2.postwar_mixed_omo_group(p_world,command,transition,events->0,batches,omos->c.country_id));
+  elsif c.command_type in('CORE_GOODS_TRANSFER_V1','CORE_GOODS_SHIPMENT_V1','CORE_GOODS_DELIVERY_V1')then
+   if to_regprocedure('world_v2.postwar_mixed_goods_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)')is null then raise exception 'MIXED_GOODS_EFFECTS_EXTENSION_REQUIRED'using errcode='55000';end if;
+   perform world_v2.postwar_mixed_goods_group(p_world,command,transition,events->0,batches,inventory);
+  end if;
   all_batches:=all_batches||batches;
-  frames:=frames||jsonb_build_array(jsonb_build_object('command',command,'transition',transition,'financialPostingBatches',batches,'inventoryPostings','[]'::jsonb,'receipt',receipt,'events',events));
+  frames:=frames||jsonb_build_array(jsonb_build_object('command',command,'transition',transition,'financialPostingBatches',batches,'inventoryPostings',inventory,'receipt',receipt,'events',events));
   meta:=meta||jsonb_build_array(jsonb_build_object('commandId',c.command_id,'countryId',c.country_id,'commandType',c.command_type,'transitionFingerprint','sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(transition),'UTF8')),'hex'),'receiptFingerprint','sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(receipt),'UTF8')),'hex'),'eventFingerprints',(select jsonb_agg(x->'fingerprint'order by n)from jsonb_array_elements(events)with ordinality q(x,n)),'worldVersionBefore',r.world_version_before::text,'worldVersionAfter',r.world_version_after::text,'events',(select jsonb_agg(jsonb_build_object('eventId',x->>'eventId','fingerprint',x->>'fingerprint','sequence',x->>'sequence','worldVersion',x->>'worldVersion')order by n)from jsonb_array_elements(events)with ordinality q(x,n))));
   wv:=r.world_version_after;seq:=seq+expected_count;
  end loop;
@@ -177,6 +202,7 @@ begin
  select x.seed_fingerprint into strict seed_fp from world_v2.postwar_projection_admission_header(p_world)x;
  prefix_fingerprint:='sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(jsonb_build_object('worldId',p_world,'seedFingerprint',seed_fp,'headWorldVersion',wv::text,'headEventSequence',seq::text,'frames',frames)),'UTF8')),'hex');
  effects_fingerprint:='sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(meta),'UTF8')),'hex');budget_envelopes:=envelopes;financial_posting_count:=total_legs::text;financial_batch_count:=total_batches::text;financial_postings_fingerprint:='sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(all_batches),'UTF8')),'hex');
+ if total_inventory<>inventory_total then raise exception 'MIXED_COMPLETE_INVENTORY_SET_REQUIRED'using errcode='55000';end if;
  if total_batches<>(select count(*)from world_v2.financial_posting_batch x where x.world_id=p_world)then raise exception 'MIXED_GLOBAL_POSTING_SET_INCOMPLETE'using errcode='55000';end if;return next;
 end;$$;
 alter function world_v2.postwar_mixed_current_prefix(text)owner to world_v2_postwar_projection_owner;
@@ -241,7 +267,7 @@ begin
  state_hash:=case when ow=0 then assertion->>'employmentStateHash'else 'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(state),'UTF8')),'hex')end;
  if state_hash is null or state_hash!~'^sha256:[a-f0-9]{64}$'or assertion->>'employmentStateHash'is distinct from state_hash or assertion->>'materializationHash'is distinct from material_hash or assertion->>'positionsHash'is distinct from 'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(state->'labour'->'positions'),'UTF8')),'hex')or assertion->>'servicePoolsHash'is distinct from 'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(state->'servicePools'),'UTF8')),'hex')then raise exception 'MIXED_CORE_SQL_STATE_MISMATCH'using errcode='23514';end if;
  coverage_id:='POSTWAR_MIXED_SOCIAL_COVERAGE_'||upper(encode(sha256(convert_to(p_assertion||p_country,'UTF8')),'hex'));
- coverage:=assertion->'coverage'||jsonb_build_object('schemaVersion','postwar-social-current-prefix-coverage-v3','reducerVersion','POSTWAR_SOCIAL_FINANCE_FX_COMPLETE_PREFIX_V3','countryId',p_country,'coverageRef',coverage_id,'globalWorldVersion',h.world_version,'globalEventSequence',h.event_sequence,'originWorldVersion',ow::text,'originEventSequence',os::text,'employmentStateHash',state_hash,'materializationHash',material_hash,'stateOrigin',case when ow=0 then'ADMITTED_OPENING_SOURCE'else'COMMITTED_MATERIALIZATION'end);
+ coverage:=assertion->'coverage'||jsonb_build_object('schemaVersion','postwar-social-current-prefix-coverage-v3','reducerVersion',case when exists(select 1 from world_v2.command_submission mc join world_v2.command_receipt mr on mr.world_id=mc.world_id and mr.command_id=mc.command_id and mr.outcome='COMMITTED'where mc.world_id=p_world and mc.command_type in('CORE_CENTRAL_BANK_OMO_V1','CORE_GOODS_TRANSFER_V1','CORE_GOODS_SHIPMENT_V1','CORE_GOODS_DELIVERY_V1'))then'POSTWAR_FINANCE_SOCIAL_FX_CAPTAIN_GOODS_OMO_COMPLETE_PREFIX_V2'else'POSTWAR_SOCIAL_FINANCE_FX_COMPLETE_PREFIX_V3'end,'countryId',p_country,'coverageRef',coverage_id,'globalWorldVersion',h.world_version,'globalEventSequence',h.event_sequence,'originWorldVersion',ow::text,'originEventSequence',os::text,'employmentStateHash',state_hash,'materializationHash',material_hash,'stateOrigin',case when ow=0 then'ADMITTED_OPENING_SOURCE'else'COMMITTED_MATERIALIZATION'end);
  foreach dataset_name in array array['positions','service-pools']loop
   select * into strict b from world_v2.postwar_office_projection_document x where x.world_id=p_world and x.country_id=p_country and x.office_id='SOCIAL'and x.dataset=dataset_name and x.seed_fingerprint=a.seed_fingerprint and x.admission_ref=a.admission_ref;
   items:=case dataset_name when'positions'then state->'labour'->'positions'else state->'servicePools'end;

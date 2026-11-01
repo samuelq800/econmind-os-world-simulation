@@ -1,3 +1,5 @@
+import { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
+export { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
 /** Browser-safe DATA wire. A validated shape is never source/actor authority. */
 export const POSTWAR_SOCIAL_MIXED_CURRENT_NATURE =
   'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX' as const;
@@ -7,7 +9,9 @@ export const POSTWAR_SOCIAL_MIXED_REDUCER =
   'POSTWAR_SOCIAL_FINANCE_FX_COMPLETE_PREFIX_V3' as const;
 export interface PostwarSocialMixedCoverage {
   readonly schemaVersion: typeof POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA;
-  readonly reducerVersion: typeof POSTWAR_SOCIAL_MIXED_REDUCER;
+  readonly reducerVersion:
+    | typeof POSTWAR_SOCIAL_MIXED_REDUCER
+    | typeof POSTWAR_EXTENDED_CURRENT_REDUCER;
   readonly countryId: string;
   readonly coverageRef: string;
   readonly globalWorldVersion: string;
@@ -83,7 +87,8 @@ export function parsePostwarSocialMixedCoverage(
   ]);
   if (
     c.schemaVersion !== POSTWAR_SOCIAL_MIXED_COVERAGE_SCHEMA ||
-    c.reducerVersion !== POSTWAR_SOCIAL_MIXED_REDUCER ||
+    (c.reducerVersion !== POSTWAR_SOCIAL_MIXED_REDUCER &&
+      c.reducerVersion !== POSTWAR_EXTENDED_CURRENT_REDUCER) ||
     c.countryId !== scope.countryId ||
     !id(c.countryId) ||
     !id(c.coverageRef) ||

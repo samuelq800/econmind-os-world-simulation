@@ -1,3 +1,5 @@
+import { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
+export { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
 /** Browser-safe derived read wire. This validates shape/scope, never issues
  * source custody, admission, ledger authority or spending permission. */
 export const POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE =
@@ -26,7 +28,9 @@ export type PostwarFinancialMixedOffice =
   keyof typeof POSTWAR_FINANCIAL_MIXED_DATASETS;
 export interface PostwarFinancialMixedCoverage {
   readonly schemaVersion: typeof POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA;
-  readonly reducerVersion: typeof POSTWAR_FINANCIAL_MIXED_REDUCER;
+  readonly reducerVersion:
+    | typeof POSTWAR_FINANCIAL_MIXED_REDUCER
+    | typeof POSTWAR_EXTENDED_CURRENT_REDUCER;
   readonly countryId: string;
   readonly coverageRef: string;
   readonly prefixFingerprint: string;
@@ -138,7 +142,8 @@ export function parsePostwarFinancialMixedCoverage(
   ]);
   if (
     c.schemaVersion !== POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA ||
-    c.reducerVersion !== POSTWAR_FINANCIAL_MIXED_REDUCER ||
+    (c.reducerVersion !== POSTWAR_FINANCIAL_MIXED_REDUCER &&
+      c.reducerVersion !== POSTWAR_EXTENDED_CURRENT_REDUCER) ||
     c.countryId !== scope.countryId ||
     !id(c.countryId) ||
     !id(c.coverageRef) ||

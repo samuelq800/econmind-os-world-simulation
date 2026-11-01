@@ -1,3 +1,5 @@
+import { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
+export { POSTWAR_EXTENDED_CURRENT_REDUCER } from './postwar-extended-current-reducer.js';
 /** Browser-safe wire validation only. These records grant no source admission,
  * political capital, command authority or currentness by themselves. */
 export const POSTWAR_CAPTAIN_CURRENT_NATURE =
@@ -30,7 +32,9 @@ export interface PostwarCaptainPoliticalCapitalRow {
 }
 export interface PostwarCaptainCurrentCoverage {
   readonly schemaVersion: 'postwar-captain-current-prefix-coverage-v1';
-  readonly reducerVersion: 'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1';
+  readonly reducerVersion:
+    | 'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1'
+    | typeof POSTWAR_EXTENDED_CURRENT_REDUCER;
   readonly countryId: string;
   readonly coverageRef: string;
   readonly prefixFingerprint: string;
@@ -135,8 +139,9 @@ export function parsePostwarCaptainCurrentCoverage(
   ]);
   if (
     r.schemaVersion !== 'postwar-captain-current-prefix-coverage-v1' ||
-    r.reducerVersion !==
-      'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1' ||
+    (r.reducerVersion !==
+      'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1' &&
+      r.reducerVersion !== POSTWAR_EXTENDED_CURRENT_REDUCER) ||
     typeof r.countryId !== 'string' ||
     !/^COUNTRY_(?:0[1-9]|[1-6][0-9]|70)$/u.test(r.countryId) ||
     !id(r.coverageRef) ||

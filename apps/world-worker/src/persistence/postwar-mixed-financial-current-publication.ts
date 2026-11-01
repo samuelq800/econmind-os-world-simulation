@@ -10,6 +10,7 @@ import {
 import {
   POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
   POSTWAR_FINANCIAL_MIXED_REDUCER,
+  POSTWAR_EXTENDED_CURRENT_REDUCER,
   parsePostwarFinancialMixedCoverage,
   parsePostwarMixedFinancialBalanceRow,
   parsePostwarMixedTreasuryCapacityRow,
@@ -213,7 +214,16 @@ export function derivePostwarMixedFinancialCurrentFrom(
   const coverage = parsePostwarFinancialMixedCoverage(
     {
       schemaVersion: POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
-      reducerVersion: POSTWAR_FINANCIAL_MIXED_REDUCER,
+      reducerVersion: f.frames.some((frame) =>
+        [
+          'CORE_CENTRAL_BANK_OMO_V1',
+          'CORE_GOODS_TRANSFER_V1',
+          'CORE_GOODS_SHIPMENT_V1',
+          'CORE_GOODS_DELIVERY_V1',
+        ].includes(frame.command.commandType),
+      )
+        ? POSTWAR_EXTENDED_CURRENT_REDUCER
+        : POSTWAR_FINANCIAL_MIXED_REDUCER,
       countryId: country,
       coverageRef:
         'MIXED_FINANCIAL_' +

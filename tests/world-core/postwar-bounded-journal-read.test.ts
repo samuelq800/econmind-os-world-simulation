@@ -140,6 +140,7 @@ it('returns the complete actual bounded journal through fixed role/host/admissio
         event_sequence: '2',
         financial_batch_count: '2',
         inventory_posting_count: '0',
+        inventory_postings: [],
         financial_batches: [
           {
             causation_command_id: 'COMMAND_TEST_ONLY',
@@ -218,9 +219,27 @@ it('returns the complete actual bounded journal through fixed role/host/admissio
       `insert into world_v2.inventory_posting values($1,'INV','COMMAND_TEST_ONLY',0,1,0,'["EVENT_TEST_ONLY"]','{}','RESERVE','{}',$2)`,
       [world, 'sha256:' + '4'.repeat(64)],
     );
-    await expect(read()).rejects.toThrow(
-      'JOURNAL_UNSUPPORTED_INVENTORY_EFFECT',
+    const inventoryRead = await read();
+    expect(inventoryRead.rows[0]?.inventory_posting_count).toBe('1');
+    expect(inventoryRead.rows[0]?.inventory_postings).toEqual([
+      {
+        causation_command_id: 'COMMAND_TEST_ONLY',
+        canonical_payload: '{}',
+        fingerprint: 'sha256:' + '4'.repeat(64),
+      },
+    ]);
+    expect(
+      (
+        await db.query(
+          "select has_column_privilege('world_v2_social_source_reader','world_v2.inventory_posting','canonical_payload','SELECT')as social_raw,has_column_privilege('world_v2_finance_budget_source_reader','world_v2.inventory_posting','canonical_payload','SELECT')as finance_raw",
+        )
+      ).rows,
+    ).toEqual([{ social_raw: false, finance_raw: false }]);
+    await db.query(
+      "update world_v2.inventory_posting set canonical_payload=$1 where posting_id='INV'",
+      ['x'.repeat(65537)],
     );
+    await expect(read()).rejects.toThrow('JOURNAL_BOUNDED_CAPACITY_EXCEEDED');
     await db.exec('delete from world_v2.inventory_posting');
     await insertBatch(world, 'OVERSIZED', 'x'.repeat(65537));
     await expect(read()).rejects.toThrow('JOURNAL_BOUNDED_CAPACITY_EXCEEDED');
