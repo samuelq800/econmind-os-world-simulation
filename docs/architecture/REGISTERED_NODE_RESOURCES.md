@@ -24,6 +24,35 @@ the process-private verified source, so a cold process currently repeats the
 complete verifier. Online requests use bounded readers; they do not perform
 this full proof per request.
 
+The separate 2026-11-01 Industry original-registration probe used an admitted
+124,268,887-byte seed in an owned PostgreSQL 16.15 clone. Registration and its
+idempotent repeat took 7.584 and 7.553 seconds. Resource observations belong to
+different processes and must not be combined into a Node sizing result:
+
+| Registration measurement                   | Observation                                                                                  |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| PostgreSQL backend RSS                     | Maximum observed sample 1,303,720 KiB, about 1.24 GiB                                        |
+| PostgreSQL container memory                | Maximum observed sample 1,760,878,592 bytes, about 1.64 GiB; includes more than that backend |
+| Node RSS after source-context construction | 702,267,392 bytes, about 670 MiB; a point observation, not a measured lifetime peak          |
+| Node RSS after registration                | 296,189,952 bytes, about 282 MiB                                                             |
+
+Database samples were taken approximately every 250 ms, so these are observed
+maxima, not hard upper bounds. The probe did not run the complete 70-country
+Core proof and did not measure the later child-world registration. The existing
+3-GiB isolated database configuration provided headroom for this run; the
+production Supabase compute specification has not been verified. Do not assume
+that a Micro instance can execute this offline registration. Its database
+budget must be evaluated separately from the Node process and bounded online
+reads. No production instance was resized or purchased.
+
+Low-memory termination, rollback and reconnect readback during this large
+registration remain **NOT_RUN**. Successful ordinary registration, idempotent
+repeat and unrelated transaction-rollback tests do not establish that failure
+case. Before applying the publication procedure on a smaller database, verify
+it on an isolated equivalent or provide a validated bounded publication path;
+an unknown transaction outcome must be inspected before retrying. Evidence:
+`industry-original-registration-native-20261101-a2/report.json`.
+
 For planning, allow approximately USD 20–60/month for a self-managed 2-vCPU,
 4–8-GiB VM, or USD 40–100+/month for managed persistent compute of similar size.
 These are budget estimates, not checked provider quotes. Region, backups,

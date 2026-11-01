@@ -103,5 +103,70 @@ grant execute on function world_v2.lock_postwar_industry_intake_binding(text,uui
 alter function world_v2.read_postwar_industry_recovery_binding(text,uuid,text,text,text,text,text,text)owner to world_v2_industry_source_owner;
 revoke all on function world_v2.read_postwar_industry_recovery_binding(text,uuid,text,text,text,text,text,text)from public;
 grant execute on function world_v2.read_postwar_industry_recovery_binding(text,uuid,text,text,text,text,text,text)to world_v2_industry_source_reader;
+
+-- Fixed worker lock reads. Caller supplies no seat/entitlement/approval rows.
+-- The two functions reuse immutable admission and actual current metadata;
+-- reader obtains EXECUTE only, with locks on the caller's existing transaction.
+create function world_v2.lock_postwar_industry_current_authorization(p_world text,p_subject uuid,p_country text,p_office text,p_capability text)
+returns table(auth_subject text,world_id text,country_id text,office_id text,capability text,team_id text,authorization_version text)
+language plpgsql security definer set search_path=pg_catalog as $$
+declare effective name;a world_v2.runtime_opening_admission%rowtype;begin
+ effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
+ if p_office is distinct from 'INDUSTRY'or p_subject is null or p_world is null or p_country is null
+ or p_world!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'or p_country!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'
+ or current_setting('transaction_read_only')<>'off'
+ or not pg_has_role(effective,'world_v2_industry_source_reader','MEMBER')
+ or pg_has_role(effective,'world_v2_industry_source_owner','MEMBER')or pg_has_role(effective,'world_v2_industry_source_publisher','MEMBER')or pg_has_role(effective,'world_v2_admission_release','MEMBER')
+ or has_schema_privilege(effective,'world_v2','CREATE')
+ or exists(select 1 from pg_roles r where r.rolname=effective and(r.rolsuper or r.rolbypassrls or r.rolcreatedb or r.rolcreaterole or r.rolreplication))
+ then raise exception 'INDUSTRY_WORKER_FIXED_AUTHORIZATION_SCOPE_REQUIRED'using errcode='42501';end if;
+ perform set_config('econmind.industry_source_world',p_world,true);
+ perform 1 from world_v2.world_head h where h.world_id=p_world for share;
+ if not found then raise exception 'INDUSTRY_WORKER_CURRENT_WORLD_REQUIRED'using errcode='55000';end if;
+ select * into a from world_v2.industry_intake_admission_header(p_world);
+ -- Never return zero rows for a missing admission in the revoked predicate:
+ -- that could falsely assert absence of a still-active Office authorization.
+ if not found then raise exception 'INDUSTRY_WORKER_CURRENT_ADMISSION_REQUIRED'using errcode='55000';end if;
+ perform world_v2.industry_source_admission(p_world);
+ if p_capability is distinct from 'INDUSTRY_PRODUCTION'then raise exception 'INDUSTRY_WORKER_FIXED_CAPABILITY_REQUIRED'using errcode='42501';end if;
+ return query select authz.auth_subject::text,authz.world_id,authz.country_id,authz.office_id,authz.capability,authz.team_id,authz.authorization_version
+ from world_v2.current_commit_authorization authz
+ join world_v2.runtime_read_seat seat on seat.world_id=authz.world_id and seat.auth_subject=authz.auth_subject and seat.country_id=authz.country_id and seat.office_id=authz.office_id and seat.team_id=authz.team_id and seat.authorization_revision=authz.authorization_version
+ join world_v2.projection_entitlement entitlement on entitlement.world_id=seat.world_id and entitlement.auth_subject=seat.auth_subject and entitlement.authorization_version=seat.authorization_revision and entitlement.active and entitlement.revoked_at is null and entitlement.classification='OFFICE_PRIVATE'and entitlement.scope_key='OFFICE_'||upper(encode(convert_to(p_country,'UTF8'),'hex'))||'_494E445553545259'
+ where authz.world_id=p_world and authz.auth_subject=p_subject and authz.country_id=p_country and authz.office_id=p_office and authz.capability=p_capability and authz.active
+ and not exists(select 1 from world_v2.current_commit_authorization other where other.world_id=authz.world_id and other.auth_subject=authz.auth_subject and other.active and(other.country_id is distinct from authz.country_id or other.team_id is distinct from authz.team_id or other.authorization_version is distinct from authz.authorization_version))
+ limit 2 for share of authz,entitlement;
+end;$$;
+create function world_v2.lock_postwar_industry_revoked_authorization(p_world text,p_subject uuid,p_country text,p_office text)
+returns table(present integer)language plpgsql security definer set search_path=pg_catalog as $$
+declare effective name;a world_v2.runtime_opening_admission%rowtype;begin
+ effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
+ if p_office is distinct from 'INDUSTRY'or p_subject is null or p_world is null or p_country is null
+ or p_world!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'or p_country!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'
+ or current_setting('transaction_read_only')<>'off'
+ or not pg_has_role(effective,'world_v2_industry_source_reader','MEMBER')
+ or pg_has_role(effective,'world_v2_industry_source_owner','MEMBER')or pg_has_role(effective,'world_v2_industry_source_publisher','MEMBER')or pg_has_role(effective,'world_v2_admission_release','MEMBER')
+ or has_schema_privilege(effective,'world_v2','CREATE')
+ or exists(select 1 from pg_roles r where r.rolname=effective and(r.rolsuper or r.rolbypassrls or r.rolcreatedb or r.rolcreaterole or r.rolreplication))
+ then raise exception 'INDUSTRY_WORKER_FIXED_AUTHORIZATION_SCOPE_REQUIRED'using errcode='42501';end if;
+ perform set_config('econmind.industry_source_world',p_world,true);
+ perform 1 from world_v2.world_head h where h.world_id=p_world for share;
+ if not found then raise exception 'INDUSTRY_WORKER_CURRENT_WORLD_REQUIRED'using errcode='55000';end if;
+ select * into a from world_v2.industry_intake_admission_header(p_world);
+ -- Never return zero rows for a missing admission in the revoked predicate:
+ -- that could falsely assert absence of a still-active Office authorization.
+ if not found then raise exception 'INDUSTRY_WORKER_CURRENT_ADMISSION_REQUIRED'using errcode='55000';end if;
+ perform world_v2.industry_source_admission(p_world);
+ -- Preserve the original ANY-active-capability assertion. Missing entitlement
+ -- must never turn an active Office authorization into AUTHORIZATION_REVOKED.
+ return query select 1 from world_v2.current_commit_authorization authz
+ where authz.world_id=p_world and authz.auth_subject=p_subject and authz.country_id=p_country and authz.office_id is not distinct from p_office and authz.active for share;
+end;$$;
+alter function world_v2.lock_postwar_industry_current_authorization(text,uuid,text,text,text)owner to world_v2_industry_source_owner;
+revoke all on function world_v2.lock_postwar_industry_current_authorization(text,uuid,text,text,text)from public;
+grant execute on function world_v2.lock_postwar_industry_current_authorization(text,uuid,text,text,text)to world_v2_industry_source_reader;
+alter function world_v2.lock_postwar_industry_revoked_authorization(text,uuid,text,text)owner to world_v2_industry_source_owner;
+revoke all on function world_v2.lock_postwar_industry_revoked_authorization(text,uuid,text,text)from public;
+grant execute on function world_v2.lock_postwar_industry_revoked_authorization(text,uuid,text,text)to world_v2_industry_source_reader;
 revoke create on schema world_v2 from world_v2_industry_source_owner;
 commit;

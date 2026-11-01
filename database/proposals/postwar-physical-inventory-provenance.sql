@@ -30,7 +30,7 @@ create function world_v2.publish_postwar_inventory_provenance_v2(p_world text,p_
 returns setof world_v2.postwar_inventory_provenance_v2
 language plpgsql security definer set search_path=pg_catalog as $$
 declare effective name;a record;s record;d record;existing world_v2.postwar_inventory_provenance_v2%rowtype;
- root jsonb;financial jsonb;operating jsonb;src jsonb;schema_name text;financial_count integer:=0;operating_count integer:=0;items jsonb;copied jsonb;pointer jsonb;raw_sha text;doc_sha text;ref text;version text;
+ root json;financial json;operating json;src json;schema_name text;financial_count integer:=0;operating_count integer:=0;items jsonb;copied jsonb;pointer jsonb;raw_sha text;doc_sha text;ref text;version text;
 begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
  if not pg_has_role(effective,'world_v2_postwar_projection_publisher','MEMBER')or pg_has_role(effective,'world_v2_postwar_projection_owner','MEMBER')then raise exception 'POSTWAR_FIXED_PROJECTION_PUBLISHER_REQUIRED'using errcode='42501';end if;
@@ -42,10 +42,13 @@ begin
  raw_sha:=encode(sha256(convert_to(s.canonical_payload,'UTF8')),'hex');
  if s.seed_fingerprint<>p_seed_fingerprint or s.seed_fingerprint<>a.seed_fingerprint or raw_sha<>p_canonical_sha256 or a.source_bundle_sha256<>p_bundle_sha256 or a.admission_ref<>p_admission
  or s.seed_fingerprint<>'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||s.canonical_payload,'UTF8')),'hex')then raise exception 'POSTWAR_INVENTORY_ACTUAL_SOURCE_PINS_REQUIRED'using errcode='23514';end if;
- -- Offline only: parse the fixed admitted seed once for both office records.
- root:=s.canonical_payload::jsonb;
+ -- Offline only. Keep the large root/carriers as JSON text; only individual
+ -- small inventory entries become JSONB. This preserves the exact hashes and
+ -- immutable output while avoiding expansion of the whole operating carrier.
+ root:=s.canonical_payload::json;
+ s.canonical_payload:=null;
  if root->>'worldId'<>p_world or root->>'seedId'<>a.seed_id then raise exception 'POSTWAR_INVENTORY_CANONICAL_SCOPE_REQUIRED'using errcode='23514';end if;
- for src in select value from jsonb_array_elements(root->'sources')loop
+ for src in select value from json_array_elements(root->'sources')loop
   -- Inspect only each root schema with JSON text, not a JSONB expansion of the
   -- 120 MB operating carrier. One source walk replaces repeated lateral casts.
   schema_name:=((src->>'canonicalPayload')::json)->>'schemaVersion';
@@ -56,7 +59,13 @@ begin
  if financial->>'sourceKind'<>'AUTHORITATIVE_DATASET'or financial->>'sourceId'=operating->>'sourceId'
  or financial->>'payloadHash'<>'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||'{"payload":'||(financial->>'canonicalPayload')||'}','UTF8')),'hex')
  or operating->>'payloadHash'<>'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||'{"payload":'||(operating->>'canonicalPayload')||'}','UTF8')),'hex')then raise exception 'POSTWAR_INVENTORY_SOURCE_HASH_OR_KIND_INVALID'using errcode='23514';end if;
- select coalesce(jsonb_agg(x order by x->>'entryId'),'[]'::jsonb)into items from jsonb_array_elements(root->'inventoryEntries')x where x->'account'->>'countryId'=p_country and x->>'sourceId'=financial->>'sourceId';
+ -- Payload hashes above were checked against the actual full source text.
+ -- Only metadata is needed from here onward; release those large carriers.
+ financial:=json_build_object('sourceId',financial->>'sourceId','payloadHash',financial->>'payloadHash','sourceVersion',financial->>'sourceVersion');
+ operating:=json_build_object('sourceId',operating->>'sourceId','payloadHash',operating->>'payloadHash','sourceVersion',operating->>'sourceVersion');
+ src:=null;
+ select coalesce(jsonb_agg(x::jsonb order by x->>'entryId'),'[]'::jsonb)into items from json_array_elements(root->'inventoryEntries')x where x->'account'->>'countryId'=p_country and x->>'sourceId'=financial->>'sourceId';
+ root:=null;
  doc_sha:=encode(sha256(convert_to(items::text,'UTF8')),'hex');
  perform 1 from world_v2.postwar_office_projection_document x where x.world_id=p_world and x.country_id=p_country and x.office_id in('INDUSTRY','TRADE')and x.dataset='opening-inventory-entries'for share;
  if(select count(*)from world_v2.postwar_office_projection_document x where x.world_id=p_world and x.country_id=p_country and x.office_id in('INDUSTRY','TRADE')and x.dataset='opening-inventory-entries')<>2 then raise exception 'POSTWAR_INVENTORY_BOTH_LEGACY_DOCUMENTS_REQUIRED'using errcode='23514';end if;

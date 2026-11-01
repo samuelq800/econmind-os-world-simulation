@@ -56,7 +56,7 @@ end;$$;
 alter function world_v2.industry_source_admission(text)owner to world_v2_industry_source_owner;
 create function world_v2.register_postwar_industry_originals(p_world text,p_country text,p_checksums text,p_originals jsonb)
 returns table(registration_ref text,facility_id text,document_sha256 text)language plpgsql security definer set search_path=pg_catalog as $$
-declare a world_v2.runtime_opening_admission%rowtype;s world_v2.opening_seed%rowtype;root jsonb;o jsonb;op jsonb;receipt jsonb;manifest jsonb;raw jsonb;f jsonb;recipe jsonb;recipe_count integer;plans jsonb;technology jsonb;license jsonb;regions jsonb;financial jsonb;roster jsonb;recon jsonb;pair text[];book jsonb;asset jsonb;liability jsonb;opening_batch jsonb;asset_leg jsonb;liability_leg jsonb;asset_id text;liability_id text;claim_id text;source_country text;key text;path text;expected text;body jsonb;body_text text;ref text;existing world_v2.postwar_industry_original%rowtype;country_rows integer;effective name;
+declare a world_v2.runtime_opening_admission%rowtype;s world_v2.opening_seed%rowtype;root json;opening_batches json;o json;op json;source_row json;source_payload json;source_document json;source_pins jsonb;region_mapping_bytes text;receipt_id text;operating_count integer:=0;financial_count integer:=0;receipt_count integer:=0;financial_payload jsonb;receipt jsonb;manifest jsonb;raw jsonb;f jsonb;recipe jsonb;recipe_count integer;plans jsonb;technology jsonb;license jsonb;regions jsonb;financial jsonb;roster jsonb;recon jsonb;pair text[];book jsonb;asset jsonb;liability jsonb;opening_batch jsonb;asset_leg jsonb;liability_leg jsonb;asset_id text;liability_id text;claim_id text;source_country text;key text;path text;expected text;body jsonb;body_text text;ref text;existing world_v2.postwar_industry_original%rowtype;country_rows integer;effective name;
 begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
  if not pg_has_role(effective,'world_v2_industry_source_publisher','MEMBER')or pg_has_role(effective,'world_v2_industry_source_owner','MEMBER')then raise exception 'INDUSTRY_FIXED_PUBLISHER_REQUIRED'using errcode='42501';end if;
@@ -65,23 +65,48 @@ begin
  a:=world_v2.industry_source_admission(p_world);
  select * into strict s from world_v2.opening_seed where world_id=p_world;
  if s.seed_fingerprint<>a.seed_fingerprint or s.seed_fingerprint<>'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||s.canonical_payload,'UTF8')),'hex')then raise exception 'INDUSTRY_CANONICAL_SEED_MISMATCH'using errcode='23514';end if;
- root:=s.canonical_payload::jsonb;
- select count(*),jsonb_agg(x)->0 into country_rows,o from jsonb_array_elements(root->'sources')x where (x->>'canonicalPayload')::jsonb->>'schemaVersion'='postwar-operating-genesis-seed-source-v1';
- if country_rows<>1 then raise exception 'INDUSTRY_EXACT_OPERATING_SOURCE_REQUIRED'using errcode='23514';end if;op:=(o->>'canonicalPayload')::jsonb;
- select (d->>'bytes')::jsonb into receipt from jsonb_array_elements(op->'carrier'->'documents')d where d->>'documentId'=op->'carrier'->>'physicalServiceReceiptDocumentId'and d->>'sha256'=encode(sha256(convert_to(d->>'bytes','UTF8')),'hex');
+ -- Offline publisher only: retain the admitted seed and large operating
+ -- payload as JSON text. Never build a jsonb tree/aggregate of the full seed,
+ -- all source envelopes, or all carrier documents. Only selected small
+ -- financial/receipt/region/batch originals below become jsonb.
+ root:=s.canonical_payload::json;
+ for source_row in select value from json_array_elements(root->'sources')loop
+  source_payload:=(source_row->>'canonicalPayload')::json;
+  if source_payload->>'schemaVersion'='postwar-operating-genesis-seed-source-v1'then
+   operating_count:=operating_count+1;op:=source_payload;
+   o:=json_build_object('sourceId',source_row->>'sourceId','payloadHash',source_row->>'payloadHash');
+  elsif source_payload->>'schemaVersion'='adopted-financial-opening-source-v2'then
+   financial_count:=financial_count+1;financial:=source_row::jsonb;
+  end if;
+ end loop;
+ source_row:=null;source_payload:=null;
+ opening_batches:=root->'financialBatches';root:=null;s.canonical_payload:=null;
+ if operating_count<>1 then raise exception 'INDUSTRY_EXACT_OPERATING_SOURCE_REQUIRED'using errcode='23514';end if;
+ if financial_count<>1 then raise exception 'INDUSTRY_EXACT_FINANCIAL_SOURCE_REQUIRED'using errcode='23514';end if;
+ receipt_id:=op->'carrier'->>'physicalServiceReceiptDocumentId';
+ source_pins:=(op->'carrier'->'sourcePins')::jsonb;
+ region_mapping_bytes:=op->'carrier'->'selectedSource'->>'regionMappingBytes';
+ for source_document in select value from json_array_elements(op->'carrier'->'documents')loop
+  if source_document->>'documentId'=receipt_id then
+   if source_document->>'sha256'is distinct from encode(sha256(convert_to(source_document->>'bytes','UTF8')),'hex')then raise exception 'INDUSTRY_PHYSICAL_OWNER_ORIGINAL_MISSING'using errcode='23514';end if;
+   receipt_count:=receipt_count+1;receipt:=(source_document->>'bytes')::jsonb;
+  end if;
+ end loop;
+ source_document:=null;op:=null;
+ if receipt_count<>1 then raise exception 'INDUSTRY_PHYSICAL_OWNER_ORIGINAL_MISSING'using errcode='23514';end if;
  if receipt is null or receipt->>'worldId' is distinct from p_world or receipt->>'seedId' is distinct from s.seed_id or receipt->>'ownerOriginalSha256' is distinct from '57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5'then raise exception 'INDUSTRY_PHYSICAL_OWNER_ORIGINAL_MISSING'using errcode='23514';end if;
- if receipt->>'sourceChecksumsSha256' is distinct from '88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315' or receipt->>'mappingSha256' is distinct from 'd2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253' or receipt->>'mappingSha256' is distinct from op->'carrier'->'sourcePins'->>'mapping' or encode(sha256(convert_to(op->'carrier'->'selectedSource'->>'regionMappingBytes','UTF8')),'hex') is distinct from op->'carrier'->'sourcePins'->>'regionMapping' or receipt->>'sourceChecksumsSha256' is distinct from encode(sha256(convert_to(p_checksums,'UTF8')),'hex')then raise exception 'INDUSTRY_CHECKSUMS_ORIGINAL_DRIFT'using errcode='23514';end if;manifest:=p_checksums::jsonb;
+ if receipt->>'sourceChecksumsSha256' is distinct from '88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315' or receipt->>'mappingSha256' is distinct from 'd2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253' or receipt->>'mappingSha256' is distinct from source_pins->>'mapping' or encode(sha256(convert_to(region_mapping_bytes,'UTF8')),'hex') is distinct from source_pins->>'regionMapping' or receipt->>'sourceChecksumsSha256' is distinct from encode(sha256(convert_to(p_checksums,'UTF8')),'hex')then raise exception 'INDUSTRY_CHECKSUMS_ORIGINAL_DRIFT'using errcode='23514';end if;manifest:=p_checksums::jsonb;
  if jsonb_typeof(p_originals) is distinct from 'object'or(select count(*)from jsonb_object_keys(p_originals))<>6 then raise exception 'INDUSTRY_FIXED_ORIGINAL_SET_REQUIRED'using errcode='23514';end if;
  foreach key in array array['facilities','recipes','production-plans','technology-proposals','license-proposals','commodity-catalog']loop
   path:='data/'||key||'.json';select count(*),min(x->>'sha256')into country_rows,expected from jsonb_array_elements(manifest)x where x->>'path'=path;
   if country_rows<>1 or jsonb_typeof(p_originals->key) is distinct from 'string'or expected is distinct from encode(sha256(convert_to(p_originals->>key,'UTF8')),'hex')then raise exception 'INDUSTRY_PINNED_ORIGINAL_DRIFT:%',key using errcode='23514';end if;
  end loop;
- regions:=(op->'carrier'->'selectedSource'->>'regionMappingBytes')::jsonb;
+ regions:=region_mapping_bytes::jsonb;
  select count(distinct x->>'countryId'),min(x->>'countryId')into country_rows,source_country from jsonb_array_elements((p_originals->>'facilities')::jsonb)x join jsonb_array_elements(regions->'mappings')m on m->>'sourceRegionId'=x->>'regionId'where m->>'coreCountryId'=p_country;
  if country_rows<>1 then raise exception 'INDUSTRY_EXACT_COUNTRY_MAPPING_REQUIRED'using errcode='23514';end if;
- select x into financial from jsonb_array_elements(root->'sources')x where (x->>'canonicalPayload')::jsonb->>'schemaVersion'='adopted-financial-opening-source-v2';
- select c->'roster'into roster from jsonb_array_elements(((financial->>'canonicalPayload')::jsonb)->'assembly'->'countries')c where c->>'countryId'=p_country;
- select c into recon from jsonb_array_elements(((financial->>'canonicalPayload')::jsonb)->'reconciliations')c where c->>'countryId'=p_country;
+ financial_payload:=(financial->>'canonicalPayload')::jsonb;
+ select c->'roster'into roster from jsonb_array_elements(financial_payload->'assembly'->'countries')c where c->>'countryId'=p_country;
+ select c into recon from jsonb_array_elements(financial_payload->'reconciliations')c where c->>'countryId'=p_country;
  if roster is null or recon is null then raise exception 'INDUSTRY_EXACT_FINANCIAL_SOURCE_REQUIRED'using errcode='23514';end if;
  -- Classification is derived only from actual original opening pair and its
  -- source contract; caller supplies no payment-account / classification flag.
@@ -92,7 +117,7 @@ begin
   asset_id:='ACCOUNT_'||upper(encode(sha256(convert_to(world_v2.canonical_json(jsonb_build_array(p_world,p_country,pair[2]||'_ASSET',book->>'currency')),'UTF8')),'hex'));
   liability_id:='ACCOUNT_'||upper(encode(sha256(convert_to(world_v2.canonical_json(jsonb_build_array(p_world,p_country,pair[2]||'_LIABILITY',book->>'currency')),'UTF8')),'hex'));
   claim_id:='CLAIM_'||upper(encode(sha256(convert_to(world_v2.canonical_json(jsonb_build_array(p_world,p_country,pair[2],book->>'currency')),'UTF8')),'hex'));
-  select b into opening_batch from jsonb_array_elements(root->'financialBatches')b where b->>'sourceId'=financial->>'sourceId'and exists(select 1 from jsonb_array_elements(b->'legs')l where l->'account'->>'accountId'=asset_id);
+  select b::jsonb into opening_batch from json_array_elements(opening_batches)b where b->>'sourceId'=financial->>'sourceId'and exists(select 1 from json_array_elements(b->'legs')l where l->'account'->>'accountId'=asset_id);
   select l into asset_leg from jsonb_array_elements(opening_batch->'legs')l where l->'account'->>'accountId'=asset_id;
   select l into liability_leg from jsonb_array_elements(opening_batch->'legs')l where l->'account'->>'accountId'=liability_id;
   asset:=asset_leg->'account';liability:=liability_leg->'account';

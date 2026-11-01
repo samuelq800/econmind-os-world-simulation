@@ -41,6 +41,7 @@ import {
   type PostwarNarrowTradeSharedRuntime,
 } from '../preparation/postwar-narrow-trade-shared-runtime.js';
 import { createPostwarNarrowTradeIntakeAuthorizationPool } from '../persistence/postwar-narrow-trade-intake-authorization.js';
+import { createPostwarIndustryAuthorizationDatabase } from '../persistence/postwar-industry-current-authorization.js';
 import {
   createServerCommandHostBinding,
   registeredFinanceCommandHostDependencies,
@@ -411,9 +412,9 @@ function constructFinanceSocialRuntimeConnection(
   const token = Object.freeze({}) as FinanceSocialSourceBinding;
   let reserved = false;
   try {
-    // The Finance adapter must be outermost: Social's general authority lock
-    // adapter also serves Social's dual-capability read and must not consume the
-    // Finance execution cutoff before Finance's exact fixed helper sees it.
+    // Office-specific authority helpers must intercept their exact capability
+    // before Social's general dual-capability adapter. Keep the same-backend
+    // manual scope outside those adapters so reauthorization retains this tx.
     const d = serverBinding
       ? registeredFinanceCommandHostDependencies(serverBinding)
       : null;
@@ -436,8 +437,11 @@ function constructFinanceSocialRuntimeConnection(
     const centralBankDatabase = input.centralBankOmo
       ? createPostwarCentralBankAuthorizationDatabase(captainDatabase)
       : captainDatabase;
+    const industryDatabase = input.industry
+      ? createPostwarIndustryAuthorizationDatabase(centralBankDatabase)
+      : centralBankDatabase;
     const officeDatabase =
-      createManualOfficeAuthorizationTransactionDatabase(centralBankDatabase);
+      createManualOfficeAuthorizationTransactionDatabase(industryDatabase);
     const database = input.trade
       ? createPostwarNarrowTradeSharedDatabase(officeDatabase, world)
       : officeDatabase;

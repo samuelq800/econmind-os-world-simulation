@@ -590,6 +590,76 @@ afterAll(async () => {
   await db?.close();
 });
 describe('actual pinned Industry source custody, incomplete operations remain typed missing', () => {
+  it('retains exact selected source pins and deposit claim originals without rewriting the admitted opening bytes', async () => {
+    await admin();
+    const operating = seed.sources.find(
+        (s) =>
+          JSON.parse(s.canonicalPayload).schemaVersion ===
+          'postwar-operating-genesis-seed-source-v1',
+      )!,
+      financial = seed.sources.find(
+        (s) =>
+          JSON.parse(s.canonicalPayload).schemaVersion ===
+          'adopted-financial-opening-source-v2',
+      )!;
+    const registered = (
+      await db.query<{
+        operating_source_id: string;
+        operating_source_hash: string;
+        checksums_sha256: string;
+      }>(
+        'select operating_source_id,operating_source_hash,checksums_sha256 from world_v2.postwar_industry_original order by facility_id',
+      )
+    ).rows;
+    expect(registered).toHaveLength(2);
+    for (const r of registered)
+      expect(r).toEqual({
+        operating_source_id: operating.sourceId,
+        operating_source_hash: operating.payloadHash,
+        checksums_sha256: sha(context.sourceBytes.checksumsBytes),
+      });
+    const deposits = (
+      await db.query<{
+        financial_source_id: string;
+        financial_source_hash: string;
+        asset_account: C.FinancialAccount;
+        liability_account: C.FinancialAccount;
+        opening_amount: string;
+      }>(
+        'select financial_source_id,financial_source_hash,asset_account,liability_account,opening_amount::text from world_v2.postwar_industry_deposit_original order by kind',
+      )
+    ).rows;
+    expect(deposits).toEqual([
+      {
+        financial_source_id: financial.sourceId,
+        financial_source_hash: financial.payloadHash,
+        asset_account: hhAsset,
+        liability_account: hhLiability,
+        opening_amount: '100',
+      },
+      {
+        financial_source_id: financial.sourceId,
+        financial_source_hash: financial.payloadHash,
+        asset_account: opAsset,
+        liability_account: opLiability,
+        opening_amount: '100',
+      },
+    ]);
+    const { fingerprint, ...intent } = seed;
+    expect(
+      (
+        await db.query(
+          'select canonical_payload,seed_fingerprint from world_v2.opening_seed where world_id=$1',
+          [world],
+        )
+      ).rows,
+    ).toEqual([
+      {
+        canonical_payload: C.canonicalSerialize(intent),
+        seed_fingerprint: fingerprint,
+      },
+    ]);
+  });
   it('registers exactly the two actual COUNTRY01 recipe facilities and original bank claim pairs idempotently', async () => {
     expect(registrationRows.map((r) => r.facility_id).sort()).toEqual([
       'OPEN-01-GRAIN',
