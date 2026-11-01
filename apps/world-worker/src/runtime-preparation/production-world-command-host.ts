@@ -367,8 +367,10 @@ export function boundProductionManualIntakeRuntime(
   return registry.boundIntake(runtime, binding);
 }
 
-/** Source-pool snapshot only. Fixed read-only SQL and existing canonical seed
- * validator; no client identity/GUC, role escalation or request snapshot trust.
+/** Fixed metadata snapshot. Shared office hosts use the existing bounded
+ * metadata transport, never the offline source reader for a projection RPC.
+ * Fixed read-only SQL uses the verified command subject. Domain sources and
+ * current authorization are checked separately before and after preparation.
  * An abort destroys the owned client, including a client acquired after abort.
  */
 async function readCurrentBinding(
@@ -393,18 +395,26 @@ async function readCurrentBinding(
   try {
     const socialMetadata =
       d.socialRuntimeConnection !== undefined && command.officeId === 'SOCIAL';
+    const sharedMetadata =
+      d.sharedSourceBinding !== undefined && command.officeId !== null;
+    const dedicatedMetadata =
+      socialMetadata ||
+      sharedMetadata ||
+      (command.officeId === 'FINANCE' &&
+        !!d.financeCapacitySource &&
+        !!d.socialMetadataRead);
     if (
-      socialMetadata &&
+      (socialMetadata || sharedMetadata) &&
       (!d.socialMetadataRead ||
         !isPreparedPostwarSocialRuntimeConnection(
-          d.socialRuntimeConnection,
+          d.socialRuntimeConnection!,
           d.worldId,
         ))
     )
       throw Error('PREPARED_SOCIAL_RUNTIME_CONNECTION_REQUIRED');
     check();
     client = await (
-      socialMetadata ? d.socialMetadataRead!.pool : d.sourcePool
+      dedicatedMetadata ? d.socialMetadataRead!.pool : d.sourcePool
     ).connect();
     if (signal.aborted) {
       release(true);
@@ -429,10 +439,10 @@ async function readCurrentBinding(
     ]);
     if (
       (d.financeCapacitySource && command.officeId === 'FINANCE') ||
-      socialMetadata
+      dedicatedMetadata
     ) {
       const store = createPostwarOfficeProjectionStore({
-        runtimeReaderRole: socialMetadata
+        runtimeReaderRole: dedicatedMetadata
           ? d.socialMetadataRead!.readerRole
           : d.readerRole,
         authorizationPublisherRole: d.authorizationPublisherRole,
