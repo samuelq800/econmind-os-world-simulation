@@ -136,6 +136,7 @@ export interface IndustryWaterScenarioRecord {
   readonly unservedRequest: WaterVolume;
   readonly additionalWaterElectricityRequirement: ExactScenarioElectricity;
   readonly additionalProtectedClaims: readonly IndustryWaterScenarioProtectedClaim[];
+  readonly effectiveProtectedClaims: readonly IndustryWaterScenarioProtectedClaim[];
 }
 export interface IndustryWaterScenarioRun {
   readonly sourceCountryId: string;
@@ -153,6 +154,10 @@ export interface IndustryWaterScenarioState {
   readonly modelRef: string;
   readonly baselineFingerprint: string;
   readonly cursorTicks: string;
+  readonly regionCursors: readonly Readonly<{
+    sourceRegionId: string;
+    throughTicks: string;
+  }>[];
   readonly predecessorRef: string;
   readonly records: readonly Readonly<IndustryWaterScenarioRecord>[];
   readonly runTargets: readonly Readonly<IndustryWaterScenarioRun>[];
@@ -166,6 +171,8 @@ interface Profile {
   readonly sourceRegionId: string;
   readonly basinRef: string;
   readonly dailyRawLimit: WaterVolume;
+  readonly originalIndustrialQuota: WaterVolume;
+  readonly allocationPointer: string;
   readonly treatmentBps: string;
   readonly qualityBps: string;
   readonly simulatedFraction: WaterFraction;
@@ -345,7 +352,7 @@ export function createIndustryFirstDayWaterScenario(
     countries = rows(parsed.countries),
     facilities = rows(parsed.facilities),
     recipes = rows(parsed.recipes);
-  const profiles = basis.regions.map((r) => {
+  const profiles = basis.regions.map((r, index) => {
     const rs = regionRows.filter(
         (x) => x.id === r.sourceRegionId && x.countryId === r.sourceCountryId,
       ),
@@ -360,6 +367,10 @@ export function createIndustryFirstDayWaterScenario(
       sourceRegionId: r.sourceRegionId,
       basinRef: r.basinRef,
       dailyRawLimit: limits[0]!.limit.volume,
+      originalIndustrialQuota: volumeFromDecimal(
+        text(r.raw.allocation.industryM3Day),
+      ),
+      allocationPointer: '/' + index,
       ...profile(rs[0]!, cs[0]!),
     });
   });
@@ -421,6 +432,11 @@ export function createIndustryFirstDayWaterScenario(
     modelRef: input.modelRef,
     baselineFingerprint: fingerprint,
     cursorTicks: '0',
+    regionCursors: Object.freeze(
+      profiles.map((p) =>
+        Object.freeze({ sourceRegionId: p.sourceRegionId, throughTicks: '0' }),
+      ),
+    ),
     predecessorRef: hash([input.modelRef, fingerprint, '0'], sha256Hex),
     records: Object.freeze([]),
     runTargets: Object.freeze([]),
@@ -537,13 +553,38 @@ export function calculateIndustryFirstDayWaterScenarioPeriod(
   if (
     state.records.length >= 512 ||
     op.predecessorRef !== state.predecessorRef ||
-    until <= uint(state.cursorTicks)
+    until < uint(state.cursorTicks)
   )
     fail('unconsumed ordered first-day predecessor required');
-  const duration = waterFraction(
-      (until - uint(state.cursorTicks)).toString(),
-      '86400000',
-    ),
+  const activeRegionIds = new Set(demands.map((d) => d.sourceRegionId));
+  const starts = state.regionCursors.filter((r) =>
+    activeRegionIds.has(r.sourceRegionId),
+  );
+  if (
+    starts.length !== activeRegionIds.size ||
+    new Set(starts.map((r) => r.throughTicks)).size !== 1
+  )
+    fail('aligned known region interval cursors required');
+  const from = starts[0]!.throughTicks;
+  if (until <= uint(from)) fail('unconsumed ordered region interval required');
+  const overlaps = state.records.filter(
+    (r) => uint(r.fromTicks) < until && uint(r.untilTicks) > uint(from),
+  );
+  const effectiveByRef = new Map<string, IndustryWaterScenarioProtectedClaim>();
+  for (const c of [
+    ...overlaps.flatMap((r) => r.additionalProtectedClaims),
+    ...protectedClaims,
+  ]) {
+    const old = effectiveByRef.get(c.claimRef);
+    if (old && old.sourceRegionId !== c.sourceRegionId)
+      fail('immutable protected claim region required');
+    if (!old || compareWater(c.rawReserved, old.rawReserved) > 0)
+      effectiveByRef.set(c.claimRef, c);
+  }
+  const effectiveProtectedClaims = [...effectiveByRef.values()].sort((a, b) =>
+    a.claimRef < b.claimRef ? -1 : a.claimRef > b.claimRef ? 1 : 0,
+  );
+  const duration = waterFraction((until - uint(from)).toString(), '86400000'),
     lines: Readonly<IndustryWaterScenarioLine>[] = [];
   const positiveDifference = (a: WaterVolume, b: WaterVolume) =>
     compareWater(a, b) > 0 ? subtractWater(a, b) : zeroWater();
@@ -563,7 +604,7 @@ export function calculateIndustryFirstDayWaterScenarioPeriod(
     );
     if (!selected.length) continue;
     const localProtected = sumWater(
-      protectedClaims
+      effectiveProtectedClaims
         .filter((c) => c.sourceRegionId === p.sourceRegionId)
         .map((c) => c.rawReserved),
     );
@@ -623,15 +664,26 @@ export function calculateIndustryFirstDayWaterScenarioPeriod(
           .map((x) => x.sourceRegionId),
       ),
       basinProtected = sumWater(
-        protectedClaims
+        effectiveProtectedClaims
           .filter((c) => basinRegions.has(c.sourceRegionId))
           .map((c) => c.rawReserved),
       ),
       basinDaily = b.basinDailyLimits.get(p.basinRef);
     if (!basinDaily) fail('one fixed basin envelope required');
+    // Prior overlapping withdrawals are charged in full, a conservative
+    // interval envelope that does not assume unrecorded uniform pump timing.
+    const priorDraw = sumWater(
+      overlaps
+        .flatMap((r) => r.lines)
+        .filter((l) => basinRegions.has(l.demand.sourceRegionId))
+        .map((l) => l.abstracted),
+    );
     const basinAllowed = minimumWater(
       basinProposed,
-      positiveDifference(scaleWater(basinDaily, duration), basinProtected),
+      positiveDifference(
+        scaleWater(basinDaily, duration),
+        addWater(basinProtected, priorDraw),
+      ),
     );
     const extracted =
       basinProposed.numerator === '0'
@@ -691,14 +743,23 @@ export function calculateIndustryFirstDayWaterScenarioPeriod(
           .map((l) => l.abstracted),
       );
     const reserved = sumWater(
-      protectedClaims
+      effectiveProtectedClaims
         .filter((c) => ids.has(c.sourceRegionId))
         .map((c) => c.rawReserved),
+    );
+    const priorDraw = sumWater(
+      overlaps
+        .flatMap((r) => r.lines)
+        .filter((l) => ids.has(l.demand.sourceRegionId))
+        .map((l) => l.abstracted),
     );
     if (
       compareWater(
         total,
-        positiveDifference(scaleWater(limit, duration), reserved),
+        positiveDifference(
+          scaleWater(limit, duration),
+          addWater(reserved, priorDraw),
+        ),
       ) > 0
     )
       fail('one shared basin interval budget required');
@@ -726,7 +787,7 @@ export function calculateIndustryFirstDayWaterScenarioPeriod(
     operationFingerprint,
     predecessorRef: state.predecessorRef,
     successorRef,
-    fromTicks: state.cursorTicks,
+    fromTicks: from,
     untilTicks: op.untilTicks,
     lines: Object.freeze(lines),
     abstracted,
@@ -734,6 +795,7 @@ export function calculateIndustryFirstDayWaterScenarioPeriod(
     modelUnavailableAfterAbstraction: unavailable,
     unservedRequest: sumWater(lines.map((l) => l.unservedRequest)),
     additionalProtectedClaims: Object.freeze(protectedClaims),
+    effectiveProtectedClaims: Object.freeze(effectiveProtectedClaims),
     additionalWaterElectricityRequirement: additional,
   });
   const runTargets = [...state.runTargets];
@@ -770,7 +832,15 @@ export function calculateIndustryFirstDayWaterScenarioPeriod(
   const next: Readonly<IndustryWaterScenarioState> = Object.freeze({
     ...state,
     runTargets: Object.freeze(runTargets),
-    cursorTicks: op.untilTicks,
+    cursorTicks:
+      uint(state.cursorTicks) > until ? state.cursorTicks : op.untilTicks,
+    regionCursors: Object.freeze(
+      state.regionCursors.map((r) =>
+        activeRegionIds.has(r.sourceRegionId)
+          ? Object.freeze({ ...r, throughTicks: op.untilTicks })
+          : r,
+      ),
+    ),
     predecessorRef: successorRef,
     records: Object.freeze([...state.records, record]),
     abstracted: addWater(state.abstracted, abstracted),
@@ -800,4 +870,72 @@ export function replayIndustryFirstDayWaterScenarioPeriod(
   if (canonicalSerialize(result.record) !== canonicalSerialize(input.record))
     fail('complete exact scenario record differs');
   return result;
+}
+
+/** Read-only mathematical source/cursor pins; no grant/authority is returned. */
+export function readIndustryFirstDayWaterScenarioExecutionScope(
+  state: Readonly<IndustryWaterScenarioState>,
+) {
+  const b = identity(state);
+  return Object.freeze({
+    profiles: b.profiles,
+    targets: b.targets,
+    basinDailyLimits: Object.freeze(
+      [...b.basinDailyLimits].map(([basinRef, rawLimit]) =>
+        Object.freeze({ basinRef, rawLimit }),
+      ),
+    ),
+    regionCursors: state.regionCursors,
+    baselineFingerprint: b.fingerprint,
+  });
+}
+
+/** A real grant replay may discard elapsed pre-grant capacity. This can only
+ * reduce an unused region interval; it never delivers or restores water. */
+export function discardIndustryWaterScenarioPreGrantInterval(
+  input: {
+    state: Readonly<IndustryWaterScenarioState>;
+    sourceRegionId: string;
+    throughTicks: string;
+  },
+  sha256Hex: Sha256Hex,
+) {
+  const b = identity(input.state),
+    through = uint(input.throughTicks),
+    r = input.state.regionCursors.find(
+      (r) => r.sourceRegionId === input.sourceRegionId,
+    );
+  if (
+    !r ||
+    through < uint(r.throughTicks) ||
+    through > 86400000n ||
+    input.state.records.some((x) =>
+      x.lines.some((l) => l.demand.sourceRegionId === input.sourceRegionId),
+    )
+  )
+    fail('unused bounded pregrant region interval required');
+  if (through === uint(r.throughTicks)) return input.state;
+  const next: Readonly<IndustryWaterScenarioState> = Object.freeze({
+    ...input.state,
+    cursorTicks:
+      through > uint(input.state.cursorTicks)
+        ? input.throughTicks
+        : input.state.cursorTicks,
+    predecessorRef: hash(
+      [
+        input.state.predecessorRef,
+        'DISCARD_PREGRANT',
+        input.sourceRegionId,
+        input.throughTicks,
+      ],
+      sha256Hex,
+    ),
+    regionCursors: Object.freeze(
+      input.state.regionCursors.map((x) =>
+        x === r ? Object.freeze({ ...x, throughTicks: input.throughTicks }) : x,
+      ),
+    ),
+  });
+  baselines.set(next, b);
+  return next;
 }

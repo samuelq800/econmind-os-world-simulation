@@ -7,6 +7,8 @@ import {
   INDUSTRY_FIRST_DAY_WATER_SCENARIO_POLICY as POLICY,
   createIndustryFirstDayWaterScenario,
   readIndustryFirstDayWaterScenarioProfiles,
+  readIndustryFirstDayWaterScenarioExecutionScope,
+  discardIndustryWaterScenarioPreGrantInterval,
   calculateIndustryFirstDayWaterScenarioPeriod,
   replayIndustryFirstDayWaterScenarioPeriod,
   type IndustryWaterScenarioDemand,
@@ -439,5 +441,102 @@ describe('adopted first-day industrial nonpotable scenario mathematics', () => {
         sha,
       ),
     ).toThrow('duplicate');
+  });
+  it('shares basin budgets across separate country frames at the same interval without resetting region cursors or dropping protection', () => {
+    const data = readIndustryFirstDayWaterScenarioExecutionScope(initial),
+      targetIds = [
+        'OPEN-18-REFINED_FUEL',
+        'OPEN-20-REFINED_FUEL',
+        'OPEN-25-REFINED_FUEL',
+      ],
+      targets = data.targets.filter((t) => targetIds.includes(t.id));
+    expect(targets).toHaveLength(3);
+    const firstRegion = targets[0]!.sourceRegionId,
+      basin = data.profiles.find(
+        (p) => p.sourceRegionId === firstRegion,
+      )!.basinRef,
+      limit = data.basinDailyLimits.find((b) => b.basinRef === basin)!.rawLimit;
+    const claim = {
+      claimRef: 'CURRENT_HIGH_PRIORITY_SHARED_BASIN',
+      sourceRegionId: firstRegion,
+      rawReserved: scaleWater(limit, waterFraction('1', '3')),
+    };
+    let state = initial;
+    const records = [];
+    for (const [i, t] of targets.entries()) {
+      const d = {
+        demandRef: 'DEMAND_SEPARATE_' + i,
+        sourceCountryId: t.sourceCountryId,
+        sourceRegionId: t.sourceRegionId,
+        sourceOperatorId: t.sourceOperatorId,
+        facilityId: t.id,
+        runId: 'RUN_SEPARATE_' + i,
+        requestedOutputAmount: '1000000000',
+      };
+      const r = calculateIndustryFirstDayWaterScenarioPeriod(
+        {
+          state,
+          operation: {
+            ...operation(state, 'SEPARATE_' + i, '86400000', [d]),
+            additionalProtectedClaims: i === 0 ? [claim] : [],
+          },
+        },
+        sha,
+      );
+      records.push(r.record);
+      state = r.state;
+      expect(r.record.fromTicks).toBe('0');
+      expect(r.record.effectiveProtectedClaims).toContainEqual(claim);
+      expect(
+        compareWater(
+          addWater(
+            sumWater(records.map((r) => r.abstracted)),
+            claim.rawReserved,
+          ),
+          limit,
+        ),
+      ).toBeLessThanOrEqual(0);
+    }
+    expect(state.records).toHaveLength(3);
+    expect(
+      state.regionCursors
+        .filter((r) =>
+          targets.some((t) => t.sourceRegionId === r.sourceRegionId),
+        )
+        .every((r) => r.throughTicks === '86400000'),
+    ).toBe(true);
+    expect(() =>
+      discardIndustryWaterScenarioPreGrantInterval(
+        { state, sourceRegionId: firstRegion, throughTicks: '0' },
+        sha,
+      ),
+    ).toThrow('unused bounded pregrant');
+  });
+  it('discards elapsed pre-grant capacity without creating delivery and cannot restore a previous interval', () => {
+    const state = discardIndustryWaterScenarioPreGrantInterval(
+        {
+          state: initial,
+          sourceRegionId: 'visual-territory-02-E1',
+          throughTicks: '1000',
+        },
+        sha,
+      ),
+      result = calculateIndustryFirstDayWaterScenarioPeriod(
+        { state, operation: operation(state, 'AFTER_REAL_GRANT', '72000') },
+        sha,
+      );
+    expect(state.abstracted.numerator).toBe('0');
+    expect(state.records).toEqual([]);
+    expect(result.record.fromTicks).toBe('1000');
+    expect(() =>
+      discardIndustryWaterScenarioPreGrantInterval(
+        {
+          state,
+          sourceRegionId: 'visual-territory-02-E1',
+          throughTicks: '999',
+        },
+        sha,
+      ),
+    ).toThrow();
   });
 });

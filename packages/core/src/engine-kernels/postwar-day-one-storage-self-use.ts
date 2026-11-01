@@ -576,3 +576,13 @@ export function readDayOneStorageSelfUseLedger(
     })),
   });
 }
+
+/** Speculative Core calculation must never consume the before-state. This
+ * forks only a genuine private computation handle, never restores a DTO or
+ * issues a source/commit/delivery authority. The chosen canonical fold alone
+ * decides which immutable result becomes current. */
+export function forkDayOneStorageSelfUseLedger(
+  value: DayOneStorageSelfUseLedger,
+): DayOneStorageSelfUseLedger {
+  return issue(state(value));
+}

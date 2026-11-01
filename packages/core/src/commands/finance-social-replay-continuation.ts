@@ -61,6 +61,9 @@ export interface FinanceSocialReplayContinuationView {
 export interface FinanceSocialReplayPageOriginals {
   readonly industryWorkSources?: FinanceNativeBudgetMixedPrefixInput['industryWorkSources'];
   readonly industryWageSources?: FinanceNativeBudgetMixedPrefixInput['industryWageSources'];
+  readonly industryPowerOriginals?: FinanceNativeBudgetMixedPrefixInput['industryPowerOriginals'];
+  readonly industryWaterOriginals?: FinanceNativeBudgetMixedPrefixInput['industryWaterOriginals'];
+  readonly industryLogisticsSources?: FinanceNativeBudgetMixedPrefixInput['industryLogisticsSources'];
   readonly fxOriginals?: Parameters<
     typeof prepareFinanceNativeBudgetFinancialReplay
   >[0]['fxOriginals'];
@@ -83,6 +86,9 @@ const continuations = new WeakMap<
     readonly origin: ContinuationOrigin;
   }
 >();
+// Immutable replay DATA may be borrowed after its cursor is retired. This is
+// not source currentness or commit authority, and copies cannot mint it.
+const issuedViews = new WeakSet<object>();
 export const FINANCE_SOCIAL_REPLAY_PAGE_LIMITS = Object.freeze({
   events: 256,
   bytes: 1048576,
@@ -138,6 +144,7 @@ function issue(
   value: Readonly<FinanceSocialReplayContinuationView>,
   origin: ContinuationOrigin,
 ): FinanceSocialReplayContinuation {
+  issuedViews.add(value);
   const token = Object.freeze({}) as FinanceSocialReplayContinuation;
   continuations.set(token, {
     view: Object.freeze(value),
@@ -145,6 +152,22 @@ function issue(
     origin,
   });
   return token;
+}
+export function readFinanceSocialReplayContinuationView(
+  view: FinanceSocialReplayContinuationView,
+  sha256Hex: Sha256Hex,
+): Readonly<FinanceSocialReplayContinuationView> {
+  if (!issuedViews.has(view)) invalid('genuine issued replay view required');
+  if (
+    readFinanceNativeBudgetMixedPrefix(
+      view.lastPage.evidence,
+      view.worldId,
+      view.lastPage.frames,
+      sha256Hex,
+    ) !== view.result
+  )
+    invalid('exact replay view result required');
+  return view;
 }
 function lookup(
   token: FinanceSocialReplayContinuation,
@@ -166,6 +189,9 @@ export function prepareFinanceSocialReplayContinuation(
     readonly captainCountries?: FinanceNativeBudgetMixedPrefixInput['captainCountries'];
     readonly industryWorkSources?: FinanceNativeBudgetMixedPrefixInput['industryWorkSources'];
     readonly industryWageSources?: FinanceNativeBudgetMixedPrefixInput['industryWageSources'];
+    readonly industryPowerOriginals?: FinanceNativeBudgetMixedPrefixInput['industryPowerOriginals'];
+    readonly industryWaterOriginals?: FinanceNativeBudgetMixedPrefixInput['industryWaterOriginals'];
+    readonly industryLogisticsSources?: FinanceNativeBudgetMixedPrefixInput['industryLogisticsSources'];
     readonly openingEncumbrances: Parameters<
       typeof prepareFinanceNativeBudgetFinancialReplay
     >[0]['openingEncumbrances'];
@@ -226,6 +252,15 @@ export function prepareFinanceSocialReplayContinuation(
         ...(input.industryWageSources === undefined
           ? {}
           : { industryWageSources: input.industryWageSources }),
+        ...(input.industryPowerOriginals === undefined
+          ? {}
+          : { industryPowerOriginals: input.industryPowerOriginals }),
+        ...(input.industryWaterOriginals === undefined
+          ? {}
+          : { industryWaterOriginals: input.industryWaterOriginals }),
+        ...(input.industryLogisticsSources === undefined
+          ? {}
+          : { industryLogisticsSources: input.industryLogisticsSources }),
       },
       sha256Hex,
     ),
@@ -371,6 +406,18 @@ export function appendFinanceSocialReplayPage(input: {
         ...(input.originals?.industryWageSources === undefined
           ? {}
           : { industryWageSources: input.originals.industryWageSources }),
+        ...(input.originals?.industryPowerOriginals === undefined
+          ? {}
+          : { industryPowerOriginals: input.originals.industryPowerOriginals }),
+        ...(input.originals?.industryWaterOriginals === undefined
+          ? {}
+          : { industryWaterOriginals: input.originals.industryWaterOriginals }),
+        ...(input.originals?.industryLogisticsSources === undefined
+          ? {}
+          : {
+              industryLogisticsSources:
+                input.originals.industryLogisticsSources,
+            }),
       },
       input.sha256Hex,
     ),

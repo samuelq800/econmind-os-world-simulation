@@ -148,6 +148,13 @@ export interface IndustryInternalLogisticsSourceData {
   readonly distanceKm: string;
   readonly capacityTonnesPerSimDay: string;
   readonly tonnesPerUnit: string;
+  readonly logisticsEmploymentSources: readonly Readonly<{
+    sourceObjectId: string;
+    sourceRegionId: string;
+    sourceOperatorId: string;
+    projectId: string;
+    labourBySkill: Readonly<Record<'LOW' | 'MEDIUM' | 'HIGH', string>>;
+  }>[];
   readonly rawSourceHashes: typeof SOURCE_HASHES;
 }
 declare const sourceBrand: unique symbol;
@@ -219,6 +226,41 @@ export function prepareIndustryInternalLogisticsSource(input: {
     'STOCK-02-CRUDE_OIL',
     input.sha256Hex,
   );
+  const logisticsEmploymentSources = Object.freeze(
+    ['WAREHOUSE-02', 'GATE-02'].map((id) => {
+      const row = selected(
+        input.sourceBytes['facilities.json'],
+        SOURCE_HASHES['facilities.json'],
+        id,
+        input.sha256Hex,
+      );
+      if (
+        row.countryId !== site.sourceCountryId ||
+        row.operatorId !== site.sourceOperatorId ||
+        row.constructionStatusProposal !== 'OPENING_EXISTING_ASSET' ||
+        !['PROJECT-21', 'PROJECT-26'].includes(String(row.projectId))
+      )
+        invalid('EXISTING_SAME_OP_LOGISTICS_EMPLOYMENT_SOURCE_REQUIRED');
+      const bySkill = record(row.labourBySkill),
+        counts = {
+          LOW: String(bySkill.low),
+          MEDIUM: String(bySkill.medium),
+          HIGH: String(bySkill.high),
+        };
+      if (
+        Object.values(counts).reduce((n, c) => n + tick(c), 0n) !==
+        tick(String(row.requiredWorkers))
+      )
+        invalid('ACTUAL_LOGISTICS_EMPLOYMENT_SKILL_TOTAL_REQUIRED');
+      return Object.freeze({
+        sourceObjectId: String(row.id),
+        sourceRegionId: String(row.regionId),
+        sourceOperatorId: String(row.operatorId),
+        projectId: String(row.projectId),
+        labourBySkill: Object.freeze(counts),
+      });
+    }),
+  );
   const commodity = selected(
     input.sourceBytes['commodity-catalog.json'],
     SOURCE_HASHES['commodity-catalog.json'],
@@ -285,6 +327,7 @@ export function prepareIndustryInternalLogisticsSource(input: {
       decimal(String(route.capacityTonnesDayProposal)),
     ),
     tonnesPerUnit: exact(decimal(String(commodity.freightTonnesPerUnit))),
+    logisticsEmploymentSources,
     rawSourceHashes: SOURCE_HASHES,
   });
   if (

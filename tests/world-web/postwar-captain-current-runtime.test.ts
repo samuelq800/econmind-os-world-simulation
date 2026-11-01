@@ -3,6 +3,9 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
   POSTWAR_CAPTAIN_CURRENT_NATURE,
+  POSTWAR_CAPTAIN_OPENING_NATURE,
+  POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
+  POSTWAR_CAPTAIN_OPENING_REDUCER,
   POSTWAR_CAPTAIN_CURRENT_DATASET,
   POSTWAR_CAPTAIN_CURRENT_BUCKETS,
 } from '@econmind/core/postwar-captain-current-contract';
@@ -168,7 +171,107 @@ function fixture() {
   };
 }
 afterEach(() => vi.unstubAllGlobals());
+function openingWire(w: ReturnType<ReturnType<typeof fixture>['wire']>) {
+  return {
+    ...w,
+    authority: {
+      ...w.authority,
+      readback: {
+        ...w.authority.readback,
+        worldVersion: '0',
+        eventSequence: '0',
+      },
+    },
+    source: {
+      ...w.source,
+      dataNature: POSTWAR_CAPTAIN_OPENING_NATURE,
+      worldVersion: '0',
+      eventSequence: '0',
+      observedHead: { worldVersion: '0', eventSequence: '0' },
+      currentCaptainCoverage: {
+        ...w.source.currentCaptainCoverage,
+        schemaVersion: POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
+        reducerVersion: POSTWAR_CAPTAIN_OPENING_REDUCER,
+        globalWorldVersion: '0',
+        globalEventSequence: '0',
+        coveredThroughEventId: null,
+        coveredThroughEventFingerprint: null,
+        financialPostingCount: '0',
+        financialBatchCount: '0',
+      },
+    },
+    rows: w.rows.map((r) => ({
+      ...r,
+      opening: '70',
+      total: '70',
+      available: '70',
+      closing: '70',
+    })),
+  };
+}
 describe('Captain current runtime browser-safe wire and view', () => {
+  it('accepts explicit real-zero opening coverage with seven actual genesis rows and no invented event', async () => {
+    const f = fixture();
+    f.change(openingWire);
+    const c = createPostwarRuntimeClient(f.config, { fetcher: f.fetcher }),
+      r = await c.readPage(POSTWAR_CAPTAIN_CURRENT_DATASET, requestId);
+    expect(r.status).toBe('PAGE');
+    if (r.status !== 'PAGE') throw Error('H0_PAGE_REQUIRED');
+    expect(r.source.worldVersion).toBe('0');
+    expect(r.source.originWorldVersion).toBe('0');
+    expect(r.rows).toHaveLength(7);
+    expect(r.rows[0]).toMatchObject({ opening: '70', balance: '10' });
+    c.disconnect();
+  });
+  it('rejects H0 schema under a nonzero head, an invented zero-head event or legacy coverage relabelled as opening', async () => {
+    const changes: ((w: ReturnType<typeof openingWire>) => unknown)[] = [
+      (w) => ({
+        ...w,
+        source: {
+          ...w.source,
+          worldVersion: '1',
+          eventSequence: '1',
+          observedHead: { worldVersion: '1', eventSequence: '1' },
+        },
+      }),
+      (w) => ({
+        ...w,
+        source: {
+          ...w.source,
+          currentCaptainCoverage: {
+            ...w.source.currentCaptainCoverage,
+            coveredThroughEventId: 'FAKE_H0_EVENT',
+            coveredThroughEventFingerprint: hash,
+          },
+        },
+      }),
+      (w) => ({
+        ...w,
+        source: {
+          ...w.source,
+          currentCaptainCoverage: {
+            ...w.source.currentCaptainCoverage,
+            schemaVersion: 'postwar-captain-current-prefix-coverage-v1',
+            reducerVersion:
+              'POSTWAR_CAPTAIN_FINANCE_SOCIAL_FX_COMPLETE_PREFIX_V1',
+          },
+        },
+      }),
+      (w) => ({
+        ...w,
+        source: { ...w.source, dataNature: POSTWAR_CAPTAIN_CURRENT_NATURE },
+      }),
+    ];
+    for (const change of changes) {
+      const f = fixture();
+      f.change((w) => change(openingWire(w)));
+      const c = createPostwarRuntimeClient(f.config, { fetcher: f.fetcher });
+      expect(
+        (await c.readPage(POSTWAR_CAPTAIN_CURRENT_DATASET, requestId)).status,
+      ).toBe('UNAVAILABLE');
+      c.disconnect();
+    }
+  });
   it('requests the fixed dataset and accepts seven scoped buckets with separate origin/current head', async () => {
     const f = fixture(),
       client = createPostwarRuntimeClient(f.config, { fetcher: f.fetcher });
