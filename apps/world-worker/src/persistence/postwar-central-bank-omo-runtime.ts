@@ -1,3 +1,7 @@
+import {
+  readPagedFromPreparedSocialBaseOnHeldExecutor,
+  releasePostwarPagedFinanceSocialReplay,
+} from './postwar-paged-finance-social-replay.js';
 /** Fixed native OMO source. Startup keeps a genuine H0 financial ledger only;
  * every fresh use rechecks the real custody and complete bounded SQL prefix.
  * This is not an activation, issuer, actor grant, Clock or consumer factory. */
@@ -6,6 +10,7 @@ import {
   CENTRAL_BANK_OMO_COMMAND,
   CENTRAL_BANK_OMO_CAPABILITY,
   CENTRAL_BANK_OMO_EVENT,
+  CURRENT_REPLAY_BINDING,
   canonicalSerialize,
   canonicalHashInput,
   canonicalSha256,
@@ -47,6 +52,7 @@ import {
 import {
   CENTRAL_BANK_OMO_SOURCE_READER,
   lockCentralBankOmoOriginalsFrom,
+  lockCentralBankOmoPagedOriginalsFrom,
   invalidCentralBankOmoOriginal as invalid,
   exactOmoText as text,
   CentralBankOmoOriginalsMissing,
@@ -55,15 +61,19 @@ import {
 } from './postgres-central-bank-omo-originals.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import {
-  prepareFinanceSocialLedger,
+  prepareFinanceSocialLedgerFromOpening,
   replayPreparedFinanceSocialFxLedger,
   type PreparedFinanceSocialLedger,
 } from '@econmind/core/finance-social-prepared-ledger';
+import type { Pool } from 'pg';
+import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
 import { decodeBoundedPostwarCanonicalPrefix } from './bounded-postwar-canonical-prefix.js';
 import { decodeBoundedPostwarJournal } from './bounded-postwar-fx-postings.js';
 import { readCentralBankOmoCommittedOriginalsFrom } from './postgres-central-bank-omo-history.js';
 import {
   readPostwarSocialRuntimeFinancialReplayBase,
+  readPostwarSocialRuntimeConnectionResources,
+  isPostwarSocialRuntimeConnection,
   type PostwarSocialRuntimeConnection,
 } from '../runtime-preparation/social-runtime-connection.js';
 import { consumePreparedPostwarSocialFinancialReplayBase } from './prepared-postwar-social-source.js';
@@ -156,6 +166,74 @@ interface Prepared {
   readonly rawSHA256: string;
   readonly financial: Financial;
   readonly mixedLedger: PreparedFinanceSocialLedger;
+}
+interface OpeningBaseline extends Omit<Prepared, 'rawSHA256'> {
+  readonly rawSHA256: string | null;
+  readonly replayBinding: string;
+}
+const openingBaselines = new WeakSet<object>();
+const runtimeBinders = new WeakMap<
+  object,
+  (baseline: Readonly<OpeningBaseline>) => Promise<void>
+>();
+function openingFromSeed(
+  seed: Readonly<OpeningSeed>,
+): Readonly<OpeningBaseline> {
+  if (
+    !isValidatedOpeningSeed(seed) ||
+    seed.openingWorldVersion !== '0' ||
+    seed.sources.some((s) => s.sourceKind === 'TEST_FIXTURE')
+  )
+    invalid('GENUINE_SERVER_OPENING_REQUIRED');
+  const { fingerprint, ...intent } = seed,
+    raw = canonicalSerialize(intent),
+    rawSHA256 = sha(raw);
+  if (fingerprint !== 'sha256:' + sha('SHA-256\n' + raw))
+    invalid('ACTUAL_OPENING_SHA_REQUIRED');
+  const rebuilt = rebuildV08LedgersFromLineage({ seed, sha256Hex: sha });
+  const value = Object.freeze({
+    seedId: seed.seedId,
+    seedFingerprint: fingerprint,
+    sourceMetadata: Object.freeze(
+      seed.sources.map((s) =>
+        Object.freeze({ sourceId: s.sourceId, payloadHash: s.payloadHash }),
+      ),
+    ),
+    rawSHA256,
+    financial: rebuilt.financial,
+    mixedLedger: prepareFinanceSocialLedgerFromOpening(rebuilt, sha),
+    replayBinding: canonicalSerialize(seed.replayBinding),
+  });
+  openingBaselines.add(value);
+  return value;
+}
+function openingFromSocial(
+  connection: Readonly<PostwarSocialRuntimeConnection>,
+  world: string,
+): Readonly<OpeningBaseline> {
+  const b = consumePreparedPostwarSocialFinancialReplayBase(
+    readPostwarSocialRuntimeFinancialReplayBase(connection, world),
+  );
+  const financial = replayPreparedFinanceSocialFxLedger({
+    prepared: b.prepared,
+    frames: [],
+    socialCountries: [],
+    fxOriginals: [],
+    openingEncumbrances: projectPostwarOpeningFinancialEncumbrances(b.funding),
+    expectedHead: { worldVersion: '0', eventSequence: '0' },
+    sha256Hex: sha,
+  }).financial;
+  const value = Object.freeze({
+    seedId: b.pins.seedRef,
+    seedFingerprint: b.pins.contentHash,
+    sourceMetadata: b.sourceMetadata,
+    rawSHA256: null,
+    financial,
+    mixedLedger: b.prepared,
+    replayBinding: canonicalSerialize(CURRENT_REPLAY_BINDING),
+  });
+  openingBaselines.add(value);
+  return value;
 }
 function trace(
   facts: CentralBankOmoSourceFacts,
@@ -509,6 +587,58 @@ export function createPostwarCentralBankOmoRuntime(config: {
       throw error;
     }
   }
+  async function bindOpening(
+    baseline: Readonly<OpeningBaseline>,
+  ): Promise<void> {
+    if (
+      !openingBaselines.has(baseline) ||
+      baseline.financial.worldId !== config.worldId
+    )
+      invalid('GENUINE_SAME_WORLD_OPENING_BASE_REQUIRED');
+    const rawSHA256 = await config.database.transaction((tx) =>
+      inReader(tx, async () => {
+        let h;
+        try {
+          h = await tx.query<Record<string, unknown>>(
+            'select * from world_v2.lock_central_bank_omo_startup_header($1,$2)',
+            [config.worldId, config.countryId],
+          );
+        } catch (error: unknown) {
+          if (
+            error &&
+            typeof error === 'object' &&
+            'code' in error &&
+            'message' in error &&
+            error.code === '55000' &&
+            /^CB_OMO_[A-Z_]+$/u.test(String(error.message))
+          )
+            throw new CentralBankOmoOriginalsMissing([String(error.message)]);
+          throw error;
+        }
+        const r = h.rows[0];
+        if (
+          h.rows.length !== 1 ||
+          !r ||
+          r.seed_id !== baseline.seedId ||
+          r.seed_fingerprint !== baseline.seedFingerprint ||
+          r.replay_binding !== baseline.replayBinding ||
+          typeof r.canonical_seed_sha256 !== 'string' ||
+          !/^[a-f0-9]{64}$/u.test(r.canonical_seed_sha256) ||
+          (baseline.rawSHA256 !== null &&
+            r.canonical_seed_sha256 !== baseline.rawSHA256)
+        )
+          invalid('STORED_OPENING_HEADER_DIFFERS');
+        return r.canonical_seed_sha256;
+      }),
+    );
+    if (
+      prepared &&
+      (prepared.seedFingerprint !== baseline.seedFingerprint ||
+        prepared.rawSHA256 !== rawSHA256)
+    )
+      invalid('RUNTIME_ALREADY_BOUND');
+    prepared = Object.freeze({ ...baseline, rawSHA256 });
+  }
   async function derive(
     tx: SqlExecutor,
     command: CanonicalCommand,
@@ -527,7 +657,11 @@ export function createPostwarCentralBankOmoRuntime(config: {
       command.countryId !== config.countryId
     )
       invalid('FIXED_COUNTRY_WORLD_REQUIRED');
-    const original = await lockCentralBankOmoOriginalsFrom(tx, {
+    const original = await (
+      config.mixedSocialConnection
+        ? lockCentralBankOmoPagedOriginalsFrom
+        : lockCentralBankOmoOriginalsFrom
+    )(tx, {
       worldId: config.worldId,
       countryId: config.countryId,
       securityRef: intent.securityRef,
@@ -569,17 +703,23 @@ export function createPostwarCentralBankOmoRuntime(config: {
       !same(openingSnapshots.centralBank, original.original.centralBank)
     )
       invalid('ORIGINAL_OPENING_SNAPSHOT_DIFFERS_FROM_LEDGER');
-    const eventRows = rows(original.row.events);
+    const eventRows = config.mixedSocialConnection
+      ? []
+      : rows(original.row.events);
     if (eventRows.some((e) => BigInt(uint(e.sim_time)) > command.simTime.ticks))
       invalid('COMMAND_PRECEDES_ACTUAL_PREFIX');
-    const foreign = rows(original.row.commands).some(
-      (r) =>
-        r.command_type !== CENTRAL_BANK_OMO_COMMAND ||
-        r.country_id !== config.countryId,
-    );
-    const current = foreign
-        ? await replayMixed(tx, prepared, original)
-        : replay(prepared, original),
+    const foreign =
+      !config.mixedSocialConnection &&
+      rows(original.row.commands).some(
+        (r) =>
+          r.command_type !== CENTRAL_BANK_OMO_COMMAND ||
+          r.country_id !== config.countryId,
+      );
+    const current = config.mixedSocialConnection
+        ? await replayPaged(tx, prepared, original, command)
+        : foreign
+          ? await replayMixed(tx, prepared, original)
+          : replay(prepared, original),
       source = sourceFrom(
         original,
         current.financial,
@@ -629,6 +769,68 @@ export function createPostwarCentralBankOmoRuntime(config: {
         ),
       }),
     };
+  }
+  async function replayPaged(
+    tx: SqlExecutor,
+    base: Prepared,
+    original: CentralBankOmoLockedOriginals,
+    command: CanonicalCommand,
+  ) {
+    const social = config.mixedSocialConnection;
+    if (!social) invalid('GENUINE_SHARED_SOCIAL_REQUIRED');
+    const session = await tx.query<{ role_name: string }>(
+      'select current_user as role_name',
+    );
+    if (
+      session.rows.length !== 1 ||
+      session.rows[0]?.role_name !== 'world_v2_cb_omo_source_reader'
+    )
+      invalid('FIXED_CB_READER_REQUIRED');
+    await tx.query("select set_config('role',$1,true)", [config.workerRole]);
+    let result:
+      | Awaited<
+          ReturnType<typeof readPagedFromPreparedSocialBaseOnHeldExecutor>
+        >
+      | undefined;
+    try {
+      result = await readPagedFromPreparedSocialBaseOnHeldExecutor(tx, {
+        socialConnection: social,
+        worldId: config.worldId,
+        hostCountryId: config.countryId,
+        expectedHead: {
+          worldVersion: uint(original.row.world_version),
+          eventSequence: uint(original.row.event_sequence),
+        },
+        omoOriginalMode: config.mode,
+      });
+      if (
+        result.seedPins.seedId !== base.seedId ||
+        result.seedPins.seedFingerprint !== base.seedFingerprint ||
+        result.seedPins.admissionRef !== original.binding.admissionRef
+      )
+        invalid('GENUINE_MIXED_BASE_SEED_ADMISSION_DIFFERS');
+      if (
+        BigInt(result.metadata.maxCommandSimTimeTicks) > command.simTime.ticks
+      )
+        invalid('COMMAND_PRECEDES_ACTUAL_PREFIX');
+      const financial = result.view.result.financialState;
+      if (!financial) invalid('COMPLETE_CURRENT_FINANCIAL_REQUIRED');
+      // A country absent from Core's applied-OMO domain has no historical OMO
+      // movement. Only its separately adopted immutable opening holding applies.
+      const holdings =
+        result.view.result.omoCountries?.find(
+          (c) => c.countryId === config.countryId,
+        )?.holdings ?? original.original.holdings;
+      return { financial, holdings, sequence: result.view.head.eventSequence };
+    } finally {
+      try {
+        if (result) releasePostwarPagedFinanceSocialReplay(result);
+      } finally {
+        await tx.query("select set_config('role',$1,true)", [
+          'world_v2_cb_omo_source_reader',
+        ]);
+      }
+    }
   }
   async function replayMixed(
     tx: SqlExecutor,
@@ -879,63 +1081,253 @@ export function createPostwarCentralBankOmoRuntime(config: {
       );
     },
     async prepare(seed: Readonly<OpeningSeed>) {
-      if (
-        !isValidatedOpeningSeed(seed) ||
-        seed.worldId !== config.worldId ||
-        seed.openingWorldVersion !== '0' ||
-        seed.sources.some((s) => s.sourceKind === 'TEST_FIXTURE')
-      )
-        invalid('GENUINE_SERVER_OPENING_REQUIRED');
-      const { fingerprint, ...intent } = seed;
-      const raw = canonicalSerialize(intent),
-        rawSHA256 = sha(raw);
-      if (fingerprint !== 'sha256:' + sha('SHA-256\n' + raw))
-        invalid('ACTUAL_OPENING_SHA_REQUIRED');
-      await config.database.transaction((tx) =>
-        inReader(tx, async () => {
-          const h = await tx.query<Record<string, unknown>>(
-            'select * from world_v2.lock_central_bank_omo_startup_header($1,$2)',
-            [config.worldId, config.countryId],
-          );
-          const r = h.rows[0];
-          if (
-            h.rows.length !== 1 ||
-            !r ||
-            r.seed_id !== seed.seedId ||
-            r.seed_fingerprint !== fingerprint ||
-            r.canonical_seed_sha256 !== rawSHA256 ||
-            r.replay_binding !== canonicalSerialize(seed.replayBinding)
-          )
-            invalid('STORED_OPENING_HEADER_DIFFERS');
-        }),
-      );
-      const financial = rebuildV08LedgersFromLineage({
-        seed,
-        sha256Hex: sha,
-      }).financial;
-      const next = {
-        seedId: seed.seedId,
-        seedFingerprint: fingerprint,
-        sourceMetadata: Object.freeze(
-          seed.sources.map((s) =>
-            Object.freeze({ sourceId: s.sourceId, payloadHash: s.payloadHash }),
-          ),
-        ),
-        rawSHA256,
-        financial,
-        mixedLedger: prepareFinanceSocialLedger(financial),
-      };
-      if (
-        prepared &&
-        !same(
-          { fp: prepared.seedFingerprint, raw: prepared.rawSHA256 },
-          { fp: next.seedFingerprint, raw: next.rawSHA256 },
-        )
-      )
-        invalid('RUNTIME_ALREADY_BOUND');
-      prepared = next;
+      await bindOpening(openingFromSeed(seed));
     },
   });
   runtimeInstances.add(runtime);
+  runtimeBinders.set(runtime, bindOpening);
   return runtime;
+}
+
+export interface PostwarCentralBankOmoOpeningStatus {
+  readonly countryId: string;
+  readonly status: 'BOUND_TO_STORED_OPENING' | 'MISSING';
+  readonly missing: readonly string[];
+}
+export interface PostwarCentralBankOmoWorldRuntime extends PostwarCentralBankOmoRuntime {
+  readonly worldId: string;
+  readonly workerId: string;
+  readonly countryIds: readonly string[];
+  readonly clock: DurableConsumptionClock;
+  prepareFromSocial(): Promise<
+    readonly Readonly<PostwarCentralBankOmoOpeningStatus>[]
+  >;
+  close(): Promise<void>;
+}
+/** One finite server selector, never an Office capability/source selector
+ * supplied by a request. All children use the exact same database/worker and
+ * their own genuine cutoff. Missing countries never fall back to a neighbour. */
+export function createPostwarCentralBankOmoWorldRuntime(input: {
+  readonly database: SqlDatabase;
+  readonly worldId: string;
+  readonly workerId: string;
+  readonly workerRole: string;
+  readonly mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
+  readonly countryIds: readonly string[];
+  readonly clock: DurableConsumptionClock;
+  readonly workerPool: Pick<Pool, 'connect'>;
+  readonly mixedSocialConnection?: Readonly<PostwarSocialRuntimeConnection>;
+}): Readonly<PostwarCentralBankOmoWorldRuntime> {
+  if (
+    !Array.isArray(input.countryIds) ||
+    !input.countryIds.length ||
+    input.countryIds.length > 70 ||
+    new Set(input.countryIds).size !== input.countryIds.length ||
+    input.countryIds.some((c) => !/^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(c))
+  )
+    invalid('FINITE_UNIQUE_CANONICAL_COUNTRY_ROSTER_REQUIRED');
+  if (
+    !input.clock ||
+    !Object.isFrozen(input.clock) ||
+    ['nowReal', 'simTime'].some((k) => {
+      const d = Object.getOwnPropertyDescriptor(input.clock, k);
+      return !d || !('value' in d) || typeof d.value !== 'function';
+    }) ||
+    typeof input.workerPool?.connect !== 'function'
+  )
+    invalid('FIXED_CLOCK_AND_WORKER_TRANSPORT_REQUIRED');
+  const config = Object.freeze({
+    ...input,
+    countryIds: Object.freeze([...input.countryIds]),
+  });
+  if (config.mixedSocialConnection) {
+    if (
+      !isPostwarSocialRuntimeConnection(
+        config.mixedSocialConnection,
+        config.worldId,
+      ) ||
+      config.mixedSocialConnection.workerId !== config.workerId
+    )
+      invalid('GENUINE_SAME_WORLD_WORKER_SOCIAL_CONNECTION_REQUIRED');
+    const resources = readPostwarSocialRuntimeConnectionResources(
+      config.mixedSocialConnection,
+    );
+    if (
+      resources.workerPool !== config.workerPool ||
+      resources.workerRole !== config.workerRole ||
+      config.countryIds.some((c) => !resources.countryIds.includes(c))
+    )
+      invalid('EXACT_SHARED_WORKER_POOL_ROLE_AND_COUNTRY_ROSTER_REQUIRED');
+  }
+  const children = new Map(
+    config.countryIds.map((countryId) => [
+      countryId,
+      createPostwarCentralBankOmoRuntime({
+        database: config.database,
+        worldId: config.worldId,
+        countryId,
+        workerId: config.workerId,
+        workerRole: config.workerRole,
+        mode: config.mode,
+        ...(config.mixedSocialConnection === undefined
+          ? {}
+          : { mixedSocialConnection: config.mixedSocialConnection }),
+      }),
+    ]),
+  );
+  let baseline: Readonly<OpeningBaseline> | null = null,
+    closed = false,
+    preparing = false;
+  const bound = new Set<string>(),
+    pending = new Set<Promise<unknown>>();
+  function live() {
+    if (closed)
+      throw new CentralBankOmoOriginalsMissing(['WORLD_CB_SOURCE_RETIRED']);
+    if (config.mixedSocialConnection)
+      consumePreparedPostwarSocialFinancialReplayBase(
+        readPostwarSocialRuntimeFinancialReplayBase(
+          config.mixedSocialConnection,
+          config.worldId,
+        ),
+      );
+  }
+  function select(command: CanonicalCommand) {
+    live();
+    validateCanonicalCommand(command, sha);
+    if (
+      command.worldId !== config.worldId ||
+      command.officeId !== 'CENTRAL_BANK' ||
+      command.commandType !== CENTRAL_BANK_OMO_COMMAND
+    )
+      invalid('FIXED_CB_WORLD_OFFICE_FAMILY_REQUIRED');
+    const child = children.get(command.countryId);
+    if (!child)
+      throw new CentralBankOmoOriginalsMissing([
+        'COUNTRY_NOT_BOUND_TO_CB_RUNTIME',
+      ]);
+    return child;
+  }
+  function track<T>(f: () => Promise<T>): Promise<T> {
+    try {
+      live();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    const p = Promise.resolve().then(f);
+    pending.add(p);
+    void p.then(
+      () => pending.delete(p),
+      () => pending.delete(p),
+    );
+    return p;
+  }
+  async function bind(country: string) {
+    const base = baseline;
+    if (!base)
+      throw new CentralBankOmoOriginalsMissing([
+        'GENUINE_WORLD_OPENING_NOT_PREPARED',
+      ]);
+    await runtimeBinders.get(children.get(country)!)!(base);
+    bound.add(country);
+  }
+  async function prepare(next: Readonly<OpeningBaseline>) {
+    if (preparing) invalid('WORLD_CB_PREPARATION_ALREADY_ACTIVE');
+    if (baseline && baseline.seedFingerprint !== next.seedFingerprint)
+      invalid('WORLD_CB_ALREADY_BOUND_TO_ANOTHER_OPENING');
+    preparing = true;
+    baseline = next;
+    try {
+      const statuses: Readonly<PostwarCentralBankOmoOpeningStatus>[] = [];
+      for (const countryId of config.countryIds) {
+        try {
+          await bind(countryId);
+          statuses.push(
+            Object.freeze({
+              countryId,
+              status: 'BOUND_TO_STORED_OPENING',
+              missing: Object.freeze([]),
+            }),
+          );
+        } catch (e) {
+          if (!(e instanceof CentralBankOmoOriginalsMissing)) throw e;
+          statuses.push(
+            Object.freeze({
+              countryId,
+              status: 'MISSING',
+              missing: Object.freeze([...e.missing]),
+            }),
+          );
+        }
+      }
+      return Object.freeze(statuses);
+    } finally {
+      preparing = false;
+    }
+  }
+  const factory: AtomicTransitionCandidateFactory = Object.freeze({
+    async prepare(
+      request: Parameters<AtomicTransitionCandidateFactory['prepare']>[0],
+    ) {
+      return track(async () => {
+        const child = select(request.command);
+        if (!bound.has(request.command.countryId))
+          await bind(request.command.countryId);
+        return child.factory.prepare(request);
+      });
+    },
+  });
+  const guard: CentralBankOmoSourceCommitProtectionPort = Object.freeze({
+    async assertCurrentFrom(
+      tx: SqlExecutor,
+      request: Readonly<CentralBankOmoSourceCommitRequest>,
+    ) {
+      return track(async () => {
+        const child = select(request.command);
+        if (!bound.has(request.command.countryId))
+          throw new CentralBankOmoOriginalsMissing([
+            'GENUINE_WORLD_OPENING_NOT_PREPARED',
+          ]);
+        return child.sourceCommitProtectionPort.assertCurrentFrom(tx, request);
+      });
+    },
+  });
+  issued.add(guard);
+  const result: Readonly<PostwarCentralBankOmoWorldRuntime> = Object.freeze({
+    worldId: config.worldId,
+    workerId: config.workerId,
+    countryIds: config.countryIds,
+    clock: config.clock,
+    factory,
+    sourceCommitProtectionPort: guard,
+    async prepare(seed: Readonly<OpeningSeed>) {
+      await track(() => prepare(openingFromSeed(seed)));
+    },
+    async prepareFromSocial() {
+      return track(async () => {
+        if (!config.mixedSocialConnection)
+          throw new CentralBankOmoOriginalsMissing([
+            'GENUINE_SOCIAL_BASE_NOT_CONFIGURED',
+          ]);
+        return prepare(
+          openingFromSocial(config.mixedSocialConnection, config.worldId),
+        );
+      });
+    },
+    async preflight(command: CanonicalCommand, at: string) {
+      return track(async () => {
+        const child = select(command);
+        if (!bound.has(command.countryId)) await bind(command.countryId);
+        await child.preflight(command, at);
+      });
+    },
+    async close() {
+      closed = true;
+      await Promise.allSettled([...pending]);
+      bound.clear();
+      children.clear();
+      baseline = null;
+    },
+  });
+  runtimeInstances.add(result);
+  return result;
 }

@@ -785,6 +785,66 @@ describe('Captain release exact registry and fixed bounded mixed source', () => 
     ).rejects.toThrow('CAPTAIN_HISTORY_CURRENT_HOST_SOURCE_REQUIRED');
     await admin();
   });
+  it('paged Captain header preserves actual actor/head and exact host packet without exposing a partial prefix', async () => {
+    await admin();
+    await db.exec(
+      await read('database/proposals/postwar-captain-paged-scope.sql'),
+    );
+    const head = (
+      await db.query<{ h: string }>(
+        'select world_version::text h from world_v2.world_head where world_id=$1',
+        [world],
+      )
+    ).rows[0]!.h;
+    const query =
+      'select * from world_v2.read_postwar_captain_paged_scope($1,$2,$3::uuid,$4)';
+    await reader();
+    await expect(
+      db.query(query, [world, country, subject, head]),
+    ).rejects.toMatchObject({ code: '25001' });
+    await db.exec('begin isolation level repeatable read');
+    try {
+      const r = (
+        await db.query<Record<string, unknown>>(query, [
+          world,
+          country,
+          subject,
+          head,
+        ])
+      ).rows[0]!;
+      expect(r).toMatchObject({
+        world_version: head,
+        seed_fingerprint: fp,
+        admission_ref: worldAdmission,
+        history_mode: 'GENUINE_SHARED_PAGED_CORE_REPLAY_REQUIRED',
+      });
+      expect(r.captain_packets).toHaveLength(1);
+      for (const field of [
+        'events',
+        'commands',
+        'receipts',
+        'financial_batches',
+        'fx_quotes',
+      ])
+        expect(r).not.toHaveProperty(field);
+      await db.exec('commit');
+    } catch (e) {
+      await db.exec('rollback');
+      throw e;
+    }
+    for (const args of [
+      [world, 'COUNTRY_02', subject, head],
+      [world, country, subject, String(BigInt(head) + 1n)],
+    ]) {
+      await db.exec('begin isolation level repeatable read');
+      try {
+        await expect(db.query(query, args)).rejects.toThrow();
+      } finally {
+        await db.exec('rollback');
+      }
+    }
+    await admin();
+  });
   it('rejects immutable conflicts and current source/admission revocation', async () => {
     await admin();
     const actualHead = (

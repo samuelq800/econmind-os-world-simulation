@@ -695,3 +695,72 @@ describe('fixed CB OMO custody/runtime (TEST_ONLY embedded PostgreSQL)', () => {
     }
   });
 });
+
+describe('paged shared OMO custody (TEST_ONLY metadata, not complete replay)', () => {
+  it('preserves real current quote/actor/lease and revocation while returning no partial economic history', async () => {
+    const f = await fixture();
+    try {
+      await f.db.exec(
+        await readFile(
+          'database/proposals/central-bank-omo-paged-custody.sql',
+          'utf8',
+        ),
+      );
+      const { lockCentralBankOmoPagedOriginalsFrom } =
+        await import('../../apps/world-worker/src/persistence/postgres-central-bank-omo-originals.js');
+      const input = {
+        worldId: f.seed.worldId,
+        countryId: f.base.command.countryId,
+        securityRef: f.quote.securityRef,
+        batchRef: f.quote.batchRef,
+        workerId: worker,
+        observedAtReal: at,
+        authSubject: f.base.command.authSubject,
+        settlementSimTime: f.quote.validAtSimTime,
+      };
+      const read = (patch: Partial<typeof input> = {}) =>
+        f.database.transaction(async (tx) => {
+          await tx.query('set local role world_v2_cb_omo_source_reader');
+          return lockCentralBankOmoPagedOriginalsFrom(tx, {
+            ...input,
+            ...patch,
+          });
+        });
+      const actual = await read();
+      expect(actual.original).toEqual(f.original);
+      expect(actual.quote).toEqual(f.quote);
+      expect(actual.row).toMatchObject({
+        history_mode: 'GENUINE_SHARED_PAGED_CORE_REPLAY_REQUIRED',
+        world_version: '0',
+        event_sequence: '0',
+      });
+      for (const field of [
+        'events',
+        'commands',
+        'receipts',
+        'financial_batches',
+        'historical_quotes',
+      ])
+        expect(actual.row).not.toHaveProperty(field);
+      await expect(
+        read({ authSubject: '22222222-2222-4222-8222-222222222222' }),
+      ).rejects.toThrow();
+      await expect(read({ workerId: 'WRONG_WORKER' })).rejects.toThrow(
+        'CURRENT_WRITER_LEASE',
+      );
+      await expect(read({ securityRef: 'WRONG_SECURITY' })).rejects.toThrow(
+        'CURRENT_ADOPTED_QUOTE',
+      );
+      await f.publisher.transaction((tx) =>
+        tx.query('select world_v2.revoke_central_bank_omo_original($1,$2,$3)', [
+          f.adoption,
+          'SOURCE',
+          'TEST_ONLY_PAGED_REVOKED',
+        ]),
+      );
+      await expect(read()).rejects.toThrow('SOURCE_REVOKED');
+    } finally {
+      await f.db.close();
+    }
+  });
+});

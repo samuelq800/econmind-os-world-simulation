@@ -116,10 +116,25 @@ export async function lockCentralBankOmoOriginalsFrom(
     readonly settlementSimTime: string;
   },
 ): Promise<Readonly<CentralBankOmoLockedOriginals>> {
+  return lockOriginalsFrom(tx, input, false);
+}
+export async function lockCentralBankOmoPagedOriginalsFrom(
+  tx: SqlExecutor,
+  input: Parameters<typeof lockCentralBankOmoOriginalsFrom>[1],
+) {
+  return lockOriginalsFrom(tx, input, true);
+}
+async function lockOriginalsFrom(
+  tx: SqlExecutor,
+  input: Parameters<typeof lockCentralBankOmoOriginalsFrom>[1],
+  paged: boolean,
+): Promise<Readonly<CentralBankOmoLockedOriginals>> {
   let result;
   try {
     result = await tx.query<Record<string, unknown>>(
-      CENTRAL_BANK_OMO_ORIGINAL_QUERY,
+      paged
+        ? 'select * from world_v2.lock_central_bank_omo_paged_originals($1,$2,$3,$4,$5,$6::timestamptz,$7::uuid,$8)'
+        : CENTRAL_BANK_OMO_ORIGINAL_QUERY,
       [
         input.worldId,
         input.countryId,
@@ -153,6 +168,8 @@ export async function lockCentralBankOmoOriginalsFrom(
     throw new CentralBankOmoOriginalsMissing([
       'ADOPTED_HOLDING_TERMS_AND_CURRENT_QUOTE',
     ]);
+  if (paged && r.history_mode !== 'GENUINE_SHARED_PAGED_CORE_REPLAY_REQUIRED')
+    invalidCentralBankOmoOriginal('EXACT_PAGED_SCOPE_REQUIRED');
   const original = objectBytes<CentralBankOmoOriginal>(
     r.original_text,
     r.original_sha256,
