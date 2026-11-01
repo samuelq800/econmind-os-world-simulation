@@ -106,20 +106,40 @@ function checkHead(h: RegisteredIndustryHead) {
 }
 /** The caller supplies an explicit planned quantity/window/maximum expense;
  * this helper adds no defaults and does not infer money/work from headcount. */
-export async function executeRegisteredFinalIndustrySteps(
-  input: Readonly<{
-    driver: RegisteredIndustryNativeDriver;
-    selectors: RegisteredIndustrySelectors;
-    commandPrefix: string;
-    plan: Pick<
-      IndustryFirstDayRunTerms,
-      | 'runId'
-      | 'quantity'
-      | 'startsAtSimTime'
-      | 'endsAtSimTime'
-      | 'maximumExpense'
-    >;
-  }>,
+type RegisteredIndustryStepsInput = Readonly<{
+  driver: RegisteredIndustryNativeDriver;
+  selectors: RegisteredIndustrySelectors;
+  commandPrefix: string;
+  plan: Pick<
+    IndustryFirstDayRunTerms,
+    | 'runId'
+    | 'quantity'
+    | 'startsAtSimTime'
+    | 'endsAtSimTime'
+    | 'maximumExpense'
+  >;
+  /** Test orchestration only: drain the old OS and register the next finite
+   * clock generation before the due publishers. No receipt/source injection. */
+  afterRunCommitted?: (
+    run: AuthenticatedOfficeCommandRequestDto,
+  ) => Promise<void>;
+}>;
+/** Full production acceptance remains strict, including the inventory journal. */
+export function executeRegisteredFinalIndustrySteps(
+  input: RegisteredIndustryStepsInput,
+) {
+  return executeIndustrySteps(input, 'FULL_PRODUCTION');
+}
+/** Deliberately partial acceptance for the current candidate. This function
+ * never claims a production transition or inventory delivery took place. */
+export function executeRegisteredFinalIndustryRunWorkWageSteps(
+  input: RegisteredIndustryStepsInput,
+) {
+  return executeIndustrySteps(input, 'RUN_WORK_WAGE_ONLY');
+}
+async function executeIndustrySteps(
+  input: RegisteredIndustryStepsInput,
+  mode: 'FULL_PRODUCTION' | 'RUN_WORK_WAGE_ONLY',
 ) {
   const { driver: d, selectors: s, plan } = input,
     url = new URL(d.origin);
@@ -148,7 +168,7 @@ export async function executeRegisteredFinalIndustrySteps(
   };
   let head = await d.readHead();
   checkHead(head);
-  async function post(path: string, body: unknown) {
+  async function post(path: string, body: unknown, expectedStatus = 200) {
     const response = await fetch(d.origin + path, {
       method: 'POST',
       headers: {
@@ -160,7 +180,7 @@ export async function executeRegisteredFinalIndustrySteps(
       signal: AbortSignal.timeout(15000),
     });
     const result: unknown = await response.json();
-    assert(response.status === 200, 'HTTP_' + response.status);
+    assert(response.status === expectedStatus, 'HTTP_' + response.status);
     return record(result);
   }
   function manual(
@@ -185,7 +205,7 @@ export async function executeRegisteredFinalIndustrySteps(
     };
   }
   async function queue(request: AuthenticatedOfficeCommandRequestDto) {
-    const r = await post('/v1/office-command', request),
+    const r = await post('/v1/office-command', request, 202),
       state = record(r.state);
     assert(
       r.ok === true &&
@@ -308,6 +328,7 @@ export async function executeRegisteredFinalIndustrySteps(
     false,
     INDUSTRY_RUN_SCHEDULED_EVENT,
   );
+  await input.afterRunCommitted?.(run);
   const work = await d.publishWork(scope);
   await consume(
     work.commandId,
@@ -324,6 +345,15 @@ export async function executeRegisteredFinalIndustrySteps(
     true,
     INDUSTRY_OPERATING_WAGE_EVENT,
   );
+  if (mode === 'RUN_WORK_WAGE_ONLY')
+    return Object.freeze({
+      classification: 'INDUSTRY_PARTIAL_RUN_WORK_WAGE' as const,
+      production: 'PRODUCTION_NOT_YET_IMPLEMENTED_IN_CANDIDATE' as const,
+      scope,
+      head,
+      stages: Object.freeze(stages),
+      manualRequests: Object.freeze([run]),
+    });
   const production = manual(
       INDUSTRY_PRODUCTION_COMMAND,
       { facilityId: s.facilityId, runId: plan.runId },

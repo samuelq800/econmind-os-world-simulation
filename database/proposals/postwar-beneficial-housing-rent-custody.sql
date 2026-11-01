@@ -69,17 +69,30 @@ declare a world_v2.runtime_opening_admission%rowtype;p world_v2.runtime_admissio
  if not found or exists(select 1 from world_v2.runtime_admission_publication_revocation v where v.authorization_id=p.authorization_id)then return null;end if;return a;
 end;$$;
 create function world_v2.register_postwar_beneficial_rent_source(p_world text,p_bundle text,p_sha text)returns integer language plpgsql security definer set search_path=pg_catalog as $$
-declare a world_v2.runtime_opening_admission%rowtype;b jsonb;s world_v2.opening_seed%rowtype;r jsonb;o jsonb;n integer:=0;reg text;old world_v2.postwar_beneficial_rent_source%rowtype;begin
+declare a world_v2.runtime_opening_admission%rowtype;b jsonb;s world_v2.opening_seed%rowtype;r jsonb;o jsonb;n integer:=0;reg text;original json;selected_sources jsonb;selected_batches jsonb;source_row jsonb;seed_sha text;old world_v2.postwar_beneficial_rent_source%rowtype;begin
  perform world_v2.beneficial_rent_role('world_v2_beneficial_rent_source_publisher');a:=world_v2.beneficial_rent_admission(p_world);if a.world_id is null then raise exception 'BENEFICIAL_RENT_REAL_ADMISSION_REQUIRED'using errcode='55000';end if;
  if p_bundle is null or octet_length(p_bundle)>4194304 or p_sha is distinct from encode(sha256(convert_to(p_bundle,'UTF8')),'hex')then raise exception 'BENEFICIAL_RENT_EXACT_BUNDLE_REQUIRED'using errcode='23514';end if;b:=p_bundle::jsonb;
  if b->>'schemaVersion'<>'postwar-beneficial-housing-rent-source-v1'or b->>'worldId'<>p_world or b->>'seedId'<>a.seed_id or b->>'seedFingerprint'<>a.seed_fingerprint or jsonb_typeof(b->'receipts')<>'array'or jsonb_array_length(b->'receipts')not between 1 and 70 then raise exception 'BENEFICIAL_RENT_EXACT_ADMITTED_BUNDLE_REQUIRED'using errcode='23514';end if;
  select canonical_payload into strict s.canonical_payload from world_v2.opening_seed where world_id=p_world;
+ -- Keep the large admitted seed as JSON text. Materialize only the selected
+ -- small rent originals and batch identities once, never the entire JSONB
+ -- seed once per country. Raw admitted bytes still determine seed_sha.
+ seed_sha:=encode(sha256(convert_to(s.canonical_payload,'UTF8')),'hex');
+ original:=s.canonical_payload::json;s.canonical_payload:=null;
+ select coalesce(json_agg(x),'[]'::json)::jsonb into selected_sources
+ from json_array_elements(original->'sources')x
+ where x->>'sourceVersion'='POSTWAR_BENEFICIAL_HOUSING_V1'and exists(select 1 from jsonb_array_elements(b->'receipts')q where q->>'supplementalSourceId'=x->>'sourceId');
+ select coalesce(jsonb_agg(jsonb_build_object('batchId',x->>'batchId','sourceId',x->>'sourceId')),'[]'::jsonb)into selected_batches
+ from json_array_elements(original->'financialBatches')x
+ where exists(select 1 from jsonb_array_elements(b->'receipts')q where q->>'reclassificationBatchId'=x->>'batchId'and q->>'supplementalSourceId'=x->>'sourceId');
+ original:=null;
  for r in select value from jsonb_array_elements(b->'receipts')loop
   if r->>'countryId'!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or r->>'worldId'<>p_world or r->>'seedId'<>a.seed_id or r->>'parentSeedFingerprint'<>b->>'parentSeedFingerprint'or r->>'rentPaidAtOpening'<>'0'or r->>'rentAccruedAtOpening'<>'0'or r->>'newLegalClaims'<>'false'then raise exception 'BENEFICIAL_RENT_EXACT_UNPAID_RIGHTS_REQUIRED'using errcode='23514';end if;
-  select (x->>'canonicalPayload')::jsonb into strict o from jsonb_array_elements(s.canonical_payload::jsonb->'sources')x where x->>'sourceId'=r->>'supplementalSourceId'and x->>'sourceVersion'='POSTWAR_BENEFICIAL_HOUSING_V1';
-  if o->>'parentSeedFingerprint'<>b->>'parentSeedFingerprint'or o->>'countryId'<>r->>'countryId'or o->'leases'is distinct from r->'leases'or o->'groups'is distinct from r->'groups'or o->'subaccounts'is distinct from r->'subaccounts'or not exists(select 1 from jsonb_array_elements(s.canonical_payload::jsonb->'financialBatches')x where x->>'batchId'=r->>'reclassificationBatchId'and x->>'sourceId'=r->>'supplementalSourceId')then raise exception 'BENEFICIAL_RENT_ACTUAL_SEED_RIGHTS_AND_BATCH_REQUIRED'using errcode='23514';end if;
+  select x into strict source_row from jsonb_array_elements(selected_sources)x where x->>'sourceId'=r->>'supplementalSourceId'and x->>'sourceVersion'='POSTWAR_BENEFICIAL_HOUSING_V1';
+  o:=(source_row->>'canonicalPayload')::jsonb;
+  if o->>'parentSeedFingerprint'<>b->>'parentSeedFingerprint'or o->>'countryId'<>r->>'countryId'or o->'leases'is distinct from r->'leases'or o->'groups'is distinct from r->'groups'or o->'subaccounts'is distinct from r->'subaccounts'or not exists(select 1 from jsonb_array_elements(selected_batches)x where x->>'batchId'=r->>'reclassificationBatchId'and x->>'sourceId'=r->>'supplementalSourceId')then raise exception 'BENEFICIAL_RENT_ACTUAL_SEED_RIGHTS_AND_BATCH_REQUIRED'using errcode='23514';end if;
   reg:='BENEFICIAL_RENT_'||upper(encode(sha256(convert_to(jsonb_build_array(p_world,r->>'countryId',a.seed_fingerprint,p_sha)::text,'UTF8')),'hex'));
-  insert into world_v2.postwar_beneficial_rent_source select p_world,r->>'countryId',reg,a.seed_id,a.seed_fingerprint,b->>'parentSeedFingerprint',a.admission_ref,encode(sha256(convert_to(s.canonical_payload,'UTF8')),'hex'),p_sha,r->>'fingerprint',r::text,r->>'supplementalSourceId',x->>'payloadHash'from jsonb_array_elements(s.canonical_payload::jsonb->'sources')x where x->>'sourceId'=r->>'supplementalSourceId'on conflict(world_id,country_id)do nothing;
+  insert into world_v2.postwar_beneficial_rent_source select p_world,r->>'countryId',reg,a.seed_id,a.seed_fingerprint,b->>'parentSeedFingerprint',a.admission_ref,seed_sha,p_sha,r->>'fingerprint',r::text,r->>'supplementalSourceId',source_row->>'payloadHash'on conflict(world_id,country_id)do nothing;
   select * into strict old from world_v2.postwar_beneficial_rent_source where world_id=p_world and country_id=r->>'countryId';if old.registration_ref<>reg then raise exception 'BENEFICIAL_RENT_SOURCE_CONFLICT'using errcode='23514';end if;n:=n+1;
  end loop;
  if (select count(*)from world_v2.postwar_beneficial_rent_source x where x.world_id=p_world and x.bundle_sha256=p_sha)<>n then raise exception 'BENEFICIAL_RENT_COMPLETE_BUNDLE_REQUIRED'using errcode='23514';end if;return n;

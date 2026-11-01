@@ -48,9 +48,10 @@ const ident = (s: string) => {
 type Fixture = Awaited<
   ReturnType<typeof createPostwarFinanceSocialFxNativeFixture>
 >;
-interface H0Data {
+export interface H0Data {
   readonly countryId: string;
-  readonly officeId: 'FINANCE' | 'CENTRAL_BANK' | 'SOCIAL';
+  readonly officeId:
+    'FINANCE' | 'CENTRAL_BANK' | 'SOCIAL' | 'INDUSTRY' | 'TRADE';
   readonly dataset: string;
   readonly rows: readonly unknown[];
   readonly sourcePointer: Readonly<Record<string, unknown>>;
@@ -92,6 +93,51 @@ export function deriveCfcMixedCurrentReadData(input: {
     fs = seed.sources.filter((s) => s.sourceId === financial.financialSourceId);
   if (op.length !== 1 || fs.length !== 1)
     throw Error('EXACT_SOURCE_IDENTITIES_REQUIRED');
+  const docs = buildPostwarMixedCurrentH0Documents({
+    seed,
+    view,
+    financial,
+    operatingSourceId: small.operatingSourceId,
+    countryIds: input.countryIds ?? ['COUNTRY_01'],
+  });
+  const value: CfcMixedCurrentReadData = Object.freeze({
+    classification: 'ACTUAL_CFC_DERIVED_H0_DATA_NOT_AUTHORITY',
+    seedId: seed.seedId,
+    worldId: seed.worldId,
+    seedFingerprint: seed.fingerprint,
+    canonicalSeedSHA256: input.canonicalSeedSHA256,
+    admissionRef: input.admissionRef,
+    sourceId: op[0]!.sourceId,
+    sourcePayloadHash: op[0]!.payloadHash,
+    sourceRevision: op[0]!.sourceVersion,
+    modelVersion: seed.replayBinding.modelVersion,
+    replayBinding: C.canonicalSerialize(seed.replayBinding),
+    scopes: small.countries,
+    documents: Object.freeze(docs),
+  });
+  immutable(value);
+  issued.add(value);
+  return value;
+}
+/** Pure deterministic H0 document projection. Caller-facing readiness/source
+ * authority cannot be issued here; each owning registrar independently binds
+ * genuine seed/proof/admission before writing these derived rows. */
+export function buildPostwarMixedCurrentH0Documents(
+  input: Readonly<{
+    seed: C.OpeningSeed;
+    view: ReturnType<typeof readPostwarOperatingGenesisFromSeed>;
+    financial: ReturnType<typeof readPostwarFinancialOfficeOriginalsFromSeed>;
+    operatingSourceId: string;
+    countryIds: readonly string[];
+  }>,
+): readonly H0Data[] {
+  const { seed, view, financial } = input;
+  if (!C.isValidatedOpeningSeed(seed) || !view.socialEmployment)
+    throw Error('GENUINE_OPENING_AND_SOCIAL_DOCUMENT_REQUIRED');
+  const op = seed.sources.filter((s) => s.sourceId === input.operatingSourceId),
+    fs = seed.sources.filter((s) => s.sourceId === financial.financialSourceId);
+  if (op.length !== 1 || fs.length !== 1)
+    throw Error('EXACT_SOURCE_IDENTITIES_REQUIRED');
   const assembly = JSON.parse(fs[0]!.canonicalPayload) as {
     assembly: {
       countries: readonly {
@@ -100,7 +146,7 @@ export function deriveCfcMixedCurrentReadData(input: {
       }[];
     };
   };
-  const countries = input.countryIds ?? ['COUNTRY_01'];
+  const countries = input.countryIds;
   if (!countries.length || new Set(countries).size !== countries.length)
     throw Error('UNIQUE_COUNTRIES_REQUIRED');
   const docs: H0Data[] = [];
@@ -206,24 +252,7 @@ export function deriveCfcMixedCurrentReadData(input: {
         });
     }
   }
-  const value: CfcMixedCurrentReadData = Object.freeze({
-    classification: 'ACTUAL_CFC_DERIVED_H0_DATA_NOT_AUTHORITY',
-    seedId: seed.seedId,
-    worldId: seed.worldId,
-    seedFingerprint: seed.fingerprint,
-    canonicalSeedSHA256: input.canonicalSeedSHA256,
-    admissionRef: input.admissionRef,
-    sourceId: op[0]!.sourceId,
-    sourcePayloadHash: op[0]!.payloadHash,
-    sourceRevision: op[0]!.sourceVersion,
-    modelVersion: seed.replayBinding.modelVersion,
-    replayBinding: C.canonicalSerialize(seed.replayBinding),
-    scopes: small.countries,
-    documents: Object.freeze(docs),
-  });
-  immutable(value);
-  issued.add(value);
-  return value;
+  return Object.freeze(docs);
 }
 const installations = [
   [

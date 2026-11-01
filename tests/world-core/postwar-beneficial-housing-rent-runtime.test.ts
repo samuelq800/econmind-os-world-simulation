@@ -572,6 +572,54 @@ const empty = {
   materials: 0,
 };
 describe('TEST_ONLY fixed SQL rent custody and Root Atomic execution', () => {
+  it('registers identical rent originals idempotently, keeps exact admitted bytes and refuses altered rights', async () => {
+    const f = await embeddedFixture();
+    try {
+      const registered = () =>
+        f.db.query<{
+          country_id: string;
+          registration_ref: string;
+          canonical_seed_sha256: string;
+          source_payload_hash: string;
+          receipt_bytes: string;
+        }>(
+          'select country_id,registration_ref,canonical_seed_sha256,source_payload_hash,receipt_bytes from world_v2.postwar_beneficial_rent_source order by country_id',
+        );
+      const before = (await registered()).rows;
+      const seed = await f.db.query<{ canonical_payload: string }>(
+        'select canonical_payload from world_v2.opening_seed where world_id=$1',
+        [world],
+      );
+      expect(before).toHaveLength(1);
+      expect(before[0]!.canonical_seed_sha256).toBe(
+        sha(seed.rows[0]!.canonical_payload),
+      );
+      const repeat = await f.publisher.query<{ count: number }>(
+        'select world_v2.register_postwar_beneficial_rent_source($1,$2,$3) as count',
+        [world, f.data.bundleBytes, f.data.bundleSha256],
+      );
+      expect(repeat.rows).toEqual([{ count: 1 }]);
+      expect((await registered()).rows).toEqual(before);
+      const changed = JSON.parse(f.data.bundleBytes) as {
+        receipts: { groups: unknown[] }[];
+      };
+      changed.receipts[0]!.groups = [];
+      const bytes = C.canonicalSerialize(changed);
+      await expect(
+        f.publisher.query(
+          'select world_v2.register_postwar_beneficial_rent_source($1,$2,$3)',
+          [world, bytes, sha(bytes)],
+        ),
+      ).rejects.toThrow(
+        'BENEFICIAL_RENT_ACTUAL_SEED_RIGHTS_AND_BATCH_REQUIRED',
+      );
+      expect((await registered()).rows).toEqual(before);
+      expect(await f.counts()).toEqual(empty);
+    } finally {
+      await f.runtime.close();
+      await f.db.close();
+    }
+  });
   it('settles one real rent batch atomically, reads the paid receipt at H1 and recovers FINAL after revocation', async () => {
     const f = await embeddedFixture();
     try {
