@@ -19,6 +19,12 @@ revoke all on world_v2.captain_source_publication_registry from public;
 create trigger captain_source_publication_registry_immutable before update or delete on world_v2.captain_source_publication_registry for each row execute function world_v2.reject_authoritative_history_mutation();
 create trigger captain_source_publication_registry_no_truncate before truncate on world_v2.captain_source_publication_registry for each statement execute function world_v2.reject_authoritative_history_mutation();
 grant select(world_id,seed_id,seed_fingerprint)on world_v2.opening_seed to world_v2_captain_source_owner;
+-- The baseline PUBLIC admission SELECT policy references these seat columns.
+-- Its ACL dependency exists even when this owner's independent exact-world
+-- admission policy allows the row. Initialization precedes intake installation;
+-- do not rely on that later proposal's broader metadata grant. No runtime or
+-- release identity receives table access and no seat policy is broadened.
+grant select(world_id,auth_subject)on world_v2.runtime_read_seat to world_v2_captain_source_owner;
 grant select on world_v2.runtime_opening_admission,world_v2.runtime_admission_publication_permit,world_v2.runtime_admission_publication_revocation to world_v2_captain_source_owner;
 grant update(seed_id)on world_v2.runtime_opening_admission to world_v2_captain_source_owner;
 grant update(authorization_id)on world_v2.runtime_admission_publication_permit to world_v2_captain_source_owner;
