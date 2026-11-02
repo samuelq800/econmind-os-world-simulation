@@ -534,17 +534,39 @@ describe('Industry actual commit source boundary (controlled protocol only)', ()
           worldVersion: '1',
           eventSequence: '1',
         });
-        expect(Object.keys(r)).toHaveLength(7);
+        expect(Object.keys(r).sort()).toEqual(
+          [
+            'command',
+            'costLegId',
+            'currentMaterializations',
+            'expectedHead',
+            'fundingBatchId',
+            'fundingFingerprint',
+            'posting',
+            'transition',
+          ].sort(),
+        );
+        expect(r.currentMaterializations).toBe(
+          f.candidate.currentMaterializations,
+        );
         ready();
         await pending;
         throw Error('SOURCE_REFUSED');
       },
     });
     const attempt = p.repository.commit(f.candidate);
-    await started;
-    expect(p.events).toBe(0);
-    expect(p.calls).not.toContain('PHASE:BEFORE_EVENTS');
-    release();
+    try {
+      await Promise.race([
+        started,
+        attempt.then(() => {
+          throw Error('Commit finished before the guarded source was released');
+        }),
+      ]);
+      expect(p.events).toBe(0);
+      expect(p.calls).not.toContain('PHASE:BEFORE_EVENTS');
+    } finally {
+      release();
+    }
     await expect(attempt).rejects.toThrow('SOURCE_REFUSED');
   });
   it('matching protocol audit preserves existing ordered atomic writes, not native proof', async () => {

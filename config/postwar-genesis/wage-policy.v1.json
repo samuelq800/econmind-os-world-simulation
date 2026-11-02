@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "postwar-wage-policy-v1",
+  "version": "POSTWAR_WAGE_POLICY_20261028_V1",
+  "classification": "GENERATED_POLICY",
+  "authorizationReference": "Sentinel_a619bdbe25588191aa05709db76c7567",
+  "scope": "SELECTED_70_COUNTRY_POSTWAR_OPERATING_GENESIS",
+  "sourceIncomeMeaning": "GCU_SCENARIO_ACCOUNTING_UNIT_PER_REFERENCE_DAY_NOT_AN_EXISTING_WAGE",
+  "calibration": "COUNTRY_SOURCE_DAILY_LABOUR_INCOME_TIMES_360_CALIBRATES_ACTUAL_FILLED_POSITION_SKILL_WEIGHTED_ANNUAL_PAYROLL",
+  "period": "SIM_YEAR",
+  "simulationDaysPerYear": "360",
+  "skillWeights": { "LOW": "10", "MEDIUM": "14", "HIGH": "20" },
+  "occupationPremium": "NONE_SKILL_GRID_ONLY",
+  "currency": "PRESERVE_COUNTRY_MONETARY_BINDING",
+  "fx": "PRESERVE_BOUND_LC_PER_GCU_WITH_SOURCE_VERSION_AND_VALUE_DATE",
+  "annualWageDecimalPlaces": "6",
+  "quantization": "FLOOR_POSITIVE_GENERATED_WAGE_ONLY_RETAIN_EXACT_PAYROLL_RESIDUAL",
+  "funding": "EXISTING_EMPLOYER_FUNDS_ONLY_NO_NEW_MONEY_NO_T0_PAYMENT",
+  "minimumWagePolicyCreated": false,
+  "sourceAmountsChanged": false,
+  "paymentHistoryCreated": false,
+  "worldClockStarted": false
+}

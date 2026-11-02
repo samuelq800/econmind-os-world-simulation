@@ -138,7 +138,7 @@ describe('W1 Office private DOM lifecycle / shipped view and bounded transport',
     expect(s.f.f.calls).toHaveLength(0);
     expect(s.f.commands).toHaveLength(0);
   });
-  it.each(['industry', 'finance', 'trade'] as const)(
+  it.each(['industry', 'trade'] as const)(
     'unsupported %s creates no private shell',
     (role) => {
       const s = setup(role);
@@ -149,6 +149,14 @@ describe('W1 Office private DOM lifecycle / shipped view and bounded transport',
       expect(s.f.commands).toHaveLength(0);
     },
   );
+  it('Finance transport mounts only after a trusted binding and performs no automatic request', () => {
+    const s = setup('finance');
+    expect(s.connect()).toBe('READY_TO_READ');
+    s.flush();
+    expect(privateNodes(s.doc).length).toBeGreaterThan(0);
+    expect(s.f.f.calls).toHaveLength(0);
+    expect(s.f.commands).toHaveLength(0);
+  });
   it('invalid binding is missing with no private accessibility controls or dispatch', () => {
     const s = setup();
     s.connect(s.f, {

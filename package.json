@@ -14,6 +14,8 @@
     "dev:web": "node scripts/run-development-service.mjs web",
     "dev:api": "node scripts/run-development-service.mjs api",
     "dev:worker": "node scripts/run-development-service.mjs worker",
+    "connections:plan": "node tools/office-connection/run.mjs --plan",
+    "connections:check": "node tools/office-connection/run.mjs --check",
     "pretest": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build && pnpm --filter @econmind/world-api build",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -46,7 +48,8 @@
     "seed:check": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build && node scripts/world-seed-preflight.mjs --check",
     "supabase:safe": "node scripts/supabase-safe.mjs",
     "build": "pnpm -r --if-present build",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:world-v2-official-edge && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm foundation:policy && pnpm secrets:check && pnpm test:balanced-candidate && pnpm test:authoritative-ui && pnpm build"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:world-v2-official-edge && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm foundation:policy && pnpm secrets:check && pnpm test:balanced-candidate && pnpm test:authoritative-ui && pnpm build",
+    "genesis:prepare": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build && node tools/office-connection/postwar-genesis.mjs"
   },
   "devDependencies": {
     "@econmind/core": "workspace:*",

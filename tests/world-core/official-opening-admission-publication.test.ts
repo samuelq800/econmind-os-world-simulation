@@ -2,7 +2,6 @@
  * seed bootstrap, simulation, native URL, production key or real grant. */
 import { generateKeyPairSync, sign, createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { canonicalSerialize, CURRENT_REPLAY_BINDING } from '@econmind/core';
@@ -23,7 +22,15 @@ import {
   inspectOfficialOpeningDecisionSource,
   unresolvedOfficialOpeningDecision,
 } from '../../apps/world-worker/src/preparation/official-opening-decision-reconciliation.js';
-import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
+import type {
+  SqlDatabase,
+  SqlExecutor,
+} from '../../apps/world-worker/src/persistence/sql-database.js';
+import {
+  ADMISSION_PUBLICATION_BLOCKER,
+  RuntimeReadBindingStore,
+} from '../../apps/world-worker/src/persistence/runtime-read-binding-store.js';
+import type { ValidatedReadOnlyOpeningSnapshotScope } from '../../apps/world-worker/src/persistence/validated-read-only-opening-snapshot.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const read = (file: string) => readFile(path.join(root, file), 'utf8');
@@ -386,25 +393,74 @@ describe('official opening publication source-blocked entry', () => {
           }),
       ).toThrow('OPENING_PUBLISHER_ROLE_DENIED');
   });
-  it('retains exact read-only store and SQL publication veto from main', async () => {
-    for (const file of [
-      'apps/world-worker/src/persistence/runtime-read-binding-store.ts',
-      'database/proposals/runtime-read-binding-storage.sql',
-    ]) {
-      const base = execFileSync(
-        'git',
-        [
-          '--no-replace-objects',
-          'show',
-          `bcfc66787631a13aa5093df42954070c2d7dd66b:${file}`,
-        ],
-        { cwd: root },
-      );
-      expect(await readFile(path.join(root, file))).toEqual(base);
-      expect(base.toString()).toContain(
-        'ADMISSION_PUBLICATION_ENTRYPOINT_MISSING',
-      );
-    }
+  it('does not turn a structural readonly snapshot into admission or database writes', async () => {
+    // Protocol-only fixture: it supplies no seed, admission or real role grant.
+    // Exact SQL veto/RLS/immutability and genuine scoped replay are exercised
+    // by runtime-read-binding-store and runtime-admission-publication-sql.
+    const subject = '11111111-1111-4111-8111-111111111111';
+    const statements: string[] = [];
+    const executor: SqlExecutor = {
+      async query<Row extends object>(statement: string) {
+        statements.push(statement);
+        if (statement.includes('current_user as role_name'))
+          return {
+            rows: [
+              {
+                role_name: 'fixture_publication_runtime_reader',
+                rolsuper: false,
+                rolbypassrls: false,
+                rolcreaterole: false,
+                rolcreatedb: false,
+                rolreplication: false,
+                official_source_member: false,
+                publisher_member: false,
+                unsafe_reader_privileges: false,
+                verified_subject: subject,
+              },
+            ] as Row[],
+            rowCount: 1,
+          };
+        if (statement.includes('from world_v2.runtime_opening_admission'))
+          return { rows: [], rowCount: 0 };
+        throw Error('UNEXPECTED_REFERENCE_READ_OR_WRITE');
+      },
+    };
+    const database: SqlDatabase = {
+      async query() {
+        throw Error('SUPPLIED_EXECUTOR_REQUIRED');
+      },
+      async transaction() {
+        throw Error('REFERENCE_LOOKUP_MUST_NOT_START_WRITER_TRANSACTION');
+      },
+    };
+    const store = new RuntimeReadBindingStore({
+      database,
+      authorizationPublisherRole: 'fixture_publication_auth_publisher',
+      runtimeReaderRole: 'fixture_publication_runtime_reader',
+    });
+    const input = {
+      executor,
+      verifiedSubject: subject,
+      worldId: request.worldId,
+    };
+    await expect(
+      store.readImmutableAdmissionWithSnapshotFrom({
+        ...input,
+        snapshot: Object.freeze({}) as ValidatedReadOnlyOpeningSnapshotScope,
+      }),
+    ).rejects.toMatchObject({ code: 'RUNTIME_READ_BINDING_UNAVAILABLE' });
+    // Private scope validation fails before any admission or seed lookup.
+    expect(statements).toHaveLength(1);
+    expect(statements[0]).toContain('current_user as role_name');
+    expect(await store.readImmutableAdmissionFrom(input)).toBeNull();
+    expect(statements).toHaveLength(3);
+    expect(statements.every((sql) => /^\s*select\b/iu.test(sql))).toBe(true);
+    expect('publishAdmission' in store).toBe(false);
+    expect(ADMISSION_PUBLICATION_BLOCKER).toBe(
+      'ADMISSION_PUBLICATION_ENTRYPOINT_MISSING',
+    );
+  });
+  it('retains the independently fixed source mapping identity', () => {
     const sha = createHash('sha256').update(mappingBytes).digest('hex');
     expect(sha).toBe(
       'd2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253',

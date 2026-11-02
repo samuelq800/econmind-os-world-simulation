@@ -4,6 +4,18 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./postwar-budget-current-readback": {
+      "types": "./dist/outbox/postwar-budget-current-readback-consumer.d.ts",
+      "default": "./dist/outbox/postwar-budget-current-readback-consumer.js"
+    },
+    "./social-runtime-connection": {
+      "types": "./dist/runtime-preparation/social-runtime-connection.d.ts",
+      "default": "./dist/runtime-preparation/social-runtime-connection.js"
+    },
+    "./finance-social-runtime-connection": {
+      "types": "./dist/runtime-preparation/finance-social-runtime-connection.d.ts",
+      "default": "./dist/runtime-preparation/finance-social-runtime-connection.js"
+    },
     "./runtime-command-host": {
       "types": "./dist/runtime-preparation/production-world-command-host-exports.d.ts",
       "default": "./dist/runtime-preparation/production-world-command-host-exports.js"
@@ -27,6 +39,26 @@
     "./social-office-demo": {
       "types": "./dist/social-office-demo/consumer.d.ts",
       "default": "./dist/social-office-demo/consumer.js"
+    },
+    "./postwar-office-runtime": {
+      "types": "./dist/runtime-preparation/postwar-office-runtime-exports.d.ts",
+      "default": "./dist/runtime-preparation/postwar-office-runtime-exports.js"
+    },
+    "./finance-budget-runtime": {
+      "types": "./dist/runtime-preparation/finance-budget-runtime-exports.d.ts",
+      "default": "./dist/runtime-preparation/finance-budget-runtime-exports.js"
+    },
+    "./postwar-financial-current-read": {
+      "types": "./dist/runtime-preparation/postwar-financial-current-exports.d.ts",
+      "default": "./dist/runtime-preparation/postwar-financial-current-exports.js"
+    },
+    "./postwar-physical-opening-facts-read": {
+      "types": "./dist/runtime-preparation/postwar-physical-opening-exports.d.ts",
+      "default": "./dist/runtime-preparation/postwar-physical-opening-exports.js"
+    },
+    "./postwar-treasury-fx-runtime-connection": {
+      "types": "./dist/runtime-preparation/postwar-treasury-fx-runtime-connection.d.ts",
+      "default": "./dist/runtime-preparation/postwar-treasury-fx-runtime-connection.js"
     }
   },
   "scripts": {

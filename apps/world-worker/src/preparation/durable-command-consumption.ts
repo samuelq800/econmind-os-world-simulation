@@ -1,7 +1,11 @@
+import { createHash } from 'node:crypto';
 import {
   DOMAIN_ERROR_CODES,
   DomainError,
   SimTime,
+  SOCIAL_JOB_MATCH_DUE_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   canonicalSerialize,
   parseWorldWriterLease,
   workerId,
@@ -27,8 +31,27 @@ import {
   type ManualOfficeRuntimeReaders,
 } from './manual-office-command-composition.js';
 import type { AuthorizedOfficeContext } from '@econmind/core';
-import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import {
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+} from '@econmind/core/authenticated-office-command-contract';
+import {
+  readPostwarTreasuryFxSourceBinding,
+  type PostwarTreasuryFxSourceBinding,
+} from '../runtime-preparation/postwar-treasury-fx-runtime-connection.js';
+import { isFinanceBudgetNativeCommitGuard } from '../persistence/postgres-finance-budget-custody.js';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
+import { isPostwarSocialMatchSourceCommitProtectionPort } from '../persistence/postwar-social-match-runtime.js';
+
+import {
+  registeredFinanceCommandHostDependencies,
+  productionFinanceCommandExecutionBlocker,
+  type ServerCommandHostBinding,
+} from '../runtime-preparation/production-world-command-host.js';
+import {
+  readFinanceSocialSourceBinding,
+  type FinanceSocialSourceBinding,
+} from '../runtime-preparation/finance-social-runtime-connection.js';
 
 export const DURABLE_COMMAND_CONSUMPTION_STATUS =
   'PREPARATION_ONLY_NOT_RUNTIME_ACCEPTANCE' as const;
@@ -124,7 +147,7 @@ function domainFailure(error: unknown): DomainError | null {
  * supplied command/ledger, polling loop, lease takeover or clock advancement.
  * The host must bind an admitted server clock and existing SQL database.
  */
-export function createDurableCommandConsumptionPreparation(input: {
+type DurableConsumptionInput = {
   readonly database: SqlDatabase;
   readonly environment: NodeJS.ProcessEnv;
   readonly workerId: string;
@@ -133,49 +156,142 @@ export function createDurableCommandConsumptionPreparation(input: {
   readonly clock: DurableConsumptionClock | null;
   /** Trusted server constructors only; absent sources never enable a family. */
   readonly officeReaders?: ManualOfficeRuntimeReaders;
-}) {
-  if (!['local', 'ci'].includes(input.environment.ECONMIND_ENV ?? '')) {
+};
+const FINANCE_SOCIAL_COMMAND_FAMILIES: ReadonlySet<string> = new Set([
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_JOB_MATCH_DUE_COMMAND,
+]);
+function assertLocalPreparationEnvironment(environment: NodeJS.ProcessEnv) {
+  if (!['local', 'ci'].includes(environment.ECONMIND_ENV ?? ''))
     invalid('Durable command preparation is local/CI only');
-  }
-  for (const [name, value] of Object.entries(input.environment)) {
+  for (const [name, value] of Object.entries(environment)) {
     if (
       value &&
       (/^(?:VITE_)?SUPABASE_/u.test(name) ||
         name === 'WORLD_DATABASE_URL' ||
         name === 'DATABASE_URL')
-    ) {
+    )
       invalid(
         'Production connection configuration is forbidden in preparation',
       );
-    }
   }
+}
+export function createDurableCommandConsumptionPreparation(
+  input: DurableConsumptionInput,
+) {
+  assertLocalPreparationEnvironment(input.environment);
+  return createDurableCommandConsumer(input, null);
+}
+/** Fixed private issuer only. No caller source registry, candidate or readiness flag.
+ * Unsupported families remain at the actual global queue head. */
+export function createTreasuryFxCommandConsumptionPreparation(
+  binding: PostwarTreasuryFxSourceBinding,
+) {
+  const fixed = readPostwarTreasuryFxSourceBinding(binding);
+  assertLocalPreparationEnvironment(fixed.environment);
+  return createDurableCommandConsumer(
+    {
+      database: fixed.workerDatabase,
+      workerId: fixed.workerId,
+      worldId: fixed.worldId,
+      clock: fixed.clock,
+      sha256Hex: fixed.sha256Hex,
+      environment: fixed.environment,
+      officeReaders: fixed.readers,
+    },
+    null,
+    'LEGACY_GENERIC',
+    binding,
+  );
+}
+/** Fixed finite local/CI composition only. No caller readers, allowlist,
+ * candidate callback, role grant, Clock startup or new consumer authority.
+ * The private combined issuer owns exact DB/pool/world/worker identities. */
+export function createFinanceSocialCommandConsumptionPreparation(
+  binding: FinanceSocialSourceBinding,
+) {
+  const d = readFinanceSocialSourceBinding(binding);
+  assertLocalPreparationEnvironment(d.environment);
+  return createDurableCommandConsumer(
+    {
+      database: d.database,
+      workerId: d.workerId,
+      worldId: d.worldId,
+      clock: d.clock,
+      sha256Hex: d.sha256Hex,
+      environment: d.environment,
+      officeReaders: d.readers,
+    },
+    null,
+    d.readers.treasuryFx ? 'FINANCE_SOCIAL_FX' : 'FINANCE_SOCIAL',
+  );
+}
+/** Explicit finite server composition. No environment substitution, loop,
+ * lease acquisition or Clock construction. Missing formal originals deny first. */
+export function createProductionFinanceCommandConsumption(
+  binding: ServerCommandHostBinding,
+) {
+  const d = registeredFinanceCommandHostDependencies(binding);
+  return createDurableCommandConsumer(
+    {
+      database: d.workerDatabase,
+      environment: Object.freeze({}),
+      workerId: d.workerId,
+      worldId: d.worldId,
+      sha256Hex: (bytes) => createHash('sha256').update(bytes).digest('hex'),
+      clock: d.clock,
+      officeReaders: { financeBudget: d.readers.financeBudget! },
+    },
+    binding,
+  );
+}
+function createDurableCommandConsumer(
+  input: DurableConsumptionInput,
+  serverBinding: ServerCommandHostBinding | null,
+  familyBoundary:
+    | 'LEGACY_GENERIC'
+    | 'FINANCE_SOCIAL'
+    | 'FINANCE_SOCIAL_FX' = 'LEGACY_GENERIC',
+  treasuryFxBinding: PostwarTreasuryFxSourceBinding | null = null,
+) {
   const world = worldId(input.worldId);
   const holder = workerId(input.workerId);
   const clock = input.clock;
   const officeReaders = Object.freeze({ ...input.officeReaders });
   const lineage = new DurableV08LedgerLineageReader(input);
-  const delivery = createAuthoritativeWorkerExecution({
-    database: input.database,
-    workerId: holder,
-    sha256Hex: input.sha256Hex,
-    candidateFactory: createSqlNarrowTreasuryGcuDeliveryCandidateFactory({
-      database: input.database,
-      workerId: holder,
-      sha256Hex: input.sha256Hex,
-    }),
-  });
-  const shipment = createAuthoritativeWorkerExecution({
-    database: input.database,
-    workerId: holder,
-    sha256Hex: input.sha256Hex,
-    candidateFactory: createSqlNarrowTreasuryGcuShipmentCandidateFactory({
-      database: input.database,
-      workerId: holder,
-      sha256Hex: input.sha256Hex,
-    }),
-  });
+  const delivery =
+    serverBinding || treasuryFxBinding || familyBoundary !== 'LEGACY_GENERIC'
+      ? null
+      : createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: createSqlNarrowTreasuryGcuDeliveryCandidateFactory({
+            database: input.database,
+            workerId: holder,
+            sha256Hex: input.sha256Hex,
+          }),
+        });
+  const shipment =
+    serverBinding || treasuryFxBinding || familyBoundary !== 'LEGACY_GENERIC'
+      ? null
+      : createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: createSqlNarrowTreasuryGcuShipmentCandidateFactory({
+            database: input.database,
+            workerId: holder,
+            sha256Hex: input.sha256Hex,
+          }),
+        });
   const reservation =
-    clock === null
+    clock === null ||
+    serverBinding !== null ||
+    treasuryFxBinding !== null ||
+    familyBoundary !== 'LEGACY_GENERIC'
       ? null
       : createLocalNarrowReservationWorker({
           ...input,
@@ -240,13 +356,21 @@ export function createDurableCommandConsumptionPreparation(input: {
   ) {
     if (
       command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
-      command.commandType !== 'CORE_GOODS_DELIVERY_V1'
+      command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
+      !(
+        command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND &&
+        isPostwarSocialMatchSourceCommitProtectionPort(
+          officeReaders.socialMatch?.sourceCommitProtectionPort,
+        )
+      )
     )
-      invalid('Only the fixed Shipment or Delivery may use this claim path');
+      invalid('Only a fixed automatic source may use this claim path');
     const label =
       command.commandType === 'CORE_GOODS_SHIPMENT_V1'
         ? 'Shipment'
-        : 'Delivery';
+        : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
+          ? 'Social MATCH'
+          : 'Delivery';
     await input.database.transaction(async (transaction) => {
       // Follow atomic/intake submission-before-lease/head lock order. Never
       // take the queue lock in the selector and then wait for a submission.
@@ -261,7 +385,30 @@ export function createDurableCommandConsumptionPreparation(input: {
       );
       if (canonicalSerialize(durable) !== canonicalSerialize(command))
         invalid(`${label} differs from durable canonical Command`);
-      const lease = await checkSource(transaction, durable, at);
+      // MATCH's fixed source runtime validates the complete prefix before
+      // claim and again under held source guards at Atomic's commit cutoff.
+      // Its queue writer reads lease/head metadata only; it has no raw seed
+      // access. Goods retain their existing lineage source protocol.
+      const isMatch = command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND;
+      const lease = isMatch
+        ? await leaseFrom(transaction, at)
+        : await checkSource(transaction, durable, at);
+      if (isMatch) {
+        const head = await transaction.query<{ world_version: string }>(
+          'select world_version::text from world_v2.world_head where world_id=$1 for share',
+          [world],
+        );
+        if (
+          lease.worldId !== world ||
+          lease.holderId !== holder ||
+          lease.expiresAtReal <= at ||
+          head.rows.length !== 1 ||
+          head.rows[0]?.world_version !== command.expectedWorldVersion
+        )
+          invalid(
+            'Social MATCH claim requires its exact active lease and current head',
+          );
+      }
       const queue = await transaction.query<QueueRow>(
         `select command_id, authority_kind, queue_state, available_at_sim_time::text,
                 claimed_by, claim_fencing_token::text
@@ -394,9 +541,15 @@ export function createDurableCommandConsumptionPreparation(input: {
   }
 
   async function step(): Promise<DurableConsumptionStep> {
+    if (serverBinding) {
+      const reason = productionFinanceCommandExecutionBlocker(serverBinding);
+      if (reason) return blocked(reason);
+    }
     if (clock === null) return blocked('SERVER_CLOCK_NOT_BOUND');
     let selectedId: string | null = null;
     try {
+      if (treasuryFxBinding)
+        readPostwarTreasuryFxSourceBinding(treasuryFxBinding);
       const at = timestamp(clock.nowReal());
       const simTime = SimTime.fromTicks(await clock.simTime(world));
       const selected = await input.database.transaction(async (transaction) => {
@@ -405,6 +558,7 @@ export function createDurableCommandConsumptionPreparation(input: {
                   claimed_by, claim_fencing_token::text
              from world_v2.command_queue
             where world_id=$1 and queue_state in ('PENDING','CLAIMED')
+              ${serverBinding ? "and command_id in(select s.command_id from world_v2.command_submission s where s.world_id=$1 and s.command_type='CORE_FINANCE_BUDGET_APPROPRIATION_V1'and s.office_id='FINANCE')" : ''}
               and available_at_sim_time <= $2::bigint
             order by available_at_sim_time, priority_rank, command_id limit 1`,
           [world, simTime.toCanonicalValue()],
@@ -425,11 +579,46 @@ export function createDurableCommandConsumptionPreparation(input: {
       });
       if (selected === null) return Object.freeze({ status: 'IDLE' });
       const { command, row } = selected;
+      // Keep the real global queue head. Never add an Office WHERE clause,
+      // skip an unsupported head, alter its expected version, or invoke a
+      // source/claim/legacy goods branch for an uninstalled family.
+      if (
+        familyBoundary !== 'LEGACY_GENERIC' &&
+        !FINANCE_SOCIAL_COMMAND_FAMILIES.has(command.commandType) &&
+        !(
+          familyBoundary === 'FINANCE_SOCIAL_FX' &&
+          command.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+        )
+      )
+        return blocked(
+          'FINANCE_SOCIAL_FAMILY_NOT_INSTALLED',
+          command.commandId,
+        );
+      if (
+        serverBinding &&
+        (command.commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND ||
+          command.officeId !== 'FINANCE')
+      )
+        return blocked('FINITE_FINANCE_FAMILY_REQUIRED', command.commandId);
+      if (
+        treasuryFxBinding &&
+        (command.commandType !== POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND ||
+          command.officeId !== 'FINANCE')
+      )
+        return blocked('TREASURY_FX_FAMILY_NOT_INSTALLED', command.commandId);
       const manualCapability = manualOfficeCapability(command);
+      const matchRuntime = officeReaders.socialMatch;
+      const socialMatch =
+        command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND &&
+        !!matchRuntime &&
+        isPostwarSocialMatchSourceCommitProtectionPort(
+          matchRuntime.sourceCommitProtectionPort,
+        );
       if (
         command.commandType !== 'CORE_GOODS_TRANSFER_V1' &&
         command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
         command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
+        !socialMatch &&
         manualCapability === null
       )
         return blocked('UNSUPPORTED_COMMAND', command.commandId);
@@ -449,7 +638,47 @@ export function createDurableCommandConsumptionPreparation(input: {
         return blocked('COMMAND_NOT_DUE', command.commandId);
       if (row.queue_state === 'CLAIMED' && row.claimed_by !== holder)
         return blocked('CLAIM_REQUIRES_REVIEWED_RECOVERY', command.commandId);
-      if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND) {
+      if (socialMatch) {
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: matchRuntime.candidateFactory,
+          socialMatchSourceCommitProtectionPort:
+            matchRuntime.sourceCommitProtectionPort,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        await matchRuntime.assertSourceBeforeClaim({
+          command,
+          observedAtReal: at,
+        });
+        await claimAutomatic(command, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'VERSIONED_AUTOMATIC',
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
+      if (
+        command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+        !isFinanceBudgetNativeCommitGuard(
+          officeReaders.financeBudget?.commitGuard,
+        )
+      ) {
         validateManualOfficeCommandIntent(command);
         return blocked('SOURCE_RUNTIME_UNAVAILABLE', command.commandId);
       }
@@ -468,6 +697,30 @@ export function createDurableCommandConsumptionPreparation(input: {
           workerId: holder,
           sha256Hex: input.sha256Hex,
           candidateFactory: composition.factory,
+          ...(composition.dayOneFxSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                dayOneFxSourceCommitProtectionPort:
+                  composition.dayOneFxSourceCommitProtectionPort,
+              }),
+          ...(composition.captainSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                captainSourceCommitProtectionPort:
+                  composition.captainSourceCommitProtectionPort,
+              }),
+          ...(composition.socialPositionSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                socialPositionSourceCommitProtectionPort:
+                  composition.socialPositionSourceCommitProtectionPort,
+              }),
+          ...(composition.financeBudgetSourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                financeBudgetSourceCommitProtectionPort:
+                  composition.financeBudgetSourceCommitProtectionPort,
+              }),
           ...(composition.sourceCommitProtectionPort === undefined
             ? {}
             : {
@@ -522,6 +775,10 @@ export function createDurableCommandConsumptionPreparation(input: {
       await claimAutomatic(command, at, simTime);
       const execution =
         command.commandType === 'CORE_GOODS_SHIPMENT_V1' ? shipment : delivery;
+      if (!execution)
+        invalid(
+          'Only the fixed Finance branch is installed in the server consumer',
+        );
       const result = await execution.executeQueuedCommand({
         command,
         authorityKind: 'VERSIONED_AUTOMATIC',
@@ -564,12 +821,23 @@ export function createDurableCommandConsumptionPreparation(input: {
     preparationStatus: DURABLE_COMMAND_CONSUMPTION_STATUS,
     state: () => lifecycle,
     startPreparation(): void {
+      if (serverBinding)
+        invalid(
+          'Production finite consumer cannot be activated through preparation',
+        );
       if (lifecycle !== 'PREPARED')
         invalid('Only a prepared instance may become ready');
       lifecycle = 'READY';
     },
     consumeOnce(): Promise<DurableConsumptionStep> {
-      if (lifecycle !== 'READY')
+      if (
+        serverBinding &&
+        !['STOPPING', 'STOPPED', 'FAULTED'].includes(lifecycle)
+      ) {
+        const reason = productionFinanceCommandExecutionBlocker(serverBinding);
+        if (reason) return Promise.resolve(blocked(reason));
+      }
+      if (lifecycle !== 'READY' && !(serverBinding && lifecycle === 'PREPARED'))
         return Promise.resolve(blocked(`LIFECYCLE_${lifecycle}`));
       if (active !== null)
         return Promise.resolve(blocked('STEP_ALREADY_RUNNING'));

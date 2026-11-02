@@ -32,6 +32,8 @@ interface ServiceDefinition {
 
 interface ManagedPublicCommand {
   readonly child: ChildProcess;
+  /** Spawned detached leader: this PID also owns the POSIX session. */
+  readonly ownedRootPid: number | undefined;
   readonly exited: Promise<{
     code: number | null;
     signal: NodeJS.Signals | null;
@@ -44,7 +46,7 @@ interface ProcessRow {
   readonly pgid: number;
   readonly pid: number;
   readonly ppid: number;
-  readonly session: number;
+  readonly session: string;
   readonly state: string;
 }
 
@@ -71,15 +73,23 @@ function startPublicCommand(
   port: number,
   environment: NodeJS.ProcessEnv = {},
 ): ManagedPublicCommand {
-  const child = spawn('pnpm', [service.command], {
+  return startManagedCommand('pnpm', [service.command], {
+    ...process.env,
+    ECONMIND_ENV: 'local',
+    [service.environmentPort]: String(port),
+    ...environment,
+  });
+}
+
+function startManagedCommand(
+  command: string,
+  args: readonly string[],
+  environment: NodeJS.ProcessEnv,
+): ManagedPublicCommand {
+  const child = spawn(command, [...args], {
     cwd: repositoryRoot,
     detached: process.platform !== 'win32',
-    env: {
-      ...process.env,
-      ECONMIND_ENV: 'local',
-      [service.environmentPort]: String(port),
-      ...environment,
-    },
+    env: environment,
     shell: false,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -97,7 +107,7 @@ function startPublicCommand(
     child.once('error', reject);
     child.once('exit', (code, signal) => resolve({ code, signal }));
   });
-  return { child, exited, output: () => output };
+  return { child, ownedRootPid: child.pid, exited, output: () => output };
 }
 
 function signalOwnedGroup(
@@ -194,19 +204,26 @@ async function readProcessTable(): Promise<ProcessRow[]> {
     '-axo',
     'pid=,ppid=,pgid=,sess=,stat=,command=',
   ]);
+  return parseProcessTable(stdout);
+}
+
+/** Darwin ps prints sess as a KPTR (%lx), while Linux prints a numeric SID.
+ * Retain the opaque token only for captured identity comparisons.
+ * Apple adv_cmds 6bed8737a34d ps/keyword.c:182, print.c:1135-1139. */
+function parseProcessTable(stdout: string): ProcessRow[] {
   return stdout
     .trim()
     .split('\n')
     .map((line) => {
       const match = line.match(
-        /^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/u,
+        /^\s*(\d+)\s+(\d+)\s+(\d+)\s+((?:0x)?[0-9a-fA-F]+)\s+(\S+)\s+(.*)$/u,
       );
       if (match === null) return undefined;
       return {
         pid: Number(match[1]),
         ppid: Number(match[2]),
         pgid: Number(match[3]),
-        session: Number(match[4]),
+        session: match[4]!,
         state: match[5]!,
         command: match[6]!,
       } satisfies ProcessRow;
@@ -231,9 +248,53 @@ function descendants(rows: readonly ProcessRow[], rootPid: number) {
 
 async function liveCapturedRows(captured: readonly ProcessRow[]) {
   const rows = await readProcessTable();
-  const capturedPids = new Set(captured.map((row) => row.pid));
   return rows.filter(
-    (row) => capturedPids.has(row.pid) && !row.state.startsWith('Z'),
+    (row) =>
+      !row.state.startsWith('Z') &&
+      captured.some(
+        (owned) =>
+          row.pid === owned.pid &&
+          row.pgid === owned.pgid &&
+          row.session === owned.session,
+      ),
+  );
+}
+
+/** Only the actually spawned detached process group is eligible for fresh
+ * discovery. A shared/zero Darwin session token is never a group selector. */
+function ownedCleanupRows(
+  rows: readonly ProcessRow[],
+  rootPid: number,
+  parentPid: number,
+  captured: readonly ProcessRow[] = [],
+): ProcessRow[] {
+  const root = rows.find((row) => row.pid === rootPid);
+  if (root && (root.pgid !== rootPid || root.ppid !== parentPid))
+    throw new Error(
+      'Owned public root process-group/parent identity changed; refusing cleanup',
+    );
+  const fresh = rows.filter(
+    (row) => row.pgid === rootPid && (!root || row.session === root.session),
+  );
+  const descendantsNow = root ? descendants(rows, rootPid) : [];
+  return [
+    ...new Map(
+      [...captured, ...fresh, ...descendantsNow].map((row) => [row.pid, row]),
+    ).values(),
+  ];
+}
+
+/** Readiness can fail before descendants are captured, or after the detached
+ * leader exits. Its recorded PGID retains only its own reparented descendants;
+ * previously captured PID/PGID/opaque-session tuples remain rechecked. */
+async function cleanupManagedCommand(
+  managed: ManagedPublicCommand,
+  captured: readonly ProcessRow[] = [],
+) {
+  const pid = managed.ownedRootPid;
+  if (pid === undefined) return;
+  await cleanupCapturedProcesses(
+    ownedCleanupRows(await readProcessTable(), pid, process.pid, captured),
   );
 }
 
@@ -263,6 +324,11 @@ async function cleanupCapturedProcesses(captured: readonly ProcessRow[]) {
       // The process exited between observation and cleanup.
     }
   }
+  await waitUntil(
+    async () => (await liveCapturedRows(captured)).length === 0,
+    1_000,
+    'forced owned test cleanup',
+  );
 }
 
 async function publicBoundaryAttack(
@@ -322,7 +388,7 @@ async function publicBoundaryAttack(
     };
   } finally {
     if (observed === undefined || observed.survivors.length > 0) {
-      await cleanupCapturedProcesses(captured);
+      await cleanupManagedCommand(managed, captured);
     }
   }
   return observed;
@@ -388,7 +454,7 @@ async function repeatedSignalAttack(
     };
   } finally {
     socket?.destroy();
-    await cleanupCapturedProcesses(captured);
+    await cleanupManagedCommand(managed, captured);
   }
 }
 
@@ -429,7 +495,7 @@ async function startupWindowAttack(service: ServiceDefinition) {
       survivors: await liveCapturedRows(captured),
     };
   } finally {
-    await cleanupCapturedProcesses(captured);
+    await cleanupManagedCommand(managed, captured);
   }
 }
 
@@ -440,17 +506,21 @@ async function failedBuildAttack(service: ServiceDefinition) {
     port,
     preloadEnvironment(failedBuildPreload),
   );
-  const exit = await Promise.race([
-    managed.exited,
-    new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Failed build did not exit')), 5_000);
-    }),
-  ]);
-  return {
-    endpointReachable: await endpointIsReachable(port),
-    exit,
-    rebound: await canRebind(port),
-  };
+  try {
+    const exit = await Promise.race([
+      managed.exited,
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Failed build did not exit')), 5_000);
+      }),
+    ]);
+    return {
+      endpointReachable: await endpointIsReachable(port),
+      exit,
+      rebound: await canRebind(port),
+    };
+  } finally {
+    await cleanupManagedCommand(managed);
+  }
 }
 
 async function unexpectedRuntimeSignalAttack() {
@@ -474,23 +544,131 @@ async function unexpectedRuntimeSignalAttack() {
     );
     return { exit, rebound: await canRebind(port) };
   } finally {
-    await cleanupCapturedProcesses(captured);
+    await cleanupManagedCommand(managed, captured);
   }
 }
+
+describe('owned process identity portability', () => {
+  it('retains Linux SID and Darwin hexadecimal/zero sess tokens without numeric conversion', () => {
+    const rows = parseProcessTable(
+      '101 99 101 101 Ss linux-root\n' +
+        '201 99 201 ffffff801234abcd Ss darwin-root\n' +
+        '202 201 201 0 S darwin-child\n',
+    );
+    expect(rows.map((row) => row.session)).toEqual([
+      '101',
+      'ffffff801234abcd',
+      '0',
+    ]);
+  });
+
+  it('never treats shared Darwin session zero as ownership of another detached group', () => {
+    const rows = parseProcessTable(
+      '101 99 101 0 Ss owned-root\n' +
+        '102 101 101 0 S owned-child\n' +
+        '201 99 201 0 Ss unrelated-root\n' +
+        '202 201 201 0 S unrelated-child\n',
+    );
+    expect(ownedCleanupRows(rows, 101, 99).map((row) => row.pid)).toEqual([
+      101, 102,
+    ]);
+  });
+
+  it('retains the owned group after the leader exits without collecting unrelated session peers', () => {
+    const rows = parseProcessTable(
+      '102 1 101 ffffff801234abcd S reparented-owned-child\n' +
+        '201 99 201 ffffff801234abcd Ss unrelated-root\n',
+    );
+    expect(ownedCleanupRows(rows, 101, 99).map((row) => row.pid)).toEqual([
+      102,
+    ]);
+  });
+
+  it('refuses a live root whose parent or process group no longer matches the spawned identity', () => {
+    for (const line of [
+      '101 100 101 0 Ss wrong-parent',
+      '101 99 201 0 Ss wrong-group',
+    ]) {
+      expect(() => ownedCleanupRows(parseProcessTable(line), 101, 99)).toThrow(
+        'identity changed',
+      );
+    }
+  });
+});
+
+describe.skipIf(process.platform === 'win32')(
+  'owned early-readiness failure cleanup',
+  () => {
+    it('cleans its root and descendant before any ready capture while preserving an unrelated owned fixture', async () => {
+      const own = startManagedCommand(
+        process.execPath,
+        [
+          '-e',
+          "const {spawn}=require('node:child_process'); const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'}); process.stdout.write('CHILD:'+child.pid+'\\n'); setInterval(()=>{},1000);",
+        ],
+        process.env,
+      );
+      const unrelated = startManagedCommand(
+        process.execPath,
+        [
+          '-e',
+          "process.stdout.write('CONTROL_READY\\n');setInterval(()=>{},1000);",
+        ],
+        process.env,
+      );
+      let expected: ProcessRow[] = [];
+      try {
+        await waitUntil(
+          () =>
+            own.output().includes('CHILD:') &&
+            unrelated.output().includes('CONTROL_READY'),
+          2_000,
+          'owned Node fixtures',
+        );
+        expected = descendants(await readProcessTable(), own.ownedRootPid!);
+        expect(expected.length).toBeGreaterThanOrEqual(2);
+        // The actual attack helpers have not yet assigned captured when readiness
+        // rejects. Preserve that exact empty-capture failure state in this test.
+        await expect(
+          (async () => {
+            try {
+              throw new Error('SIMULATED_READINESS_FAILURE');
+            } finally {
+              await cleanupManagedCommand(own, []);
+            }
+          })(),
+        ).rejects.toThrow('SIMULATED_READINESS_FAILURE');
+        expect(await liveCapturedRows(expected)).toEqual([]);
+        expect(
+          (await readProcessTable()).some(
+            (row) =>
+              row.pid === unrelated.ownedRootPid && !row.state.startsWith('Z'),
+          ),
+        ).toBe(true);
+      } finally {
+        await cleanupManagedCommand(own, expected);
+        await cleanupManagedCommand(unrelated);
+        await Promise.all([own.exited, unrelated.exited]);
+      }
+    });
+  },
+);
 
 describe.skipIf(process.platform === 'win32')(
   'V00.2 public runtime lifecycle boundary',
   () => {
     it.each(
       services.flatMap((service) =>
-        (['SIGINT', 'SIGTERM'] as const).map(
-          (signal) => [service, signal] as const,
-        ),
+        (['SIGINT', 'SIGTERM'] as const).map((signal) => ({
+          service,
+          command: service.command,
+          signal,
+        })),
       ),
     )(
-      'stops every descendant and releases the listener for $0.command $1',
+      'stops every descendant and releases the listener for $command $signal',
       { timeout: 30_000 },
-      async (service, signal) => {
+      async ({ service, signal }) => {
         const observed = await publicBoundaryAttack(service, signal);
         expect(observed.captured.length).toBeGreaterThanOrEqual(3);
         // pnpm can translate SIGINT to the conventional 128 + signal exit code.
@@ -521,12 +699,17 @@ describe.skipIf(process.platform === 'win32')(
               ['SIGINT', 'SIGTERM'],
               ['SIGTERM', 'SIGINT'],
             ] as const
-          ).map((signals) => [service, signals] as const),
+          ).map((signals) => ({
+            service,
+            command: service.command,
+            signals,
+            signalLabel: signals.join(' then '),
+          })),
         ),
     )(
-      'keeps $0.command shutdown idempotent for $1',
+      'keeps $command shutdown idempotent for $signalLabel',
       { timeout: 30_000 },
-      async (service, signals) => {
+      async ({ service, signals }) => {
         const observed = await repeatedSignalAttack(service, signals);
         expect(observed.survivedRepeat).toBe(true);
         expect(observed.launcherExit).toEqual({ code: 0, signal: null });

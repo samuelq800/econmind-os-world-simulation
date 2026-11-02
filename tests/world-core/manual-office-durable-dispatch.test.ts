@@ -508,6 +508,30 @@ describe('manual family → existing durable authoritative execution, TEST_ONLY 
       await w.stop();
     },
   );
+  it('funded Social position requires its own issued runtime before any queue claim', async () => {
+    const f = await fixture('SOCIAL', {
+      commandType: 'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
+      payload: {
+        schemaVersion: 'social-employment-position-offer-create-v1',
+        positionId: 'POSITION_NEW_TEST',
+        locationId: 'REGION_01_E1',
+        skill: 'LOW',
+        publicService: 'PUBLIC_SAFETY',
+        occupation: 'GENERAL',
+        requiredCount: '1',
+        wageScheduleRef: 'POSITION_ACTUAL_SOURCE',
+        fundingAccountId: 'ACCOUNT_ACTUAL_SOURCE',
+        coverageDays: '1',
+      },
+    });
+    const w = f.make({});
+    expect(await w.consumeOnce()).toMatchObject({
+      status: 'BLOCKED',
+      reason: 'MANUAL_OFFICE_SOURCE_NOT_BOUND',
+    });
+    await f.zero();
+    await w.stop();
+  });
   it('Social actual source constructor retains NOT_READY operating-state refusal before claim', async () => {
     const f = await fixture('SOCIAL');
     const adoption = await socialAdoption();

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "postwar-gcu-bank-opening-policy-v1",
+  "classification": "GENERATED_POLICY",
+  "version": "POSTWAR_GCU_BANK_OPENING_20261029_V1",
+  "authorization": "docs/governance/owner-inputs/2026-10-29/GCU_OPENING_USER_ADOPTION.original.json",
+  "coverageSimDays": "1",
+  "formula": "FLOOR_6DP(SUM_IMPORT_QUANTITY_TIMES_REFERENCE_PRICE_PLUS_INBOUND_FREIGHT)",
+  "totalCapGcu": "6662014088.360237",
+  "holder": "EXISTING_COUNTRY_PRIVATE_BANK",
+  "debitAccountClass": "CASH",
+  "creditAccountClass": "EQUITY",
+  "currency": "GCU",
+  "netWealthEffect": "NEW_INITIAL_NET_WEALTH",
+  "quoteNature": "UNSIGNED_PLANNING_REFERENCE_NOT_EXECUTABLE_QUOTE",
+  "preserve": ["LC", "FX", "RESOURCES", "EXISTING_FINANCIAL_BATCHES"],
+  "scope": "NEW_WORLD_ONLY_NO_EXISTING_WORLD_RESET",
+  "BRSplit": false,
+  "productionAdmission": false,
+  "worldClockStarted": false
+}

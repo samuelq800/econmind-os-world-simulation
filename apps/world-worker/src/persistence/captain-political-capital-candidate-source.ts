@@ -14,6 +14,7 @@ import {
   prepareCaptainPoliticalCapitalEvent,
   reauthorizeCommitAuthorizationProof,
   replayCaptainPoliticalCapitalAllocation,
+  validateCanonicalCommand,
   type CanonicalCommand,
   type CaptainPoliticalCapitalSourceSnapshot,
   type Sha256Hex,
@@ -77,18 +78,28 @@ export interface CaptainPoliticalCapitalCandidateSource {
  * one consistent cutoff. This interface does NOT perform or certify admission.
  * No request DTO, magic source tag, boolean override or implicit genesis exists.
  */
+export interface CaptainPoliticalCapitalRuntimeReadRequest {
+  readonly worldId: CanonicalCommand['worldId'];
+  readonly countryId: CanonicalCommand['countryId'];
+  readonly commandId: CanonicalCommand['commandId'];
+  readonly commandFingerprint: CanonicalCommand['fingerprint'];
+  readonly expectedWorldVersion: string;
+  readonly simTime: string;
+  readonly reasonFactRef: string;
+  readonly observedAtReal: string;
+}
+
 export interface CaptainPoliticalCapitalRuntimeReader {
   read(
-    input: Readonly<{
-      worldId: CanonicalCommand['worldId'];
-      countryId: CanonicalCommand['countryId'];
-      commandId: CanonicalCommand['commandId'];
-      commandFingerprint: CanonicalCommand['fingerprint'];
-      expectedWorldVersion: string;
-      simTime: string;
-      reasonFactRef: string;
-      observedAtReal: string;
-    }>,
+    input: Readonly<CaptainPoliticalCapitalRuntimeReadRequest>,
+  ): Promise<CaptainPoliticalCapitalSourceRead>;
+  /** Server-only prospective source read. The caller passes its validated
+   * canonical intent before first durable INSERT. This is neither an HTTP
+   * capability nor a commit preparation; originals/admission and complete
+   * durable history must still be independently resolved by the reader. */
+  readCanonical?(
+    input: Readonly<CaptainPoliticalCapitalRuntimeReadRequest>,
+    canonicalCommand: Readonly<CanonicalCommand>,
   ): Promise<CaptainPoliticalCapitalSourceRead>;
 }
 
@@ -169,25 +180,33 @@ export function createCaptainPoliticalCapitalRuntimeSource(input: {
     async load(
       request: Parameters<CaptainPoliticalCapitalCandidateSource['load']>[0],
     ): Promise<CaptainPoliticalCapitalSourceRead> {
-      const terms = parseCaptainPoliticalCapitalAllocation(
+      const command = validateCanonicalCommand(
         request.command,
+        input.sha256Hex,
+      );
+      const terms = parseCaptainPoliticalCapitalAllocation(
+        command,
         input.sha256Hex,
       );
       if (input.reader === null)
         return unavailableCaptainPoliticalCapitalSource().load(request);
+      const readRequest = Object.freeze({
+        worldId: command.worldId,
+        countryId: command.countryId,
+        commandId: command.commandId,
+        commandFingerprint: command.fingerprint,
+        expectedWorldVersion: command.expectedWorldVersion!,
+        simTime: command.simTime.toCanonicalValue(),
+        reasonFactRef: terms.reasonFactRef,
+        observedAtReal: request.observedAtReal,
+      });
+      const canonicalRead = input.reader.readCanonical;
+      if (canonicalRead !== undefined && typeof canonicalRead !== 'function')
+        invalid('Unsupported server canonical-read dependency');
       return frozenRead(
-        await input.reader.read(
-          Object.freeze({
-            worldId: request.command.worldId,
-            countryId: request.command.countryId,
-            commandId: request.command.commandId,
-            commandFingerprint: request.command.fingerprint,
-            expectedWorldVersion: request.command.expectedWorldVersion!,
-            simTime: request.command.simTime.toCanonicalValue(),
-            reasonFactRef: terms.reasonFactRef,
-            observedAtReal: request.observedAtReal,
-          }),
-        ),
+        await (canonicalRead === undefined
+          ? input.reader.read(readRequest)
+          : canonicalRead.call(input.reader, readRequest, command)),
       );
     },
   });

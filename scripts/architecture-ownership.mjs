@@ -33,6 +33,7 @@ export const POLICY_HELPERS = [
 export const SERVER_TOOLS = [
   'scripts/run-development-service.mjs',
   'scripts/run-development-stack.mjs',
+  'scripts/process-parent-pid.mjs',
 ];
 export const GOVERNED_ROOTS = [
   'apps',

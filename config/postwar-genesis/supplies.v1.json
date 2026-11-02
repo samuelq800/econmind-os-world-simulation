@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "postwar-operating-supplies-policy.v1",
+  "classification": "GENERATED_POLICY",
+  "authorityRef": "PROJECT_OWNER_2026_10_28_142754_POSTWAR_GENESIS",
+  "sourceKind": "DOCUMENTED_ASSUMPTION",
+  "stockMeaning": "Newly modelled finite remaining t0 public clinical and school consumables. Not an observation in the selected 12-commodity source, not OP property, not a purchase, payment, historical delivery or service event.",
+  "coverage": {
+    "minimumSimDays": "3",
+    "maximumSimDays": "21",
+    "sourceBufferReferenceDays": "120",
+    "sourceReferenceDayThroughputEquivalentsPerSimDay": "1",
+    "bufferRecoveryWeightBps": "6000",
+    "settlementAccessWeightBps": "3000",
+    "hazardResilienceWeightBps": "1000",
+    "rule": "minimum + floor((maximum-minimum) * recoveryBps/10000); recovery uses bounded source stockBufferDays, settlementAccess and one-minus max(flood,storm). previousPopulation is never war-casualty evidence."
+  },
+  "medicine": {
+    "commodityId": "POSTWAR_CLINICAL_MEDICINE_V1",
+    "unit": "medical_dose",
+    "dosesPerReferenceVisit": "1",
+    "bedDailyDoseReserve": "2",
+    "dailyBasis": "Generated one source-reference-day throughput equivalent per sim day: source dailyMedicalVisitsReference + source hospitalBeds * bedDailyDoseReserve. This is policy calibration, not an observed calendar conversion or historical treatment."
+  },
+  "schoolMaterials": {
+    "commodityId": "POSTWAR_STUDENT_DAY_MATERIAL_V1",
+    "unit": "student_day_material",
+    "unitsPerSeatSimDay": "1",
+    "dailyBasis": "source schoolSeats times unitsPerSeatSimDay; finite student-day material bundle, not a fabricated observation of paper or a new unbounded entitlement."
+  },
+  "rights": {
+    "titleHolder": "EXISTING_COUNTRY_GOV",
+    "riskBearer": "EXISTING_COUNTRY_GOV",
+    "bucket": "AVAILABLE"
+  },
+  "unchanged": [
+    "selected original 12 commodities",
+    "all original inventory entries and provenance",
+    "all original financial batches and balances"
+  ],
+  "servicePrerequisites": "These stocks alone do not establish service readiness. Actual authorized finite equipment, water, power, staffing and local-currency budget constraints remain separately required. Allocation is prospective, not consumption or stock subtraction."
+}

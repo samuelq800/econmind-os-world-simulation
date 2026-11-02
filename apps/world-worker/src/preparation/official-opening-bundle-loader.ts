@@ -95,6 +95,15 @@ export interface ServerOpeningIncomingManifestV2 extends Omit<
     }>[];
   }>;
 }
+/** Complete generated operating seed, bound to the same fixed financial inputs.
+ * A hash pin never grants admission; the publication path revalidates lineage. */
+export interface ServerOpeningIncomingManifestV3 extends Omit<
+  ServerOpeningIncomingManifestV2,
+  'schemaVersion'
+> {
+  readonly schemaVersion: 'server-opening-incoming-v3';
+  readonly operating: Readonly<{ finalSeed: OpeningBundleFileIdentity }>;
+}
 export interface OfficialOpeningPublicationSourceBundle {
   readonly source: OfficialOpeningSourceBytes;
   readonly selectionBytes: string;
@@ -124,6 +133,13 @@ export interface OfficialOpeningPublicationSourceBundleV2 extends OfficialOpenin
     }>[];
   }>;
 }
+export interface OfficialOpeningPublicationSourceBundleV3 extends Omit<
+  OfficialOpeningPublicationSourceBundleV2,
+  'schemaVersion'
+> {
+  readonly schemaVersion: 'official-opening-publication-source-v3';
+  readonly operating: Readonly<{ finalSeedBytes: string }>;
+}
 export function officialOpeningPublicationSourceSha256(
   bundle:
     | OfficialOpeningPublicationSourceBundle
@@ -135,10 +151,13 @@ export function officialOpeningPublicationSourceSha256(
 }
 export function isOfficialOpeningBundleV2(
   bundle: OfficialOpeningPublicationSourceBundle,
-): bundle is OfficialOpeningPublicationSourceBundleV2 {
+): bundle is
+  | OfficialOpeningPublicationSourceBundleV2
+  | OfficialOpeningPublicationSourceBundleV3 {
   return (
     'schemaVersion' in bundle &&
-    bundle.schemaVersion === 'official-opening-publication-source-v2'
+    (bundle.schemaVersion === 'official-opening-publication-source-v2' ||
+      bundle.schemaVersion === 'official-opening-publication-source-v3')
   );
 }
 export type OfficialOpeningSourceBundleInputs = Omit<
@@ -234,8 +253,14 @@ function safeLocator(locator: string): void {
     fail('OPENING_FILE_PATH_DENIED', locator);
 }
 function snapshotIncoming(
-  value: ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2,
-): ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2 {
+  value:
+    | ServerOpeningIncomingManifest
+    | ServerOpeningIncomingManifestV2
+    | ServerOpeningIncomingManifestV3,
+):
+  | ServerOpeningIncomingManifest
+  | ServerOpeningIncomingManifestV2
+  | ServerOpeningIncomingManifestV3 {
   const v2 = 'schemaVersion' in value;
   keys(
     value,
@@ -243,6 +268,7 @@ function snapshotIncoming(
       ? [
           'schemaVersion',
           'financial',
+          ...('operating' in value ? ['operating'] : []),
           'decision',
           'assembly',
           'ownerRecords',
@@ -288,7 +314,10 @@ function snapshotIncoming(
     expectedBundleSha256: value.expectedBundleSha256,
   });
   if (!v2) return base;
-  if (value.schemaVersion !== 'server-opening-incoming-v2')
+  if (
+    value.schemaVersion !== 'server-opening-incoming-v2' &&
+    value.schemaVersion !== 'server-opening-incoming-v3'
+  )
     fail('OPENING_FILE_MANIFEST_INVALID', 'version');
   const f = value.financial;
   keys(
@@ -316,9 +345,22 @@ function snapshotIncoming(
       return Object.freeze({ documentId: d.documentId, identity: checked });
     })
     .sort((a, b) => (a.documentId < b.documentId ? -1 : 1));
+  if (value.schemaVersion === 'server-opening-incoming-v3') {
+    keys(value.operating, ['finalSeed'], 'operating');
+  }
   return Object.freeze({
     ...base,
-    schemaVersion: 'server-opening-incoming-v2',
+    schemaVersion: value.schemaVersion,
+    ...(value.schemaVersion === 'server-opening-incoming-v3'
+      ? {
+          operating: Object.freeze({
+            finalSeed: identity(
+              value.operating.finalSeed,
+              'operating.finalSeed',
+            ),
+          }),
+        }
+      : {}),
     financial: Object.freeze({
       input: identity(f.input, 'financial.input'),
       adoptionReceipt: identity(f.adoptionReceipt, 'financial.adoptionReceipt'),
@@ -334,13 +376,18 @@ function snapshotIncoming(
 export class OfficialOpeningBundleLoader {
   readonly #root: string;
   readonly #incoming:
-    ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2 | null;
+    | ServerOpeningIncomingManifest
+    | ServerOpeningIncomingManifestV2
+    | ServerOpeningIncomingManifestV3
+    | null;
   readonly #financialRegistration: FinancialSupplementRegistration | null;
   constructor(
     input: Readonly<{
       repositoryRoot: string;
       incoming?:
-        ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2;
+        | ServerOpeningIncomingManifest
+        | ServerOpeningIncomingManifestV2
+        | ServerOpeningIncomingManifestV3;
       financialAdoptionRegistration?: FinancialSupplementRegistration;
     }>,
   ) {
@@ -569,6 +616,21 @@ export class OfficialOpeningBundleLoader {
             registeredReference:
               this.#financialRegistration?.retainedReference ?? null,
             documents: Object.freeze(documents),
+          }),
+        });
+      }
+      if (
+        'schemaVersion' in this.#incoming &&
+        this.#incoming.schemaVersion === 'server-opening-incoming-v3'
+      ) {
+        bundle = Object.freeze({
+          ...bundle,
+          schemaVersion: 'official-opening-publication-source-v3' as const,
+          operating: Object.freeze({
+            finalSeedBytes: await read(
+              'incoming/operating/final-seed.json',
+              this.#incoming.operating.finalSeed,
+            ),
           }),
         });
       }

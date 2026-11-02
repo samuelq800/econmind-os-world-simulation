@@ -48,3 +48,5 @@ artifacts/world-runtime-postgres/
 # Preserve the exact adopted COUNTRY01 B06 definition receipt bytes; the preparation regression verifies its pinned SHA-256.
 docs/governance/owner-inputs/2026-10-21/OWNER_B06_C01_DEFINITION_ADOPTION.json
 data/scenario-candidates/unknown2544/approved17/execution_batches.v1.json
+# Preserve the exact GCU adoption receipt bytes pinned by the opening policy.
+docs/governance/owner-inputs/2026-10-29/GCU_OPENING_USER_ADOPTION.original.json

@@ -9,6 +9,8 @@ import {
 } from './model.js';
 import { renderOfficeReadout } from './readout-view.js';
 import { renderDecisionResult } from './decision-result-view.js';
+import { POSTWAR_RUNTIME_SCHEMA } from '../postwar-office-runtime/client.js';
+import { createPostwarRuntimeView } from '../postwar-office-runtime/view.js';
 
 /** Additive drawer in the approved country shell. No map, opening HUD, source
  * asset or original form is replaced. No URL/storage/VITE credentials loaded. */
@@ -30,6 +32,17 @@ export function installOfficeProjection(
       : null;
   };
   let controller = createController(null, currentView);
+  let runtime: ReturnType<typeof createPostwarRuntimeView> | null = null;
+  const disconnect = () => {
+    const old = runtime;
+    runtime = null;
+    old?.disconnect();
+    controller.disconnect();
+  };
+  const getState = () =>
+    runtime
+      ? { ...controller.getState(), ...runtime.state() }
+      : controller.getState();
   let root: HTMLElement | null = null,
     trigger: HTMLButtonElement | null = null,
     dialog: HTMLDialogElement | null = null;
@@ -50,7 +63,7 @@ export function installOfficeProjection(
     return el;
   }
   function render() {
-    const state = controller.getState(),
+    const state = getState(),
       view = currentView();
     if (trigger) {
       trigger.setAttribute('aria-label', 'Authorized World projection');
@@ -73,6 +86,17 @@ export function installOfficeProjection(
         `${view ? officeProjectionRoles[view.role] : 'Office'} / World readout`,
       ),
     );
+    if (runtime) {
+      dialog.append(runtime.render(document));
+      dialog.append(
+        button('Disconnect readout', disconnect),
+        button('Close', () => {
+          dialog?.close();
+          dialog?.replaceChildren();
+        }),
+      );
+      return;
+    }
     const status = node(
       'p',
       `${state.connection} · ${state.status}${state.code ? ' · ' + state.code : ''}`,
@@ -180,7 +204,7 @@ export function installOfficeProjection(
         view.role !== mountedView.role ||
         view.countryDisplayId !== mountedView.countryDisplayId)
     )
-      controller.disconnect();
+      disconnect();
     if (root !== next) {
       trigger?.remove();
       dialog?.remove();
@@ -229,20 +253,25 @@ export function installOfficeProjection(
     attributes: true,
     attributeFilter: ['data-country', 'data-office'],
   });
-  host.addEventListener('pagehide', () => controller.disconnect());
+  host.addEventListener('pagehide', disconnect);
   sync();
   return Object.freeze({
     /** Explicit trusted host config only. Config strings do not grant seats. */
     connect(binding: OfficeProjectionBinding) {
-      controller.disconnect();
+      disconnect();
       unsubscribe();
       controller = createController(binding, currentView);
       unsubscribe = controller.subscribe(changed);
+      if (
+        binding.read.identity.projectionVersion === POSTWAR_RUNTIME_SCHEMA &&
+        controller.getState().canRead
+      )
+        runtime = createPostwarRuntimeView(binding.read, changed);
       render();
       return controller.getState().status;
     },
-    disconnect: () => controller.disconnect(),
-    getState: () => controller.getState(),
+    disconnect,
+    getState,
     /** Stable relay across explicit controller replacement; no new authority. */
     subscribe(listener: () => void) {
       listeners.add(listener);

@@ -13,6 +13,11 @@ import {
   OFFICIAL_MAP_ASSET_LIST_PATH,
   createOfficialMapAssetRoute,
 } from './official-map-asset-route.js';
+import { OFFICIAL_SOCIAL_BINDINGS_PATH } from './official-social-source-bindings-dto.js';
+import {
+  createOfficialSocialBindingsRoute,
+  type OfficialSocialBindingsPublication,
+} from './official-social-source-bindings-publication.js';
 import { handleOfficialPublicCors } from './official-public-cors.js';
 
 export const OFFICIAL_EDGE_FUNCTION_NAME = 'world-v2-official-read';
@@ -101,14 +106,19 @@ async function runNodeReadRoute(
 }
 
 /** Only the frozen country, 34-dataset and metadata-only map routes exist.
+ * An explicit publication adds selected Social evidence, default unavailable.
  * No Command, receipt, arbitrary SQL, table, World or worker route is mapped. */
 export function createOfficialEdgeFetchHandler(input: {
   readonly reader: OfficialCountrySqlReader;
   readonly allowedOrigins: readonly string[];
+  readonly socialBindings?: OfficialSocialBindingsPublication | null;
 }): (request: Request) => Promise<Response> {
   const countries = createOfficialCountryBaselineRoute(input.reader);
   const datasets = createOfficialDatasetRoute(input.reader);
   const mapAssets = createOfficialMapAssetRoute();
+  const socialBindings = createOfficialSocialBindingsRoute(
+    input.socialBindings ?? null,
+  );
   return async (request) => {
     if (request.url.length > 2_048)
       return jsonError(414, 'REQUEST_URI_TOO_LONG', request.method);
@@ -136,15 +146,17 @@ export function createOfficialEdgeFetchHandler(input: {
     }
     const path = url.pathname.slice(prefix.length);
     const route =
-      path === OFFICIAL_MAP_ASSET_LIST_PATH
-        ? mapAssets
-        : path === OFFICIAL_DATASET_LIST_PATH ||
-            path.startsWith(`${OFFICIAL_DATASET_LIST_PATH}/`)
-          ? datasets
-          : path === OFFICIAL_COUNTRY_LIST_PATH ||
-              path.startsWith(`${OFFICIAL_COUNTRY_LIST_PATH}/`)
-            ? countries
-            : undefined;
+      path === OFFICIAL_SOCIAL_BINDINGS_PATH
+        ? socialBindings
+        : path === OFFICIAL_MAP_ASSET_LIST_PATH
+          ? mapAssets
+          : path === OFFICIAL_DATASET_LIST_PATH ||
+              path.startsWith(`${OFFICIAL_DATASET_LIST_PATH}/`)
+            ? datasets
+            : path === OFFICIAL_COUNTRY_LIST_PATH ||
+                path.startsWith(`${OFFICIAL_COUNTRY_LIST_PATH}/`)
+              ? countries
+              : undefined;
     if (route === undefined) return jsonError(404, 'NOT_FOUND', request.method);
     return runNodeReadRoute(
       route,

@@ -1,0 +1,286 @@
+{
+  "schemaVersion": "postwar-gcu-country-mapping-v1",
+  "sourceMappingSha256": "d2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253",
+  "countries": [
+    {
+      "sourceCountryId": "visual-territory-01",
+      "countryId": "COUNTRY_01"
+    },
+    {
+      "sourceCountryId": "visual-territory-02",
+      "countryId": "COUNTRY_02"
+    },
+    {
+      "sourceCountryId": "visual-territory-03",
+      "countryId": "COUNTRY_03"
+    },
+    {
+      "sourceCountryId": "visual-territory-04",
+      "countryId": "COUNTRY_04"
+    },
+    {
+      "sourceCountryId": "visual-territory-05",
+      "countryId": "COUNTRY_05"
+    },
+    {
+      "sourceCountryId": "visual-territory-06",
+      "countryId": "COUNTRY_06"
+    },
+    {
+      "sourceCountryId": "visual-territory-07",
+      "countryId": "COUNTRY_07"
+    },
+    {
+      "sourceCountryId": "visual-territory-08",
+      "countryId": "COUNTRY_08"
+    },
+    {
+      "sourceCountryId": "visual-territory-09",
+      "countryId": "COUNTRY_09"
+    },
+    {
+      "sourceCountryId": "visual-territory-10",
+      "countryId": "COUNTRY_10"
+    },
+    {
+      "sourceCountryId": "visual-territory-11",
+      "countryId": "COUNTRY_11"
+    },
+    {
+      "sourceCountryId": "visual-territory-12",
+      "countryId": "COUNTRY_12"
+    },
+    {
+      "sourceCountryId": "visual-territory-13",
+      "countryId": "COUNTRY_13"
+    },
+    {
+      "sourceCountryId": "visual-territory-14",
+      "countryId": "COUNTRY_14"
+    },
+    {
+      "sourceCountryId": "visual-territory-15",
+      "countryId": "COUNTRY_15"
+    },
+    {
+      "sourceCountryId": "visual-territory-16",
+      "countryId": "COUNTRY_16"
+    },
+    {
+      "sourceCountryId": "visual-territory-17",
+      "countryId": "COUNTRY_17"
+    },
+    {
+      "sourceCountryId": "visual-territory-18",
+      "countryId": "COUNTRY_18"
+    },
+    {
+      "sourceCountryId": "visual-territory-19",
+      "countryId": "COUNTRY_19"
+    },
+    {
+      "sourceCountryId": "visual-territory-20",
+      "countryId": "COUNTRY_20"
+    },
+    {
+      "sourceCountryId": "visual-territory-21",
+      "countryId": "COUNTRY_21"
+    },
+    {
+      "sourceCountryId": "visual-territory-22",
+      "countryId": "COUNTRY_22"
+    },
+    {
+      "sourceCountryId": "visual-territory-23",
+      "countryId": "COUNTRY_23"
+    },
+    {
+      "sourceCountryId": "visual-territory-24",
+      "countryId": "COUNTRY_24"
+    },
+    {
+      "sourceCountryId": "visual-territory-25",
+      "countryId": "COUNTRY_25"
+    },
+    {
+      "sourceCountryId": "visual-territory-26",
+      "countryId": "COUNTRY_26"
+    },
+    {
+      "sourceCountryId": "visual-territory-27",
+      "countryId": "COUNTRY_27"
+    },
+    {
+      "sourceCountryId": "visual-territory-28",
+      "countryId": "COUNTRY_28"
+    },
+    {
+      "sourceCountryId": "visual-territory-29",
+      "countryId": "COUNTRY_29"
+    },
+    {
+      "sourceCountryId": "visual-territory-30",
+      "countryId": "COUNTRY_30"
+    },
+    {
+      "sourceCountryId": "visual-territory-31",
+      "countryId": "COUNTRY_31"
+    },
+    {
+      "sourceCountryId": "visual-territory-32",
+      "countryId": "COUNTRY_32"
+    },
+    {
+      "sourceCountryId": "visual-territory-33",
+      "countryId": "COUNTRY_33"
+    },
+    {
+      "sourceCountryId": "visual-territory-34",
+      "countryId": "COUNTRY_34"
+    },
+    {
+      "sourceCountryId": "visual-territory-35",
+      "countryId": "COUNTRY_35"
+    },
+    {
+      "sourceCountryId": "visual-territory-36",
+      "countryId": "COUNTRY_36"
+    },
+    {
+      "sourceCountryId": "visual-territory-37",
+      "countryId": "COUNTRY_37"
+    },
+    {
+      "sourceCountryId": "visual-territory-38",
+      "countryId": "COUNTRY_38"
+    },
+    {
+      "sourceCountryId": "visual-territory-39",
+      "countryId": "COUNTRY_39"
+    },
+    {
+      "sourceCountryId": "visual-territory-40",
+      "countryId": "COUNTRY_40"
+    },
+    {
+      "sourceCountryId": "visual-territory-41",
+      "countryId": "COUNTRY_41"
+    },
+    {
+      "sourceCountryId": "visual-territory-42",
+      "countryId": "COUNTRY_42"
+    },
+    {
+      "sourceCountryId": "visual-territory-43",
+      "countryId": "COUNTRY_43"
+    },
+    {
+      "sourceCountryId": "visual-territory-44",
+      "countryId": "COUNTRY_44"
+    },
+    {
+      "sourceCountryId": "visual-territory-45",
+      "countryId": "COUNTRY_45"
+    },
+    {
+      "sourceCountryId": "visual-territory-46",
+      "countryId": "COUNTRY_46"
+    },
+    {
+      "sourceCountryId": "visual-territory-47",
+      "countryId": "COUNTRY_47"
+    },
+    {
+      "sourceCountryId": "visual-territory-48",
+      "countryId": "COUNTRY_48"
+    },
+    {
+      "sourceCountryId": "visual-territory-49",
+      "countryId": "COUNTRY_49"
+    },
+    {
+      "sourceCountryId": "visual-territory-50",
+      "countryId": "COUNTRY_50"
+    },
+    {
+      "sourceCountryId": "visual-territory-51",
+      "countryId": "COUNTRY_51"
+    },
+    {
+      "sourceCountryId": "visual-territory-52",
+      "countryId": "COUNTRY_52"
+    },
+    {
+      "sourceCountryId": "visual-territory-53",
+      "countryId": "COUNTRY_53"
+    },
+    {
+      "sourceCountryId": "visual-territory-54",
+      "countryId": "COUNTRY_54"
+    },
+    {
+      "sourceCountryId": "visual-territory-55",
+      "countryId": "COUNTRY_55"
+    },
+    {
+      "sourceCountryId": "visual-territory-56",
+      "countryId": "COUNTRY_56"
+    },
+    {
+      "sourceCountryId": "visual-territory-57",
+      "countryId": "COUNTRY_57"
+    },
+    {
+      "sourceCountryId": "visual-territory-58",
+      "countryId": "COUNTRY_58"
+    },
+    {
+      "sourceCountryId": "visual-territory-59",
+      "countryId": "COUNTRY_59"
+    },
+    {
+      "sourceCountryId": "visual-territory-60",
+      "countryId": "COUNTRY_60"
+    },
+    {
+      "sourceCountryId": "visual-territory-61",
+      "countryId": "COUNTRY_61"
+    },
+    {
+      "sourceCountryId": "visual-territory-62",
+      "countryId": "COUNTRY_62"
+    },
+    {
+      "sourceCountryId": "visual-territory-63",
+      "countryId": "COUNTRY_63"
+    },
+    {
+      "sourceCountryId": "visual-territory-64",
+      "countryId": "COUNTRY_64"
+    },
+    {
+      "sourceCountryId": "visual-territory-65",
+      "countryId": "COUNTRY_65"
+    },
+    {
+      "sourceCountryId": "visual-territory-66",
+      "countryId": "COUNTRY_66"
+    },
+    {
+      "sourceCountryId": "visual-territory-67",
+      "countryId": "COUNTRY_67"
+    },
+    {
+      "sourceCountryId": "visual-territory-68",
+      "countryId": "COUNTRY_68"
+    },
+    {
+      "sourceCountryId": "visual-territory-69",
+      "countryId": "COUNTRY_69"
+    },
+    {
+      "sourceCountryId": "visual-territory-70",
+      "countryId": "COUNTRY_70"
+    }
+  ]
+}

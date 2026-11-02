@@ -29,6 +29,8 @@ import {
 } from '../../packages/core/src/events/event.js';
 import { SimTime } from '../../packages/core/src/numeric/sim-time.js';
 import { canonicalSerialize } from '../../packages/core/src/serialization/canonical.js';
+import { createManualOfficeCommandComposition } from '../../apps/world-worker/src/preparation/manual-office-command-composition.js';
+import { parseCanonicalCommand as parseRuntimeCommand } from '@econmind/core';
 
 // Every source/policy/approval/origin and COMMITTED receipt below is synthetic.
 // These controls prove TEST_ONLY correspondence, never actual budget execution.
@@ -741,7 +743,7 @@ describe('TEST_ONLY budget canonical correspondence — no runtime authority', (
     expect(() => set(result, 'groups.0.eventIds.0', 'MUTATED_TEST')).toThrow();
     expect(() => set(result, 'head.eventSequence', '99')).toThrow();
   });
-  it('FB-C17: no public export, official importer or budget-veto change', () => {
+  it('FB-C17: test-only replay stays private and missing native budget custody still refuses', () => {
     const read = (path: string) =>
       readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
     for (const path of [
@@ -753,13 +755,30 @@ describe('TEST_ONLY budget canonical correspondence — no runtime authority', (
       expect(read(path)).not.toContain(
         'finance-budget-causal-replay-test-contract',
       );
+    let databaseCalls = 0;
+    const database = {
+      async query() {
+        databaseCalls++;
+        throw Error('NOT_REACHED');
+      },
+      async transaction() {
+        databaseCalls++;
+        throw Error('NOT_REACHED');
+      },
+    };
     expect(
-      read(
-        'apps/world-worker/src/preparation/manual-office-command-composition.ts',
-      ),
-    ).toContain(
-      '// Deliberately no budget reader/factory/guard port or positive source.\n      return null;',
-    );
+      createManualOfficeCommandComposition({
+        command: parseRuntimeCommand(
+          commandInput(fixture().frames[0]!.command),
+          sha,
+        ),
+        database,
+        workerId: 'WORKER_TEST_BUDGET_GUARD',
+        sha256Hex: sha,
+        readers: {},
+      }),
+    ).toBeNull();
+    expect(databaseCalls).toBe(0);
     expect(
       read('apps/world-worker/src/preparation/durable-command-consumption.ts'),
     ).toContain(

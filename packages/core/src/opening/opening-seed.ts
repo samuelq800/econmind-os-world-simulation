@@ -29,6 +29,10 @@ import {
   type InventoryLedgerPosting,
 } from '../inventory/inventory-ledger.js';
 import {} from '../inventory/production-consumption-posting.js';
+import {
+  bindOpeningProductionDepositInstruments,
+  inheritProductionDepositInstruments,
+} from '../finance/production-deposit-funding.js';
 import { isMoney, Money } from '../numeric/money.js';
 import { isQuantity, Quantity } from '../numeric/quantity.js';
 import {
@@ -42,8 +46,10 @@ import {
   type AuthoritativeTransitionBinding,
 } from '../commands/receipt.js';
 import {
+  CANONICAL_HASH_ALGORITHM,
   canonicalHashInput,
   canonicalSerialize,
+  isCanonicalInputProxy,
 } from '../serialization/canonical.js';
 import {
   applyFinancialPostingBatch,
@@ -191,6 +197,73 @@ function list(value: unknown, label: string): readonly unknown[] {
   return value;
 }
 
+/** Compare all canonical evidence without repeatedly JSON-escaping a payload
+ * string already checked byte-for-byte above. Preserve descriptors/prototypes:
+ * accessors, hidden/symbol state, proxies and unexpected fields still reject.
+ * This is lexical comparison only, never a cache or a source-validation flag. */
+function replaceEvidenceValue(
+  value: object,
+  key: string,
+  replacement: unknown,
+): object {
+  if (isCanonicalInputProxy(value)) canonicalSerialize(value);
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const descriptor = descriptors[key];
+  if (
+    !descriptor ||
+    !Object.hasOwn(descriptor, 'value') ||
+    descriptor.get !== undefined ||
+    descriptor.set !== undefined ||
+    !descriptor.enumerable
+  ) {
+    // Fixed canonical rules supply the same rejection for malformed evidence.
+    canonicalSerialize(value);
+    invalid('Opening evidence must contain an enumerable data property');
+  }
+  descriptors[key] = { ...descriptor, value: replacement };
+  return Object.defineProperties(
+    Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value)),
+    descriptors,
+  ) as object;
+}
+function sourceEvidenceWithoutPayload(
+  source: object,
+  expectedPayload: string,
+): object {
+  if (isCanonicalInputProxy(source)) canonicalSerialize(source);
+  const descriptor = Object.getOwnPropertyDescriptor(
+    source,
+    'canonicalPayload',
+  );
+  if (!descriptor || descriptor.value !== expectedPayload)
+    invalid('Opening source canonical payload changed during validation');
+  return replaceEvidenceValue(source, 'canonicalPayload', '');
+}
+function seedEvidenceWithoutPayloads(
+  seed: object,
+  expectedSources: readonly OpeningSource[],
+): object {
+  const sources = (seed as { readonly sources: readonly object[] }).sources;
+  if (isCanonicalInputProxy(sources)) canonicalSerialize(sources);
+  const descriptors = Object.getOwnPropertyDescriptors(sources as object);
+  for (let index = 0; index < sources.length; index++) {
+    const descriptor = descriptors[String(index)];
+    if (!descriptor || !Object.hasOwn(descriptor, 'value')) {
+      canonicalSerialize(sources);
+      invalid('Opening source array must contain canonical data properties');
+    }
+    descriptors[String(index)] = {
+      ...descriptor,
+      value: sourceEvidenceWithoutPayload(
+        descriptor.value as object,
+        expectedSources[index]?.canonicalPayload ?? '',
+      ),
+    };
+  }
+  const masked = Object.defineProperties([], descriptors);
+  return replaceEvidenceValue(seed, 'sources', masked);
+}
+
 function parseQuantity(value: unknown): Quantity {
   const quantity = record(value, 'Opening inventory quantity');
   return Quantity.from(
@@ -240,7 +313,7 @@ export function parseOpeningSeed(
     ) {
       invalid('Unsupported opening-source schema version');
     }
-    const restored = createOpeningSource(
+    const restored = openingSourceFromCanonicalPayload(
       {
         schemaVersion: OPENING_SOURCE_SCHEMA_VERSION,
         sourceId: openingSourceId(text(source.sourceId, 'Opening source ID')),
@@ -250,11 +323,16 @@ export function parseOpeningSeed(
         ) as OpeningSourceKind,
         locator: text(source.locator, 'Opening source locator'),
         sourceVersion: text(source.sourceVersion, 'Opening source version'),
-        payload,
+        canonicalPayload,
       },
       sha256Hex,
     );
-    if (canonicalSerialize(restored) !== canonicalSerialize(source)) {
+    if (
+      canonicalSerialize(
+        sourceEvidenceWithoutPayload(restored, canonicalPayload),
+      ) !==
+      canonicalSerialize(sourceEvidenceWithoutPayload(source, canonicalPayload))
+    ) {
       invalid('Opening source hash or canonical evidence is invalid');
     }
     return restored;
@@ -339,7 +417,10 @@ export function parseOpeningSeed(
     },
     sha256Hex,
   );
-  if (canonicalSerialize(seed) !== canonicalSerialize(raw)) {
+  if (
+    canonicalSerialize(seedEvidenceWithoutPayloads(seed, seed.sources)) !==
+    canonicalSerialize(seedEvidenceWithoutPayloads(raw, seed.sources))
+  ) {
     invalid('Opening seed fingerprint or canonical evidence is invalid');
   }
   return seed;
@@ -366,6 +447,43 @@ export function createOpeningSource(
     invalid('Unsupported opening source kind');
   }
   const canonicalPayload = canonicalSerialize(input.payload);
+  return openingSourceFromCanonicalPayload(
+    {
+      schemaVersion: input.schemaVersion,
+      sourceId: input.sourceId,
+      sourceKind: input.sourceKind,
+      locator: input.locator,
+      sourceVersion: input.sourceVersion,
+      canonicalPayload,
+    },
+    sha256Hex,
+  );
+}
+
+/** Private construction from bytes just produced/checked by canonicalSerialize.
+ * It never accepts an external ready/canonical flag or skips payload validation.
+ * The one-key envelope is byte-identical to canonicalHashInput({ payload }). */
+function openingSourceFromCanonicalPayload(
+  input: {
+    readonly schemaVersion: typeof OPENING_SOURCE_SCHEMA_VERSION;
+    readonly sourceId: OpeningSourceId;
+    readonly sourceKind: OpeningSourceKind;
+    readonly locator: string;
+    readonly sourceVersion: string;
+    readonly canonicalPayload: string;
+  },
+  sha256Hex: Sha256Hex,
+): Readonly<OpeningSource> {
+  if (input.schemaVersion !== OPENING_SOURCE_SCHEMA_VERSION) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.VERSION_MISMATCH,
+      'Unsupported opening-source schema version',
+    );
+  }
+  if (!SOURCE_KINDS.includes(input.sourceKind)) {
+    invalid('Unsupported opening source kind');
+  }
+  const canonicalPayload = input.canonicalPayload;
   const source = Object.freeze({
     schemaVersion: OPENING_SOURCE_SCHEMA_VERSION,
     sourceId: openingSourceId(input.sourceId),
@@ -374,7 +492,7 @@ export function createOpeningSource(
     sourceVersion: nonEmpty(input.sourceVersion, 'source version'),
     canonicalPayload,
     payloadHash: canonicalSha256(
-      canonicalHashInput({ payload: input.payload }),
+      `${CANONICAL_HASH_ALGORITHM}\n{"payload":${canonicalPayload}}`,
       sha256Hex,
     ),
   });
@@ -606,8 +724,13 @@ export function createOpeningSeed(
   return seed;
 }
 
+/** @internal Pure identity check; does not authorize an untrusted seed. */
+export function isValidatedOpeningSeed(value: object): value is OpeningSeed {
+  return openingSeedInstances.has(value);
+}
 function openingFinancialState(
   seed: OpeningSeed,
+  sha256Hex: Sha256Hex,
 ): Readonly<FinancialLedgerState> {
   const accounts = new Map<string, Readonly<FinancialAccount>>();
   const balances = new Map<string, Money>();
@@ -631,7 +754,7 @@ function openingFinancialState(
       );
     }
   }
-  return authorizeFinancialLedgerState(
+  const state = authorizeFinancialLedgerState(
     parseFinancialLedgerSnapshot({
       worldId: seed.worldId,
       worldVersion: seed.openingWorldVersion,
@@ -646,6 +769,8 @@ function openingFinancialState(
         }),
     }),
   );
+  bindOpeningProductionDepositInstruments(seed, state, sha256Hex);
+  return state;
 }
 
 function openingInventoryState(
@@ -681,7 +806,7 @@ function financialStateAtVersion(
   state: FinancialLedgerState,
   worldVersion: string,
 ): Readonly<FinancialLedgerState> {
-  return authorizeFinancialLedgerState(
+  const next = authorizeFinancialLedgerState(
     parseFinancialLedgerSnapshot({
       worldId: state.worldId,
       worldVersion,
@@ -690,6 +815,8 @@ function financialStateAtVersion(
       appliedBatches: state.appliedBatches,
     }),
   );
+  inheritProductionDepositInstruments(next, state);
+  return next;
 }
 
 function assertInventoryPostingBinding(
@@ -729,7 +856,7 @@ export function rebuildV08LedgersFromLineage(input: {
   }
   let worldVersion: string = input.seed.openingWorldVersion;
   let inventory = openingInventoryState(input.seed);
-  let financial = openingFinancialState(input.seed);
+  let financial = openingFinancialState(input.seed, input.sha256Hex);
   const transitionIds = new Set<string>();
   const eventIds = new Set<string>();
   const idempotencyCommands = new Map<string, string>();

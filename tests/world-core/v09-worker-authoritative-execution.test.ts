@@ -109,6 +109,48 @@ describe('V09 authoritative Worker composition', () => {
     });
   });
 
+  it.each([
+    'captainSourceCommitProtectionPort',
+    'socialPositionSourceCommitProtectionPort',
+    'financeBudgetSourceCommitProtectionPort',
+    'socialMatchSourceCommitProtectionPort',
+  ] as const)(
+    'rejects a caller-forged %s before querying or preparing',
+    (port) => {
+      let effects = 0;
+      const database: SqlDatabase = {
+        async query() {
+          effects++;
+          throw new Error('NOT_REACHED');
+        },
+        async transaction() {
+          effects++;
+          throw new Error('NOT_REACHED');
+        },
+      };
+      expect(() =>
+        createAuthoritativeWorkerExecution({
+          database,
+          workerId: 'WORKER_FORGED_SOURCE_GUARD',
+          sha256Hex,
+          candidateFactory: {
+            async prepare() {
+              effects++;
+              throw new Error('NOT_REACHED');
+            },
+          },
+          [port]: {
+            async assertCurrentFrom() {
+              effects++;
+              throw new Error('NOT_REACHED');
+            },
+          },
+        }),
+      ).toThrow(/source port must be issued by its fixed native runtime/u);
+      expect(effects).toBe(0);
+    },
+  );
+
   it('has no caller-selectable authorization guard at the Worker composition root', () => {
     const transaction: SqlExecutor = Object.freeze({
       async query() {
