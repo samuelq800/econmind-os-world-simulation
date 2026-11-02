@@ -1,6 +1,6 @@
 # Actions entry cleanup — 2026-11-02
 
-Status: IMPLEMENTED_UNVERIFIED pending mainline review/acceptance. Scope: CI entry consolidation, classified P2 foundation/tooling; no authoritative application, schema, RLS, migration, deployment permission or economic behavior change. No owner approval or independent approval is inferred.
+Status: VERIFIED by explicit OWNER_FAST_TRACK_ACCEPTED, P2 foundation/tooling. Scope: CI entry consolidation; no authoritative application, schema, RLS, migration, deployment permission or economic behavior change. Owner acceptance is recorded below; no independent review is claimed.
 
 ## Authority and dependencies
 
@@ -45,3 +45,13 @@ The exact original source commit is now published under `refs/tags/provenance/mi
 Push a reviewable branch and PR. Do not stop old workflows before the new definition is merged into main. After owner acceptance/merge, disable only the mapped old IDs, read back API states and count the remaining active definitions. No irreversible history deletion is needed or authorized by the user's clarification. Under the centralized policy, implementation cannot invent P2 OWNER_FAST_TRACK_ACCEPTED; main merge/acceptance remains a distinct step.
 
 Affected owner: CI/operations; source/provenance/security/native database acceptance owners retain their checks. Legacy site and Supabase production impact: none. Rollback restores workflow files from baseline and enables their old IDs; no economic or database rollback. User instructions and original six untracked governance files remain intact.
+
+## Completion and explicit owner acceptance
+
+The project owner explicitly answered: `同意，CI 通过后合并并停用旧入口`. This grants P2 owner fast-track acceptance conditional on passing CI; it is not independent review or P0/ADR approval. Accepted implementation: `f5acddb82e407f15e33b5f4148f88adb18cec541`. Evidence: [CI run 41385170118](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/41385170118), both the unmodified complete pnpm check and native PostgreSQL V09/V10 job SUCCESS.
+
+[PR #198](https://github.com/samuelq800/econmind-os-world-simulation/pull/198) merged as `9ea759e72802a64d61571c9a94ac0d08da618c64` only after that success. New workflow ID `404117964` is active. Its source-only suite was then really dispatched on merged main: [smoke run 41387463815](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/41387463815) SUCCESS, with exactly the selector and requested source-audit job successful; the other 13 suites were skipped as designed, not claimed as exercised.
+
+All 14 old IDs were individually read back as `deleted` after their definitions were removed from main; they were already inactive, so no redundant disable PUT was needed. Total active GitHub workflow entries: **31 → 18**. Main definitions: **28 → 15**. The other three active entries are the Office development workflow and GitHub's Dependency Graph/Pages system workflows. Existing failed run `41384906951` remains readable; no run history or artifacts were deleted. Exact IDs, states, owner instruction and result metadata are recorded in the accompanying JSON.
+
+This completion update only records already observed results. It does not change the accepted workflow implementation, create another approval or advance any economic gate.
