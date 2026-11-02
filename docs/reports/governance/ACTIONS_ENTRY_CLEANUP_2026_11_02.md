@@ -36,6 +36,12 @@ The initial PowerShell wildcard invocation of actionlint failed to expand filena
 
 ## Release and stopping boundary
 
+### Remote provenance correction discovered by real CI
+
+Initial PR run `41384906951` failed the unchanged native job at `migration:validate`: `SOURCE_COMMIT_NOT_FOUND:0023_world_v2_production_consumption_posting`. Local validation passed because this machine retained cleanup backup refs. The preceding branch cleanup had removed `codex/f-production-posting-schema` on exact current-file equivalence, but its historical source commit `4714c1da7af9324741996b94c6da036bf54c39a4` was still a required manifest dependency. Tree equivalence alone was insufficient for that deletion.
+
+The exact original source commit is now published under `refs/tags/provenance/migration-0023-4714c1da`, so existing full-history checkout can fetch it without restoring another work branch. This is a provenance anchor, not a release, schema mutation or permission approval. The migration manifest, SQL bytes and validation rules are unchanged. A subsequent remote-ref reachability check covers all 23 migration source commits: PASS, none missing. No CI failure was bypassed; the initial failed run remains historical evidence. The repaired candidate must pass a new real CI run before merge.
+
 Push a reviewable branch and PR. Do not stop old workflows before the new definition is merged into main. After owner acceptance/merge, disable only the mapped old IDs, read back API states and count the remaining active definitions. No irreversible history deletion is needed or authorized by the user's clarification. Under the centralized policy, implementation cannot invent P2 OWNER_FAST_TRACK_ACCEPTED; main merge/acceptance remains a distinct step.
 
 Affected owner: CI/operations; source/provenance/security/native database acceptance owners retain their checks. Legacy site and Supabase production impact: none. Rollback restores workflow files from baseline and enables their old IDs; no economic or database rollback. User instructions and original six untracked governance files remain intact.

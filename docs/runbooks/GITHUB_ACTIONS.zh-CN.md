@@ -53,6 +53,8 @@
 
 ## 生效、历史与恢复
 
+迁移验收依赖 manifest 指定的历史来源提交。不要删除专用 `provenance/*` 来源 tag；全历史 checkout 必须同时取得这些 tag。当前迁移 0023 的必要引用为 `provenance/migration-0023-4714c1da`。仅比较分支当前文件是否与 main 一致，不能证明来源历史已被保存。
+
 此变更合入默认 main 后，新手动入口才正式可用。在此之前不通过 API 停用旧工作流，避免暂时失去验收入口。
 
 合入后可按清理记录中的旧 ID 停用 14 个旧入口，并读回状态。若 GitHub 仍显示旧工作流历史，它不等于该入口仍可执行；为了清理名称而删除过去的运行证据不属于本次操作。GitHub API 本身提供启用/停用工作流能力，参见[官方说明](https://docs.github.com/en/rest/actions/workflows#disable-a-workflow)。
