@@ -1,0 +1,246 @@
+{
+  "baseline": "cd966907494ddee5d8a86f18f75989f0eff288ce",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "mainWorkflowFilesBefore": 28,
+  "mainWorkflowFilesAfter": 15,
+  "remoteWorkflowCountBefore": 31,
+  "remoteMutationPerformed": false,
+  "runHistoryDeleted": false,
+  "oldEntries": [
+    {
+      "suite": "e-world-v2-release-handoff",
+      "formerWorkflow": ".github/workflows/e-world-v2-release-handoff.yml",
+      "formerJob": "native-pg17-release-handoff",
+      "branches": [
+        "codex/e-world-v2-release-handoff"
+      ],
+      "normalizedJobSha256": "d34a405474ad67a5a64a49bc77f6808f55178c8d49d78dd49d148ff6ffbde94e",
+      "workflowId": 368210149,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "f-durable-command-intake",
+      "formerWorkflow": ".github/workflows/f-durable-command-intake.yml",
+      "formerJob": "native-intake",
+      "branches": [
+        "codex/f-durable-command-receipt"
+      ],
+      "normalizedJobSha256": "626ad4c706cd31f0e038b094761e28401db9a051bf03c67ca345ab8b3f3e9c9b",
+      "workflowId": 368165105,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "f-official-opening",
+      "formerWorkflow": ".github/workflows/f-official-opening.yml",
+      "formerJob": "isolated-opening",
+      "branches": [
+        "codex/f-opening-seed-70-country"
+      ],
+      "normalizedJobSha256": "3abe41095f82aae7fa0e85c4f49ee2bf197fa14e4659387b12492b153be4ef32",
+      "workflowId": 370678431,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "gate-b-disposable-diagnostic",
+      "formerWorkflow": ".github/workflows/gate-b-disposable-diagnostic.yml",
+      "formerJob": "disposable-v09-diagnostic",
+      "branches": [],
+      "normalizedJobSha256": "b02713d3a0485aa7df2bb316132bf8b23aa5f28a0b712b0b040c6c313338d31c",
+      "workflowId": 365649385,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "narrow-transfer-approval-reference",
+      "formerWorkflow": ".github/workflows/narrow-transfer-approval-reference.yml",
+      "formerJob": "native-approval-reference",
+      "branches": [
+        "codex/narrow-transfer-approval-reference"
+      ],
+      "normalizedJobSha256": "0d03f20d1ff43c06838bfd2655a9d99ead136b8dbe84938c1d29c24bd58c277a",
+      "workflowId": 368162227,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "staged-narrow-transfer-http",
+      "formerWorkflow": ".github/workflows/staged-narrow-transfer-http.yml",
+      "formerJob": "native-staged-http",
+      "branches": [
+        "codex/staged-narrow-transfer-http",
+        "codex/live-command-bridge"
+      ],
+      "normalizedJobSha256": "1727b7ded1945e437081f2b9e36ded78120de5bb6565ba9ba2c66033721462f1",
+      "workflowId": 368181905,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "v30-2-postgres-permission-negatives",
+      "formerWorkflow": ".github/workflows/v30-2-postgres-permission-negatives.yml",
+      "formerJob": "native-world-v2-permission-negatives",
+      "branches": [],
+      "normalizedJobSha256": "ac656c3b1103d3bc35579dfb18964dbd99fb3603d579815ff73a007cefc1b717",
+      "workflowId": 365788761,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "v30-3-local-authenticated-bridge",
+      "formerWorkflow": ".github/workflows/v30-3-local-authenticated-bridge.yml",
+      "formerJob": "native-local-authenticated-bridge",
+      "branches": [
+        "codex/e-gateb-auth-chain"
+      ],
+      "normalizedJobSha256": "0ec3b55b803354df51853341aed9321b2071e691ce03e8ca115d73aa38a110b4",
+      "workflowId": 365852758,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "v30-4-buyer-finance-approval-reader",
+      "formerWorkflow": ".github/workflows/v30-4-buyer-finance-approval-reader.yml",
+      "formerJob": "native-buyer-finance-approval-reader",
+      "branches": [
+        "codex/e-buyer-finance-reader-native"
+      ],
+      "normalizedJobSha256": "1638ceaab06c5d8096b55332c07373a15d9888dd7a7074a91ad442ad8312ab4e",
+      "workflowId": 368168594,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "v30-disposable-restore",
+      "formerWorkflow": ".github/workflows/v30-disposable-restore.yml",
+      "formerJob": "disposable-restore",
+      "branches": [],
+      "normalizedJobSha256": "2cd8d403e8c1db3a7a6860edd23432fd29c062c1316a447d5945ff4c9f4601cf",
+      "workflowId": 365818812,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "world-v2-api-full-reader-role",
+      "formerWorkflow": ".github/workflows/world-v2-api-full-reader-role.yml",
+      "formerJob": "native-full-reader-role",
+      "branches": [
+        "codex/e-official-data-full-reader"
+      ],
+      "normalizedJobSha256": "f60e0a4d10e24b77006934f628c2e70e20531bc5e9a6e4630b6f6fe8acc612d2",
+      "workflowId": 370691432,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "world-v2-api-reader-readback-audit-postgres",
+      "formerWorkflow": ".github/workflows/world-v2-api-reader-readback-audit-postgres.yml",
+      "formerJob": "native-readback",
+      "branches": [
+        "codex/e-reader-readback-audit"
+      ],
+      "normalizedJobSha256": "d89c86f330039e7f09c06661a9b3c593e67a9e6f7fbff620befbd4fc34464be4",
+      "workflowId": 370715379,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "world-v2-api-reader-readback-audit",
+      "formerWorkflow": ".github/workflows/world-v2-api-reader-readback-audit.yml",
+      "formerJob": "source",
+      "branches": [
+        "codex/e-reader-readback-audit"
+      ],
+      "normalizedJobSha256": "ac3a19f8198a0a83dbfa73025327613a24f98db64555c92c2223521c28c299ef",
+      "workflowId": 370704245,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    },
+    {
+      "suite": "world-v2-api-reader-role",
+      "formerWorkflow": ".github/workflows/world-v2-api-reader-role.yml",
+      "formerJob": "native-reader-role",
+      "branches": [
+        "codex/e-official-data-release"
+      ],
+      "normalizedJobSha256": "ca602ca612999238257ca361921b39da0edf2a5bab43e3a5894b9d6aa1208ca0",
+      "workflowId": 370674979,
+      "plannedAfterMainMerge": "disable; preserve runs and artifacts"
+    }
+  ],
+  "jobEquivalence": [
+    {
+      "suite": "e-world-v2-release-handoff",
+      "formerWorkflow": ".github/workflows/e-world-v2-release-handoff.yml",
+      "formerJob": "native-pg17-release-handoff",
+      "status": "PASS"
+    },
+    {
+      "suite": "f-durable-command-intake",
+      "formerWorkflow": ".github/workflows/f-durable-command-intake.yml",
+      "formerJob": "native-intake",
+      "status": "PASS"
+    },
+    {
+      "suite": "f-official-opening",
+      "formerWorkflow": ".github/workflows/f-official-opening.yml",
+      "formerJob": "isolated-opening",
+      "status": "PASS"
+    },
+    {
+      "suite": "gate-b-disposable-diagnostic",
+      "formerWorkflow": ".github/workflows/gate-b-disposable-diagnostic.yml",
+      "formerJob": "disposable-v09-diagnostic",
+      "status": "PASS"
+    },
+    {
+      "suite": "narrow-transfer-approval-reference",
+      "formerWorkflow": ".github/workflows/narrow-transfer-approval-reference.yml",
+      "formerJob": "native-approval-reference",
+      "status": "PASS"
+    },
+    {
+      "suite": "staged-narrow-transfer-http",
+      "formerWorkflow": ".github/workflows/staged-narrow-transfer-http.yml",
+      "formerJob": "native-staged-http",
+      "status": "PASS"
+    },
+    {
+      "suite": "v30-2-postgres-permission-negatives",
+      "formerWorkflow": ".github/workflows/v30-2-postgres-permission-negatives.yml",
+      "formerJob": "native-world-v2-permission-negatives",
+      "status": "PASS"
+    },
+    {
+      "suite": "v30-3-local-authenticated-bridge",
+      "formerWorkflow": ".github/workflows/v30-3-local-authenticated-bridge.yml",
+      "formerJob": "native-local-authenticated-bridge",
+      "status": "PASS"
+    },
+    {
+      "suite": "v30-4-buyer-finance-approval-reader",
+      "formerWorkflow": ".github/workflows/v30-4-buyer-finance-approval-reader.yml",
+      "formerJob": "native-buyer-finance-approval-reader",
+      "status": "PASS"
+    },
+    {
+      "suite": "v30-disposable-restore",
+      "formerWorkflow": ".github/workflows/v30-disposable-restore.yml",
+      "formerJob": "disposable-restore",
+      "status": "PASS"
+    },
+    {
+      "suite": "world-v2-api-full-reader-role",
+      "formerWorkflow": ".github/workflows/world-v2-api-full-reader-role.yml",
+      "formerJob": "native-full-reader-role",
+      "status": "PASS"
+    },
+    {
+      "suite": "world-v2-api-reader-readback-audit-postgres",
+      "formerWorkflow": ".github/workflows/world-v2-api-reader-readback-audit-postgres.yml",
+      "formerJob": "native-readback",
+      "status": "PASS"
+    },
+    {
+      "suite": "world-v2-api-reader-readback-audit",
+      "formerWorkflow": ".github/workflows/world-v2-api-reader-readback-audit.yml",
+      "formerJob": "source",
+      "status": "PASS"
+    },
+    {
+      "suite": "world-v2-api-reader-role",
+      "formerWorkflow": ".github/workflows/world-v2-api-reader-role.yml",
+      "formerJob": "native-reader-role",
+      "status": "PASS"
+    }
+  ]
+}

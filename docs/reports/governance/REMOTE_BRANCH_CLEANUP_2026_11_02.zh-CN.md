@@ -1,5 +1,7 @@
 # GitHub 远端分支清理记录
 
+> 后续纠正：Actions 整理的真实 CI 发现，文件内容等价不代表历史来源引用可删除。原 `codex/f-production-posting-schema` 中的 `4714c1da7af9324741996b94c6da036bf54c39a4` 是迁移 0023 的 manifest 来源。已用专用 tag `provenance/migration-0023-4714c1da` 恢复其远端可达性；23 项迁移来源的远端可达性复查通过，未改校验规则。今后清理分支必须先保留 manifest 和受控证据引用的历史提交。详细记录见 `ACTIONS_ENTRY_CLEANUP_2026_11_02.md`。
+
 日期：2026-11-02（Asia/Shanghai）。范围：`samuelq800/econmind-os-world-simulation` 的远端分支维护，用户明确要求按 main 和现有方针清理。没有合并候选代码或改变经济逻辑、数据库、生产部署、ADR 和 R2 gate。
 
 ## 基准与判断方式
