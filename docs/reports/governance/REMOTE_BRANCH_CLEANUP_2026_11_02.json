@@ -1,0 +1,4035 @@
+{
+  "date": "2026-11-02",
+  "main": "14595f81caec2ed5ce7cec564d7db9609b693718",
+  "openPullRequests": [
+    {
+      "number": 196,
+      "title": "Assemble registered Node host and extend office operation sources",
+      "branch": "codex/office-operations-followup-20261030",
+      "sha": "46532148934bc23387e4756519843fc8846d1e02"
+    },
+    {
+      "number": 195,
+      "title": "Connect postwar office sources, shared execution, and mixed database readback",
+      "branch": "codex/postwar-fx-mixed-replay-20261029",
+      "sha": "aeece72da119573018602abeb56a8f15d7985713"
+    }
+  ],
+  "policy": "No merge, main rewrite, tags or runtime changes. Exact-blob equality or commit reachability only. Changed remote tips rejected by leases.",
+  "rows": [
+    {
+      "sha": "2321e40e3c4ca25727677c0dab3dbb8a6994fab0",
+      "ref": "refs/heads/chore/r2-governance-sync",
+      "name": "chore/r2-governance-sync",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7549ba288551efb5bd099bf46019eab4c780c3d7",
+      "ref": "refs/heads/codex/a-budget-intake-reviewed-integration-20261018",
+      "name": "codex/a-budget-intake-reviewed-integration-20261018",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ed7d98f91c06763d9dea955d3b421bab433f328b",
+      "ref": "refs/heads/codex/a-cb1-omo-source-draft",
+      "name": "codex/a-cb1-omo-source-draft",
+      "changedFiles": 8,
+      "unmatchedFiles": 3,
+      "examples": [
+        "tests/world-core/cb1-omo-source-draft.test.ts",
+        "tsconfig.cb1.json",
+        "vitest.cb1.config.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "830f1a7680b5ba398b7c2688e1fb26722c68f16d",
+      "ref": "refs/heads/codex/a-crisis-locale-continuity-20261016",
+      "name": "codex/a-crisis-locale-continuity-20261016",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b2e3c8830aa47b94c5c47ae094d97220e3dc045b",
+      "ref": "refs/heads/codex/a-fb2-main1d0-integration-20261015",
+      "name": "codex/a-fb2-main1d0-integration-20261015",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "49bc625701ffcb184da21040a7f85924bb537cd7",
+      "ref": "refs/heads/codex/a-financial-crisis-reviewed-20261014",
+      "name": "codex/a-financial-crisis-reviewed-20261014",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a973dd91a9e0caf5886c45f4fbfcde5411010714",
+      "ref": "refs/heads/codex/a-financial-source-main-integration",
+      "name": "codex/a-financial-source-main-integration",
+      "changedFiles": 9,
+      "unmatchedFiles": 1,
+      "examples": [
+        "apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "6f5a784de02b2ca7dd798eedc7f10d4a7e1fcb45",
+      "ref": "refs/heads/codex/a-isolated-clock-p1-p2-20261011",
+      "name": "codex/a-isolated-clock-p1-p2-20261011",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "801660d19ba4e5d72c2fc4bd7b2eab933a851702",
+      "ref": "refs/heads/codex/a-non-host-financial-adoption",
+      "name": "codex/a-non-host-financial-adoption",
+      "changedFiles": 9,
+      "unmatchedFiles": 1,
+      "examples": [
+        "apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "51c012d7f11d3d6aac1b5280c2c0f78274791422",
+      "ref": "refs/heads/codex/a-readout-crisis-generated-at-integration-20261016",
+      "name": "codex/a-readout-crisis-generated-at-integration-20261016",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fe8c4f263dbde520a3f1725fb39ffe199c1c8254",
+      "ref": "refs/heads/codex/a-renewal-frozen-prefix-compat",
+      "name": "codex/a-renewal-frozen-prefix-compat",
+      "changedFiles": 72,
+      "unmatchedFiles": 27,
+      "examples": [
+        ".github/workflows/trusted-country-runtime.yml",
+        "README.md",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-web/src/country-runtime/entry.ts",
+        "apps/world-web/src/financial-intake/view.ts",
+        "apps/world-web/src/office-projection/model.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d7337b6992f5191d3c80143a04c1523662236579",
+      "ref": "refs/heads/codex/a-reviewed-financial-main-final",
+      "name": "codex/a-reviewed-financial-main-final",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "dd38fa625ea23ecfc2ac65650970f92076eb0658",
+      "ref": "refs/heads/codex/a-social-office-opening-finance-20261026",
+      "name": "codex/a-social-office-opening-finance-20261026",
+      "changedFiles": 2,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "590c320d8582d2a8709930fed1cd7c853836b294",
+      "ref": "refs/heads/codex/activation-cutover-plan-20261008",
+      "name": "codex/activation-cutover-plan-20261008",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "6f4a175674d248ef566dcd3072604c98f0e86f17",
+      "ref": "refs/heads/codex/adr-01-03-owner-approval",
+      "name": "codex/adr-01-03-owner-approval",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ec0f67d1e8e618bd0cf77089a0fd615cb10e0f5e",
+      "ref": "refs/heads/codex/adr16-20-owner-decisions",
+      "name": "codex/adr16-20-owner-decisions",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "cbbb3f608b4bf9265011ee42a835633fb974e011",
+      "ref": "refs/heads/codex/all-office-connection-workflow-20261028",
+      "name": "codex/all-office-connection-workflow-20261028",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "4448ea301293181a6791bc3831d6d827232edfa9",
+      "ref": "refs/heads/codex/api-command-version-fence",
+      "name": "codex/api-command-version-fence",
+      "changedFiles": 3,
+      "unmatchedFiles": 2,
+      "examples": [
+        "apps/world-api/src/integration/authenticated-narrow-transfer-command-handler.ts",
+        "tests/world-api/local-nonproduction-http-bridge.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "079ad4e174a20b0c811dda944466c383d90cb612",
+      "ref": "refs/heads/codex/atlas-scene-separation-20261012",
+      "name": "codex/atlas-scene-separation-20261012",
+      "changedFiles": 7,
+      "unmatchedFiles": 7,
+      "examples": [
+        "apps/world-web/src/brand-shell/brand-shell.css",
+        "apps/world-web/src/map-explorer/WorldExplorer.tsx",
+        "apps/world-web/src/map-explorer/world-explorer.css",
+        "docs/reports/brand-shell-20261010/SOURCE.json",
+        "docs/reports/country-context-20261010/SOURCE.json",
+        "scripts/publish-brand-shell.mjs"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "2ff0b471578f3a87941fcd112f8a4607037dadfc",
+      "ref": "refs/heads/codex/authority-preparation-consumer-fixes",
+      "name": "codex/authority-preparation-consumer-fixes",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b85747cb6175aad0fd600b0e0f926eae7df8e89a",
+      "ref": "refs/heads/codex/authority-preparation-reviewed-main",
+      "name": "codex/authority-preparation-reviewed-main",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "dcce6e5a91b76b84167ed687bd2f01c70025e1c8",
+      "ref": "refs/heads/codex/batch-closeout-20261011",
+      "name": "codex/batch-closeout-20261011",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "6a849142a010cd2b451f5fd15419285129fb8c08",
+      "ref": "refs/heads/codex/bd-reviewed-closure-20261010",
+      "name": "codex/bd-reviewed-closure-20261010",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d5618f3b659b14576a50eef168140e06c6b9ceac",
+      "ref": "refs/heads/codex/c-country-role-qa",
+      "name": "codex/c-country-role-qa",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "74768eafc8461767a02c3a7008e3acf8ccfbb4d9",
+      "ref": "refs/heads/codex/c-country-role-qa-wait-fix",
+      "name": "codex/c-country-role-qa-wait-fix",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "cf19e9591b095ce80f255edebbf24ed745bffa32",
+      "ref": "refs/heads/codex/c-country01-fee-buffer-20261021",
+      "name": "codex/c-country01-fee-buffer-20261021",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b7e132c4430ce2a6116a601727c17d005db57a15",
+      "ref": "refs/heads/codex/c-financial-lockfix-main-integration",
+      "name": "codex/c-financial-lockfix-main-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3b7b5f46dab8eaa30b55c12f1342503c877647cf",
+      "ref": "refs/heads/codex/c-immersive-index-alias-20261016",
+      "name": "codex/c-immersive-index-alias-20261016",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "90c897670fff8f64b5f55b029c153b5cc9feabc3",
+      "ref": "refs/heads/codex/c-official-ui-exact",
+      "name": "codex/c-official-ui-exact",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ef3af983aa9f996f599a392bb244872a3cb59a32",
+      "ref": "refs/heads/codex/c-official-world-complete-coverage",
+      "name": "codex/c-official-world-complete-coverage",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b8dba0ab38cbfcce71aed8e91d2d2d36d7fdcfbf",
+      "ref": "refs/heads/codex/c-official-world-json-format",
+      "name": "codex/c-official-world-json-format",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "c66de7efe84539dd61e9f578d6f9ecb6b2ad9f63",
+      "ref": "refs/heads/codex/c-official-world-mapping",
+      "name": "codex/c-official-world-mapping",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "4083c77d8221544723a0beac506024f7792c9f18",
+      "ref": "refs/heads/codex/c-r3-integration-20261020",
+      "name": "codex/c-r3-integration-20261020",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "df314ad3bacaa9d44bba04a853583dbb93a8029b",
+      "ref": "refs/heads/codex/c-social-office-actions-20261026",
+      "name": "codex/c-social-office-actions-20261026",
+      "changedFiles": 8,
+      "unmatchedFiles": 6,
+      "examples": [
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/inventory/inventory-ledger.ts",
+        "packages/core/src/inventory/production-consumption-posting.ts",
+        "packages/core/src/inventory/social-service-consumption-posting.ts",
+        "tests/world-core/c-social-service-consumption-posting.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "bff170389daa3a357044e1c2618e626322f794c8",
+      "ref": "refs/heads/codex/c-social-source-main-integration",
+      "name": "codex/c-social-source-main-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fa271bc5e24c3aa91fd53c11f2e3ec356bb327be",
+      "ref": "refs/heads/codex/c-trusted-runtime-ui-bridge",
+      "name": "codex/c-trusted-runtime-ui-bridge",
+      "changedFiles": 9,
+      "unmatchedFiles": 6,
+      "examples": [
+        ".github/workflows/trusted-country-runtime.yml",
+        "apps/world-web/public/season1-immersive/country-game.js",
+        "apps/world-web/src/country-runtime/entry.ts",
+        "apps/world-web/src/country-runtime/trusted-runtime.ts",
+        "apps/world-web/vite.config.ts",
+        "tests/world-web/trusted-country-runtime.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "7f504fea0893c3c1b60b875db8e916e04d18adba",
+      "ref": "refs/heads/codex/c-v10-authorization-guard-tests",
+      "name": "codex/c-v10-authorization-guard-tests",
+      "changedFiles": 82,
+      "unmatchedFiles": 49,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "apps/world-worker/src/recovery/world-recovery.ts",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "68e07438b1f6f1d38ca2fde488a079bad8cbcc04",
+      "ref": "refs/heads/codex/c-v10-fixture-preparation",
+      "name": "codex/c-v10-fixture-preparation",
+      "changedFiles": 74,
+      "unmatchedFiles": 39,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md",
+        "docs/exec-plans/V09.3.md",
+        "docs/exec-plans/V09.md"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/c-v10-fixture-preparation-fix"
+    },
+    {
+      "sha": "33cf489bea9b1a3d8226c2d17c659d643ff45257",
+      "ref": "refs/heads/codex/c-v10-fixture-preparation-fix",
+      "name": "codex/c-v10-fixture-preparation-fix",
+      "changedFiles": 74,
+      "unmatchedFiles": 39,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md",
+        "docs/exec-plans/V09.3.md",
+        "docs/exec-plans/V09.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "3731ccabf65bc54e3339af7b5003f26969e20b66",
+      "ref": "refs/heads/codex/c-v10-fixture-preparation-rebase",
+      "name": "codex/c-v10-fixture-preparation-rebase",
+      "changedFiles": 96,
+      "unmatchedFiles": 48,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "8038bc3f8d129f1d6bfa3877d7353ba96da15ac0",
+      "ref": "refs/heads/codex/c-v17-v18-household-fiscal-foundation",
+      "name": "codex/c-v17-v18-household-fiscal-foundation",
+      "changedFiles": 25,
+      "unmatchedFiles": 4,
+      "examples": [
+        "packages/core/src/engine-kernels/household-fiscal-closure.ts",
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v17-v18-foundation-acceptance"
+    },
+    {
+      "sha": "e818d4c701461f16a862e2f9bd59cb9ba3e4b445",
+      "ref": "refs/heads/codex/c-v22-international-contract-foundation",
+      "name": "codex/c-v22-international-contract-foundation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "76e39a9ec6d9702608e7c7e8c35dbb0a6d4e9c3c",
+      "ref": "refs/heads/codex/c-water8-b13-integration-20261018",
+      "name": "codex/c-water8-b13-integration-20261018",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "91e6ce3028cfa6ef31183bf26f3ed2283ef3ffa3",
+      "ref": "refs/heads/codex/c7-inert-integration-20261017",
+      "name": "codex/c7-inert-integration-20261017",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "8af46d36c6a8c30ca0799c610b37ae2cdadc2993",
+      "ref": "refs/heads/codex/cf-source-read-integration-20261021",
+      "name": "codex/cf-source-read-integration-20261021",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "38e1585ea63e3b01fd7bed05347c605c9b4cf2e9",
+      "ref": "refs/heads/codex/cloudflare-handoff-20261016",
+      "name": "codex/cloudflare-handoff-20261016",
+      "action": "KEEP",
+      "reason": "PROTECTED_ACTIVE_MAIN_PR_WORKTREE_OR_PLAN"
+    },
+    {
+      "sha": "c974f6d6b3090f41c48cc744c0845b79a95cc1cd",
+      "ref": "refs/heads/codex/country-candidate-batched-import",
+      "name": "codex/country-candidate-batched-import",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "878631bff23d8af0d96bda5e58f11fb7eed97b1d",
+      "ref": "refs/heads/codex/country-dataset-intake",
+      "name": "codex/country-dataset-intake",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e55378d8baff860626897b80aa41c684231ac8d3",
+      "ref": "refs/heads/codex/custom-domain-readiness-20261002-side",
+      "name": "codex/custom-domain-readiness-20261002-side",
+      "changedFiles": 5,
+      "unmatchedFiles": 3,
+      "examples": [
+        ".github/workflows/deploy-world-web.yml",
+        "apps/world-web/vite.config.ts",
+        "scripts/check-world-web-public-base.mjs"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "ebbd6fc5ccf57f499eac178f0c9ee2c9f7fb4621",
+      "ref": "refs/heads/codex/d-authorized-read-adapter",
+      "name": "codex/d-authorized-read-adapter",
+      "changedFiles": 8,
+      "unmatchedFiles": 5,
+      "examples": [
+        "apps/world-web/src/prototype/App.tsx",
+        "apps/world-web/src/prototype/CommandLifecycleStatus.tsx",
+        "apps/world-web/src/prototype/NationalOverview.tsx",
+        "apps/world-web/src/prototype/SixOfficesG01.tsx",
+        "apps/world-web/src/prototype/authorized-read-adapter.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "662ddfb028bacc37467496d15d992297c877e6cb",
+      "ref": "refs/heads/codex/d-b08-two-case-main-20261018",
+      "name": "codex/d-b08-two-case-main-20261018",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "73b7d952f788c621d14e34af35ce0cb96f711acb",
+      "ref": "refs/heads/codex/d-boot-publication-provenance",
+      "name": "codex/d-boot-publication-provenance",
+      "changedFiles": 4,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "faf0b59b65419696df2a8c8cb5aaa863ab983716",
+      "ref": "refs/heads/codex/d-browser-financial-intake",
+      "name": "codex/d-browser-financial-intake",
+      "changedFiles": 45,
+      "unmatchedFiles": 16,
+      "examples": [
+        "apps/world-api/src/integration/authenticated-financial-intake-composition.ts",
+        "apps/world-api/src/integration/postgres-financial-intake-database.ts",
+        "apps/world-api/src/integration/postgres-runtime-read-executor.ts",
+        "apps/world-api/src/integration/postgres-server-read-binding.ts",
+        "apps/world-web/src/country-runtime/entry.ts",
+        "apps/world-web/src/financial-intake/view.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/d-current-financial-position-consumer"
+    },
+    {
+      "sha": "284858fd141ca0dacb57c50df00fa82b681bf13c",
+      "ref": "refs/heads/codex/d-budget-causal-binding-v1",
+      "name": "codex/d-budget-causal-binding-v1",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0b94442550e04d091112628635e8fe3f083ffd7f",
+      "ref": "refs/heads/codex/d-budget-inert-integration-20261017",
+      "name": "codex/d-budget-inert-integration-20261017",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fc1e4f977d3de1196c2b3c447fa099bdb381f828",
+      "ref": "refs/heads/codex/d-command-receipt-binding-fix",
+      "name": "codex/d-command-receipt-binding-fix",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "46fd860bba48a27528e3e61cef1c62f9e1a76941",
+      "ref": "refs/heads/codex/d-command-receipt-loop",
+      "name": "codex/d-command-receipt-loop",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7e0d849bc0df95b659a769ce40d45921be5ab2ab",
+      "ref": "refs/heads/codex/d-command-status-mainline",
+      "name": "codex/d-command-status-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "96911d19278c2e7ed1dacc7d8bd9f422e701d364",
+      "ref": "refs/heads/codex/d-command-status-presentation",
+      "name": "codex/d-command-status-presentation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "811ebe74bcfae6940aed3f0745f2d4328ff8f6b3",
+      "ref": "refs/heads/codex/d-current-financial-position-consumer",
+      "name": "codex/d-current-financial-position-consumer",
+      "changedFiles": 57,
+      "unmatchedFiles": 12,
+      "examples": [
+        "apps/world-api/src/integration/authenticated-financial-intake-composition.ts",
+        "apps/world-api/src/integration/postgres-financial-intake-database.ts",
+        "apps/world-api/src/integration/postgres-runtime-read-executor.ts",
+        "apps/world-api/src/integration/postgres-server-read-binding.ts",
+        "apps/world-web/src/country-runtime/entry.ts",
+        "apps/world-web/src/financial-intake/view.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "ccefb9ea2419d8ecb88140ce2a2f33e7663b86cb",
+      "ref": "refs/heads/codex/d-daily-attempt-source-protocol-v1",
+      "name": "codex/d-daily-attempt-source-protocol-v1",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "de3fee4823015625f77a1c209814d52f4140f9e9",
+      "ref": "refs/heads/codex/d-final-receipt-lookup-prep",
+      "name": "codex/d-final-receipt-lookup-prep",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "4fad6a87e0d79572d114f43c713ffb06306f1221",
+      "ref": "refs/heads/codex/d-financial-mainline-20261013",
+      "name": "codex/d-financial-mainline-20261013",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "f571f12d602179bb8c524326387087dadc89d8a1",
+      "ref": "refs/heads/codex/d-fixed-projection-main-integration",
+      "name": "codex/d-fixed-projection-main-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e60115f8f690ef6cf8eed82ff776ed470e174719",
+      "ref": "refs/heads/codex/d-full-data-matrix",
+      "name": "codex/d-full-data-matrix",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "728d2ae9ad214a6a9630e6e44db3caea9328581b",
+      "ref": "refs/heads/codex/d-full-data-page-read",
+      "name": "codex/d-full-data-page-read",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5c8c17b90319bee4238dddc5c16c7766c1916571",
+      "ref": "refs/heads/codex/d-gateb-browser-harness",
+      "name": "codex/d-gateb-browser-harness",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "cc83059882473d9d9f665cd76b379d0584513b36",
+      "ref": "refs/heads/codex/d-gateb-browser-liveness-fix",
+      "name": "codex/d-gateb-browser-liveness-fix",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7340c421b7243eed5d0f73e00cd84e1f622d22be",
+      "ref": "refs/heads/codex/d-gateb-local-browser-host",
+      "name": "codex/d-gateb-local-browser-host",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "9c07ecdc787bb61412e7fdedf44719c69151f413",
+      "ref": "refs/heads/codex/d-industry-source-stage2a-v1",
+      "name": "codex/d-industry-source-stage2a-v1",
+      "changedFiles": 9,
+      "unmatchedFiles": 1,
+      "examples": [
+        "apps/world-worker/src/persistence/industry-production-source-cutoff.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "b0db98acb38ac3c888eb41d810c0a7b42f5b33ec",
+      "ref": "refs/heads/codex/d-local-demo",
+      "name": "codex/d-local-demo",
+      "changedFiles": 11,
+      "unmatchedFiles": 11,
+      "examples": [
+        "apps/world-web/public/local-demo/demo.css",
+        "apps/world-web/public/local-demo/demo.js",
+        "apps/world-web/public/local-demo/index.html",
+        "apps/world-web/public/local-demo/map-camera.js",
+        "apps/world-web/public/local-demo/office-demo.css",
+        "apps/world-web/public/local-demo/office-demo.js"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "56f77250d7e9a26809b67fe5ebc9ae4a9717a788",
+      "ref": "refs/heads/codex/d-metric-source-intel",
+      "name": "codex/d-metric-source-intel",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e4ab2db7c02b350dbbbd01402018dcc5a09f9aee",
+      "ref": "refs/heads/codex/d-mobile-drawer-reachability",
+      "name": "codex/d-mobile-drawer-reachability",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b07d9699db3cc450871374fdf3393f803c355d90",
+      "ref": "refs/heads/codex/d-native-coupon-core-v1",
+      "name": "codex/d-native-coupon-core-v1",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3354c29d2f9d039cd8d491dc8ede48325fb09753",
+      "ref": "refs/heads/codex/d-office-decision-result-consumer",
+      "name": "codex/d-office-decision-result-consumer",
+      "changedFiles": 9,
+      "unmatchedFiles": 6,
+      "examples": [
+        "apps/world-web/src/office-projection/decision-result-view.ts",
+        "apps/world-web/src/office-projection/decision-result.ts",
+        "apps/world-web/src/office-projection/model.ts",
+        "apps/world-web/src/office-projection/view.ts",
+        "tests/support/office-decision-result-consumer-fixture.ts",
+        "tests/world-web/office-decision-result-consumer.tsconfig.json"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "5c1f355aecc7656c45a44bbab444699c0295b526",
+      "ref": "refs/heads/codex/d-official-country-boot-guard",
+      "name": "codex/d-official-country-boot-guard",
+      "changedFiles": 4,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5fbb36f64993f4be0d62d39d0d5ed76c86da3161",
+      "ref": "refs/heads/codex/d-official-data-read",
+      "name": "codex/d-official-data-read",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d9cdc8db58f2ab829bb1cefb2bc25bb261592c02",
+      "ref": "refs/heads/codex/d-official-map-publication",
+      "name": "codex/d-official-map-publication",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "da5800a3545ea621fe191673c88f0bb756a8eee0",
+      "ref": "refs/heads/codex/d-opt-in-local-read",
+      "name": "codex/d-opt-in-local-read",
+      "changedFiles": 6,
+      "unmatchedFiles": 4,
+      "examples": [
+        "apps/world-web/src/prototype/LOCAL_AUTHORIZED_READ_PREPARATION.md",
+        "apps/world-web/src/prototype/LocalAuthorizedReadEntry.tsx",
+        "apps/world-web/src/prototype/authorized-read-adapter.ts",
+        "apps/world-web/src/prototype/local-authorized-read.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "b6c97bf34cd331aaed2b0339df128920473e0017",
+      "ref": "refs/heads/codex/d-page-state-doc",
+      "name": "codex/d-page-state-doc",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5a594835c5e3871020c48dbcedce5bdccfb5f07b",
+      "ref": "refs/heads/codex/d-public-home-scenes-20261013",
+      "name": "codex/d-public-home-scenes-20261013",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "004bbfaf74e0e630c0ca977b6b208f2069dc0d1d",
+      "ref": "refs/heads/codex/d-read-denied-repair",
+      "name": "codex/d-read-denied-repair",
+      "changedFiles": 14,
+      "unmatchedFiles": 7,
+      "examples": [
+        "apps/world-web/src/country-runtime/entry.ts",
+        "apps/world-web/src/office-projection/model.ts",
+        "apps/world-web/src/office-projection/view.ts",
+        "tests/world-web/office-projection-fixture.ts",
+        "tests/world-web/office-projection-test-only.html",
+        "tests/world-web/office-projection-test-only.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "856ae9d19c4f3b055e5d13ad7d36a88dacdc3530",
+      "ref": "refs/heads/codex/d-reviewed-financial-browser-main",
+      "name": "codex/d-reviewed-financial-browser-main",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7867a79f4f577115a46a652cd140bfb2f03eb6f7",
+      "ref": "refs/heads/codex/d-role-layout-reachability",
+      "name": "codex/d-role-layout-reachability",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "84fcbf2ed6f7d7d4509ac11033f900811a62967d",
+      "ref": "refs/heads/codex/d-six-role-projection-wireup",
+      "name": "codex/d-six-role-projection-wireup",
+      "changedFiles": 9,
+      "unmatchedFiles": 8,
+      "examples": [
+        "apps/world-web/src/country-runtime/entry.ts",
+        "apps/world-web/src/office-projection/controller.ts",
+        "apps/world-web/src/office-projection/model.ts",
+        "apps/world-web/src/office-projection/view.ts",
+        "tests/world-web/office-projection-fixture.ts",
+        "tests/world-web/office-projection-test-only.html"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/d-read-denied-repair"
+    },
+    {
+      "sha": "45990f32cf08c731996b84a8d435cda0a607fd47",
+      "ref": "refs/heads/codex/d-social-office-atomic-v1",
+      "name": "codex/d-social-office-atomic-v1",
+      "changedFiles": 16,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3796d8d2e2515e0251392930c6a8b990834f67da",
+      "ref": "refs/heads/codex/d-social-office-protection-v1",
+      "name": "codex/d-social-office-protection-v1",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a2f4f1f25008e90bb0ea9d29e01b5a07e25de5b6",
+      "ref": "refs/heads/codex/d-unknown840-resume-20261018",
+      "name": "codex/d-unknown840-resume-20261018",
+      "changedFiles": 6,
+      "unmatchedFiles": 1,
+      "examples": [
+        "tools/unknown2544/d-fiscal-source/NEXT_GOV01_SOURCE_CONSTRUCTION_DESIGN.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "49225918601e246529bb546bdefdf627cdb6cb6c",
+      "ref": "refs/heads/codex/d-v2-world-command-brief",
+      "name": "codex/d-v2-world-command-brief",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "2be832e472203725d02e0a1dc55c1a5fe9d90e73",
+      "ref": "refs/heads/codex/d-v25-2-browser-prep",
+      "name": "codex/d-v25-2-browser-prep",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "add68f320c7cee22cb041df145745176a1f031f9",
+      "ref": "refs/heads/codex/d-v25-3-a11y-fallback",
+      "name": "codex/d-v25-3-a11y-fallback",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "69f5681e5436424c571b6fce2f02a69bf52d40e5",
+      "ref": "refs/heads/codex/d-v25-map-ui-integration",
+      "name": "codex/d-v25-map-ui-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "77423e142414a84e5e326d7194248bbf9a6ffb5d",
+      "ref": "refs/heads/codex/d-value-causal-chain",
+      "name": "codex/d-value-causal-chain",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0c8178b5e2aac957faa57d92672e23ec6d87b36d",
+      "ref": "refs/heads/codex/d-value-trail-mainline",
+      "name": "codex/d-value-trail-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "1396b2322b1a17c0b3fe17818c0efcd67a2817aa",
+      "ref": "refs/heads/codex/d02-owner-source-records",
+      "name": "codex/d02-owner-source-records",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "c5088433cb29922cae39eb66038250c3ab6db5c6",
+      "ref": "refs/heads/codex/d02-progress-report",
+      "name": "codex/d02-progress-report",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "6c1a2382fc454a05fc301a1f681a325a2c6c9a3e",
+      "ref": "refs/heads/codex/docs-data-connection-status",
+      "name": "codex/docs-data-connection-status",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "6a73e05c2f5c7006c87e6ebcc87233cab1f731c1",
+      "ref": "refs/heads/codex/e-buyer-finance-reader-native",
+      "name": "codex/e-buyer-finance-reader-native",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3ecb8726b2f259c468afc81f085150ad33f3a176",
+      "ref": "refs/heads/codex/e-captain-political-capital-slice",
+      "name": "codex/e-captain-political-capital-slice",
+      "changedFiles": 7,
+      "unmatchedFiles": 2,
+      "examples": [
+        "apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "84b3dc9459f9694e3d2fb73ad8ea29b991862c19",
+      "ref": "refs/heads/codex/e-disposable-fix-mainline",
+      "name": "codex/e-disposable-fix-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "dbcf7c52452d0e452ff19299d310ef69f0a89dd6",
+      "ref": "refs/heads/codex/e-gate-b-api-bridge",
+      "name": "codex/e-gate-b-api-bridge",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b495158bc0b9f36239a888ed951270beae37c8ab",
+      "ref": "refs/heads/codex/e-gate-b-api-mainline",
+      "name": "codex/e-gate-b-api-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "1081eb2f13580eae4e442dd61dd302613e6d7897",
+      "ref": "refs/heads/codex/e-gate-b-staging-evidence",
+      "name": "codex/e-gate-b-staging-evidence",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a16c598610c6b148c379dd0b33bfedd7ec5127df",
+      "ref": "refs/heads/codex/e-gateb-auth-chain",
+      "name": "codex/e-gateb-auth-chain",
+      "changedFiles": 14,
+      "unmatchedFiles": 6,
+      "examples": [
+        ".github/workflows/v30-2-postgres-permission-negatives.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "docs/exec-plans/V30_2_DB_PERMISSION_NEGATIVE_TEST_PREPARATION.md",
+        "tests/integration/v30-2-db-permission-negative.test.ts",
+        "tests/integration/v30-3-local-authenticated-bridge-postgres.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "ce4fb3a2122aba9efcfa35214942e7ed45270ecd",
+      "ref": "refs/heads/codex/e-official-data-full-reader",
+      "name": "codex/e-official-data-full-reader",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "701784a3d9c3c8add16baf9c59b51c54182671fe",
+      "ref": "refs/heads/codex/e-official-data-release",
+      "name": "codex/e-official-data-release",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "75b1f10926b2c12a0d87af6a57b43cd268c2e049",
+      "ref": "refs/heads/codex/e-owner-source-adoption-integration",
+      "name": "codex/e-owner-source-adoption-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "459be2567337cfa5c06a208ae294b195aeca4971",
+      "ref": "refs/heads/codex/e-reader-execution-report",
+      "name": "codex/e-reader-execution-report",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d3884d81435816cedd6f8a0a46510dfd49c1ba5e",
+      "ref": "refs/heads/codex/e-reader-readback-audit",
+      "name": "codex/e-reader-readback-audit",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ef75fed7f64e73e765ae336081729edd52e90f34",
+      "ref": "refs/heads/codex/e-reader-readback-audit-evidence",
+      "name": "codex/e-reader-readback-audit-evidence",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "36ae8887dbc91b30ba0c5c7557dccd68c85349a1",
+      "ref": "refs/heads/codex/e-season1-lobby-rpc",
+      "name": "codex/e-season1-lobby-rpc",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "11d45e6de36e2adefbc872473770169f8cdc8918",
+      "ref": "refs/heads/codex/e-source-loader-deadline",
+      "name": "codex/e-source-loader-deadline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "c7f3c8044d4ef27b89873f6ec2b0d1ae0c594f71",
+      "ref": "refs/heads/codex/e-v08-transition-fingerprint-fix",
+      "name": "codex/e-v08-transition-fingerprint-fix",
+      "changedFiles": 63,
+      "unmatchedFiles": 38,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md",
+        "docs/exec-plans/V09.3.md",
+        "docs/exec-plans/V09.md"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/c-v10-fixture-preparation-fix"
+    },
+    {
+      "sha": "4cd9a772230e76a42985bfe440abe806ffcca016",
+      "ref": "refs/heads/codex/e-v09-cleanup-diagnostics",
+      "name": "codex/e-v09-cleanup-diagnostics",
+      "changedFiles": 3,
+      "unmatchedFiles": 2,
+      "examples": [
+        "scripts/v09-staging-evidence-runner.mjs",
+        "tests/world-core/v09-cleanup-diagnostics.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "191d69e3f1c8189eba0c1259d27cc1f3870b14f0",
+      "ref": "refs/heads/codex/e-v09-crash-client-error-latch",
+      "name": "codex/e-v09-crash-client-error-latch",
+      "changedFiles": 2,
+      "unmatchedFiles": 1,
+      "examples": [
+        "scripts/v09-staging-evidence-runner.mjs"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/e-v09-cleanup-diagnostics"
+    },
+    {
+      "sha": "eabc4ec4d9a8dd6d48d38402371d258b27acb9e0",
+      "ref": "refs/heads/codex/e-v09-disposable-bootstrap-grant",
+      "name": "codex/e-v09-disposable-bootstrap-grant",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "8c983b990da5c5cdfe243709f347fbb6bd437d0c",
+      "ref": "refs/heads/codex/e-v09-disposable-ci-evidence",
+      "name": "codex/e-v09-disposable-ci-evidence",
+      "changedFiles": 2,
+      "unmatchedFiles": 2,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "docs/reports/gate-b/V09_DISPOSABLE_POSTGRES_EVIDENCE_PATH.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "ae8ea35a383ed4fa454417ddd1cb7d6b90e14b7d",
+      "ref": "refs/heads/codex/e-v10-read-projection-preparation-rebase",
+      "name": "codex/e-v10-read-projection-preparation-rebase",
+      "changedFiles": 100,
+      "unmatchedFiles": 54,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "2753900ab9fc4902894b0a36dacc98037da5e08b",
+      "ref": "refs/heads/codex/e-v10-vertical-slice-integration",
+      "name": "codex/e-v10-vertical-slice-integration",
+      "changedFiles": 101,
+      "unmatchedFiles": 66,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/contracts.ts",
+        "apps/world-api/src/integration/generated/world-v2-read-model.ts",
+        "apps/world-api/src/integration/identity.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "b84e790e163593a914ebff771b41c50279c1748f",
+      "ref": "refs/heads/codex/e-v15-v16-social-foundation",
+      "name": "codex/e-v15-v16-social-foundation",
+      "changedFiles": 34,
+      "unmatchedFiles": 3,
+      "examples": [
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v15-v16-foundation-acceptance"
+    },
+    {
+      "sha": "02c1da1216f7cb1ddc10de3639af6adb6deaa603",
+      "ref": "refs/heads/codex/e-v21-trade-logistics-foundation",
+      "name": "codex/e-v21-trade-logistics-foundation",
+      "changedFiles": 4,
+      "unmatchedFiles": 2,
+      "examples": [
+        "packages/core/src/engine-kernels/trade-logistics-foundation.ts",
+        "tests/world-core/v21-trade-logistics-foundation.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "b79240bc1704c9c8b435024352baa91e1a559ca8",
+      "ref": "refs/heads/codex/e-v302-db-permission-negatives",
+      "name": "codex/e-v302-db-permission-negatives",
+      "changedFiles": 2,
+      "unmatchedFiles": 2,
+      "examples": [
+        "docs/exec-plans/V30_2_DB_PERMISSION_NEGATIVE_TEST_PREPARATION.md",
+        "tests/integration/v30-2-db-permission-negative.test.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/e-gateb-auth-chain"
+    },
+    {
+      "sha": "63e9d362ac6f3644939e40a712c16f362238f839",
+      "ref": "refs/heads/codex/e-v302-native-pg-permission-negatives",
+      "name": "codex/e-v302-native-pg-permission-negatives",
+      "changedFiles": 6,
+      "unmatchedFiles": 3,
+      "examples": [
+        ".github/workflows/v30-2-postgres-permission-negatives.yml",
+        "docs/exec-plans/V30_2_DB_PERMISSION_NEGATIVE_TEST_PREPARATION.md",
+        "tests/integration/v30-2-db-permission-negative.test.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/e-gateb-auth-chain"
+    },
+    {
+      "sha": "4f99422ad03b5e5d982110eff3d0fa79f097c339",
+      "ref": "refs/heads/codex/e-world-api-command-receipt-read",
+      "name": "codex/e-world-api-command-receipt-read",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5c9a24d7b29e28bfc1ae014496ddccac5363394a",
+      "ref": "refs/heads/codex/e-world-api-pg-read-adapter-prep",
+      "name": "codex/e-world-api-pg-read-adapter-prep",
+      "changedFiles": 55,
+      "unmatchedFiles": 48,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/contracts.ts",
+        "apps/world-api/src/integration/generated/world-v2-read-model.ts",
+        "apps/world-api/src/integration/identity.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/e-world-api-staging-boundary-prep"
+    },
+    {
+      "sha": "cb15d4bf0ed8ae570da6c1769c68b317eabb0333",
+      "ref": "refs/heads/codex/e-world-api-staging-boundary-prep",
+      "name": "codex/e-world-api-staging-boundary-prep",
+      "changedFiles": 59,
+      "unmatchedFiles": 48,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/generated/world-v2-read-model.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "database/migrations/artifacts/0007_world_v2_read_projection_boundary.sql",
+        "database/migrations/manifest.json"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d03528b793b50e0dbd295a0c0ca976fbd57bdff5",
+      "ref": "refs/heads/codex/e-world-api-supabase-prep",
+      "name": "codex/e-world-api-supabase-prep",
+      "changedFiles": 53,
+      "unmatchedFiles": 46,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/contracts.ts",
+        "apps/world-api/src/integration/generated/world-v2-read-model.ts",
+        "apps/world-api/src/integration/identity.ts",
+        "apps/world-api/src/integration/transport.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/e-world-api-staging-boundary-prep"
+    },
+    {
+      "sha": "02f59be5026cdf2131eaf6e7fd907d5b87e987b3",
+      "ref": "refs/heads/codex/e-world-v2-release-handoff",
+      "name": "codex/e-world-v2-release-handoff",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ea89db1cf05aa34384ebd908aba498e3703a28c9",
+      "ref": "refs/heads/codex/e-world-v2-snapshot-storage-veto",
+      "name": "codex/e-world-v2-snapshot-storage-veto",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "45cfa2e7a8f28148d3195448fba2fc19f00b147b",
+      "ref": "refs/heads/codex/e-world-v2-source-snapshot-reader",
+      "name": "codex/e-world-v2-source-snapshot-reader",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b23f3e7dd93f13a2a18369f262728f9ba4fad051",
+      "ref": "refs/heads/codex/exact-fuel-cap-recovery",
+      "name": "codex/exact-fuel-cap-recovery",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ceee8956793328ea44a9c4a5cd1c4dd864aa05ff",
+      "ref": "refs/heads/codex/f-0023-release-caller-policy",
+      "name": "codex/f-0023-release-caller-policy",
+      "changedFiles": 6,
+      "unmatchedFiles": 2,
+      "examples": [
+        "scripts/production-posting-release-policy.mjs",
+        "tests/foundation/production-posting-release-policy.test.mjs"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "bd3063821843c9eef432f21ad2db6fb2e4870817",
+      "ref": "refs/heads/codex/f-a-g-publication-integration-20261023",
+      "name": "codex/f-a-g-publication-integration-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ed68f8d1ee443de89e987bc2daf1c2f1080142b4",
+      "ref": "refs/heads/codex/f-account-physical-publication-notes-20261023",
+      "name": "codex/f-account-physical-publication-notes-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e2826232d11f675d39f0240a2314e3d125c22ad7",
+      "ref": "refs/heads/codex/f-atlas-card-status-wrap",
+      "name": "codex/f-atlas-card-status-wrap",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7bc1ec9f9309b39428ed9369560cc32432eda9e8",
+      "ref": "refs/heads/codex/f-atlas-country-operation-link",
+      "name": "codex/f-atlas-country-operation-link",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "c789433c513b33518f92e8c15f676d4a20cb9e43",
+      "ref": "refs/heads/codex/f-b06-c01-typed-register-20261021",
+      "name": "codex/f-b06-c01-typed-register-20261021",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "44b4a1f2b8682890d4c1935d0e0f8385154b8a2a",
+      "ref": "refs/heads/codex/f-browser-client-mainline",
+      "name": "codex/f-browser-client-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a5a282544d6321521cea759fafb87f3a4a7ceebe",
+      "ref": "refs/heads/codex/f-browser-pending-marker",
+      "name": "codex/f-browser-pending-marker",
+      "changedFiles": 3,
+      "unmatchedFiles": 1,
+      "examples": [
+        "apps/world-web/src/authorized-client/client.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "07b4112f33f13fe0a4066568aa89864509b0e4ce",
+      "ref": "refs/heads/codex/f-c-data-connection-batch-20261023",
+      "name": "codex/f-c-data-connection-batch-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "1a72eab11f4a578f43c37e6c365a39a248b1d2f2",
+      "ref": "refs/heads/codex/f-c02-legacy-account-consumer-test-20261023",
+      "name": "codex/f-c02-legacy-account-consumer-test-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "1dfc066efa2336ac1381e6deffaa8465113beac7",
+      "ref": "refs/heads/codex/f-c02-six-office-integration-20261023",
+      "name": "codex/f-c02-six-office-integration-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5b6dc53376e9430b2bb8b2880689b4fb34bf859f",
+      "ref": "refs/heads/codex/f-c13-transport-integration-20261023",
+      "name": "codex/f-c13-transport-integration-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "42beb8a9fc871336126f8c718f0ebe843039ff30",
+      "ref": "refs/heads/codex/f-callum-atlas-home",
+      "name": "codex/f-callum-atlas-home",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "14bd3553293c520c28502ee18ee8736887fdf103",
+      "ref": "refs/heads/codex/f-cg-industry-compat-integration-20261024",
+      "name": "codex/f-cg-industry-compat-integration-20261024",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b0360bb3defe3ad9ce13474a5dc81386a5ac41c0",
+      "ref": "refs/heads/codex/f-cg-industry-final-20261024",
+      "name": "codex/f-cg-industry-final-20261024",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "f6a3d9f570eeb25333db3a1cc98698d20c0b33ac",
+      "ref": "refs/heads/codex/f-country-module-home-guard",
+      "name": "codex/f-country-module-home-guard",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "bbb86892fd7c04e1684c096a06e31a7b93a5cbe4",
+      "ref": "refs/heads/codex/f-country-surroundings-backdrop",
+      "name": "codex/f-country-surroundings-backdrop",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ccefb9ea2419d8ecb88140ce2a2f33e7663b86cb",
+      "ref": "refs/heads/codex/f-daily-envelope-integration-20261025",
+      "name": "codex/f-daily-envelope-integration-20261025",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7c743f6ad0a482c88954a0ffe2dae8c2f1b5e567",
+      "ref": "refs/heads/codex/f-dgc-isolated-preview-20261024",
+      "name": "codex/f-dgc-isolated-preview-20261024",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a6c27c8154522c3c3fa635dbf029756c75956a77",
+      "ref": "refs/heads/codex/f-durable-command-receipt",
+      "name": "codex/f-durable-command-receipt",
+      "changedFiles": 2,
+      "unmatchedFiles": 2,
+      "examples": [
+        "docs/reports/gate-b/F_DURABLE_COMMAND_INTAKE_LOCK_ORDER_EVIDENCE.json",
+        "docs/reports/gate-b/F_DURABLE_COMMAND_INTAKE_LOCK_ORDER_FIX.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "f46d06f134c227e8b46426337a1a8ea907e8189e",
+      "ref": "refs/heads/codex/f-durable-reservation-worker",
+      "name": "codex/f-durable-reservation-worker",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b5e3a3f056195f8d6042720e5b7c741f3d7d13c0",
+      "ref": "refs/heads/codex/f-five-component-integration-20261024",
+      "name": "codex/f-five-component-integration-20261024",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "6f6155846477569705aebfacaaede514091b60be",
+      "ref": "refs/heads/codex/f-five-component-publication-notes-20261024",
+      "name": "codex/f-five-component-publication-notes-20261024",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fca302b1828c07e0f9cffd7e21b36c55876c342b",
+      "ref": "refs/heads/codex/f-gate-b-browser-e2e-preparation",
+      "name": "codex/f-gate-b-browser-e2e-preparation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7eebc8f6635d57e9e4f2157d8822f78ae3937105",
+      "ref": "refs/heads/codex/f-gov01-async-receiver-20261026",
+      "name": "codex/f-gov01-async-receiver-20261026",
+      "changedFiles": 6,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "283f0769be89a355605e20aec32cd7136243b727",
+      "ref": "refs/heads/codex/f-gov01-native-control-20261026",
+      "name": "codex/f-gov01-native-control-20261026",
+      "changedFiles": 9,
+      "unmatchedFiles": 9,
+      "examples": [
+        "apps/world-worker/src/preparation/b06-gov01-adopted-record-source.ts",
+        "apps/world-worker/src/preparation/b06-gov01-source-installation.ts",
+        "apps/world-worker/src/preparation/entity-native-cash-source-slice.ts",
+        "apps/world-worker/src/preparation/gov01-native-control-store.ts",
+        "apps/world-worker/src/preparation/gov01-private-source-host.ts",
+        "tests/support/gov01-native-control-schema.sql"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "918a6b59365454dc22c473c1ef108f20d2bc467a",
+      "ref": "refs/heads/codex/f-gov01-six-path-integration-20261026",
+      "name": "codex/f-gov01-six-path-integration-20261026",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e90f512564a7bf44ebd72dc0edffe8d219965897",
+      "ref": "refs/heads/codex/f-industry-compatibility-input-integration-20261025",
+      "name": "codex/f-industry-compatibility-input-integration-20261025",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "301ab81255d9ae487ca78642a11558c619556589",
+      "ref": "refs/heads/codex/f-industry-governing-consumer-integration-20261026",
+      "name": "codex/f-industry-governing-consumer-integration-20261026",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "817aa138bade36e1f3711d235cc5b0a858d9e088",
+      "ref": "refs/heads/codex/f-industry-native-negative-20261026",
+      "name": "codex/f-industry-native-negative-20261026",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fbb4c6f617a927fe93c301715e79f6a80b8de563",
+      "ref": "refs/heads/codex/f-industry-protected-integration-20261026",
+      "name": "codex/f-industry-protected-integration-20261026",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "1747c138f842870300202f6486af9681c53a8f4e",
+      "ref": "refs/heads/codex/f-industry-shared-core-integration-20261025",
+      "name": "codex/f-industry-shared-core-integration-20261025",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "689be21a951a22ef2cb304ee12b084d5142daa31",
+      "ref": "refs/heads/codex/f-map-official-opening-data",
+      "name": "codex/f-map-official-opening-data",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "cd0c8ea4054a5fc222be367037d1836475635048",
+      "ref": "refs/heads/codex/f-native-cash-source-candidate-20261015",
+      "name": "codex/f-native-cash-source-candidate-20261015",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7d74c7dc8b8ebf0a3bc638d5baa36522f18e33d2",
+      "ref": "refs/heads/codex/f-native-claim-b06-integration",
+      "name": "codex/f-native-claim-b06-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "bf2d772741440ae3dece233e1a1e28482dc83aa7",
+      "ref": "refs/heads/codex/f-opening-seed-70-country",
+      "name": "codex/f-opening-seed-70-country",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "201617bbba085dbbe4bf5dfab05eab98c9a577f3",
+      "ref": "refs/heads/codex/f-physical-opening-adoption",
+      "name": "codex/f-physical-opening-adoption",
+      "changedFiles": 7,
+      "unmatchedFiles": 2,
+      "examples": [
+        "docs/exec-plans/F_PHYSICAL_OPENING_ADOPTION.md",
+        "tests/world-core/official-physical-opening-adoption.test.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/f-water-opening-adoption"
+    },
+    {
+      "sha": "e3bdebf7938ecb1decb855a4b9b1ead6661cf612",
+      "ref": "refs/heads/codex/f-physical-source-main-integration",
+      "name": "codex/f-physical-source-main-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5d74f0c479cdee2225ee9b2ebb2f075121437aac",
+      "ref": "refs/heads/codex/f-posting-remote-compat",
+      "name": "codex/f-posting-remote-compat",
+      "changedFiles": 3,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "8603d61a21890c3ada6a4e3e370964fe2c8bcd80",
+      "ref": "refs/heads/codex/f-production-consumption-writer",
+      "name": "codex/f-production-consumption-writer",
+      "changedFiles": 9,
+      "unmatchedFiles": 6,
+      "examples": [
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/inventory/inventory-ledger.ts",
+        "packages/core/src/opening/opening-seed.ts",
+        "tests/world-core/production-consumption-posting.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "92cb5b9922f1bdb58ea482a65e6b9c2f3d3c487a",
+      "ref": "refs/heads/codex/f-production-posting-schema",
+      "name": "codex/f-production-posting-schema",
+      "changedFiles": 6,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "51a3f2958e209bfdc73a2c040f976bcb89670faf",
+      "ref": "refs/heads/codex/f-renewal-reviewed-main",
+      "name": "codex/f-renewal-reviewed-main",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e9d2009deb96cd82b45a62d1194f921f9946b3d3",
+      "ref": "refs/heads/codex/f-reserve-inert-integration-20261017",
+      "name": "codex/f-reserve-inert-integration-20261017",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d4fa3825ef36bbc10b4bf9c5b74bf8dc028f9b8e",
+      "ref": "refs/heads/codex/f-single-social-office-composition-20261026",
+      "name": "codex/f-single-social-office-composition-20261026",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b63c57aa4a223cf399ca2580333e24b6be84e2ea",
+      "ref": "refs/heads/codex/f-six-office-seat-switch-wiring-20261023",
+      "name": "codex/f-six-office-seat-switch-wiring-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "240572e38b82fb8eb1416b672382b74efd09bdd2",
+      "ref": "refs/heads/codex/f-social-candidate-integration-20261024",
+      "name": "codex/f-social-candidate-integration-20261024",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "64f28834355154605a27f8dc337337c290866b44",
+      "ref": "refs/heads/codex/f-social-candidate-readme-20261024",
+      "name": "codex/f-social-candidate-readme-20261024",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "4439e9b5505a9b6a092df5aad070e6bff9676de4",
+      "ref": "refs/heads/codex/f-social-commit-guard-integration-20261026",
+      "name": "codex/f-social-commit-guard-integration-20261026",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7c50f31d0c70097a3328c791e4060e675b44cba4",
+      "ref": "refs/heads/codex/f-social-host-preflight-20261027",
+      "name": "codex/f-social-host-preflight-20261027",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "28eea2cc9a4e1556353d8546c1237b82e035e14f",
+      "ref": "refs/heads/codex/f-social-industry-governing-integration-20261025",
+      "name": "codex/f-social-industry-governing-integration-20261025",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fba031a43375878ee673d13b229167a94ff629b2",
+      "ref": "refs/heads/codex/f-social-isolated-host-20261026",
+      "name": "codex/f-social-isolated-host-20261026",
+      "changedFiles": 6,
+      "unmatchedFiles": 6,
+      "examples": [
+        "tests/integration/f-social-office-isolated-host-postgres.test.ts",
+        "tests/support/f-social-office-isolated-host.ts",
+        "tests/support/tsconfig.f-social-office-isolated-host.json",
+        "tests/world-core/f-social-office-isolated-host.test.ts",
+        "tools/social-office-demo/build-host.mjs",
+        "tools/social-office-demo/host.mjs"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "503d51c96a7f258cdae7a9d97fb932e5c947d59a",
+      "ref": "refs/heads/codex/f-social-office-complete-host-20261027",
+      "name": "codex/f-social-office-complete-host-20261027",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "347b6b79ce5e3e335c60550171c37c19efdca383",
+      "ref": "refs/heads/codex/f-social-production-history-integration-20261026",
+      "name": "codex/f-social-production-history-integration-20261026",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "145544b9fcf9dfbda08add84ad0f0a27c15a2d88",
+      "ref": "refs/heads/codex/f-static-country-navigation",
+      "name": "codex/f-static-country-navigation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "74c9f796c9cb215b71cd518d81c7cf2a50a85c09",
+      "ref": "refs/heads/codex/f-unknown2544-combination-20261020",
+      "name": "codex/f-unknown2544-combination-20261020",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d75b9954e16af519f001b0bb9771ff136804a311",
+      "ref": "refs/heads/codex/f-v09-atomic-test-infra",
+      "name": "codex/f-v09-atomic-test-infra",
+      "changedFiles": 48,
+      "unmatchedFiles": 37,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md",
+        "docs/exec-plans/V09.3.md",
+        "docs/exec-plans/V09.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d1be45fc28ba7021ad0317514f2eebdbc61364b5",
+      "ref": "refs/heads/codex/f-v10-acceptance-runner-rebase",
+      "name": "codex/f-v10-acceptance-runner-rebase",
+      "changedFiles": 89,
+      "unmatchedFiles": 48,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d2f7374a84831233b6055bc5157403bb9081d4f2",
+      "ref": "refs/heads/codex/f-v10-v11-preparation",
+      "name": "codex/f-v10-v11-preparation",
+      "changedFiles": 70,
+      "unmatchedFiles": 48,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "apps/world-worker/src/persistence/postgres-sql-database.ts",
+        "apps/world-worker/src/v10/atomic-transfer-candidates.ts",
+        "database/migrations/artifacts/0007_world_v2_atomic_transition_facts.sql"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+      "ref": "refs/heads/codex/f-v11-v18-causal-channels",
+      "name": "codex/f-v11-v18-causal-channels",
+      "changedFiles": 20,
+      "unmatchedFiles": 3,
+      "examples": [
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v17-v18-foundation-acceptance"
+    },
+    {
+      "sha": "291034d1c4f4ca1f9a3fd8779cf129ec46793b4f",
+      "ref": "refs/heads/codex/f-v11-v18-engine-preparation-plan",
+      "name": "codex/f-v11-v18-engine-preparation-plan",
+      "changedFiles": 9,
+      "unmatchedFiles": 8,
+      "examples": [
+        "packages/core/src/engine-kernels/common.ts",
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/engine-kernels/population-labour-services.ts",
+        "packages/core/src/engine-kernels/resources-energy-production.ts",
+        "packages/core/src/engine-kernels/technology-project-household-fiscal.ts",
+        "packages/core/src/errors.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v17-v18-foundation-acceptance"
+    },
+    {
+      "sha": "16356316144d27412183a13e4e568cd6a79151f5",
+      "ref": "refs/heads/codex/f-v25-fictional-map-preparation",
+      "name": "codex/f-v25-fictional-map-preparation",
+      "changedFiles": 41,
+      "unmatchedFiles": 30,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-web/src/App.tsx",
+        "apps/world-web/src/assets/asterra-satellite-terrain-v2.png",
+        "apps/world-web/src/map-lab/FictionalWorldMap.tsx",
+        "apps/world-web/src/map-lab/atlas.ts",
+        "apps/world-web/src/map-lab/fictional-world-map.css"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "84ec895a1ad6a0c54453aa7b7cd4415923e32490",
+      "ref": "refs/heads/codex/f-v26-forecast-worker-preparation",
+      "name": "codex/f-v26-forecast-worker-preparation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "73b4e4b69127549fd80ed6e1c7cafe315e047ee4",
+      "ref": "refs/heads/codex/f-v26-reconnect-cache-preparation",
+      "name": "codex/f-v26-reconnect-cache-preparation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a3748afa10ac095f0a7c38e6a73b0464ef7852ee",
+      "ref": "refs/heads/codex/f-v29-longrun-replay-harness",
+      "name": "codex/f-v29-longrun-replay-harness",
+      "changedFiles": 4,
+      "unmatchedFiles": 1,
+      "examples": [
+        "tests/support/V29_PREPARATION.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "db0301870692a1434fd87afb8420bd86b58a6707",
+      "ref": "refs/heads/codex/f-v29-native-worker-sequence",
+      "name": "codex/f-v29-native-worker-sequence",
+      "changedFiles": 8,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3d6f655930630a2febb9181a01ff0bf2778f0af8",
+      "ref": "refs/heads/codex/f-v29-replay-tz",
+      "name": "codex/f-v29-replay-tz",
+      "changedFiles": 7,
+      "unmatchedFiles": 6,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "docs/exec-plans/V30.3.md",
+        "scripts/v30-disposable-restore-diagnostic.mjs",
+        "tests/foundation/v30-disposable-restore-diagnostic.test.ts",
+        "tests/support/v29-worker-delivery-driver.test.ts",
+        "tests/support/v29-worker-replay-evidence.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "6ffa60aa32418d53db7c188c012cf444ae210fc6",
+      "ref": "refs/heads/codex/f-v29-worker-driver-preparation",
+      "name": "codex/f-v29-worker-driver-preparation",
+      "changedFiles": 4,
+      "unmatchedFiles": 2,
+      "examples": [
+        "tests/support/tsconfig.v29-worker.json",
+        "tests/support/v29-worker-delivery-driver.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "51d9d221b9f5e89390724f4b015bf5e852c03995",
+      "ref": "refs/heads/codex/f-v29-worker-replay-evidence",
+      "name": "codex/f-v29-worker-replay-evidence",
+      "changedFiles": 4,
+      "unmatchedFiles": 3,
+      "examples": [
+        "tests/support/tsconfig.v29-worker.json",
+        "tests/support/v29-worker-delivery-driver.test.ts",
+        "tests/support/v29-worker-replay-evidence.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "83e8db9f241a9f73434c9204b5fd8c01e2865d3a",
+      "ref": "refs/heads/codex/f-v29-worker-two-deliveries",
+      "name": "codex/f-v29-worker-two-deliveries",
+      "changedFiles": 2,
+      "unmatchedFiles": 2,
+      "examples": [
+        "tests/support/V29_TWO_DELIVERIES_PREPARATION.md",
+        "tests/support/v29-worker-delivery-driver.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "7bcd73b3bd2e83ccd39a26f1e26f12055b433edf",
+      "ref": "refs/heads/codex/f-water-opening-adoption",
+      "name": "codex/f-water-opening-adoption",
+      "changedFiles": 19,
+      "unmatchedFiles": 3,
+      "examples": [
+        "docs/exec-plans/F_PHYSICAL_OPENING_ADOPTION.md",
+        "packages/core/src/index.ts",
+        "tests/world-core/official-physical-opening-adoption.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "54a33e28a3230ccfbb9ae75bb15c6359b15fc851",
+      "ref": "refs/heads/codex/f-water-source-main-integration",
+      "name": "codex/f-water-source-main-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7a1417b8eb8857a122fee19cc7cfa2f9faabb5fd",
+      "ref": "refs/heads/codex/f-world-page-layout",
+      "name": "codex/f-world-page-layout",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0f1b4330f15c2e4917b775887a2e6048a5b405e6",
+      "ref": "refs/heads/codex/f-world-web-authorized-client-preparation",
+      "name": "codex/f-world-web-authorized-client-preparation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b7ea2fa2aaeff879112c40c9bcbbd3ffdb3fd7cd",
+      "ref": "refs/heads/codex/fe-reviewed-office-source-main",
+      "name": "codex/fe-reviewed-office-source-main",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "218fb03c137edf1856e3f09b7643ffba18a4047c",
+      "ref": "refs/heads/codex/formal-runtime-source-closure-20261008",
+      "name": "codex/formal-runtime-source-closure-20261008",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "1a950a41567900761d4f4313092ab4a3404e6f67",
+      "ref": "refs/heads/codex/foundation-v02-v05",
+      "name": "codex/foundation-v02-v05",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "bdff7075453c65bcdd9d4321a493745e6e78ab57",
+      "ref": "refs/heads/codex/g-current-seat-consumer-20261015",
+      "name": "codex/g-current-seat-consumer-20261015",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "dfd6bbeadcbfff9ddbdc21347b01322eaa677626",
+      "ref": "refs/heads/codex/g-followup-five-scenes-20261018",
+      "name": "codex/g-followup-five-scenes-20261018",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3f2f5ad401c58d9095a7656edee25322606913f5",
+      "ref": "refs/heads/codex/g-food-reference-20261023",
+      "name": "codex/g-food-reference-20261023",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "503ac17ee1e73f443aed06750e32a7a49dd27273",
+      "ref": "refs/heads/codex/g-foreign-main-integration-20261013",
+      "name": "codex/g-foreign-main-integration-20261013",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "15eea021d400a16aff8f2390fc766ee6c6c3dfc1",
+      "ref": "refs/heads/codex/g-full-read-provider-integration",
+      "name": "codex/g-full-read-provider-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "07f3b200507c43247b3072d20267adecec034a4c",
+      "ref": "refs/heads/codex/g-intake-uncertain-rollback-repair",
+      "name": "codex/g-intake-uncertain-rollback-repair",
+      "changedFiles": 22,
+      "unmatchedFiles": 6,
+      "examples": [
+        "apps/world-api/src/integration/authenticated-financial-intake-composition.ts",
+        "apps/world-api/src/integration/postgres-runtime-read-executor.ts",
+        "apps/world-api/src/integration/postgres-server-read-binding.ts",
+        "apps/world-worker/package.json",
+        "packages/core/src/index.ts",
+        "tests/world-api/postgres-full-read-provider.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d07bef2506ba7e51a4c05f8dce9264ceb7a40932",
+      "ref": "refs/heads/codex/g-lake-scene-assets-20261018",
+      "name": "codex/g-lake-scene-assets-20261018",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "26490f533bd7b011d30c16f3454a526b95193a06",
+      "ref": "refs/heads/codex/g-official-source-status",
+      "name": "codex/g-official-source-status",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "6a7638faf3018236dc4c9f42175ea7d6fa841d05",
+      "ref": "refs/heads/codex/g-principal-phase1-integration-20261015",
+      "name": "codex/g-principal-phase1-integration-20261015",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3034f62ee0f09355f298934375e1f862f1d6324d",
+      "ref": "refs/heads/codex/g-read-foundation-reviewed",
+      "name": "codex/g-read-foundation-reviewed",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "11d4774c7681b121f554d4bee7529b019902c3bb",
+      "ref": "refs/heads/codex/g-reviewed-intake-main-final",
+      "name": "codex/g-reviewed-intake-main-final",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "38459a7534b8746370a3afa85cdd9b0025452478",
+      "ref": "refs/heads/codex/g-single-social-office-demo-20261026",
+      "name": "codex/g-single-social-office-demo-20261026",
+      "changedFiles": 30,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0333301d3468f49ae66cb170189ce300c67351d6",
+      "ref": "refs/heads/codex/g-slices-1-2-reviewed-integration-20261010",
+      "name": "codex/g-slices-1-2-reviewed-integration-20261010",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "afd2dfbe835fd09417d36571d58b4d318d233b23",
+      "ref": "refs/heads/codex/g-visual-integration-20261011",
+      "name": "codex/g-visual-integration-20261011",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7195dfd5c93150d2dbcf55ae39edae26d131cf62",
+      "ref": "refs/heads/codex/g-w1-main-integration-20261013",
+      "name": "codex/g-w1-main-integration-20261013",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "c02f25b9898c5fd9a28db082950f7331bf172727",
+      "ref": "refs/heads/codex/g-web-integrated-candidate",
+      "name": "codex/g-web-integrated-candidate",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "71160c2735f3e21367822717663074b7df307df5",
+      "ref": "refs/heads/codex/gate-a-targeted-fixes",
+      "name": "codex/gate-a-targeted-fixes",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5d40aa0037634cc2212ef98c709b4fc7a773f79e",
+      "ref": "refs/heads/codex/gate-b-browser-preflight-mainline",
+      "name": "codex/gate-b-browser-preflight-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "cdf9d62b61b5d0b458a9d836509365a986b7033e",
+      "ref": "refs/heads/codex/gate-b-browser-scenario-cases",
+      "name": "codex/gate-b-browser-scenario-cases",
+      "changedFiles": 3,
+      "unmatchedFiles": 1,
+      "examples": [
+        "tests/support/gate-b-browser-scenario-cases.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d738362b275956f2a338a2c6cba4bde50b6e9f23",
+      "ref": "refs/heads/codex/gate-b-cleanup-inspection",
+      "name": "codex/gate-b-cleanup-inspection",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ca5b056ea818dc73e113a2bf4635318ae7c8bebf",
+      "ref": "refs/heads/codex/gate-b-code-integration",
+      "name": "codex/gate-b-code-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d5da894d45ea919398e2533b6afde4f206a20edc",
+      "ref": "refs/heads/codex/gate-b-disposable-mainline",
+      "name": "codex/gate-b-disposable-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "76ac0038493a931d9d550d57a7ed590c6cdf94df",
+      "ref": "refs/heads/codex/gate-b-evidence-ebc5",
+      "name": "codex/gate-b-evidence-ebc5",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0469d23761a1febcd64eaa39b596beca56aa5d39",
+      "ref": "refs/heads/codex/gate-b-matrix-mainline",
+      "name": "codex/gate-b-matrix-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d651b13272321e49fb533d57b9beb30771368c66",
+      "ref": "refs/heads/codex/gate-b-minimal-evidence",
+      "name": "codex/gate-b-minimal-evidence",
+      "changedFiles": 93,
+      "unmatchedFiles": 65,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "668245f978a5ea3667a313abbe2fbedf088faf7f",
+      "ref": "refs/heads/codex/gov01-domain-lineage-reviewed-integration-20261018",
+      "name": "codex/gov01-domain-lineage-reviewed-integration-20261018",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "f61b95c51022383340af8838360bac89ac6fb6b0",
+      "ref": "refs/heads/codex/industry-utilities-integration-20261101",
+      "name": "codex/industry-utilities-integration-20261101",
+      "action": "KEEP",
+      "reason": "PROTECTED_ACTIVE_MAIN_PR_WORKTREE_OR_PLAN"
+    },
+    {
+      "sha": "653ecc90f66a0815fc6726d73f713fdeb7f14353",
+      "ref": "refs/heads/codex/integration-20260924",
+      "name": "codex/integration-20260924",
+      "changedFiles": 6,
+      "unmatchedFiles": 3,
+      "examples": [
+        "apps/world-api/src/integration/authenticated-narrow-transfer-command-handler.ts",
+        "apps/world-web/src/authorized-client/client.ts",
+        "tests/world-api/local-nonproduction-http-bridge.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d1b4c4356a718c80922e2bb42f21a31837c4d49e",
+      "ref": "refs/heads/codex/legacy-econmind-visual-20261009",
+      "name": "codex/legacy-econmind-visual-20261009",
+      "changedFiles": 29,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b34656e127f1dcae3cdf8a9fa96aec8137195d98",
+      "ref": "refs/heads/codex/legacy-visual-reviewed-integration-20261009",
+      "name": "codex/legacy-visual-reviewed-integration-20261009",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "07c4ad43547e40fd4f4b3369569501a4ec9c428e",
+      "ref": "refs/heads/codex/live-command-bridge",
+      "name": "codex/live-command-bridge",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "888be88ab3a30e3f2397dc9f2cc15e054fd9303d",
+      "ref": "refs/heads/codex/local-bridge-cors",
+      "name": "codex/local-bridge-cors",
+      "changedFiles": 2,
+      "unmatchedFiles": 2,
+      "examples": [
+        "apps/world-api/src/integration/local-nonproduction-http-bridge.ts",
+        "tests/world-api/local-nonproduction-http-bridge.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "94e5fe5beacb0731a915f6b27ebe418218439a17",
+      "ref": "refs/heads/codex/mainline-reviewed-runtime",
+      "name": "codex/mainline-reviewed-runtime",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d77d1f91d3d866ae6b75c9c56aa39116121a8d52",
+      "ref": "refs/heads/codex/manual-office-route-integration-20261008",
+      "name": "codex/manual-office-route-integration-20261008",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fc1b416f9c44bcafb39c4221a6548e71b84e9584",
+      "ref": "refs/heads/codex/manual-office-source-boundary",
+      "name": "codex/manual-office-source-boundary",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0a61951e7d6b94f6f68b54d4cad46d0a460c13bc",
+      "ref": "refs/heads/codex/narrow-transfer-approval-reference",
+      "name": "codex/narrow-transfer-approval-reference",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "778f58bd07b6d60e5dd7d6d2138af3e19fe7b40f",
+      "ref": "refs/heads/codex/o-current-main-closeout-record",
+      "name": "codex/o-current-main-closeout-record",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0c01ae6d2e007d6593db22492056b29dcf5b5938",
+      "ref": "refs/heads/codex/o-four-office-backlog-main",
+      "name": "codex/o-four-office-backlog-main",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "06752fbf98bf468f8faa5d32df5c61daf17e186d",
+      "ref": "refs/heads/codex/o-reviewed-roundtrip-main-final",
+      "name": "codex/o-reviewed-roundtrip-main-final",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "da75614cf3f1d5a2364ba1847f20ace4fa7a2de1",
+      "ref": "refs/heads/codex/o-reviewed-runtime-roundtrip-integration",
+      "name": "codex/o-reviewed-runtime-roundtrip-integration",
+      "changedFiles": 7,
+      "unmatchedFiles": 3,
+      "examples": [
+        "packages/core/package.json",
+        "tests/integration/o-authenticated-financial-roundtrip-postgres.test.ts",
+        "tests/support/o-authenticated-financial-roundtrip-fixture.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "9a637542467a3ed5a19c44d507d3c06c85661fb7",
+      "ref": "refs/heads/codex/o-sparse-cas-f-reviewed-composition",
+      "name": "codex/o-sparse-cas-f-reviewed-composition",
+      "changedFiles": 5,
+      "unmatchedFiles": 1,
+      "examples": [
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "ae84cadbe1b7a743557837e8cb1c247dc189906e",
+      "ref": "refs/heads/codex/o-v10-contract-preparation",
+      "name": "codex/o-v10-contract-preparation",
+      "changedFiles": 68,
+      "unmatchedFiles": 42,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md",
+        "docs/exec-plans/V09.3.md",
+        "docs/exec-plans/V09.md"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/o-v10-reservation-preparation"
+    },
+    {
+      "sha": "6a5cea700f60b54cb89cfa45568dbedcec2277d3",
+      "ref": "refs/heads/codex/o-v10-reservation-preparation",
+      "name": "codex/o-v10-reservation-preparation",
+      "changedFiles": 76,
+      "unmatchedFiles": 51,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/trade/goods-reservation.ts",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "60e9b50501893d89f07d9db83214f49fa730b880",
+      "ref": "refs/heads/codex/oct06-interface-connection-checkpoint",
+      "name": "codex/oct06-interface-connection-checkpoint",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0c905a12cbd9d5a2e6666794b88bf5035a52c609",
+      "ref": "refs/heads/codex/oct06-page-acceptance-record",
+      "name": "codex/oct06-page-acceptance-record",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5ab934add68abccb1f0eae49296a0410ef31b968",
+      "ref": "refs/heads/codex/oct06-runtime-inspection-observability",
+      "name": "codex/oct06-runtime-inspection-observability",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "46532148934bc23387e4756519843fc8846d1e02",
+      "ref": "refs/heads/codex/office-operations-followup-20261030",
+      "name": "codex/office-operations-followup-20261030",
+      "action": "KEEP",
+      "reason": "PROTECTED_ACTIVE_MAIN_PR_WORKTREE_OR_PLAN"
+    },
+    {
+      "sha": "452ee6e4b7adb45eefe0013a2f209fd9af16abe7",
+      "ref": "refs/heads/codex/office-operations-next-20261101",
+      "name": "codex/office-operations-next-20261101",
+      "action": "KEEP",
+      "reason": "PROTECTED_ACTIVE_MAIN_PR_WORKTREE_OR_PLAN"
+    },
+    {
+      "sha": "bb6c17f7e6cd9a6eabc336fb2bab1d91e51e103c",
+      "ref": "refs/heads/codex/office-result-consumer-integration-20261008",
+      "name": "codex/office-result-consumer-integration-20261008",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3979b5146788d59b834f5cf009f54604b551c415",
+      "ref": "refs/heads/codex/office-runtime-bindings-20261028",
+      "name": "codex/office-runtime-bindings-20261028",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "0795ed07790be9e39d073503726bde3dcf7d84a7",
+      "ref": "refs/heads/codex/office-selected-source-bindings-20261028",
+      "name": "codex/office-selected-source-bindings-20261028",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "ca59838d9d3c0c5c5f00263124690402cfb6a996",
+      "ref": "refs/heads/codex/official-70-country-data",
+      "name": "codex/official-70-country-data",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "74c3266033210851296784cac13ff2708365c867",
+      "ref": "refs/heads/codex/official-explorer-country-adapter",
+      "name": "codex/official-explorer-country-adapter",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "406ecdb98d6a819e168bd366f56dad785de244de",
+      "ref": "refs/heads/codex/official-source-cache",
+      "name": "codex/official-source-cache",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e55ef95de8b21d2efd6d092ae6a99e505adfba7f",
+      "ref": "refs/heads/codex/official-source-connection-audit",
+      "name": "codex/official-source-connection-audit",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e0a4af28019969ace2ab62340e71bac6c848dcbc",
+      "ref": "refs/heads/codex/official-source-directory-entry",
+      "name": "codex/official-source-directory-entry",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "abda53461fe156996e941081005666591b9215a9",
+      "ref": "refs/heads/codex/official-source-resume",
+      "name": "codex/official-source-resume",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7bcea04f33e9536fb188ed4350902e946c0e193e",
+      "ref": "refs/heads/codex/official-world-ui-data",
+      "name": "codex/official-world-ui-data",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "df6ce6e7ac156af3fc1a9b50810f9916e28cfa0b",
+      "ref": "refs/heads/codex/online-auth-transport-integration",
+      "name": "codex/online-auth-transport-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "71d88bf6584d9f72337ccbf3ac5b0a9e920321c5",
+      "ref": "refs/heads/codex/online-source-checkpoint",
+      "name": "codex/online-source-checkpoint",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "1669a6a9e2ba7f825ef06dedf7be55c835188fb0",
+      "ref": "refs/heads/codex/opening-canonical-seed-integration",
+      "name": "codex/opening-canonical-seed-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a435a31466eec5ed52478e75ef9c4c5cfd189f55",
+      "ref": "refs/heads/codex/opening-data-connections-20261009",
+      "name": "codex/opening-data-connections-20261009",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "17461415bd7323fadea387744b77fdbb48a93508",
+      "ref": "refs/heads/codex/opening-interface-source-closeout-20261009",
+      "name": "codex/opening-interface-source-closeout-20261009",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7502eca1cb5222e1215250468bfef4738ab82e65",
+      "ref": "refs/heads/codex/positive-office-intake-integration-20261008",
+      "name": "codex/positive-office-intake-integration-20261008",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "dfd43ed4c68bf4dbef6cbe6ddf9fc4148ca23867",
+      "ref": "refs/heads/codex/postgres-final-receipt-reader",
+      "name": "codex/postgres-final-receipt-reader",
+      "changedFiles": 5,
+      "unmatchedFiles": 2,
+      "examples": [
+        "apps/world-api/src/integration/postgres-final-receipt-reader.ts",
+        "tests/integration/world-api-postgres-final-receipt-reader.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "e87a89cb520dd6f0a74ab0e67c15c19f7e2bf010",
+      "ref": "refs/heads/codex/postwar-connected-genesis-20261029",
+      "name": "codex/postwar-connected-genesis-20261029",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "07892833447c0650210310e0ac94343b8f6e0a4f",
+      "ref": "refs/heads/codex/postwar-day-one-fx-20261029",
+      "name": "codex/postwar-day-one-fx-20261029",
+      "changedFiles": 423,
+      "unmatchedFiles": 423,
+      "examples": [
+        ".github/workflows/office-connection.yml",
+        ".github/workflows/postwar-read-release-preparation.yml",
+        "apps/world-api/cloudflare/runtime-api.mjs",
+        "apps/world-api/src/integration/bounded-authenticated-office-command-service.ts",
+        "apps/world-api/src/integration/bounded-office-command-binding.ts",
+        "apps/world-api/src/integration/bounded-office-command-fetch-handler.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "aeece72da119573018602abeb56a8f15d7985713",
+      "ref": "refs/heads/codex/postwar-fx-mixed-replay-20261029",
+      "name": "codex/postwar-fx-mixed-replay-20261029",
+      "action": "KEEP",
+      "reason": "PROTECTED_ACTIVE_MAIN_PR_WORKTREE_OR_PLAN"
+    },
+    {
+      "sha": "cd19e054544ba6dac2c89e74a588d49266b5145d",
+      "ref": "refs/heads/codex/postwar-gcu-opening-20261029",
+      "name": "codex/postwar-gcu-opening-20261029",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "62261b5c20f60608593538a610e306168b86dec7",
+      "ref": "refs/heads/codex/postwar-operating-genesis-20261028",
+      "name": "codex/postwar-operating-genesis-20261028",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "5bd892e5312e9bf926f27a979bf231dbe1a37b02",
+      "ref": "refs/heads/codex/postwar-shared-consumer-20261029",
+      "name": "codex/postwar-shared-consumer-20261029",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "6beb42b38271853b8632b3c1341aef00b19e9653",
+      "ref": "refs/heads/codex/postwar-social-node-connection-20261029",
+      "name": "codex/postwar-social-node-connection-20261029",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_RETAINED_BRANCH",
+      "coveredBy": "codex/office-operations-followup-20261030"
+    },
+    {
+      "sha": "bb291b6b081bd39053e2e9ccb266b167a931ec9c",
+      "ref": "refs/heads/codex/project-checkpoint-financial-browser-addendum",
+      "name": "codex/project-checkpoint-financial-browser-addendum",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "87b5f08136fc41cfbd9c8a9f118afe319be3ea0e",
+      "ref": "refs/heads/codex/project-completion-checkpoint-20261007",
+      "name": "codex/project-completion-checkpoint-20261007",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "8e7d87c07a9b60a4ba011179496268ad1d639ebe",
+      "ref": "refs/heads/codex/public-world-preview-ui-20261012",
+      "name": "codex/public-world-preview-ui-20261012",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e98619f428104260115155431cd83840b3fc1890",
+      "ref": "refs/heads/codex/readme-closeout-20261017",
+      "name": "codex/readme-closeout-20261017",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0e8a34796bf57ad74cbf5a8216eaaed2f1fa1d36",
+      "ref": "refs/heads/codex/repository-audit-20261026",
+      "name": "codex/repository-audit-20261026",
+      "changedFiles": 19,
+      "unmatchedFiles": 19,
+      "examples": [
+        ".gitattributes",
+        ".prettierignore",
+        "README.md",
+        "docs/reports/repository-audit-20261026/EXECUTION_PLAN.md",
+        "docs/reports/repository-audit-20261026/IMPLEMENTATION_REPORT.md",
+        "docs/reports/repository-audit-20261026/SOURCE_REPORT_CHECK.json"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "91338228876a41350a11ad07aadcec44214b2273",
+      "ref": "refs/heads/codex/review-clock-isolated-20261011",
+      "name": "codex/review-clock-isolated-20261011",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7461a053a74131fcc8273a8ac981e28b510ca03c",
+      "ref": "refs/heads/codex/reviewed-runtime-composition",
+      "name": "codex/reviewed-runtime-composition",
+      "changedFiles": 69,
+      "unmatchedFiles": 23,
+      "examples": [
+        ".github/workflows/trusted-country-runtime.yml",
+        "README.md",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-web/src/country-runtime/entry.ts",
+        "apps/world-web/src/financial-intake/view.ts",
+        "apps/world-web/src/office-projection/model.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "66727597ac89d3c23bbe256128c41a7c17f1c2af",
+      "ref": "refs/heads/codex/root-hd-original-default-20261013",
+      "name": "codex/root-hd-original-default-20261013",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "4800a124da4ddf07ada313a7a9c402d0aeeac793",
+      "ref": "refs/heads/codex/root-viewport-fit",
+      "name": "codex/root-viewport-fit",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5daba03570a3ebc50ddcb291131b7b885f6c8e3d",
+      "ref": "refs/heads/codex/runtime-read-binding-integration",
+      "name": "codex/runtime-read-binding-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "068f885649a2887133ae973a7493961167a4953b",
+      "ref": "refs/heads/codex/schema-current-main-integration-20261008",
+      "name": "codex/schema-current-main-integration-20261008",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5f0c0c8be8ee9b38eb5ed443ddc3d60dcd5953da",
+      "ref": "refs/heads/codex/season1-authoritative-ui-pages",
+      "name": "codex/season1-authoritative-ui-pages",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "dbeed3303b6d849f8e6db999d6ef8a033ef2656c",
+      "ref": "refs/heads/codex/season1-same-user-api",
+      "name": "codex/season1-same-user-api",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "19dbc3ac5c2909da3f3590549bb32b5eb01847a5",
+      "ref": "refs/heads/codex/staged-narrow-transfer-http",
+      "name": "codex/staged-narrow-transfer-http",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ed0e4df4571e30fdb8b2f3e95b43f4680c19acb8",
+      "ref": "refs/heads/codex/start-ready-coordination-20261010",
+      "name": "codex/start-ready-coordination-20261010",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "33c88d853a744df8a78f1292220d47095fe9f44e",
+      "ref": "refs/heads/codex/start-ready-provenance-20261010",
+      "name": "codex/start-ready-provenance-20261010",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7b93cac7bb727e34582aa358b3e1eb293f4b8529",
+      "ref": "refs/heads/codex/unknown2544-reviewed-integration-20261018",
+      "name": "codex/unknown2544-reviewed-integration-20261018",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "f864bdfc67e99acba29573ee770d81676cb77dff",
+      "ref": "refs/heads/codex/v01-adr18-governance-fix",
+      "name": "codex/v01-adr18-governance-fix",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e117287dcd091190e116c7835b52a678895f4672",
+      "ref": "refs/heads/codex/v01-mainline",
+      "name": "codex/v01-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0720a57b56394a577d34534356aa784a8bef9d22",
+      "ref": "refs/heads/codex/v08-authority-clean-mainline",
+      "name": "codex/v08-authority-clean-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5c8fbece451e4d7f26b5e3e4ad50e7e553a46f71",
+      "ref": "refs/heads/codex/v08-authority-remediation",
+      "name": "codex/v08-authority-remediation",
+      "changedFiles": 58,
+      "unmatchedFiles": 38,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md",
+        "docs/exec-plans/V09.3.md",
+        "docs/exec-plans/V09.md"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/c-v10-fixture-preparation-fix"
+    },
+    {
+      "sha": "33f0a8855956458256c631318d54da93a3454bfb",
+      "ref": "refs/heads/codex/v09-atomic-preparation",
+      "name": "codex/v09-atomic-preparation",
+      "changedFiles": 73,
+      "unmatchedFiles": 44,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/c-v10-authorization-guard-tests"
+    },
+    {
+      "sha": "a345fd7e805a9803faa78cbde2d2a941609484fd",
+      "ref": "refs/heads/codex/v09-ci-manifest-19",
+      "name": "codex/v09-ci-manifest-19",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d355bb6557492aa0d5a9edde3d408a115a85a99f",
+      "ref": "refs/heads/codex/v09-disposable-manifest-baseline",
+      "name": "codex/v09-disposable-manifest-baseline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "c96dfbfe65781cf8a776329538893d2c6009933b",
+      "ref": "refs/heads/codex/v09-migration-reservation-binding",
+      "name": "codex/v09-migration-reservation-binding",
+      "changedFiles": 86,
+      "unmatchedFiles": 48,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/c-v10-fixture-preparation-rebase"
+    },
+    {
+      "sha": "ca96cbace21e365f2548cf3188c9f89ca5a8a70e",
+      "ref": "refs/heads/codex/v09-package-integration",
+      "name": "codex/v09-package-integration",
+      "changedFiles": 92,
+      "unmatchedFiles": 64,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/gate-b-minimal-evidence"
+    },
+    {
+      "sha": "dadad8292f7b2e3f16430052d1e599d733c76031",
+      "ref": "refs/heads/codex/v09-recovery-preparation",
+      "name": "codex/v09-recovery-preparation",
+      "changedFiles": 85,
+      "unmatchedFiles": 47,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/c-v10-fixture-preparation-rebase"
+    },
+    {
+      "sha": "ebc5fcbe010559d5d6a94e86792a77ecc02502d2",
+      "ref": "refs/heads/codex/v09-v10-composite",
+      "name": "codex/v09-v10-composite",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ebc5fcbe010559d5d6a94e86792a77ecc02502d2",
+      "ref": "refs/heads/codex/v09-v10-mainline-integration",
+      "name": "codex/v09-v10-mainline-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b24efdfec32e8fd6e98ef3f6941660bbac1a974c",
+      "ref": "refs/heads/codex/v10-1-implementation",
+      "name": "codex/v10-1-implementation",
+      "changedFiles": 178,
+      "unmatchedFiles": 92,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v11-2-labour-core"
+    },
+    {
+      "sha": "bacb8d6ac8623f0e527a63e969121a36740a78bc",
+      "ref": "refs/heads/codex/v10-preaudit-integration",
+      "name": "codex/v10-preaudit-integration",
+      "changedFiles": 113,
+      "unmatchedFiles": 54,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v11-2-labour-core"
+    },
+    {
+      "sha": "2db39d01a22873162d1c841675855b60d4e5816e",
+      "ref": "refs/heads/codex/v11-1-population-core",
+      "name": "codex/v11-1-population-core",
+      "changedFiles": 184,
+      "unmatchedFiles": 94,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v11-2-labour-core"
+    },
+    {
+      "sha": "017be11af224424f26396abfaa602046fc90380a",
+      "ref": "refs/heads/codex/v11-2-labour-core",
+      "name": "codex/v11-2-labour-core",
+      "changedFiles": 189,
+      "unmatchedFiles": 94,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "47526ea2219ece011da82e397cf5435b1d044ea8",
+      "ref": "refs/heads/codex/v11-2-owner-acceptance",
+      "name": "codex/v11-2-owner-acceptance",
+      "changedFiles": 191,
+      "unmatchedFiles": 96,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v11-3-owner-acceptance"
+    },
+    {
+      "sha": "d519e923034946c4691f06dda08ed6f29dce7457",
+      "ref": "refs/heads/codex/v11-3-cross-engine-invariants",
+      "name": "codex/v11-3-cross-engine-invariants",
+      "changedFiles": 196,
+      "unmatchedFiles": 97,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v11-3-owner-acceptance"
+    },
+    {
+      "sha": "7c92c588bf1682371cef0892ee35e27df9ba6e75",
+      "ref": "refs/heads/codex/v11-3-owner-acceptance",
+      "name": "codex/v11-3-owner-acceptance",
+      "changedFiles": 198,
+      "unmatchedFiles": 99,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "72dcb20d83fbc7365fb22d5ac24c373e3ca55994",
+      "ref": "refs/heads/codex/v11-v18-foundation-main-integration",
+      "name": "codex/v11-v18-foundation-main-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d0db47e6080850a58c0552ea8b62bab6fa6acaaa",
+      "ref": "refs/heads/codex/v11-v18-kernel-integration",
+      "name": "codex/v11-v18-kernel-integration",
+      "changedFiles": 192,
+      "unmatchedFiles": 105,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "f05b1283d40e83d87f145eecc8c1f9c64000c0d7",
+      "ref": "refs/heads/codex/v12-1-preflight",
+      "name": "codex/v12-1-preflight",
+      "changedFiles": 198,
+      "unmatchedFiles": 99,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-api/src/index.ts",
+        "apps/world-api/src/integration/postgres-read-adapter.ts",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "899bcb1a750d01be812fde9eee3fa0fd82357b42",
+      "ref": "refs/heads/codex/v12-foundation-acceptance",
+      "name": "codex/v12-foundation-acceptance",
+      "changedFiles": 36,
+      "unmatchedFiles": 4,
+      "examples": [
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/resource-inventory/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "8bc779dcceb34adf731adc4c4868e4032093f8b0",
+      "ref": "refs/heads/codex/v12-foundation-mode",
+      "name": "codex/v12-foundation-mode",
+      "changedFiles": 33,
+      "unmatchedFiles": 4,
+      "examples": [
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts",
+        "packages/core/src/resource-inventory/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v12-foundation-acceptance"
+    },
+    {
+      "sha": "60fc5f8271bff8c86a14993e94cdf44c156472b6",
+      "ref": "refs/heads/codex/v13-v14-foundation-acceptance",
+      "name": "codex/v13-v14-foundation-acceptance",
+      "changedFiles": 35,
+      "unmatchedFiles": 6,
+      "examples": [
+        "packages/core/src/engine-kernels/energy-production-foundation.ts",
+        "packages/core/src/engine-kernels/foundation-provenance.ts",
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/engine-kernels/technology-project-foundation.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "653c1cba9681798260954a29e32dee3398054b70",
+      "ref": "refs/heads/codex/v13-v14-foundation-mode",
+      "name": "codex/v13-v14-foundation-mode",
+      "changedFiles": 32,
+      "unmatchedFiles": 6,
+      "examples": [
+        "packages/core/src/engine-kernels/energy-production-foundation.ts",
+        "packages/core/src/engine-kernels/foundation-provenance.ts",
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/engine-kernels/technology-project-foundation.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v13-v14-foundation-acceptance"
+    },
+    {
+      "sha": "1ccc680682faae18b150a33978ee1456b88cdc24",
+      "ref": "refs/heads/codex/v15-v16-foundation-acceptance",
+      "name": "codex/v15-v16-foundation-acceptance",
+      "changedFiles": 37,
+      "unmatchedFiles": 3,
+      "examples": [
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "74748ec4e607647af2bc5898233f6e17db1457f8",
+      "ref": "refs/heads/codex/v17-v18-foundation-acceptance",
+      "name": "codex/v17-v18-foundation-acceptance",
+      "changedFiles": 28,
+      "unmatchedFiles": 4,
+      "examples": [
+        "packages/core/src/engine-kernels/household-fiscal-closure.ts",
+        "packages/core/src/engine-kernels/index.ts",
+        "packages/core/src/errors.ts",
+        "packages/core/src/index.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "ff1afa118b207deb69fef1d44daafad3f3717d94",
+      "ref": "refs/heads/codex/v19-bank-central-foundation",
+      "name": "codex/v19-bank-central-foundation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ec5ceb2ef8434fc3f6c40c8c62b0311a3676a24d",
+      "ref": "refs/heads/codex/v19-foundation-acceptance",
+      "name": "codex/v19-foundation-acceptance",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "c91744a6d02865829b82df2088025949de99d88d",
+      "ref": "refs/heads/codex/v20-fx-international-foundation",
+      "name": "codex/v20-fx-international-foundation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0c7ed26236ce4a25b5252c77c9609a60502dbddc",
+      "ref": "refs/heads/codex/v21-1-global-order-book-foundation",
+      "name": "codex/v21-1-global-order-book-foundation",
+      "changedFiles": 4,
+      "unmatchedFiles": 2,
+      "examples": [
+        "packages/core/src/engine-kernels/global-order-book-foundation.ts",
+        "tests/world-core/v21-1-global-order-book-foundation.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "145a0a3aa22d640aaa3202c786fd5a359610b582",
+      "ref": "refs/heads/codex/v21-core-composed-candidate",
+      "name": "codex/v21-core-composed-candidate",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ebd255e8d0147ce204288328333d59a4e7728acb",
+      "ref": "refs/heads/codex/v21-trade-logistics-review-fix",
+      "name": "codex/v21-trade-logistics-review-fix",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "8490635605b015e1afff8c095824aabd6102c7e0",
+      "ref": "refs/heads/codex/v22-2-international-executors-a",
+      "name": "codex/v22-2-international-executors-a",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "751e06b896741fc69c438f5603fa770972d3d5de",
+      "ref": "refs/heads/codex/v22-2-mainline",
+      "name": "codex/v22-2-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3f488639515ac79dd41c0d38879de1291f9d8385",
+      "ref": "refs/heads/codex/v22-3-international-executors-b",
+      "name": "codex/v22-3-international-executors-b",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "015de795dfd1780c14c580e743cd7d0fa721b0c6",
+      "ref": "refs/heads/codex/v22-3-mainline",
+      "name": "codex/v22-3-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "f4815cc3d24e4876e9f09858f5536aac560592ef",
+      "ref": "refs/heads/codex/v22-contract-mainline",
+      "name": "codex/v22-contract-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "2dc1de3fc4b4ea4c5f4792538d961420317912db",
+      "ref": "refs/heads/codex/v23-1-mainline",
+      "name": "codex/v23-1-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d6968d557b62b1c852331ea2befb10231d05f00a",
+      "ref": "refs/heads/codex/v23-1-national-accounts-core",
+      "name": "codex/v23-1-national-accounts-core",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "6b0de2fc6e1127c24da3a12a24f81888b986d1fc",
+      "ref": "refs/heads/codex/v23-2-mainline",
+      "name": "codex/v23-2-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "13fe8283a451df123d0ab710c3b69d302926ef4d",
+      "ref": "refs/heads/codex/v23-2-reconciliation-core",
+      "name": "codex/v23-2-reconciliation-core",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fa281e2bdb7a6b2a1628f015aa721e859438fbb8",
+      "ref": "refs/heads/codex/v23-3-mainline",
+      "name": "codex/v23-3-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b8504b5e165c06f971ad8569d1901760c90da2e8",
+      "ref": "refs/heads/codex/v23-3-risk-score-core",
+      "name": "codex/v23-3-risk-score-core",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7577a57d140c5a0f039ac473766dd9d76a0faf4a",
+      "ref": "refs/heads/codex/v24-1-captain-strategy-preparation",
+      "name": "codex/v24-1-captain-strategy-preparation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fd7bc406f383b6b5b69c623449e3f1e429350c89",
+      "ref": "refs/heads/codex/v24-1-mainline",
+      "name": "codex/v24-1-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d75cf5e74ef050f00855e087afb0c69c0537e6ca",
+      "ref": "refs/heads/codex/v24-2-crisis-cause-core",
+      "name": "codex/v24-2-crisis-cause-core",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fa8fc876124a013e4b3554a62d1baefb8ff381dc",
+      "ref": "refs/heads/codex/v24-2-mainline",
+      "name": "codex/v24-2-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "bd1fe7fe07b35f47d73768b6633bd4396d1599b6",
+      "ref": "refs/heads/codex/v24-3-brief-conflict-expiry-core",
+      "name": "codex/v24-3-brief-conflict-expiry-core",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "45990429bb5405675d72cfde0299ca176084485c",
+      "ref": "refs/heads/codex/v24-3-mainline",
+      "name": "codex/v24-3-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ce3510eccd68fbb9252176ddd18c642287bec3f1",
+      "ref": "refs/heads/codex/v25-2-mainline",
+      "name": "codex/v25-2-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7ba4d971e27cb55288e798b4a34c6ecd7c3a3389",
+      "ref": "refs/heads/codex/v25-3-mainline",
+      "name": "codex/v25-3-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "0d9b8151c93761558c505b5af845fdc776cbc429",
+      "ref": "refs/heads/codex/v26-cache-mainline",
+      "name": "codex/v26-cache-mainline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e599c874d8b8617526fc17381e24f69223f05efe",
+      "ref": "refs/heads/codex/v27-1-seed-provenance-core",
+      "name": "codex/v27-1-seed-provenance-core",
+      "changedFiles": 5,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3b5766864dd15630b7beec7ddb358b2ec112aef6",
+      "ref": "refs/heads/codex/v27-2-calibration-preparation",
+      "name": "codex/v27-2-calibration-preparation",
+      "changedFiles": 6,
+      "unmatchedFiles": 2,
+      "examples": [
+        "packages/core/src/calibration/country-input-closure.ts",
+        "tests/world-core/v27-2-calibration-closure-preparation.test.ts"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/v27-provenance-calibration-adapter"
+    },
+    {
+      "sha": "56ab370b5013f47894a26def2e600ea73ed608cc",
+      "ref": "refs/heads/codex/v27-3-npc-intent-preparation",
+      "name": "codex/v27-3-npc-intent-preparation",
+      "changedFiles": 5,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "28215c36b4a7e05cea1742c7e069fb29384094bf",
+      "ref": "refs/heads/codex/v27-country-config-fingerprint-contract-fix",
+      "name": "codex/v27-country-config-fingerprint-contract-fix",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e70fa7cf6dd451cc5ea7dae3dd227d8e21f5bc77",
+      "ref": "refs/heads/codex/v27-country-configuration-manifest-preparation",
+      "name": "codex/v27-country-configuration-manifest-preparation",
+      "changedFiles": 5,
+      "unmatchedFiles": 2,
+      "examples": [
+        "tests/foundation/v27-country-configuration-manifest-preparation.test.ts",
+        "tools/v27/country-configuration-manifest-preparation.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "416b8e750c803a438320df4c1ea70375928b8d36",
+      "ref": "refs/heads/codex/v27-provenance-calibration-adapter",
+      "name": "codex/v27-provenance-calibration-adapter",
+      "changedFiles": 11,
+      "unmatchedFiles": 4,
+      "examples": [
+        "packages/core/src/calibration/country-input-closure.ts",
+        "packages/core/src/calibration/country-provenance-adapter.ts",
+        "tests/world-core/v27-2-calibration-closure-preparation.test.ts",
+        "tests/world-core/v27-provenance-calibration-adapter.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "ec72b19e120398c17bd4550c8673a16ca0fb5bb0",
+      "ref": "refs/heads/codex/v27-single-world-worker-preparation",
+      "name": "codex/v27-single-world-worker-preparation",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "4b675158c4cd9c516b8649faf5002c0b3db19ab0",
+      "ref": "refs/heads/codex/v27-v28-single-world-core-composition",
+      "name": "codex/v27-v28-single-world-core-composition",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "81bf859d051a5c85b3f097b92eb76111103318d5",
+      "ref": "refs/heads/codex/v28-1-single-world-config-preparation",
+      "name": "codex/v28-1-single-world-config-preparation",
+      "changedFiles": 6,
+      "unmatchedFiles": 6,
+      "examples": [
+        "docs/architecture/ADR-14_SINGLE_WORLD_SUPERSESSION_PROPOSAL.md",
+        "docs/exec-plans/V28.1.md",
+        "docs/reports/V28.1/IMPLEMENTATION.md",
+        "docs/reports/V28.1/TEST_EVIDENCE.json",
+        "packages/core/src/orchestration/single-world-configuration.ts",
+        "tests/world-core/v28-1-single-world-configuration.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "875114cca52211cb752bfafaee923fc9dd63958d",
+      "ref": "refs/heads/codex/v28-v30-preparation",
+      "name": "codex/v28-v30-preparation",
+      "changedFiles": 14,
+      "unmatchedFiles": 12,
+      "examples": [
+        "docs/architecture/ADR-14_SINGLE_WORLD_SUPERSESSION_PROPOSAL.md",
+        "docs/exec-plans/V28.1.md",
+        "docs/exec-plans/V29.1.md",
+        "docs/exec-plans/V30.1.md",
+        "docs/reports/V28.1/IMPLEMENTATION.md",
+        "docs/reports/V28.1/INDEPENDENT_REVIEW_B.md"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "d18de60c6b02e6892c34c8104c4588e534d62810",
+      "ref": "refs/heads/codex/v29-3-parameter-provenance-preparation",
+      "name": "codex/v29-3-parameter-provenance-preparation",
+      "changedFiles": 5,
+      "unmatchedFiles": 0,
+      "examples": [],
+      "action": "DELETE",
+      "reason": "ALL_BRANCH_CHANGED_PATHS_IDENTICAL_TO_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "9b50836c8f4ba90e2f3454e7e11880ef9b9cf9cb",
+      "ref": "refs/heads/codex/v29-balanced-core-binding",
+      "name": "codex/v29-balanced-core-binding",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a64b483faf74e2a0683e7fe3e5ce5034fcf0d897",
+      "ref": "refs/heads/codex/v29-balanced-run-evidence",
+      "name": "codex/v29-balanced-run-evidence",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ef310d38b5e352062529cf3621254d178b7eb932",
+      "ref": "refs/heads/codex/v29-balanced-seed-dryrun",
+      "name": "codex/v29-balanced-seed-dryrun",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "03be567c73b1fdeb60f14745aba0052cb9a28c0d",
+      "ref": "refs/heads/codex/v29-existing-data-closure",
+      "name": "codex/v29-existing-data-closure",
+      "changedFiles": 7,
+      "unmatchedFiles": 1,
+      "examples": [
+        "tests/world-core/v27-v29-existing-data-seed-closure.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "325520e83181683ca14c84775d698fab932daaef",
+      "ref": "refs/heads/codex/v29-mainline-integration",
+      "name": "codex/v29-mainline-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5548fc15672216402ddc3f0063ff0ec802a21ce9",
+      "ref": "refs/heads/codex/v30-disposable-restore-preparation",
+      "name": "codex/v30-disposable-restore-preparation",
+      "changedFiles": 6,
+      "unmatchedFiles": 6,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        ".github/workflows/v30-disposable-restore.yml",
+        "docs/exec-plans/V30.3.md",
+        "docs/reports/V30.3/DISPOSABLE_RESTORE_DIAGNOSTIC.md",
+        "scripts/v30-disposable-restore-diagnostic.mjs",
+        "tests/foundation/v30-disposable-restore-diagnostic.test.ts"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "5f3133d797c0e3d67242ba32b1b3a6c0cbad4a8d",
+      "ref": "refs/heads/codex/v30-ledger-restore-evidence",
+      "name": "codex/v30-ledger-restore-evidence",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "450a6abffc1efec8592848327cf4ff324e5e6ffa",
+      "ref": "refs/heads/codex/v30-manifest-restore-forward",
+      "name": "codex/v30-manifest-restore-forward",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "8e58ca3b0cff9603079b87cd24163d50fbdc52a1",
+      "ref": "refs/heads/codex/window-closeout-receipt-20261009",
+      "name": "codex/window-closeout-receipt-20261009",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "d7ad8a576ca729fe6dca36003b069d08f8519913",
+      "ref": "refs/heads/codex/world-api-all-data-read",
+      "name": "codex/world-api-all-data-read",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e9747048a082bebfc7aafbbab3e5b3da9054c9e2",
+      "ref": "refs/heads/codex/world-api-official-baseline",
+      "name": "codex/world-api-official-baseline",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "aa2b82c48337b2a0eb71baf362be9a4e184b7ca5",
+      "ref": "refs/heads/codex/world-api-official-public-cors",
+      "name": "codex/world-api-official-public-cors",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "ae086ce0b51cf3423a5b1ed3522371cfa48b3c92",
+      "ref": "refs/heads/codex/world-balanced-candidate-intake",
+      "name": "codex/world-balanced-candidate-intake",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "b803e28a3e225842bf2a70d67f492242dfe359c0",
+      "ref": "refs/heads/codex/world-core-planning",
+      "name": "codex/world-core-planning",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "a4dd1147407e3be8ad1ca9a41db5711ed6fa3c4c",
+      "ref": "refs/heads/codex/world-core-v06-v10",
+      "name": "codex/world-core-v06-v10",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "35ca483dc6e72bbcfc6d71202c3916f2a326dd76",
+      "ref": "refs/heads/codex/world-core-v07",
+      "name": "codex/world-core-v07",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7f0e65231656db95cc1210fb55c62bb0e30011e9",
+      "ref": "refs/heads/codex/world-core-v08",
+      "name": "codex/world-core-v08",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "8da085184bf063b61ba53c10537c6a797018072b",
+      "ref": "refs/heads/codex/world-core-v09",
+      "name": "codex/world-core-v09",
+      "changedFiles": 41,
+      "unmatchedFiles": 35,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "database/migrations/manifest.json",
+        "docs/exec-plans/V09.1.md",
+        "docs/exec-plans/V09.2.md",
+        "docs/exec-plans/V09.3.md",
+        "docs/exec-plans/V09.md"
+      ],
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_UNMERGED_SUCCESSOR",
+      "coveredBy": "codex/c-v10-authorization-guard-tests"
+    },
+    {
+      "sha": "a7668592b4d8d8bcfc1ec4a4dd4f00f71d3b3327",
+      "ref": "refs/heads/codex/world-core-v10-continuation",
+      "name": "codex/world-core-v10-continuation",
+      "changedFiles": 85,
+      "unmatchedFiles": 47,
+      "examples": [
+        ".github/workflows/v09-postgres.yml",
+        "apps/world-worker/package.json",
+        "apps/world-worker/src/authoritative-execution.ts",
+        "apps/world-worker/src/index.ts",
+        "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "abbcdc5c86279227627d30d13952fdadda96737b",
+      "ref": "refs/heads/codex/world-data-calibration",
+      "name": "codex/world-data-calibration",
+      "changedFiles": 97,
+      "unmatchedFiles": 97,
+      "examples": [
+        ".gitignore",
+        "data/calibration/concordances/source_entity_concordance.v1.json",
+        "data/calibration/concordances/trade_classification_concordance.v1.json",
+        "data/calibration/examples/calibration_package.development.json",
+        "data/calibration/exploration/c3_execution_contract.v1.json",
+        "data/calibration/exploration/c3_exploration_manifest.v1.json"
+      ],
+      "action": "KEEP",
+      "reason": "UNIQUE_OR_SUPERSEDED_CONTENT_REQUIRES_REVIEW"
+    },
+    {
+      "sha": "c08dd38c65b4a0241208d2f976890c86539eec7e",
+      "ref": "refs/heads/codex/world-data-mainline-oct02",
+      "name": "codex/world-data-mainline-oct02",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "e93ebcc3a1ec6e9849e640ca7a6052aba2af8956",
+      "ref": "refs/heads/codex/world-delivery-oct02",
+      "name": "codex/world-delivery-oct02",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "f75138ea01acacbf7424602cf14921329612cb49",
+      "ref": "refs/heads/codex/world-hold-actions-publication-record",
+      "name": "codex/world-hold-actions-publication-record",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "3acae5072729f136091f01c5f63ff29c7829114c",
+      "ref": "refs/heads/codex/world-map-full-integration",
+      "name": "codex/world-map-full-integration",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "85c461743e21045f971cf2554231b5df044e52e1",
+      "ref": "refs/heads/codex/world-official-page-config",
+      "name": "codex/world-official-page-config",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fcc1b88847d5f5680317d9c9534df969f6bf56ef",
+      "ref": "refs/heads/codex/world-runtime-actions",
+      "name": "codex/world-runtime-actions",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "7c08a5385c5a9e9c0955461d82b9839972fe86c2",
+      "ref": "refs/heads/codex/world-runtime-optimization-plan-20261031",
+      "name": "codex/world-runtime-optimization-plan-20261031",
+      "action": "KEEP",
+      "reason": "PROTECTED_ACTIVE_MAIN_PR_WORKTREE_OR_PLAN"
+    },
+    {
+      "sha": "7ad2313cedb26fe1ff8e854208c1965d3a80bb9b",
+      "ref": "refs/heads/codex/world-seed-delivery",
+      "name": "codex/world-seed-delivery",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "5aa237563dfb50e767df01752c6bfa1b4153f874",
+      "ref": "refs/heads/codex/world-shared-visual",
+      "name": "codex/world-shared-visual",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "47dadfa5fa7ccd598a791ed24b9c2174b06f1133",
+      "ref": "refs/heads/codex/world-source-custom-domain-cors",
+      "name": "codex/world-source-custom-domain-cors",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "43322811eff235500490b748449ba0c030476d65",
+      "ref": "refs/heads/codex/world-v2-edge-official-read",
+      "name": "codex/world-v2-edge-official-read",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "429c14580595a40e8c0f4f87daf8ab115f32a6c0",
+      "ref": "refs/heads/feat/v00-2",
+      "name": "feat/v00-2",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "fc9fc84158c62a3174c40e77896119ca41f9f71b",
+      "ref": "refs/heads/feat/v00-3",
+      "name": "feat/v00-3",
+      "action": "DELETE",
+      "reason": "ANCESTOR_OF_MAIN",
+      "coveredBy": "main"
+    },
+    {
+      "sha": "14595f81caec2ed5ce7cec564d7db9609b693718",
+      "ref": "refs/heads/main",
+      "name": "main",
+      "action": "KEEP",
+      "reason": "PROTECTED_ACTIVE_MAIN_PR_WORKTREE_OR_PLAN"
+    }
+  ],
+  "verification": {
+    "status": "PASS",
+    "remoteHeads": 80,
+    "deleted": 315,
+    "mainUnchanged": true,
+    "keptTipsUnchangedBeforeAuditPublication": true,
+    "atomicBatches": 21,
+    "allBatchExitCodes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "localBackupRefPrefix": "refs/codex-cleanup-backup/20261102/"
+}
