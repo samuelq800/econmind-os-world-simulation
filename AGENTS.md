@@ -88,3 +88,22 @@ Codex may never downgrade risk, approve its own P0 change, ignore a failed
 mandatory check, weaken Constitution requirements, create another Source of
 Truth, permit authoritative UI mutation, introduce direct macro buffs, or
 mutate production Supabase outside an authorized release.
+
+## Small-platform development and repository upkeep
+
+- At the start of each development task, remind the agent that EconMind is a
+  small platform: pursue robustness with the smallest maintainable change.
+  Avoid defensive programming and large-platform machinery without a measured
+  need; in particular, do not introduce a complex Redis cache, extra services,
+  or another framework solely for hypothetical scale. Keep the real authority,
+  money, replay, and access boundaries above intact.
+- Before adding a GitHub Actions workflow, inspect the existing workflows. If
+  one covers the job, extend it without breaking its existing triggers or
+  consumers; add a workflow only when the existing ones do not fit. When a
+  workflow is confirmed obsolete after evaluating its users and history,
+  record the decision prominently in
+  `docs/runbooks/WORLD_RUNTIME_GITHUB_ACTIONS.zh-CN.md` before retiring it.
+- At the end of each task, identify the current and superseded local and GitHub
+  branches, and ask the owner which superseded branches to delete from each
+  location. Do not assume the two locations have the same branches or delete
+  unmerged work without that decision.

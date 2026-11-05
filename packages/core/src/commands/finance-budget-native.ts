@@ -780,14 +780,14 @@ export function readFinanceNativeBudgetMixedFinancialState(input: {
   readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
   readonly sha256Hex: Sha256Hex;
 }): Readonly<FinancialLedgerState> {
-  const meta = mixedPrefixes.get(input.evidence);
   const result = readFinanceNativeBudgetMixedPrefix(
     input.evidence,
     input.financialBase.worldId,
     input.frames,
     input.sha256Hex,
+    input.financialBase,
   );
-  if (meta?.financialBase !== input.financialBase || !result.financialState)
+  if (!result.financialState)
     invalid('EXACT_GENUINE_FINANCIAL_REPLAY_BASE_REQUIRED');
   return result.financialState;
 }
@@ -805,6 +805,7 @@ export function readFinanceNativeBudgetMixedPrefix(
   worldId: string,
   frames: readonly FinanceNativeBudgetFrame[],
   sha: Sha256Hex,
+  financialBase?: Readonly<FinancialLedgerState>,
 ): Readonly<FinanceNativeBudgetMixedPrefixResult> {
   const issued = mixedPrefixes.get(evidence);
   if (
@@ -816,6 +817,12 @@ export function readFinanceNativeBudgetMixedPrefix(
         : frameHash(frames, sha))
   )
     invalid('GENUINE_EXACT_MIXED_PREFIX_EVIDENCE_REQUIRED');
+  if (
+    financialBase !== undefined &&
+    issued.result.financialState !== undefined &&
+    issued.financialBase !== financialBase
+  )
+    invalid('EXACT_GENUINE_FINANCIAL_REPLAY_BASE_REQUIRED');
   return issued.result;
 }
 /** Whole ordered canonical groups only. The existing Budget/Social reducers
