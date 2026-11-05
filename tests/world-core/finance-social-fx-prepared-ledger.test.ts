@@ -393,4 +393,30 @@ describe('complete Finance/Social/FX prepared-ledger replay', () => {
     ).toThrow('EXACT_GENUINE_FINANCIAL');
     expect(() => f.replay([...prefix].reverse())).toThrow('ORDERED');
   });
+  it('checks the exact financial opening in the same prefix read', () => {
+    const prefix = frames.slice(0, 2);
+    const replay = f.replay(prefix);
+    expect(
+      readFinanceNativeBudgetMixedPrefix(
+        replay.mixedPrefixEvidence,
+        world,
+        prefix,
+        sha,
+        f.f.financial,
+      ).financialState,
+    ).toBe(replay.financial);
+    const otherOpening = C.rebuildV08LedgersFromLineage({
+      seed: f.f.seed,
+      sha256Hex: sha,
+    }).financial;
+    expect(() =>
+      readFinanceNativeBudgetMixedPrefix(
+        replay.mixedPrefixEvidence,
+        world,
+        prefix,
+        sha,
+        otherOpening,
+      ),
+    ).toThrow('EXACT_GENUINE_FINANCIAL');
+  });
 });

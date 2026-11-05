@@ -28,7 +28,6 @@ import {
   readFinanceNativeBudgetMixedPrefix,
   prepareFinanceNativeBudgetFinancialReplay,
   prepareFinanceNativeBudgetMixedPrefix,
-  readFinanceNativeBudgetMixedFinancialState,
   type FinanceSocialFxOpeningEncumbrance,
   type FinanceSocialFxOriginal,
   type FinanceSocialOmoOriginal,
@@ -124,19 +123,14 @@ export function replayPreparedFinanceSocialLedger(input: {
     base.worldId,
     input.frames,
     input.sha256Hex,
+    base,
   );
   if (
     replay.budgetState.worldVersion !== input.expectedHead.worldVersion ||
     replay.budgetState.eventSequence !== input.expectedHead.eventSequence
   )
     invalid('exact complete current head required');
-  if (replay.financialState !== undefined)
-    return readFinanceNativeBudgetMixedFinancialState({
-      evidence: input.mixedPrefixEvidence,
-      financialBase: base,
-      frames: input.frames,
-      sha256Hex: input.sha256Hex,
-    });
+  if (replay.financialState !== undefined) return replay.financialState;
   // Evidence binds commands/events; these adjacent canonical containers and
   // posting arrays must independently be checked on EVERY use, not cached.
   let version = '0';
@@ -296,18 +290,15 @@ export function replayPreparedFinanceSocialFxLedger(input: {
     base.worldId,
     input.frames,
     input.sha256Hex,
+    base,
   );
   if (
     result.budgetState.worldVersion !== input.expectedHead.worldVersion ||
     result.budgetState.eventSequence !== input.expectedHead.eventSequence
   )
     invalid('exact complete current FX prefix head required');
-  const financial = readFinanceNativeBudgetMixedFinancialState({
-    evidence,
-    financialBase: base,
-    frames: input.frames,
-    sha256Hex: input.sha256Hex,
-  });
+  const financial = result.financialState;
+  if (!financial) invalid('EXACT_GENUINE_FINANCIAL_REPLAY_BASE_REQUIRED');
   return Object.freeze({
     financial,
     ...(result.inventoryState === undefined
