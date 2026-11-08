@@ -16,13 +16,24 @@ const forbidden =
 // no publication/approval is conferred by recognizing its source text.
 const tradeCurrentOfficeCheckExtension =
   /alter\s+table\s+world_v2\.postwar_paged_current_document\s+drop\s+constraint\s+postwar_paged_current_document_office_id_check\s*;\s*alter\s+table\s+world_v2\.postwar_paged_current_document\s+add\s+constraint\s+postwar_paged_current_document_office_id_check\s+check\s*\(\s*office_id\s+in\s*\(\s*'FINANCE'\s*,\s*'CENTRAL_BANK'\s*,\s*'SOCIAL'\s*,\s*'CAPTAIN'\s*,\s*'TRADE'\s*\)\s*\)\s*;/giu;
+// One reviewed existing-registry key replacement. The complete SQL bytes are
+// pinned so its owner/RLS/column/function/history guards cannot be omitted or
+// changed while retaining this narrow transaction-classification exception.
+const waterGrantScopeUpgradeSha256 =
+  '6f4dec7dbf60001e3c1953e326ce71e97d876b32c30e9e32c5100ccc486aa360';
+const waterGrantScopeKeyReplacement =
+  /alter\s+table\s+world_v2\.postwar_industry_water_grant_publication\s+drop\s+constraint\s+postwar_industry_water_grant_publication_pkey\s*;\s*alter\s+table\s+world_v2\.postwar_industry_water_grant_publication\s+add\s+constraint\s+postwar_industry_water_grant_publication_pkey\s+primary\s+key\s*\(\s*world_id\s*,\s*schedule_command_id\s*\)\s*;/giu;
 /** Conservative fixed-source classification, not a general SQL parser. Unknown
  * transaction shapes or unsafe commands stop packaging for explicit review. */
 export function classifyDeltaTransaction(bytes) {
   const sql = bytes.toString('utf8');
   if (!Buffer.from(sql, 'utf8').equals(bytes) || sql.includes('\0'))
     throw Error('VALID_UTF8_SQL_REQUIRED');
-  if (forbidden.test(sql.replace(tradeCurrentOfficeCheckExtension, '')))
+  const classified =
+    sha(bytes) === waterGrantScopeUpgradeSha256
+      ? sql.replace(waterGrantScopeKeyReplacement, '')
+      : sql;
+  if (forbidden.test(classified.replace(tradeCurrentOfficeCheckExtension, '')))
     throw Error('DESTRUCTIVE_CREDENTIAL_OR_NONTRANSACTIONAL_SQL_DENIED');
   const outer = sql
     .replace(/(\$[a-z_0-9]*\$)[\s\S]*?\1/giu, ' ')
