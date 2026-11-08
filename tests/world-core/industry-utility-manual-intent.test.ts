@@ -85,7 +85,7 @@ describe('Industry utility manual scheduling boundary', () => {
     ['POWER', 'DELIVER'],
     ['WATER', 'GRANT_RIGHT'],
   ] as const)(
-    'preserves conditional %s/%s DATA parsing but rejects manual execution',
+    'preserves conditional %s/%s DATA parsing but rejects an incomplete or forbidden manual operation',
     (kind, action) => {
       const payload = { ...manualUtilityPayload(kind), operation: { action } },
         c = command(kind, {}, payload);
@@ -93,6 +93,33 @@ describe('Industry utility manual scheduling boundary', () => {
       expect(() => parseIndustryUtilityManualIntent(c, sha)).toThrow();
       expect(() =>
         parseManualOfficeCommandRequest({ ...request(kind), payload }),
+      ).toThrow();
+    },
+  );
+  it.each([
+    { bookingRef: '' },
+    { workEventFingerprint: 'NOT_COMMITTED_EVENT_FP' },
+    { paymentEventFingerprint: false },
+    { paymentAmount: '1' },
+    { deliveredMWh: '1' },
+    { paid: true },
+    { allocations: [] },
+  ])(
+    'requires POWER delivery references, never reported outcomes %j',
+    (change) => {
+      const payload = manualUtilityPayload('POWER', 'DELIVER');
+      const bad = {
+        ...payload,
+        operation: { ...payload.operation, ...change },
+      };
+      expect(() =>
+        parseIndustryUtilityManualIntent(command('POWER', {}, bad), sha),
+      ).toThrow();
+      expect(() =>
+        parseManualOfficeCommandRequest({
+          ...request('POWER', 'DELIVER'),
+          payload: bad,
+        }),
       ).toThrow();
     },
   );

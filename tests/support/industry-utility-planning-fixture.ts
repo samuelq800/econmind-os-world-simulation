@@ -38,30 +38,37 @@ export function planningRow(
           }
       : {
           operation:
-            serviceKind === 'WATER'
+            serviceKind === 'POWER'
               ? {
                   action: 'DELIVER',
+                  bookingRef: 'BOOKING_TEST_ONLY',
                   workEventFingerprint: planningFp,
                   paymentEventFingerprint: planningFp,
-                  powerEventFingerprints: [planningFp],
-                  additionalProtectedClaims: [],
                 }
-              : action === 'SERVICE_WORK'
+              : serviceKind === 'WATER'
                 ? {
-                    action,
-                    transferId: 'TRANSFER_TEST_ONLY',
-                    workOrderRef: 'ORDER_TEST_ONLY',
-                    workOrderSha256: planningRaw,
+                    action: 'DELIVER',
+                    workEventFingerprint: planningFp,
+                    paymentEventFingerprint: planningFp,
+                    powerEventFingerprints: [planningFp],
+                    additionalProtectedClaims: [],
                   }
-                : action === 'PAY_INPUTS'
+                : action === 'SERVICE_WORK'
                   ? {
                       action,
                       transferId: 'TRANSFER_TEST_ONLY',
-                      workEventFingerprint: planningFp,
-                      expenseOrderRef: 'EXPENSE_TEST_ONLY',
-                      expenseOrderSha256: planningRaw,
+                      workOrderRef: 'ORDER_TEST_ONLY',
+                      workOrderSha256: planningRaw,
                     }
-                  : { action, transferId: 'TRANSFER_TEST_ONLY' },
+                  : action === 'PAY_INPUTS'
+                    ? {
+                        action,
+                        transferId: 'TRANSFER_TEST_ONLY',
+                        workEventFingerprint: planningFp,
+                        expenseOrderRef: 'EXPENSE_TEST_ONLY',
+                        expenseOrderSha256: planningRaw,
+                      }
+                    : { action, transferId: 'TRANSFER_TEST_ONLY' },
         };
   return parseIndustryUtilityPlanningRow({
     schemaVersion: 'postwar-industry-utility-planning-row-v1',

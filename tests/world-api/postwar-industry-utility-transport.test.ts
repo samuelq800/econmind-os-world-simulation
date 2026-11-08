@@ -187,7 +187,7 @@ describe('fixed Industry utilities HTTP scheduling and original recovery', () =>
     ['POWER', 'DELIVER'],
     ['WATER', 'GRANT_RIGHT'],
   ] as const)(
-    'rejects %s/%s before dispatch and recovery',
+    'rejects incomplete or forbidden %s/%s fields before dispatch and recovery',
     async (kind, action) => {
       let calls = 0;
       const mux = createPostwarOfficeCommandFetchHandler({

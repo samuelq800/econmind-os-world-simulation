@@ -171,7 +171,7 @@ export function renderIndustryUtilityForm(
     const route =
       row.serviceKind === 'LOGISTICS' && row.action === 'BOOK'
         ? `${row.parameters.materialRef} · ${row.parameters.fromLocationId} → ${row.parameters.toLocationId} · 产权 ${row.parameters.titleHolderId} · 风险 ${row.parameters.riskBearerId} · `
-        : row.serviceKind === 'POWER'
+        : row.serviceKind === 'POWER' && row.action === 'BOOK'
           ? `${row.parameters.purpose} · `
           : '';
     const detail =

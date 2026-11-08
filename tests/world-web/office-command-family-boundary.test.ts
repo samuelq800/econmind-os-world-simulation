@@ -119,7 +119,7 @@ describe('browser manual Office transport permits only the twelve registered man
     ['POWER', 'DELIVER'],
     ['WATER', 'GRANT_RIGHT'],
   ] as const)(
-    'does not expose %s/%s as a manual scheduling action',
+    'rejects incomplete or forbidden %s/%s manual fields',
     (kind, action) => {
       const value = envelope(
         'INDUSTRY',
@@ -135,6 +135,36 @@ describe('browser manual Office transport permits only the twelve registered man
       expect(parseOfficeIntent(changed, config('INDUSTRY'))).toBeNull();
     },
   );
+  it('permits only the complete reference-only POWER delivery for the current Industry scope', () => {
+    const value = envelope('INDUSTRY', 'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1');
+    const valid = {
+      ...value,
+      request: {
+        ...value.request,
+        payload: manualUtilityPayload('POWER', 'DELIVER'),
+      },
+    };
+    expect(parseOfficeIntent(valid, config('INDUSTRY'))).toEqual(valid);
+    expect(parseOfficeIntent(valid, config('FINANCE'))).toBeNull();
+    expect(
+      parseOfficeIntent(
+        {
+          ...valid,
+          request: {
+            ...valid.request,
+            payload: {
+              ...valid.request.payload,
+              operation: {
+                ...valid.request.payload.operation,
+                deliveredMWh: '1',
+              },
+            },
+          },
+        },
+        config('INDUSTRY'),
+      ),
+    ).toBeNull();
+  });
   it('rejects raw logistics labour allocations instead of a controlled work-order reference', () => {
     const value = envelope(
       'INDUSTRY',

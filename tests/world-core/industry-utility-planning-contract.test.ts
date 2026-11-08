@@ -11,6 +11,7 @@ import {
 describe('public source-bound Industry utility planning DATA', () => {
   it.each([
     ['POWER', 'BOOK'],
+    ['POWER', 'DELIVER'],
     ['LOGISTICS', 'BOOK'],
     ['LOGISTICS', 'SHIP'],
     ['LOGISTICS', 'SERVICE_WORK'],

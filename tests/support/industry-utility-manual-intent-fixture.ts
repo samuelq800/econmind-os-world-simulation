@@ -4,6 +4,7 @@ export const manualUtilityKinds = ['POWER', 'WATER', 'LOGISTICS'] as const;
 export type ManualUtilityKind = (typeof manualUtilityKinds)[number];
 export const manualUtilityCases = [
   ['POWER', 'BOOK'],
+  ['POWER', 'DELIVER'],
   ['WATER', 'DELIVER'],
   ['LOGISTICS', 'BOOK'],
   ['LOGISTICS', 'SHIP'],
@@ -51,23 +52,30 @@ export function manualUtilityPayload(kind: ManualUtilityKind, action?: string) {
     sourceRef: 'SOURCE_TEST_ONLY',
     sourceRawSha256: 'a'.repeat(64),
     operation:
-      kind !== 'LOGISTICS' || action === undefined || action === 'BOOK'
-        ? operation
-        : action === 'SERVICE_WORK'
-          ? {
-              action,
-              transferId: 'TRANSFER_TEST_ONLY',
-              workOrderRef: 'WORK_ORDER_TEST_ONLY',
-              workOrderSha256: 'c'.repeat(64),
-            }
-          : action === 'PAY_INPUTS'
+      kind === 'POWER' && action === 'DELIVER'
+        ? {
+            action: 'DELIVER',
+            bookingRef: 'BOOKING_TEST_ONLY',
+            workEventFingerprint: 'sha256:' + '1'.repeat(64),
+            paymentEventFingerprint: 'sha256:' + '2'.repeat(64),
+          }
+        : kind !== 'LOGISTICS' || action === undefined || action === 'BOOK'
+          ? operation
+          : action === 'SERVICE_WORK'
             ? {
                 action,
                 transferId: 'TRANSFER_TEST_ONLY',
-                workEventFingerprint: 'sha256:' + '1'.repeat(64),
-                expenseOrderRef: 'EXPENSE_ORDER_TEST_ONLY',
-                expenseOrderSha256: 'b'.repeat(64),
+                workOrderRef: 'WORK_ORDER_TEST_ONLY',
+                workOrderSha256: 'c'.repeat(64),
               }
-            : { action, transferId: 'TRANSFER_TEST_ONLY' },
+            : action === 'PAY_INPUTS'
+              ? {
+                  action,
+                  transferId: 'TRANSFER_TEST_ONLY',
+                  workEventFingerprint: 'sha256:' + '1'.repeat(64),
+                  expenseOrderRef: 'EXPENSE_ORDER_TEST_ONLY',
+                  expenseOrderSha256: 'b'.repeat(64),
+                }
+              : { action, transferId: 'TRANSFER_TEST_ONLY' },
   };
 }

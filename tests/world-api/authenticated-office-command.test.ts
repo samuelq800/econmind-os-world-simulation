@@ -127,6 +127,12 @@ describe('actual JWT/current SQL manual Office intake: unavailable source is zer
     ],
     [
       'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'DELIVER',
+    ],
+    [
+      'INDUSTRY',
       'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1',
       'INDUSTRY_PRODUCTION',
       'DELIVER',
@@ -171,7 +177,7 @@ describe('actual JWT/current SQL manual Office intake: unavailable source is zer
         commandType,
         payload:
           commandType === 'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1'
-            ? manualUtilityPayload('POWER')
+            ? manualUtilityPayload('POWER', action)
             : commandType === 'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1'
               ? manualUtilityPayload('WATER')
               : commandType === 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1'

@@ -56,6 +56,11 @@ export type IndustryUtilityPlanningRow = Common &
         }>;
       }>
     | Readonly<{
+        serviceKind: 'POWER';
+        action: 'DELIVER';
+        parameters: Readonly<{ operation: Readonly<Record<string, unknown>> }>;
+      }>
+    | Readonly<{
         serviceKind: 'WATER';
         action: 'DELIVER';
         parameters: Readonly<{ operation: Readonly<Record<string, unknown>> }>;
@@ -200,7 +205,11 @@ export function parseIndustryUtilityPlanningRow(
     const op = object(p.operation);
     if (
       op.action !== r.action ||
-      !(r.serviceKind === 'WATER' || r.serviceKind === 'LOGISTICS') ||
+      !(
+        r.serviceKind === 'POWER' ||
+        r.serviceKind === 'WATER' ||
+        r.serviceKind === 'LOGISTICS'
+      ) ||
       !isManualIndustryUtilityPayload(
         MANUAL_INDUSTRY_UTILITY_COMMANDS[r.serviceKind],
         {
@@ -228,6 +237,14 @@ export function parseIndustryUtilityPlanningRow(
         (!ref(op.expenseOrderRef) ||
           !raw(op.expenseOrderSha256) ||
           !fp(op.workEventFingerprint))
+      )
+        fail();
+    } else if (r.serviceKind === 'POWER') {
+      if (
+        r.action !== 'DELIVER' ||
+        !ref(op.bookingRef) ||
+        !fp(op.workEventFingerprint) ||
+        !fp(op.paymentEventFingerprint)
       )
         fail();
     } else if (

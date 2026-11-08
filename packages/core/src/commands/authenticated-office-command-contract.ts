@@ -40,6 +40,10 @@ export function isManualIndustryUtilityPayload(
     v !== null && typeof v === 'object' && !Array.isArray(v)
       ? (v as Record<string, unknown>)
       : null;
+  const reference = (v: unknown) =>
+    typeof v === 'string' && /^[A-Za-z][A-Za-z0-9_.:-]{0,255}$/u.test(v);
+  const fingerprint = (v: unknown) =>
+    typeof v === 'string' && /^sha256:[a-f0-9]{64}$/u.test(v);
   const exact = (v: Record<string, unknown>, keys: readonly string[]) =>
     Object.keys(v).length === keys.length &&
     keys.every((k) => Object.hasOwn(v, k));
@@ -71,6 +75,18 @@ export function isManualIndustryUtilityPayload(
     return false;
   switch (family) {
     case MANUAL_INDUSTRY_UTILITY_COMMANDS.POWER:
+      if (operation.action === 'DELIVER')
+        return (
+          exact(operation, [
+            'action',
+            'bookingRef',
+            'workEventFingerprint',
+            'paymentEventFingerprint',
+          ]) &&
+          reference(operation.bookingRef) &&
+          fingerprint(operation.workEventFingerprint) &&
+          fingerprint(operation.paymentEventFingerprint)
+        );
       return (
         operation.action === 'BOOK' &&
         exact(operation, [
