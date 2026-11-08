@@ -1,4 +1,5 @@
-/** Native ordinary Finance-administration budget bookkeeping. No payment,
+/** Native Finance bookkeeping: legacy own-administration funding and separately
+ * versioned ordinary department ceilings. No payment,
  * source admission, source publication or TEST_ONLY evidence promotion. The
  * Worker must protect actual policy/originals and source cutoff through commit. */
 import {
@@ -176,6 +177,20 @@ import {
 } from './social-employment-service.js';
 import type { ReplayReducerEvent } from '../replay/replay.js';
 
+import {
+  validateFinanceDepartmentCapOnlyPolicy,
+  financeDepartmentCapEnvelopeRef,
+  type FinanceDepartmentCapOnlyPolicy,
+} from './finance-department-cap-policy.js';
+export {
+  FINANCE_DEPARTMENT_CAP_ONLY_RULE,
+  FINANCE_DEPARTMENT_CAP_CATEGORIES,
+  financeDepartmentCapNormativeUnits,
+  financeDepartmentCapEnvelopeRef,
+  financeDepartmentCapSetPayload,
+  validateFinanceDepartmentCapOnlyPolicy,
+  type FinanceDepartmentCapOnlyPolicy,
+} from './finance-department-cap-policy.js';
 export const FINANCE_NATIVE_BUDGET_RULE =
   'FINANCE_ORDINARY_SELF_ADMINISTRATION_FULL_V1' as const;
 export const FINANCE_NATIVE_BUDGET_EVENT_TYPES = Object.freeze([
@@ -184,7 +199,7 @@ export const FINANCE_NATIVE_BUDGET_EVENT_TYPES = Object.freeze([
   'FINANCE_NATIVE_BUDGET_APPROPRIATED_V1',
   'FINANCE_NATIVE_BUDGET_LINE_INITIALIZED_V1',
 ] as const);
-export interface FinanceNativeBudgetPolicy {
+export interface FinanceNativeBudgetFullPolicy {
   readonly schemaVersion: 'finance-native-budget-policy-v1';
   readonly ruleRef: typeof FINANCE_NATIVE_BUDGET_RULE;
   readonly ruleRevision: string;
@@ -205,6 +220,8 @@ export interface FinanceNativeBudgetPolicy {
   readonly funding: 'FULL_UNCONDITIONAL';
   readonly requiredApprovalOffices: readonly ['FINANCE'];
 }
+export type FinanceNativeBudgetPolicy =
+  FinanceNativeBudgetFullPolicy | FinanceDepartmentCapOnlyPolicy;
 export interface FinanceNativeBudgetBinding {
   readonly seedRef: string;
   readonly seedFingerprint: string;
@@ -394,6 +411,10 @@ function hash(v: unknown, sha: Sha256Hex) {
 export function validateFinanceNativeBudgetPolicy(
   policy: FinanceNativeBudgetPolicy,
 ): void {
+  if (policy?.schemaVersion === 'finance-department-cap-policy-v1') {
+    validateFinanceDepartmentCapOnlyPolicy(policy);
+    return;
+  }
   if (
     !policy ||
     policy.schemaVersion !== 'finance-native-budget-policy-v1' ||
@@ -509,6 +530,24 @@ function checkedPolicy(
   sha: Sha256Hex,
 ) {
   validateFinanceNativeBudgetPolicy(policy);
+  if (policy.schemaVersion === 'finance-department-cap-policy-v1') {
+    if (p.operation !== 'SET_ENVELOPE')
+      invalid('DEPARTMENT_CAP_ONLY_SET_ENVELOPE_REQUIRED');
+    if (
+      policy.envelopeRef !==
+      financeDepartmentCapEnvelopeRef(
+        {
+          worldId: policy.worldId,
+          countryId: policy.countryId,
+          governmentEntityId: policy.governmentEntityId,
+          departmentCategory: policy.departmentCategory,
+          effectivePeriodRef: policy.effectivePeriodRef,
+        },
+        sha,
+      )
+    )
+      invalid('DETERMINISTIC_DEPARTMENT_PERIOD_ENVELOPE_REQUIRED');
+  }
   if (
     !same(p.scope, {
       worldId: policy.worldId,

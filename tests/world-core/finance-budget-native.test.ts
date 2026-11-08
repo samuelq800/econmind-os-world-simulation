@@ -5,6 +5,12 @@ import { describe, expect, it } from 'vitest';
 import * as C from '../../packages/core/src/index.js';
 import {
   FINANCE_NATIVE_BUDGET_RULE,
+  FINANCE_DEPARTMENT_CAP_ONLY_RULE,
+  financeDepartmentCapNormativeUnits,
+  financeDepartmentCapEnvelopeRef,
+  financeDepartmentCapSetPayload,
+  validateFinanceNativeBudgetPolicy,
+  type FinanceDepartmentCapOnlyPolicy,
   evaluateFinanceNativeBudgetSource,
   prepareFinanceNativeBudgetTransition,
   replayFinanceNativeBudgetHistory,
@@ -199,7 +205,7 @@ async function run(
     },
     worldId: world,
     requestedCountryId: country,
-    requestedOfficeId: 'FINANCE',
+    requestedOfficeId: C.officeId('FINANCE'),
     capability: 'FINANCE_BUDGET',
   });
   await C.processQueuedCommand({
@@ -447,5 +453,253 @@ describe('native Finance own-administration budget rules / Core TEST_ONLY fixtur
         sha256Hex: sha,
       }),
     ).rejects.toThrow('APPROVAL_RULE');
+  });
+});
+
+describe('versioned Finance department cap only / TEST_ONLY applicability originals', () => {
+  function cap(
+    f: ReturnType<typeof fixture>,
+    category: FinanceDepartmentCapOnlyPolicy['departmentCategory'] = 'INDUSTRY_SCIENCE_RESOURCES',
+  ): FinanceDepartmentCapOnlyPolicy {
+    const old = f.source.policy;
+    const policy: FinanceDepartmentCapOnlyPolicy = {
+      schemaVersion: 'finance-department-cap-policy-v1',
+      ruleRef: FINANCE_DEPARTMENT_CAP_ONLY_RULE,
+      ruleRevision: 'CAP_RULE_TEST_ONLY',
+      sourceDocumentSHA256: old.sourceDocumentSHA256,
+      normativeUnits: financeDepartmentCapNormativeUnits(category),
+      worldId: old.worldId,
+      countryId: old.countryId,
+      governmentEntityId: old.governmentEntityId,
+      currency: old.currency,
+      envelopeRef: financeDepartmentCapEnvelopeRef(
+        {
+          worldId: old.worldId,
+          countryId: old.countryId,
+          governmentEntityId: old.governmentEntityId,
+          departmentCategory: category,
+          effectivePeriodRef: old.effectivePeriodRef,
+        },
+        sha,
+      ),
+      effectivePeriodRef: old.effectivePeriodRef,
+      periodRevision: old.periodRevision,
+      validFromSimTime: old.validFromSimTime,
+      validUntilSimTime: old.validUntilSimTime,
+      requestingOfficeId: 'FINANCE',
+      departmentCategory: category,
+      classification: 'ORDINARY_DEPARTMENTAL',
+      funding: 'CAP_ONLY_NO_APPROPRIATION',
+      requiredApprovalOffices: ['FINANCE'],
+      applicability: {
+        classificationOriginalRef: 'TEST_ONLY_ADMITTED_ORDINARY_CLASSIFICATION',
+        classificationOriginalSHA256: 'sha256:' + 'c'.repeat(64),
+        governanceRuleRef: 'TEST_ONLY_GOVERNANCE_RULE_NOT_PRODUCTION',
+        governanceRuleSHA256: 'sha256:' + 'd'.repeat(64),
+      },
+    };
+    return policy;
+  }
+  function source(
+    f: ReturnType<typeof fixture>,
+    policy: FinanceDepartmentCapOnlyPolicy,
+  ) {
+    if (!f.source.financialState)
+      throw Error('TEST_ONLY_GENUINE_FINANCIAL_REQUIRED');
+    return {
+      policy,
+      binding: {
+        ...f.source.binding,
+        policyHash: C.canonicalSha256(C.canonicalHashInput(policy), sha),
+      },
+      financialState: f.source.financialState,
+      frames: [],
+      openingEncumbrances: f.source.openingEncumbrances,
+      worldVersion: '0',
+      eventSequence: '0',
+    };
+  }
+  function command(
+    policy: FinanceDepartmentCapOnlyPolicy,
+    amount: string,
+    head = '0',
+    suffix = 'CAP',
+  ) {
+    return C.parseCanonicalCommand(
+      {
+        schemaVersion: C.COMMAND_SCHEMA_VERSION,
+        commandId: 'COMMAND_DEPARTMENT_' + suffix,
+        idempotencyKey: 'KEY_DEPARTMENT_' + suffix,
+        worldId: world,
+        countryId: country,
+        officeId: 'FINANCE',
+        actorId: 'ACTOR_TEST_ONLY',
+        authSubject: subject,
+        commandType: 'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
+        expectedWorldVersion: head,
+        simTime: '0',
+        correlationId: 'CORRELATION_TEST_ONLY',
+        submittedAtReal: at,
+        payload: financeDepartmentCapSetPayload(
+          { policy, amount, revisionRef: 'DEPARTMENT_REV_' + suffix },
+          sha,
+        ),
+      },
+      sha,
+    );
+  }
+  it('uses actual currency/period and existing FINANCE_BUDGET authority for one cap, with zero cash/stock effects', async () => {
+    const f = fixture(),
+      p = cap(f),
+      s = source(f, p),
+      c = command(p, '300'),
+      r = await run(c, s);
+    expect(r.result.financialPostingBatches).toEqual([]);
+    expect(r.result.transition.events).toHaveLength(1);
+    expect(r.result.nextState.envelopes[0]).toMatchObject({
+      currency: 'GBP',
+      cap: '300',
+      lines: [],
+      scope: {
+        envelopeRef: p.envelopeRef,
+        effectivePeriodRef: p.effectivePeriodRef,
+      },
+    });
+    expect(
+      replayFinanceNativeBudgetHistory(
+        world,
+        [{ command: c, events: r.result.transition.events }],
+        sha,
+      ),
+    ).toEqual(r.result.nextState);
+    expect(
+      f.source.financialState?.positions[0]?.netDebitBalance.toCanonicalValue()
+        .amount,
+    ).toBe('1000');
+  });
+  it('reserves all department caps against the same TGA plus opening reservations and rejects a repeated slot', async () => {
+    const f = fixture(),
+      p = cap(f),
+      s = source(f, p),
+      c = command(p, '300'),
+      r = await run(c, s),
+      q = cap(f, 'LABOUR_SOCIAL_DEVELOPMENT');
+    const ss: FinanceNativeBudgetSource = {
+      ...source(f, q),
+      frames: [{ command: c, events: r.result.transition.events }],
+      worldVersion: '1',
+      eventSequence: '1',
+      financialState: C.rebuildV08LedgersFromLineage({
+        seed: f.seed,
+        transitions: [
+          {
+            command: c,
+            transition: r.result.transition,
+            inventoryPostings: [],
+            financialPostingBatches: [],
+          },
+        ],
+        sha256Hex: sha,
+      }).financial,
+    };
+    expect(() =>
+      evaluateFinanceNativeBudgetSource({
+        command: command(q, '701', '1', 'OTHER'),
+        source: ss,
+        sha256Hex: sha,
+      }),
+    ).toThrow('INSUFFICIENT_UNENCUMBERED_FISCAL_CAPACITY');
+    const ok = await run(command(q, '700', '1', 'OTHER'), ss);
+    expect(ok.result.nextState.envelopes).toHaveLength(2);
+    expect(() =>
+      evaluateFinanceNativeBudgetSource({
+        command: command(p, '1', '1', 'REPEAT'),
+        source: { ...ss, policy: p, binding: s.binding },
+        sha256Hex: sha,
+      }),
+    ).toThrow('ENVELOPE_SLOT_OCCUPIED');
+    const blocked = {
+      ...s,
+      openingEncumbrances: [
+        {
+          reference: 'EXISTING_PAYROLL',
+          accountId: s.binding.treasuryAccountId,
+          amount: '800',
+          currency: 'GBP',
+        },
+      ],
+      binding: {
+        ...s.binding,
+        openingEncumbranceHash: C.canonicalSha256(
+          C.canonicalHashInput([
+            {
+              reference: 'EXISTING_PAYROLL',
+              accountId: s.binding.treasuryAccountId,
+              amount: '800',
+              currency: 'GBP',
+            },
+          ]),
+          sha,
+        ),
+      },
+    };
+    expect(() =>
+      evaluateFinanceNativeBudgetSource({
+        command: c,
+        source: blocked,
+        sha256Hex: sha,
+      }),
+    ).toThrow('INSUFFICIENT_UNENCUMBERED_FISCAL_CAPACITY');
+  });
+  it('cannot approve a programme line, change currency, or disguise legacy full funding as a department cap', () => {
+    const f = fixture(),
+      p = cap(f),
+      s = source(f, p),
+      original = JSON.parse(f.command('APPROVE_NEW_LINE').canonicalPayload);
+    original.scope.envelopeRef = p.envelopeRef;
+    const line = C.parseCanonicalCommand(
+      {
+        schemaVersion: C.COMMAND_SCHEMA_VERSION,
+        commandId: 'COMMAND_LINE_CAP',
+        idempotencyKey: 'KEY_LINE_CAP',
+        worldId: world,
+        countryId: country,
+        officeId: 'FINANCE',
+        actorId: 'ACTOR_TEST_ONLY',
+        authSubject: subject,
+        commandType: 'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
+        expectedWorldVersion: '0',
+        simTime: '0',
+        correlationId: 'CORRELATION_TEST_ONLY',
+        submittedAtReal: at,
+        payload: original,
+      },
+      sha,
+    );
+    expect(() =>
+      evaluateFinanceNativeBudgetSource({
+        command: line,
+        source: s,
+        sha256Hex: sha,
+      }),
+    ).toThrow('DEPARTMENT_CAP_ONLY_SET_ENVELOPE_REQUIRED');
+    for (const bad of [
+      { ...p, funding: 'FULL_UNCONDITIONAL' },
+      { ...p, departmentCategory: 'CENTRAL_BANK' },
+      { ...p, classification: 'NATIONAL' },
+      { ...p, applicability: undefined },
+      { ...p, requiredApprovalOffices: [] },
+      { ...p, programmeOwnerOfficeId: 'INDUSTRY' },
+    ])
+      expect(() =>
+        validateFinanceNativeBudgetPolicy(bad as FinanceNativeBudgetPolicy),
+      ).toThrow();
+    expect(() =>
+      evaluateFinanceNativeBudgetSource({
+        command: command(p, '1'),
+        source: { ...s, policy: { ...p, currency: 'USD' } },
+        sha256Hex: sha,
+      }),
+    ).toThrow();
   });
 });
