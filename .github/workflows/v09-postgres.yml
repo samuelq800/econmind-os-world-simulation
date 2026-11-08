@@ -10,7 +10,7 @@ on:
       - codex/v09-v10-composite
   pull_request:
     paths:
-      - .github/workflows/v09-postgres.yml
+      - .github/workflows/**
       - database/migrations/**
       - package.json
       - pnpm-lock.yaml

@@ -1,0 +1,672 @@
+# Consolidated legacy specialist checks; see docs/runbooks/GITHUB_ACTIONS.zh-CN.md.
+name: World specialist checks (select one suite)
+run-name: Specialist · ${{ inputs.suite || github.ref_name }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Select one isolated specialist acceptance suite (no deployment)
+        required: true
+        type: choice
+        default: world-v2-api-reader-readback-audit
+        options:
+          - e-world-v2-release-handoff
+          - f-durable-command-intake
+          - f-official-opening
+          - gate-b-disposable-diagnostic
+          - narrow-transfer-approval-reference
+          - staged-narrow-transfer-http
+          - v30-2-postgres-permission-negatives
+          - v30-3-local-authenticated-bridge
+          - v30-4-buyer-finance-approval-reader
+          - v30-disposable-restore
+          - world-v2-api-full-reader-role
+          - world-v2-api-reader-readback-audit-postgres
+          - world-v2-api-reader-readback-audit
+          - world-v2-api-reader-role
+  push:
+    branches:
+      - codex/e-world-v2-release-handoff
+      - codex/f-durable-command-receipt
+      - codex/f-opening-seed-70-country
+      - codex/narrow-transfer-approval-reference
+      - codex/staged-narrow-transfer-http
+      - codex/live-command-bridge
+      - codex/e-gateb-auth-chain
+      - codex/e-buyer-finance-reader-native
+      - codex/e-official-data-full-reader
+      - codex/e-reader-readback-audit
+      - codex/e-official-data-release
+
+permissions:
+  contents: read
+
+jobs:
+  select-suite:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Reject unknown suites instead of reporting an empty successful run
+        env:
+          SUITE: ${{ inputs.suite }}
+        shell: bash
+        run: |
+          case "$SUITE" in
+            e-world-v2-release-handoff|f-durable-command-intake|f-official-opening|gate-b-disposable-diagnostic|narrow-transfer-approval-reference|staged-narrow-transfer-http|v30-2-postgres-permission-negatives|v30-3-local-authenticated-bridge|v30-4-buyer-finance-approval-reader|v30-disposable-restore|world-v2-api-full-reader-role|world-v2-api-reader-readback-audit-postgres|world-v2-api-reader-readback-audit|world-v2-api-reader-role)
+              printf 'Selected specialist suite: %s\n' "$SUITE" >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            *)
+              printf 'Unknown specialist suite\n' >&2
+              exit 1
+              ;;
+          esac
+
+  # Former entry: .github/workflows/e-world-v2-release-handoff.yml
+  e-world-v2-release-handoff:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'e-world-v2-release-handoff') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/e-world-v2-release-handoff"]'), github.ref))
+    name: Disposable PostgreSQL 17 release handoff
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - name: Rehearse the release handoff on disposable PostgreSQL 17
+        run: pnpm test:world-v2-release-handoff:postgres
+
+  # Former entry: .github/workflows/f-durable-command-intake.yml
+  f-durable-command-intake:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'f-durable-command-intake') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/f-durable-command-receipt"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker build
+      - run: pnpm exec tsc -p tests/support/tsconfig.f-durable-intake.json
+      - run: node scripts/v09-postgres-test-environment.mjs
+      - run: pnpm exec vitest run tests/integration/f-durable-command-intake-postgres.test.ts
+
+  # Former entry: .github/workflows/f-official-opening.yml
+  f-official-opening:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'f-official-opening') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/f-opening-seed-70-country"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker build
+      - run: pnpm exec tsc -p tests/support/tsconfig.f-official-opening.json --pretty false
+      - run: pnpm exec prettier --check apps/world-worker/src/persistence/opening-seed-store.ts apps/world-worker/src/persistence/world-opening-bootstrap-readback.ts apps/world-worker/src/preparation/official-world-opening-admission.ts apps/world-worker/src/index.ts tests/integration/f-official-opening-postgres.test.ts tests/world-core/official-world-opening-admission.test.ts tests/world-core/opening-seed-store.test.ts tests/support/tsconfig.f-official-opening.json .github/workflows/world-specialist-checks.yml
+      - run: pnpm exec eslint apps/world-worker/src/persistence/opening-seed-store.ts apps/world-worker/src/persistence/world-opening-bootstrap-readback.ts apps/world-worker/src/preparation/official-world-opening-admission.ts apps/world-worker/src/index.ts tests/integration/f-official-opening-postgres.test.ts tests/world-core/official-world-opening-admission.test.ts tests/world-core/opening-seed-store.test.ts
+      - run: pnpm exec vitest run tests/world-core/official-world-opening-admission.test.ts tests/world-core/opening-seed-store.test.ts
+      - run: node scripts/v09-postgres-test-environment.mjs
+      - run: pnpm exec vitest run tests/integration/f-official-opening-postgres.test.ts
+      - run: git diff --check origin/main...HEAD
+
+  # Former entry: .github/workflows/gate-b-disposable-diagnostic.yml
+  gate-b-disposable-diagnostic:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'gate-b-disposable-diagnostic')
+    name: Frozen V09 disposable cleanup diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+      V09_DISPOSABLE_EVIDENCE_CONFIRMATION: EXECUTE_DISPOSABLE_V09_POSTGRES_EVIDENCE
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Record frozen source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+          printf 'frozen_main_sha=%s\n' "${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - name: Capture disposable fault evidence
+        id: evidence
+        env:
+          V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
+        run: pnpm test:v09:disposable-evidence
+      - name: Verify lease, receipt recovery, and V10.4 on the same candidate
+        run: |
+          pnpm test:v09:postgres
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          pnpm exec vitest run tests/world-core/v09-commit-authorization-cutoff.test.ts
+          pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
+          pnpm test:v10.4:postgres
+          pnpm exec vitest run tests/world-core/v09-world-recovery-preparation.test.ts
+      - name: Summarize external dependency classes after failure
+        if: ${{ always() && steps.evidence.outcome == 'failure' }}
+        env:
+          V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
+          V09_DEPENDENCY_SUMMARY_OUTPUT: ${{ runner.temp }}/v09-dependency-summary.json
+        run: node scripts/v09-disposable-dependency-summary.mjs
+      - name: Upload durable redacted JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v09-disposable-diagnostic-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/v09-disposable-evidence.json
+            ${{ runner.temp }}/v09-dependency-summary.json
+          if-no-files-found: error
+
+  # Former entry: .github/workflows/narrow-transfer-approval-reference.yml
+  narrow-transfer-approval-reference:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'narrow-transfer-approval-reference') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/narrow-transfer-approval-reference"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+      APPROVAL_REFERENCE_NATIVE: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: node scripts/v09-postgres-test-environment.mjs
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker typecheck
+      - name: Native PostgreSQL reference binding and retry regressions
+        run: pnpm exec vitest run tests/world-core/v10-narrow-transfer-approval-store.test.ts
+
+  # Former entry: .github/workflows/staged-narrow-transfer-http.yml
+  staged-narrow-transfer-http:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'staged-narrow-transfer-http') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/staged-narrow-transfer-http","refs/heads/codex/live-command-bridge"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+      STAGED_HTTP_NATIVE: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: node scripts/v09-postgres-test-environment.mjs
+      - run: pnpm pretest
+      - run: pnpm exec tsc -p tests/support/tsconfig.staged-http.json
+      - run: node scripts/check-boundaries.mjs
+      - run: node scripts/check-authoritative-patterns.mjs
+      - run: pnpm secrets:check
+      - run: pnpm exec eslint apps/world-worker/src/preparation/local-narrow-reservation-worker.ts apps/world-api/src/integration/staged-narrow-transfer-composition.ts tests/integration/staged-narrow-transfer-http.test.ts
+      - name: Native PostgreSQL through actual staged HTTP
+        run: pnpm exec vitest run --reporter=verbose --disableConsoleIntercept tests/integration/staged-narrow-transfer-http.test.ts tests/world-api/local-nonproduction-http-bridge.test.ts
+
+  # Former entry: .github/workflows/v30-2-postgres-permission-negatives.yml
+  v30-2-postgres-permission-negatives:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'v30-2-postgres-permission-negatives')
+    name: Disposable PostgreSQL World V2 permission negatives
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: pnpm --filter @econmind/core build
+      - name: Run native World V2 role, grant, and RLS negatives
+        run: pnpm exec vitest run tests/integration/v30-2-postgres-permission-negative.test.ts
+
+  # Former entry: .github/workflows/v30-3-local-authenticated-bridge.yml
+  v30-3-local-authenticated-bridge:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'v30-3-local-authenticated-bridge') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/e-gateb-auth-chain"]'), github.ref))
+    name: Disposable PostgreSQL local authenticated bridge
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-api build
+      - name: Run native local authenticated bridge vertical
+        run: pnpm exec vitest run tests/integration/v30-3-local-authenticated-bridge-postgres.test.ts
+
+  # Former entry: .github/workflows/v30-4-buyer-finance-approval-reader.yml
+  v30-4-buyer-finance-approval-reader:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'v30-4-buyer-finance-approval-reader') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/e-buyer-finance-reader-native"]'), github.ref))
+    name: Disposable PostgreSQL Buyer Finance reader
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-api build
+      - name: Run native Buyer Finance approval-reader vertical
+        run: pnpm exec vitest run tests/integration/v30-3-local-authenticated-bridge-postgres.test.ts
+
+  # Former entry: .github/workflows/v30-disposable-restore.yml
+  v30-disposable-restore:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'v30-disposable-restore')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V30_DISPOSABLE_POSTGRES_ADMIN_URL: postgresql://postgres@127.0.0.1:5432/postgres
+      V30_DISPOSABLE_RESTORE_CONFIRMATION: EXECUTE_DISPOSABLE_V30_PG_RESTORE
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - name: Ensure disposable PostgreSQL client utilities
+        run: |
+          if [ ! -x /usr/lib/postgresql/16/bin/pg_dump ] || [ ! -x /usr/lib/postgresql/16/bin/pg_restore ]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client-16
+          fi
+          /usr/lib/postgresql/16/bin/pg_dump --version
+          /usr/lib/postgresql/16/bin/pg_restore --version
+      - name: Run real backup and restore on ephemeral service only
+        env:
+          V30_DISPOSABLE_RESTORE_OUTPUT: ${{ runner.temp }}/v30-disposable-restore-evidence.json
+        run: node scripts/v30-disposable-restore-diagnostic.mjs
+      - name: Upload redacted diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v30-disposable-restore-${{ github.sha }}
+          path: ${{ runner.temp }}/v30-disposable-restore-evidence.json
+          if-no-files-found: warn
+
+  # Former entry: .github/workflows/world-v2-api-full-reader-role.yml
+  world-v2-api-full-reader-role:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'world-v2-api-full-reader-role') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/e-official-data-full-reader"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: pnpm exec vitest run tests/integration/world-v2-api-full-reader-role-postgres.test.ts
+
+  # Former entry: .github/workflows/world-v2-api-reader-readback-audit-postgres.yml
+  world-v2-api-reader-readback-audit-postgres:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'world-v2-api-reader-readback-audit-postgres') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/e-reader-readback-audit"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: node scripts/test-world-v2-api-reader-readback-audit.mjs
+      - run: pnpm exec vitest run tests/integration/world-v2-api-reader-readback-audit-postgres.test.ts
+
+  # Former entry: .github/workflows/world-v2-api-reader-readback-audit.yml
+  world-v2-api-reader-readback-audit:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'world-v2-api-reader-readback-audit') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/e-reader-readback-audit"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: node scripts/test-world-v2-api-reader-readback-audit.mjs
+
+  # Former entry: .github/workflows/world-v2-api-reader-role.yml
+  world-v2-api-reader-role:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.suite == 'world-v2-api-reader-role') || (github.event_name == 'push' && contains(fromJSON('["refs/heads/codex/e-official-data-release"]'), github.ref))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: pnpm test:world-v2-api-reader-release
+      - run: pnpm exec vitest run tests/integration/world-v2-api-reader-role-postgres.test.ts
