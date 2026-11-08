@@ -7,6 +7,10 @@ import {
   type IndustryUtilityDraft,
 } from '../industry-utility/form.js';
 import {
+  buildSocialEmploymentPlanRequest,
+  type SocialEmploymentPlanDraft,
+} from '../social-employment/plan-form.js';
+import {
   buildCaptainCapitalRequest,
   type CaptainCapitalDraft,
 } from '../captain-capital/form.js';
@@ -129,6 +133,10 @@ export function createOfficeCommandController(
       b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
         : null,
+    socialPoolsReader =
+      b?.read.identity.officeId === 'SOCIAL' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
     recoverer = b
       ? createOfficeRecoveryClient(b.endpoint, b.read, options)
       : null,
@@ -147,6 +155,8 @@ export function createOfficeCommandController(
   let runParametersPage: RuntimePage | null = null;
   let utilityPlanningPage: RuntimePage | null = null;
   let utilityPlanningCode: string | null = null;
+  let socialPoolsPage: RuntimePage | null = null;
+  let socialPoolsCode: string | null = null;
   let model: OfficeProjectionModel | null = null,
     intent: AuthenticatedOfficeCommandRequestDto | null = null,
     acknowledgement: ManualOfficeQueueAcknowledgementDto | null = null,
@@ -176,6 +186,8 @@ export function createOfficeCommandController(
     runParametersPage = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
+    socialPoolsPage = null;
+    socialPoolsCode = null;
     intent = null;
     acknowledgement = null;
     lookup = null;
@@ -185,6 +197,7 @@ export function createOfficeCommandController(
     runtimeReader?.disconnect();
     industryRunReader?.disconnect();
     industryUtilityReader?.disconnect();
+    socialPoolsReader?.disconnect();
     recoverer?.disconnect();
     writer?.disconnect();
     const cleanup = stop;
@@ -234,6 +247,8 @@ export function createOfficeCommandController(
     runParametersPage = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
+    socialPoolsPage = null;
+    socialPoolsCode = null;
     status = 'UNAVAILABLE';
     code = reason;
   }
@@ -284,6 +299,51 @@ export function createOfficeCommandController(
       utilityPlanningCode = null;
     }
   }
+  function clearUnsubmittedSocialPlan() {
+    if (
+      !attempted &&
+      intent?.request.commandType === 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1'
+    ) {
+      intent = null;
+      status = 'CURRENT_AUTHORIZED_HEAD';
+      code = null;
+    }
+  }
+  async function readSocialPools(previous?: RuntimePage) {
+    if (!socialPoolsReader || !currentHead()) return;
+    clearUnsubmittedSocialPlan();
+    socialPoolsPage = null;
+    socialPoolsCode = 'READING';
+    notify();
+    const next = await socialPoolsReader.readPage(
+      'service-pools',
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    socialPoolsCode = next.status;
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const h = currentHead();
+      if (
+        !h ||
+        next.authority.readback.worldVersion !== h.worldVersion ||
+        next.authority.readback.eventSequence !== h.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      socialPoolsPage = next;
+      socialPoolsCode = null;
+    }
+  }
   async function read(tradeOpeningH0 = false, previous?: RuntimePage) {
     if (!b || !reader) return;
     model = null;
@@ -291,6 +351,9 @@ export function createOfficeCommandController(
     runParametersPage = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
+    socialPoolsPage = null;
+    socialPoolsCode = null;
+    clearUnsubmittedSocialPlan();
     status = 'READING';
     notify();
     if (runtimeReader) {
@@ -364,6 +427,8 @@ export function createOfficeCommandController(
       }
       floor = result.authority.readback.worldVersion;
       runtimePage = result;
+      await readSocialPools();
+      if (!checkLiveness() || !runtimePage) return;
       if (industryRunReader) {
         const parameters = await industryRunReader.readPage(
           INDUSTRY_RUN_PARAMETERS_DATASET,
@@ -564,6 +629,10 @@ export function createOfficeCommandController(
           ? (JSON.parse(JSON.stringify(utilityPlanningPage)) as RuntimePage)
           : null,
         utilityPlanningCode,
+        socialPoolsPage: socialPoolsPage
+          ? (JSON.parse(JSON.stringify(socialPoolsPage)) as RuntimePage)
+          : null,
+        socialPoolsCode,
         tradeDataset:
           b?.read.identity.officeId === 'TRADE' && runtimeReader
             ? tradeDataset
@@ -666,6 +735,61 @@ export function createOfficeCommandController(
     },
     stage: stageIntent,
     restoreOriginalForRecovery,
+    nextSocialPositionsPage() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        runtimePage?.dataset !== 'positions' ||
+        runtimePage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = runtimePage;
+      return operation(() => read(false, previous));
+    },
+    nextSocialPoolsPage() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        !socialPoolsPage ||
+        socialPoolsPage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = socialPoolsPage;
+      return operation(() => readSocialPools(previous));
+    },
+    stageSocialEmploymentPlan(draft: SocialEmploymentPlanDraft) {
+      if (
+        !b ||
+        busy ||
+        attempted ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        runtimePage?.dataset !== 'positions' ||
+        !socialPoolsPage
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildSocialEmploymentPlanRequest({
+            positions: runtimePage,
+            pools: socialPoolsPage,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            draft,
+            requestId: requestId(),
+            commandId: 'SOCIAL_PLAN_' + id,
+            idempotencyKey: 'SOCIAL_PLAN_KEY_' + id,
+          }),
+        );
+      } catch {
+        intent = null;
+        status = 'UNAVAILABLE';
+        code = 'SOCIAL_PLAN_CURRENT_SELECTION_INVALID';
+        notify();
+        return false;
+      }
+    },
     stageCaptainCapital(draft: CaptainCapitalDraft) {
       const head = currentHead();
       if (
