@@ -158,6 +158,34 @@ const RFC3339_MILLISECONDS =
   /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d{3}Z$/u;
 const MATERIALIZATION_KEY = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/u;
 
+/** Effect-set consistency only, never source/commit authority. The caller must
+ * first have the fixed source port recompute this exact event under its guards.
+ * Prepared materialization hashes are independently checked during capture. */
+export function assertSocialServiceCreationEffectSet(input: {
+  readonly countryId: string;
+  readonly eventPayload: string;
+  readonly materials: readonly Readonly<{ key: string; payloadHash: string }>[];
+  readonly outboxCount: number;
+}): void {
+  const event: unknown = JSON.parse(input.eventPayload);
+  if (
+    event === null ||
+    typeof event !== 'object' ||
+    Array.isArray(event) ||
+    !('afterStateHash' in event) ||
+    typeof event.afterStateHash !== 'string' ||
+    !/^sha256:[a-f0-9]{64}$/u.test(event.afterStateHash) ||
+    input.outboxCount !== 0 ||
+    input.materials.length !== 1 ||
+    input.materials[0]!.key !==
+      `SOCIAL_EMPLOYMENT_SERVICE_${input.countryId}` ||
+    input.materials[0]!.payloadHash !== event.afterStateHash
+  )
+    invalid(
+      'Social service creation must publish only its exact Core state and no outbox',
+    );
+}
+
 export interface CurrentMaterializationInput {
   readonly key: string;
   readonly payload: unknown;
@@ -2385,6 +2413,21 @@ export class AtomicTransitionRepository {
       invalid(
         'Social service creation source protection did not return the exact guarded command and head audit',
       );
+    const event = candidate.transition.events[0];
+    if (
+      candidate.transition.events.length !== 1 ||
+      !event ||
+      candidate.currentMaterializations[0]?.observation == null
+    )
+      invalid(
+        'Social service creation requires one guarded event and an observed current state',
+      );
+    assertSocialServiceCreationEffectSet({
+      countryId: candidate.command.countryId!,
+      eventPayload: event.canonicalPayload,
+      materials: candidate.currentMaterializations,
+      outboxCount: candidate.outboxMessages.length,
+    });
   }
 
   async #assertSocialPositionSourceCurrent(
