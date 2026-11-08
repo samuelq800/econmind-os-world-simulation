@@ -1,0 +1,326 @@
+{
+  "classification": "UNAPPROVED_EXACT_UPGRADE_REVIEW_INPUT",
+  "oldCommit": "0cf65bc0e6cbf1b117ca625bb16ec7280938e239",
+  "newCommit": "4b6d400c2620303bfdc167d6645adfbfed3f3e04",
+  "oldProposalSha256": {
+    "postwar-captain-current-derived-read": "83bd6bddf354f720efc2d9b69bd2699b69865f6f9a885f346776b59bb496e86c",
+    "postwar-captain-h0-current": "c20c56240db1d03f7279099cb5965eca6233eed12e7c68a28b6c389005740098",
+    "postwar-industry-first-day-source": "331ae91dbce76403615af720bd6cfef458137bde8ade21d97809e720ef63c364",
+    "postwar-paged-current-projection": "f6f68e5a9025a8aa7d73c72b5b3f5c3efdf82a7debe0d1493cc2ce2a40486230",
+    "postwar-industry-utility-custody": "0341a55519ba0e8eb970ae43acf19980b2f2c3a6134cd97f1695a417907a1fb5"
+  },
+  "newProposalSha256": {
+    "postwar-captain-current-derived-read": "aeedc9d42932916973482690f487c5a2e115c4e440a7a04993bae16f81addcbd",
+    "postwar-captain-h0-current": "b2d46d498c57e7e4f43013b0bbf29028f63d34184a368893ac5915ca7556b779",
+    "postwar-industry-first-day-source": "64c88c9b36ddf4215b258af90dc280b81339e39b6324057cbb2fa92cab2eaf84",
+    "postwar-paged-current-projection": "dd7534670f54e86eab75f9d71cd98280e8fc735c03d8d9ed9d02abc156d18664",
+    "postwar-industry-utility-custody": "ff2bd7ca8133575ed20311cce80fd2a1828380cf384f0eb92698f64806a62717"
+  },
+  "functions": [
+    {
+      "name": "read_postwar_captain_current_page",
+      "types": "text,integer,integer,text",
+      "args": [
+        "p_world",
+        "p_offset",
+        "p_limit",
+        "p_expected",
+        "status",
+        "scope",
+        "source",
+        "page",
+        "rows_text"
+      ],
+      "result": "TABLE(status text, scope jsonb, source jsonb, page jsonb, rows_text text)",
+      "owner": "world_v2_postwar_projection_owner",
+      "readers": ["world_v2_postwar_projection_reader"],
+      "oldBodySha256": "2abebf6800000c7c882b1a89c733692c924efc7af1892efa35e6669c17ead355",
+      "newBodySha256": "01eb84f2212dba8d23f8eb760d37f6ccf1738a99fd7bd81fa9ba1265d4875fba",
+      "oldSource": "postwar-captain-h0-current",
+      "newSource": "postwar-captain-h0-current"
+    },
+    {
+      "name": "publish_postwar_industry_first_day_source",
+      "types": "text,text,text,text,text,text,text",
+      "args": [
+        "p_world",
+        "p_country",
+        "p_facility",
+        "p_policy",
+        "p_adoption",
+        "p_checksums",
+        "p_domestic_access",
+        "source_ref",
+        "source_sha256"
+      ],
+      "result": "TABLE(source_ref text, source_sha256 text)",
+      "owner": "world_v2_industry_source_owner",
+      "readers": ["world_v2_industry_source_publisher"],
+      "oldBodySha256": "3a5d7add71cfac523ece7abd9e29415910af9f4ca5cf1f472631ab30b27077b9",
+      "newBodySha256": "71a52c4a5f14db4ebefcb494bdaf134ad9b82023c3cfe4f01c78a730fafe0cd6",
+      "oldSource": "postwar-industry-first-day-source",
+      "newSource": "postwar-industry-first-day-source"
+    },
+    {
+      "name": "read_postwar_paged_current_page",
+      "types": "text,text,text,integer,integer,text",
+      "args": [
+        "p_world",
+        "p_office",
+        "p_dataset",
+        "p_offset",
+        "p_limit",
+        "p_expected",
+        "status",
+        "scope",
+        "source",
+        "page",
+        "rows_text"
+      ],
+      "result": "TABLE(status text, scope jsonb, source jsonb, page jsonb, rows_text text)",
+      "owner": "world_v2_postwar_projection_owner",
+      "readers": [],
+      "oldBodySha256": "6d78dc6ba86a4a92a8139b0f7032c92532a133a736c940cab3c730e12fdf6112",
+      "newBodySha256": "4606001b1317dd318f8e376d67101f3d63baf93f01c7110fcb1e2703394125b9",
+      "oldSource": "postwar-paged-current-projection",
+      "newSource": "postwar-paged-current-projection"
+    },
+    {
+      "name": "publish_postwar_industry_utility_source",
+      "types": "text,text,jsonb,text",
+      "args": [
+        "p_world",
+        "p_source",
+        "p_raw",
+        "p_adoption",
+        "source_ref",
+        "source_sha256"
+      ],
+      "result": "TABLE(source_ref text, source_sha256 text)",
+      "owner": "world_v2_industry_source_owner",
+      "readers": ["world_v2_industry_source_publisher"],
+      "oldBodySha256": "f10e860aff97e8877a580a50521f6a0806895b7824ed36ae27330a974dc4b0ed",
+      "newBodySha256": "60577454171fd57f9c4365a73ec9e16f415f4ff192339adf940b36f4514f5ae0",
+      "oldSource": "postwar-industry-utility-custody",
+      "newSource": "postwar-industry-utility-custody"
+    },
+    {
+      "name": "read_postwar_industry_water_command_evidence",
+      "types": "text,text,text,text,bigint,bigint,text,text,jsonb",
+      "args": [
+        "p_world",
+        "p_country",
+        "p_facility",
+        "p_run",
+        "p_before_version",
+        "p_before_sequence",
+        "p_until",
+        "p_work_fingerprint",
+        "p_power_fingerprints",
+        "grant_pin",
+        "power_pins",
+        "work_source",
+        "protected_claims",
+        "from_ticks"
+      ],
+      "result": "TABLE(grant_pin jsonb, power_pins jsonb, work_source jsonb, protected_claims jsonb, from_ticks text)",
+      "owner": "world_v2_industry_source_owner",
+      "readers": ["world_v2_industry_source_reader"],
+      "oldBodySha256": "544d8693de6a08368a4590d2ea88f87ca43e9003e02091fe2e3f18a9dbd442ca",
+      "newBodySha256": "8459e711b1e59037b37816938b373a7e8a4a58572ce950850d89b74e8b2c2f11",
+      "oldSource": "postwar-industry-utility-custody",
+      "newSource": "postwar-industry-utility-custody"
+    }
+  ],
+  "helperBodySha256": "fdb710e49c20b98d5291e2304022176a2d98de6dcc8dc9d7c16b53bc6ef8e90c",
+  "schemaVersion": "postwar-exact-historical-upgrade-review-v1",
+  "execution": "REVIEW_INPUT_ONLY_NO_EXECUTOR_NO_PRODUCTION_APPROVAL",
+  "scope": "FIVE_MODIFIED_PROPOSALS_SPLIT_INTO_FIVE_EXACT_UPGRADES_PLUS_TWO_FRESH_PROPOSALS_NOT_FULL_WORLD_ACCEPTANCE",
+  "orderedUpgradeFiles": [
+    {
+      "path": "database/upgrades/postwar-captain-allocation-options-upgrade.sql",
+      "rawSha256": "01ac17fe2414c89b9d7d908303007c94398a6edf72b0fec24d56a9c21b9ea12c",
+      "transaction": "SOURCE_BEGIN_COMMIT",
+      "repeat": "REJECT_EXACT_OLD_PRECONDITION",
+      "requires": []
+    },
+    {
+      "path": "database/upgrades/postwar-industry-first-day-refinery-upgrade.sql",
+      "rawSha256": "139d2ade17430758194df57ce37a9462882afe1bbe93160ef6ce1be5e1c76d54",
+      "transaction": "SOURCE_BEGIN_COMMIT",
+      "repeat": "REJECT_EXACT_OLD_PRECONDITION",
+      "requires": []
+    },
+    {
+      "path": "database/upgrades/postwar-paged-current-options-upgrade.sql",
+      "rawSha256": "40d3799e108f3ffdb6b68c790be6c9a45f8c9ba49b99ceca7d02cabb08a191de",
+      "transaction": "SOURCE_BEGIN_COMMIT",
+      "repeat": "REJECT_EXACT_OLD_PRECONDITION",
+      "requires": [
+        "database/upgrades/postwar-captain-allocation-options-upgrade.sql",
+        "database/upgrades/postwar-industry-first-day-refinery-upgrade.sql"
+      ]
+    },
+    {
+      "path": "database/upgrades/postwar-industry-utility-source-functions-upgrade.sql",
+      "rawSha256": "1d3e5232eb62389245315c480e6f3b101d81045bde6e8bfb226a08d1afe7de37",
+      "transaction": "SOURCE_BEGIN_COMMIT",
+      "repeat": "REJECT_EXACT_OLD_PRECONDITION",
+      "requires": []
+    },
+    {
+      "path": "database/upgrades/postwar-industry-water-grant-scope-upgrade.sql",
+      "rawSha256": "6f4dec7dbf60001e3c1953e326ce71e97d876b32c30e9e32c5100ccc486aa360",
+      "transaction": "SOURCE_BEGIN_COMMIT",
+      "repeat": "REJECT_EXACT_OLD_PRECONDITION",
+      "requires": [
+        "database/upgrades/postwar-captain-allocation-options-upgrade.sql",
+        "database/upgrades/postwar-industry-first-day-refinery-upgrade.sql",
+        "database/upgrades/postwar-paged-current-options-upgrade.sql",
+        "database/upgrades/postwar-industry-utility-source-functions-upgrade.sql"
+      ],
+      "companionOwner": "transactions_acceptance",
+      "scope": "Exact 0cf world/run key to 4b world/schedule key; full target4b publisher and scoped recovery RPCs",
+      "targetFunctionBodySha256": {
+        "read_postwar_industry_water_grant_publication(text,text,text,text)": "29fb5a78ad8a7ecbbc7ab99db976ecd81d5a0522d7f3b8116af30fb1b6697296",
+        "read_postwar_industry_water_grant_publication(text,text)": "7f5c11c2d046b7c15aafab9dac004f2706aa610967c0c43981f07517277d739d",
+        "publish_postwar_industry_water_grant(text,text,text,text,text,bigint,bigint,timestamptz,text,text)": "7ea0feff174c496cbf2658d02bc3f88532869819d1124fb3d2f0d60ac89c0848"
+      }
+    }
+  ],
+  "freshProposalFiles": [
+    {
+      "path": "database/proposals/postwar-industry-power-service-source.sql",
+      "rawSha256": "1d01eff8f3a0ad213c090b402f8667c15250f11655d334ab1ee05fbe358ba159",
+      "mechanism": "EXISTING_FIXED_SOURCE_FRESH_FILE_PLAN_AFTER_CATALOG_REVIEW",
+      "dependsOn": [
+        "postwar-industry-utility-custody",
+        "postwar-industry-first-day-source",
+        "postwar-industry-run-history",
+        "postwar-industry-work-publication"
+      ]
+    },
+    {
+      "path": "database/proposals/postwar-industry-power-service-current.sql",
+      "rawSha256": "c5084404405005918171217b19ad85cbff06ed4f8e9d6a3b0388fc139204c1d3",
+      "mechanism": "EXISTING_FIXED_SOURCE_FRESH_FILE_PLAN_AFTER_CATALOG_REVIEW",
+      "dependsOn": [
+        "postwar-industry-power-service-source",
+        "postwar-mixed-industry-current-effects"
+      ]
+    }
+  ],
+  "sourceFunctionChanges": [
+    {
+      "source": "database/proposals/postwar-captain-current-derived-read.sql",
+      "signature": "postwar_captain_allocation_options(jsonb,text)",
+      "oldBodySha256": null,
+      "targetBodySha256": "fdb710e49c20b98d5291e2304022176a2d98de6dcc8dc9d7c16b53bc6ef8e90c",
+      "effect": "NEW_PRIVATE_HELPER",
+      "coveredBy": "database/upgrades/postwar-captain-allocation-options-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-captain-current-derived-read.sql",
+      "signature": "read_postwar_captain_current_page(text,integer,integer,text)",
+      "oldBodySha256": "af6d774647dabf7849f60c1a14066e8e4870cf9afb432077de8b1dc2585cdf2c",
+      "targetBodySha256": "8785530a7f48966564fec330c61ad9721455846770c02917e0d6e341aa22d045",
+      "effect": "SHADOWED_BY_PAGED_DISPATCHER_THEN_H0_WRAPPER_AT_FINAL_INSTALL",
+      "coveredBy": null
+    },
+    {
+      "source": "database/proposals/postwar-captain-h0-current.sql",
+      "signature": "read_postwar_captain_current_page(text,integer,integer,text)",
+      "oldBodySha256": "2abebf6800000c7c882b1a89c733692c924efc7af1892efa35e6669c17ead355",
+      "targetBodySha256": "01eb84f2212dba8d23f8eb760d37f6ccf1738a99fd7bd81fa9ba1265d4875fba",
+      "effect": "REPLACE_EXACT_FUNCTION",
+      "coveredBy": "database/upgrades/postwar-captain-allocation-options-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-industry-first-day-source.sql",
+      "signature": "publish_postwar_industry_first_day_source(text,text,text,text,text,text,text)",
+      "oldBodySha256": "3a5d7add71cfac523ece7abd9e29415910af9f4ca5cf1f472631ab30b27077b9",
+      "targetBodySha256": "71a52c4a5f14db4ebefcb494bdaf134ad9b82023c3cfe4f01c78a730fafe0cd6",
+      "effect": "REPLACE_EXACT_FUNCTION",
+      "coveredBy": "database/upgrades/postwar-industry-first-day-refinery-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-paged-current-projection.sql",
+      "signature": "read_postwar_paged_current_page(text,text,text,integer,integer,text)",
+      "oldBodySha256": "6d78dc6ba86a4a92a8139b0f7032c92532a133a736c940cab3c730e12fdf6112",
+      "targetBodySha256": "4606001b1317dd318f8e376d67101f3d63baf93f01c7110fcb1e2703394125b9",
+      "effect": "REPLACE_EXACT_FUNCTION",
+      "coveredBy": "database/upgrades/postwar-paged-current-options-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-industry-utility-custody.sql",
+      "signature": "publish_postwar_industry_utility_source(text,text,jsonb,text)",
+      "oldBodySha256": "f10e860aff97e8877a580a50521f6a0806895b7824ed36ae27330a974dc4b0ed",
+      "targetBodySha256": "60577454171fd57f9c4365a73ec9e16f415f4ff192339adf940b36f4514f5ae0",
+      "effect": "REPLACE_EXACT_FUNCTION",
+      "coveredBy": "database/upgrades/postwar-industry-utility-source-functions-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-industry-utility-custody.sql",
+      "signature": "read_postwar_industry_water_grant_publication(text,text,text,text)",
+      "oldBodySha256": null,
+      "targetBodySha256": "29fb5a78ad8a7ecbbc7ab99db976ecd81d5a0522d7f3b8116af30fb1b6697296",
+      "effect": "NEW_FIXED_SCOPED_RECOVERY_RPC",
+      "coveredBy": "database/upgrades/postwar-industry-water-grant-scope-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-industry-utility-custody.sql",
+      "signature": "read_postwar_industry_water_grant_publication(text,text)",
+      "oldBodySha256": "c52fbaa074e5438de4d54fb81bad2ae378f5f63593ee1e114f8b82fc04110614",
+      "targetBodySha256": "7f5c11c2d046b7c15aafab9dac004f2706aa610967c0c43981f07517277d739d",
+      "effect": "REPLACE_EXACT_FUNCTION",
+      "coveredBy": "database/upgrades/postwar-industry-water-grant-scope-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-industry-utility-custody.sql",
+      "signature": "publish_postwar_industry_water_grant(text,text,text,text,text,bigint,bigint,timestamptz,text,text)",
+      "oldBodySha256": "c5d1cfaf81993b66f8f2e21f316c7624d43bbf235de317e51398dc8fd351bec1",
+      "targetBodySha256": "7ea0feff174c496cbf2658d02bc3f88532869819d1124fb3d2f0d60ac89c0848",
+      "effect": "REPLACE_EXACT_FUNCTION",
+      "coveredBy": "database/upgrades/postwar-industry-water-grant-scope-upgrade.sql"
+    },
+    {
+      "source": "database/proposals/postwar-industry-utility-custody.sql",
+      "signature": "read_postwar_industry_water_command_evidence(text,text,text,text,bigint,bigint,text,text,jsonb)",
+      "oldBodySha256": "544d8693de6a08368a4590d2ea88f87ca43e9003e02091fe2e3f18a9dbd442ca",
+      "targetBodySha256": "8459e711b1e59037b37816938b373a7e8a4a58572ce950850d89b74e8b2c2f11",
+      "effect": "REPLACE_EXACT_FUNCTION",
+      "coveredBy": "database/upgrades/postwar-industry-utility-source-functions-upgrade.sql"
+    }
+  ],
+  "verificationBoundary": {
+    "nativePostgres": false,
+    "retainedWorldUpgrade": false,
+    "production": false,
+    "coreEconomicExecution": false,
+    "myFourFunctionTransactions": "ACTUAL_PGLITE_ONE_INTEGRATION_PASS",
+    "companionGrantScope": "SEPARATE_OWNER_PGLITE_8_PASS_NOT_COMBINED_RETAINED_WORLD",
+    "freshPowerSQLExecution": "NOT_RUN_IN_THIS_UPGRADE_TEST",
+    "freshPowerClassification": "REUSED_EXISTING_CLASSIFIER_ONLY_2_FILES_NO_SQL_EXECUTION"
+  },
+  "tableChanges": [
+    {
+      "source": "database/proposals/postwar-industry-utility-custody.sql",
+      "relation": "world_v2.postwar_industry_water_grant_publication",
+      "oldPrimaryKey": ["world_id", "run_id"],
+      "targetPrimaryKey": ["world_id", "schedule_command_id"],
+      "coveredBy": "database/upgrades/postwar-industry-water-grant-scope-upgrade.sql",
+      "dataRewrite": false
+    }
+  ],
+  "targetKind": "EXACT_4B6D400C_SOURCE_AND_SCHEMA_TARGET",
+  "companionVerification": {
+    "artifactPath": "database/upgrades/postwar-industry-water-grant-scope-upgrade.sql",
+    "actualEmbeddedPassed": 8,
+    "note": "Separately tested by owner; exact product bytes independently hashed here. Not a combined retained-World upgrade or native validation.",
+    "evidenceDirectory": "/workspace/.cloud-setup/evidence/refinery-grant-upgrade-20261108",
+    "commit": "c86460417ef93443282c563634673bc420f9d4a4",
+    "existingSchemaRegressionPassed": 20,
+    "report": "/workspace/.cloud-setup/evidence/refinery-grant-upgrade-20261108/final04.vitest.json",
+    "notRun": "Combined five-upgrade retained-World/native execution"
+  }
+}
