@@ -1479,7 +1479,6 @@ function foldFinanceNativeBudgetMixedPrefix(
       creationOriginalCountries.has(original.countryId) ||
       original.worldId !== input.worldId ||
       !Array.isArray(original.usageLicences) ||
-      !original.usageLicences.length ||
       original.usageLicences.length > 4096 ||
       !Array.isArray(original.populationAvailability) ||
       !/^sha256:[a-f0-9]{64}$/u.test(original.sourceFingerprint) ||

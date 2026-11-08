@@ -107,7 +107,7 @@ function fixture() {
     governmentEntityId: 'ENTITY_GOVERNMENT_01',
     localCurrency: 'XAA',
     sourceRef: 'SOURCE_TEST_ONLY_CREATION',
-    sourceFingerprint: 'sha256:' + '1'.repeat(64),
+    sourceFingerprint: `sha256:${'1'.repeat(64)}`,
     sourceRevocations: [],
     usageLicence: {
       licenseId: 'LICENCE_TEST_ONLY_PUBLIC_REFERRAL',
@@ -585,6 +585,25 @@ describe('CREATE in the actual complete ordered canonical Social prefix', () => 
       result.socialCountries[0]!.lifecycle.employment.creations,
     ).toHaveLength(1);
   });
+  it('retains a real empty licence set without disabling unrelated history; CREATE remains closed', () => {
+    const x = input(),
+      base = {
+        worldId: x.c.worldId,
+        socialCountries: [
+          { countryId: country, state: x.f.state, offers: [x.f.facts.offer] },
+        ],
+        socialCreationOriginals: [{ ...x.original, usageLicences: [] }],
+      };
+    expect(() =>
+      prepareFinanceNativeBudgetMixedPrefix({ ...base, frames: [] }, sha),
+    ).not.toThrow();
+    expect(() =>
+      prepareFinanceNativeBudgetMixedPrefix(
+        { ...base, frames: [x.frame] },
+        sha,
+      ),
+    ).toThrow('SOCIAL_CREATION_ACTUAL_T0_ORIGINALS');
+  });
   it('rejects missing or mismatched real licence/source/population originals and unknown families', () => {
     const x = input(),
       base = {
@@ -666,4 +685,164 @@ describe('CREATE in the actual complete ordered canonical Social prefix', () => 
       ),
     ).toThrow();
   });
+});
+
+import {
+  OPENING_SOURCE_SCHEMA_VERSION,
+  OPENING_SEED_SCHEMA_VERSION,
+  CURRENT_REPLAY_BINDING,
+  createOpeningSource,
+  createOpeningSeed,
+  openingSourceId,
+  openingSeedId,
+  worldId,
+  rebuildV08LedgersFromLineage,
+  canonicalSha256,
+  canonicalHashInput,
+} from '../../packages/core/src/index.js';
+import {
+  prepareFinanceSocialReplayContinuation,
+  appendFinanceSocialReplayPage,
+  readFinanceSocialReplayContinuation,
+  retireFinanceSocialReplayContinuation,
+} from '../../packages/core/src/commands/finance-social-replay-continuation.js';
+it('genuine paired H0 continuation keeps CREATE and its immutable licence across pages, matching one full prefix', () => {
+  const f = fixture(),
+    c = create(),
+    creation = birth(c, f.state, f.creationFacts),
+    p = plan(creation.result.servicePoolId, '4', 'PLAN_PAGED_CREATION'),
+    operation = allocate(p, creation.state, f.facts),
+    frames = [
+      canonicalFrame(
+        c,
+        SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
+        creation.eventPayload,
+        '1',
+      ),
+      canonicalFrame(
+        p,
+        'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1',
+        operation.eventPayload,
+        '2',
+      ),
+    ];
+  const source = createOpeningSource(
+    {
+      schemaVersion: OPENING_SOURCE_SCHEMA_VERSION,
+      sourceId: openingSourceId('SOURCE_TEST_ONLY_CREATE_PAGES'),
+      sourceKind: 'TEST_FIXTURE',
+      locator: 'tests/world-core/social-employment-service-creation.test.ts',
+      sourceVersion: 'TEST_ONLY_V1',
+      payload: { classification: 'TEST_ONLY_NOT_ADMISSION' },
+    },
+    sha,
+  );
+  const seed = createOpeningSeed(
+    {
+      schemaVersion: OPENING_SEED_SCHEMA_VERSION,
+      seedId: openingSeedId('SEED_TEST_ONLY_CREATE_PAGES'),
+      worldId: worldId(c.worldId),
+      openingWorldVersion: '0',
+      replayBinding: CURRENT_REPLAY_BINDING,
+      sources: [source],
+      financialBatches: [],
+      inventoryEntries: [],
+    },
+    sha,
+  );
+  const opening = rebuildV08LedgersFromLineage({ seed, sha256Hex: sha }),
+    {
+      worldId: w,
+      countryId,
+      governmentEntityId,
+      localCurrency,
+      sourceRef,
+      sourceFingerprint,
+      populationAvailability,
+      usageLicence,
+    } = f.creationFacts,
+    original = {
+      worldId: w,
+      countryId,
+      governmentEntityId,
+      localCurrency,
+      sourceRef,
+      sourceFingerprint,
+      populationAvailability,
+      usageLicences: [usageLicence],
+    },
+    originals = { socialCreationOriginals: [original] },
+    head = { worldVersion: '2', eventSequence: '2' },
+    start = () =>
+      prepareFinanceSocialReplayContinuation(
+        {
+          opening,
+          expectedHead: head,
+          socialCountries: [
+            { countryId: country, state: f.state, offers: [f.facts.offer] },
+          ],
+          ...originals,
+          openingEncumbrances: [],
+          fxOriginals: [],
+        },
+        sha,
+      ),
+    page = (
+      from: number,
+      through: number,
+      fs: readonly FinanceNativeBudgetCanonicalFrame[],
+    ) => ({
+      schemaVersion: 'finance-social-replay-page-v1' as const,
+      worldId: w,
+      seedFingerprint: seed.fingerprint,
+      fromHead: { worldVersion: String(from), eventSequence: String(from) },
+      throughHead: {
+        worldVersion: String(through),
+        eventSequence: String(through),
+      },
+      expectedHead: head,
+      frames: fs,
+      framesSha256: canonicalSha256(canonicalHashInput(fs), sha),
+    });
+  let paged = start(),
+    single = start();
+  expect(() =>
+    appendFinanceSocialReplayPage({
+      continuation: paged,
+      page: page(0, 1, [frames[0]!]),
+      sha256Hex: sha,
+      originals: {
+        socialCreationOriginals: [{ ...original, localCurrency: 'XBB' }],
+      },
+    }),
+  ).toThrow('IMMUTABLE_SOCIAL_CREATION_ORIGINAL_CHANGED');
+  expect(readFinanceSocialReplayContinuation(paged).head.worldVersion).toBe(
+    '0',
+  );
+  paged = appendFinanceSocialReplayPage({
+    continuation: paged,
+    page: page(0, 1, [frames[0]!]),
+    sha256Hex: sha,
+  });
+  paged = appendFinanceSocialReplayPage({
+    continuation: paged,
+    page: page(1, 2, [frames[1]!]),
+    sha256Hex: sha,
+  });
+  single = appendFinanceSocialReplayPage({
+    continuation: single,
+    page: page(0, 2, frames),
+    sha256Hex: sha,
+  });
+  const result = readFinanceSocialReplayContinuation(paged);
+  expect(result.complete).toBe(true);
+  expect(result.result.socialCountries).toEqual(
+    readFinanceSocialReplayContinuation(single).result.socialCountries,
+  );
+  expect(result.result.socialCountries[0]!.lifecycle.employment).toEqual(
+    operation.state,
+  );
+  expect(result.result.financialState?.positions).toEqual([]);
+  retireFinanceSocialReplayContinuation(paged);
+  retireFinanceSocialReplayContinuation(single);
 });
