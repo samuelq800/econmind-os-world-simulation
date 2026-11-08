@@ -17,6 +17,54 @@ const REPAIR = {
   commit: '79a31c939789c300bfdb7249e72180082cda7554',
   sha256: 'aa47ebbae894c4c9f0dbaff22a18757962a294e5fa18fb0fcea802ae8454cb37',
 };
+const LABOUR = {
+  commit: 'd3e1caecb87bc8fd9fa3cd85b09fc7f0de52b6ad',
+  sourcePath: 'database/proposals/postwar-industry-labour-current-read.sql',
+  predecessorSourceSha256:
+    '3b5f065737ed2bd88f30831f60acb951859bd91a91df380aa8183f6d5a864a0e',
+  sourceSha256:
+    '15791060eb27bd953a6909816a001eb7ba1750dbab936c255857455fd425fa60',
+  artifactSha256:
+    '84db02e76299341686e407da3dca71ea220f2bdbf5c6d48cfb36d25bd03f0645',
+  functions: [
+    {
+      signature: 'world_v2.prepare_postwar_industry_labour_scopes(text)',
+      operation: 'REPLACE',
+      oldBodySha256:
+        '3659e7890d46b581d1c3e0cefb8109418872c3023da8ecd4673d6d61d9d82de3',
+      newBodySha256:
+        'a41bd7decbcb53b4c4c1ff7f458a80f5a8b9a398adef39704384920d1d768d3e',
+      owner: 'world_v2_postwar_projection_owner',
+      executeRoles: ['world_v2_postwar_projection_publisher'],
+      securityDefiner: true,
+      searchPath: 'pg_catalog',
+    },
+    {
+      signature:
+        'world_v2.repair_postwar_industry_regional_source_capacity(text,text)',
+      operation: 'CREATE',
+      oldBodySha256: null,
+      newBodySha256:
+        'd36417b6ab909625d95be7f6e8b0747390c8027351ee67049d22331331e2562b',
+      owner: 'world_v2_postwar_projection_owner',
+      executeRoles: ['world_v2_postwar_projection_publisher'],
+      securityDefiner: true,
+      searchPath: 'pg_catalog',
+    },
+  ],
+};
+const LABOUR_ACL =
+  '{world_v2_postwar_projection_owner=X/world_v2_postwar_projection_owner,world_v2_postwar_projection_publisher=X/world_v2_postwar_projection_owner}';
+const KNOWN_SCHEMA_ANCESTRY = {
+  repairCheckpoint:
+    '/workspace/.cloud-setup/evidence/trade-current-h3-repair-final13-20261108/retained-checkpoint.json',
+  repairCheckpointSha256:
+    '75881f62b7c1469d8bec5e5b6b06ee82caf801da442905bf006d89ca92905e31',
+  actualRestoreEvidence:
+    '/workspace/.cloud-setup/evidence/current-read-native-02/pg/restore-evidence.json',
+  actualRestoreSha256:
+    'b52e9ac6f3fe6e998320bf873fb1c74faa30d36a6e4f1ba53e01b3a1d1e49b55',
+};
 type Artifact = { path: string; rawSha256: string; bytes: string };
 type FunctionChange = {
   signature: string;
@@ -41,6 +89,7 @@ type Checkpoint = {
   parentCheckpoint?: string;
   extraDdlReceipt?: string;
   inheritedDdlReceipts?: { path: string; field: string };
+  functionForwardReceipt?: string;
 };
 type FunctionRow = {
   signature: string;
@@ -131,13 +180,79 @@ const evidencePath = (value: string) => {
   return value;
 };
 
+/** Pure metadata validation, never permission to execute caller SQL. Only this
+ * exact already-executed forward is recognized, not arbitrary receipt families. */
+export function validateKnownRetainedLabourReceipt(receipt: unknown) {
+  assert(receipt && typeof receipt === 'object');
+  const r = receipt as Record<string, unknown>;
+  assert.equal(
+    r.schemaVersion,
+    'postwar-industry-labour-function-forward-ddl-receipt-v1',
+  );
+  assert.equal(r.status, 'DDL_COMMITTED');
+  assert.equal(
+    r.executionClassification,
+    'LOCAL_OWNED_CHECKPOINT_FUNCTION_ONLY_FORWARD',
+  );
+  assert.equal(r.candidateCommit, LABOUR.commit);
+  assert.equal(r.predecessorSourceSha256, LABOUR.predecessorSourceSha256);
+  assert.equal(r.nextSourceSha256, LABOUR.sourceSha256);
+  assert.equal(r.artifactSha256, LABOUR.artifactSha256);
+  assert.equal(r.baselineAnd76ProposalReceiptsUnchanged, true);
+  assert.equal(r.freshWholeProposalInstalled, false);
+  assert.deepEqual(r.expectedFunctions, LABOUR.functions);
+  const observed = r.observedFunctions as Record<string, unknown>[];
+  assert.equal(observed.length, 2);
+  for (const expected of LABOUR.functions) {
+    const actual = observed.find((f) => f.signature === expected.signature);
+    assert(actual);
+    assert.equal(actual.body_sha256, expected.newBodySha256);
+    assert.equal(actual.owner, expected.owner);
+    assert.equal(actual.prosecdef, true);
+    assert.deepEqual(actual.proconfig, ['search_path=pg_catalog']);
+    assert.equal(actual.proacl, LABOUR_ACL);
+  }
+  return { functions: LABOUR.functions, artifactSha256: LABOUR.artifactSha256 };
+}
+
+/** Called only with fresh actual catalog rows by the upgrade entry, before any
+ * of its seven DDL chunks. Public for small metadata-only regression tests. */
+export function assertKnownRetainedLabourCatalog(
+  functions: readonly FunctionRow[],
+) {
+  for (const expected of LABOUR.functions) {
+    const actual = functions.find((f) => f.signature === expected.signature);
+    assert(actual, expected.signature);
+    assert.equal(
+      actual.body_sha256,
+      expected.newBodySha256,
+      expected.signature,
+    );
+    assert.equal(actual.owner, expected.owner, expected.signature);
+    assert.equal(actual.security_definer, true, expected.signature);
+    assert.deepEqual(
+      actual.config,
+      ['search_path=pg_catalog'],
+      expected.signature,
+    );
+    assert.equal(actual.acl, LABOUR_ACL, expected.signature);
+    assert.deepEqual(actual.readers, expected.executeRoles, expected.signature);
+  }
+}
+
 /** Read the complete inherited descriptor/receipt chain without executing it.
  * Additional derived-data checkpoints may wrap the repair checkpoint; unknown
  * extra DDL receipts fail closed instead of becoming executable SQL input. */
 export async function readRetainedPostwarPowerUpgradeLineage(
   checkpointPath: string,
   expectedSha256: string,
-) {
+): Promise<{
+  checkpoint: Checkpoint;
+  markerPath: string;
+  lineage: { path: string; sha256: string; document: unknown }[];
+  labourForward?: Record<string, unknown>;
+  schemaAncestrySidecar?: Record<string, unknown>;
+}> {
   assert.match(expectedSha256, /^[a-f0-9]{64}$/u);
   const lineage: { path: string; sha256: string; document: unknown }[] = [];
   const visited = new Set<string>();
@@ -146,6 +261,8 @@ export async function readRetainedPostwarPowerUpgradeLineage(
   let root: Checkpoint | undefined;
   let repairFound = false;
   let inheritedFound = false;
+  let labourForward: Record<string, unknown> | undefined;
+  let schemaAncestrySidecar: Record<string, unknown> | undefined;
   while (current) {
     evidencePath(current);
     assert(
@@ -189,6 +306,34 @@ export async function readRetainedPostwarPowerUpgradeLineage(
         document: r,
       });
     }
+    if (checkpoint.functionForwardReceipt) {
+      assert(!labourForward, 'DUPLICATE_FORWARD_RECEIPT_DENIED');
+      const receiptPath = evidencePath(checkpoint.functionForwardReceipt);
+      const receiptBytes = await readFile(receiptPath);
+      const receipt = JSON.parse(receiptBytes.toString('utf8')) as Record<
+        string,
+        unknown
+      >;
+      validateKnownRetainedLabourReceipt(receipt);
+      assert.equal(receipt.database, checkpoint.templateDatabase);
+      const artifactPath = evidencePath(String(receipt.artifactPath));
+      const artifactBytes = await readFile(artifactPath);
+      assert.equal(hash(artifactBytes), LABOUR.artifactSha256);
+      labourForward = receipt;
+      lineage.push({
+        path: receiptPath,
+        sha256: hash(receiptBytes),
+        document: receipt,
+      });
+      lineage.push({
+        path: artifactPath,
+        sha256: hash(artifactBytes),
+        document: {
+          classification: 'ALREADY_EXECUTED_REFERENCE_BYTES_NEVER_REPLAYED',
+          sha256: LABOUR.artifactSha256,
+        },
+      });
+    }
     if (checkpoint.inheritedDdlReceipts) {
       const receiptPath = evidencePath(checkpoint.inheritedDdlReceipts.path);
       assert.equal(checkpoint.inheritedDdlReceipts.field, 'ddlReceipts');
@@ -213,13 +358,84 @@ export async function readRetainedPostwarPowerUpgradeLineage(
     }
     current = checkpoint.parentCheckpoint;
   }
+  if (labourForward) {
+    // The old parentCheckpoint tracks economic recovery, not the schema clone
+    // source. Append a precisely pinned sidecar; never rewrite those records.
+    const repair = await readRetainedPostwarPowerUpgradeLineage(
+      KNOWN_SCHEMA_ANCESTRY.repairCheckpoint,
+      KNOWN_SCHEMA_ANCESTRY.repairCheckpointSha256,
+    );
+    assert.equal(root!.ownershipNonce, repair.checkpoint.ownershipNonce);
+    assert.equal(root!.ownedContainer, repair.checkpoint.ownedContainer);
+    const restoreBytes = await readFile(
+      KNOWN_SCHEMA_ANCESTRY.actualRestoreEvidence,
+    );
+    assert.equal(hash(restoreBytes), KNOWN_SCHEMA_ANCESTRY.actualRestoreSha256);
+    const restore = JSON.parse(restoreBytes.toString('utf8'));
+    assert.equal(
+      restore.readRepair.checkpointFile,
+      KNOWN_SCHEMA_ANCESTRY.repairCheckpoint,
+    );
+    assert.equal(
+      restore.readRepair.checkpointSha256,
+      KNOWN_SCHEMA_ANCESTRY.repairCheckpointSha256,
+    );
+    assert.equal(restore.readRepair.sqlSha256, REPAIR.sha256);
+    assert.equal(
+      restore.cloneDatabase,
+      (labourForward.sourceCheckpoint as Checkpoint).templateDatabase,
+    );
+    const actualRepairFunctions = restore.actualReadRepairFunctions as {
+      signature: string;
+      prosrc_sha256: string;
+      owner: string;
+      prosecdef: boolean;
+      proconfig: string[];
+      acl: string;
+    }[];
+    assert.equal(actualRepairFunctions.length, 13);
+    schemaAncestrySidecar = {
+      schemaVersion: 'postwar-retained-power-schema-ancestry-sidecar-v1',
+      classification:
+        'APPENDED_SCHEMA_ANCESTRY_NOT_REWRITTEN_ECONOMIC_CHECKPOINTS',
+      repairCheckpoint: KNOWN_SCHEMA_ANCESTRY.repairCheckpoint,
+      repairCheckpointSha256: KNOWN_SCHEMA_ANCESTRY.repairCheckpointSha256,
+      repairExtraReceipt: repair.lineage.find((item) =>
+        item.path.endsWith('/extra-ddl-receipt.json'),
+      ),
+      actualRestoreEvidence: KNOWN_SCHEMA_ANCESTRY.actualRestoreEvidence,
+      actualRestoreSha256: KNOWN_SCHEMA_ANCESTRY.actualRestoreSha256,
+      inputDescriptorPins: restore.readRepair,
+      actualRepairFunctions,
+      freshCatalogVerificationStillRequired: true,
+    };
+    lineage.push(
+      ...repair.lineage.filter(
+        (item) => !lineage.some((p) => p.path === item.path),
+      ),
+    );
+    lineage.push({
+      path: KNOWN_SCHEMA_ANCESTRY.actualRestoreEvidence,
+      sha256: hash(restoreBytes),
+      document: { ...schemaAncestrySidecar },
+    });
+    markerPath ??= repair.markerPath;
+    repairFound = true;
+    inheritedFound = true;
+  }
   assert(
     root && markerPath && repairFound && inheritedFound,
     'EXACT_REPAIR_AND_INHERITED_DDL_LINEAGE_REQUIRED',
   );
   assert(root.isTemplate && root.allowConnections === false);
   assert.match(root.templateDatabase, /^postwar_clone_[a-z0-9_]+$/u);
-  return { checkpoint: root, markerPath, lineage };
+  return {
+    checkpoint: root,
+    markerPath,
+    lineage,
+    labourForward,
+    schemaAncestrySidecar,
+  };
 }
 
 async function catalog(tx: PoolClient): Promise<Catalog> {
@@ -279,6 +495,11 @@ export async function upgradeRetainedPostwarPowerClone(input: {
     input.parentCheckpointSha256,
   );
   await mkdir(input.evidenceDirectory, { recursive: false });
+  if (inherited.schemaAncestrySidecar)
+    await writeFile(
+      path.join(input.evidenceDirectory, 'schema-ancestry-sidecar.json'),
+      JSON.stringify(inherited.schemaAncestrySidecar, null, 2) + '\n',
+    );
   const report: Record<string, unknown> = {
     classification:
       'TEST_ONLY_RETAINED_CLONE_FIXED_POWER_UPGRADE_NOT_SOURCE_ADMISSION_OR_PRODUCTION',
@@ -293,6 +514,11 @@ export async function upgradeRetainedPostwarPowerClone(input: {
     parentCheckpoint: input.parentCheckpointPath,
     parentCheckpointSha256: input.parentCheckpointSha256,
     inheritedLineage: inherited.lineage,
+    schemaAncestrySidecar: inherited.schemaAncestrySidecar ?? null,
+    schemaAncestrySidecarPath: inherited.schemaAncestrySidecar
+      ? path.join(input.evidenceDirectory, 'schema-ancestry-sidecar.json')
+      : null,
+    knownLabourForward: inherited.labourForward ?? null,
     manifestPath: MANIFEST,
     manifestSha256: plan.manifestSha256,
     originalFreshPlanNotReinstalled: true,
@@ -430,6 +656,41 @@ export async function upgradeRetainedPostwarPowerClone(input: {
         expected.bodySha256,
         'ACTUAL_REPAIR_FUNCTION_REQUIRED:' + expected.signature,
       );
+      if (inherited.schemaAncestrySidecar) {
+        const prior = (
+          inherited.schemaAncestrySidecar.actualRepairFunctions as {
+            signature: string;
+            prosrc_sha256: string;
+            owner: string;
+            prosecdef: boolean;
+            proconfig: string[];
+            acl: string;
+          }[]
+        ).find((f) => f.signature === expected.signature);
+        assert(prior);
+        assert.equal(prior.prosrc_sha256, expected.bodySha256);
+        const current = before.functions.find(
+          (f) => f.signature === expected.signature,
+        )!;
+        assert.equal(current.owner, prior.owner);
+        assert.equal(current.security_definer, prior.prosecdef);
+        assert.deepEqual(current.config, prior.proconfig);
+        assert.equal(current.acl, prior.acl);
+      }
+    }
+    if (inherited.labourForward) {
+      assert.equal(inherited.labourForward.worldId, marker.worldId);
+      const sourceBytes = execFileSync(
+        'git',
+        [
+          '--no-replace-objects',
+          'show',
+          LABOUR.commit + ':' + LABOUR.sourcePath,
+        ],
+        { cwd: input.repositoryRoot, maxBuffer: 4 * 1024 * 1024 },
+      );
+      assert.equal(hash(sourceBytes), LABOUR.sourceSha256);
+      assertKnownRetainedLabourCatalog(before.functions);
     }
     await save();
     const phases = report.phases as Record<string, unknown>[];
@@ -521,6 +782,12 @@ export async function upgradeRetainedPostwarPowerClone(input: {
         (f) => f.signature === old.signature,
       );
       assert(current, old.signature);
+      if (!expectedBodies.has(old.signature))
+        assert.equal(
+          current.body_sha256,
+          old.body_sha256,
+          'UNRELATED_FUNCTION_BODY_CHANGED:' + old.signature,
+        );
       assert.deepEqual(
         { ...current, body_sha256: old.body_sha256 },
         old,
