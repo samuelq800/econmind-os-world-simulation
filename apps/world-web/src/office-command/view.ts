@@ -3,6 +3,7 @@ import {
   parseIndustryUtilityPlanningRow,
 } from '@econmind/core/postwar-industry-utility-planning-contract';
 import { renderIndustryUtilityForm } from '../industry-utility/form.js';
+import { renderSocialEmploymentPlanForm } from '../social-employment/plan-form.js';
 import {
   parsePostwarCaptainAllocationOptions,
   parsePostwarCaptainPoliticalCapitalRow,
@@ -268,6 +269,41 @@ export function installOfficeCommand(
           );
       }
       dialog.append(section);
+    }
+    if (currentView()?.role === 'social') {
+      dialog.append(
+        renderSocialEmploymentPlanForm(document, {
+          positions:
+            state.runtimePage?.dataset === 'positions'
+              ? state.runtimePage
+              : null,
+          pools: state.socialPoolsPage,
+          countryId: state.runtimePage?.authority.identity.countryId ?? '',
+          enabled: state.canStage,
+          code: state.socialPoolsCode ?? state.code,
+          stage: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialEmploymentPlan(draft),
+        }),
+      );
+      if (
+        state.runtimePage?.dataset === 'positions' &&
+        state.runtimePage.page.nextOffset !== null
+      )
+        dialog.append(
+          button('下一授权岗位页', 'social-next-positions', state.canRead, () =>
+            owner.nextSocialPositionsPage(),
+          ),
+        );
+      if (
+        state.socialPoolsPage?.page.nextOffset !== null &&
+        state.socialPoolsPage
+      )
+        dialog.append(
+          button('下一授权服务池页', 'social-next-pools', state.canRead, () =>
+            owner.nextSocialPoolsPage(),
+          ),
+        );
     }
     if (currentView()?.role === 'captain') {
       try {
