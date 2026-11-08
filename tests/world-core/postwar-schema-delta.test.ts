@@ -39,6 +39,8 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-industry-operating-receipts.sql',
   'postwar-industry-production-source.sql',
   'postwar-industry-first-day-source.sql',
+  'postwar-industry-power-service-source.sql',
+  'postwar-industry-power-service-current.sql',
   'postwar-industry-utility-custody.sql',
   'postwar-industry-logistics-custody.sql',
   'postwar-mixed-industry-utility-effects.sql',
@@ -357,14 +359,14 @@ describe('unapproved postwar schema delta package boundary', () => {
         ),
       ).toThrow('DESTRUCTIVE_CREDENTIAL_OR_NONTRANSACTIONAL_SQL_DENIED');
   });
-  it('classifies the complete seventy-six non-Clock source proposal paths without running or editing SQL', async () => {
+  it('classifies the complete seventy-eight non-Clock source proposal paths without running or editing SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
     const selected = names
       .filter((n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql')
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(76);
+    expect(selected).toHaveLength(78);
     expect(selected).not.toContain('isolated-world-clock.sql');
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));

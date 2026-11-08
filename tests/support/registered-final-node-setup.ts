@@ -21,18 +21,21 @@ import {
 } from '../../apps/world-api/src/integration/postgres-world-actor-registry.js';
 import {
   loadPostwarIndustryFirstDayAdoptedPolicy,
-  publishPostwarIndustryFirstDaySourceFrom,
+  registerPostwarIndustryRefineryFirstDayFrom,
 } from '../../apps/world-worker/src/persistence/postwar-industry-first-day-source.js';
 import { loadPostwarSourceContext as loadPostwarIndustryRuntimeSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
-import { createPostwarIndustryProductionSource } from '../../apps/world-worker/src/persistence/postwar-industry-production-source.js';
+import { readPostwarIndustryRefineryCoverage } from '../../apps/world-worker/src/persistence/postwar-industry-refinery-sites.js';
 import {
   createPostwarSocialRuntimeConnection,
   readPostwarSocialRuntimeFinancialReplayBase,
 } from '../../apps/world-worker/src/runtime-preparation/social-runtime-connection.js';
 import {
   loadPostwarIndustryUtilitySourceProposal,
+  loadPostwarIndustryUtilitySourceProposals,
   publishPostwarIndustryUtilitySourcesFrom,
   preparePostwarIndustryUtilitySource,
+  preparePostwarIndustryUtilitySources,
+  consumePostwarIndustryUtilitySource,
   retireUnownedPostwarIndustryUtilitySource,
 } from '../../apps/world-worker/src/persistence/postwar-industry-utility-source.js';
 import { publishPostwarIndustryPowerServiceSourceFrom } from '../../apps/world-worker/src/persistence/postwar-industry-power-service-publication.js';
@@ -147,6 +150,8 @@ export async function createRegisteredFinalNodeSetup(input: {
   fixture: Fixture;
   repositoryRoot: string;
   sqlPlan: Plan;
+  /** Explicit owned TEST_ONLY source-registration coverage; no economic command. */
+  allExistingRefinerySources?: true;
   recordCommitted?: (
     receipt: Readonly<{ name: string; sha256: string; status: string }>,
   ) => Promise<void>;
@@ -524,52 +529,78 @@ export async function createRegisteredFinalNodeSetup(input: {
     const industryPublicationDatabase = new PostgresSqlDatabase(
       open(roles.industryPublication),
     );
-    const industrySource = await industryPublicationDatabase.transaction(
-      async (tx) => {
-        await tx.query('set transaction isolation level repeatable read');
-        await tx.query('set local role world_v2_industry_source_publisher');
-        const session = await tx.query<{
-          session_role: string;
-          effective_role: string;
-          safe: boolean;
-          publisher_member: boolean;
-          owner_member: boolean;
-        }>(
-          "select session_user::text session_role,current_setting('role')effective_role,not(rolsuper or rolbypassrls or rolcreaterole or rolcreatedb or rolreplication)safe,pg_has_role(session_user,'world_v2_industry_source_publisher','MEMBER')publisher_member,pg_has_role(session_user,'world_v2_industry_source_owner','MEMBER')owner_member from pg_roles where rolname=session_user",
-        );
-        if (
-          session.rows.length !== 1 ||
-          session.rows[0]?.session_role !== roles.industryPublication ||
-          session.rows[0].effective_role !==
-            'world_v2_industry_source_publisher' ||
-          !session.rows[0].safe ||
-          !session.rows[0].publisher_member ||
-          session.rows[0].owner_member
-        )
-          throw Error('ACTUAL_SEPARATED_INDUSTRY_PUBLISHER_SESSION_REQUIRED');
-        await writeFile(
-          path.join(m.evidenceDirectory, 'industry-publisher-session.json'),
-          JSON.stringify(session.rows[0], null, 2) + '\n',
-        );
-        const registration = await createPostwarIndustryProductionSource({
-          sourceContext: industryContext,
-          scope: { worldId: m.worldId, countryId: 'COUNTRY_02' },
-          runtimeReaderRole: 'world_v2_industry_source_reader',
-        }).registerFrom(tx);
-        if (
-          registration.rows.filter(
-            (v) => v.facility_id === 'OPEN-02-REFINED_FUEL',
-          ).length !== 1
-        )
-          throw Error('ACTUAL_C2_REFINERY_REGISTRATION_REQUIRED');
-        return publishPostwarIndustryFirstDaySourceFrom(tx, {
-          worldId: m.worldId,
-          countryId: 'COUNTRY_02',
-          facilityId: 'OPEN-02-REFINED_FUEL',
-          adoptedPolicy,
-          sourceContext: industryContext,
-        });
-      },
+    const refineryCoverage =
+      readPostwarIndustryRefineryCoverage(industryContext);
+    const refinerySites = refineryCoverage.sites.filter(
+      (site) =>
+        input.allExistingRefinerySources === true ||
+        site.countryId === 'COUNTRY_02',
+    );
+    if (
+      !refinerySites.some((site) => site.facilityId === 'OPEN-02-REFINED_FUEL')
+    )
+      throw Error('ACTUAL_C2_REFINERY_REQUIRED_FOR_EXISTING_DRIVER');
+    const industrySources: Awaited<
+      ReturnType<typeof registerPostwarIndustryRefineryFirstDayFrom>
+    >[] = [];
+    for (const site of refinerySites) {
+      const published = await industryPublicationDatabase.transaction(
+        async (tx) => {
+          await tx.query('set transaction isolation level repeatable read');
+          await tx.query('set local role world_v2_industry_source_publisher');
+          const session = await tx.query<{
+            session_role: string;
+            effective_role: string;
+            safe: boolean;
+            publisher_member: boolean;
+            owner_member: boolean;
+          }>(
+            "select session_user::text session_role,current_setting('role')effective_role,not(rolsuper or rolbypassrls or rolcreaterole or rolcreatedb or rolreplication)safe,pg_has_role(session_user,'world_v2_industry_source_publisher','MEMBER')publisher_member,pg_has_role(session_user,'world_v2_industry_source_owner','MEMBER')owner_member from pg_roles where rolname=session_user",
+          );
+          if (
+            session.rows.length !== 1 ||
+            session.rows[0]?.session_role !== roles.industryPublication ||
+            session.rows[0].effective_role !==
+              'world_v2_industry_source_publisher' ||
+            !session.rows[0].safe ||
+            !session.rows[0].publisher_member ||
+            session.rows[0].owner_member
+          )
+            throw Error('ACTUAL_SEPARATED_INDUSTRY_PUBLISHER_SESSION_REQUIRED');
+          await writeFile(
+            path.join(m.evidenceDirectory, 'industry-publisher-session.json'),
+            JSON.stringify(session.rows[0], null, 2) + '\n',
+          );
+          return registerPostwarIndustryRefineryFirstDayFrom(tx, {
+            worldId: m.worldId,
+            countryId: site.countryId,
+            facilityId: site.facilityId,
+            adoptedPolicy,
+            sourceContext: industryContext,
+          });
+        },
+      );
+      industrySources.push(published);
+    }
+    const industrySource = industrySources.find(
+      (site) => site.countryId === 'COUNTRY_02',
+    )!;
+    await writeFile(
+      path.join(m.evidenceDirectory, 'registered-refinery-sources.json'),
+      JSON.stringify(
+        {
+          classification:
+            'TEST_ONLY_ACTUAL_SOURCE_REGISTRATION_NOT_PRODUCTION_OR_ECONOMIC_EXECUTION',
+          mode:
+            input.allExistingRefinerySources === true
+              ? 'ALL_EXISTING_REFINERIES'
+              : 'LEGACY_C2',
+          sources: industrySources,
+          notApplicableCountries: refineryCoverage.notApplicableCountries,
+        },
+        null,
+        2,
+      ) + '\n',
     );
     const h0 = await installRegisteredFinalChildH0From({
       fixture: f,
@@ -600,41 +631,57 @@ export async function createRegisteredFinalNodeSetup(input: {
         startupSeed: f.seed,
         startupBeneficialHousingRentSource: f.preparation,
       });
-      const proposal = await loadPostwarIndustryUtilitySourceProposal({
+      const utilityInput = {
         repositoryRoot: input.repositoryRoot,
         socialConnection: utilitySocial,
         startupSeed: f.seed,
         startupBeneficialHousingRentSource: f.preparation,
-      });
-      await industryPublicationDatabase.transaction(async (tx) => {
-        await tx.query('set transaction isolation level repeatable read');
-        await tx.query('set local role world_v2_industry_source_publisher');
-        await publishPostwarIndustryUtilitySourcesFrom(tx, { proposal });
-      });
-      // Reuse this real prepared Social source only for controlled immutable
-      // staff-original publication. It issues no schedule, WORK, wage or power.
-      const utilityPreparation = await preparePostwarIndustryUtilitySource({
-        repositoryRoot: input.repositoryRoot,
-        socialConnection: utilitySocial,
-        startupSeed: f.seed,
-        startupBeneficialHousingRentSource: f.preparation,
-      });
-      try {
-        await new PostgresSqlDatabase(
-          open(roles.industryPublication),
-        ).transaction(async (tx) => {
+      };
+      const proposals =
+        input.allExistingRefinerySources === true
+          ? await loadPostwarIndustryUtilitySourceProposals(utilityInput)
+          : [await loadPostwarIndustryUtilitySourceProposal(utilityInput)];
+      for (const proposal of proposals) {
+        await industryPublicationDatabase.transaction(async (tx) => {
           await tx.query('set transaction isolation level repeatable read');
           await tx.query('set local role world_v2_industry_source_publisher');
-          await publishPostwarIndustryPowerServiceSourceFrom(tx, {
-            baseline: readPostwarSocialRuntimeFinancialReplayBase(
-              utilitySocial,
-              m.worldId,
-            ),
-            preparation: utilityPreparation,
-          });
+          await publishPostwarIndustryUtilitySourcesFrom(tx, { proposal });
         });
+      }
+      // Reuse the genuine prepared Social source. Bulk preparation parses the
+      // common source once; every issued token still has its own actual site.
+      const utilityPreparations =
+        input.allExistingRefinerySources === true
+          ? await preparePostwarIndustryUtilitySources(utilityInput)
+          : [await preparePostwarIndustryUtilitySource(utilityInput)];
+      try {
+        const preparedSites = utilityPreparations
+          .map((token) => {
+            const { compact } = consumePostwarIndustryUtilitySource(token);
+            return compact.countryId + '/' + compact.facilityId;
+          })
+          .sort();
+        const expectedSites = refinerySites
+          .map((site) => site.countryId + '/' + site.facilityId)
+          .sort();
+        if (JSON.stringify(preparedSites) !== JSON.stringify(expectedSites))
+          throw Error('EXACT_REGISTERED_REFINERY_UTILITY_SITES_REQUIRED');
+        for (const utilityPreparation of utilityPreparations) {
+          await industryPublicationDatabase.transaction(async (tx) => {
+            await tx.query('set transaction isolation level repeatable read');
+            await tx.query('set local role world_v2_industry_source_publisher');
+            await publishPostwarIndustryPowerServiceSourceFrom(tx, {
+              baseline: readPostwarSocialRuntimeFinancialReplayBase(
+                utilitySocial,
+                m.worldId,
+              ),
+              preparation: utilityPreparation,
+            });
+          });
+        }
       } finally {
-        retireUnownedPostwarIndustryUtilitySource(utilityPreparation);
+        for (const utilityPreparation of utilityPreparations)
+          retireUnownedPostwarIndustryUtilitySource(utilityPreparation);
       }
     } finally {
       await utilitySocial.close();
@@ -944,6 +991,7 @@ export async function createRegisteredFinalNodeSetup(input: {
       locators: Object.freeze(locators),
       captain: Object.freeze(captain),
       industrySource,
+      industrySources: Object.freeze(industrySources),
       h0,
       inventoryProvenance,
       initial,
