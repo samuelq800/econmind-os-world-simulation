@@ -1,4 +1,4 @@
-/** TEST_ONLY restore of an actual owned H0 checkpoint. No opening seed parse,
+/** TEST_ONLY restore of an actual owned H0/H2 checkpoint. No opening seed parse,
  * private proof, source publication, role/grant creation or World initialization.
  * Independent Node children still issue their own genuine source proofs. */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -13,8 +13,14 @@ import {
   loadPostwarNativeReferenceMarker,
   sealPostwarReferenceClone,
 } from './postwar-native-reference-db.js';
+import {
+  REGISTERED_UTILITY_H2_DIRECTORY,
+  readRegisteredUtilityH2Evidence,
+  readRegisteredUtilityH2ResumeFrom,
+  type RegisteredUtilityH2Resume,
+} from './registered-utility-h2-checkpoint.js';
 const exec = promisify(execFile);
-const sourceDirectory = '/workspace/.cloud-setup/evidence/ru-c2-02';
+const initializationDirectory = '/workspace/.cloud-setup/evidence/ru-c2-02';
 const childFingerprint =
   'sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -69,6 +75,7 @@ export interface RegisteredUtilitySetup {
 export async function restoreRegisteredUtilityCheckpoint(input: {
   readonly repositoryRoot: string;
   readonly evidenceDirectory: string;
+  readonly checkpoint?: 'RU_C2_05_H2';
   readonly sqlPlan: Readonly<{
     entries: readonly Readonly<{ name: string; sha256: string }>[];
     planSha256: string;
@@ -77,6 +84,7 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
   Readonly<{
     fixture: RegisteredUtilityResources;
     setup: RegisteredUtilitySetup;
+    resume?: RegisteredUtilityH2Resume;
   }>
 > {
   must(
@@ -87,6 +95,16 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     input.evidenceDirectory.startsWith('/workspace/.cloud-setup/evidence/'),
     'OWNED_EVIDENCE_DIRECTORY_REQUIRED',
   );
+  must(
+    input.checkpoint === undefined || input.checkpoint === 'RU_C2_05_H2',
+    'FIXED_CHECKPOINT_MODE_REQUIRED',
+  );
+  const sourceDirectory =
+    input.checkpoint === 'RU_C2_05_H2'
+      ? REGISTERED_UTILITY_H2_DIRECTORY
+      : initializationDirectory;
+  if (input.checkpoint === 'RU_C2_05_H2')
+    await readRegisteredUtilityH2Evidence();
   const pg = path.join(input.evidenceDirectory, 'pg');
   await mkdir(pg, { recursive: true });
   const cp = await read(
@@ -108,7 +126,9 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
   const oldReport = await read(
     path.join(sourceDirectory, 'utility-native-report.json'),
   );
-  const sourceReport = await read(path.join(sourceDirectory, 'pg/result.json'));
+  const sourceReport = await read(
+    path.join(initializationDirectory, 'pg/result.json'),
+  );
   const installed: Record<string, string> = {};
   for (const row of [
     ...originalMarker.installedArtifacts,
@@ -369,10 +389,26 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
       must(r.rows.length === 1, 'ACTUAL_SINGLE_HEAD_REQUIRED');
       return r.rows[0]!;
     };
-    must(
-      Object.values(await counts()).every((v) => v === '0'),
-      'ONLY_ORIGINAL_H0_UNEXECUTED_CHECKPOINT_SUPPORTED',
-    );
+    const initialCounts = await counts();
+    const resume =
+      input.checkpoint === 'RU_C2_05_H2'
+        ? await readRegisteredUtilityH2ResumeFrom({
+            pool: db,
+            worldId: marker.worldId,
+            seedFingerprint: marker.seedFingerprint,
+            admissionRef: marker.admissionRef,
+            counts: initialCounts,
+          })
+        : undefined;
+    if (!resume)
+      must(
+        Object.values(initialCounts).every((v) => v === '0'),
+        'ONLY_ORIGINAL_H0_UNEXECUTED_CHECKPOINT_SUPPORTED',
+      );
+    if (resume) {
+      restoreEvidence.resume = resume;
+      restoreEvidence.economicCommandsResubmitted = 0;
+    }
     const registrationRows = await db.query<{
       registration_ref: string;
       worker_id: string;
@@ -767,6 +803,7 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     return Object.freeze({
       fixture: Object.freeze({ marker, clone, cleanup }),
       setup: Object.freeze(setup),
+      ...(resume ? { resume } : {}),
     });
   } catch (error) {
     try {

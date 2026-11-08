@@ -211,48 +211,51 @@ async function protocol(
 }
 
 describe('registered MANUAL_FINITE driver protocol', () => {
-  it('keeps START forbidden, consumes once, drains, and recovers FINAL on a new OS without consuming again', async () => {
-    const { driver: d, calls } = await protocol();
-    await d.launch({ classification: 'PROTOCOL_ONLY' });
-    await d.assertPreparationStartDenied();
-    const original = await d.makeRequest({
-      countryId: 'COUNTRY_02',
-      officeId: 'INDUSTRY',
-      commandId: 'RUN_ONE',
-      commandType: 'CORE_INDUSTRY_RUN_SCHEDULE_V1',
-      idempotencyKey: 'KEY_ONE',
-      payload: {},
-    });
-    const fp = await d.submit(original);
-    await d.consume('RUN_ONE', {
-      commandType: 'CORE_INDUSTRY_RUN_SCHEDULE_V1',
-      countryId: 'COUNTRY_02',
-      fingerprint: fp,
-      financialBatches: 0,
-      inventoryPostings: 0,
-    });
-    await d.stop();
-    await d.launch({ classification: 'PROTOCOL_ONLY_NEW_OS' });
-    await d.assertPreparationStartDenied();
-    await d.recover(original);
-    await d.stop();
-    expect(calls).toEqual([
-      'INIT:1',
-      'STATE:1',
-      'START:1',
-      'STATE:1',
-      '/v1/office-command:1',
-      'CONSUME:1',
-      'CLOSE:1',
-      'INIT:2',
-      'STATE:2',
-      'START:2',
-      'STATE:2',
-      '/v1/command-recovery:2',
-      '/v1/office-command:2',
-      'CLOSE:2',
-    ]);
-  });
+  it.each([true, false])(
+    'keeps START forbidden, consumes once, drains, and recovers FINAL on a new OS (duplicateProbe=%s)',
+    async (duplicateProbe) => {
+      const { driver: d, calls } = await protocol();
+      await d.launch({ classification: 'PROTOCOL_ONLY' });
+      await d.assertPreparationStartDenied();
+      const original = await d.makeRequest({
+        countryId: 'COUNTRY_02',
+        officeId: 'INDUSTRY',
+        commandId: 'RUN_ONE',
+        commandType: 'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+        idempotencyKey: 'KEY_ONE',
+        payload: {},
+      });
+      const fp = await d.submit(original);
+      await d.consume('RUN_ONE', {
+        commandType: 'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+        countryId: 'COUNTRY_02',
+        fingerprint: fp,
+        financialBatches: 0,
+        inventoryPostings: 0,
+      });
+      await d.stop();
+      await d.launch({ classification: 'PROTOCOL_ONLY_NEW_OS' });
+      await d.assertPreparationStartDenied();
+      await d.recover(original, { duplicateProbe });
+      await d.stop();
+      expect(calls).toEqual([
+        'INIT:1',
+        'STATE:1',
+        'START:1',
+        'STATE:1',
+        '/v1/office-command:1',
+        'CONSUME:1',
+        'CLOSE:1',
+        'INIT:2',
+        'STATE:2',
+        'START:2',
+        'STATE:2',
+        '/v1/command-recovery:2',
+        ...(duplicateProbe ? ['/v1/office-command:2'] : []),
+        'CLOSE:2',
+      ]);
+    },
+  );
 
   it.each([{ stateAfterStart: 'READY' }, { mutateCounts: true }])(
     'rejects a denial that mutates lifecycle or economy: %j',

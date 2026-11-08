@@ -196,12 +196,13 @@ export function deriveRegisteredFinalIndustryRunPlan(value: unknown) {
 export function registeredFinalPublishedCommand(
   value: unknown,
   shape: 'WRAPPED' | 'CANONICAL' = 'WRAPPED',
+  expectedStatus: 'QUEUED' | 'FINAL' = 'QUEUED',
 ): Readonly<{ commandId: string; commandFingerprint: string }> {
   const result = registeredFinalRecord(value),
     command =
       shape === 'CANONICAL' ? result : registeredFinalRecord(result.command);
   registeredFinalAssert(
-    (shape === 'CANONICAL' || result.status === 'QUEUED') &&
+    (shape === 'CANONICAL' || result.status === expectedStatus) &&
       command.schemaVersion === 'command-v1' &&
       typeof command.commandId === 'string' &&
       fp(command.fingerprint),
@@ -544,7 +545,10 @@ export function createRegisteredFinalDriver(
     await checkpoint('ACTUAL_COMMITTED', { commandId: id, head: after });
     return actual;
   };
-  const recover = async (original: AuthenticatedOfficeCommandRequestDto) => {
+  const recover = async (
+    original: AuthenticatedOfficeCommandRequestDto,
+    options: Readonly<{ duplicateProbe: boolean }> = { duplicateProbe: true },
+  ) => {
     const before = await readHead(),
       response = await post(
         '/v1/command-recovery',
@@ -572,20 +576,22 @@ export function createRegisteredFinalDriver(
         receipt.commandFingerprint === actual.commandFingerprint,
       'DURABLE_FINAL_RECOVERY_REQUIRED',
     );
-    const duplicate = await post(
-        '/v1/office-command',
-        original,
-        original.request.countryId,
-      ),
-      duplicateState = registeredFinalRecord(duplicate.body.state);
-    registeredFinalAssert(
-      duplicate.status === 200 &&
-        duplicateState.status === 'FINALIZED' &&
-        duplicateState.source === 'EXISTING' &&
-        duplicateState.submitted === false &&
-        duplicateState.commandFingerprint === actual.commandFingerprint,
-      'IDEMPOTENT_FINAL_REQUIRED',
-    );
+    if (options.duplicateProbe) {
+      const duplicate = await post(
+          '/v1/office-command',
+          original,
+          original.request.countryId,
+        ),
+        duplicateState = registeredFinalRecord(duplicate.body.state);
+      registeredFinalAssert(
+        duplicate.status === 200 &&
+          duplicateState.status === 'FINALIZED' &&
+          duplicateState.source === 'EXISTING' &&
+          duplicateState.submitted === false &&
+          duplicateState.commandFingerprint === actual.commandFingerprint,
+        'IDEMPOTENT_FINAL_REQUIRED',
+      );
+    }
     registeredFinalAssert(
       JSON.stringify(await readHead()) === JSON.stringify(before) &&
         JSON.stringify(await inspect(actual.commandId)) ===
