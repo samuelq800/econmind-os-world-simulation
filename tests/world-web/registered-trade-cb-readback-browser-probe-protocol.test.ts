@@ -5,6 +5,7 @@ import {
   runRegisteredTradeCbReadbackBrowserProbe,
   registeredReadbackFailureState,
   registeredReadbackPublicErrorCode,
+  registeredReadbackCompletedRecordSummary,
 } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
 import type { RegisteredTradeCbReadbackBrowserInput } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
 function preflight(expectedHead: unknown) {
@@ -15,6 +16,45 @@ function preflight(expectedHead: unknown) {
   } as RegisteredTradeCbReadbackBrowserInput;
 }
 describe('Trade/CB read-only browser probe preflight (NOT browser acceptance)', () => {
+  it.each(['Bearer SHORT_SECRET', '{"amount":"17"}', 'RAW\nPAYLOAD'])(
+    'rejects a short secret/rawpayload in failure state fields: %s',
+    (secret) => {
+      const value = registeredReadbackFailureState({
+        status: secret,
+        code: secret,
+        runtimePage: { dataset: secret },
+      });
+      expect(value).toEqual({
+        status: null,
+        code: null,
+        dataset: null,
+        hasRuntimePage: true,
+      });
+      expect(JSON.stringify(value)).not.toContain(secret);
+    },
+  );
+  it('limits completed records to fixed metadata and never duplicates authorized economic rows or declaration payloads', () => {
+    const value = registeredReadbackCompletedRecordSummary({
+      role: 'trade',
+      operation: 'INVENTORY_PAGE',
+      dataset: 'inventory-current',
+      status: 'PAGE',
+      head: { worldVersion: '3', eventSequence: '3' },
+      sourceVersion: 'sha256:' + 'a'.repeat(64),
+      page: { offset: 0, returned: 1, total: 10, rawPayload: 'SHORT_SECRET' },
+      rows: [{ accountId: 'SHORT_SECRET', amount: '12345' }],
+      centralBankOpeningInstruments: { rawPayload: 'SHORT_SECRET' },
+    });
+    expect(value).toMatchObject({
+      role: 'trade',
+      dataset: 'inventory-current',
+      head: { worldVersion: '3', eventSequence: '3' },
+      page: { offset: 0, returned: 1, total: 10 },
+    });
+    expect(JSON.stringify(value)).not.toContain('SHORT_SECRET');
+    expect(value).not.toHaveProperty('rows');
+    expect(value).not.toHaveProperty('centralBankOpeningInstruments');
+  });
   it('retains only bounded failure status/code/page identity, never full intent, JWT or headers', () => {
     const value = {
       status: 'UNAVAILABLE',

@@ -15,13 +15,70 @@ const head = (v) => ({
 const fingerprint = /^sha256:[a-f0-9]{64}$/u;
 /** Public typed status only; never headers, JWT, raw body, intent or receipt. */
 export function registeredReadbackFailureState(value) {
-  const text = (v) => (typeof v === 'string' && v.length <= 128 ? v : null);
+  const statuses = [
+    'MISSING',
+    'READY_TO_READ',
+    'READING',
+    'CURRENT',
+    'CURRENT_AUTHORIZED_HEAD',
+    'UNAVAILABLE',
+    'DENIED',
+    'FINAL_VERIFIED',
+  ];
+  const datasets = [
+    'inventory-current',
+    'goods-transfers-current',
+    'ledger-balances',
+  ];
   return {
-    status: text(value?.status),
-    code: text(value?.code),
-    dataset: text(value?.runtimePage?.dataset),
+    status: statuses.includes(value?.status) ? value.status : null,
+    code: registeredReadbackPublicErrorCode({ error: { code: value?.code } }),
+    dataset: datasets.includes(value?.runtimePage?.dataset)
+      ? value.runtimePage.dataset
+      : null,
     hasRuntimePage:
       value?.runtimePage !== null && value?.runtimePage !== undefined,
+  };
+}
+/** Failure artifacts keep bounded metadata only. Successful authorized rows
+ * remain exclusively in the separate successful report. */
+export function registeredReadbackCompletedRecordSummary(value) {
+  const datasets = [
+    'inventory-current',
+    'goods-transfers-current',
+    'ledger-balances',
+  ];
+  const operations = [
+    'INVENTORY_PAGE',
+    'EMPTY_TRANSFERS',
+    'REFRESH_EMPTY_TRANSFERS',
+    'F5_INVENTORY',
+    'CURRENT_FUNDS_AND_OPENING_DECLARATION',
+    'REFRESH_FUNDS',
+    'F5_FUNDS',
+  ];
+  const integer = (v) => (Number.isSafeInteger(v) && v >= 0 ? v : null);
+  const version = (v) =>
+    typeof v === 'string' && /^(0|[1-9][0-9]*)$/u.test(v) && v.length <= 20
+      ? v
+      : null;
+  return {
+    role: ['trade', 'central_bank'].includes(value?.role) ? value.role : null,
+    operation: operations.includes(value?.operation) ? value.operation : null,
+    dataset: datasets.includes(value?.dataset) ? value.dataset : null,
+    status: ['PAGE', 'EMPTY'].includes(value?.status) ? value.status : null,
+    head: {
+      worldVersion: version(value?.head?.worldVersion),
+      eventSequence: version(value?.head?.eventSequence),
+    },
+    sourceVersion: fingerprint.test(value?.sourceVersion)
+      ? value.sourceVersion
+      : null,
+    page: {
+      offset: integer(value?.page?.offset),
+      returned: integer(value?.page?.returned),
+      total: integer(value?.page?.total),
+    },
   };
 }
 export function registeredReadbackPublicErrorCode(body) {
@@ -332,8 +389,10 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
               phase,
               states,
               network,
-              completedRecords: records,
-              metadata: manager.evidence.metadata,
+              completedRecordCount: records.length,
+              completedRecords: records
+                .slice(0, 72)
+                .map(registeredReadbackCompletedRecordSummary),
               economicRequestsBlocked: forbidden,
               expectedHead: input.expectedHead,
             },

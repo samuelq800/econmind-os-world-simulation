@@ -30,7 +30,7 @@ it('saves a real file for a negative adapter observation and still throws the ex
         },
         state: async () => ({
           status: 'UNAVAILABLE',
-          code: 'CURRENT_SOURCE_UNAVAILABLE',
+          code: 'Bearer SHORT_SECRET',
           runtimePage: null,
           intent: { jwt: 'TEST_ONLY_SECRET' },
           headers: { authorization: 'TEST_ONLY_SECRET' },
@@ -76,7 +76,7 @@ it('saves a real file for a negative adapter observation and still throws the ex
     );
     expect(result.states.trade).toEqual({
       status: 'UNAVAILABLE',
-      code: 'CURRENT_SOURCE_UNAVAILABLE',
+      code: null,
       dataset: null,
       hasRuntimePage: false,
     });
@@ -85,6 +85,7 @@ it('saves a real file for a negative adapter observation and still throws the ex
       publicErrorCode: 'CURRENT_SOURCE_UNAVAILABLE',
     });
     expect(result.completedRecords).toEqual([]);
+    expect(bytes).not.toContain('SHORT_SECRET');
     expect(bytes).not.toContain('TEST_ONLY_SECRET');
     expect(closed).toHaveBeenCalledOnce();
   } finally {

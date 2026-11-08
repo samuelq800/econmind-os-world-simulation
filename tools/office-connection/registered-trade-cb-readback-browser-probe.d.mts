@@ -26,6 +26,9 @@ export function registeredReadbackFailureState(value: unknown): Readonly<{
   hasRuntimePage: boolean;
 }>;
 export function registeredReadbackPublicErrorCode(body: unknown): string | null;
+export function registeredReadbackCompletedRecordSummary(
+  value: unknown,
+): Readonly<Record<string, unknown>>;
 /** Starts no browser/backend/DB. Closes only contexts opened by this call.
  * Report contains bounded office-private read rows, never JWT/headers. */
 export function runRegisteredTradeCbReadbackBrowserProbe(
