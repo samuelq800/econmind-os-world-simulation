@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import type { Pool } from 'pg';
 import { canonicalSerialize } from '@econmind/core';
 import type { AuthenticatedOfficeCommandRequestDto } from '@econmind/core/authenticated-office-command-contract';
@@ -98,6 +99,18 @@ export function assertRegisteredUtilityResumeCounts(
   );
 }
 
+/** Inspection DTOs contain numeric counts. Compare their exact plain values;
+ * Core canonical serialization remains reserved for canonical World intents. */
+export function assertRegisteredUtilityPriorFinal(
+  actual: unknown,
+  expected: unknown,
+): void {
+  must(
+    isDeepStrictEqual(actual, expected),
+    'H2_IMMUTABLE_FINAL_OR_EVENT_DIFFERS',
+  );
+}
+
 export async function readRegisteredUtilityH2ResumeFrom(input: {
   readonly pool: Pool;
   readonly worldId: string;
@@ -147,10 +160,7 @@ export async function readRegisteredUtilityH2ResumeFrom(input: {
       input.worldId,
       command.commandId,
     );
-    must(
-      canonicalSerialize(actual) === canonicalSerialize(expectedFinals[i]),
-      'H2_IMMUTABLE_FINAL_OR_EVENT_DIFFERS',
-    );
+    assertRegisteredUtilityPriorFinal(actual, expectedFinals[i]);
     const receipt = await readFinalReceiptFrom(database, command);
     must(receipt?.outcome === 'COMMITTED', 'H2_CANONICAL_FINAL_REQUIRED');
     commands.push(command);

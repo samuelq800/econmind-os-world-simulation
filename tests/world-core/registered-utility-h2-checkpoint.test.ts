@@ -1,6 +1,9 @@
 /** Pure checkpoint/transport checks only, never a database/proof/native PASS. */
 import { describe, expect, it } from 'vitest';
-import { assertRegisteredUtilityResumeCounts } from '../support/registered-utility-h2-checkpoint.js';
+import {
+  assertRegisteredUtilityResumeCounts,
+  assertRegisteredUtilityPriorFinal,
+} from '../support/registered-utility-h2-checkpoint.js';
 import { registeredFinalPublishedCommand } from '../support/postwar-registered-final-driver.js';
 const pending = Object.freeze({
   worldVersion: '2',
@@ -21,6 +24,36 @@ const final = Object.freeze({
 });
 
 describe('fixed H2 continuation DATA contract', () => {
+  it('compares stored FINAL evidence with numeric counts without treating it as a canonical World intent', () => {
+    const actual = Object.freeze({
+      commandFingerprint: 'sha256:' + '1'.repeat(64),
+      receiptCount: 1,
+      financialBatchCount: 0,
+      eventIds: ['EVENT_ONE'],
+    });
+    const archived = {
+      eventIds: ['EVENT_ONE'],
+      financialBatchCount: 0,
+      receiptCount: 1,
+      commandFingerprint: actual.commandFingerprint,
+    };
+    expect(() =>
+      assertRegisteredUtilityPriorFinal(actual, archived),
+    ).not.toThrow();
+    expect(() =>
+      assertRegisteredUtilityPriorFinal(actual, {
+        ...archived,
+        receiptCount: '1',
+      }),
+    ).toThrow();
+    expect(() =>
+      assertRegisteredUtilityPriorFinal(actual, {
+        ...archived,
+        eventIds: ['OTHER'],
+      }),
+    ).toThrow();
+  });
+
   it('recognizes pending GRANT and an already FINAL GRANT without issuing or consuming commands', () => {
     expect(() =>
       assertRegisteredUtilityResumeCounts(pending, 'PENDING'),
