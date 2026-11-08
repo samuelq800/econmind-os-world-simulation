@@ -189,6 +189,9 @@ export interface PostwarFinanceSocialRuntimeConnectionInput {
   };
 }
 export interface PostwarFinanceSocialRuntimePorts {
+  readonly socialServiceCreation: NonNullable<
+    ManualOfficeRuntimeReaders['socialServiceCreation']
+  > | null;
   readonly industryUtility: Readonly<PostwarIndustryUtilityRuntime> | null;
   readonly industryLogistics: Readonly<PostwarIndustryLogisticsRuntime> | null;
   readonly industryRun: Readonly<PostwarIndustryRunRuntime> | null;
@@ -1007,6 +1010,7 @@ function constructFinanceSocialRuntimeConnection(
         industry,
         industryRun,
         industryUtility,
+        socialServiceCreation: readers.socialServiceCreation ?? null,
         industryLogistics,
         beneficialRent,
         trade,

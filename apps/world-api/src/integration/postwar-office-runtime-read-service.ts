@@ -1,4 +1,9 @@
 import {
+  isPostwarSocialServiceCreationPlanningReader,
+  type PostwarSocialServiceCreationPlanningReader,
+  type PostwarSocialServiceCreationPlanningResult,
+} from '@econmind/world-worker/postwar-social-service-creation-planning-read';
+import {
   INDUSTRY_UTILITY_PLANNING_DATASET,
   INDUSTRY_UTILITY_PLANNING_NATURE,
   parseIndustryUtilityPlanningRow,
@@ -63,6 +68,7 @@ import {
 import {
   bearer,
   exact,
+  record,
   parseCurrentSeatRequest,
   uuid,
 } from '../runtime-preparation/bounded-executor-transport.js';
@@ -199,6 +205,7 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             hashAlgorithm: string;
             sourcePointer: SuccessPage['source']['sourcePointer'];
             currentIndustryUtilityPlanningCoverage?: IndustryUtilityPlanningCoverage;
+            currentEmploymentServiceCreationOptions?: PostwarSocialServiceCreationPlanningResult;
             currentStateBinding?: SuccessPage['source']['currentStateBinding'];
             currentPrefixCoverage?: SuccessPage['source']['currentPrefixCoverage'];
             currentFinancialCoverage?: SuccessPage['source']['currentFinancialCoverage'];
@@ -465,6 +472,7 @@ export function createPostwarOfficeRuntimeReadService(
   config: ExplicitReadPreparationConfig | null = null,
   dependencies: Readonly<{
     industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+    socialServiceCreationPlanningReader?: Readonly<PostwarSocialServiceCreationPlanningReader>;
   }> = {},
 ) {
   const c = explicitReadConfig(config);
@@ -479,6 +487,17 @@ export function createPostwarOfficeRuntimeReadService(
       ))
   )
     throw Error('GENUINE_INDUSTRY_UTILITY_PLANNING_READER_REQUIRED');
+  const socialServiceCreationPlanningReader =
+    dependencies.socialServiceCreationPlanningReader ?? null;
+  if (
+    socialServiceCreationPlanningReader &&
+    (!c ||
+      !isPostwarSocialServiceCreationPlanningReader(
+        socialServiceCreationPlanningReader,
+        c.admittedWorldPins.worldId,
+      ))
+  )
+    throw Error('GENUINE_SOCIAL_SERVICE_CREATION_PLANNING_READER_REQUIRED');
   const verifier = c ? createSupabaseJwksSignatureVerifier(c.auth) : null;
   const snapshots = c ? createPostgresServerReadBindingSnapshotReader(c) : null;
   const store = c
@@ -937,7 +956,46 @@ export function createPostwarOfficeRuntimeReadService(
                     page.source.eventSequence !== head.eventSequence)
                 )
                   return fail(503, 'READ_BINDING_UNAVAILABLE');
-                return pageBody(page, request);
+                const response = pageBody(page, request);
+                if (
+                  request.office === 'SOCIAL' &&
+                  request.dataset === 'service-pools' &&
+                  socialServiceCreationPlanningReader &&
+                  response.body.ok
+                ) {
+                  let options: PostwarSocialServiceCreationPlanningResult;
+                  try {
+                    const servicePoolIds = page.rows.map((row) => {
+                      const pool = record(row);
+                      if (!pool || typeof pool.poolId !== 'string')
+                        throw Error('SOCIAL_POOL_ID_REQUIRED');
+                      return pool.poolId;
+                    });
+                    options = await socialServiceCreationPlanningReader.read({
+                      countryId: page.scope.countryId,
+                      expectedHead: head,
+                      servicePoolIds,
+                    });
+                  } catch {
+                    // Optional creation prerequisites must never masquerade as
+                    // an empty licence set or break the existing PLAN read.
+                    options = {
+                      status: 'UNAVAILABLE',
+                      code: 'SOCIAL_SERVICE_CREATION_SOURCE_UNAVAILABLE',
+                    };
+                  }
+                  return {
+                    ...response,
+                    body: {
+                      ...response.body,
+                      source: {
+                        ...response.body.source,
+                        currentEmploymentServiceCreationOptions: options,
+                      },
+                    },
+                  };
+                }
+                return response;
               } catch (error) {
                 const failure = errorCode(error);
                 return fail(failure.status, failure.code, failure.retryable);

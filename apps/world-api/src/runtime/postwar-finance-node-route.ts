@@ -1,3 +1,4 @@
+import type { PostwarSocialServiceCreationPlanningReader } from '@econmind/world-worker/postwar-social-service-creation-planning-read';
 import type { PostwarIndustryUtilityPlanningReader } from '@econmind/world-worker/postwar-industry-utility-planning-read';
 /** Explicit Node transport only. All JWT/current-seat/CORS/intent decisions
  * remain in the installed Fetch handler. Pools and manual execution stay with
@@ -267,14 +268,20 @@ export function createPostwarOfficeReadNodeRoute(
   options: Readonly<{
     timeoutMs?: number;
     industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+    socialServiceCreationPlanningReader?: Readonly<PostwarSocialServiceCreationPlanningReader>;
   }> = {},
 ) {
-  const pages = createPostwarOfficeRuntimeFetchHandler(
-    configuration,
-    options.industryUtilityPlanningReader
+  const pages = createPostwarOfficeRuntimeFetchHandler(configuration, {
+    ...(options.industryUtilityPlanningReader
       ? { industryUtilityPlanningReader: options.industryUtilityPlanningReader }
-      : {},
-  );
+      : {}),
+    ...(options.socialServiceCreationPlanningReader
+      ? {
+          socialServiceCreationPlanningReader:
+            options.socialServiceCreationPlanningReader,
+        }
+      : {}),
+  });
   const seats = createPostwarCurrentSeatFetchHandler(configuration);
   return createNodeCommandRoute(
     {

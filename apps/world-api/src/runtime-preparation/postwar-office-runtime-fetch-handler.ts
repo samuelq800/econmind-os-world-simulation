@@ -1,3 +1,4 @@
+import type { PostwarSocialServiceCreationPlanningReader } from '@econmind/world-worker/postwar-social-service-creation-planning-read';
 import type { PostwarIndustryUtilityPlanningReader } from '@econmind/world-worker/postwar-industry-utility-planning-read';
 import {
   AUTHENTICATED_CURRENT_SEAT_PATH,
@@ -35,6 +36,7 @@ function createBoundedPostwarFetchHandler(
   target: 'OFFICE_PAGE' | 'CURRENT_SEAT',
   dependencies: Readonly<{
     industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+    socialServiceCreationPlanningReader?: Readonly<PostwarSocialServiceCreationPlanningReader>;
   }> = {},
 ) {
   const path =
@@ -182,6 +184,7 @@ export function createPostwarOfficeRuntimeFetchHandler(
   config: ExplicitReadPreparationConfig | null = null,
   dependencies: Readonly<{
     industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+    socialServiceCreationPlanningReader?: Readonly<PostwarSocialServiceCreationPlanningReader>;
   }> = {},
 ) {
   return createBoundedPostwarFetchHandler(config, 'OFFICE_PAGE', dependencies);

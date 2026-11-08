@@ -1,3 +1,4 @@
+import type { PostwarSocialServiceCreationPlanningReader } from '@econmind/world-worker/postwar-social-service-creation-planning-read';
 import type { PostwarIndustryUtilityPlanningReader } from '@econmind/world-worker/postwar-industry-utility-planning-read';
 import type { PostwarIndustryConnection } from './runtime/postwar-industry-connection.js';
 import type { PostwarCentralBankConnection } from './runtime/postwar-central-bank-connection.js';
@@ -171,16 +172,21 @@ function createApiServer(
   postwarTradeConnection?: PostwarTradeConnection,
   postwarIndustryConnection?: PostwarIndustryConnection,
   industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>,
+  socialServiceCreationPlanningReader?: Readonly<PostwarSocialServiceCreationPlanningReader>,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
   let allDataVerifiedAt = 0;
   let allDataProbe: Promise<boolean> | undefined;
   const officeReadRoute = postwarReadConfiguration
-    ? createPostwarOfficeReadNodeRoute(
-        postwarReadConfiguration,
-        industryUtilityPlanningReader ? { industryUtilityPlanningReader } : {},
-      )
+    ? createPostwarOfficeReadNodeRoute(postwarReadConfiguration, {
+        ...(industryUtilityPlanningReader
+          ? { industryUtilityPlanningReader }
+          : {}),
+        ...(socialServiceCreationPlanningReader
+          ? { socialServiceCreationPlanningReader }
+          : {}),
+      })
     : undefined;
   const financeRoute =
     postwarCaptainConnection !== undefined ||
@@ -636,6 +642,7 @@ export async function startApiRuntime(
       shared?.trade,
       shared?.industry,
       shared?.industryUtilityPlanningReader,
+      shared?.socialServiceCreationPlanningReader,
     );
   } catch (error) {
     return failStartupAfterCleanup(error, [

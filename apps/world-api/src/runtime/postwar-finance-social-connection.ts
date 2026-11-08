@@ -1,4 +1,8 @@
 import {
+  createPostwarSocialServiceCreationPlanningReader,
+  type PostwarSocialServiceCreationPlanningReader,
+} from '@econmind/world-worker/postwar-social-service-creation-planning-read';
+import {
   createPostwarIndustryUtilityPlanningReader,
   type PostwarIndustryUtilityPlanningReader,
 } from '@econmind/world-worker/postwar-industry-utility-planning-read';
@@ -80,6 +84,7 @@ export interface PostwarFinanceSocialApiConnection {
 }
 export interface PostwarFinanceSocialApiPorts {
   readonly industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+  readonly socialServiceCreationPlanningReader?: Readonly<PostwarSocialServiceCreationPlanningReader>;
   readonly readConfiguration?: ExplicitReadPreparationConfig;
   readonly captain?: Readonly<PostwarCaptainConnection>;
   readonly centralBank?: Readonly<PostwarCentralBankConnection>;
@@ -314,6 +319,14 @@ export async function createPostwarFinanceSocialApiConnection(
           ? {
               industryUtilityPlanningReader:
                 createPostwarIndustryUtilityPlanningReader({
+                  binding: input.binding,
+                }),
+            }
+          : {}),
+        ...(readConfiguration && ports.socialServiceCreation
+          ? {
+              socialServiceCreationPlanningReader:
+                createPostwarSocialServiceCreationPlanningReader({
                   binding: input.binding,
                 }),
             }
