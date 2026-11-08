@@ -1,3 +1,5 @@
+import { selectPostwarIndustryRefinerySite } from './postwar-industry-refinery-sites.js';
+import { createPostwarIndustryProductionSource } from './postwar-industry-production-source.js';
 /** Fixed adopted policy -> registered source publication. These immutable rule
  * originals establish no work, maintenance, payment, delivery or output. */
 import { createHash } from 'node:crypto';
@@ -62,8 +64,8 @@ export async function publishPostwarIndustryFirstDaySourceFrom(
   tx: SqlExecutor,
   input: Readonly<{
     worldId: string;
-    countryId: 'COUNTRY_02';
-    facilityId: 'OPEN-02-REFINED_FUEL';
+    countryId: string;
+    facilityId: string;
     adoptedPolicy: Readonly<PostwarIndustryFirstDayAdoptedPolicy>;
     sourceContext: PostwarPhysicalSourceContext;
   }>,
@@ -76,6 +78,10 @@ export async function publishPostwarIndustryFirstDaySourceFrom(
     throw Error(
       'INDUSTRY_FIRST_DAY_GENUINE_POLICY_AND_PINNED_CONTEXT_REQUIRED',
     );
+  selectPostwarIndustryRefinerySite(input.sourceContext, {
+    countryId: input.countryId,
+    facilityId: input.facilityId,
+  });
   const domestic =
     input.sourceContext.sourceBytes.datasets['data/domestic-access.json'];
   if (typeof domestic !== 'string')
@@ -103,6 +109,50 @@ export async function publishPostwarIndustryFirstDaySourceFrom(
   return Object.freeze({
     sourceRef: r.source_ref,
     sourceSha256: r.source_sha256,
+  });
+}
+/** Offline controlled registrar composition. Other recipe documents remain raw
+ * originals; only the actual adopted refinery site receives first-day policy. */
+export async function registerPostwarIndustryRefineryFirstDayFrom(
+  tx: SqlExecutor,
+  input: Readonly<{
+    worldId: string;
+    countryId: string;
+    facilityId?: string;
+    adoptedPolicy: Readonly<PostwarIndustryFirstDayAdoptedPolicy>;
+    sourceContext: PostwarPhysicalSourceContext;
+  }>,
+): Promise<
+  Readonly<{
+    countryId: string;
+    facilityId: string;
+    sourceRef: string;
+    sourceSha256: string;
+  }>
+> {
+  const site = selectPostwarIndustryRefinerySite(input.sourceContext, input);
+  if (!POLICIES.has(input.adoptedPolicy))
+    throw Error('INDUSTRY_FIRST_DAY_GENUINE_POLICY_REQUIRED');
+  const originals = createPostwarIndustryProductionSource({
+    sourceContext: input.sourceContext,
+    scope: { worldId: input.worldId, countryId: site.countryId },
+    runtimeReaderRole: 'world_v2_industry_source_reader',
+  });
+  const registered = await originals.registerFrom(tx);
+  if (
+    registered.rows.filter((r) => r.facility_id === site.facilityId).length !==
+    1
+  )
+    throw Error('INDUSTRY_REFINERY_ACTUAL_REGISTRATION_REQUIRED');
+  const published = await publishPostwarIndustryFirstDaySourceFrom(tx, {
+    ...input,
+    countryId: site.countryId,
+    facilityId: site.facilityId,
+  });
+  return Object.freeze({
+    countryId: site.countryId,
+    facilityId: site.facilityId,
+    ...published,
   });
 }
 export interface PostwarIndustryFirstDaySourceData {
