@@ -78,9 +78,42 @@ export function createPostwarPhysicalInventoryProvenanceReader(configuration: {
       const result = await reader.readPageFrom(fixed, input);
       if ('code' in result) return result;
       const pointer = result.source.sourcePointer;
+      const multiple = pointer.sourceRole === 'MULTIPLE_DIRECT_ROW_SOURCES';
+      const directSources = new Map<string, string>();
+      if (multiple) {
+        if (
+          !Array.isArray(pointer.inventorySources) ||
+          pointer.inventorySources.length < 2 ||
+          pointer.inventorySources.length > 64
+        )
+          throw Error(
+            'POSTWAR_INVENTORY_PROVENANCE:EXACT_DIRECT_SOURCES_REQUIRED',
+          );
+        for (const source of pointer.inventorySources) {
+          if (
+            !source ||
+            typeof source !== 'object' ||
+            typeof source.sourceId !== 'string' ||
+            typeof source.sourcePayloadHash !== 'string' ||
+            !/^sha256:[0-9a-f]{64}$/u.test(source.sourcePayloadHash) ||
+            directSources.has(source.sourceId)
+          )
+            throw Error(
+              'POSTWAR_INVENTORY_PROVENANCE:EXACT_DIRECT_SOURCES_REQUIRED',
+            );
+          directSources.set(source.sourceId, source.sourcePayloadHash);
+        }
+        if (
+          directSources.get(String(pointer.sourceId)) !==
+          pointer.sourcePayloadHash
+        )
+          throw Error(
+            'POSTWAR_INVENTORY_PROVENANCE:DIRECT_SOURCE_ANCHOR_REQUIRED',
+          );
+      }
       if (
         pointer.schemaVersion !== 'postwar-inventory-source-pointer-v2' ||
-        pointer.sourceRole !== 'DIRECT_ROW_SOURCE' ||
+        (!multiple && pointer.sourceRole !== 'DIRECT_ROW_SOURCE') ||
         pointer.adoptionContextSourceRole !== 'OPERATING_ADOPTION_CONTEXT' ||
         pointer.countryId !== result.scope.countryId ||
         typeof pointer.sourceId !== 'string' ||
@@ -101,7 +134,9 @@ export function createPostwarPhysicalInventoryProvenanceReader(configuration: {
           !row ||
           typeof row !== 'object' ||
           !('sourceId' in row) ||
-          row.sourceId !== pointer.sourceId ||
+          (multiple
+            ? !directSources.has(String(row.sourceId))
+            : row.sourceId !== pointer.sourceId) ||
           !('account' in row) ||
           !row.account ||
           typeof row.account !== 'object' ||
