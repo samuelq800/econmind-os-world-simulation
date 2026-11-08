@@ -237,7 +237,7 @@ export function createOfficeCommandController(
     }
     checkLiveness();
   }
-  function fail(reason: string) {
+  function fail(reason: string, publicCode = reason) {
     if (reason === 'DENIED') {
       disconnect('DENIED');
       return;
@@ -250,7 +250,7 @@ export function createOfficeCommandController(
     socialPoolsPage = null;
     socialPoolsCode = null;
     status = 'UNAVAILABLE';
-    code = reason;
+    code = publicCode;
   }
   async function operation(fn: () => Promise<void>) {
     if (busy || !checkLiveness()) return;
@@ -378,7 +378,7 @@ export function createOfficeCommandController(
       );
       if (!checkLiveness()) return;
       if (result.status !== 'PAGE' && result.status !== 'EMPTY') {
-        fail(result.status);
+        fail(result.status, 'code' in result ? result.code : result.status);
         return;
       }
       if (

@@ -15,7 +15,17 @@ export interface RegisteredTradeCbReadbackBrowserInput {
     worldVersion: string;
     eventSequence: string;
   }>;
+  /** Trusted local native evidence path. Failure still throws the original
+   * assertion; saved data excludes headers, tokens and full intent state. */
+  readonly failureEvidencePath?: string;
 }
+export function registeredReadbackFailureState(value: unknown): Readonly<{
+  status: string | null;
+  code: string | null;
+  dataset: string | null;
+  hasRuntimePage: boolean;
+}>;
+export function registeredReadbackPublicErrorCode(body: unknown): string | null;
 /** Starts no browser/backend/DB. Closes only contexts opened by this call.
  * Report contains bounded office-private read rows, never JWT/headers. */
 export function runRegisteredTradeCbReadbackBrowserProbe(

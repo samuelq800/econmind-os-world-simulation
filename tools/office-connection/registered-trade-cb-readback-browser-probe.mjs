@@ -4,6 +4,8 @@
  * command submission, recovery, consumer or Clock is created here. */
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
+import { writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { createRegisteredOfficeBrowserAcceptance } from './registered-office-browser-acceptance.mjs';
 const sha = (v) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const head = (v) => ({
@@ -11,6 +13,23 @@ const head = (v) => ({
   eventSequence: v.eventSequence,
 });
 const fingerprint = /^sha256:[a-f0-9]{64}$/u;
+/** Public typed status only; never headers, JWT, raw body, intent or receipt. */
+export function registeredReadbackFailureState(value) {
+  const text = (v) => (typeof v === 'string' && v.length <= 128 ? v : null);
+  return {
+    status: text(value?.status),
+    code: text(value?.code),
+    dataset: text(value?.runtimePage?.dataset),
+    hasRuntimePage:
+      value?.runtimePage !== null && value?.runtimePage !== undefined,
+  };
+}
+export function registeredReadbackPublicErrorCode(body) {
+  const code = body?.error?.code;
+  return typeof code === 'string' && /^[A-Z][A-Z0-9_:.-]{0,127}$/u.test(code)
+    ? code
+    : null;
+}
 export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
   assert.ok(
     input.browser && input.application,
@@ -26,14 +45,24 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
     BigInt(input.expectedHead.worldVersion) > 0n,
     'POST_H0_EXPECTATION_REQUIRED',
   );
+  if (input.failureEvidencePath !== undefined)
+    assert.ok(
+      path.isAbsolute(input.failureEvidencePath),
+      'ABSOLUTE_FAILURE_EVIDENCE_PATH_REQUIRED',
+    );
   const manager = await createRegisteredOfficeBrowserAcceptance(input);
   const records = [],
     network = [],
     forbidden = [];
+  const sessions = new Map(),
+    observations = [];
+  let phase = 'PREFLIGHT_COMPLETE';
   const roles = { trade: 'TRADE', central_bank: 'CENTRAL_BANK' };
   const pins = input.readConfiguration.admittedWorldPins;
   async function open(role) {
+    phase = role + ':OPEN';
     const session = await manager.openOffice(role);
+    sessions.set(role, session);
     await session.page.route('**/*', async (route) => {
       const p = new URL(route.request().url()).pathname;
       if (['/v1/office-command', '/v1/command-recovery'].includes(p)) {
@@ -44,13 +73,30 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
     session.page.on('response', (response) => {
       const request = response.request(),
         path = new URL(response.url()).pathname;
-      if (path === input.readConfiguration.endpointPins.projectionPath)
-        network.push({
+      if (path === input.readConfiguration.endpointPins.projectionPath) {
+        const observed = {
           role,
+          phase,
           method: request.method(),
           path,
           status: response.status(),
-        });
+          publicErrorCode: null,
+        };
+        network.push(observed);
+        observations.push(
+          (async () => {
+            try {
+              const bytes = await response.body();
+              if (bytes.length <= 65536)
+                observed.publicErrorCode = registeredReadbackPublicErrorCode(
+                  JSON.parse(bytes.toString('utf8')),
+                );
+            } catch {
+              /* Keep observed HTTP status even for a malformed body. */
+            }
+          })(),
+        );
+      }
     });
     return session;
   }
@@ -72,6 +118,7 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
     return p;
   }
   function record(role, operation, p) {
+    phase = role + ':' + operation + ':DONE';
     records.push({
       role,
       operation,
@@ -97,9 +144,11 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
     });
   }
   async function reload(role, session) {
+    phase = role + ':F5:NAVIGATION';
     await session.page.reload();
     await session.page.waitForFunction(() => !!window.EconMindFixedOfficeProbe);
     // F5 discards the page token/config. Obtain both again from the real fixture.
+    phase = role + ':F5:CURRENT_SEAT';
     const current = await manager.currentSeat();
     const authority = current.bindings.find(
       (b) => b.identity.officeId === roles[role],
@@ -108,6 +157,7 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
     assert.deepEqual(head(authority.readback), input.expectedHead);
     const bearer = await input.getAccessToken();
     assert.match(bearer, /^Bearer [A-Za-z0-9._-]+$/u);
+    phase = role + ':F5:CONFIGURE';
     await session.page.evaluate(
       (supplied) => window.EconMindFixedOfficeProbe.configure(supplied),
       {
@@ -128,9 +178,11 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
       },
     );
     await session.page.locator('[data-office-command-action="open"]').click();
+    phase = role + ':F5:READ';
     return session.read();
   }
   async function selectTrade(session, action, dataset) {
+    phase = 'trade:SELECT:' + dataset;
     await session.page
       .locator(`[data-office-command-action="${action}"]`)
       .click();
@@ -260,6 +312,42 @@ export async function runRegisteredTradeCbReadbackBrowserProbe(input) {
         'SHIPPED_COMMAND_DRAWER_AND_VALIDATED_RUNTIME_PAGE_STATE',
       platformTls: 'NOT_VERIFIED_BY_LOOPBACK_PROXY',
     };
+  } catch (error) {
+    if (input.failureEvidencePath) {
+      await Promise.allSettled(observations);
+      const states = {};
+      for (const [role, session] of sessions) {
+        try {
+          states[role] = registeredReadbackFailureState(await session.state());
+        } catch {
+          states[role] = { status: 'STATE_READ_FAILED', code: null };
+        }
+      }
+      try {
+        await writeFile(
+          input.failureEvidencePath,
+          JSON.stringify(
+            {
+              classification: 'ACTUAL_READBACK_FAILURE_DIAGNOSTICS_NOT_SUCCESS',
+              phase,
+              states,
+              network,
+              completedRecords: records,
+              metadata: manager.evidence.metadata,
+              economicRequestsBlocked: forbidden,
+              expectedHead: input.expectedHead,
+            },
+            null,
+            2,
+          ) + '\n',
+        );
+      } catch {
+        process.stderr.write(
+          'REGISTERED_READBACK_FAILURE_EVIDENCE_WRITE_FAILED\n',
+        );
+      }
+    }
+    throw error;
   } finally {
     await manager.close();
   }

@@ -609,6 +609,10 @@ native(
             registeredCurrentC2BrowserSubject(subjectRows.rows, token);
             return 'Bearer ' + token;
           },
+          failureEvidencePath: path.join(
+            evidenceDirectory,
+            'browser-readback-failure.json',
+          ),
           expectedHead: { worldVersion: '3', eventSequence: '3' },
           readConfiguration: {
             modelVersion: text(config.modelVersion),
@@ -627,6 +631,8 @@ native(
             },
           },
         };
+        report.browserReadbackFailureEvidencePath =
+          browserInput.failureEvidencePath;
         report.browser =
           await runRegisteredTradeCbReadbackBrowserProbe(browserInput);
         await phase('SHIPPED_CHROMIUM_TRADE_AND_CB_READBACK_SAME_NODE', 'END');
