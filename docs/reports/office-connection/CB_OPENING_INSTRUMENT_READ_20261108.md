@@ -46,6 +46,32 @@ missing source document can be labeled unavailable while valid current funds
 remain visible. No quote, securities, loan, spendable balance or readiness token
 is created.
 
+## Correction of the initial non-H0 read path
+
+The initial `6ed87e0d` implementation incorrectly called the legacy H0 page RPC
+for these documents even at a positive World head. The real old SQL returns
+STALE there; the H6 transport vector incorrectly supplied a PAGE and did not
+exercise that SQL gate. The original 93 light cases are not evidence for that
+non-H0 composition. The preserved real H1 regression first confirms the old RPC
+returns STALE and reproduces the original helper failure after a valid current
+funds read. No SQL gate is loosened and STALE is never translated to absence.
+
+The fixed reader first reads the actual current CB seat/header on the same
+executor. At exactly H0 it retains the old H0 route; at positive heads it uses
+the existing posting-aware financial store with the instrument option omitted
+(no recursive decoration). Each immutable dataset still has origin 0/0, but
+observedHead and complete financial coverage must match the current funds page,
+as must scope, seed/admission, canonical/bundle hashes, model and replay binding.
+A missing current-head projection of an immutable original means the source
+**readout is unavailable**, not that the original never existed or is zero.
+
+The added actual SQL H1 case holds a low-role RR READ ONLY snapshot, reads real
+stored current funds and all three immutable opening datasets together, and
+asserts four posting-aware RPC calls and no legacy H0 page calls on that path.
+Its setup uses explicit TEST_ONLY small source/admission/cache metadata and an
+actual Core reconstructed financial ledger plus stored Social frame; it is SQL
+infrastructure evidence, not native consumer or formal opening acceptance.
+
 ## The 24-account interface
 
 `assertCentralBankOmoOpeningOriginal` / `reconcileSnapshot` require distinct

@@ -1,3 +1,7 @@
+import {
+  createPostwarFinancialMixedCurrentProjectionStore,
+  type PostwarFinancialMixedCurrentSource,
+} from './postwar-financial-mixed-current-projection.js';
 /** Fixed read composition over already admitted bounded H0 documents. It does
  * not adopt an OMO source, construct accounts, supply prices or hydrate a seed. */
 import { canonicalSerialize } from '@econmind/core';
@@ -23,18 +27,40 @@ export function createPostwarCentralBankOpeningInstrumentReader(config: {
   authorizationPublisherRole: string;
 }) {
   const store = createPostwarOfficeProjectionStore(config);
+  // Deliberately omit the optional instrument decorator. This leaf reader
+  // checks real current coverage without recursively constructing this helper.
+  const currentStore = createPostwarFinancialMixedCurrentProjectionStore({
+    runtimeReaderRole: config.runtimeReaderRole,
+    authorizationPublisherRole: config.authorizationPublisherRole,
+  });
   return Object.freeze({
     async readFrom(
       tx: SqlExecutor,
       input: { worldId: string },
     ): Promise<Readonly<{
       scope: PostwarOfficeProjectionScope;
-      source: PostwarOfficeProjectionSource;
+      source:
+        PostwarOfficeProjectionSource | PostwarFinancialMixedCurrentSource;
+      observedHead: Readonly<{ worldVersion: string; eventSequence: string }>;
       instruments: Readonly<PostwarCentralBankOpeningInstruments>;
     }> | null> {
+      const headers = await store.readCurrentSeatHeadersFrom(tx, {
+        worldId: input.worldId,
+      });
+      const selected = headers.filter(
+        (h) => h.scope.officeId === 'CENTRAL_BANK',
+      );
+      if (selected.length !== 1) invalid();
+      const header = selected[0]!,
+        observedHead = Object.freeze({
+          worldVersion: header.source.worldVersion,
+          eventSequence: header.source.eventSequence,
+        });
+      const opening =
+        observedHead.worldVersion === '0' && observedHead.eventSequence === '0';
       const pages = [];
       for (const dataset of ['cb-categories', 'cb-holdings', 'bank-loans']) {
-        const page = await store.readPageFrom(tx, {
+        const page = await (opening ? store : currentStore).readPageFrom(tx, {
           worldId: input.worldId,
           officeId: 'CENTRAL_BANK',
           dataset,
@@ -56,10 +82,31 @@ export function createPostwarCentralBankOpeningInstrumentReader(config: {
       for (const page of pages) {
         if (
           canonicalSerialize(page.scope) !== canonicalSerialize(first.scope) ||
+          canonicalSerialize(page.scope) !== canonicalSerialize(header.scope) ||
           page.source.worldVersion !== '0' ||
           page.source.eventSequence !== '0'
         )
           invalid();
+        if (!opening) {
+          if (
+            !('observedHead' in page.source) ||
+            canonicalSerialize(page.source.observedHead) !==
+              canonicalSerialize(observedHead) ||
+            !('currentFinancialCoverage' in first.source) ||
+            canonicalSerialize(page.source.currentFinancialCoverage) !==
+              canonicalSerialize(first.source.currentFinancialCoverage)
+          )
+            invalid();
+        }
+        for (const key of [
+          'seedId',
+          'seedFingerprint',
+          'admissionRef',
+          'sourceBundleSha256',
+          'modelVersion',
+          'replayBinding',
+        ] as const)
+          if (page.source[key] !== header.source[key]) invalid();
         for (const key of [
           'seedId',
           'seedFingerprint',
@@ -95,6 +142,7 @@ export function createPostwarCentralBankOpeningInstrumentReader(config: {
       return Object.freeze({
         scope: first.scope,
         source,
+        observedHead,
         instruments: parsePostwarCentralBankOpeningInstruments({
           schemaVersion: 'postwar-cb-opening-instruments-v1',
           measurement: 'ADMITTED_OPENING_DECLARATION_NOT_CURRENT_TRADABILITY',

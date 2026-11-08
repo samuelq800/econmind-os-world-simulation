@@ -1,4 +1,7 @@
-import { POSTWAR_PROJECTION_PAGE_QUERY } from '../../apps/world-worker/src/persistence/postwar-office-projection-store.js';
+import {
+  POSTWAR_PROJECTION_PAGE_QUERY,
+  POSTWAR_PROJECTION_SEATS_QUERY,
+} from '../../apps/world-worker/src/persistence/postwar-office-projection-store.js';
 /** TEST_ONLY protocol vectors, not native source/currentness evidence. */
 import { createHash } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
@@ -88,7 +91,41 @@ function protocol(
     : store;
   const tx: SqlExecutor = {
     async query<Row extends object>(q: string, args: readonly unknown[] = []) {
-      if (q === POSTWAR_PROJECTION_PAGE_QUERY) {
+      if (q === POSTWAR_PROJECTION_SEATS_QUERY) {
+        const scope = row.scope as Record<string, unknown>,
+          source = row.source as Record<string, unknown>,
+          head = source.observedHead as Record<string, unknown>;
+        return {
+          rowCount: 1,
+          rows: [
+            {
+              world_id: scope.worldId,
+              country_id: scope.countryId,
+              office_id: scope.officeId,
+              auth_subject: scope.authSubject,
+              team_id: scope.teamId,
+              authorization_revision: scope.authorizationVersion,
+              scope_key: scope.scopeKey,
+              seat_ref: scope.seatRef,
+              admission_ref: source.admissionRef,
+              seed_id: source.seedId,
+              seed_fingerprint: source.seedFingerprint,
+              model_version: source.modelVersion,
+              replay_binding: source.replayBinding,
+              source_bundle_sha256: source.sourceBundleSha256,
+              world_version: head.worldVersion,
+              event_sequence: head.eventSequence,
+            },
+          ] as Row[],
+        };
+      }
+      if (q === POSTWAR_PROJECTION_PAGE_QUERY)
+        return { rowCount: 1, rows: [{ status: 'STALE' }] as Row[] };
+      if (
+        q === POSTWAR_FINANCIAL_MIXED_CURRENT_PAGE_QUERY &&
+        openingMode &&
+        args[2] !== 'ledger-balances'
+      ) {
         if (openingMode === 'missing')
           return { rowCount: 1, rows: [{ status: 'UNAVAILABLE' }] as Row[] };
         const dataset = args[2],
@@ -110,10 +147,10 @@ function protocol(
           rows: [
             {
               status: items.length ? 'PAGE' : 'EMPTY',
-              scope_json: row.scope,
-              source_json: {
+              scope: row.scope,
+              source: {
                 ...(row.source as object),
-                dataNature: 'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY',
+                dataNature: 'ADMITTED_IMMUTABLE_OPENING_FACTS',
                 worldVersion: '0',
                 eventSequence: '0',
                 pageHash: h,
@@ -122,7 +159,7 @@ function protocol(
                   ? { seedFingerprint: 'sha256:' + 'd'.repeat(64) }
                   : {}),
               },
-              page_json: {
+              page: {
                 offset: 0,
                 limit: 100,
                 returned: items.length,
@@ -291,7 +328,7 @@ describe('CB actual financial rows with separately bound opening instrument decl
   });
   it('refuses source seed substitution', async () => {
     await expect(protocol(true, cbRow, 'wrong-seed')()).rejects.toThrow(
-      'CB_OPENING_SOURCE_DIFFERS',
+      'CB_OPENING_INSTRUMENT_ORIGINALS_DIFFER',
     );
   });
 });

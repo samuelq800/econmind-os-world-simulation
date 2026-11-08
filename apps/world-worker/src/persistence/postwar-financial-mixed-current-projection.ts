@@ -327,6 +327,17 @@ export function createPostwarFinancialMixedCurrentProjectionStore(config: {
         if (opening) {
           if (canonicalSerialize(opening.scope) !== canonicalSerialize(scope))
             invalid('CB_OPENING_SCOPE_DIFFERS');
+          if (
+            canonicalSerialize(opening.observedHead) !==
+            canonicalSerialize(observed)
+          )
+            invalid('CB_OPENING_OBSERVED_HEAD_DIFFERS');
+          if (
+            'currentFinancialCoverage' in opening.source &&
+            canonicalSerialize(opening.source.currentFinancialCoverage) !==
+              canonicalSerialize(validatedCoverage)
+          )
+            invalid('CB_OPENING_COVERAGE_DIFFERS');
           for (const key of [
             'seedId',
             'seedFingerprint',

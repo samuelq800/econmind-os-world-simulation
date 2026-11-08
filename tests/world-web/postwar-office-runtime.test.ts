@@ -1021,7 +1021,7 @@ describe('posting-aware mixed current page wire', () => {
     await view.refresh();
     text = view.render(doc as unknown as Document).textContent;
     expect(text).toContain('TEST_BANK_GCU_CURRENT');
-    expect(text).toContain('原件不可用');
+    expect(text).toContain('来源读出不可用');
     expect(text).toContain('不表示证券余额为零');
     wrongSeed = true;
     await view.refresh();
