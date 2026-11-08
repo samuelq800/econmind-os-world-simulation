@@ -46,22 +46,22 @@ end loop;end;$$;
 -- One controlled offline extraction, never an HTTP request or caller rows.
 create function world_v2.prepare_postwar_industry_labour_scopes(p_world text)returns void
 language plpgsql security definer set search_path=pg_catalog as $$
-declare effective name;a record;s record;base record;root jsonb;src jsonb;doc jsonb;sc record;p jsonb;contract jsonb;people jsonb;pay jsonb;roster jsonb;body text;n integer;pointer jsonb;head record;begin
+declare effective name;a record;s record;base record;root json;src json;seed_raw_sha text;doc jsonb;sc record;p jsonb;contract jsonb;people jsonb;pay jsonb;roster jsonb;body text;n integer;pointer jsonb;head record;begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
  if not pg_has_role(effective,'world_v2_postwar_projection_publisher','MEMBER')or pg_has_role(effective,'world_v2_postwar_projection_owner','MEMBER')or pg_has_role(effective,'world_v2_postwar_projection_reader','MEMBER')then raise exception 'INDUSTRY_FIXED_SEPARATE_PUBLISHER_REQUIRED'using errcode='42501';end if;
  perform set_config('econmind.postwar_projection_world',p_world,true);select * into strict a from world_v2.postwar_projection_admission_header(p_world);
  if exists(select 1 from world_v2.postwar_industry_labour_scope where world_id=p_world)then
   if(select count(*)from world_v2.postwar_industry_labour_scope where world_id=p_world)<>(select count(*)from world_v2.postwar_social_prefix_scope where world_id=p_world)or exists(select 1 from world_v2.postwar_industry_labour_scope x where x.world_id=p_world and(x.seed_fingerprint<>a.seed_fingerprint or x.admission_ref<>a.admission_ref or x.roster_sha256<>encode(sha256(convert_to(x.roster_text,'UTF8')),'hex')))then raise exception 'INDUSTRY_IMMUTABLE_SCOPE_CONFLICT'using errcode='23514';end if;return;
  end if;
- select * into strict s from world_v2.opening_seed where world_id=p_world;root:=s.canonical_payload::jsonb;
+ select * into strict s from world_v2.opening_seed where world_id=p_world;root:=s.canonical_payload::json;seed_raw_sha:=encode(sha256(convert_to(s.canonical_payload,'UTF8')),'hex');
  if s.seed_fingerprint is distinct from a.seed_fingerprint or s.seed_fingerprint is distinct from 'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||s.canonical_payload,'UTF8')),'hex')then raise exception 'INDUSTRY_ACTUAL_SEED_HASH_REQUIRED'using errcode='23514';end if;
- select count(*),jsonb_agg(x)->0 into n,src from jsonb_array_elements(root->'sources')x where(x->>'canonicalPayload')::jsonb->>'schemaVersion'='postwar-operating-genesis-seed-source-v1';
+ select count(*),json_agg(x)->0 into n,src from json_array_elements(root->'sources')x where(x->>'canonicalPayload')::json->>'schemaVersion'='postwar-operating-genesis-seed-source-v1';
  -- OpeningSource hashes the one-key {payload:...} envelope, not raw payload.
  if n<>1 or src->>'payloadHash'is distinct from 'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||'{"payload":'||(src->>'canonicalPayload')||'}','UTF8')),'hex')then raise exception 'INDUSTRY_UNIQUE_OPERATING_SOURCE_HASH_REQUIRED'using errcode='23514';end if;
- doc:=(src->>'canonicalPayload')::jsonb->'carrier'->'socialEmployment';
+ doc:=((src->>'canonicalPayload')::json->'carrier'->'socialEmployment')::jsonb;
  if doc->>'schemaVersion'is distinct from 'postwar-social-employment-state-v1'or doc->'inputs'->>'worldId'is distinct from p_world or doc->'inputs'->>'seedId'is distinct from a.seed_id or jsonb_typeof(doc->'inputs'->'sourcePositions')is distinct from 'array'then raise exception 'INDUSTRY_ACTUAL_E03_ORIGINAL_REQUIRED'using errcode='23514';end if;
  for sc in select * from world_v2.postwar_social_prefix_scope where world_id=p_world order by country_id loop
-  if sc.seed_fingerprint<>a.seed_fingerprint or sc.admission_ref<>a.admission_ref or sc.source_id<>src->>'sourceId'or sc.source_payload_hash<>src->>'payloadHash'or sc.canonical_seed_sha256<>encode(sha256(convert_to(s.canonical_payload,'UTF8')),'hex')or sc.scope_sha256<>encode(sha256(convert_to(sc.scope_document,'UTF8')),'hex')then raise exception 'INDUSTRY_SEALED_PARENT_MISMATCH'using errcode='23514';end if;
+  if sc.seed_fingerprint<>a.seed_fingerprint or sc.admission_ref<>a.admission_ref or sc.source_id<>src->>'sourceId'or sc.source_payload_hash<>src->>'payloadHash'or sc.canonical_seed_sha256<>seed_raw_sha or sc.scope_sha256<>encode(sha256(convert_to(sc.scope_document,'UTF8')),'hex')then raise exception 'INDUSTRY_SEALED_PARENT_MISMATCH'using errcode='23514';end if;
   if(select count(*)from jsonb_array_elements(doc->'countries')c where c->>'countryId'=sc.country_id)<>1 then raise exception 'INDUSTRY_EXACT_ORIGINAL_COUNTRY_REQUIRED'using errcode='23514';end if;
   roster:='[]';
   for p in select x from jsonb_array_elements(doc->'inputs'->'sourcePositions')x where x->>'countryId'=sc.country_id and x->>'sourceBucket'='INDUSTRY'order by (x->>'positionId')collate"C" loop
@@ -171,6 +171,60 @@ declare s record;d world_v2.postwar_industry_labour_document%rowtype;sc world_v2
  jsonb_build_object('dataNature',case when d.world_version=0 then'ADMITTED_OPENING_INDUSTRY_EMPLOYMENT_HEADCOUNT'else'ADMITTED_CURRENT_INDUSTRY_EMPLOYMENT_HEADCOUNT'end,'sourceVersion',d.source_version,'sourceRevision',sc.source_revision,'seedId',s.seed_id,'seedFingerprint',s.seed_fingerprint,'admissionRef',s.admission_ref,'modelVersion',s.model_version,'replayBinding',s.replay_binding,'sourceBundleSha256',s.source_bundle_sha256,'canonicalSeedSha256',sc.canonical_seed_sha256,'worldVersion',d.world_version::text,'eventSequence',d.event_sequence::text,'originWorldVersion','0','originEventSequence','0','observedHead',jsonb_build_object('worldVersion',d.world_version::text,'eventSequence',d.event_sequence::text),'currentIndustryLabourCoverage',d.coverage,'pageHash',coalesce(p.page_sha256,encode(sha256(convert_to('[]','UTF8')),'hex')),'returnedRowsHash',encode(sha256(convert_to(selected::text,'UTF8')),'hex'),'hashAlgorithm','POSTGRES_JSONB_TEXT_UTF8_SHA256','sourcePointer',d.source_pointer),
  jsonb_build_object('offset',p_offset,'limit',p_limit,'returned',returned,'total',d.total_rows,'nextOffset',case when p_offset+returned<d.total_rows then p_offset+returned else null end),selected::text;
 end;$$;
+-- Fixed same-admitted-origin read repair. This cannot publish any other Office
+-- or dataset, change the original H0 gate, or write an economic event/state.
+create function world_v2.repair_postwar_industry_regional_source_capacity(p_world text,p_country text)
+returns world_v2.postwar_office_projection_document language plpgsql security definer set search_path=pg_catalog as $$
+declare effective name;a record;s world_v2.opening_seed%rowtype;sc world_v2.postwar_social_prefix_scope%rowtype;
+ root json;src json;op json;mapping jsonb;items jsonb;item jsonb;buffer jsonb:='[]';n integer;
+ seed_sha text;doc_hash text;ref text;version text;pointer jsonb;pages integer:=1;idx integer:=0;off integer:=0;
+ existing world_v2.postwar_office_projection_document%rowtype;
+begin
+ effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
+ if not pg_has_role(effective,'world_v2_postwar_projection_publisher','MEMBER')or pg_has_role(effective,'world_v2_postwar_projection_owner','MEMBER')or pg_has_role(effective,'world_v2_postwar_projection_reader','MEMBER')then raise exception 'INDUSTRY_FIXED_SEPARATE_PUBLISHER_REQUIRED'using errcode='42501';end if;
+ if current_setting('transaction_isolation')not in('repeatable read','serializable')then raise exception 'INDUSTRY_REGIONAL_REPAIR_HELD_RR_REQUIRED'using errcode='25001';end if;
+ if p_country is null or p_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'then raise exception 'INDUSTRY_EXACT_COUNTRY_REQUIRED'using errcode='22023';end if;
+ perform world_v2.lock_postwar_source_revocation_fences(p_world);
+ perform set_config('econmind.postwar_projection_world',p_world,true);
+ perform 1 from world_v2.world_head where world_id=p_world for share;
+ if not found then raise exception 'INDUSTRY_ACTUAL_WORLD_REQUIRED'using errcode='55000';end if;
+ select * into strict a from world_v2.postwar_projection_admission_header(p_world);
+ select * into strict sc from world_v2.postwar_social_prefix_scope where world_id=p_world and country_id=p_country for share;
+ if not world_v2.postwar_industry_labour_source_current(p_world,p_country,a.seed_fingerprint,a.admission_ref,sc.source_id,sc.source_payload_hash)then raise exception 'INDUSTRY_REGIONAL_ORIGINAL_REVOKED'using errcode='55000';end if;
+ if exists(select 1 from world_v2.postwar_office_projection_document d join world_v2.postwar_office_projection_revocation r using(document_ref)where d.world_id=p_world and d.country_id=p_country and d.office_id='INDUSTRY'and d.dataset='regional-source-capacity')then raise exception 'INDUSTRY_REGIONAL_REPAIR_PARENT_REVOKED'using errcode='55000';end if;
+ if exists(select 1 from world_v2.postwar_office_projection_document d where d.world_id=p_world and d.country_id=p_country and d.office_id='INDUSTRY'and d.dataset='regional-source-capacity')then raise exception 'INDUSTRY_REGIONAL_REPAIR_ALREADY_EXISTS'using errcode='55000';end if;
+ select * into strict s from world_v2.opening_seed where world_id=p_world;
+ root:=s.canonical_payload::json;seed_sha:=encode(sha256(convert_to(s.canonical_payload,'UTF8')),'hex');
+ if root->>'worldId'is distinct from p_world or root->>'seedId'is distinct from s.seed_id or s.seed_fingerprint is distinct from a.seed_fingerprint or s.seed_fingerprint is distinct from 'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||s.canonical_payload,'UTF8')),'hex')or(root->'replayBinding')::jsonb is distinct from s.replay_binding::jsonb then raise exception 'INDUSTRY_REGIONAL_ACTUAL_SEED_REQUIRED'using errcode='23514';end if;
+ select count(*),json_agg(x)->0 into n,src from json_array_elements(root->'sources')x where(x->>'canonicalPayload')::json->>'schemaVersion'='postwar-operating-genesis-seed-source-v1';
+ if n<>1 or src->>'payloadHash'is distinct from 'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||'{"payload":'||(src->>'canonicalPayload')||'}','UTF8')),'hex')then raise exception 'INDUSTRY_UNIQUE_OPERATING_SOURCE_HASH_REQUIRED'using errcode='23514';end if;
+ if sc.seed_fingerprint<>a.seed_fingerprint or sc.admission_ref<>a.admission_ref or sc.source_id<>src->>'sourceId'or sc.source_payload_hash<>src->>'payloadHash'or sc.canonical_seed_sha256<>seed_sha or sc.scope_sha256<>encode(sha256(convert_to(sc.scope_document,'UTF8')),'hex')then raise exception 'INDUSTRY_SEALED_PARENT_MISMATCH'using errcode='23514';end if;
+ op:=(src->>'canonicalPayload')::json;
+ if(select count(*)from json_array_elements(op->'carrier'->'socialEmployment'->'countries')x where x->>'countryId'=p_country)<>1 then raise exception 'INDUSTRY_EXACT_ORIGINAL_COUNTRY_REQUIRED'using errcode='23514';end if;
+ mapping:=(op->'carrier'->'selectedSource'->>'regionMappingBytes')::jsonb;
+ -- Exactly the existing publisher's regional-source-capacity row semantics.
+ select coalesce(jsonb_agg(jsonb_build_object('countryId',p_country,'locationId',m->>'normalizedRegionId','sourceRegionId',r->>'id','sourceInitial',r->'initial','sourceStatus','PINNED_SOURCE_CAPACITY_NOT_CURRENT_DELIVERY')order by m->>'normalizedRegionId'),'[]')into items from jsonb_array_elements((op->'carrier'->'selectedSource'->>'regionsBytes')::jsonb)r join jsonb_array_elements(mapping->'mappings')m on m->>'sourceRegionId'=r->>'id'where m->>'coreCountryId'=p_country;
+ if jsonb_array_length(items)=0 or jsonb_array_length(items)>1000 or octet_length(items::text)>1048576 then raise exception 'INDUSTRY_BOUNDED_REGIONAL_ORIGINAL_REQUIRED'using errcode='54000';end if;
+ pointer:=jsonb_build_object('sourceId',src->>'sourceId','sourcePayloadHash',src->>'payloadHash','decode','sources[].canonicalPayload','countryId',p_country,'path','carrier.selectedSource.regionsBytes::json.initial','mapping','carrier.selectedSource.regionMappingBytes::json.mappings');
+ doc_hash:=encode(sha256(convert_to(items::text,'UTF8')),'hex');
+ ref:='POSTWAR_PROJECTION_'||upper(encode(sha256(convert_to(jsonb_build_array(p_world,p_country,'INDUSTRY','regional-source-capacity',s.seed_fingerprint,a.admission_ref,seed_sha,doc_hash)::text,'UTF8')),'hex'));
+ version:='sha256:'||encode(sha256(convert_to(ref||doc_hash,'UTF8')),'hex');
+ for item in select value from jsonb_array_elements(items)loop
+  if octet_length(jsonb_build_array(item)::text)>48000 then raise exception 'INDUSTRY_REGIONAL_SINGLE_ROW_CAPACITY'using errcode='54000';end if;
+  if jsonb_array_length(buffer)>=100 or octet_length((buffer||jsonb_build_array(item))::text)>48000 then pages:=pages+1;buffer:='[]';end if;buffer:=buffer||jsonb_build_array(item);
+ end loop;buffer:='[]';
+ insert into world_v2.postwar_office_projection_document(document_ref,world_id,country_id,office_id,dataset,projection_version,source_version,source_revision,admission_ref,seed_id,seed_fingerprint,canonical_seed_sha256,source_bundle_sha256,source_id,source_payload_hash,source_pointer,model_version,replay_binding,world_version,event_sequence,document_sha256,total_rows,page_count)
+ values(ref,p_world,p_country,'INDUSTRY','regional-source-capacity','postwar-office-projection.v1',version,src->>'sourceVersion',a.admission_ref,s.seed_id,s.seed_fingerprint,seed_sha,a.source_bundle_sha256,src->>'sourceId',src->>'payloadHash',pointer,a.model_version,a.replay_binding,0,0,doc_hash,jsonb_array_length(items),pages);
+ for item in select value from jsonb_array_elements(items)loop
+  if jsonb_array_length(buffer)>=100 or octet_length((buffer||jsonb_build_array(item))::text)>48000 then insert into world_v2.postwar_office_projection_page values(ref,p_world,p_country,'INDUSTRY',idx,off,jsonb_array_length(buffer),buffer::text,encode(sha256(convert_to(buffer::text,'UTF8')),'hex'));off:=off+jsonb_array_length(buffer);idx:=idx+1;buffer:='[]';end if;buffer:=buffer||jsonb_build_array(item);
+ end loop;
+ insert into world_v2.postwar_office_projection_page values(ref,p_world,p_country,'INDUSTRY',idx,off,jsonb_array_length(buffer),buffer::text,encode(sha256(convert_to(buffer::text,'UTF8')),'hex'));
+ select * into strict existing from world_v2.postwar_office_projection_document where document_ref=ref;return existing;
+end;$$;
+alter function world_v2.repair_postwar_industry_regional_source_capacity(text,text)owner to world_v2_postwar_projection_owner;
+revoke all on function world_v2.repair_postwar_industry_regional_source_capacity(text,text)from public;
+grant execute on function world_v2.repair_postwar_industry_regional_source_capacity(text,text)to world_v2_postwar_projection_publisher;
+
 alter function world_v2.prepare_postwar_industry_labour_scopes(text)owner to world_v2_postwar_projection_owner;
 alter function world_v2.publish_postwar_industry_labour_current(text,text,text)owner to world_v2_postwar_projection_owner;
 alter function world_v2.read_postwar_industry_labour_current_page(text,integer,integer,text)owner to world_v2_postwar_projection_owner;
