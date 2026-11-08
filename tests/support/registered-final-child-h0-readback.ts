@@ -1,5 +1,6 @@
 /** TEST_ONLY child H0 derived rows only. No source-admission/role issuance,
  * consumer, clock, pool creation, seed parsing or 70-family proof replay. */
+import { projectRegisteredFinalOpeningInventoryRows } from './registered-final-opening-inventory.js';
 import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
 import * as C from '@econmind/core';
@@ -184,28 +185,24 @@ export function deriveRegisteredFinalChildH0ReadData(
   if (fs.length !== 1)
     fail('EXACT_RETAINED_FINANCIAL_INVENTORY_SOURCE_REQUIRED');
   for (const countryId of countries) {
-    const rows = seed.inventoryEntries
-      .filter(
-        (entry) =>
-          entry.account.countryId === countryId &&
-          entry.sourceId === fs[0]!.sourceId,
-      )
-      .sort((a, b) =>
-        a.entryId < b.entryId ? -1 : a.entryId > b.entryId ? 1 : 0,
-      );
-    const dataRows = JSON.parse(C.canonicalSerialize(rows)) as unknown[];
+    const inventory = projectRegisteredFinalOpeningInventoryRows({
+      inventoryEntries: seed.inventoryEntries,
+      sources: seed.sources,
+      countryId,
+    });
     for (const officeId of ['INDUSTRY', 'TRADE'] as const)
       projected.push({
         countryId,
         officeId,
         dataset: 'opening-inventory-entries',
-        rows: dataRows,
+        rows: inventory.rows,
         sourcePointer: {
           sourceId: op[0]!.sourceId,
           sourcePayloadHash: op[0]!.payloadHash,
-          decode: 'sources[].canonicalPayload',
+          decode: 'seed.inventoryEntries',
           countryId,
-          path: 'seed.inventoryEntries[account.countryId;sourceId=originalAdoptedFinancialSource]',
+          path: 'seed.inventoryEntries[account.countryId]',
+          inventorySources: inventory.inventorySources,
           financialSourceId: fs[0]!.sourceId,
           financialSourcePayloadHash: fs[0]!.payloadHash,
           sourceRole: 'LEGACY_OPERATING_ADOPTION_CONTEXT_NOT_DIRECT_ROW_SOURCE',
@@ -217,7 +214,10 @@ export function deriveRegisteredFinalChildH0ReadData(
       ...doc,
       sourcePointer: Object.freeze({
         ...doc.sourcePointer,
-        classification: 'TRUE_PARENT_FACTS_ACTUAL_CHILD_FINANCIAL_BATCHES',
+        classification:
+          doc.dataset === 'opening-inventory-entries'
+            ? 'ACTUAL_CHILD_COMPLETE_OPENING_INVENTORY'
+            : 'TRUE_PARENT_FACTS_ACTUAL_CHILD_FINANCIAL_BATCHES',
         parentOperatingSeedFingerprint: PARENT,
         actualOpeningSeedFingerprint: CHILD,
         ...(doc.dataset === 'opening-financial-legs'
