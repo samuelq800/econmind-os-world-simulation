@@ -433,8 +433,8 @@ export async function readRetainedPostwarPowerUpgradeLineage(
     checkpoint: root,
     markerPath,
     lineage,
-    labourForward,
-    schemaAncestrySidecar,
+    ...(labourForward === undefined ? {} : { labourForward }),
+    ...(schemaAncestrySidecar === undefined ? {} : { schemaAncestrySidecar }),
   };
 }
 
