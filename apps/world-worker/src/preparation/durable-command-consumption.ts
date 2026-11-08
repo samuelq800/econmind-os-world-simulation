@@ -393,6 +393,15 @@ function createDurableCommandConsumer(
     at: string,
     simTime: SimTime,
   ) {
+    const isUtilityGrant =
+      financeSocialBinding !== null &&
+      command.commandType === INDUSTRY_UTILITY_COMMANDS.WATER &&
+      command.officeId === null &&
+      isPostwarIndustryUtilityRuntime(officeReaders.industryUtility) &&
+      isPreparedPostwarIndustryUtilityRuntime(officeReaders.industryUtility) &&
+      officeReaders.industryUtility.database === input.database &&
+      officeReaders.industryUtility.worldId === world &&
+      isPostwarIndustryWaterGrantCommand(command);
     if (
       command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
       command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
@@ -406,6 +415,7 @@ function createDurableCommandConsumer(
         command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND &&
         isPostwarIndustryWorkRuntime(officeReaders.industryWork)
       ) &&
+      !isUtilityGrant &&
       !(
         command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND &&
         isPostwarBeneficialHousingRentRuntime(
@@ -423,11 +433,13 @@ function createDurableCommandConsumer(
     const label =
       command.commandType === 'CORE_GOODS_SHIPMENT_V1'
         ? 'Shipment'
-        : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
-          ? 'Social MATCH'
-          : command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND
-            ? 'Beneficial rent'
-            : 'Delivery';
+        : isUtilityGrant
+          ? 'Water grant'
+          : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
+            ? 'Social MATCH'
+            : command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND
+              ? 'Beneficial rent'
+              : 'Delivery';
     await input.database.transaction(async (transaction) => {
       // Follow atomic/intake submission-before-lease/head lock order. Never
       // take the queue lock in the selector and then wait for a submission.
@@ -442,19 +454,20 @@ function createDurableCommandConsumer(
       );
       if (canonicalSerialize(durable) !== canonicalSerialize(command))
         invalid(`${label} differs from durable canonical Command`);
-      // MATCH's fixed source runtime validates the complete prefix before
-      // claim and again under held source guards at Atomic's commit cutoff.
-      // Its queue writer reads lease/head metadata only; it has no raw seed
-      // access. Goods retain their existing lineage source protocol.
-      const isMatch =
+      // Fixed prepared sources validate the complete prefix before claim and
+      // again under held guards at Atomic's cutoff. Their queue claim needs
+      // the actual lease/head, never a cold seed rebuild. Goods retain their
+      // existing lineage source protocol.
+      const fixedPreparedSource =
+        isUtilityGrant ||
         command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND ||
         command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND ||
         command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND ||
         command.commandType === INDUSTRY_OPERATING_WAGE_COMMAND;
-      const lease = isMatch
+      const lease = fixedPreparedSource
         ? await leaseFrom(transaction, at)
         : await checkSource(transaction, durable, at);
-      if (isMatch) {
+      if (fixedPreparedSource) {
         const head = await transaction.query<{ world_version: string }>(
           'select world_version::text from world_v2.world_head where world_id=$1 for share',
           [world],
@@ -467,7 +480,7 @@ function createDurableCommandConsumer(
           head.rows[0]?.world_version !== command.expectedWorldVersion
         )
           invalid(
-            'Social MATCH claim requires its exact active lease and current head',
+            `${label} claim requires its exact active lease and current head`,
           );
       }
       const queue = await transaction.query<QueueRow>(
