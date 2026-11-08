@@ -36,6 +36,7 @@ import {
   SOCIAL_JOB_MATCH_DUE_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   canonicalSerialize,
   parseWorldWriterLease,
@@ -194,6 +195,7 @@ type DurableConsumptionInput = {
 const FINANCE_SOCIAL_COMMAND_FAMILIES: ReadonlySet<string> = new Set([
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
 ]);
@@ -1150,6 +1152,13 @@ function createDurableCommandConsumer(
             : {
                 captainSourceCommitProtectionPort:
                   composition.captainSourceCommitProtectionPort,
+              }),
+          ...(composition.socialServiceCreationSourceCommitProtectionPort ===
+          undefined
+            ? {}
+            : {
+                socialServiceCreationSourceCommitProtectionPort:
+                  composition.socialServiceCreationSourceCommitProtectionPort,
               }),
           ...(composition.socialPositionSourceCommitProtectionPort === undefined
             ? {}

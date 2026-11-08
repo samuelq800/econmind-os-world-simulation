@@ -62,6 +62,7 @@ export const officeFamilies = Object.freeze({
     MANUAL_INDUSTRY_UTILITY_COMMANDS.LOGISTICS,
   ] as const),
   SOCIAL: Object.freeze([
+    'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
     'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
     'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
   ] as const),

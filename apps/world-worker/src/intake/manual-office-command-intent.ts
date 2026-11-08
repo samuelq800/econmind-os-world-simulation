@@ -14,7 +14,9 @@ import {
   CENTRAL_BANK_OMO_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   parseSocialPositionOfferCreateIntent,
+  parseSocialEmploymentServiceCreateIntent,
   DomainError,
   DOMAIN_ERROR_CODES,
   actorId,
@@ -151,6 +153,17 @@ export function validateManualOfficeCommandIntent(
         parseSocialEmploymentServiceCommand(command, sha).kind !== 'PLAN'
       )
         invalid();
+      return;
+    case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialEmploymentServiceCreateIntent(
+        JSON.parse(command.canonicalPayload),
+      );
       return;
     case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
       if (

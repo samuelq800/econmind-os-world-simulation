@@ -1,3 +1,8 @@
+import {
+  isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort,
+  type createPostwarSocialEmploymentServiceCreationRuntime,
+  type SocialServiceCreationSourceCommitProtectionPort,
+} from '../persistence/postwar-social-employment-service-creation-runtime.js';
 import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
 import {
   isPostwarIndustryUtilityRuntime,
@@ -49,6 +54,7 @@ import {
   CENTRAL_BANK_OMO_CAPABILITY,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DOMAIN_ERROR_CODES,
   DomainError,
@@ -143,6 +149,9 @@ export interface ManualOfficeRuntimeReaders {
   readonly captainNative?: ReturnType<
     typeof createPostwarCaptainRuntime
   > | null;
+  readonly socialServiceCreation?: ReturnType<
+    typeof createPostwarSocialEmploymentServiceCreationRuntime
+  >;
   readonly socialPosition?: ReturnType<
     typeof createPostwarSocialPositionRuntime
   > | null;
@@ -181,6 +190,7 @@ export function manualOfficeCapability(command: CanonicalCommand) {
       return command.officeId === 'SOCIAL'
         ? SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY
         : null;
+    case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND:
     case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
       return command.officeId === 'SOCIAL' ? ('SOCIAL_LABOUR' as const) : null;
     case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND:
@@ -286,6 +296,7 @@ export function createManualOfficeCommandComposition(input: {
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
   readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
   readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
+  readonly socialServiceCreationSourceCommitProtectionPort?: SocialServiceCreationSourceCommitProtectionPort;
   readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
   readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
   readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
@@ -424,6 +435,24 @@ export function createManualOfficeCommandComposition(input: {
         dayOneFxSourceCommitProtectionPort: runtime.sourceCommitProtectionPort,
         assertSourceBeforeClaim: (observedAtReal) =>
           runtime.preflightCanonical(command, observedAtReal),
+      };
+    }
+    case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.socialServiceCreation;
+      if (
+        !runtime ||
+        !isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort(
+          runtime.sourceCommitProtectionPort,
+        )
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        socialServiceCreationSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.assertSourceBeforeClaim({ command, observedAtReal }),
       };
     }
     case SOCIAL_POSITION_OFFER_CREATE_COMMAND: {

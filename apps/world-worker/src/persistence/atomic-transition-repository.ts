@@ -1,3 +1,8 @@
+import {
+  isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort,
+  type SocialServiceCreationSourceCommitProtectionPort,
+  type SocialServiceCreationSourceCommitRequest,
+} from './postwar-social-employment-service-creation-runtime.js';
 import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
 import {
   INDUSTRY_UTILITY_SOURCE_PURPOSE,
@@ -44,6 +49,7 @@ import {
   NARROW_TREASURY_GCU_COMMAND_TYPE,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
   SimTime,
   bindAuthoritativeTransition,
@@ -1026,6 +1032,7 @@ export class AtomicTransitionRepository {
   readonly #industryRunSourceCommitProtectionPort: IndustryRunSourceCommitProtectionPort | null;
   readonly #sourceCommitProtectionPort: SourceCommitProtectionPort | null;
   readonly #industryProductionCutoffGuard: IndustryProductionCutoffGuard | null;
+  readonly #socialServiceCreationSourceCommitProtectionPort: SocialServiceCreationSourceCommitProtectionPort | null;
   readonly #socialPositionSourceCommitProtectionPort: SocialPositionSourceCommitProtectionPort | null;
   readonly #financeBudgetSourceCommitProtectionPort: FinanceBudgetNativeCommitGuard | null;
   readonly #socialMatchSourceCommitProtectionPort: SocialMatchSourceCommitProtectionPort | null;
@@ -1049,6 +1056,7 @@ export class AtomicTransitionRepository {
     readonly industryLogisticsSourceCommitProtectionPort?: IndustryLogisticsSourceCommitProtectionPort;
     readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
     readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
+    readonly socialServiceCreationSourceCommitProtectionPort?: SocialServiceCreationSourceCommitProtectionPort;
     readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
     readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
     readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
@@ -1170,6 +1178,15 @@ export class AtomicTransitionRepository {
     this.#captainSourceCommitProtectionPort =
       input.captainSourceCommitProtectionPort ?? null;
     if (
+      input.socialServiceCreationSourceCommitProtectionPort !== undefined &&
+      !isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort(
+        input.socialServiceCreationSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'Social service creation source port must be issued by its fixed native runtime',
+      );
+    if (
       input.socialPositionSourceCommitProtectionPort !== undefined &&
       !isPostwarSocialPositionSourceCommitProtectionPort(
         input.socialPositionSourceCommitProtectionPort,
@@ -1206,6 +1223,8 @@ export class AtomicTransitionRepository {
     this.#sourceCommitProtectionPort = input.sourceCommitProtectionPort ?? null;
     this.#industryProductionCutoffGuard =
       input.industryProductionCutoffGuard ?? null;
+    this.#socialServiceCreationSourceCommitProtectionPort =
+      input.socialServiceCreationSourceCommitProtectionPort ?? null;
     this.#socialPositionSourceCommitProtectionPort =
       input.socialPositionSourceCommitProtectionPort ?? null;
     this.#financeBudgetSourceCommitProtectionPort =
@@ -1360,6 +1379,11 @@ export class AtomicTransitionRepository {
         }
         await this.#faultInjector.hit('AUTHORIZATION_RECHECKED');
         await this.#assertPlanSourceCurrent(transaction, candidate, head);
+        await this.#assertSocialServiceCreationSourceCurrent(
+          transaction,
+          candidate,
+          head,
+        );
         await this.#assertSocialPositionSourceCurrent(
           transaction,
           candidate,
@@ -2294,6 +2318,72 @@ export class AtomicTransitionRepository {
     )
       invalid(
         'Finance source protection did not return the exact guarded command and head audit',
+      );
+  }
+
+  async #assertSocialServiceCreationSourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    if (
+      candidate.command.commandType !== SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
+    )
+      return;
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding;
+    const proof = candidate.commitAuthorization;
+    if (
+      candidate.command.officeId !== 'SOCIAL' ||
+      candidate.authorityKind !== 'DISCRETIONARY_USER' ||
+      candidate.financialPostingBatches.length !== 0 ||
+      candidate.inventoryPostings.length !== 0 ||
+      this.#socialServiceCreationSourceCommitProtectionPort === null ||
+      !isCommitAuthorizationProof(proof) ||
+      captured.captureFailed ||
+      captured.canonicalData === null
+    )
+      invalid(
+        'Fresh Social service creation requires its own binding and source protection port',
+      );
+    const request: Readonly<SocialServiceCreationSourceCommitRequest> =
+      Object.freeze({
+        phase: 'BEFORE_EVENTS',
+        purpose: 'SOCIAL_EMPLOYMENT_SERVICE_CREATE_SOURCE_EVALUATION_V1',
+        command: candidate.command,
+        transition: candidate.transition,
+        currentHead: Object.freeze({
+          worldId: candidate.command.worldId,
+          ...head,
+        }),
+        observedAtReal: candidate.observedAtReal,
+        readBinding: JSON.parse(captured.canonicalData) as unknown,
+        commitAuthorization: proof,
+      });
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: request.purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(request.readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    const audit: unknown =
+      await this.#socialServiceCreationSourceCommitProtectionPort.assertCurrentFrom(
+        transaction,
+        request,
+      );
+    const observed = captureGoverningSourceReadBinding({
+      governingSourceReadBinding: audit,
+    });
+    if (
+      observed.captureFailed ||
+      observed.canonicalData !== canonicalSerialize(expected)
+    )
+      invalid(
+        'Social service creation source protection did not return the exact guarded command and head audit',
       );
   }
 

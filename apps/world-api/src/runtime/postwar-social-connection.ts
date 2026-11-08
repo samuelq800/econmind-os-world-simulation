@@ -11,6 +11,7 @@ import {
   AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   type AuthenticatedCommandRecoveryResponseDto,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   type CanonicalCommand,
   type OpeningSeed,
@@ -160,6 +161,7 @@ const gates = Object.freeze([
 ]);
 const manualFamilies: ReadonlySet<string> = new Set([
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
 ]);
 

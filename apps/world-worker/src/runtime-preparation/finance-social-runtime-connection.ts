@@ -1,3 +1,4 @@
+import { createPostwarSocialServiceCreationForSharedConnection } from './social-runtime-connection.js';
 import {
   createPostwarIndustryUtilityRuntime,
   type PostwarIndustryUtilityRuntime,
@@ -623,6 +624,15 @@ function constructFinanceSocialRuntimeConnection(
         : null;
     let readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
       ...social.readers,
+      ...(d
+        ? {
+            socialServiceCreation:
+              createPostwarSocialServiceCreationForSharedConnection(social, {
+                database,
+                clock: input.clock,
+              }),
+          }
+        : {}),
       financeBudget: budget,
       ...(industry ? { industry } : {}),
       ...(industryRun ? { industryRun } : {}),

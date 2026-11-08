@@ -14,6 +14,7 @@ import {
   NARROW_TREASURY_GCU_COMMAND_TYPE,
   AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
 } from '@econmind/core';
 import {
@@ -205,6 +206,7 @@ export function createPostwarOfficeCommandFetchHandler(
                         : selector.officeId === 'SOCIAL' &&
                             [
                               SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+                              SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
                               SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
                             ].some((f) => f === selector.commandType)
                           ? social

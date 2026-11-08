@@ -37,6 +37,8 @@ import {
   type ManualOfficeIntakeRuntime,
 } from '../intake/manual-office-intake-runtime.js';
 import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
+import { registeredWorldExecutionClockScope } from '../time/registered-world-execution-state.js';
+import { createPostwarSocialEmploymentServiceCreationRuntime } from '../persistence/postwar-social-employment-service-creation-runtime.js';
 import { loadPostwarSourceContext } from '../preparation/postwar-source-context.js';
 import { createSocialIntakeAuthorizationPool } from '../persistence/social-intake-authorization.js';
 export { createSocialIntakeAuthorizationPool } from '../persistence/social-intake-authorization.js';
@@ -264,6 +266,31 @@ const issuedConnections = new WeakMap<
     countryIds: readonly string[];
   }
 >();
+/** Attach the licensed creation command to the existing registered consumer.
+ * Reuses its exact source, database and Clock; starts no service or Clock. */
+export function createPostwarSocialServiceCreationForSharedConnection(
+  value: Readonly<PostwarSocialRuntimeConnection>,
+  input: Readonly<{ database: SqlDatabase; clock: DurableConsumptionClock }>,
+) {
+  const binding = issuedConnections.get(value);
+  const clock = registeredWorldExecutionClockScope(input.clock);
+  if (
+    !binding ||
+    !clock ||
+    clock.database !== value.database ||
+    clock.worldId !== binding.world ||
+    clock.workerId !== value.workerId
+  )
+    throw Error('EXACT_REGISTERED_SOCIAL_CREATION_CONSUMER_REQUIRED');
+  return createPostwarSocialEmploymentServiceCreationRuntime({
+    worldId: binding.world,
+    preparedSource: binding.source,
+    database: input.database,
+    workerId: value.workerId,
+    workerRole: binding.workerRole,
+    clock: input.clock,
+  });
+}
 /** Only this fixed instance's actual completed DATA preparation is recognized.
  * A copy/wrapper, same-shaped object or caller flag cannot replace the instance;
  * true does not admit a source or authorize an operation. */

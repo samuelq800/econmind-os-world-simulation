@@ -1,3 +1,4 @@
+import { isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort } from '../persistence/postwar-social-employment-service-creation-runtime.js';
 import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
 import { isPreparedPostwarIndustryUtilityRuntime } from '../persistence/postwar-industry-utility-runtime.js';
 import { isPreparedPostwarIndustryLogisticsRuntime } from '../persistence/postwar-industry-logistics-runtime.js';
@@ -25,6 +26,7 @@ import {
   DomainError,
   DOMAIN_ERROR_CODES,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   type CanonicalCommand,
   type Sha256Hex,
@@ -539,6 +541,15 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
       ) === null &&
       isFinanceBudgetNativeCommitGuard(
         construction.readers.financeBudget?.commitGuard,
+      )
+    );
+  if (commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND)
+    return (
+      !!construction &&
+      (!construction.productionBinding ||
+        !!construction.financeSocialBinding) &&
+      isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort(
+        construction.readers.socialServiceCreation?.sourceCommitProtectionPort,
       )
     );
   if (

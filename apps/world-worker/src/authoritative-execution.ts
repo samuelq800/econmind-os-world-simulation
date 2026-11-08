@@ -1,3 +1,4 @@
+import type { SocialServiceCreationSourceCommitProtectionPort } from './persistence/postwar-social-employment-service-creation-runtime.js';
 import type { IndustryUtilitySourceCommitProtectionPort } from './persistence/postwar-industry-utility-runtime.js';
 import type { IndustryLogisticsSourceCommitProtectionPort } from './persistence/postwar-industry-logistics-runtime.js';
 import type { IndustryOperatingWageSourceCommitProtectionPort } from './persistence/postwar-industry-operating-wage-runtime.js';
@@ -233,6 +234,7 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
   /** Fixed server source guard; current authorization is still independently held. */
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
+  readonly socialServiceCreationSourceCommitProtectionPort?: SocialServiceCreationSourceCommitProtectionPort;
   readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
   readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
   readonly socialMatchSourceCommitProtectionPort?: SocialMatchSourceCommitProtectionPort;
@@ -322,6 +324,12 @@ export function createAuthoritativeWorkerExecution(input: {
     ...(input.sourceCommitProtectionPort === undefined
       ? {}
       : { sourceCommitProtectionPort: input.sourceCommitProtectionPort }),
+    ...(input.socialServiceCreationSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          socialServiceCreationSourceCommitProtectionPort:
+            input.socialServiceCreationSourceCommitProtectionPort,
+        }),
     ...(input.socialPositionSourceCommitProtectionPort === undefined
       ? {}
       : {

@@ -73,7 +73,7 @@ function envelope(officeId: string, commandType: string) {
   };
 }
 
-describe('browser manual Office transport permits only the twelve registered manual families', () => {
+describe('browser manual Office transport permits only the registered manual families', () => {
   it('retains exact readonly family types without enabling any automatic family', () => {
     expectTypeOf(officeFamilies).toEqualTypeOf<{
       readonly CAPTAIN: readonly ['CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'];
@@ -87,6 +87,7 @@ describe('browser manual Office transport permits only the twelve registered man
         'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
       ];
       readonly SOCIAL: readonly [
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
         'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
         'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
       ];
