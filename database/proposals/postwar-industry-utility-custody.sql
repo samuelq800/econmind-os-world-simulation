@@ -94,7 +94,7 @@ grant execute on function world_v2.read_postwar_industry_utility_source(text,tex
 
 -- Source-controlled quota publication. No manual Industry seat may use this
 -- function; amount/holder/validity are not caller inputs. RUN audit is frozen.
-create table world_v2.postwar_industry_water_grant_publication(world_id text not null,run_id text not null,schedule_command_id text not null,command_id text not null,command_fingerprint text not null,source_ref text not null,seed_fingerprint text not null,admission_ref text not null,primary key(world_id,run_id),foreign key(world_id,command_id)references world_v2.command_submission(world_id,command_id));
+create table world_v2.postwar_industry_water_grant_publication(world_id text not null,run_id text not null,schedule_command_id text not null,command_id text not null,command_fingerprint text not null,source_ref text not null,seed_fingerprint text not null,admission_ref text not null,primary key(world_id,schedule_command_id),foreign key(world_id,command_id)references world_v2.command_submission(world_id,command_id));
 alter table world_v2.postwar_industry_water_grant_publication owner to world_v2_industry_source_owner;
 alter table world_v2.postwar_industry_water_grant_publication enable row level security;
 alter table world_v2.postwar_industry_water_grant_publication force row level security;
@@ -103,14 +103,23 @@ create policy industry_water_grant_owner on world_v2.postwar_industry_water_gran
 create trigger industry_water_grant_immutable before update or delete on world_v2.postwar_industry_water_grant_publication for each row execute function world_v2.reject_authoritative_history_mutation();
 create trigger industry_water_grant_no_truncate before truncate on world_v2.postwar_industry_water_grant_publication for each statement execute function world_v2.reject_authoritative_history_mutation();
 create policy industry_water_grant_command_insert on world_v2.command_submission for insert to world_v2_industry_source_owner with check(world_id=current_setting('econmind.industry_source_world',true)and command_type='INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1'and office_id is null and canonical_payload::jsonb->'operation'=jsonb_build_object('action','GRANT_RIGHT'));
-create function world_v2.read_postwar_industry_water_grant_publication(p_world text,p_run text)
+create function world_v2.read_postwar_industry_water_grant_publication(p_world text,p_country text,p_facility text,p_run text)
 returns table(command_json jsonb,command_fingerprint text,publication_status text)language plpgsql security definer set search_path=pg_catalog as $$
 declare effective name;begin
  effective:=case when current_setting('role')='none'then session_user else current_setting('role')::name end;
  if effective<>'world_v2_industry_source_publisher'or pg_has_role(session_user,'world_v2_industry_source_owner','MEMBER')then raise exception 'WATER_GRANT_FIXED_PUBLISHER_REQUIRED'using errcode='42501';end if;
  perform set_config('econmind.industry_source_world',p_world,true);
- return query select jsonb_build_object('schemaVersion',c.schema_version,'worldId',c.world_id,'commandId',c.command_id,'commandType',c.command_type,'actorId',c.actor_id,'authSubject',c.auth_subject::text,'countryId',c.country_id,'officeId',c.office_id,'expectedWorldVersion',c.expected_world_version::text,'idempotencyKey',c.idempotency_key,'correlationId',c.correlation_id,'simTime',c.sim_time::text,'submittedAtReal',to_char(c.submitted_at_real at time zone'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),'payload',c.canonical_payload::jsonb),c.command_fingerprint,case when exists(select 1 from world_v2.command_receipt r where r.world_id=c.world_id and r.command_id=c.command_id)then 'FINAL'else 'QUEUED'end from world_v2.postwar_industry_water_grant_publication p join world_v2.command_submission c on c.world_id=p.world_id and c.command_id=p.command_id and c.command_fingerprint=p.command_fingerprint where p.world_id=p_world and p.run_id=p_run;
+ return query select jsonb_build_object('schemaVersion',c.schema_version,'worldId',c.world_id,'commandId',c.command_id,'commandType',c.command_type,'actorId',c.actor_id,'authSubject',c.auth_subject::text,'countryId',c.country_id,'officeId',c.office_id,'expectedWorldVersion',c.expected_world_version::text,'idempotencyKey',c.idempotency_key,'correlationId',c.correlation_id,'simTime',c.sim_time::text,'submittedAtReal',to_char(c.submitted_at_real at time zone'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),'payload',c.canonical_payload::jsonb),c.command_fingerprint,case when exists(select 1 from world_v2.command_receipt r where r.world_id=c.world_id and r.command_id=c.command_id)then 'FINAL'else 'QUEUED'end from world_v2.postwar_industry_water_grant_publication p join world_v2.command_submission c on c.world_id=p.world_id and c.command_id=p.command_id and c.command_fingerprint=p.command_fingerprint where p.world_id=p_world and p.run_id=p_run and c.country_id=p_country and c.office_id is null and c.command_type='INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1'and c.canonical_payload::jsonb->>'facilityId'=p_facility and c.canonical_payload::jsonb->>'runId'=p_run;
 end;$$;
+alter function world_v2.read_postwar_industry_water_grant_publication(text,text,text,text)owner to world_v2_industry_source_owner;
+revoke all on function world_v2.read_postwar_industry_water_grant_publication(text,text,text,text)from public;
+grant execute on function world_v2.read_postwar_industry_water_grant_publication(text,text,text,text)to world_v2_industry_source_publisher;
+-- Legacy C2 recovery only. New callers must supply their exact actual scope.
+create function world_v2.read_postwar_industry_water_grant_publication(p_world text,p_run text)
+returns table(command_json jsonb,command_fingerprint text,publication_status text)
+language sql security definer set search_path=pg_catalog as $$
+ select * from world_v2.read_postwar_industry_water_grant_publication(p_world,'COUNTRY_02','OPEN-02-REFINED_FUEL',p_run);
+$$;
 alter function world_v2.read_postwar_industry_water_grant_publication(text,text)owner to world_v2_industry_source_owner;
 revoke all on function world_v2.read_postwar_industry_water_grant_publication(text,text)from public;
 grant execute on function world_v2.read_postwar_industry_water_grant_publication(text,text)to world_v2_industry_source_publisher;
@@ -121,7 +130,7 @@ declare effective name;a world_v2.runtime_opening_admission%rowtype;h world_v2.w
  if effective<>'world_v2_industry_source_publisher'or pg_has_role(session_user,'world_v2_industry_source_owner','MEMBER')or exists(select 1 from pg_roles where rolname=session_user and(rolsuper or rolbypassrls or rolcreaterole or rolcreatedb or rolreplication))then raise exception 'WATER_GRANT_FIXED_PUBLISHER_REQUIRED'using errcode='42501';end if;
  perform set_config('econmind.industry_source_world',p_world,true);
  -- Immutable recovery before any new grant or due calculation.
- if exists(select 1 from world_v2.postwar_industry_water_grant_publication q where q.world_id=p_world and q.run_id=p_run)then return query select * from world_v2.read_postwar_industry_water_grant_publication(p_world,p_run);return;end if;
+ if exists(select 1 from world_v2.postwar_industry_water_grant_publication q join world_v2.command_submission gc on gc.world_id=q.world_id and gc.command_id=q.command_id where q.world_id=p_world and q.run_id=p_run and gc.country_id=p_country and gc.canonical_payload::jsonb->>'facilityId'=p_facility)then return query select * from world_v2.read_postwar_industry_water_grant_publication(p_world,p_country,p_facility,p_run);return;end if;
  if p_country is null or p_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or p_facility is null or p_facility!~'^[A-Za-z][A-Za-z0-9_.:-]{0,127}$'or p_at is null or not isfinite(p_at)or p_sim is null or p_sim!~'^(0|[1-9][0-9]*)$'or p_sim::numeric>=86400000 then raise exception 'WATER_GRANT_EXACT_FIRST_DAY_SCOPE_REQUIRED'using errcode='22023';end if;
  perform world_v2.lock_postwar_source_revocation_fences(p_world);
  perform 1 from world_v2.world_writer_lease l where l.world_id=p_world and l.holder_id=p_worker and l.acquired_at_real<=p_at and l.renewed_at_real<=p_at and l.lease_expires_at_real>p_at for share;
@@ -146,7 +155,7 @@ declare effective name;a world_v2.runtime_opening_admission%rowtype;h world_v2.w
  insert into world_v2.command_submission(world_id,command_id,idempotency_key,command_type,schema_version,canonical_payload,payload_sha256,command_fingerprint,auth_subject,actor_id,country_id,office_id,expected_world_version,sim_time,correlation_id,submitted_at_real)values(p_world,id,id,'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1','command-v1',raw,'sha256:'||world_v2.authoritative_sha256(E'SHA-256\n'||raw),fp,c.auth_subject,c.actor_id,p_country,null,p_version,p_sim::numeric,c.correlation_id,p_at);
  insert into world_v2.command_queue(world_id,command_id,authority_kind,available_at_sim_time)values(p_world,id,'VERSIONED_AUTOMATIC',p_sim::numeric);
  insert into world_v2.postwar_industry_water_grant_publication values(p_world,p_run,c.command_id,id,fp,s.source_ref,a.seed_fingerprint,a.admission_ref);
- return query select * from world_v2.read_postwar_industry_water_grant_publication(p_world,p_run);
+ return query select * from world_v2.read_postwar_industry_water_grant_publication(p_world,p_country,p_facility,p_run);
 end;$$;
 alter function world_v2.publish_postwar_industry_water_grant(text,text,text,text,text,bigint,bigint,timestamptz,text,text)owner to world_v2_industry_source_owner;
 revoke all on function world_v2.publish_postwar_industry_water_grant(text,text,text,text,text,bigint,bigint,timestamptz,text,text)from public;
