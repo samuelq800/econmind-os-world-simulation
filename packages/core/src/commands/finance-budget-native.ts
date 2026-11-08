@@ -35,6 +35,36 @@ import {
   type IndustryOperatingWageSource,
   type IndustryOperatingWageState,
 } from './industry-operating-wage-payment.js';
+import {
+  INDUSTRY_UTILITY_COMMANDS,
+  parseIndustryUtilityIntent,
+  type IndustryUtilitySource,
+} from './industry-utility-execution.js';
+import {
+  createIndustryFirstDayPowerState,
+  extendIndustryFirstDayPowerOriginals,
+  readIndustryFirstDayPowerState,
+  replayIndustryFirstDayPowerFrame,
+  type IndustryFirstDayPowerOriginal,
+  type IndustryFirstDayPowerState,
+} from './industry-first-day-power-execution.js';
+import {
+  createIndustryFirstDayWaterExecutionState,
+  extendIndustryFirstDayWaterExecutionOriginals,
+  readIndustryFirstDayWaterExecutionState,
+  replayIndustryFirstDayWaterExecutionFrame,
+  type IndustryFirstDayWaterReplayOriginal,
+  type IndustryFirstDayWaterExecutionState,
+} from './industry-first-day-water-execution.js';
+import {
+  mergeIndustryInternalLogisticsReplaySources,
+  readIndustryInternalLogisticsReplaySources,
+  readIndustryInternalLogisticsExecutionState,
+  replayIndustryInternalLogisticsFrame,
+  synchronizeIndustryInternalLogisticsExecutionState,
+  type IndustryInternalLogisticsReplaySources,
+  type IndustryInternalLogisticsExecutionState,
+} from '../inventory/industry-internal-logistics-execution.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
   POSTWAR_NARROW_GOODS_TYPES,
@@ -261,6 +291,10 @@ export interface FinanceNativeBudgetMixedPrefixResult {
   readonly captainCountries?: readonly FinanceNativeBudgetMixedCaptainCountry[];
   readonly industryWorkState?: IndustryFirstDayWorkState;
   readonly industryWageState?: Readonly<IndustryOperatingWageState>;
+  readonly industryPowerState?: IndustryFirstDayPowerState;
+  readonly industryWaterState?: IndustryFirstDayWaterExecutionState;
+  /** Scoped private logistics states, never caller-supplied ledger snapshots. */
+  readonly industryLogisticsState?: readonly IndustryInternalLogisticsExecutionState[];
   readonly budgetState: FinanceNativeBudgetState;
   readonly budgetEncumbrances: readonly FinanceNativeBudgetCapacityEncumbrance[];
   readonly socialCountries: readonly FinanceNativeBudgetMixedSocialCountry[];
@@ -661,6 +695,14 @@ interface MixedSocialCountryCursor {
 /** In-process deterministic data only. It is issued by the same existing fold,
  * not reconstructed from a snapshot DTO, a supplied head or a database cache. */
 interface MixedPrefixFoldState {
+  readonly industryPowerState: IndustryFirstDayPowerState | undefined;
+  readonly industryWaterState: IndustryFirstDayWaterExecutionState | undefined;
+  readonly industryWaterOriginals: ReadonlyMap<
+    string,
+    IndustryFirstDayWaterReplayOriginal
+  >;
+  readonly industryLogisticsState: readonly IndustryInternalLogisticsExecutionState[];
+  readonly industryLogisticsSources: readonly IndustryInternalLogisticsReplaySources[];
   readonly industryWorkState: IndustryFirstDayWorkState | undefined;
   readonly industryWageState: Readonly<IndustryOperatingWageState> | undefined;
   readonly industryWageSources: ReadonlyMap<
@@ -903,6 +945,9 @@ export interface FinanceNativeBudgetMixedPrefixInput {
   readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
   readonly industryWorkSources?: readonly IndustryFirstDayWorkSiteSource[];
   readonly industryWageSources?: readonly IndustryOperatingWageSource[];
+  readonly industryPowerOriginals?: readonly IndustryFirstDayPowerOriginal[];
+  readonly industryWaterOriginals?: readonly IndustryFirstDayWaterReplayOriginal[];
+  readonly industryLogisticsSources?: readonly IndustryInternalLogisticsReplaySources[];
   readonly financialReplay?: FinanceNativeBudgetFinancialReplayBase;
   /** Immutable original DATA; no default capital, callback or admission flag. */
   readonly captainCountries?: readonly {
@@ -932,6 +977,9 @@ export function continueFinanceNativeBudgetMixedPrefix(
     readonly captainCountries?: FinanceNativeBudgetMixedPrefixInput['captainCountries'];
     readonly industryWorkSources?: FinanceNativeBudgetMixedPrefixInput['industryWorkSources'];
     readonly industryWageSources?: FinanceNativeBudgetMixedPrefixInput['industryWageSources'];
+    readonly industryPowerOriginals?: FinanceNativeBudgetMixedPrefixInput['industryPowerOriginals'];
+    readonly industryWaterOriginals?: FinanceNativeBudgetMixedPrefixInput['industryWaterOriginals'];
+    readonly industryLogisticsSources?: FinanceNativeBudgetMixedPrefixInput['industryLogisticsSources'];
   },
   sha: Sha256Hex,
 ): FinanceNativeBudgetMixedPrefixEvidence {
@@ -1045,10 +1093,124 @@ export function continueFinanceNativeBudgetMixedPrefix(
     captainEnabled: issued.foldState.captainEnabled || captains.size > 0,
   };
   return foldFinanceNativeBudgetMixedPrefix(
-    { worldId: input.worldId, frames: input.frames, socialCountries: [] },
+    {
+      worldId: input.worldId,
+      frames: input.frames,
+      socialCountries: [],
+      ...(input.industryPowerOriginals === undefined
+        ? {}
+        : { industryPowerOriginals: input.industryPowerOriginals }),
+      ...(input.industryWaterOriginals === undefined
+        ? {}
+        : { industryWaterOriginals: input.industryWaterOriginals }),
+      ...(input.industryLogisticsSources === undefined
+        ? {}
+        : { industryLogisticsSources: input.industryLogisticsSources }),
+    },
     sha,
     prior,
   );
+}
+function utilityOriginalKey(source: IndustryUtilitySource): string {
+  return canonicalSerialize([
+    source.worldId,
+    source.countryId,
+    source.facilityId,
+    source.runId,
+    source.sourceRef,
+  ]);
+}
+function requireUtilityOpening(
+  source: IndustryUtilitySource,
+  worldId: string,
+  financialReplay: MixedFinancialReplayData | undefined,
+): void {
+  if (
+    !financialReplay?.inventory ||
+    !financialReplay.seedFingerprint ||
+    source.worldId !== worldId ||
+    source.seedFingerprint !== financialReplay.seedFingerprint
+  )
+    invalid('UTILITY_EXACT_GENUINE_PAIRED_H0_SOURCE_REQUIRED');
+}
+/** One derived consistency check over actual private work records. It creates
+ * no people/work ledger. Logistics service time and canonical Industry WORK
+ * must not spend the same regional population ordinals twice, in either order.
+ * Sweep range boundaries rather than enumerate potentially billions of people. */
+function assertUtilityWorkerTimeConserved(
+  work: IndustryFirstDayWorkState | undefined,
+  logistics: readonly IndustryInternalLogisticsExecutionState[],
+): void {
+  const service = logistics.flatMap((state) =>
+    readIndustryInternalLogisticsExecutionState(state).transfers.flatMap(
+      (transfer) => transfer.work?.allocations ?? [],
+    ),
+  );
+  if (!service.length) return;
+  if (!work) invalid('ACTUAL_UTILITY_WORKER_ORIGINALS_REQUIRED');
+  type Range = {
+    readonly ordinal: bigint;
+    readonly from: bigint;
+    readonly until: bigint;
+    readonly duration: bigint;
+  };
+  type Boundary = {
+    readonly at: bigint;
+    readonly add: boolean;
+    readonly row: Range;
+  };
+  const regions = new Map<string, Boundary[]>();
+  for (const allocation of [
+    ...readIndustryFirstDayWorkState(work).bookings,
+    ...service,
+  ]) {
+    const start = BigInt(allocation.startOrdinal),
+      count = BigInt(allocation.count),
+      from = BigInt(allocation.startsAtSimTime),
+      until = BigInt(allocation.endsAtSimTime);
+    if (count <= 0n || until <= from)
+      invalid('ACTUAL_UTILITY_WORKER_RANGE_REQUIRED');
+    const row = { ordinal: start, from, until, duration: until - from },
+      boundaries = regions.get(allocation.regionId) ?? [];
+    boundaries.push(
+      { at: start, add: true, row },
+      { at: start + count, add: false, row },
+    );
+    regions.set(allocation.regionId, boundaries);
+  }
+  for (const boundaries of regions.values()) {
+    boundaries.sort((a, b) =>
+      a.at < b.at ? -1 : a.at > b.at ? 1 : Number(a.add) - Number(b.add),
+    );
+    const active: Range[] = [];
+    let total = 0n;
+    for (const boundary of boundaries) {
+      const row = boundary.row;
+      if (!boundary.add) {
+        const index = active.indexOf(row);
+        if (index < 0) invalid('ACTUAL_UTILITY_WORKER_RANGE_REQUIRED');
+        active.splice(index, 1);
+        total -= row.duration;
+        continue;
+      }
+      let lo = 0,
+        hi = active.length;
+      while (lo < hi) {
+        const mid = (lo + hi) >>> 1;
+        if (active[mid]!.from < row.from) lo = mid + 1;
+        else hi = mid;
+      }
+      if (
+        (lo > 0 && active[lo - 1]!.until > row.from) ||
+        (lo < active.length && active[lo]!.from < row.until)
+      )
+        invalid('ACTUAL_UTILITY_WORKER_TIME_OVERLAP');
+      total += row.duration;
+      if (total > 28800000n)
+        invalid('ACTUAL_UTILITY_WORKER_480_MINUTES_EXCEEDED');
+      active.splice(lo, 0, row);
+    }
+  }
 }
 function foldFinanceNativeBudgetMixedPrefix(
   input: FinanceNativeBudgetMixedPrefixInput,
@@ -1069,7 +1231,10 @@ function foldFinanceNativeBudgetMixedPrefix(
     invalid('BOUNDED_COMPLETE_FINANCIAL_PREFIX_REQUIRED');
   if (
     (input.industryWorkSources?.length ?? 0) > 2048 ||
-    (input.industryWageSources?.length ?? 0) > 4096
+    (input.industryWageSources?.length ?? 0) > 4096 ||
+    (input.industryPowerOriginals?.length ?? 0) > 4096 ||
+    (input.industryWaterOriginals?.length ?? 0) > 4096 ||
+    (input.industryLogisticsSources?.length ?? 0) > 2048
   )
     invalid('BOUNDED_INDUSTRY_ORIGINALS_REQUIRED');
   let industryWorkState =
@@ -1105,6 +1270,77 @@ function foldFinanceNativeBudgetMixedPrefix(
       financial: financialReplay.financial,
       seedFingerprint: financialReplay.seedFingerprint,
     });
+  let industryPowerState = prior?.industryPowerState;
+  if (input.industryPowerOriginals?.length) {
+    for (const original of input.industryPowerOriginals)
+      requireUtilityOpening(original.source, input.worldId, financialReplay);
+    industryPowerState = industryPowerState
+      ? extendIndustryFirstDayPowerOriginals(
+          industryPowerState,
+          input.industryPowerOriginals,
+          sha,
+        )
+      : createIndustryFirstDayPowerState(input.industryPowerOriginals, sha);
+  }
+  if (industryPowerState) {
+    const state = readIndustryFirstDayPowerState(industryPowerState, sha);
+    if (
+      state.worldId !== input.worldId ||
+      state.seedFingerprint !== financialReplay?.seedFingerprint
+    )
+      invalid('UTILITY_EXACT_GENUINE_PAIRED_H0_SOURCE_REQUIRED');
+  }
+  let industryWaterState = prior?.industryWaterState;
+  const industryWaterOriginals = new Map(prior?.industryWaterOriginals);
+  if (input.industryWaterOriginals?.length) {
+    for (const original of input.industryWaterOriginals)
+      requireUtilityOpening(original.source, input.worldId, financialReplay);
+    if (!industryWaterState) {
+      const first = input.industryWaterOriginals.find(
+        (o) => o.scenario !== undefined,
+      );
+      if (!first?.scenario)
+        invalid('ACTUAL_UTILITY_WATER_H0_SCENARIO_REQUIRED');
+      industryWaterState = createIndustryFirstDayWaterExecutionState(
+        { scenario: first.scenario, source: first.source },
+        sha,
+      );
+    }
+    industryWaterState = extendIndustryFirstDayWaterExecutionOriginals(
+      { state: industryWaterState, originals: input.industryWaterOriginals },
+      sha,
+    );
+    for (const original of input.industryWaterOriginals)
+      industryWaterOriginals.set(utilityOriginalKey(original.source), original);
+  }
+  if (industryWaterState) {
+    const state = readIndustryFirstDayWaterExecutionState(
+      industryWaterState,
+      sha,
+    );
+    if (
+      state.worldId !== input.worldId ||
+      state.seedFingerprint !== financialReplay?.seedFingerprint
+    )
+      invalid('UTILITY_EXACT_GENUINE_PAIRED_H0_SOURCE_REQUIRED');
+  }
+  const industryLogisticsSources = mergeIndustryInternalLogisticsReplaySources(
+    prior?.industryLogisticsSources ?? [],
+    input.industryLogisticsSources ?? [],
+    sha,
+  );
+  for (const original of industryLogisticsSources) {
+    const row = readIndustryInternalLogisticsReplaySources(original);
+    if (
+      row.worldId !== input.worldId ||
+      row.seedFingerprint !== financialReplay?.seedFingerprint ||
+      !financialReplay?.inventory
+    )
+      invalid('UTILITY_EXACT_GENUINE_PAIRED_H0_SOURCE_REQUIRED');
+    for (const source of row.utilitySources)
+      requireUtilityOpening(source, input.worldId, financialReplay);
+  }
+  let industryLogisticsState = [...(prior?.industryLogisticsState ?? [])];
   // The opening reservation is an account aggregate. Only actually paid,
   // genuinely replayed wage releases reduce that exact immutable reference.
   // Recompute from the original amount on each frame; never release a carry.
@@ -1156,6 +1392,37 @@ function foldFinanceNativeBudgetMixedPrefix(
     prior?.captains,
   );
   const originalReferences = new Map(prior?.originalReferences);
+  const retainUtilityOriginal = (
+    kind: string,
+    source: IndustryUtilitySource,
+  ) => {
+    const key = kind + ':' + utilityOriginalKey(source),
+      { originals, ...base } = source;
+    const retain = (reference: string, value: unknown) => {
+      const digest = hash(value, sha),
+        old = originalReferences.get(reference);
+      if (old !== undefined && old !== digest)
+        invalid('CONTINUATION_IMMUTABLE_UTILITY_ORIGINAL_CHANGED');
+      originalReferences.set(reference, digest);
+    };
+    retain(key, base);
+    if (!Array.isArray(originals) || !originals.length || originals.length > 64)
+      invalid('BOUNDED_UTILITY_SOURCE_ORIGINALS_REQUIRED');
+    for (const row of originals)
+      retain(key + ':' + row.kind + ':' + row.reference, row);
+  };
+  if (industryPowerState)
+    for (const original of readIndustryFirstDayPowerState(
+      industryPowerState,
+      sha,
+    ).originals)
+      retainUtilityOriginal('POWER', original.source);
+  for (const original of industryWaterOriginals.values())
+    retainUtilityOriginal('WATER', original.source);
+  for (const token of industryLogisticsSources)
+    for (const original of readIndustryInternalLogisticsReplaySources(token)
+      .utilitySources)
+      retainUtilityOriginal('LOGISTICS', original);
   if (!prior) {
     for (const value of input.industryWorkSources ?? [])
       originalReferences.set(
@@ -1273,7 +1540,12 @@ function foldFinanceNativeBudgetMixedPrefix(
     if (
       (frame.inventoryPostings.length !== 0 &&
         !(
-          inventory && POSTWAR_NARROW_GOODS_TYPES.includes(command.commandType)
+          inventory &&
+          (POSTWAR_NARROW_GOODS_TYPES.includes(command.commandType) ||
+            (command.commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS &&
+              industryLogisticsSources.length > 0 &&
+              financial &&
+              industryWorkState))
         )) ||
       (frame.financialPostingBatches.length !== 0 &&
         !(
@@ -1283,6 +1555,10 @@ function foldFinanceNativeBudgetMixedPrefix(
             (command.commandType === INDUSTRY_OPERATING_WAGE_COMMAND &&
               industryWorkState !== undefined &&
               industryWageState !== undefined) ||
+            (command.commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS &&
+              industryLogisticsSources.length > 0 &&
+              inventory &&
+              industryWorkState) ||
             (inventory && command.commandType === 'CORE_GOODS_DELIVERY_V1') ||
             (command.commandType === BENEFICIAL_HOUSING_RENT_COMMAND &&
               rentOrigins !== undefined))
@@ -1330,7 +1606,138 @@ function foldFinanceNativeBudgetMixedPrefix(
         invalid('COMPLETE_UNIQUE_MIXED_EVENT_SEQUENCE_REQUIRED');
       eventIds.add(event.eventId);
     }
-    if (
+    if (command.commandType === INDUSTRY_UTILITY_COMMANDS.POWER) {
+      if (
+        !industryPowerState ||
+        !financial ||
+        !inventory ||
+        !industryWorkState ||
+        !industryWageState
+      )
+        invalid('ACTUAL_UTILITY_POWER_SOURCE_WORK_AND_FINANCIAL_REQUIRED');
+      industryPowerState = replayIndustryFirstDayPowerFrame(
+        {
+          state: industryPowerState,
+          frame,
+          financial,
+          industryWorkState,
+          industryWageState,
+        },
+        sha,
+      );
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events.at(-1)!.sequence,
+      });
+    } else if (command.commandType === INDUSTRY_UTILITY_COMMANDS.WATER) {
+      if (!industryWaterState || !financial || !inventory)
+        invalid('ACTUAL_UTILITY_WATER_SOURCE_AND_PAIRED_LEDGERS_REQUIRED');
+      const intent = parseIndustryUtilityIntent(command, sha),
+        matches = [...industryWaterOriginals.values()].filter(
+          (original) =>
+            original.source.worldId === command.worldId &&
+            original.source.countryId === command.countryId &&
+            original.source.facilityId === intent.facilityId &&
+            original.source.runId === intent.runId &&
+            original.source.sourceRef === intent.sourceRef &&
+            original.source.sourceRawSha256 === intent.sourceRawSha256,
+        );
+      if (matches.length !== 1)
+        invalid('EXACT_INSTALLED_UTILITY_WATER_ORIGINAL_REQUIRED');
+      const reduced = replayIndustryFirstDayWaterExecutionFrame(
+        {
+          state: industryWaterState,
+          frame,
+          sourceInputs: matches[0]!,
+          prior: {
+            head: {
+              worldVersion: budget.worldVersion,
+              eventSequence: budget.eventSequence,
+            },
+            financial,
+            inventory,
+            ...(industryWorkState === undefined ? {} : { industryWorkState }),
+            ...(industryWageState === undefined ? {} : { industryWageState }),
+            ...(industryPowerState === undefined ? {} : { industryPowerState }),
+          },
+        },
+        sha,
+      );
+      if (reduced.financial !== financial || reduced.inventory !== inventory)
+        invalid('WATER_REPLAY_CANNOT_INVENT_UNPOSTED_LEDGER_EFFECTS');
+      industryWaterState = reduced.state;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events.at(-1)!.sequence,
+      });
+    } else if (command.commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS) {
+      if (!financial || !inventory || !industryWorkState)
+        invalid(
+          'ACTUAL_UTILITY_LOGISTICS_SOURCE_WORK_AND_PAIRED_LEDGERS_REQUIRED',
+        );
+      const intent = parseIndustryUtilityIntent(command, sha),
+        matches = industryLogisticsSources.filter((token) => {
+          const source = readIndustryInternalLogisticsReplaySources(token);
+          return (
+            source.worldId === command.worldId &&
+            source.countryId === command.countryId &&
+            source.facilityId === intent.facilityId &&
+            source.utilitySources.some(
+              (row) =>
+                row.runId === intent.runId &&
+                row.sourceRef === intent.sourceRef &&
+                row.sourceRawSha256 === intent.sourceRawSha256,
+            )
+          );
+        });
+      if (matches.length !== 1)
+        invalid('EXACT_INSTALLED_UTILITY_LOGISTICS_ORIGINAL_REQUIRED');
+      const states = industryLogisticsState.filter((state) => {
+        const source =
+          readIndustryInternalLogisticsExecutionState(state).source;
+        return (
+          source.worldId === command.worldId &&
+          source.countryId === command.countryId &&
+          source.facilityId === intent.facilityId
+        );
+      });
+      if (states.length > 1)
+        invalid('UNIQUE_UTILITY_LOGISTICS_PRIVATE_STATE_REQUIRED');
+      const reduced = replayIndustryInternalLogisticsFrame(
+        {
+          ...(states[0] === undefined ? {} : { state: states[0] }),
+          sourceInputs: matches[0]!,
+          context: {
+            head: {
+              worldId: input.worldId,
+              worldVersion: budget.worldVersion,
+              eventSequence: budget.eventSequence,
+            },
+            financial,
+            inventory,
+            industryWorkState,
+            ...(industryWageState === undefined ? {} : { industryWageState }),
+          },
+          frame,
+        },
+        sha,
+      );
+      if (reduced.execution !== null)
+        invalid('UTILITY_REPLAY_MUST_NOT_MINT_DELIVERY_BEFORE_COMPLETE_PREFIX');
+      industryLogisticsState = [
+        ...industryLogisticsState.filter((state) => state !== states[0]),
+        reduced.state,
+      ];
+      financial = reduced.financial;
+      inventory = reduced.inventory;
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: frame.events.at(-1)!.sequence,
+      });
+    } else if (
       command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
       command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND
     ) {
@@ -1807,6 +2214,30 @@ function foldFinanceNativeBudgetMixedPrefix(
       );
     if (financial)
       financial = financialAtVersion(financial, transition.worldVersionAfter);
+    if (industryLogisticsState.length) {
+      if (!financial || !inventory || !industryWorkState)
+        invalid(
+          'ACTUAL_UTILITY_LOGISTICS_CONTEXT_REQUIRED_AFTER_COMPLETE_SIBLING',
+        );
+      industryLogisticsState = industryLogisticsState.map((state) =>
+        synchronizeIndustryInternalLogisticsExecutionState(
+          state,
+          {
+            head: {
+              worldId: input.worldId,
+              worldVersion: budget.worldVersion,
+              eventSequence: budget.eventSequence,
+            },
+            financial: financial!,
+            inventory: inventory!,
+            industryWorkState: industryWorkState!,
+            ...(industryWageState === undefined ? {} : { industryWageState }),
+          },
+          sha,
+        ),
+      );
+    }
+    assertUtilityWorkerTimeConserved(industryWorkState, industryLogisticsState);
     // Domain synchronization follows actual full sibling reduction only. It
     // cannot establish a no-effect classification or omit a financial batch.
     if (financial && rentOrigins !== undefined)
@@ -1910,6 +2341,11 @@ function foldFinanceNativeBudgetMixedPrefix(
         });
     }
   const result = freeze({
+    ...(industryPowerState === undefined ? {} : { industryPowerState }),
+    ...(industryWaterState === undefined ? {} : { industryWaterState }),
+    ...(industryLogisticsSources.length === 0
+      ? {}
+      : { industryLogisticsState }),
     ...(industryWorkState === undefined ? {} : { industryWorkState }),
     ...(industryWageState === undefined ? {} : { industryWageState }),
     ...(inventory === undefined
@@ -1960,6 +2396,11 @@ function foldFinanceNativeBudgetMixedPrefix(
       : { completeFrames: true as const }),
     ...(financialReplay ? { financialBase: financialReplay.financial } : {}),
     foldState: {
+      industryPowerState,
+      industryWaterState,
+      industryWaterOriginals,
+      industryLogisticsState,
+      industryLogisticsSources,
       industryWorkState,
       industryWageState,
       industryWageSources,

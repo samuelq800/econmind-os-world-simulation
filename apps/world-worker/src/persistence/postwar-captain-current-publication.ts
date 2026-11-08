@@ -8,6 +8,8 @@ import {
 } from '@econmind/core';
 import {
   parsePostwarCaptainPoliticalCapitalRow,
+  parsePostwarCaptainCurrentCoverage,
+  POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
   type PostwarCaptainPoliticalCapitalRow,
 } from '@econmind/core/postwar-captain-current-contract';
 import {
@@ -21,6 +23,59 @@ import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import { derivePostwarMixedFinancialCurrentFrom } from './postwar-mixed-financial-current-publication.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
+/** Fixed H0-only publication from already registered actual genesis. This is
+ * not source issuance/admission and accepts no capital rows or ready flag. */
+export function createPostwarCaptainOpeningCurrentPublisher(input: {
+  readonly worldId: string;
+  readonly publicationDatabase: SqlDatabase;
+}) {
+  if (!/^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$/u.test(input.worldId))
+    throw Error('CAPTAIN_H0_FIXED_WORLD_REQUIRED');
+  return Object.freeze({
+    publishCountry(countryId: string) {
+      if (!/^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(countryId))
+        throw Error('CAPTAIN_H0_EXACT_COUNTRY_REQUIRED');
+      return input.publicationDatabase.transaction(async (tx) => {
+        await tx.query('set transaction isolation level repeatable read');
+        const result = await tx.query<{
+          document_ref: string;
+          country_id: string;
+          source_version: string;
+          coverage: unknown;
+          rows_text: string;
+        }>('select * from world_v2.publish_postwar_captain_h0_current($1,$2)', [
+          input.worldId,
+          countryId,
+        ]);
+        const row = result.rows[0];
+        if (result.rows.length !== 1 || !row || row.country_id !== countryId)
+          throw Error('CAPTAIN_H0_EXACT_PUBLICATION_REQUIRED');
+        const coverage = parsePostwarCaptainCurrentCoverage(row.coverage);
+        const raw: unknown = JSON.parse(row.rows_text);
+        if (
+          coverage.schemaVersion !== POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA ||
+          coverage.countryId !== countryId ||
+          !Array.isArray(raw) ||
+          raw.length !== 7
+        )
+          throw Error('CAPTAIN_H0_EXACT_GENESIS_ROWS_REQUIRED');
+        const rows = raw.map(parsePostwarCaptainPoliticalCapitalRow);
+        if (
+          rows.some((r) => r.countryId !== countryId) ||
+          new Set(rows.map((r) => r.bucket)).size !== 7
+        )
+          throw Error('CAPTAIN_H0_SEVEN_DISTINCT_ACTUAL_BUCKETS_REQUIRED');
+        return Object.freeze({
+          documentRef: row.document_ref,
+          sourceVersion: row.source_version,
+          head: Object.freeze({ worldVersion: '0', eventSequence: '0' }),
+          coverage,
+          rows: Object.freeze(rows),
+        });
+      });
+    },
+  });
+}
 export function derivePostwarCaptainCurrentFrom(
   tx: SqlExecutor,
   token: PostwarMixedCurrentProjectionSnapshot,

@@ -3,6 +3,8 @@
 import { createHash } from 'node:crypto';
 import {
   POSTWAR_CAPTAIN_CURRENT_NATURE,
+  POSTWAR_CAPTAIN_OPENING_NATURE,
+  POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
   parsePostwarCaptainCurrentCoverage,
   parsePostwarCaptainPoliticalCapitalRow,
   type PostwarCaptainCurrentCoverage,
@@ -13,7 +15,9 @@ import type { PostwarOfficeProjectionScope } from './postwar-office-projection-s
 export const POSTWAR_CAPTAIN_CURRENT_PAGE_QUERY =
   'select * from world_v2.read_postwar_captain_current_page($1,$2,$3,$4)';
 export interface PostwarCaptainCurrentSource {
-  readonly dataNature: typeof POSTWAR_CAPTAIN_CURRENT_NATURE;
+  readonly dataNature:
+    | typeof POSTWAR_CAPTAIN_CURRENT_NATURE
+    | typeof POSTWAR_CAPTAIN_OPENING_NATURE;
   readonly sourceVersion: string;
   readonly sourceRevision: string;
   readonly seedId: string;
@@ -180,7 +184,10 @@ export function createPostwarCaptainCurrentProjectionStore(config: {
       )
         invalid('ACTUAL_SCOPE_MISMATCH');
       if (
-        source.dataNature !== POSTWAR_CAPTAIN_CURRENT_NATURE ||
+        source.dataNature !==
+          (coverage.schemaVersion === POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA
+            ? POSTWAR_CAPTAIN_OPENING_NATURE
+            : POSTWAR_CAPTAIN_CURRENT_NATURE) ||
         source.worldVersion !== coverage.globalWorldVersion ||
         source.eventSequence !== coverage.globalEventSequence ||
         observed.worldVersion !== source.worldVersion ||

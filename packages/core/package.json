@@ -107,6 +107,22 @@
     "./industry-paid-work-production": {
       "types": "./dist/commands/industry-paid-work-production.d.ts",
       "default": "./dist/commands/industry-paid-work-production.js"
+    },
+    "./industry-utility-execution": {
+      "types": "./dist/commands/industry-utility-execution.d.ts",
+      "default": "./dist/commands/industry-utility-execution.js"
+    },
+    "./industry-first-day-power-execution": {
+      "types": "./dist/commands/industry-first-day-power-execution.d.ts",
+      "default": "./dist/commands/industry-first-day-power-execution.js"
+    },
+    "./industry-first-day-water-execution": {
+      "types": "./dist/commands/industry-first-day-water-execution.d.ts",
+      "default": "./dist/commands/industry-first-day-water-execution.js"
+    },
+    "./industry-internal-logistics-execution": {
+      "types": "./dist/inventory/industry-internal-logistics-execution.d.ts",
+      "default": "./dist/inventory/industry-internal-logistics-execution.js"
     }
   },
   "scripts": {

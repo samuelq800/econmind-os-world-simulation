@@ -4,6 +4,10 @@
 import { DomainError, DOMAIN_ERROR_CODES } from '../errors.js';
 import { worldId } from '../ids.js';
 import {
+  readIndustryFirstDayWaterExecution,
+  type IndustryFirstDayWaterExecution,
+} from '../commands/industry-first-day-water-execution.js';
+import {
   canonicalSha256,
   validateCanonicalCommand,
   type CanonicalCommand,
@@ -67,6 +71,11 @@ export interface ProductionWaterAccount {
   readonly delivered: WaterVolume;
   readonly consumed: WaterVolume;
   readonly available: WaterVolume;
+  /** Present only for the fixed first-day actual-delivery constructor. */
+  readonly targetRunId?: string;
+  readonly facilityRef?: string;
+  readonly sourceRecipeRef?: string;
+  readonly expiresAtTicks?: string;
 }
 export interface ProductionWaterUse {
   readonly commandId: string;
@@ -218,6 +227,34 @@ export function createProductionWaterConsumptionState(
   states.add(state);
   return state;
 }
+/** Accepts only a privately confirmed COMMITTED water delivery in a genuine
+ * complete prefix. Scenario calculations and prepared drafts cannot enter. */
+export function createProductionWaterConsumptionStateFromIndustryWaterExecution(
+  input: { readonly execution: IndustryFirstDayWaterExecution },
+  sha: Sha256Hex,
+): Readonly<ProductionWaterConsumptionState> {
+  const delivery = readIndustryFirstDayWaterExecution(input.execution, sha);
+  const state = freeze({
+    schemaVersion: PRODUCTION_WATER_STATE_SCHEMA,
+    worldId: delivery.worldId,
+    materializationKey:
+      'PRODUCTION_WATER_' +
+      hash(
+        {
+          worldId: delivery.worldId,
+          eventFingerprint: delivery.frame.events[0]!.fingerprint,
+        },
+        sha,
+      )
+        .slice(7)
+        .toUpperCase(),
+    allocationSourceHash: delivery.allocationSourceHash,
+    accounts: delivery.accounts,
+    uses: [],
+  });
+  states.add(state);
+  return state;
+}
 function payload(
   input: {
     command: CanonicalCommand;
@@ -306,6 +343,12 @@ export function prepareProductionWaterConsumption(
     account.countryRef !== command.countryId ||
     account.regionRef !== recipe.regionRef ||
     account.holderRef !== op.operatorId ||
+    (account.targetRunId !== undefined &&
+      account.targetRunId !== input.evidence.runId) ||
+    (account.facilityRef !== undefined &&
+      account.facilityRef !== recipe.facilityRef) ||
+    (account.sourceRecipeRef !== undefined &&
+      account.sourceRecipeRef !== recipe.sourceRecipeRef) ||
     !['FOOD_AGRICULTURE', 'OTHER_INDUSTRY'].includes(account.purpose)
   )
     invalid(
@@ -313,6 +356,11 @@ export function prepareProductionWaterConsumption(
     );
   if (BigInt(account.untilTicks) > command.simTime.ticks)
     invalid('future water is not delivered');
+  if (
+    account.expiresAtTicks !== undefined &&
+    command.simTime.ticks >= BigInt(account.expiresAtTicks)
+  )
+    invalid('first-day delivered-water usage period expired');
   const consumed = scaleWater(
     rate,
     waterScalarFromDecimal(production.result.actualOutput.amount),

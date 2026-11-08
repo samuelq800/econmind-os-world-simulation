@@ -11,6 +11,8 @@ import {
 } from '@econmind/core/postwar-industry-labour-current-contract';
 import {
   POSTWAR_CAPTAIN_CURRENT_NATURE,
+  POSTWAR_CAPTAIN_OPENING_NATURE,
+  POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
   POSTWAR_CAPTAIN_CURRENT_DATASET,
   POSTWAR_CAPTAIN_CURRENT_BUCKETS,
   parsePostwarCaptainCurrentCoverage,
@@ -457,11 +459,14 @@ export function createPostwarRuntimeClient(
             'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
             source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE);
         const currentCaptain =
-          source.dataNature === POSTWAR_CAPTAIN_CURRENT_NATURE &&
           c.identity.officeId === 'CAPTAIN' &&
           dataset === POSTWAR_CAPTAIN_CURRENT_DATASET &&
-          source.worldVersion !== '0' &&
-          source.eventSequence !== '0';
+          ((source.dataNature === POSTWAR_CAPTAIN_CURRENT_NATURE &&
+            source.worldVersion !== '0' &&
+            source.eventSequence !== '0') ||
+            (source.dataNature === POSTWAR_CAPTAIN_OPENING_NATURE &&
+              source.worldVersion === '0' &&
+              source.eventSequence === '0'));
         if (dataset === POSTWAR_CAPTAIN_CURRENT_DATASET && !currentCaptain)
           throw Error('CURRENT_STATE_BINDING_MISMATCH');
         if (currentCaptain) {
@@ -469,6 +474,9 @@ export function createPostwarRuntimeClient(
             source.currentCaptainCoverage,
           );
           if (
+            (source.dataNature === POSTWAR_CAPTAIN_OPENING_NATURE) !==
+              (coverage.schemaVersion ===
+                POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA) ||
             !observedHeadMatches(source, authority) ||
             coverage.countryId !== c.identity.countryId ||
             coverage.globalWorldVersion !== authority.readback.worldVersion ||
