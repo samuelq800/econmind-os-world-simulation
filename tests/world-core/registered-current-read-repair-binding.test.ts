@@ -1,9 +1,11 @@
 /** Metadata transport protocol only; no actual PostgreSQL or source proof. */
 import { describe, it, expect, vi } from 'vitest';
 import type { Pool } from 'pg';
+import { REGISTERED_FINAL_NATIVE_SQL_ORDER } from '../../tools/office-connection/registered-final-native-sql.mjs';
 import {
   verifyRegisteredCurrentReadRepairFunctionsFrom,
   loadRegisteredCurrentReadRepairCheckpoint,
+  assertRegisteredReadRepairReceiptCoverage,
 } from '../support/registered-current-read-repair-checkpoint.js';
 const adaptations = Array.from({ length: 13 }, (_, i) => ({
   signature: 'world_v2.fixture_' + i + '(text)',
@@ -47,6 +49,41 @@ const pool = (result: ReturnType<typeof rows>) =>
     'query'
   >;
 describe('exact repaired function transport contract', () => {
+  it('binds the actual 76-proposal union separately from the 60 later runtime receipts and 74 canonical loader entries', () => {
+    const planNames = [...REGISTERED_FINAL_NATIVE_SQL_ORDER];
+    const installed = Object.fromEntries(
+      [
+        ...planNames,
+        'current-authorization-writer-preparation',
+        'postwar-runtime-source-read-policy',
+      ].map((name) => [name, 'a'.repeat(64)]),
+    );
+    const input = {
+      installed,
+      planNames,
+      runtimeReceiptNames: planNames.slice(0, 60),
+    };
+    expect(assertRegisteredReadRepairReceiptCoverage(input)).toHaveLength(76);
+    expect(() =>
+      assertRegisteredReadRepairReceiptCoverage({
+        ...input,
+        installed: { ...installed, UNKNOWN_DDL: 'b'.repeat(64) },
+      }),
+    ).toThrow();
+    expect(() =>
+      assertRegisteredReadRepairReceiptCoverage({
+        ...input,
+        planNames: planNames.slice(0, 60),
+      }),
+    ).toThrow();
+    expect(() =>
+      assertRegisteredReadRepairReceiptCoverage({
+        ...input,
+        runtimeReceiptNames: planNames.slice(0, 59),
+      }),
+    ).toThrow();
+  });
+
   it('requires all 13 concrete signatures and body hashes rather than an installation flag', async () => {
     await expect(
       verifyRegisteredCurrentReadRepairFunctionsFrom(pool(rows()), repair),

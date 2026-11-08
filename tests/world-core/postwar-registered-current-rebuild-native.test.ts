@@ -212,21 +212,106 @@ native(
             typeof invSource.bindingVersion === 'string',
           'ACTUAL_CURRENT_PAGINATION_REQUIRED',
         );
-        const inventorySecond = await d.post(
-          '/v1/postwar-office-runtime',
-          readBody(
-            'TRADE',
-            'inventory-current',
-            1,
-            invSource.sourceVersion,
-            invSource.bindingVersion,
+        const inventoryPages = [inventory];
+        let nextOffset: unknown = page.nextOffset;
+        while (nextOffset !== null) {
+          must(
+            Number.isSafeInteger(nextOffset) &&
+              Number(nextOffset) > 0 &&
+              inventoryPages.length < 10,
+            'FINITE_TEN_ROW_PAGINATION_REQUIRED',
+          );
+          const next = await d.post(
+            '/v1/postwar-office-runtime',
+            readBody(
+              'TRADE',
+              'inventory-current',
+              Number(nextOffset),
+              invSource.sourceVersion,
+              invSource.bindingVersion,
+            ),
+            'COUNTRY_02',
+          );
+          const source = validate(next);
+          must(
+            source.sourceVersion === invSource.sourceVersion &&
+              source.bindingVersion === invSource.bindingVersion,
+            'SAME_PINNED_CURRENT_PAGE_SERIES_REQUIRED',
+          );
+          (next.body.rows as unknown[]).forEach(parsePostwarTradeInventoryRow);
+          inventoryPages.push(next);
+          nextOffset = record(next.body.page).nextOffset;
+        }
+        const inventoryRows = inventoryPages.flatMap(
+          (response) => response.body.rows as unknown[],
+        );
+        must(
+          inventoryRows.length === 10,
+          'ALL_TEN_ACTUAL_CURRENT_INVENTORY_ROWS_REQUIRED',
+        );
+        const expectedRows = await f.clone.installer.query<{
+          document_ref: string;
+          rows_text: string;
+        }>(
+          `select d.document_ref,p.rows_text from world_v2.postwar_office_projection_document d join world_v2.postwar_office_projection_page p using(document_ref)
+           where d.world_id=$1 and d.country_id='COUNTRY_02'and d.office_id='TRADE'and d.dataset='opening-inventory-entries-complete-v2'order by p.page_index`,
+          [f.marker.worldId],
+        );
+        must(
+          expectedRows.rows.length > 0,
+          'ACTUAL_REPAIRED_IMMUTABLE_INVENTORY_REQUIRED',
+        );
+        const openingRows = expectedRows.rows.flatMap((row) => {
+          must(
+            row.document_ref ===
+              record(invSource.sourcePointer).openingDocumentRef,
+            'CURRENT_HTTP_SOURCE_MUST_BIND_REPAIRED_OPENING_DOCUMENT',
+          );
+          const values: unknown = JSON.parse(row.rows_text);
+          must(Array.isArray(values), 'ACTUAL_OPENING_ROW_ARRAY_REQUIRED');
+          return values.map(record);
+        });
+        must(
+          openingRows.length === 10,
+          'EXACT_TEN_REPAIRED_OPENING_ENTRIES_REQUIRED',
+        );
+        for (const entry of openingRows) {
+          const account = { ...record(entry.account) };
+          delete account.worldId;
+          const expected = {
+            ...account,
+            schemaVersion: 'postwar-trade-current-inventory-row-v1',
+            quantity: record(entry.quantity).amount,
+          };
+          must(
+            inventoryRows.filter((row) => isDeepStrictEqual(row, expected))
+              .length === 1,
+            'ACTUAL_HTTP_INVENTORY_MUST_EQUAL_IMMUTABLE_ADMITTED_QUANTITY',
+          );
+        }
+        const supplements = openingRows.filter((entry) =>
+          [
+            'POSTWAR_STUDENT_DAY_MATERIAL_V1',
+            'POSTWAR_CLINICAL_MEDICINE_V1',
+          ].includes(String(record(entry.account).commodityId)),
+        );
+        must(
+          supplements.length === 2 &&
+            supplements.every(
+              (entry) =>
+                typeof entry.sourceId === 'string' &&
+                entry.sourceId.startsWith('POSTWAR_SUPPLY_SOURCE_'),
+            ),
+          'TWO_ACTUAL_SUPPLEMENTAL_SOURCE_ROWS_REQUIRED',
+        );
+        report.supplementalHttpRows = supplements.map((entry) => ({
+          sourceId: entry.sourceId,
+          account: entry.account,
+          quantity: entry.quantity,
+          actualHttpRow: inventoryRows.find(
+            (row) => record(row).batchId === record(entry.account).batchId,
           ),
-          'COUNTRY_02',
-        );
-        validate(inventorySecond);
-        (inventorySecond.body.rows as unknown[]).forEach(
-          parsePostwarTradeInventoryRow,
-        );
+        }));
         const transfers = await d.post(
           '/v1/postwar-office-runtime',
           readBody('TRADE', 'goods-transfers-current'),
@@ -270,7 +355,7 @@ native(
             instruments.originEventSequence === '0',
           'ACTUAL_H0_CB_DECLARATIONS_MUST_REMAIN_EXPLICIT_AT_H3',
         );
-        report.httpPages = { inventory, inventorySecond, transfers, cb };
+        report.httpPages = { inventoryPages, transfers, cb };
         await phase('ACTUAL_TRADE_AND_CB_TCP_PAGES', 'END');
         const denied = await fetch(d.origin() + '/v1/postwar-office-runtime', {
           method: 'POST',

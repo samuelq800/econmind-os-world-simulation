@@ -21,6 +21,7 @@ import {
 } from './registered-utility-h2-checkpoint.js';
 import {
   loadRegisteredCurrentReadRepairCheckpoint,
+  assertRegisteredReadRepairReceiptCoverage,
   verifyRegisteredCurrentReadRepairFunctionsFrom,
 } from './registered-current-read-repair-checkpoint.js';
 const exec = promisify(execFile);
@@ -158,13 +159,26 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     installed[d.name] = d.sha256;
   }
   if (readRepair) {
-    const originalEntries = input.sqlPlan.entries.filter(
-      (x) => x.name !== readRepair.extraReceipt.name,
-    );
-    must(
-      originalEntries.length === 76 || originalEntries.length === 78,
-      'EXACT_ORIGINAL_76_OR_78_RECEIPTS_REQUIRED',
-    );
+    const originalNames = assertRegisteredReadRepairReceiptCoverage({
+      installed,
+      planNames: input.sqlPlan.entries.map((x) => x.name),
+      runtimeReceiptNames: oldReport.ddlReceipts.map((x) =>
+        String(record(x).name),
+      ),
+    });
+    for (const name of originalNames)
+      must(
+        sha(
+          await readFile(
+            path.join(
+              input.repositoryRoot,
+              'database/proposals/' + name + '.sql',
+            ),
+            'utf8',
+          ),
+        ) === installed[name],
+        'ORIGINAL_PROPOSAL_RECEIPT_SOURCE_HASH_DIFFERS:' + name,
+      );
     installed[readRepair.extraReceipt.name] = readRepair.extraReceipt.sha256;
   }
   for (const entry of input.sqlPlan.entries)

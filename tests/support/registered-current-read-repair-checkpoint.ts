@@ -33,6 +33,35 @@ const fixedNames = [
   'read_postwar_narrow_trade_automatic_paged_scope',
   'postwar_projection_current_inventory_balance',
 ];
+/** The canonical loader has 74 selected entries; 60 were executed after the
+ * initializer. The two explicit fixture prerequisites complete the 76 receipts. */
+export function assertRegisteredReadRepairReceiptCoverage(input: {
+  installed: Readonly<Record<string, string>>;
+  planNames: readonly string[];
+  runtimeReceiptNames: readonly string[];
+}): readonly string[] {
+  const base = input.planNames.filter((x) => x !== CURRENT_READ_REPAIR_NAME);
+  const expected = new Set([
+    ...base,
+    'current-authorization-writer-preparation',
+    'postwar-runtime-source-read-policy',
+  ]);
+  const observed = Object.keys(input.installed).filter(
+    (x) => !/^\d{4}_/u.test(x),
+  );
+  must(
+    base.length === 74 &&
+      expected.size === 76 &&
+      observed.length === 76 &&
+      observed.every((x) => expected.has(x)) &&
+      input.runtimeReceiptNames.length === 60 &&
+      new Set(input.runtimeReceiptNames).size === 60 &&
+      input.runtimeReceiptNames.every((x) => expected.has(x)),
+    'EXACT_BASE76_RUNTIME60_RECEIPT_UNION_REQUIRED',
+  );
+  return Object.freeze([...expected].sort());
+}
+
 export async function loadRegisteredCurrentReadRepairCheckpoint(
   repositoryRoot: string,
 ) {
