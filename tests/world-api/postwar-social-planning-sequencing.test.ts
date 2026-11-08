@@ -29,52 +29,73 @@ vi.mock(
   '../../apps/world-api/src/integration/supabase-jwks-signature-verifier.js',
   () => ({ createSupabaseJwksSignatureVerifier: () => ({ verify: h.verify }) }),
 );
+// Target the exact exported dist files: this test lives at the repository root,
+// which does not depend on world-worker; the API resolves it from its workspace.
+// A bare package mock here can become a separate unresolved virtual module.
 vi.mock(
-  '@econmind/world-worker/postwar-social-service-creation-planning-read',
+  '../../apps/world-worker/dist/persistence/postwar-social-service-creation-planning-read.js',
   () => ({
     // Protocol seam only: does not exercise or replace the real private issuer.
     isPostwarSocialServiceCreationPlanningReader: (reader: unknown) =>
       reader === h.planning,
   }),
 );
-vi.mock('@econmind/world-worker/postwar-office-runtime', () => ({
-  PostwarOfficeProjectionStoreError: class extends Error {},
-  POSTWAR_PROJECTION_DATASETS: {
-    SOCIAL: ['service-pools'],
-    INDUSTRY: [],
-    TRADE: [],
-    CAPTAIN: [],
-  },
-  createPostwarOfficeProjectionStore: () => ({
-    readCurrentSeatHeadersFrom: h.headers,
-    readPageFrom: h.page,
-  }),
-  createPostwarSocialMixedCurrentProjectionStore: () => ({
-    readPageFrom: h.page,
-  }),
-  createPostwarCaptainCurrentProjectionStore: () => ({}),
-}));
-vi.mock('@econmind/world-worker/postwar-financial-current-read', () => ({
-  POSTWAR_FINANCIAL_CURRENT_DATASETS: {},
-  createPostwarFinancialMixedCurrentProjectionStore: () => ({}),
-}));
 vi.mock(
-  '@econmind/world-worker/postwar-industry-utility-planning-read',
+  '../../apps/world-worker/dist/runtime-preparation/postwar-office-runtime-exports.js',
+  () => ({
+    PostwarOfficeProjectionStoreError: class extends Error {},
+    POSTWAR_PROJECTION_DATASETS: {
+      SOCIAL: ['service-pools'],
+      INDUSTRY: [],
+      TRADE: [],
+      CAPTAIN: [],
+    },
+    createPostwarOfficeProjectionStore: () => ({
+      readCurrentSeatHeadersFrom: h.headers,
+      readPageFrom: h.page,
+    }),
+    createPostwarSocialMixedCurrentProjectionStore: () => ({
+      readPageFrom: h.page,
+    }),
+    createPostwarCaptainCurrentProjectionStore: () => ({}),
+  }),
+);
+vi.mock(
+  '../../apps/world-worker/dist/runtime-preparation/postwar-financial-current-exports.js',
+  () => ({
+    POSTWAR_FINANCIAL_CURRENT_DATASETS: {},
+    createPostwarFinancialMixedCurrentProjectionStore: () => ({}),
+  }),
+);
+vi.mock(
+  '../../apps/world-worker/dist/runtime-preparation/postwar-industry-utility-planning-exports.js',
   () => ({ isPostwarIndustryUtilityPlanningReader: () => false }),
 );
-vi.mock('@econmind/world-worker/postwar-trade-current-read', () => ({
-  createPostwarTradeCurrentProjectionStore: () => ({}),
-}));
-vi.mock('@econmind/world-worker/postwar-industry-run-parameters-read', () => ({
-  createPostwarIndustryRunParametersReader: () => ({}),
-}));
-vi.mock('@econmind/world-worker/postwar-industry-labour-current-read', () => ({
-  createPostwarIndustryLabourCurrentProjectionStore: () => ({}),
-}));
-vi.mock('@econmind/world-worker/postwar-physical-opening-facts-read', () => ({
-  createPostwarPhysicalOpeningHeadReader: () => ({}),
-  createPostwarPhysicalInventoryProvenanceReader: () => ({}),
-}));
+vi.mock(
+  '../../apps/world-worker/dist/persistence/postwar-trade-current-read.js',
+  () => ({
+    createPostwarTradeCurrentProjectionStore: () => ({}),
+  }),
+);
+vi.mock(
+  '../../apps/world-worker/dist/runtime-preparation/postwar-industry-run-parameters-exports.js',
+  () => ({
+    createPostwarIndustryRunParametersReader: () => ({}),
+  }),
+);
+vi.mock(
+  '../../apps/world-worker/dist/runtime-preparation/postwar-industry-labour-current-exports.js',
+  () => ({
+    createPostwarIndustryLabourCurrentProjectionStore: () => ({}),
+  }),
+);
+vi.mock(
+  '../../apps/world-worker/dist/runtime-preparation/postwar-physical-opening-exports.js',
+  () => ({
+    createPostwarPhysicalOpeningHeadReader: () => ({}),
+    createPostwarPhysicalInventoryProvenanceReader: () => ({}),
+  }),
+);
 import { createPostwarOfficeRuntimeReadService } from '../../apps/world-api/src/integration/postwar-office-runtime-read-service.js';
 
 const subject = '11111111-1111-4111-8111-111111111111';
