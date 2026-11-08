@@ -2,6 +2,7 @@
  * original publisher and least-privilege reads. No native/production approval. */
 import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
+import { startGOwnedPg16Cluster } from '../support/g-owned-pg16-cluster.js';
 import { beforeAll, afterAll, afterEach, describe, it, expect } from 'vitest';
 import { installPostwarNarrowTradeCutoffFixture } from '../support/postwar-narrow-trade-cutoff-fixture.js';
 import {
@@ -25,8 +26,17 @@ const reader = 'test_captain_h0_reader',
   publisher = 'test_captain_h0_publisher';
 const page =
   'select * from world_v2.read_postwar_captain_current_page($1,$2,$3,$4)';
+const native = process.env.ECONMIND_CAPTAIN_H0_NATIVE === '1';
+interface TestDatabase {
+  exec(sql: string): Promise<unknown>;
+  query<Row extends object = Record<string, unknown>>(
+    sql: string,
+    args?: unknown[],
+  ): Promise<{ rows: Row[]; affectedRows?: number }>;
+  close(): Promise<void>;
+}
 describe('actual Captain admitted-genesis H0 current publication and reads', () => {
-  let db: PGlite,
+  let db: TestDatabase,
     f: Awaited<ReturnType<typeof installPostwarNarrowTradeCutoffFixture>>,
     legacyBody: string,
     adoptionRef: string,
@@ -70,7 +80,41 @@ describe('actual Captain admitted-genesis H0 current publication and reads', () 
     await db.exec('set session authorization ' + publisher);
   }
   beforeAll(async () => {
-    db = new PGlite();
+    if (native) {
+      const cluster = await startGOwnedPg16Cluster();
+      try {
+        const client = await cluster.admin.connect(),
+          admin = (
+            await client.query<{ name: string }>('select current_user as name')
+          ).rows[0]!.name;
+        // The existing small fixture names its setup administrator "postgres".
+        // This owned cluster deliberately uses another administrator name.
+        // Only that exact TEST_ONLY reset literal is adapted; online roles,
+        // JWT scope, functions, policies and all economic SQL stay verbatim.
+        const statement = (sql: string) =>
+          sql.replaceAll(
+            'set session authorization postgres',
+            'set session authorization "' + admin + '"',
+          );
+        db = {
+          async exec(sql) {
+            await client.query(statement(sql));
+          },
+          async query<Row extends object>(sql: string, args: unknown[] = []) {
+            const r = await client.query<Row>(statement(sql), args);
+            return { rows: r.rows, affectedRows: r.rowCount ?? 0 };
+          },
+          async close() {
+            client.release();
+            await cluster.close();
+            cluster.assertHealthy();
+          },
+        };
+      } catch (e) {
+        await cluster.close();
+        throw e;
+      }
+    } else db = new PGlite();
     f = await installPostwarNarrowTradeCutoffFixture(db);
     // Actual immutable H0 parent was derived by the fixture's real fixed
     // publisher from its stored small Core seed, not manually labelled rows.
@@ -158,7 +202,7 @@ describe('actual Captain admitted-genesis H0 current publication and reads', () 
   }, 60000);
   afterEach(admin);
   afterAll(async () => {
-    await db.close();
+    await db?.close();
   });
   it('publishes actual approved 70=7x10 genesis at real H0 with zero events/journals, exact idempotency and no raw reader privileges', async () => {
     await asReader();
@@ -174,6 +218,8 @@ describe('actual Captain admitted-genesis H0 current publication and reads', () 
       first = await p.publishCountry(f.seller),
       second = await p.publishCountry(f.seller);
     expect(second).toEqual(first);
+    expect(first.seedFingerprint).toBe(f.seed.fingerprint);
+    expect(first.admissionRef).toBe(f.admissionRef);
     expect(first.rows).toHaveLength(7);
     expect(first.rows.map((r) => r.balance)).toEqual(Array(7).fill('10'));
     expect(

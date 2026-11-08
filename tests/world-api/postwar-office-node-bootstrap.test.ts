@@ -13,6 +13,7 @@ import type { PostwarOfficeNodeBootstrapInput } from '../../apps/world-api/src/r
 const fixed = vi.hoisted(() => ({
   social: vi.fn(),
   shared: vi.fn(),
+  readBinding: vi.fn(),
   api: vi.fn(),
   listen: vi.fn(),
 }));
@@ -27,12 +28,24 @@ vi.mock(
 );
 vi.mock(
   '../../apps/world-worker/dist/runtime-preparation/finance-social-runtime-connection.js',
-  async (original) => ({
-    ...(await original<
-      typeof import('../../apps/world-worker/dist/runtime-preparation/finance-social-runtime-connection.js')
-    >()),
-    createPostwarFinanceSocialRuntimeConnection: fixed.shared,
-  }),
+  async (original) => {
+    const actual =
+      await original<
+        typeof import('../../apps/world-worker/dist/runtime-preparation/finance-social-runtime-connection.js')
+      >();
+    return {
+      ...actual,
+      createPostwarFinanceSocialRuntimeConnection: fixed.shared,
+      readPostwarFinanceSocialRuntimeBinding: (
+        binding: Parameters<
+          typeof actual.readPostwarFinanceSocialRuntimeBinding
+        >[0],
+      ) =>
+        fixed.readBinding.getMockImplementation()
+          ? fixed.readBinding(binding)
+          : actual.readPostwarFinanceSocialRuntimeBinding(binding),
+    };
+  },
 );
 vi.mock(
   '../../apps/world-api/src/runtime/postwar-finance-social-connection.js',
@@ -73,7 +86,10 @@ function protocol() {
     };
     pools.set(name, control);
   }
-  const seed = { worldId: 'WORLD_NODE_PROTOCOL' } as Readonly<OpeningSeed>;
+  const seed = {
+    worldId: 'WORLD_NODE_PROTOCOL',
+    fingerprint: 'sha256:' + 'a'.repeat(64),
+  } as Readonly<OpeningSeed>;
   const config = {
     api: {
       environment: 'ci',
@@ -83,7 +99,12 @@ function protocol() {
     },
     social: {
       environment: 'ci',
-      admittedWorldPins: { worldId: seed.worldId },
+      admittedWorldPins: {
+        worldId: seed.worldId,
+        seedRef: 'SEED_PROTOCOL_NOT_ADMITTED',
+        contentHash: seed.fingerprint,
+        admissionRef: 'ADMISSION_PROTOCOL_NOT_REAL',
+      },
       workerId: 'WORKER_NODE_PROTOCOL',
       workerRole: 'node_protocol_worker',
       workerPool: pools.get('worker')!.pool,
@@ -235,6 +256,94 @@ function protocol() {
 }
 beforeEach(() => vi.resetAllMocks());
 describe('explicit fixed office Node bootstrap ownership protocol', () => {
+  it('awaits real preparation then opening Captain publication before listening; no consumer is started', async () => {
+    const f = protocol(),
+      gate = deferred(),
+      publish = vi.fn(async () => {
+        f.events.push('captain:h0:publish');
+        await gate.promise;
+        return {
+          status: 'PUBLISHED',
+          sources: ['COUNTRY_02', 'COUNTRY_03'].map((countryId) => ({
+            countryId,
+            seedFingerprint: f.config.startupSeed.fingerprint,
+            admissionRef: f.config.social.admittedWorldPins.admissionRef,
+          })),
+        };
+      });
+    fixed.readBinding.mockReturnValue({
+      publication: { publishOpeningCaptainCountries: publish },
+      financeCountryIds: ['COUNTRY_02', 'COUNTRY_03'],
+    });
+    const starting = startPostwarOfficeNodeBootstrap({
+      ...f.config,
+      captain: { mode: 'TEST_ONLY_LOCAL' },
+      publicationDatabase: { query: vi.fn(), transaction: vi.fn() },
+    });
+    await vi.waitFor(() =>
+      expect(publish).toHaveBeenCalledExactlyOnceWith([
+        'COUNTRY_02',
+        'COUNTRY_03',
+      ]),
+    );
+    expect(f.events.indexOf('prepare:done')).toBeLessThan(
+      f.events.indexOf('captain:h0:publish'),
+    );
+    expect(f.events).not.toContain('http:listen');
+    expect(f.control.startPreparation).not.toHaveBeenCalled();
+    gate.resolve();
+    const host = await starting;
+    expect(host.ready()).toBe(true);
+    await host.shutdown();
+  });
+  it('cleans up instead of listening when the fixed H0 publisher denies its actual source', async () => {
+    const f = protocol(),
+      failure = Error('ACTUAL_CAPTAIN_SOURCE_REVOKED');
+    fixed.readBinding.mockReturnValue({
+      publication: {
+        publishOpeningCaptainCountries: vi.fn().mockRejectedValue(failure),
+      },
+      financeCountryIds: ['COUNTRY_02'],
+    });
+    await expect(
+      startPostwarOfficeNodeBootstrap({
+        ...f.config,
+        captain: { mode: 'TEST_ONLY_LOCAL' },
+        publicationDatabase: { query: vi.fn(), transaction: vi.fn() },
+      }),
+    ).rejects.toBe(failure);
+    expect(f.events).not.toContain('http:listen');
+    for (const p of f.pools.values()) expect(p.ends).toBe(1);
+  });
+  it('refuses a separate publisher transport that returns another seed/admission before exposing HTTP', async () => {
+    const f = protocol();
+    fixed.readBinding.mockReturnValue({
+      publication: {
+        publishOpeningCaptainCountries: vi
+          .fn()
+          .mockResolvedValue({
+            status: 'PUBLISHED',
+            sources: [
+              {
+                countryId: 'COUNTRY_02',
+                seedFingerprint: 'sha256:' + 'b'.repeat(64),
+                admissionRef: f.config.social.admittedWorldPins.admissionRef,
+              },
+            ],
+          }),
+      },
+      financeCountryIds: ['COUNTRY_02'],
+    });
+    await expect(
+      startPostwarOfficeNodeBootstrap({
+        ...f.config,
+        captain: { mode: 'TEST_ONLY_LOCAL' },
+        publicationDatabase: { query: vi.fn(), transaction: vi.fn() },
+      }),
+    ).rejects.toThrow('SOURCE_PINS_DIFFER');
+    expect(f.events).not.toContain('http:listen');
+    for (const p of f.pools.values()) expect(p.ends).toBe(1);
+  });
   it('does not listen until product prepare resolves or start the consumer implicitly', async () => {
     const f = protocol();
     f.gatePreparation();

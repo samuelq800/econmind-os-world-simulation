@@ -8,6 +8,8 @@ const fixture = vi.hoisted(() => ({
   readCommand: vi.fn(),
   readReceipt: vi.fn(),
   publish: vi.fn(),
+  openingPublish: vi.fn(),
+  head: { world_version: '0', event_sequence: '0' },
   industryPublish: vi.fn(),
   close: vi.fn(),
   queries: [] as string[],
@@ -37,6 +39,9 @@ vi.mock(
   () => ({
     createPostwarCaptainCurrentPublisher: () => ({
       publishOfficeCurrentCountry: fixture.publish,
+    }),
+    createPostwarCaptainOpeningCurrentPublisher: () => ({
+      publishCountry: fixture.openingPublish,
     }),
   }),
 );
@@ -72,6 +77,8 @@ function controller(industryLabour = false) {
   const database = {
     async query(sql: string) {
       fixture.queries.push(sql);
+      if (sql.includes('from world_v2.world_head'))
+        return { rowCount: 1, rows: [fixture.head] };
       if (fixture.executionControlLockRequired && /read only/iu.test(sql))
         throw Object.assign(
           Error('FOR SHARE cannot run in a read-only transaction'),
@@ -119,6 +126,8 @@ function controller(industryLabour = false) {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  fixture.head = { world_version: '0', event_sequence: '0' };
+  fixture.openingPublish.mockResolvedValue({});
   fixture.publisherRole = 'test_publisher';
   fixture.executionControlLockRequired = false;
   fixture.queries.length = 0;
@@ -137,6 +146,51 @@ beforeEach(() => {
   fixture.close.mockResolvedValue(undefined);
 });
 describe('fixed post-commit derived publication', () => {
+  it('publishes finite configured Captain H0 countries before any economic command, without a country01 fallback', async () => {
+    const c = controller();
+    expect(
+      await c.publishOpeningCaptainCountries(['COUNTRY_02', 'COUNTRY_03']),
+    ).toMatchObject({
+      status: 'PUBLISHED',
+      head: { worldVersion: '0', eventSequence: '0' },
+      countries: ['COUNTRY_02', 'COUNTRY_03'],
+    });
+    expect(fixture.openingPublish.mock.calls.map((v) => v[0])).toEqual([
+      'COUNTRY_02',
+      'COUNTRY_03',
+    ]);
+    expect(fixture.readCommand).not.toHaveBeenCalled();
+    expect(fixture.publish).not.toHaveBeenCalled();
+    await c.close();
+  });
+  it('skips an actual nonzero head, rejects malformed scope/head, and does not hide a withdrawn H0 source', async () => {
+    const c = controller();
+    fixture.head = { world_version: '1', event_sequence: '3' };
+    expect(
+      (await c.publishOpeningCaptainCountries(['COUNTRY_02'])).status,
+    ).toBe('SKIPPED_NONZERO_HEAD');
+    expect(fixture.openingPublish).not.toHaveBeenCalled();
+    await expect(c.publishOpeningCaptainCountries([])).rejects.toThrow(
+      'FINITE',
+    );
+    await expect(
+      c.publishOpeningCaptainCountries(['COUNTRY_02', 'COUNTRY_02']),
+    ).rejects.toThrow('FINITE');
+    fixture.head = { world_version: '0', event_sequence: '1' };
+    await expect(
+      c.publishOpeningCaptainCountries(['COUNTRY_02']),
+    ).rejects.toThrow('ACTUAL_OPENING');
+    fixture.head = { world_version: '0', event_sequence: '0' };
+    const rejected = Error('ACTUAL_SOURCE_REVOKED');
+    fixture.openingPublish.mockRejectedValueOnce(rejected);
+    await expect(c.publishOpeningCaptainCountries(['COUNTRY_02'])).rejects.toBe(
+      rejected,
+    );
+    await c.close();
+    await expect(
+      c.publishOpeningCaptainCountries(['COUNTRY_02']),
+    ).rejects.toThrow('CLOSED');
+  });
   it('rejects an ordinary worker wired as publisher before holding a source or reading commands', async () => {
     const c = controller();
     fixture.publisherRole = 'test_worker';

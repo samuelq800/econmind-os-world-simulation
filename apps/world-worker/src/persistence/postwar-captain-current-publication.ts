@@ -41,6 +41,8 @@ export function createPostwarCaptainOpeningCurrentPublisher(input: {
           document_ref: string;
           country_id: string;
           source_version: string;
+          seed_fingerprint: string;
+          admission_ref: string;
           coverage: unknown;
           rows_text: string;
         }>('select * from world_v2.publish_postwar_captain_h0_current($1,$2)', [
@@ -68,6 +70,8 @@ export function createPostwarCaptainOpeningCurrentPublisher(input: {
         return Object.freeze({
           documentRef: row.document_ref,
           sourceVersion: row.source_version,
+          seedFingerprint: row.seed_fingerprint,
+          admissionRef: row.admission_ref,
           head: Object.freeze({ worldVersion: '0', eventSequence: '0' }),
           coverage,
           rows: Object.freeze(rows),

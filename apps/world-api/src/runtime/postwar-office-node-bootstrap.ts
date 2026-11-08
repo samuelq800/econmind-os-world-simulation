@@ -8,6 +8,7 @@ import {
 } from '@econmind/world-worker/social-runtime-connection';
 import {
   createPostwarFinanceSocialRuntimeConnection,
+  readPostwarFinanceSocialRuntimeBinding,
   type PostwarFinanceSocialRuntimeConnection,
   type PostwarFinanceSocialRuntimePorts,
 } from '@econmind/world-worker/finance-social-runtime-connection';
@@ -47,7 +48,8 @@ export interface PostwarOfficeNodeBootstrapInput {
     readonly mode: 'TEST_ONLY_LOCAL' | 'OFFICIAL_RUNTIME';
   };
   /** Borrowed separate publisher DB; caller ends that pool after shutdown.
-   * No pool/credential is discovered and no publication occurs by default. */
+   * With Captain enabled, publishes its actual H0 pages after preparation and
+   * before listening. No pool/credential is discovered. */
   readonly publicationDatabase?: PostwarFinanceSocialRuntimePorts['database'];
   readonly centralBankOmo?: {
     readonly countryIds: readonly string[];
@@ -241,6 +243,26 @@ export async function startPostwarOfficeNodeBootstrap(
         ? { financeAllowedOrigins: input.financeAllowedOrigins }
         : {}),
     });
+    if (input.captain && input.publicationDatabase) {
+      // One memoized genuine preparation. Publish actual registered Captain H0
+      // before exposing HTTP; resumed H>0 worlds keep their current-page path.
+      await owner.prepare();
+      const ports = readPostwarFinanceSocialRuntimeBinding(binding);
+      if (!ports.publication)
+        throw Error('POSTWAR_NODE_OPENING_CAPTAIN_PUBLISHER_REQUIRED');
+      const opening = await ports.publication.publishOpeningCaptainCountries(
+        ports.financeCountryIds,
+      );
+      if (
+        opening.status === 'PUBLISHED' &&
+        opening.sources.some(
+          (s) =>
+            s.seedFingerprint !== input.startupSeed.fingerprint ||
+            s.admissionRef !== c.admittedWorldPins.admissionRef,
+        )
+      )
+        throw Error('POSTWAR_NODE_OPENING_CAPTAIN_SOURCE_PINS_DIFFER');
+    }
     // Existing product startup really awaits owner.prepare before listening.
     runtime = await startApiRuntime(input.api, {
       postwarFinanceSocialConnection: owner,

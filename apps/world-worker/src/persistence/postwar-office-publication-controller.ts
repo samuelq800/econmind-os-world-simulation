@@ -1,4 +1,4 @@
-/** Fixed post-commit derived publication. A failed projection never changes a
+/** Fixed admitted-opening and post-commit derived publication. A failed projection never changes a
  * durable FINAL or retries an economic command. No consumer/Clock is created. */
 import { createHash } from 'node:crypto';
 import { canonicalSerialize, worldId } from '@econmind/core';
@@ -7,7 +7,10 @@ import type { PostwarSocialRuntimeConnection } from '../runtime-preparation/soci
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
 import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import { createPostwarMixedCurrentProjectionSource } from './postwar-mixed-current-projection-publication.js';
-import { createPostwarCaptainCurrentPublisher } from './postwar-captain-current-publication.js';
+import {
+  createPostwarCaptainCurrentPublisher,
+  createPostwarCaptainOpeningCurrentPublisher,
+} from './postwar-captain-current-publication.js';
 import type { SqlDatabase } from './sql-database.js';
 import { createPostwarIndustryLabourCurrentPublisher } from './postwar-industry-labour-current-publication.js';
 
@@ -33,6 +36,40 @@ export type PostwarDerivedPublicationResult =
 export type PostwarOfficeConsumptionStep = DurableConsumptionStep & {
   readonly derivedPublication?: PostwarDerivedPublicationResult;
 };
+export type PostwarOpeningCaptainPublicationResult =
+  | Readonly<{
+      status: 'SKIPPED_NONZERO_HEAD';
+      head: Readonly<{
+        worldId: string;
+        worldVersion: string;
+        eventSequence: string;
+      }>;
+      countries: readonly string[];
+    }>
+  | Readonly<{
+      status: 'PUBLISHED';
+      head: Readonly<{
+        worldId: string;
+        worldVersion: string;
+        eventSequence: string;
+      }>;
+      countries: readonly string[];
+      sources: readonly Readonly<{
+        countryId: string;
+        seedFingerprint: string;
+        admissionRef: string;
+      }>[];
+    }>;
+export interface PostwarOfficePublicationController {
+  publishOpeningCaptainCountries(
+    countryIds: readonly string[],
+  ): Promise<PostwarOpeningCaptainPublicationResult>;
+  afterCommitted(
+    step: DurableConsumptionStep,
+  ): Promise<PostwarOfficeConsumptionStep>;
+  retryCommitted(commandId: string): Promise<PostwarDerivedPublicationResult>;
+  close(): Promise<void>;
+}
 
 export function createPostwarOfficePublicationController(input: {
   readonly worldId: string;
@@ -42,7 +79,7 @@ export function createPostwarOfficePublicationController(input: {
   /** Explicit borrowed publisher identity; no credentials or pool discovered. */
   readonly publicationDatabase: SqlDatabase;
   readonly industryLabour?: true;
-}) {
+}): PostwarOfficePublicationController {
   const world = worldId(input.worldId);
   if (!/^[a-z][a-z0-9_]{0,62}$/u.test(input.workerRole))
     throw Error('EXACT_PUBLICATION_WORKER_ROLE_REQUIRED');
@@ -59,6 +96,10 @@ export function createPostwarOfficePublicationController(input: {
   });
   const publisher = createPostwarCaptainCurrentPublisher({
     source,
+    publicationDatabase: input.publicationDatabase,
+  });
+  const openingCaptainPublisher = createPostwarCaptainOpeningCurrentPublisher({
+    worldId: world,
     publicationDatabase: input.publicationDatabase,
   });
   const industryPublisher = input.industryLabour
@@ -78,6 +119,30 @@ export function createPostwarOfficePublicationController(input: {
       reason: 'DERIVED_PUBLICATION_REQUIRES_RETRY',
     });
 
+  async function requirePublisher(): Promise<void> {
+    await input.publicationDatabase.transaction(async (tx) => {
+      const role = await tx.query<{
+        role_name: string;
+        rolsuper: boolean;
+        rolbypassrls: boolean;
+        owner_member: boolean;
+        publisher_member: boolean;
+      }>(
+        "select current_user as role_name,r.rolsuper,r.rolbypassrls,pg_has_role(current_user,'world_v2_postwar_projection_owner','MEMBER')as owner_member,pg_has_role(current_user,'world_v2_postwar_projection_publisher','MEMBER')as publisher_member from pg_roles r where r.rolname=current_user",
+      );
+      const identity = role.rows[0];
+      if (
+        role.rows.length !== 1 ||
+        identity?.role_name === input.workerRole ||
+        identity?.rolsuper !== false ||
+        identity?.rolbypassrls !== false ||
+        identity?.owner_member !== false ||
+        identity?.publisher_member !== true
+      )
+        throw Error('EXACT_SEPARATE_DERIVED_PUBLISHER_REQUIRED');
+    });
+  }
+
   function publish(
     commandId: string,
     expected?: Extract<
@@ -91,27 +156,7 @@ export function createPostwarOfficePublicationController(input: {
         // Check the explicit publisher before holding a source connection.
         // Miswired ordinary worker pools fail here, not while nesting a second
         // checkout behind a held source transaction.
-        await input.publicationDatabase.transaction(async (tx) => {
-          const role = await tx.query<{
-            role_name: string;
-            rolsuper: boolean;
-            rolbypassrls: boolean;
-            owner_member: boolean;
-            publisher_member: boolean;
-          }>(
-            "select current_user as role_name,r.rolsuper,r.rolbypassrls,pg_has_role(current_user,'world_v2_postwar_projection_owner','MEMBER')as owner_member,pg_has_role(current_user,'world_v2_postwar_projection_publisher','MEMBER')as publisher_member from pg_roles r where r.rolname=current_user",
-          );
-          const identity = role.rows[0];
-          if (
-            role.rows.length !== 1 ||
-            identity?.role_name === input.workerRole ||
-            identity?.rolsuper !== false ||
-            identity?.rolbypassrls !== false ||
-            identity?.owner_member !== false ||
-            identity?.publisher_member !== true
-          )
-            throw Error('EXACT_SEPARATE_DERIVED_PUBLISHER_REQUIRED');
-        });
+        await requirePublisher();
         const command = await input.database.transaction(async (tx) => {
           await tx.query('set transaction isolation level repeatable read');
           // Immutable command/FINAL readback only. A formal database guard
@@ -192,6 +237,82 @@ export function createPostwarOfficePublicationController(input: {
     return task;
   }
   return Object.freeze({
+    /** Startup-only derived data. The real shared owner is prepared before
+     * this call; H is held while the separate fixed publisher derives H0.
+     * No event, command, Clock, lease or original source is created. */
+    publishOpeningCaptainCountries(countryIds: readonly string[]) {
+      if (closed) return Promise.reject(Error('PUBLICATION_CONTROLLER_CLOSED'));
+      if (
+        countryIds.length === 0 ||
+        countryIds.length > 70 ||
+        new Set(countryIds).size !== countryIds.length ||
+        countryIds.some((c) => !/^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(c))
+      )
+        return Promise.reject(
+          Error('EXACT_FINITE_OPENING_CAPTAIN_COUNTRIES_REQUIRED'),
+        );
+      const countries = Object.freeze([...countryIds]);
+      const task = (async () => {
+        await requirePublisher();
+        return input.database.transaction(async (tx) => {
+          await tx.query('set transaction isolation level repeatable read');
+          const head = await tx.query<{
+            world_version: string;
+            event_sequence: string;
+          }>(
+            'select world_version::text,event_sequence::text from world_v2.world_head where world_id=$1 for share',
+            [world],
+          );
+          const h = head.rows[0];
+          if (
+            head.rows.length !== 1 ||
+            !h ||
+            !/^(0|[1-9]\d*)$/u.test(h.world_version) ||
+            !/^(0|[1-9]\d*)$/u.test(h.event_sequence) ||
+            (h.world_version === '0') !== (h.event_sequence === '0')
+          )
+            throw Error('EXACT_ACTUAL_OPENING_PUBLICATION_HEAD_REQUIRED');
+          if (h.world_version !== '0')
+            return Object.freeze({
+              status: 'SKIPPED_NONZERO_HEAD' as const,
+              head: Object.freeze({
+                worldId: world,
+                worldVersion: h.world_version,
+                eventSequence: h.event_sequence,
+              }),
+              countries: Object.freeze([]) as readonly string[],
+            });
+          const sources = [];
+          for (const country of countries) {
+            const published =
+              await openingCaptainPublisher.publishCountry(country);
+            sources.push(
+              Object.freeze({
+                countryId: country,
+                seedFingerprint: published.seedFingerprint,
+                admissionRef: published.admissionRef,
+              }),
+            );
+          }
+          return Object.freeze({
+            status: 'PUBLISHED' as const,
+            head: Object.freeze({
+              worldId: world,
+              worldVersion: '0',
+              eventSequence: '0',
+            }),
+            countries,
+            sources: Object.freeze(sources),
+          });
+        });
+      })();
+      pending.add(task);
+      void task.then(
+        () => pending.delete(task),
+        () => pending.delete(task),
+      );
+      return task;
+    },
     async afterCommitted(
       step: DurableConsumptionStep,
     ): Promise<PostwarOfficeConsumptionStep> {
