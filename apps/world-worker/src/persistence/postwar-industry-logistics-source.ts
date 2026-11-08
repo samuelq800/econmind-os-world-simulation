@@ -14,6 +14,8 @@ import {
   prepareIndustryInternalLogisticsSourceFromPreparedOpening,
   readIndustryInternalLogisticsSource,
   INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION,
+  INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION,
+  INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256,
   INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256,
   INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256,
 } from '@econmind/core/industry-internal-logistics';
@@ -53,12 +55,13 @@ function text(v: unknown): string {
 export interface PostwarIndustryLogisticsPolicyBytes {
   readonly policy: string;
   readonly adoption: string;
+  readonly multiCountryPolicy?: string;
 }
 export async function loadPostwarIndustryLogisticsPolicy(
   repositoryRoot: string,
 ): Promise<Readonly<PostwarIndustryLogisticsPolicyBytes>> {
   if (!path.isAbsolute(repositoryRoot)) fail('FIXED_REPOSITORY_ROOT_REQUIRED');
-  const [policy, adoption] = await Promise.all([
+  const [policy, adoption, multiCountryPolicy] = await Promise.all([
     readFile(
       path.join(
         repositoryRoot,
@@ -73,13 +76,22 @@ export async function loadPostwarIndustryLogisticsPolicy(
       ),
       'utf8',
     ),
+    readFile(
+      path.join(
+        repositoryRoot,
+        'config/postwar-genesis/industry-internal-logistics-first-day.multicountry-v2.json',
+      ),
+      'utf8',
+    ),
   ]);
   if (
+    sha(multiCountryPolicy) !==
+      INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256 ||
     sha(policy) !== INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256 ||
     sha(adoption) !== INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256
   )
     fail('ADOPTED_POLICY_BYTES_REQUIRED');
-  return Object.freeze({ policy, adoption });
+  return Object.freeze({ policy, adoption, multiCountryPolicy });
 }
 export function projectPostwarIndustryLogisticsReplaySources(
   input: Readonly<{
@@ -108,10 +120,40 @@ export function projectPostwarIndustryLogisticsReplaySources(
       INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256
   )
     fail('ADOPTED_POLICY_BYTES_REQUIRED');
-  const policy = object(JSON.parse(input.policyBytes.policy)),
+  const selectedPolicy =
+    d.countryId === 'COUNTRY_02'
+      ? input.policyBytes.policy
+      : input.policyBytes.multiCountryPolicy;
+  if (!selectedPolicy)
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'ADOPTED_LOGISTICS_SCOPE_UNAVAILABLE',
+    );
+  const selectedHash = sha(selectedPolicy),
+    multiCountry =
+      selectedHash ===
+      INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256;
+  if (
+    !multiCountry &&
+    selectedHash !== INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256
+  )
+    fail('ADOPTED_POLICY_BYTES_REQUIRED');
+  if (
+    multiCountry &&
+    /^0(?:[.]0+)?$/u.test(String(object(d.domesticAccess).distanceKmEstimate))
+  )
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'POSITIVE_LOGISTICS_DISTANCE_REQUIRED_ZERO_SOURCE_NOT_OPERATIONAL',
+    );
+  const policyVersion = multiCountry
+    ? INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION
+    : INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION;
+  const policy = object(JSON.parse(selectedPolicy)),
     scope = object(policy.scope),
     mass = object(policy.massBasis);
-  if (d.countryId !== scope.country || d.facilityId !== scope.facility)
+  if (
+    !multiCountry &&
+    (d.countryId !== scope.country || d.facilityId !== scope.facility)
+  )
     throw new PostwarIndustryLogisticsSourceMissing(
       'ADOPTED_LOGISTICS_SCOPE_UNAVAILABLE',
     );
@@ -122,12 +164,19 @@ export function projectPostwarIndustryLogisticsReplaySources(
     d.seedFingerprint !== b.pins.contentHash ||
     d.admissionRef !== b.pins.admissionRef
   )
-    fail('EXACT_ADMITTED_C2_SOURCE_AND_PRIVATE_H0_REQUIRED');
+    fail('EXACT_ADMITTED_SITE_SOURCE_AND_PRIVATE_H0_REQUIRED');
   if (
     input.runIds.length > 256 ||
     new Set(input.runIds).size !== input.runIds.length
   )
     fail('ACTUAL_FINITE_RUN_SELECTION_REQUIRED');
+  const countrySuffix = /^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.exec(
+    text(d.countryId),
+  )?.[1];
+  if (!countrySuffix) fail('ACTUAL_FINITE_COUNTRY_REQUIRED');
+  const sourcePhysicalLocation = multiCountry
+    ? 'LOCATION_WAREHOUSE_' + countrySuffix
+    : text(scope.sourcePhysicalLocation);
   const operatorId = text(d.operatorId),
     countryId = text(d.countryId),
     facilityId = text(d.facilityId),
@@ -138,8 +187,12 @@ export function projectPostwarIndustryLogisticsReplaySources(
         x.account.riskBearerId === operatorId &&
         x.account.commodityId === mass.commodityId &&
         x.account.unit === mass.unit &&
-        x.account.physicalLocationId === scope.sourcePhysicalLocation &&
+        x.account.physicalLocationId === sourcePhysicalLocation &&
         x.account.bucket === 'AVAILABLE',
+    );
+  if (!stock.length)
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'ACTUAL_OP_WAREHOUSE_OPENING_REQUIRED',
     );
   if (stock.length !== 1) fail('ACTUAL_UNIQUE_OP_WAREHOUSE_OPENING_REQUIRED');
   const snapshot = {
@@ -151,7 +204,7 @@ export function projectPostwarIndustryLogisticsReplaySources(
     },
     trace: FoundationTraceRequest = {
       traceRef: 'INTERNAL_LOGISTICS_' + countryId,
-      calculationVersion: INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION,
+      calculationVersion: policyVersion,
       snapshot,
       snapshotAt: { amount: '0', unit: 'sim_millisecond' },
     };
@@ -173,7 +226,7 @@ export function projectPostwarIndustryLogisticsReplaySources(
         sourceOperatorId: text(f.operatorId),
       },
     }),
-    policyRawBytes: input.policyBytes.policy,
+    policyRawBytes: selectedPolicy,
     adoptionRawBytes: input.policyBytes.adoption,
     sourceBytes: {
       'facilities.json':
@@ -198,7 +251,11 @@ export function projectPostwarIndustryLogisticsReplaySources(
       p.employerId === operatorId &&
       p.sourceBucket === 'LOGISTICS',
   );
-  if (!positions.length || positions.length > 6)
+  if (!positions.length)
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'ACTUAL_LOGISTICS_EMPLOYMENT_ORIGINALS_REQUIRED',
+    );
+  if (positions.length > 6)
     fail('ACTUAL_LOGISTICS_EMPLOYMENT_ORIGINALS_REQUIRED');
   const funding = document.fundingAccounts.filter(
     (a) =>
@@ -206,6 +263,10 @@ export function projectPostwarIndustryLogisticsReplaySources(
       a.payerEntityId === operatorId &&
       a.payerRole === 'OP',
   );
+  if (!funding.length)
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'ACTUAL_OP_PAYROLL_FUNDING_ACCOUNT_REQUIRED',
+    );
   if (funding.length !== 1) fail('ACTUAL_OP_PAYROLL_FUNDING_ACCOUNT_REQUIRED');
   const currency = funding[0]!.currency,
     householdAccountId =
@@ -308,7 +369,10 @@ export function projectPostwarIndustryLogisticsReplaySources(
       });
     })
     .filter((p) => BigInt(p.count) > 0n);
-  if (!rows.length) fail('ACTUAL_FILLED_LOGISTICS_STAFF_REQUIRED');
+  if (!rows.length)
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'ACTUAL_FILLED_LOGISTICS_STAFF_REQUIRED',
+    );
   const labourBody = {
       schemaVersion: 'industry-logistics-labour-source-v1' as const,
       worldId: b.pins.worldId,
@@ -340,8 +404,8 @@ export function projectPostwarIndustryLogisticsReplaySources(
           seedId: b.pins.seedRef,
           seedFingerprint: b.pins.contentHash,
           admissionRef: b.pins.admissionRef,
-          policyVersion: INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION,
-          policyRawSha256: INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256,
+          policyVersion,
+          policyRawSha256: selectedHash,
           userAdoptionRawSha256:
             INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256,
           originals: [
@@ -408,6 +472,9 @@ export function bindPostwarIndustryLogisticsSourceConfiguration(
       b.document.inputs.sourceChecksumsSha256 ||
     sha(config.policyBytes.policy) !==
       INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256 ||
+    (config.policyBytes.multiCountryPolicy !== undefined &&
+      sha(config.policyBytes.multiCountryPolicy) !==
+        INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256) ||
     sha(config.policyBytes.adoption) !==
       INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256
   )

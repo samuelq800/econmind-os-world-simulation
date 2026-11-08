@@ -30,7 +30,7 @@ returns jsonb language plpgsql security definer set search_path=pg_catalog as $$
 declare h record;a world_v2.runtime_opening_admission%rowtype;r world_v2.postwar_industry_original%rowtype;s world_v2.postwar_industry_first_day_source%rowtype;body jsonb;
 begin
  if current_setting('transaction_isolation')not in('repeatable read','serializable')or current_setting('transaction_read_only')<>'off'then raise exception 'LOGISTICS_ORDER_HELD_WRITE_RR_REQUIRED'using errcode='25001';end if;
- if p_world is null or p_world!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'or p_country is distinct from 'COUNTRY_02'or p_facility is distinct from 'OPEN-02-REFINED_FUEL'then raise exception 'LOGISTICS_ORDER_EXACT_ADOPTED_SCOPE_REQUIRED'using errcode='22023';end if;
+ if p_world is null or p_world!~'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$'or p_country is null or p_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or p_facility is distinct from 'OPEN-'||substring(p_country from 9 for 2)||'-REFINED_FUEL'then raise exception 'LOGISTICS_ORDER_EXACT_ADOPTED_SCOPE_REQUIRED'using errcode='22023';end if;
  perform world_v2.lock_postwar_source_revocation_fences(p_world);
  perform set_config('econmind.industry_source_world',p_world,true);
  select x.world_version,x.event_sequence into h from world_v2.world_head x where x.world_id=p_world for share;
@@ -140,7 +140,7 @@ begin
  required:=case p_office when 'SOCIAL'then 'world_v2_social_source_reader'when 'FINANCE'then 'world_v2_finance_budget_source_reader'when 'PROJECTION'then case when effective in('world_v2_postwar_projection_publisher','world_v2_postwar_projection_reader')then effective else null end else null end;
  if required is null or effective<>required or pg_has_role(session_user,'world_v2_industry_source_owner','MEMBER')or exists(select 1 from pg_roles r where r.rolname=session_user and(r.rolsuper or r.rolbypassrls or r.rolcreatedb or r.rolcreaterole or r.rolreplication))then raise exception 'LOGISTICS_HISTORY_FIXED_HOST_ROLE_REQUIRED'using errcode='42501';end if;
  if current_setting('transaction_isolation')not in('repeatable read','serializable')or current_setting('transaction_read_only')<>'off'then raise exception 'LOGISTICS_HISTORY_HELD_WRITE_RR_REQUIRED'using errcode='25001';end if;
- if p_host_country is null or p_host_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or p_source_country is distinct from 'COUNTRY_02'or p_facility is distinct from 'OPEN-02-REFINED_FUEL'then raise exception 'LOGISTICS_HISTORY_EXACT_SCOPE_REQUIRED'using errcode='22023';end if;
+ if p_host_country is null or p_host_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or p_source_country is null or p_source_country!~'^COUNTRY_(0[1-9]|[1-6][0-9]|70)$'or p_facility is distinct from 'OPEN-'||substring(p_source_country from 9 for 2)||'-REFINED_FUEL'then raise exception 'LOGISTICS_HISTORY_EXACT_SCOPE_REQUIRED'using errcode='22023';end if;
  -- The PROJECTION lane has EXECUTE only for the inaccessible projection owner,
  -- never the effective runtime reader/publisher. Its fixed parent owns host
  -- metadata authorization; this nested function independently checks that

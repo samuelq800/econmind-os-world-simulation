@@ -22,6 +22,10 @@ export const INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256 =
   'de6ad8ff58ff0180706b6bc6b4d548fd2d3404c4749cf71d91845474b19fddb0';
 export const INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256 =
   'a8c9a584e88c270d297c9758341b552654905af9a9489d2de3bf1b6e20b4c3ff';
+export const INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION =
+  'INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_FIRST_DAY_20261108_V2' as const;
+export const INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256 =
+  '67214ceb7fe7bce02035827ec75de21da804e35e1831da55a7e637a3f11e25eb';
 const SOURCE_HASHES = Object.freeze({
   'domestic-access.json':
     '2b8e6102479031314ca91560a81f485edb671ab74d233c70e1da40da0be32a09',
@@ -128,7 +132,9 @@ export interface IndustryInternalLogisticsSite {
 }
 export interface IndustryInternalLogisticsSourceData {
   readonly classification: 'DATA_ONLY_NAMED_HANDOVER_SOURCE_NOT_AUTHORITY';
-  readonly policyVersion: typeof INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION;
+  readonly policyVersion:
+    | typeof INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION
+    | typeof INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION;
   readonly worldId: string;
   readonly seedId: string;
   readonly seedFingerprint: string;
@@ -231,9 +237,12 @@ function deriveSource(
       | undefined;
   }>,
 ): Readonly<IndustryInternalLogisticsSource> {
+  const policySha = input.sha256Hex(input.policyRawBytes),
+    multiCountry =
+      policySha === INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256;
   if (
-    input.sha256Hex(input.policyRawBytes) !==
-    INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256
+    !multiCountry &&
+    policySha !== INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256
   )
     invalid('EXACT_VERSIONED_LOGISTICS_POLICY_REQUIRED');
   if (
@@ -252,6 +261,13 @@ function deriveSource(
     'actualSiteFact',
   );
   Object.values(site).forEach(ref);
+  const countrySuffix = multiCountry
+    ? /^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.exec(site.countryRef)?.[1]
+    : '02';
+  if (!countrySuffix) invalid('ACTUAL_FINITE_LOGISTICS_COUNTRY_REQUIRED');
+  const warehouseId = 'WAREHOUSE-' + countrySuffix,
+    gateId = 'GATE-' + countrySuffix;
+
   const facility = selected(
     input.sourceBytes['facilities.json'],
     SOURCE_HASHES['facilities.json'],
@@ -259,13 +275,21 @@ function deriveSource(
     input.sha256Hex,
   );
   if (
-    site.facilityRef !== 'OPEN-02-REFINED_FUEL' ||
-    site.countryRef !== 'COUNTRY_02' ||
+    site.facilityRef !== 'OPEN-' + countrySuffix + '-REFINED_FUEL' ||
+    site.countryRef !== 'COUNTRY_' + countrySuffix ||
+    (multiCountry &&
+      (site.sourceCountryId !== 'visual-territory-' + countrySuffix ||
+        site.sourceOperatorId !== 'OP-' + countrySuffix ||
+        facility.projectId !== 'PROJECT-15')) ||
     facility.countryId !== site.sourceCountryId ||
     facility.operatorId !== site.sourceOperatorId ||
     facility.constructionStatusProposal !== 'OPENING_EXISTING_ASSET'
   )
-    invalid('ADOPTED_EXISTING_C2_SITE_REQUIRED');
+    invalid(
+      multiCountry
+        ? 'ADOPTED_EXISTING_COUNTRY_REFINERY_REQUIRED'
+        : 'ADOPTED_EXISTING_C2_SITE_REQUIRED',
+    );
   const route = selected(
     input.sourceBytes['domestic-access.json'],
     SOURCE_HASHES['domestic-access.json'],
@@ -275,11 +299,13 @@ function deriveSource(
   const stock = selected(
     input.sourceBytes['stocks.json'],
     SOURCE_HASHES['stocks.json'],
-    'STOCK-02-CRUDE_OIL',
+    'STOCK-' + countrySuffix + '-CRUDE_OIL',
     input.sha256Hex,
   );
+  if (multiCountry && /^0(?:[.]0+)?$/u.test(String(route.distanceKmEstimate)))
+    invalid('POSITIVE_SOURCE_CAPACITY_MASS_DISTANCE_REQUIRED');
   const logisticsEmploymentSources = Object.freeze(
-    ['WAREHOUSE-02', 'GATE-02'].map((id) => {
+    [warehouseId, gateId].map((id) => {
       const row = selected(
         input.sourceBytes['facilities.json'],
         SOURCE_HASHES['facilities.json'],
@@ -322,11 +348,11 @@ function deriveSource(
   if (
     route.countryId !== site.sourceCountryId ||
     route.fromId !== site.facilityRef ||
-    route.toId !== 'GATE-02' ||
+    route.toId !== gateId ||
     route.status !== 'NOT_SURVEYED_NOT_OPERATIONAL' ||
     stock.countryId !== site.sourceCountryId ||
     stock.ownerId !== site.sourceOperatorId ||
-    stock.warehouseId !== 'WAREHOUSE-02' ||
+    stock.warehouseId !== warehouseId ||
     stock.commodityId !== commodity.id ||
     stock.unit !== commodity.unit
   )
@@ -338,7 +364,7 @@ function deriveSource(
     a.countryId !== site.countryRef ||
     a.commodityId !== commodity.id ||
     a.unit !== commodity.unit ||
-    a.physicalLocationId !== 'LOCATION_WAREHOUSE_02' ||
+    a.physicalLocationId !== 'LOCATION_WAREHOUSE_' + countrySuffix ||
     a.bucket !== 'AVAILABLE' ||
     a.titleHolderId !== site.operatorRef ||
     a.riskBearerId !== site.operatorRef ||
@@ -351,7 +377,9 @@ function deriveSource(
     invalid('REAL_DISTINCT_FACILITY_HANDOVER_LOCATION_REQUIRED');
   const data: Readonly<IndustryInternalLogisticsSourceData> = Object.freeze({
     classification: 'DATA_ONLY_NAMED_HANDOVER_SOURCE_NOT_AUTHORITY',
-    policyVersion: INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION,
+    policyVersion: multiCountry
+      ? INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION
+      : INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION,
     worldId: seed.worldId,
     seedId: seed.seedId,
     seedFingerprint: seed.fingerprint,

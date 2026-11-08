@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "industry-internal-logistics-first-day-derived-policy-v2",
+  "policyVersion": "INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_FIRST_DAY_20261108_V2",
+  "classification": "DERIVED_COUNTRY_SOURCE_MAPPING_UNDER_EXISTING_USER_ADOPTION_NOT_NEW_APPROVAL",
+  "predecessor": {
+    "path": "config/postwar-genesis/industry-internal-logistics-first-day.v1.json",
+    "rawSha256": "a8c9a584e88c270d297c9758341b552654905af9a9489d2de3bf1b6e20b4c3ff",
+    "meaning": "Retain old C2 source/event/replay identity unchanged"
+  },
+  "existingAdoptions": [
+    {
+      "path": "docs/governance/owner-inputs/2026-11-01/INDUSTRY_FIRST_DAY_USER_ADOPTION.original.json",
+      "rawSha256": "8d5fb70a2b2250201d623aa7898a95d48540083d6fa316a1b8e920abca0fd9d6"
+    },
+    {
+      "path": "docs/reports/office-connection/INDUSTRY_UTILITIES_ADOPTION_20261101.json",
+      "rawSha256": "de6ad8ff58ff0180706b6bc6b4d548fd2d3404c4749cf71d91845474b19fddb0"
+    }
+  ],
+  "scope": {
+    "newScenarioOnly": true,
+    "firstSimulatedDayOnly": true,
+    "startsAtSimTime": "0",
+    "endsAtSimTime": "86400000",
+    "selection": "ACTUAL_ADMITTED_EXISTING_REFINERY_SITE_WITH_SAME_COUNTRY_OP_WAREHOUSE_AND_DOMESTIC_ACCESS",
+    "sameOperatorOnly": true,
+    "preserveTitleAndRisk": true,
+    "strictlyPositiveActualDistanceRequired": true,
+    "actualCountryDifferencesPreserved": true
+  },
+  "selection": {
+    "facility": "Actual OPEN-NN-REFINED_FUEL / PROJECT-15 opening facility",
+    "country": "Actual admitted COUNTRY_NN matched to raw visual-territory-NN",
+    "stock": "Actual STOCK-NN-CRUDE_OIL held at actual WAREHOUSE-NN",
+    "namedHandover": "Actual warehouse to admitted facility location; preserve raw DOM-OPEN-NN-REFINED_FUEL from/to/status",
+    "labour": "Actual same-OP WAREHOUSE-NN and GATE-NN LOGISTICS E03 origins; independent WORK and actual qualified paid inputs required"
+  },
+  "cost": {
+    "budgetReference": {
+      "amount": "0.015",
+      "currency": "GCU",
+      "perUnit": "tonne_kilometre"
+    },
+    "budgetReferenceIsExpenseOrPrice": false,
+    "noSelfPaySelfReceive": true,
+    "manufacturingWorkReusableAsLogisticsWork": false,
+    "onlyActualIndependentServiceWorkAndPaidInputsOnce": true,
+    "newVehicleFuelOrCrewCoefficients": false
+  },
+  "sourceRawSha256": {
+    "domestic-access.json": "2b8e6102479031314ca91560a81f485edb671ab74d233c70e1da40da0be32a09",
+    "facilities.json": "049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485",
+    "stocks.json": "d52e68856dabdda6d5488043291ee92100f22c16ea44d34d2000170402ee8153",
+    "commodity-catalog.json": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b"
+  },
+  "notCreated": [
+    "admission",
+    "mandate",
+    "source authority",
+    "WORK",
+    "payment",
+    "handover receipt",
+    "inventory movement",
+    "World or Clock start",
+    "service staffing",
+    "new economic rule",
+    "international transfer authority",
+    "zero-distance execution"
+  ],
+  "massBasis": {
+    "commodityId": "CRUDE_OIL",
+    "unit": "barrel",
+    "tonnesPerUnit": "0.136"
+  }
+}

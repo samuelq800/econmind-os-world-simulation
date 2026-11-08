@@ -39,7 +39,8 @@ import {
   prepareIndustryInternalLogisticsPlan,
   readIndustryInternalLogisticsPlan,
   readIndustryInternalLogisticsSource,
-  INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION,
+  INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION,
+  INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256,
   INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256,
   INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256,
   IndustryInternalLogisticsError,
@@ -425,8 +426,12 @@ export function prepareIndustryInternalLogisticsReplaySources(
       if (p[k] !== u[k] || l[k] !== u[k])
         invalid('SAME_ACTUAL_LOGISTICS_WORLD_SITE_OP_SEED_REQUIRED');
     if (
-      u.policyVersion !== INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION ||
-      u.policyRawSha256 !== INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256 ||
+      u.policyVersion !== p.policyVersion ||
+      u.policyRawSha256 !==
+        (p.policyVersion ===
+        INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION
+          ? INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256
+          : INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256) ||
       u.userAdoptionRawSha256 !==
         INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256
     )
