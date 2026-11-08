@@ -172,7 +172,7 @@
       "path": "database/upgrades/postwar-industry-water-grant-scope-upgrade.sql",
       "rawSha256": "6f4dec7dbf60001e3c1953e326ce71e97d876b32c30e9e32c5100ccc486aa360",
       "transaction": "SOURCE_BEGIN_COMMIT",
-      "repeat": "REJECT_EXACT_OLD_PRECONDITION",
+      "repeat": "IDEMPOTENT_EXACT_SUCCESSOR_ONLY",
       "requires": [
         "database/upgrades/postwar-captain-allocation-options-upgrade.sql",
         "database/upgrades/postwar-industry-first-day-refinery-upgrade.sql",

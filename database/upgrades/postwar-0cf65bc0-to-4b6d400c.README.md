@@ -40,8 +40,11 @@ rollback of an earlier commit. Repeated execution deliberately fails with
 `PROPOSAL_UPGRADE_EXACT_OLD_FUNCTION_REQUIRED`; it is not a fresh installer. Any
 unexpected definition, ACL, owner or RLS state also rejects. If COMMIT outcome is
 unknown, stop, inspect the exact catalog/data on a new connection and reconcile
-it; do not automatically rerun. No DROP/CASCADE, RLS/trigger disabling, table DML,
-new role or runtime privilege grant occurs in the upgrade candidates.
+it; do not automatically rerun. These four function-only transactions perform no
+DROP/CASCADE, RLS/trigger disabling, table DML, new role or runtime privilege grant.
+The separate GRANT scope transaction replaces one precisely checked primary-key
+constraint and adds the scoped recovery overload under the existing publisher
+role; its fixed SQL hash is the only matching classifier exception.
 
 4. `postwar-industry-utility-source-functions-upgrade.sql`: replaces only the
    utility-source publisher and water-command historical-evidence getter with
