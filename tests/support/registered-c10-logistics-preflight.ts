@@ -6,10 +6,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import type { PostwarNativeReferenceMarker } from './postwar-native-reference-db.js';
-import {
-  POSTWAR_INDUSTRY_SOURCE_LOCK,
-  inspectPostwarIndustryOriginalDocument,
-} from '../../apps/world-worker/src/persistence/postwar-industry-production-source.js';
+import { POSTWAR_INDUSTRY_SOURCE_LOCK } from '../../apps/world-worker/src/persistence/postwar-industry-production-source.js';
+import { inspectRefinery21OriginalText } from './postwar-refinery21-source-assembly.js';
 import { INDUSTRY_FIRST_DAY_READ_QUERY } from '../../apps/world-worker/src/persistence/postwar-industry-first-day-source.js';
 import { INDUSTRY_UTILITY_READ_QUERY } from '../../apps/world-worker/src/persistence/postwar-industry-utility-source.js';
 import { INDUSTRY_CURRENT_AUTHORIZATION_LOCK_QUERY } from '../../apps/world-worker/src/persistence/postwar-industry-current-authorization.js';
@@ -167,7 +165,7 @@ function one<T>(rows: readonly T[]): T {
   assert.equal(rows.length, 1, 'C10_EXACT_ONE_ACTUAL_ROW_REQUIRED');
   return rows[0]!;
 }
-function boundedOriginal(
+function boundedOriginalBytes(
   row: Record<string, unknown>,
   textField: string,
   hashField: string,
@@ -181,7 +179,26 @@ function boundedOriginal(
       sha(text) === hash,
     'C10_ACTUAL_BOUNDED_ORIGINAL_HASH_REQUIRED',
   );
-  return JSON.parse(text) as Record<string, unknown>;
+  return text;
+}
+function boundedOriginal(
+  row: Record<string, unknown>,
+  textField: string,
+  hashField: string,
+) {
+  return JSON.parse(boundedOriginalBytes(row, textField, hashField)) as Record<
+    string,
+    unknown
+  >;
+}
+/** The production inspector consumes exact numeric source lexemes, not rounded
+ * JavaScript Numbers. Preserve the original byte/hash check before decoding. */
+export function inspectRegisteredC10ProductionOriginal(
+  row: Record<string, unknown>,
+) {
+  return inspectRefinery21OriginalText(
+    boundedOriginalBytes(row, 'document_text', 'document_sha256'),
+  );
 }
 
 export async function inspectRegisteredC10LogisticsPreflight(
@@ -598,10 +615,9 @@ export async function inspectRegisteredC10LogisticsPreflight(
       checks.push(
         await probe(w, 'LOW_READER_ACTUAL_PRODUCTION_ORIGINAL', async () => {
           const r = one(
-              (await w.query(POSTWAR_INDUSTRY_SOURCE_LOCK, args)).rows,
-            ),
-            b = boundedOriginal(r, 'document_text', 'document_sha256');
-          const original = inspectPostwarIndustryOriginalDocument(b);
+            (await w.query(POSTWAR_INDUSTRY_SOURCE_LOCK, args)).rows,
+          );
+          const original = inspectRegisteredC10ProductionOriginal(r);
           assert.equal(original.scope.countryId, country);
           assert.equal(original.scope.facilityId, facility);
           return {
