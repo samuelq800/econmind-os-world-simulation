@@ -402,13 +402,15 @@ export function createPostwarRefinery21AssemblyCheck(
                 head,
                 expectedPins: input.pins,
               });
-              return d
-                ? {
-                    sourceRef: d.sourceRef,
-                    sourceSha256: d.rawSha256,
-                    outputUnit: d.data.outputUnit,
-                  }
-                : null;
+              if (!d) return null;
+              const outputUnit = record(d.data.recipe).outputUnit;
+              if (typeof outputUnit !== 'string' || !outputUnit.trim())
+                throw Error('REFINERY21_ACTUAL_RECIPE_OUTPUT_UNIT_REQUIRED');
+              return {
+                sourceRef: d.sourceRef,
+                sourceSha256: d.rawSha256,
+                outputUnit,
+              };
             });
             const utility = await probe(tx, async () => {
               const r = await tx.query<SourceRow>(
