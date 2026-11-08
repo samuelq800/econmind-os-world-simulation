@@ -117,6 +117,7 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
     readonly currentFinancialCoverage?: FinancialReadSource['currentFinancialCoverage'];
     readonly currentCaptainCoverage?: PostwarCaptainCurrentSource['currentCaptainCoverage'];
     readonly currentTradeCoverage?: PostwarTradeCurrentSource['currentTradeCoverage'];
+    readonly currentCaptainAllocationOptions?: PostwarCaptainCurrentSource['currentCaptainAllocationOptions'];
     readonly currentIndustryLabourCoverage?: PostwarIndustryLabourCurrentSource['currentIndustryLabourCoverage'];
     readonly originWorldVersion?: string;
     readonly originEventSequence?: string;
@@ -200,6 +201,7 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             currentFinancialCoverage?: SuccessPage['source']['currentFinancialCoverage'];
             currentCaptainCoverage?: SuccessPage['source']['currentCaptainCoverage'];
             currentTradeCoverage?: SuccessPage['source']['currentTradeCoverage'];
+            currentCaptainAllocationOptions?: SuccessPage['source']['currentCaptainAllocationOptions'];
             originWorldVersion?: string;
             originEventSequence?: string;
             observedHead?: Readonly<{
@@ -415,6 +417,12 @@ function pageBody(
           : {
               currentIndustryUtilityPlanningCoverage:
                 page.source.currentIndustryUtilityPlanningCoverage,
+            }),
+        ...(page.source.currentCaptainAllocationOptions === undefined
+          ? {}
+          : {
+              currentCaptainAllocationOptions:
+                page.source.currentCaptainAllocationOptions,
             }),
         ...(page.source.currentCaptainCoverage === undefined
           ? {}

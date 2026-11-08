@@ -4,6 +4,11 @@ import {
 } from '@econmind/core/postwar-industry-utility-planning-contract';
 import { renderIndustryUtilityForm } from '../industry-utility/form.js';
 import {
+  parsePostwarCaptainAllocationOptions,
+  parsePostwarCaptainPoliticalCapitalRow,
+} from '@econmind/core/postwar-captain-current-contract';
+import { renderCaptainCapitalForm } from '../captain-capital/form.js';
+import {
   INDUSTRY_RUN_PARAMETERS_DATASET,
   parseIndustryRunParameterRow,
 } from '@econmind/core/postwar-industry-run-parameters-contract';
@@ -153,6 +158,30 @@ export function installOfficeCommand(
         'Only a current server-authorized seat can submit an installed manual family. Industry supports source-bound RUN plans and service schedules selected from current data; an acknowledgement does not establish work, wages, delivery or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
       ),
     );
+    if (currentView()?.role === 'captain') {
+      try {
+        const page = state.runtimePage;
+        if (page?.dataset !== 'political-capital-current')
+          throw Error('CURRENT_CAPITAL_REQUIRED');
+        dialog.append(
+          renderCaptainCapitalForm(document, {
+            rows: page.rows.map(parsePostwarCaptainPoliticalCapitalRow),
+            options: parsePostwarCaptainAllocationOptions(
+              page.source.currentCaptainAllocationOptions,
+            ),
+            enabled: state.canStage,
+            stage: (draft) => owner.stageCaptainCapital(draft),
+          }),
+        );
+      } catch {
+        dialog.append(
+          node(
+            'p',
+            '政治资本操作未开放：需要当前七桶余额和实际登记的依据原件。',
+          ),
+        );
+      }
+    }
     if (currentView()?.role === 'industry') {
       const rows =
         state.runParametersPage?.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
@@ -418,6 +447,34 @@ export function installOfficeCommand(
     notify();
   });
   sync();
+  document.addEventListener?.(
+    'click',
+    (event) => {
+      const target =
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>(
+              '[data-module-card="captain-8"],[data-cmd="module"][data-id="captain-8"],[data-cmd="country-module"][data-id="captain-8"]',
+            )
+          : null;
+      if (
+        !target ||
+        currentView()?.role !== 'captain' ||
+        !root?.contains(target)
+      )
+        return;
+      sync();
+      const state = controller.getState();
+      if (state.status === 'MISSING' || state.status === 'DENIED' || !dialog)
+        return; // existing explicit blocked-module UI remains in force
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      dialog.showModal();
+      void controller.refresh().finally(() => {
+        reconcile(true);
+      });
+    },
+    true,
+  );
   return Object.freeze({
     connect(binding: OfficeCommandBinding) {
       sync();

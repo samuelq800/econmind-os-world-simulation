@@ -7,6 +7,10 @@ import {
   type IndustryUtilityDraft,
 } from '../industry-utility/form.js';
 import {
+  buildCaptainCapitalRequest,
+  type CaptainCapitalDraft,
+} from '../captain-capital/form.js';
+import {
   INDUSTRY_RUN_PARAMETERS_DATASET,
   parseIndustryRunParameterRow,
 } from '@econmind/core/postwar-industry-run-parameters-contract';
@@ -557,6 +561,37 @@ export function createOfficeCommandController(
       }),
     stage: stageIntent,
     restoreOriginalForRecovery,
+    stageCaptainCapital(draft: CaptainCapitalDraft) {
+      const head = currentHead();
+      if (
+        !b ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'CAPTAIN' ||
+        runtimePage?.dataset !== 'political-capital-current' ||
+        !head
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildCaptainCapitalRequest({
+            rows: runtimePage.rows,
+            options: runtimePage.source.currentCaptainAllocationOptions,
+            coverage: runtimePage.source.currentCaptainCoverage,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: head.worldVersion,
+            eventSequence: head.eventSequence,
+            requestId: requestId(),
+            commandId: 'CAPTAIN_ALLOCATION_' + id,
+            idempotencyKey: 'CAPTAIN_ALLOCATION_KEY_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
+    },
     stageIndustryRun(draft: IndustryRunDraft) {
       if (
         !b ||

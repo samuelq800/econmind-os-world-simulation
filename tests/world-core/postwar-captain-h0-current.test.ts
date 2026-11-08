@@ -12,8 +12,11 @@ import {
 import { createPostwarCaptainCurrentProjectionStore } from '../../apps/world-worker/src/persistence/postwar-captain-current-projection.js';
 import { createPostwarCaptainOpeningCurrentPublisher } from '../../apps/world-worker/src/persistence/postwar-captain-current-publication.js';
 import { canonicalSerialize } from '../../packages/core/src/serialization/canonical.js';
+import { buildCaptainCapitalRequest } from '../../apps/world-web/src/captain-capital/form.js';
+import { buildManualOfficeCommandIntent } from '../../apps/world-worker/src/intake/manual-office-command-intent.js';
 import {
   parsePostwarCaptainCurrentCoverage,
+  parsePostwarCaptainAllocationOptions,
   POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
 } from '../../packages/core/src/read-models/postwar-captain-current-contract.js';
 import type {
@@ -35,6 +38,7 @@ interface TestDatabase {
   ): Promise<{ rows: Row[]; affectedRows?: number }>;
   close(): Promise<void>;
 }
+let actualReasonRef = '';
 describe('actual Captain admitted-genesis H0 current publication and reads', () => {
   let db: TestDatabase,
     f: Awaited<ReturnType<typeof installPostwarNarrowTradeCutoffFixture>>,
@@ -181,6 +185,7 @@ describe('actual Captain admitted-genesis H0 current publication and reads', () 
         (p) => p.adoption.countryId === f.seller,
       )!;
     adoptionRef = packet.adoption.adoptionRef;
+    actualReasonRef = packet.reasons[0]!.factRef;
     const text = canonicalSerialize(packet),
       crypto = await import('node:crypto'),
       sha = crypto.createHash('sha256').update(text).digest('hex');
@@ -251,6 +256,57 @@ describe('actual Captain admitted-genesis H0 current publication and reads', () 
       'ADMITTED_OPENING_POLITICAL_CAPITAL_GENESIS',
     );
     expect(r.rows).toEqual(first.rows);
+    const options = parsePostwarCaptainAllocationOptions(
+      r.source.currentCaptainAllocationOptions,
+    );
+    expect(options.countryId).toBe(f.seller);
+    expect(options.originalPacketSha256).toBe(
+      r.source.currentCaptainCoverage.originalPacketSha256,
+    );
+    expect(options.reasons.map((x) => x.factRef)).toEqual([actualReasonRef]);
+    const request = buildCaptainCapitalRequest({
+      rows: r.rows,
+      options,
+      coverage: r.source.currentCaptainCoverage,
+      draft: {
+        fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
+        toBucket: 'FISCAL_REFORM',
+        amount: '2.5',
+        reasonFactRef: actualReasonRef,
+      },
+      worldId: f.world,
+      countryId: f.seller,
+      worldVersion: '0',
+      eventSequence: '0',
+      requestId: '11111111-1111-4111-8111-111111111111',
+      commandId: 'COMMAND_ACTUAL_CAPTAIN_FORM',
+      idempotencyKey: 'KEY_ACTUAL_CAPTAIN_FORM',
+    });
+    const command = buildManualOfficeCommandIntent({
+      request: request.request,
+      countryId: f.seller,
+      officeId: 'CAPTAIN',
+      authSubject: f.subject,
+      actor: 'ACTOR_TEST_ONLY_CAPTAIN_FORM',
+      simTime: '0',
+      submittedAtReal: new Date().toISOString(),
+      correlationId: 'CORRELATION_ACTUAL_CAPTAIN_FORM',
+    });
+    expect(JSON.parse(command.canonicalPayload)).toEqual({
+      schemaVersion: 'captain-political-capital-allocation-v1',
+      fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
+      toBucket: 'FISCAL_REFORM',
+      amount: { amount: '2.5', unit: 'political_capital' },
+      reasonFactRef: actualReasonRef,
+    });
+    expect(command.expectedWorldVersion).toBe('0');
+    expect(
+      (
+        await db.query<{ allowed: boolean }>(
+          "select has_function_privilege(current_user,'world_v2.postwar_captain_allocation_options(jsonb,text)','EXECUTE')as allowed",
+        )
+      ).rows[0]?.allowed,
+    ).toBe(false);
     expect(r.source.sourcePointer.lastCaptainEvent).toBeNull();
     const acl = await db.query(
       "select has_column_privilege(current_user,'world_v2.opening_seed','canonical_payload','SELECT')raw_seed,has_table_privilege(current_user,'world_v2.postwar_captain_h0_current_document','SELECT')raw_page,has_column_privilege(current_user,'world_v2.current_commit_authorization','authorization_version','UPDATE')auth_update",

@@ -3,6 +3,28 @@
 -- current projection schema. No role, membership, economic posting or default.
 begin;
 grant create on schema world_v2 to world_v2_captain_source_owner,world_v2_postwar_projection_owner;
+-- Pure bounded UI metadata only, from the exact packet already validated by
+-- the fixed read-only original getter. No new source, permission or factRef.
+create function world_v2.postwar_captain_allocation_options(p_packet jsonb,p_country text)returns jsonb
+language plpgsql immutable set search_path=pg_catalog as $$
+declare original jsonb;body jsonb;items jsonb:='[]';result jsonb;
+begin
+ if p_packet is null then return null;end if;
+ if p_packet->'adoption'->>'countryId'is distinct from p_country or p_packet->>'packetSha256'!~'^[a-f0-9]{64}$'or jsonb_typeof(p_packet->'reasons')is distinct from'array'or jsonb_array_length(p_packet->'reasons')not between 1 and 64 then raise exception 'CAPTAIN_ALLOCATION_ACTUAL_PACKET_REQUIRED'using errcode='23514';end if;
+ for original in select x from jsonb_array_elements(p_packet->'reasons')x loop
+  body:=(original->>'canonicalPayload')::jsonb;
+  if original->>'payloadSHA256'is distinct from encode(sha256(convert_to(original->>'canonicalPayload','UTF8')),'hex')or body->>'schemaVersion'is distinct from'captain-operating-reason-v1'or body->>'countryId'is distinct from p_country or body->'reason'->>'countryRef'is distinct from p_country then raise exception 'CAPTAIN_ALLOCATION_ACTUAL_REASON_REQUIRED'using errcode='23514';end if;
+  items:=items||jsonb_build_array(jsonb_build_object('factRef',original->'factRef','sourceRef',original->'sourceRef','payloadSha256',original->'payloadSHA256','revision',original->'revision','sourceClass',original->'sourceClass','effectiveFromSimTime',original->'effectiveFromSimTime','effectiveUntilSimTime',original->'effectiveUntilSimTime','recordRef',body->'reason'->'recordRef','reason',body->'reason'->'reason'));
+ end loop;
+ result:=jsonb_build_object('schemaVersion','postwar-captain-allocation-options-v1','classification','REGISTERED_REASON_REFERENCES_NOT_ALLOCATION_APPROVAL','countryId',p_country,'originalPacketSha256',p_packet->'packetSha256','reasons',items);
+ -- An oversized options list closes this form, without breaking an existing
+ -- current-balance page or silently truncating its registered originals.
+ if octet_length(result::text)>16384 then return null;end if;
+ return result;
+end;$$;
+alter function world_v2.postwar_captain_allocation_options(jsonb,text)owner to world_v2_postwar_projection_owner;
+revoke all on function world_v2.postwar_captain_allocation_options(jsonb,text)from public;
+
 -- The projection owner receives a fixed small original, never table access.
 create function world_v2.postwar_captain_projection_original(p_world text,p_country text,p_fp text,p_admission text)returns jsonb
 language plpgsql security definer set search_path=pg_catalog as $$
@@ -198,7 +220,7 @@ declare s record;d world_v2.postwar_captain_current_document%rowtype;original js
  select coalesce(jsonb_agg(x order by n),'[]')into selected from jsonb_array_elements(d.rows_text::jsonb)with ordinality q(x,n)where n>p_offset and n<=p_offset+p_limit;returned:=jsonb_array_length(selected);
  return query select case when returned=0 then'EMPTY'else'PAGE'end,
  jsonb_build_object('worldId',s.world_id,'countryId',s.country_id,'officeId',s.office_id,'authSubject',s.auth_subject,'teamId',s.team_id,'authorizationVersion',s.authorization_revision,'scopeKey',s.scope_key,'seatRef',s.seat_ref),
- jsonb_build_object('dataNature','ADMITTED_CURRENT_POLITICAL_CAPITAL_MIXED_PREFIX','sourceVersion',d.source_version,'sourceRevision',d.source_revision,'seedId',s.seed_id,'seedFingerprint',s.seed_fingerprint,'admissionRef',s.admission_ref,'modelVersion',s.model_version,'replayBinding',s.replay_binding,'sourceBundleSha256',s.source_bundle_sha256,'canonicalSeedSha256',d.source_pointer->>'canonicalSeedSha256','worldVersion',d.world_version::text,'eventSequence',d.event_sequence::text,'originWorldVersion',d.origin_world_version::text,'originEventSequence',d.origin_event_sequence::text,'observedHead',jsonb_build_object('worldVersion',d.world_version::text,'eventSequence',d.event_sequence::text),'currentCaptainCoverage',d.coverage,'pageHash',d.rows_sha256,'returnedRowsHash',encode(sha256(convert_to(selected::text,'UTF8')),'hex'),'hashAlgorithm','POSTGRES_JSONB_TEXT_UTF8_SHA256','sourcePointer',d.source_pointer),
+ jsonb_build_object('dataNature','ADMITTED_CURRENT_POLITICAL_CAPITAL_MIXED_PREFIX','sourceVersion',d.source_version,'sourceRevision',d.source_revision,'seedId',s.seed_id,'seedFingerprint',s.seed_fingerprint,'admissionRef',s.admission_ref,'modelVersion',s.model_version,'replayBinding',s.replay_binding,'sourceBundleSha256',s.source_bundle_sha256,'canonicalSeedSha256',d.source_pointer->>'canonicalSeedSha256','worldVersion',d.world_version::text,'eventSequence',d.event_sequence::text,'originWorldVersion',d.origin_world_version::text,'originEventSequence',d.origin_event_sequence::text,'observedHead',jsonb_build_object('worldVersion',d.world_version::text,'eventSequence',d.event_sequence::text),'currentCaptainCoverage',d.coverage,'pageHash',d.rows_sha256,'returnedRowsHash',encode(sha256(convert_to(selected::text,'UTF8')),'hex'),'hashAlgorithm','POSTGRES_JSONB_TEXT_UTF8_SHA256','sourcePointer',d.source_pointer)||case when world_v2.postwar_captain_allocation_options(original,s.country_id)is null then '{}'::jsonb else jsonb_build_object('currentCaptainAllocationOptions',world_v2.postwar_captain_allocation_options(original,s.country_id))end,
  jsonb_build_object('offset',p_offset,'limit',p_limit,'returned',returned,'total',7,'nextOffset',case when p_offset+returned<7 then p_offset+returned else null end),selected::text;
 end;$$;
 alter function world_v2.read_postwar_captain_current_page(text,integer,integer,text)owner to world_v2_postwar_projection_owner;

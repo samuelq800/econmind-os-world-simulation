@@ -249,3 +249,89 @@ export function parsePostwarCaptainCurrentCoverage(
     ...(pageProof === undefined ? {} : { pageProof }),
   }) as unknown as Readonly<PostwarCaptainCurrentCoverage>;
 }
+
+/** Actual registered reason references, read under the same authorized current
+ * source snapshot. This immutable metadata is not allocation approval. */
+export interface PostwarCaptainAllocationOptions {
+  readonly schemaVersion: 'postwar-captain-allocation-options-v1';
+  readonly classification: 'REGISTERED_REASON_REFERENCES_NOT_ALLOCATION_APPROVAL';
+  readonly countryId: string;
+  readonly originalPacketSha256: string;
+  readonly reasons: readonly Readonly<{
+    factRef: string;
+    sourceRef: string;
+    payloadSha256: string;
+    revision: string;
+    sourceClass: 'ADMITTED_ORIGINAL' | 'TEST_ONLY';
+    effectiveFromSimTime: string;
+    effectiveUntilSimTime: string | null;
+    recordRef: string;
+    reason: string;
+  }>[];
+}
+export function parsePostwarCaptainAllocationOptions(
+  value: unknown,
+): Readonly<PostwarCaptainAllocationOptions> {
+  const r = record(value, [
+    'schemaVersion',
+    'classification',
+    'countryId',
+    'originalPacketSha256',
+    'reasons',
+  ]);
+  if (
+    r.schemaVersion !== 'postwar-captain-allocation-options-v1' ||
+    r.classification !==
+      'REGISTERED_REASON_REFERENCES_NOT_ALLOCATION_APPROVAL' ||
+    typeof r.countryId !== 'string' ||
+    !/^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(r.countryId) ||
+    typeof r.originalPacketSha256 !== 'string' ||
+    !/^[a-f0-9]{64}$/u.test(r.originalPacketSha256) ||
+    !Array.isArray(r.reasons) ||
+    r.reasons.length < 1 ||
+    r.reasons.length > 64 ||
+    JSON.stringify(value).length > 16384
+  )
+    invalid('BOUNDED_ALLOCATION_OPTIONS_REQUIRED');
+  const reasons = r.reasons.map((v) => {
+    const x = record(v, [
+      'factRef',
+      'sourceRef',
+      'payloadSha256',
+      'revision',
+      'sourceClass',
+      'effectiveFromSimTime',
+      'effectiveUntilSimTime',
+      'recordRef',
+      'reason',
+    ]);
+    if (
+      !id(x.factRef) ||
+      !['sourceRef', 'revision', 'recordRef'].every(
+        (k) =>
+          typeof x[k] === 'string' &&
+          String(x[k]).trim().length > 0 &&
+          String(x[k]).length <= 8192,
+      ) ||
+      typeof x.payloadSha256 !== 'string' ||
+      !/^[a-f0-9]{64}$/u.test(x.payloadSha256) ||
+      !['ADMITTED_ORIGINAL', 'TEST_ONLY'].includes(String(x.sourceClass)) ||
+      !uint(x.effectiveFromSimTime) ||
+      (x.effectiveUntilSimTime !== null &&
+        (!uint(x.effectiveUntilSimTime) ||
+          BigInt(x.effectiveUntilSimTime) <=
+            BigInt(String(x.effectiveFromSimTime)))) ||
+      typeof x.reason !== 'string' ||
+      !x.reason.trim() ||
+      x.reason.length > 8192
+    )
+      invalid('ACTUAL_REGISTERED_REASON_REFERENCE_REQUIRED');
+    return Object.freeze({ ...x });
+  });
+  if (new Set(reasons.map((x) => x.factRef)).size !== reasons.length)
+    invalid('DISTINCT_REASON_REFERENCES_REQUIRED');
+  return Object.freeze({
+    ...r,
+    reasons: Object.freeze(reasons),
+  }) as unknown as Readonly<PostwarCaptainAllocationOptions>;
+}

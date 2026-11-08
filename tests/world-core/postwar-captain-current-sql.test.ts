@@ -14,6 +14,7 @@ import {
 import { createCaptainSourcePublicationPacket } from '../../apps/world-worker/src/persistence/postwar-captain-source-publication.js';
 import type { CaptainOperatingOriginal } from '../../apps/world-worker/src/persistence/captain-operating-source-custody.js';
 import type { FinanceNativeBudgetCanonicalFrame } from '../../packages/core/src/commands/finance-budget-native.js';
+import { parsePostwarCaptainAllocationOptions } from '../../packages/core/src/read-models/postwar-captain-current-contract.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex'),
   hash = (v: unknown) => 'sha256:' + sha('SHA-256\n' + C.canonicalSerialize(v));
 const read = (p: string) =>
@@ -594,6 +595,18 @@ describe('Captain current exact reducer and complete mixed prefix SQL', () => {
       originWorldVersion: '0',
       originEventSequence: '0',
     });
+    const source = page.source as Record<string, unknown>,
+      options = parsePostwarCaptainAllocationOptions(
+        source.currentCaptainAllocationOptions,
+      );
+    expect(options.countryId).toBe(country);
+    expect(options.originalPacketSha256).toBe(
+      (source.currentCaptainCoverage as Record<string, unknown>)
+        .originalPacketSha256,
+    );
+    expect(options.reasons.map((r) => r.factRef)).toEqual([
+      'REASON_TEST_ONLY_COUNTRY_01',
+    ]);
     const rows = JSON.parse(r.rows[0]!.rows_text as string);
     expect(rows[0]).toMatchObject({
       balance: '40',

@@ -97,6 +97,25 @@ function fixture() {
     originEventSequence: '0',
     observedHead: { worldVersion: '3', eventSequence: '6' },
     currentCaptainCoverage: coverage,
+    currentCaptainAllocationOptions: {
+      schemaVersion: 'postwar-captain-allocation-options-v1',
+      classification: 'REGISTERED_REASON_REFERENCES_NOT_ALLOCATION_APPROVAL',
+      countryId: scope.countryId,
+      originalPacketSha256: raw,
+      reasons: [
+        {
+          factRef: 'REASON_TEST_ONLY_EXISTING',
+          sourceRef: 'SOURCE_TEST_ONLY',
+          payloadSha256: raw,
+          revision: '1',
+          sourceClass: 'TEST_ONLY',
+          effectiveFromSimTime: '0',
+          effectiveUntilSimTime: null,
+          recordRef: 'Record / section 1',
+          reason: 'Existing source basis, not this action approval.',
+        },
+      ],
+    },
     pageHash: raw,
     returnedRowsHash: raw,
     hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
@@ -318,6 +337,17 @@ describe('Captain fixed current API transport (TEST_ONLY protocol)', () => {
       globalWorldVersion: '3',
       originWorldVersion: '0',
       financialPostingCount: '6',
+    });
+    expect(source.currentCaptainAllocationOptions).toMatchObject({
+      originalPacketSha256: raw,
+      countryId: 'COUNTRY_01',
+      reasons: [
+        {
+          factRef: 'REASON_TEST_ONLY_EXISTING',
+          revision: '1',
+          recordRef: 'Record / section 1',
+        },
+      ],
     });
     const second = await f.call(
       f.request({

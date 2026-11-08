@@ -23,6 +23,7 @@ import {
   parsePostwarIndustryLabourCurrentRow,
 } from '@econmind/core/postwar-industry-labour-current-contract';
 import {
+  parsePostwarCaptainAllocationOptions,
   POSTWAR_CAPTAIN_CURRENT_NATURE,
   POSTWAR_CAPTAIN_OPENING_NATURE,
   POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
@@ -541,6 +542,16 @@ export function createPostwarRuntimeClient(
             page.total !== POSTWAR_CAPTAIN_CURRENT_BUCKETS.length
           )
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          if (source.currentCaptainAllocationOptions !== undefined) {
+            const options = parsePostwarCaptainAllocationOptions(
+              source.currentCaptainAllocationOptions,
+            );
+            if (
+              options.countryId !== c.identity.countryId ||
+              options.originalPacketSha256 !== coverage.originalPacketSha256
+            )
+              throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          }
           const capitals = rows.map(parsePostwarCaptainPoliticalCapitalRow);
           if (
             capitals.some((v) => v.countryId !== c.identity.countryId) ||

@@ -2,6 +2,8 @@
  * publisher, activation, or cached actor/admission/current-head decision. */
 import { createHash } from 'node:crypto';
 import {
+  parsePostwarCaptainAllocationOptions,
+  type PostwarCaptainAllocationOptions,
   POSTWAR_CAPTAIN_CURRENT_NATURE,
   POSTWAR_CAPTAIN_OPENING_NATURE,
   POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
@@ -36,6 +38,7 @@ export interface PostwarCaptainCurrentSource {
     readonly eventSequence: string;
   };
   readonly currentCaptainCoverage: PostwarCaptainCurrentCoverage;
+  readonly currentCaptainAllocationOptions?: PostwarCaptainAllocationOptions;
   readonly pageHash: string;
   readonly returnedRowsHash: string;
   readonly hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256';
@@ -218,6 +221,16 @@ export function createPostwarCaptainCurrentProjectionStore(config: {
         source.hashAlgorithm !== 'POSTGRES_JSONB_TEXT_UTF8_SHA256'
       )
         invalid('SOURCE_HEADER_REQUIRED');
+      if (source.currentCaptainAllocationOptions !== undefined) {
+        const options = parsePostwarCaptainAllocationOptions(
+          source.currentCaptainAllocationOptions,
+        );
+        if (
+          options.countryId !== scope.countryId ||
+          options.originalPacketSha256 !== coverage.originalPacketSha256
+        )
+          invalid('ALLOCATION_OPTIONS_ACTUAL_PACKET_MISMATCH');
+      }
       const pointer = obj(source.sourcePointer),
         parent = obj(pointer.canonicalSeedParent);
       if (

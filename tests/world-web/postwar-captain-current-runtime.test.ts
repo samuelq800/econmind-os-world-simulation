@@ -16,7 +16,11 @@ import {
 } from '../../apps/world-web/src/postwar-office-runtime/client.js';
 import { createPostwarRuntimeView } from '../../apps/world-web/src/postwar-office-runtime/view.js';
 import { officeProjectionFixture } from './office-projection-fixture.js';
-import { HostDocument } from './trusted-host-dom.js';
+import { HostDocument, HostElement } from './trusted-host-dom.js';
+import { createOfficeCommandController } from '../../apps/world-web/src/office-command/controller.js';
+import { installOfficeCommand } from '../../apps/world-web/src/office-command/view.js';
+import type { AuthenticatedOfficeCommandRequestDto } from '@econmind/core/authenticated-office-command-contract';
+import { AUTHENTICATED_COMMAND_RECOVERY_SCHEMA } from '@econmind/core/authenticated-command-recovery-contract';
 const requestId = '11111111-1111-4111-8111-111111111111',
   hash = 'sha256:' + 'a'.repeat(64);
 function fixture() {
@@ -171,6 +175,135 @@ function fixture() {
   };
 }
 afterEach(() => vi.unstubAllGlobals());
+const allocationOptions = {
+  schemaVersion: 'postwar-captain-allocation-options-v1',
+  classification: 'REGISTERED_REASON_REFERENCES_NOT_ALLOCATION_APPROVAL',
+  countryId: 'COUNTRY_01',
+  originalPacketSha256: 'b'.repeat(64),
+  reasons: [
+    {
+      factRef: 'REASON_TEST_ONLY_REGISTERED',
+      sourceRef: 'SOURCE_TEST_ONLY',
+      payloadSha256: 'd'.repeat(64),
+      revision: '1',
+      sourceClass: 'TEST_ONLY',
+      effectiveFromSimTime: '0',
+      effectiveUntilSimTime: null,
+      recordRef: 'Recorded basis / section 1',
+      reason: 'Explicit test basis, not an allocation approval.',
+    },
+  ],
+};
+function commandFixture(withOptions = true, installed = true) {
+  const f = fixture(),
+    endpoint = {
+      origin: f.config.endpoints.origin,
+      path: '/v1/office-command' as const,
+      deploymentRef: 'TEST_ONLY_CAPTAIN_FORM',
+    },
+    requests: AuthenticatedOfficeCommandRequestDto[] = [],
+    recoveries: {
+      request: { originalRequest: AuthenticatedOfficeCommandRequestDto };
+    }[] = [];
+  f.change((w) => ({
+    ...openingWire(w),
+    source: {
+      ...openingWire(w).source,
+      ...(withOptions
+        ? { currentCaptainAllocationOptions: allocationOptions }
+        : {}),
+    },
+  }));
+  const fetcher: typeof fetch = async (url, init) => {
+    const path = new URL(String(url)).pathname;
+    if (path === endpoint.path) {
+      const request = JSON.parse(
+        String(init?.body),
+      ) as AuthenticatedOfficeCommandRequestDto;
+      requests.push(request);
+      return installed
+        ? Response.json(
+            {
+              schemaVersion: request.schemaVersion,
+              requestId: request.requestId,
+              ok: true,
+              state: {
+                status: 'QUEUED',
+                source: 'NEW',
+                commandType: request.request.commandType,
+                commandId: request.request.commandId,
+                commandFingerprint: hash,
+                submitted: true,
+                queued: true,
+              },
+            },
+            { status: 202 },
+          )
+        : Response.json(
+            {
+              schemaVersion: request.schemaVersion,
+              requestId: request.requestId,
+              ok: false,
+              error: { code: 'SOURCE_RUNTIME_UNAVAILABLE', retryable: false },
+              state: {
+                status: 'REJECTED',
+                reason: 'SOURCE_RUNTIME_UNAVAILABLE',
+                commandType: request.request.commandType,
+                submitted: false,
+                queued: false,
+                missing: ['ADMITTED_DOMAIN_SOURCE'],
+              },
+            },
+            { status: 503 },
+          );
+    }
+    if (path === '/v1/command-recovery') {
+      const request = JSON.parse(String(init?.body)) as {
+        requestId: string;
+        request: { originalRequest: AuthenticatedOfficeCommandRequestDto };
+      };
+      recoveries.push(request);
+      const original = request.request.originalRequest;
+      return Response.json({
+        schemaVersion: AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
+        requestId: request.requestId,
+        ok: true,
+        state: {
+          status: 'FINAL',
+          commandType: original.request.commandType,
+          receipt: {
+            source: 'DURABLE_FINAL_COMMAND_RECEIPT',
+            schemaVersion: 'command-receipt-v2',
+            worldId: original.request.worldId,
+            commandId: original.request.commandId,
+            idempotencyKey: original.request.idempotencyKey,
+            commandFingerprint: hash,
+            outcome: 'COMMITTED',
+            reasonCode: null,
+            transitionId: 'TRANSITION_TEST_ONLY',
+            worldVersionBefore: '0',
+            worldVersionAfter: '1',
+            simTime: '0',
+            eventIds: ['EVENT_TEST_ONLY_ALLOCATION'],
+            recordedAtReal: '2026-11-08T00:00:00.000Z',
+          },
+        },
+      });
+    }
+    return f.fetcher(url, init);
+  };
+  const binding = {
+      read: f.config,
+      view: { role: 'captain' as const, countryDisplayId: '01' },
+      endpoint,
+    },
+    controller = () =>
+      createOfficeCommandController(binding, () => binding.view, {
+        fetcher,
+        requestId: () => requestId,
+      });
+  return { ...f, fetcher, binding, controller, requests, recoveries };
+}
 function openingWire(w: ReturnType<ReturnType<typeof fixture>['wire']>) {
   return {
     ...w,
@@ -210,6 +343,193 @@ function openingWire(w: ReturnType<ReturnType<typeof fixture>['wire']>) {
   };
 }
 describe('Captain current runtime browser-safe wire and view', () => {
+  it('opens the source form from the exact Captain-8 catalog entry and leaves other catalog or unbound entries on their existing closed path', async () => {
+    vi.stubGlobal(
+      'MutationObserver',
+      class {
+        observe() {}
+      },
+    );
+    vi.stubGlobal('Element', HostElement);
+    class CatalogDocument extends HostDocument {
+      capture: ((event: MouseEvent) => void) | null = null;
+      addEventListener(key: string, listener: (event: MouseEvent) => void) {
+        if (key === 'click') this.capture = listener;
+      }
+    }
+    const f = commandFixture(),
+      doc = new CatalogDocument('captain'),
+      api = installOfficeCommand(
+        doc as unknown as Document,
+        { addEventListener() {} } as unknown as Window,
+        (binding, view) =>
+          createOfficeCommandController(binding, view, {
+            fetcher: f.fetcher,
+            requestId: () => requestId,
+          }),
+      );
+    const module = doc.createElement('button') as HostElement & {
+      closest(selector: string): HostElement | null;
+    };
+    module.dataset.cmd = 'country-module';
+    module.dataset.id = 'captain-8';
+    module.closest = (selector) =>
+      selector.includes('[data-cmd="country-module"][data-id="captain-8"]') &&
+      module.dataset.id === 'captain-8'
+        ? module
+        : null;
+    doc.root.append(module);
+    let prevented = 0;
+    const click = () =>
+      doc.capture?.({
+        target: module,
+        preventDefault() {
+          prevented++;
+        },
+        stopImmediatePropagation() {},
+      } as unknown as MouseEvent);
+    click();
+    expect(prevented).toBe(0);
+    api.connect(f.binding);
+    module.dataset.id = 'captain-7';
+    click();
+    expect(prevented).toBe(0);
+    module.dataset.id = 'captain-8';
+    click();
+    await expect
+      .poll(() => api.getState().status)
+      .toBe('CURRENT_AUTHORIZED_HEAD');
+    expect(prevented).toBe(1);
+    const dialog = doc.root
+      .all()
+      .find((e) => Object.hasOwn(e.dataset, 'officeCommandDialog'))!;
+    expect(dialog.open).toBe(true);
+    const form = dialog
+      .all()
+      .find((e) => Object.hasOwn(e.dataset, 'captainCapitalForm'))!;
+    expect(form.textContent).toContain('Recorded basis / section 1');
+    expect(form.textContent).toContain('未分配／危机预留');
+    const fields: Record<string, string> = {
+      fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
+      toBucket: 'FISCAL_REFORM',
+      amount: '1',
+      reasonFactRef: allocationOptions.reasons[0]!.factRef,
+    };
+    for (const el of form.all())
+      if (el.dataset.captainCapitalField)
+        (el as HostElement & { value: string }).value =
+          fields[el.dataset.captainCapitalField]!;
+    form
+      .all()
+      .find((e) => Object.hasOwn(e.dataset, 'captainCapitalStage'))!
+      .click();
+    expect(api.getState().status).toBe('REVIEW_REQUIRED');
+    expect(api.getState().intent?.request.payload).toMatchObject({
+      fromBucket: fields.fromBucket,
+      reasonFactRef: fields.reasonFactRef,
+    });
+    expect(f.requests).toHaveLength(0);
+    expect(
+      dialog.all().find((e) => e.dataset.officeCommandAction === 'confirm')
+        ?.disabled,
+    ).toBe(true);
+    dialog
+      .all()
+      .find((e) => e.dataset.officeCommandAction === 'review')!
+      .click();
+    dialog
+      .all()
+      .find((e) => e.dataset.officeCommandAction === 'confirm')!
+      .click();
+    await expect.poll(() => api.getState().status).toBe('QUEUE_ACK');
+    expect(api.getState().receipt).toBeNull();
+    expect(dialog.textContent).not.toContain('COMMITTED');
+    dialog
+      .all()
+      .find((e) => e.dataset.officeCommandAction === 'recover')!
+      .click();
+    await expect.poll(() => api.getState().receipt?.outcome).toBe('COMMITTED');
+    expect(dialog.textContent).toContain('COMMITTED');
+    expect(f.requests).toHaveLength(1);
+    f.invalidate();
+    click();
+    expect(prevented).toBe(1);
+    expect(doc.root.textContent).not.toContain('Recorded basis / section 1');
+  });
+  it('stages one source-referenced transfer, requires review, and restores the original request after reload without resubmission', async () => {
+    const f = commandFixture(),
+      c = f.controller();
+    await c.refresh();
+    expect(
+      c.stageCaptainCapital({
+        fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
+        toBucket: 'FISCAL_REFORM',
+        amount: '2.5',
+        reasonFactRef: allocationOptions.reasons[0]!.factRef,
+      }),
+    ).toBe(true);
+    const original = c.getState().intent!;
+    expect(original.request).toMatchObject({
+      expectedWorldVersion: '0',
+      payload: {
+        fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
+        toBucket: 'FISCAL_REFORM',
+        amount: { amount: '2.5', unit: 'political_capital' },
+        reasonFactRef: allocationOptions.reasons[0]!.factRef,
+      },
+    });
+    await c.confirm();
+    expect(f.requests).toHaveLength(0);
+    expect(c.review()).toBe(true);
+    await c.confirm();
+    expect(c.getState().status).toBe('QUEUE_ACK');
+    expect(c.getState().receipt).toBeNull();
+    expect(f.requests).toEqual([original]);
+    c.disconnect();
+    const fresh = f.controller();
+    await fresh.refresh();
+    expect(
+      fresh.restoreOriginalForRecovery(JSON.parse(JSON.stringify(original))),
+    ).toBe(true);
+    expect(fresh.review()).toBe(false);
+    await fresh.confirm();
+    await fresh.recoverOriginal();
+    expect(fresh.getState().receipt).toMatchObject({
+      outcome: 'COMMITTED',
+      commandId: original.request.commandId,
+    });
+    expect(fresh.getState().canConfirm).toBe(false);
+    expect(f.recoveries[0]?.request.originalRequest).toEqual(original);
+    expect(f.recoveries[0]?.request.originalRequest.requestId).toBe(
+      original.requestId,
+    );
+    expect(f.requests).toHaveLength(1);
+    fresh.disconnect();
+  });
+  it('keeps missing reason originals closed and preserves a server source-runtime rejection as no submission, never local success', async () => {
+    const draft = {
+      fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
+      toBucket: 'FISCAL_REFORM',
+      amount: '1',
+      reasonFactRef: allocationOptions.reasons[0]!.factRef,
+    };
+    const absent = commandFixture(false),
+      closed = absent.controller();
+    await closed.refresh();
+    expect(closed.stageCaptainCapital(draft)).toBe(false);
+    expect(absent.requests).toHaveLength(0);
+    closed.disconnect();
+    const missing = commandFixture(true, false),
+      c = missing.controller();
+    await c.refresh();
+    expect(c.stageCaptainCapital(draft)).toBe(true);
+    expect(c.review()).toBe(true);
+    await c.confirm();
+    expect(c.getState()).toMatchObject({ status: 'REJECTED', receipt: null });
+    expect(missing.requests).toHaveLength(1);
+    expect(missing.recoveries).toHaveLength(0);
+    c.disconnect();
+  });
   it('accepts explicit real-zero opening coverage with seven actual genesis rows and no invented event', async () => {
     const f = fixture();
     f.change(openingWire);
