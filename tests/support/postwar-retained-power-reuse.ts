@@ -19,6 +19,16 @@ import {
   RETAINED_OPENING_BASE_CHECKPOINT_SHA256,
   readRetainedOpeningBaseEvidence,
 } from './postwar-retained-opening-base-evidence.js';
+
+/** pg returns this one timestamptz column as Date; the saved JSON evidence
+ * uses its ISO wire value. Preserve every other metadata/pin/hash verbatim. */
+export function retainedOpeningDocumentWire(row: Record<string, unknown>) {
+  assert(
+    row.generated_at instanceof Date &&
+      Number.isFinite(row.generated_at.getTime()),
+  );
+  return { ...row, generated_at: row.generated_at.toISOString() };
+}
 export {
   RETAINED_OPENING_BASE_CHECKPOINT,
   RETAINED_OPENING_BASE_CHECKPOINT_SHA256,
@@ -245,6 +255,8 @@ export async function reuseRetainedPostwarPowerClone(input: {
       client,
       marker.worldId,
     );
+    report.before = { catalog: before, economic: economicBefore.economic };
+    await save();
     assert.deepEqual(
       economicBefore.economic,
       readback.economicAfter,
@@ -258,7 +270,7 @@ export async function reuseRetainedPostwarPowerClone(input: {
         )
       ).rows;
       assert.deepEqual(
-        documents,
+        documents.map(retainedOpeningDocumentWire),
         repaired.documents,
         'RETAINED_C10_OPENING_DOCUMENT_DRIFT',
       );
