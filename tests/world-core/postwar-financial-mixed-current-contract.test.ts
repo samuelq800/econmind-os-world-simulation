@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
+  parsePostwarCentralBankOpeningInstruments,
   POSTWAR_FINANCIAL_MIXED_REDUCER,
   parsePostwarFinancialMixedCoverage,
   parsePostwarMixedFinancialBalanceRow,
@@ -166,4 +167,32 @@ describe('posting-aware financial read wire', () => {
       ),
     ).toThrow();
   });
+});
+
+it('keeps unknown CB source distinct from no-declared opening and rejects relabelled current origins', () => {
+  const value = {
+    schemaVersion: 'postwar-cb-opening-instruments-v1',
+    measurement: 'ADMITTED_OPENING_DECLARATION_NOT_CURRENT_TRADABILITY',
+    countryId: 'COUNTRY_01',
+    seedFingerprint: hash,
+    admissionRef: 'ADMISSION_TEST',
+    canonicalSeedSha256: 'a'.repeat(64),
+    sourceBundleSha256: 'b'.repeat(64),
+    originWorldVersion: '0',
+    originEventSequence: '0',
+    status: 'SOURCE_UNAVAILABLE',
+    governmentSecurityHoldingCount: null,
+    bankLoanRecordCount: null,
+    sourcePages: [],
+  };
+  expect(parsePostwarCentralBankOpeningInstruments(value).status).toBe(
+    'SOURCE_UNAVAILABLE',
+  );
+  for (const bad of [
+    { ...value, governmentSecurityHoldingCount: 0 },
+    { ...value, originWorldVersion: '6' },
+    { ...value, status: 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY' },
+    { ...value, measurement: 'CURRENT_ZERO_SECURITY_AND_QUOTE_READY' },
+  ])
+    expect(() => parsePostwarCentralBankOpeningInstruments(bad)).toThrow();
 });

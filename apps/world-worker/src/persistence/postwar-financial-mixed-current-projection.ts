@@ -1,5 +1,7 @@
+import { canonicalSerialize } from '@econmind/core';
 /** Online bounded data only. No seed loader, reducer, publisher or authority cache. */
 import { createHash } from 'node:crypto';
+import { createPostwarCentralBankOpeningInstrumentReader } from './postwar-central-bank-opening-instruments.js';
 import type { SqlExecutor } from './sql-database.js';
 import type { PostwarOfficeProjectionScope } from './postwar-office-projection-store.js';
 import {
@@ -9,6 +11,8 @@ import {
   parsePostwarMixedFinancialBalanceRow,
   parsePostwarMixedTreasuryCapacityRow,
   type PostwarFinancialMixedCoverage,
+  parsePostwarCentralBankOpeningInstruments,
+  type PostwarCentralBankOpeningInstruments,
 } from '@econmind/core/postwar-financial-mixed-current-contract';
 export const POSTWAR_FINANCIAL_MIXED_CURRENT_DATA_NATURE =
   POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE;
@@ -43,6 +47,7 @@ export interface PostwarFinancialMixedCurrentSource {
     eventSequence: string;
   }>;
   readonly currentFinancialCoverage: PostwarFinancialCurrentCoverage;
+  readonly centralBankOpeningInstruments?: Readonly<PostwarCentralBankOpeningInstruments>;
   readonly pageHash: string;
   readonly returnedRowsHash: string;
   readonly hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256';
@@ -87,6 +92,7 @@ function freeze<T>(v: T): T {
 export function createPostwarFinancialMixedCurrentProjectionStore(config: {
   runtimeReaderRole: string;
   authorizationPublisherRole: string;
+  includeCentralBankOpeningInstruments?: true;
 }) {
   for (const name of [
     config.runtimeReaderRole,
@@ -105,6 +111,9 @@ export function createPostwarFinancialMixedCurrentProjectionStore(config: {
       invalid('READER_ROLE_REQUIRED');
   if (config.runtimeReaderRole === config.authorizationPublisherRole)
     invalid('SEPARATE_ROLES_REQUIRED');
+  const openingReader = config.includeCentralBankOpeningInstruments
+    ? createPostwarCentralBankOpeningInstrumentReader(config)
+    : null;
   return Object.freeze({
     async readPageFrom(
       tx: SqlExecutor,
@@ -305,10 +314,60 @@ export function createPostwarFinancialMixedCurrentProjectionStore(config: {
         for (const value of rows)
           parsePostwarMixedTreasuryCapacityRow(value, String(scope.countryId));
       }
+      let centralBankOpeningInstruments:
+        Readonly<PostwarCentralBankOpeningInstruments> | undefined;
+      if (
+        openingReader &&
+        input.officeId === 'CENTRAL_BANK' &&
+        input.dataset === 'ledger-balances'
+      ) {
+        const opening = await openingReader.readFrom(tx, {
+          worldId: input.worldId,
+        });
+        if (opening) {
+          if (canonicalSerialize(opening.scope) !== canonicalSerialize(scope))
+            invalid('CB_OPENING_SCOPE_DIFFERS');
+          for (const key of [
+            'seedId',
+            'seedFingerprint',
+            'admissionRef',
+            'canonicalSeedSha256',
+            'sourceBundleSha256',
+            'modelVersion',
+            'replayBinding',
+          ] as const)
+            if (opening.source[key] !== source[key])
+              invalid('CB_OPENING_SOURCE_DIFFERS');
+          centralBankOpeningInstruments = opening.instruments;
+        } else
+          centralBankOpeningInstruments =
+            parsePostwarCentralBankOpeningInstruments({
+              schemaVersion: 'postwar-cb-opening-instruments-v1',
+              measurement:
+                'ADMITTED_OPENING_DECLARATION_NOT_CURRENT_TRADABILITY',
+              countryId: scope.countryId,
+              seedFingerprint: source.seedFingerprint,
+              admissionRef: source.admissionRef,
+              canonicalSeedSha256: source.canonicalSeedSha256,
+              sourceBundleSha256: source.sourceBundleSha256,
+              originWorldVersion: '0',
+              originEventSequence: '0',
+              status: 'SOURCE_UNAVAILABLE',
+              governmentSecurityHoldingCount: null,
+              bankLoanRecordCount: null,
+              sourcePages: [],
+            });
+      }
       const value = {
         status: row.status,
         scope,
-        source: { ...source, currentFinancialCoverage: validatedCoverage },
+        source: {
+          ...source,
+          currentFinancialCoverage: validatedCoverage,
+          ...(centralBankOpeningInstruments
+            ? { centralBankOpeningInstruments }
+            : {}),
+        },
         page,
         rows,
       };

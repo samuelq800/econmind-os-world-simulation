@@ -115,6 +115,7 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
     readonly dataNature: PageSourceNature;
     readonly currentIndustryUtilityPlanningCoverage?: IndustryUtilityPlanningCoverage;
     readonly currentFinancialCoverage?: FinancialReadSource['currentFinancialCoverage'];
+    readonly centralBankOpeningInstruments?: PostwarFinancialMixedCurrentSource['centralBankOpeningInstruments'];
     readonly currentCaptainCoverage?: PostwarCaptainCurrentSource['currentCaptainCoverage'];
     readonly currentTradeCoverage?: PostwarTradeCurrentSource['currentTradeCoverage'];
     readonly currentIndustryLabourCoverage?: PostwarIndustryLabourCurrentSource['currentIndustryLabourCoverage'];
@@ -187,6 +188,8 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             modelVersion: string;
             seedRef: string;
             contentHash: string;
+            canonicalSeedSha256?: string;
+            sourceBundleSha256?: string;
             admissionRef: string;
             worldVersion: string;
             eventSequence: string;
@@ -198,6 +201,7 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             currentStateBinding?: SuccessPage['source']['currentStateBinding'];
             currentPrefixCoverage?: SuccessPage['source']['currentPrefixCoverage'];
             currentFinancialCoverage?: SuccessPage['source']['currentFinancialCoverage'];
+            centralBankOpeningInstruments?: PostwarFinancialMixedCurrentSource['centralBankOpeningInstruments'];
             currentCaptainCoverage?: SuccessPage['source']['currentCaptainCoverage'];
             currentTradeCoverage?: SuccessPage['source']['currentTradeCoverage'];
             originWorldVersion?: string;
@@ -398,6 +402,16 @@ function pageBody(
         ...(page.source.currentPrefixCoverage === undefined
           ? {}
           : { currentPrefixCoverage: page.source.currentPrefixCoverage }),
+        ...(page.source.centralBankOpeningInstruments === undefined
+          ? {}
+          : {
+              centralBankOpeningInstruments:
+                page.source.centralBankOpeningInstruments,
+              canonicalSeedSha256:
+                page.source.centralBankOpeningInstruments.canonicalSeedSha256,
+              sourceBundleSha256:
+                page.source.centralBankOpeningInstruments.sourceBundleSha256,
+            }),
         ...(page.source.currentFinancialCoverage === undefined
           ? {}
           : { currentFinancialCoverage: page.source.currentFinancialCoverage }),
@@ -473,6 +487,7 @@ export function createPostwarOfficeRuntimeReadService(
     : null;
   const financialStore = c
     ? createPostwarFinancialMixedCurrentProjectionStore({
+        includeCentralBankOpeningInstruments: true,
         runtimeReaderRole: c.readerRole,
         authorizationPublisherRole: c.authorizationPublisherRole,
       })

@@ -38,6 +38,7 @@ import {
 } from '@econmind/core/postwar-social-mixed-current-contract';
 import {
   POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE,
+  parsePostwarCentralBankOpeningInstruments,
   parsePostwarFinancialMixedCoverage,
   parsePostwarMixedFinancialBalanceRow,
   parsePostwarMixedTreasuryCapacityRow,
@@ -472,6 +473,24 @@ export function createPostwarRuntimeClient(
           (source.dataNature ===
             'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
             source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE);
+        if (source.centralBankOpeningInstruments !== undefined) {
+          if (
+            c.identity.officeId !== 'CENTRAL_BANK' ||
+            dataset !== 'ledger-balances'
+          )
+            throw Error('CB_OPENING_INSTRUMENT_SCOPE_MISMATCH');
+          const opening = parsePostwarCentralBankOpeningInstruments(
+            source.centralBankOpeningInstruments,
+          );
+          if (
+            opening.countryId !== c.identity.countryId ||
+            opening.seedFingerprint !== source.contentHash ||
+            opening.admissionRef !== source.admissionRef ||
+            opening.canonicalSeedSha256 !== source.canonicalSeedSha256 ||
+            opening.sourceBundleSha256 !== source.sourceBundleSha256
+          )
+            throw Error('CB_OPENING_INSTRUMENT_SOURCE_MISMATCH');
+        }
         const currentTrade =
           c.identity.officeId === 'TRADE' &&
           POSTWAR_TRADE_CURRENT_DATASETS.some((x) => x === dataset) &&
