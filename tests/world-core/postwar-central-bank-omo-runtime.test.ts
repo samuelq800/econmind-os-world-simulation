@@ -743,7 +743,9 @@ describe('paged shared OMO custody (TEST_ONLY metadata, not complete replay)', (
       ])
         expect(actual.row).not.toHaveProperty(field);
       await expect(
-        read({ authSubject: '22222222-2222-4222-8222-222222222222' }),
+        read({
+          authSubject: C.authSubject('22222222-2222-4222-8222-222222222222'),
+        }),
       ).rejects.toThrow();
       await expect(read({ workerId: 'WRONG_WORKER' })).rejects.toThrow(
         'CURRENT_WRITER_LEASE',
