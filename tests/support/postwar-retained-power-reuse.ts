@@ -15,16 +15,16 @@ import { readRetainedPostwarPowerCatalogFrom } from './postwar-retained-power-up
 import { readRegisteredCurrentEconomicSnapshotFrom } from './registered-current-read-repair-checkpoint.js';
 import { preparePostwarIndustryFirstDayDomesticModelForward } from './postwar-industry-first-day-domestic-model-forward.js';
 
-const directory = '/workspace/.cloud-setup/evidence/power-current-native-03';
+const directory = '/workspace/.cloud-setup/evidence/power-current-native-04';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT =
   directory + '/pg/retained-checkpoint.json';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256 =
-  '2e35e77e21db62a172187d4ee144fe3951fc3c7409ee38b14f9e03e01e839a93';
+  '9487e1e98af58d16dbc1d3e4fc19858ebc5fc659323067cdfeeb3d562a915594';
 const hashes = {
   'power-reuse/reuse-receipt.json':
-    'c14954da1de6867599c27a0b6a9ccdab64d85967c7b6e6bdf818057876b59e4e',
+    'b12cbc4ccabd008f6c4d1859a55bd3150b9f340f98f645e10710bd07efe014b5',
   'independent-checkpoint-readback.json':
-    '769b148e0a96cc7ea9d800244f3f9fe078b6680ec5e4bd7f02eca3c24050d6d3',
+    '1b94dc82dddc6f5306e2ee907365eb1d774395db9098ffa0fedb52c27c5597b3',
 } as const;
 const sha = (raw: string) => createHash('sha256').update(raw).digest('hex');
 type Catalog = Awaited<ReturnType<typeof readRetainedPostwarPowerCatalogFrom>>;
@@ -117,7 +117,7 @@ export async function reuseRetainedPostwarPowerClone(input: {
   );
   assert.equal(
     receipt.expectedCommit,
-    '4a5850586ae1f13b6b34e38e5c6c828dc7b16fd5',
+    '79b67f32f14e8c45d98f5e3cecc4a16cb96cbf1b',
   );
   assert.equal(receipt.database, checkpoint.templateDatabase);
   assert.equal(
@@ -126,7 +126,31 @@ export async function reuseRetainedPostwarPowerClone(input: {
   );
   assert.equal(checkpoint.resourceState, 'RETAINED_STOPPED');
   assert(checkpoint.isTemplate && !checkpoint.allowConnections);
-  assert.equal(readback.status, 'RECONCILED_RETAINED_STOPPED');
+  assert.equal(readback.status, 'READBACK_PASSED');
+  assert.equal(readback.childGone, true);
+  assert.equal(readback.gracefulNodeDrainAcknowledged, true);
+  assert.equal(readback.cleanup.inspectionCloneDropped, true);
+  assert.equal(readback.cleanup.retainedCheckpointUntouched, true);
+  assert.equal(
+    readback.cleanup.actualState,
+    checkpoint.ownershipNonce + ' exited 0 false',
+  );
+  assert.deepEqual(readback.sourceCatalog, [
+    {
+      datname: checkpoint.templateDatabase,
+      datistemplate: true,
+      datallowconn: false,
+      active_connections: '0',
+    },
+  ]);
+  const sourceRows = (label: string): unknown[] => {
+    const matches = readback.queries.filter(
+      (q: { label: string }) => q.label === label,
+    );
+    assert.equal(matches.length, 1, 'EXACT_INDEPENDENT_SOURCE_READ_REQUIRED');
+    assert(Array.isArray(matches[0].rows));
+    return matches[0].rows;
+  };
   assert.equal(readback.economicHashesUnchanged, true);
   assert.deepEqual(checkpoint.head, {
     world_version: '3',
@@ -204,14 +228,22 @@ export async function reuseRetainedPostwarPowerClone(input: {
         [marker.worldId],
       )
     ).rows;
+    assert(
+      firstDaySources.every((row) => row.raw_hash_valid === true),
+      'RETAINED_FIRSTDAY_RAW_HASH_INVALID',
+    );
     assert.deepEqual(
-      firstDaySources,
-      readback.firstDaySources,
+      firstDaySources.map((row) => {
+        const original = { ...row };
+        delete original.raw_hash_valid;
+        return original;
+      }),
+      sourceRows('FIRST_DAY_SOURCE_COMMITTED_SCOPE'),
       'RETAINED_FIRSTDAY_ORIGINAL_SCOPE_DRIFT',
     );
     assert.deepEqual(
       utilitySources,
-      readback.utilitySources,
+      sourceRows('UTILITY_SOURCE_COMMITTED_SCOPE'),
       'RETAINED_UTILITY_ORIGINAL_SCOPE_DRIFT',
     );
     const seed = (
