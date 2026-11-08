@@ -212,6 +212,161 @@ export function createUnapprovedSchemaDeltaPlan(candidate, sources) {
   };
 }
 
+/** Explicit later function-only forward. The historical five-plus-two list and
+ * the default fresh-delta plan are deliberately not extended or relabeled. */
+export const LOGISTICS_FORWARD_MANIFEST_PATH =
+  'database/upgrades/postwar-industry-logistics-multicountry-scope.manifest.json';
+export function createUnapprovedSchemaForwardPlan(
+  candidate,
+  forward,
+  sources,
+  manifestSha256,
+) {
+  const { pins, manifest } = candidate;
+  const u = forward.upgrade;
+  const proposal = pins.proposals.find((p) => p.id === forward.targetProposal);
+  if (
+    forward.schemaVersion !== 'postwar-function-forward-manifest-v1' ||
+    forward.id !== 'postwar-industry-logistics-multicountry-scope-v1' ||
+    forward.classification !==
+      'UNAPPROVED_FUNCTION_ONLY_FORWARD_NOT_FRESH_INSTALL' ||
+    forward.installationAllowed !== false ||
+    forward.productionApproval !== 'NOT_GRANTED' ||
+    !digest.test(manifestSha256) ||
+    !/^[a-f0-9]{40}$/u.test(pins.sourceCommit ?? '') ||
+    pins.installationAllowed !== false ||
+    manifest.production_publisher !== 'main-site-release-chain' ||
+    u?.id !== 'postwar-industry-logistics-multicountry-scope-upgrade' ||
+    u.path !== 'database/upgrades/' + u.id + '.sql' ||
+    !proposal ||
+    proposal.sha256 !== forward.targetProposalSha256 ||
+    JSON.stringify(u.dependencies) !==
+      JSON.stringify([
+        'postwar-industry-logistics-custody',
+        'postwar-source-revocation-fence',
+      ]) ||
+    u.dependencies.some((id) => !pins.proposals.some((p) => p.id === id))
+  )
+    throw Error('EXPLICIT_PINNED_LOGISTICS_FORWARD_REQUIRED');
+  const bytes = sources.get(u.path);
+  if (
+    !Buffer.isBuffer(bytes) ||
+    !digest.test(u.sha256) ||
+    sha(bytes) !== u.sha256 ||
+    bytes.length !== u.bytes
+  )
+    throw Error('FORWARD_SOURCE_ARTIFACT_HASH_DIFFERS');
+  const signatures = [
+    'world_v2.postwar_industry_logistics_order_scope(text,text,text)',
+    'world_v2.read_postwar_industry_logistics_committed_orders(text,text,text,text,text,text,text,text,bigint,bigint,text,text)',
+  ];
+  if (
+    !Array.isArray(u.functions) ||
+    u.functions.length !== 2 ||
+    u.functions.some(
+      (f, i) =>
+        f.qualifiedSignature !== signatures[i] ||
+        f.owner !== 'world_v2_industry_source_owner' ||
+        f.securityDefiner !== true ||
+        f.searchPath !== 'pg_catalog' ||
+        !digest.test(f.oldBodySha256) ||
+        !digest.test(f.newBodySha256) ||
+        JSON.stringify(f.executeRoles) !==
+          JSON.stringify(
+            i === 0
+              ? []
+              : [
+                  'world_v2_finance_budget_source_reader',
+                  'world_v2_postwar_projection_owner',
+                  'world_v2_social_source_reader',
+                ],
+          ) ||
+        !bytes
+          .toString('utf8')
+          .includes(
+            "('" +
+              f.qualifiedSignature.slice('world_v2.'.length) +
+              "','" +
+              f.oldBodySha256 +
+              "','" +
+              f.newBodySha256 +
+              "'",
+          ),
+    )
+  )
+    throw Error('EXACT_TWO_EXISTING_LOGISTICS_FUNCTION_TARGETS_REQUIRED');
+  const transaction = classifyDeltaTransaction(bytes);
+  if (transaction.wrapped) throw Error('FORWARD_EXPLICIT_TRANSACTION_REQUIRED');
+  const entry = {
+    id: u.id,
+    disposition: forward.classification,
+    dependencies: u.dependencies,
+    sourcePath: u.path,
+    sourceSha256: u.sha256,
+    sourceBytes: bytes.length,
+    packagedSourcePath: 'source/01-' + u.id + '.sql',
+    transactionPath: 'transactions/01-' + u.id + '.sql',
+    transactionSha256: sha(transaction.bytes),
+    transactionBytes: transaction.bytes.length,
+    transactionEnvelope: transaction.sourceEnvelope,
+    nonTransactionalParts: [],
+    executionAllowed: false,
+    preconditions: {
+      functions: u.functions,
+      existingObjectDisposition: forward.existingObjectRequirement,
+      metadataPolicy: forward.metadataPolicy,
+      observed: false,
+    },
+    recovery: {
+      ...forward.recovery,
+      automaticRollback: false,
+      destructiveRollback: false,
+    },
+  };
+  return {
+    chunks: [{ entry, source: bytes, transaction: transaction.bytes }],
+    manifest: {
+      schemaVersion: 'postwar-schema-forward-review-package-v1',
+      classification: 'UNAPPROVED_EXPLICIT_FUNCTION_FORWARD_NOT_INSTALLATION',
+      sourceCommit: pins.sourceCommit,
+      sourceTree: pins.sourceTree,
+      baselineManifestSha256: pins.manifestSha256,
+      companionPolicySha256: pins.expandedPolicySha256,
+      baseline: manifest.migrations.map((m) => ({
+        id: m.migration_id,
+        releaseOrder: m.release_order,
+        path: m.path,
+        sha256: m.sha256,
+        sourceCommit: m.artifact_source_commit,
+      })),
+      explicitForwardManifest: {
+        path: LOGISTICS_FORWARD_MANIFEST_PATH,
+        sha256: manifestSha256,
+        predecessorCommit: forward.predecessorCommit,
+        targetSourceCommit: forward.targetSourceCommit,
+      },
+      packagedProposalCount: 0,
+      packagedForwardCount: 1,
+      installationPath: 'EXISTING_EXACT_FUNCTIONS_FORWARD_ONLY',
+      mutuallyExclusiveWith: 'FRESH_SCHEMA_DELTA_FROM_SAME_CANDIDATE',
+      freshProposalSqlIncluded: false,
+      steps: [entry],
+      installationAllowed: false,
+      productionApproval: 'NOT_GRANTED',
+      migrationRegistrationPerformed: false,
+      databaseOperations: 0,
+      networkRequests: 0,
+      credentialsCreated: 0,
+      isolatedClockSqlIncluded: false,
+      acrossFilesAtomic: false,
+      targetSchemaObserved: false,
+      targetApplicability:
+        'EXACT_EXISTING_FUNCTION_PREDECESSORS_OR_SUCCESSORS_REQUIRE_CATALOG_READBACK',
+      historicalUpgradeManifestsModified: false,
+    },
+  };
+}
+
 async function regular(file) {
   if (!(await lstat(file)).isFile() || (await realpath(file)) !== file)
     throw Error('REGULAR_COMPANION_MODULE_REQUIRED');
@@ -222,6 +377,7 @@ export async function preparePostwarSchemaDelta({
   candidateSha,
   companionRoot,
   outputDirectory,
+  forwardManifestPath,
 }) {
   for (const v of [sourceRoot, companionRoot, outputDirectory])
     if (typeof v !== 'string' || !path.isAbsolute(v))
@@ -267,10 +423,38 @@ export async function preparePostwarSchemaDelta({
       ]),
     ),
   );
-  const plan = createUnapprovedSchemaDeltaPlan(candidate, sources);
+  let plan;
+  if (forwardManifestPath !== undefined) {
+    if (forwardManifestPath !== LOGISTICS_FORWARD_MANIFEST_PATH)
+      throw Error('ONLY_EXPLICIT_LOGISTICS_FORWARD_MANIFEST_ALLOWED');
+    const forwardBytes = await regular(
+      path.join(sourceRoot, forwardManifestPath),
+    );
+    const forward = JSON.parse(forwardBytes.toString('utf8'));
+    const upgradePath = forward.upgrade?.path;
+    if (
+      upgradePath !==
+      'database/upgrades/postwar-industry-logistics-multicountry-scope-upgrade.sql'
+    )
+      throw Error('EXPLICIT_PINNED_LOGISTICS_FORWARD_REQUIRED');
+    sources.set(upgradePath, await regular(path.join(sourceRoot, upgradePath)));
+    plan = createUnapprovedSchemaForwardPlan(
+      candidate,
+      forward,
+      sources,
+      sha(forwardBytes),
+    );
+    plan.forwardSource = { path: forwardManifestPath, bytes: forwardBytes };
+  } else plan = createUnapprovedSchemaDeltaPlan(candidate, sources);
   await mkdir(outputDirectory); // Exclusive; never overwrite an earlier package.
   await mkdir(path.join(outputDirectory, 'source'));
   await mkdir(path.join(outputDirectory, 'transactions'));
+  if (plan.forwardSource)
+    await writeFile(
+      path.join(outputDirectory, 'forward-manifest.json'),
+      plan.forwardSource.bytes,
+      { flag: 'wx' },
+    );
   for (const c of plan.chunks) {
     await writeFile(
       path.join(outputDirectory, c.entry.packagedSourcePath),
@@ -293,6 +477,12 @@ export async function preparePostwarSchemaDelta({
     preflight.sourceTree !== candidate.pins.sourceTree
   )
     throw Error('CANDIDATE_CHANGED_DURING_DELTA_PACKAGING');
+  if (
+    plan.forwardSource &&
+    sha(await regular(path.join(sourceRoot, plan.forwardSource.path))) !==
+      sha(plan.forwardSource.bytes)
+  )
+    throw Error('FORWARD_MANIFEST_CHANGED_DURING_PACKAGING');
   plan.manifest.generatorSha256 = sha(
     await readFile(fileURLToPath(import.meta.url)),
   );
@@ -308,9 +498,27 @@ export async function preparePostwarSchemaDelta({
   );
   await writeFile(
     path.join(outputDirectory, 'RECOVERY.md'),
-    `# Unapproved schema delta\n\nNo SQL has run. No production registration or approval is granted.\n\nReview the exact baseline release ledger and preflight/catalog.sql output first. Resolve every existing relation/role conflict; do not drop or silently reuse objects. Check existing function signatures, owners, search paths and definition hashes against each approved predecessor. Catalog names alone cannot establish compatible bodies. Optional offline group enrollment remains separately reviewed; online readers must never inherit raw-seed access.\n\nTransactions are per source file, not one atomic ${plan.chunks.length}-file operation. Source files with BEGIN/COMMIT retain their exact envelope; files without one receive an explicit single transaction in transactions/. Both hashes are recorded. No nontransactional part is accepted by the conservative classifier; this is not a complete SQL semantic proof.\n\nIf failure occurs before known COMMIT, only the current open transaction may be rolled back. Earlier committed chunks remain. If COMMIT acknowledgement is uncertain, stop with UNKNOWN_STOP_NO_RETRY and inspect catalogs plus the controlled release ledger; never rerun CREATE ROLE/TABLE blindly. After committed DDL or economic facts, prepare a new reviewed forward-fix. No destructive or automatic rollback script is supplied. The catalog query's ROLLBACK only ends its read-only inspection.\n\nThis package omits isolated-world-clock SQL and starts no World/Clock. Publish only through a separately approved exact delta in main-site-release-chain; the existing historic workflow is not automatically enabled for this package. Production acceptance remains 0/6.\n`,
+    (plan.forwardSource
+      ? '# Explicit function-only forward\n\nThis mode packages only the selected later upgrade for an existing exact schema. It is mutually exclusive with the fresh schema-delta path from this same candidate; never execute fresh proposals followed by this forward as one chain. Inspect its exact predecessor/successor body hashes and preserved owner/ACL before applying. Do not install the fresh proposals or rerun/relabel the historical five-upgrade/two-fresh manifest. No database version is inferred.\n\n'
+      : '') +
+      `# Unapproved schema delta\n\nNo SQL has run. No production registration or approval is granted.\n\nReview the exact baseline release ledger and preflight/catalog.sql output first. Resolve every existing relation/role conflict; do not drop or silently reuse objects. Check existing function signatures, owners, search paths and definition hashes against each approved predecessor. Catalog names alone cannot establish compatible bodies. Optional offline group enrollment remains separately reviewed; online readers must never inherit raw-seed access.\n\nTransactions are per source file, not one atomic ${plan.chunks.length}-file operation. Source files with BEGIN/COMMIT retain their exact envelope; files without one receive an explicit single transaction in transactions/. Both hashes are recorded. No nontransactional part is accepted by the conservative classifier; this is not a complete SQL semantic proof.\n\nIf failure occurs before known COMMIT, only the current open transaction may be rolled back. Earlier committed chunks remain. If COMMIT acknowledgement is uncertain, stop with UNKNOWN_STOP_NO_RETRY and inspect catalogs plus the controlled release ledger; never rerun CREATE ROLE/TABLE blindly. After committed DDL or economic facts, prepare a new reviewed forward-fix. No destructive or automatic rollback script is supplied. The catalog query's ROLLBACK only ends its read-only inspection.\n\nThis package omits isolated-world-clock SQL and starts no World/Clock. Publish only through a separately approved exact delta in main-site-release-chain; the existing historic workflow is not automatically enabled for this package. Production acceptance remains 0/6.\n`,
     { flag: 'wx' },
   );
+  if (
+    plan.forwardSource &&
+    (sha(await regular(path.join(sourceRoot, plan.forwardSource.path))) !==
+      sha(plan.forwardSource.bytes) ||
+      (
+        await Promise.all(
+          plan.chunks.map(
+            async (c) =>
+              sha(await regular(path.join(sourceRoot, c.entry.sourcePath))) !==
+              c.entry.sourceSha256,
+          ),
+        )
+      ).some(Boolean))
+  )
+    throw Error('FORWARD_SOURCE_CHANGED_DURING_PACKAGING');
   // The completion manifest is last: an interrupted package cannot look final.
   for (const dependency of dependencies)
     if (sha(await regular(dependency.path)) !== dependency.sha256)
@@ -327,9 +535,12 @@ export async function preparePostwarSchemaDelta({
     { flag: 'wx' },
   );
   return {
-    status: 'UNAPPROVED_SCHEMA_DELTA_PACKAGED_NOT_EXECUTED',
+    status: plan.forwardSource
+      ? 'UNAPPROVED_SCHEMA_FORWARD_PACKAGED_NOT_EXECUTED'
+      : 'UNAPPROVED_SCHEMA_DELTA_PACKAGED_NOT_EXECUTED',
     sourceCommit: candidateSha,
-    packagedProposals: plan.chunks.length,
+    packagedProposals: plan.manifest.packagedProposalCount,
+    ...(plan.forwardSource ? { packagedForwards: plan.chunks.length } : {}),
     outputDirectory,
     installationAllowed: false,
     databaseOperations: 0,
@@ -346,13 +557,20 @@ if (
       '--companion-root',
       '--output-directory',
     ];
-  if (args.length !== 8 || !flags.every((f, i) => args[i * 2] === f))
+  if (
+    ![8, 10].includes(args.length) ||
+    !flags.every((f, i) => args[i * 2] === f) ||
+    (args.length === 10 &&
+      (args[8] !== '--forward-manifest' ||
+        args[9] !== LOGISTICS_FORWARD_MANIFEST_PATH))
+  )
     throw Error('ONLY_SOURCE_SHA_COMPANION_FRESH_OUTPUT_ARGUMENTS_ALLOWED');
   const result = await preparePostwarSchemaDelta({
     sourceRoot: args[1],
     candidateSha: args[3],
     companionRoot: args[5],
     outputDirectory: args[7],
+    ...(args.length === 10 ? { forwardManifestPath: args[9] } : {}),
   });
   process.stdout.write(JSON.stringify(result) + '\n');
 }

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "postwar-function-forward-manifest-v1",
+  "id": "postwar-industry-logistics-multicountry-scope-v1",
+  "classification": "UNAPPROVED_FUNCTION_ONLY_FORWARD_NOT_FRESH_INSTALL",
+  "installationAllowed": false,
+  "productionApproval": "NOT_GRANTED",
+  "predecessorCommit": "79b67f32f14e8c45d98f5e3cecc4a16cb96cbf1b",
+  "targetSourceCommit": "f89465422f7db1e04d78f44b79587abaa528acb3",
+  "targetProposal": "postwar-industry-logistics-custody",
+  "targetProposalSha256": "953fb19e4eb893550864f07cc47d6cee5b1f19ae8b60b9da367297b84f71f62d",
+  "upgrade": {
+    "id": "postwar-industry-logistics-multicountry-scope-upgrade",
+    "path": "database/upgrades/postwar-industry-logistics-multicountry-scope-upgrade.sql",
+    "sha256": "2ef356c2619d51928bc84a612f9d32a765f80909599d224c398081736e19bfdd",
+    "bytes": 4027,
+    "dependencies": [
+      "postwar-industry-logistics-custody",
+      "postwar-source-revocation-fence"
+    ],
+    "functions": [
+      {
+        "qualifiedSignature": "world_v2.postwar_industry_logistics_order_scope(text,text,text)",
+        "owner": "world_v2_industry_source_owner",
+        "securityDefiner": true,
+        "searchPath": "pg_catalog",
+        "executeRoles": [],
+        "oldBodySha256": "cb0945122226e0a2f5a784fd9681ab625151b7bf0cb84075c0d30ddd06e4ea52",
+        "newBodySha256": "c2d4fd3d334377b6dd506b7051172341ddae0ffbb0a0932fbf9ce7ee28e1390f"
+      },
+      {
+        "qualifiedSignature": "world_v2.read_postwar_industry_logistics_committed_orders(text,text,text,text,text,text,text,text,bigint,bigint,text,text)",
+        "owner": "world_v2_industry_source_owner",
+        "securityDefiner": true,
+        "searchPath": "pg_catalog",
+        "executeRoles": [
+          "world_v2_finance_budget_source_reader",
+          "world_v2_postwar_projection_owner",
+          "world_v2_social_source_reader"
+        ],
+        "oldBodySha256": "6a8484cf85636ea4dd53d1c40e2c1839af1d94ce5f89100aee0ab634459a73c5",
+        "newBodySha256": "f8544cf50a9f5f7ec52251faf4ce8362b1f4b892ed572dd26fd236fe8d15e5ec"
+      }
+    ]
+  },
+  "existingObjectRequirement": "EXACT_PREDECESSOR_OR_EXACT_SUCCESSOR_ONLY_NO_DB_VERSION_GUESS",
+  "metadataPolicy": "PRESERVE_EXISTING_OID_OWNER_EXECUTE_ACL_SECURITY_DEFINER_SEARCH_PATH",
+  "historyBoundary": "Independent later forward; do not modify or relabel the old0cf65bc0-to4b6d400c five-upgrade/two-fresh manifest or its receipts.",
+  "recovery": {
+    "beforeCommit": "ROLLBACK_CURRENT_TRANSACTION_IF_OUTCOME_KNOWN",
+    "uncertainCommit": "UNKNOWN_STOP_NO_RETRY_VERIFY_CATALOG_AND_RELEASE_LEDGER",
+    "afterCommit": "FORWARD_FIX_ONLY_PRESERVE_ALL_HISTORY"
+  },
+  "verificationBoundary": {
+    "SQLExecution": false,
+    "retainedWorldUpgrade": false,
+    "production": false
+  },
+  "installationPath": "EXISTING_EXACT_FUNCTIONS_FORWARD_ONLY",
+  "mutuallyExclusiveWith": "FRESH_SCHEMA_DELTA_FROM_SAME_CANDIDATE",
+  "freshProposalSqlIncluded": false
+}

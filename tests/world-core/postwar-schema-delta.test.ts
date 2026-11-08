@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import {
   classifyDeltaTransaction,
   createUnapprovedSchemaDeltaPlan,
+  createUnapprovedSchemaForwardPlan,
   preparePostwarSchemaDelta,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const sha = (v: Buffer) => createHash('sha256').update(v).digest('hex');
@@ -398,5 +399,134 @@ describe('unapproved postwar schema delta package boundary', () => {
         outputDirectory: '/tmp/unused-schema-delta',
       }),
     ).rejects.toThrow('ABSOLUTE_PATHS_REQUIRED');
+  });
+});
+
+describe('explicit logistics function-only forward packaging', () => {
+  async function forwardFixture() {
+    const manifestBytes = await readFile(
+      new URL(
+        '../../database/upgrades/postwar-industry-logistics-multicountry-scope.manifest.json',
+        import.meta.url,
+      ),
+    );
+    const forward = JSON.parse(manifestBytes.toString());
+    const bytes = await readFile(
+      new URL('../../' + forward.upgrade.path, import.meta.url),
+    );
+    const f = fixture();
+    f.candidate.pins.proposals.push({
+      ...f.candidate.pins.proposals[0]!,
+      id: 'postwar-industry-logistics-custody',
+      sha256: forward.targetProposalSha256,
+    });
+    f.candidate.pins.proposals.push({
+      ...f.candidate.pins.proposals[0]!,
+      id: 'postwar-source-revocation-fence',
+    });
+    return {
+      ...f,
+      forward,
+      manifestSha256: sha(manifestBytes),
+      bytes,
+      sources: new Map([[forward.upgrade.path, bytes]]),
+    };
+  }
+  it('packages the exact independent forward and both existing function targets without altering fresh selection', async () => {
+    const f = await forwardFixture();
+    const p = createUnapprovedSchemaForwardPlan(
+      f.candidate,
+      f.forward,
+      f.sources,
+      f.manifestSha256,
+    );
+    expect(p.chunks).toHaveLength(1);
+    expect(p.chunks[0]!.source).toEqual(f.bytes);
+    expect(p.chunks[0]!.transaction).toEqual(f.bytes);
+    expect(p.manifest).toMatchObject({
+      installationAllowed: false,
+      databaseOperations: 0,
+      networkRequests: 0,
+      packagedProposalCount: 0,
+      packagedForwardCount: 1,
+      historicalUpgradeManifestsModified: false,
+      freshProposalSqlIncluded: false,
+      mutuallyExclusiveWith: 'FRESH_SCHEMA_DELTA_FROM_SAME_CANDIDATE',
+    });
+    expect(p.chunks[0]!.entry.preconditions.functions).toEqual(
+      f.forward.upgrade.functions,
+    );
+    expect(p.chunks[0]!.entry.preconditions.functions).toHaveLength(2);
+    expect(p.chunks[0]!.entry.recovery.uncertainCommit).toContain(
+      'UNKNOWN_STOP_NO_RETRY',
+    );
+    const old = fixture();
+    expect(
+      createUnapprovedSchemaDeltaPlan(old.candidate, old.sources).chunks.map(
+        (c) => c.entry.id,
+      ),
+    ).toEqual(['delta-a', 'delta-b']);
+  });
+  it('refuses changed forward SQL bytes or a different fresh custody source', async () => {
+    const f = await forwardFixture();
+    f.sources.set(
+      f.forward.upgrade.path,
+      Buffer.concat([f.bytes, Buffer.from('\n--changed')]),
+    );
+    expect(() =>
+      createUnapprovedSchemaForwardPlan(
+        f.candidate,
+        f.forward,
+        f.sources,
+        f.manifestSha256,
+      ),
+    ).toThrow('FORWARD_SOURCE_ARTIFACT_HASH_DIFFERS');
+    f.sources.set(f.forward.upgrade.path, f.bytes);
+    f.forward.targetProposalSha256 = '0'.repeat(64);
+    expect(() =>
+      createUnapprovedSchemaForwardPlan(
+        f.candidate,
+        f.forward,
+        f.sources,
+        f.manifestSha256,
+      ),
+    ).toThrow('EXPLICIT_PINNED_LOGISTICS_FORWARD_REQUIRED');
+  });
+  it('refuses function, owner, ACL and old/new hash metadata drift', async () => {
+    for (const field of [
+      'qualifiedSignature',
+      'owner',
+      'oldBodySha256',
+      'newBodySha256',
+      'executeRoles',
+    ]) {
+      const f = await forwardFixture();
+      f.forward.upgrade.functions[0][field] =
+        field === 'executeRoles'
+          ? ['world_v2_social_source_reader']
+          : 'changed';
+      expect(() =>
+        createUnapprovedSchemaForwardPlan(
+          f.candidate,
+          f.forward,
+          f.sources,
+          f.manifestSha256,
+        ),
+      ).toThrow('EXACT_TWO_EXISTING_LOGISTICS_FUNCTION_TARGETS_REQUIRED');
+    }
+  });
+  it('refuses unrelated or install-approved manifests rather than guessing target database version', async () => {
+    for (const field of ['id', 'schemaVersion', 'installationAllowed']) {
+      const f = await forwardFixture();
+      f.forward[field] = field === 'installationAllowed' ? true : 'other';
+      expect(() =>
+        createUnapprovedSchemaForwardPlan(
+          f.candidate,
+          f.forward,
+          f.sources,
+          f.manifestSha256,
+        ),
+      ).toThrow('EXPLICIT_PINNED_LOGISTICS_FORWARD_REQUIRED');
+    }
   });
 });
