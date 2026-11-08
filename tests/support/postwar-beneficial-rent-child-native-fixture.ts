@@ -352,19 +352,59 @@ async function runChildRehearsal(
     const captainPolicy = await loadAdoptedCaptainOpeningPolicy(
       input.repositoryRoot,
     );
-    const captainPublication = await admin.transaction(async (tx) => {
-      await tx.query('set local role world_v2_admission_release');
-      return withAdoptedBeneficialChildCaptainNewScenarioFrom(
-        tx,
-        {
-          policy: captainPolicy,
-          seed,
-          preparation: token!,
-          worldAdmissionRef: marker!.admissionRef,
-        },
-        (candidate) => publishAdoptedCaptainNewScenarioFrom(tx, candidate),
-      );
+    // The controlled release checks session_user attributes. SET ROLE on the
+    // installer is deliberately insufficient; borrow the existing safe registrar.
+    const captainReleasePool = new Pool({
+      host: marker.socket,
+      port: marker.port,
+      database: clone.database,
+      user: marker.roles.registrarRole,
+      password: async () => '',
+      ssl: false,
+      max: 1,
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 1000,
     });
+    captainReleasePool.on('error', (error) => idleErrors.push(error.message));
+    pools.push(captainReleasePool);
+    const captainReleaseDatabase = new PostgresSqlDatabase(captainReleasePool);
+    const captainPublication = await captainReleaseDatabase.transaction(
+      async (tx) => {
+        await tx.query('set local role world_v2_admission_release');
+        const session = await tx.query<{
+          session_role: string;
+          effective_role: string;
+          safe: boolean;
+          release_member: boolean;
+          owner_member: boolean;
+        }>(
+          "select session_user::text session_role,current_setting('role')effective_role,not(rolsuper or rolbypassrls or rolcreaterole or rolcreatedb or rolreplication)safe,pg_has_role(session_user,'world_v2_admission_release','MEMBER')release_member,pg_has_role(session_user,'world_v2_captain_source_owner','MEMBER')owner_member from pg_roles where rolname=session_user",
+        );
+        must(
+          session.rows.length === 1 &&
+            session.rows[0]?.session_role === marker!.roles.registrarRole &&
+            session.rows[0].effective_role === 'world_v2_admission_release' &&
+            session.rows[0].safe &&
+            session.rows[0].release_member &&
+            !session.rows[0].owner_member,
+          'ACTUAL_SEPARATED_CAPTAIN_RELEASE_SESSION_REQUIRED',
+        );
+        await writeFile(
+          path.join(input.evidenceDirectory, 'captain-release-session.json'),
+          JSON.stringify(session.rows[0], null, 2) + '\n',
+        );
+        return withAdoptedBeneficialChildCaptainNewScenarioFrom(
+          tx,
+          {
+            policy: captainPolicy,
+            seed,
+            preparation: token!,
+            worldAdmissionRef: marker!.admissionRef,
+          },
+          (candidate) => publishAdoptedCaptainNewScenarioFrom(tx, candidate),
+        );
+      },
+    );
     must(
       captainPublication.seedFingerprint === CHILD &&
         captainPublication.publicationCount === 70,
@@ -704,7 +744,8 @@ async function runChildRehearsal(
         }
       const retain =
         input.retainOwnedCheckpointOnCleanup === true &&
-        registeredFixtureIssued;
+        marker !== undefined &&
+        clone !== undefined;
       let retained = false;
       if (retain && marker && clone && cleanupErrors.length === 0) {
         try {
@@ -759,6 +800,9 @@ async function runChildRehearsal(
           );
           const checkpoint = {
             resourceState: 'RETAINED_STOPPED',
+            initializationState: registeredFixtureIssued
+              ? 'FIXTURE_RETURNED'
+              : 'INITIALIZATION_INTERRUPTED',
             recoverableDatabase: true,
             runtimeReady: false,
             containerState: stoppedState,
@@ -798,6 +842,10 @@ async function runChildRehearsal(
               {
                 ...marker,
                 resourceState: 'RETAINED_STOPPED',
+                initializationState: registeredFixtureIssued
+                  ? 'FIXTURE_RETURNED'
+                  : 'INITIALIZATION_INTERRUPTED',
+                runtimeReady: false,
                 recoverableDatabase: true,
                 retainedCheckpoint: path.join(
                   input.evidenceDirectory,
@@ -851,6 +899,10 @@ async function runChildRehearsal(
                 ...marker,
                 baselineSealed: false,
                 resourceState: 'DISPOSED',
+                initializationState: registeredFixtureIssued
+                  ? 'FIXTURE_RETURNED'
+                  : 'INITIALIZATION_INTERRUPTED',
+                runtimeReady: false,
                 recoverableDatabase: false,
               },
               null,

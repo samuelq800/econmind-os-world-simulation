@@ -7,7 +7,7 @@ import {
   randomBytes,
   sign,
 } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Pool } from 'pg';
 import * as C from '@econmind/core';
@@ -521,28 +521,56 @@ export async function createRegisteredFinalNodeSetup(input: {
       adoptedPolicy = await loadPostwarIndustryFirstDayAdoptedPolicy(
         input.repositoryRoot,
       );
-    const industrySource = await admin.transaction(async (tx) => {
-      await tx.query('set transaction isolation level repeatable read');
-      await tx.query('set local role world_v2_industry_source_publisher');
-      const registration = await createPostwarIndustryProductionSource({
-        sourceContext: industryContext,
-        scope: { worldId: m.worldId, countryId: 'COUNTRY_02' },
-        runtimeReaderRole: 'world_v2_industry_source_reader',
-      }).registerFrom(tx);
-      if (
-        registration.rows.filter(
-          (v) => v.facility_id === 'OPEN-02-REFINED_FUEL',
-        ).length !== 1
-      )
-        throw Error('ACTUAL_C2_REFINERY_REGISTRATION_REQUIRED');
-      return publishPostwarIndustryFirstDaySourceFrom(tx, {
-        worldId: m.worldId,
-        countryId: 'COUNTRY_02',
-        facilityId: 'OPEN-02-REFINED_FUEL',
-        adoptedPolicy,
-        sourceContext: industryContext,
-      });
-    });
+    const industryPublicationDatabase = new PostgresSqlDatabase(
+      open(roles.industryPublication),
+    );
+    const industrySource = await industryPublicationDatabase.transaction(
+      async (tx) => {
+        await tx.query('set transaction isolation level repeatable read');
+        await tx.query('set local role world_v2_industry_source_publisher');
+        const session = await tx.query<{
+          session_role: string;
+          effective_role: string;
+          safe: boolean;
+          publisher_member: boolean;
+          owner_member: boolean;
+        }>(
+          "select session_user::text session_role,current_setting('role')effective_role,not(rolsuper or rolbypassrls or rolcreaterole or rolcreatedb or rolreplication)safe,pg_has_role(session_user,'world_v2_industry_source_publisher','MEMBER')publisher_member,pg_has_role(session_user,'world_v2_industry_source_owner','MEMBER')owner_member from pg_roles where rolname=session_user",
+        );
+        if (
+          session.rows.length !== 1 ||
+          session.rows[0]?.session_role !== roles.industryPublication ||
+          session.rows[0].effective_role !==
+            'world_v2_industry_source_publisher' ||
+          !session.rows[0].safe ||
+          !session.rows[0].publisher_member ||
+          session.rows[0].owner_member
+        )
+          throw Error('ACTUAL_SEPARATED_INDUSTRY_PUBLISHER_SESSION_REQUIRED');
+        await writeFile(
+          path.join(m.evidenceDirectory, 'industry-publisher-session.json'),
+          JSON.stringify(session.rows[0], null, 2) + '\n',
+        );
+        const registration = await createPostwarIndustryProductionSource({
+          sourceContext: industryContext,
+          scope: { worldId: m.worldId, countryId: 'COUNTRY_02' },
+          runtimeReaderRole: 'world_v2_industry_source_reader',
+        }).registerFrom(tx);
+        if (
+          registration.rows.filter(
+            (v) => v.facility_id === 'OPEN-02-REFINED_FUEL',
+          ).length !== 1
+        )
+          throw Error('ACTUAL_C2_REFINERY_REGISTRATION_REQUIRED');
+        return publishPostwarIndustryFirstDaySourceFrom(tx, {
+          worldId: m.worldId,
+          countryId: 'COUNTRY_02',
+          facilityId: 'OPEN-02-REFINED_FUEL',
+          adoptedPolicy,
+          sourceContext: industryContext,
+        });
+      },
+    );
     const h0 = await installRegisteredFinalChildH0From({
       fixture: f,
       seed: f.seed,
@@ -578,9 +606,7 @@ export async function createRegisteredFinalNodeSetup(input: {
         startupSeed: f.seed,
         startupBeneficialHousingRentSource: f.preparation,
       });
-      await new PostgresSqlDatabase(
-        open(roles.industryPublication),
-      ).transaction(async (tx) => {
+      await industryPublicationDatabase.transaction(async (tx) => {
         await tx.query('set transaction isolation level repeatable read');
         await tx.query('set local role world_v2_industry_source_publisher');
         await publishPostwarIndustryUtilitySourcesFrom(tx, { proposal });
