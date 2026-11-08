@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, beforeEach, afterEach, it, expect, vi } from 'vitest';
-import * as C from '../../packages/core/src/index.js';
+import * as C from '@econmind/core';
 import { testOpeningSeed } from '../helpers/v08-ledgers.js';
 import {
   inspectOfficialOpeningDecisionSource,
@@ -98,10 +98,15 @@ const root = fileURLToPath(new URL('../..', import.meta.url)),
   read = (p: string) =>
     readFile(new URL('../../' + p, import.meta.url), 'utf8'),
   sha = (s: string) => createHash('sha256').update(s).digest('hex');
-const seed = testOpeningSeed({
-  worldId: C.worldId('WORLD_TEST_ONLY_SCOPE_PROTOCOL'),
-  sha256Hex: sha,
-});
+// Validate the fixture through the same public Core module as the Worker.
+// A source-module seed alone does not carry the installed module's brand.
+const seed = C.parseOpeningSeed(
+  testOpeningSeed({
+    worldId: C.worldId('WORLD_TEST_ONLY_SCOPE_PROTOCOL'),
+    sha256Hex: sha,
+  }),
+  sha,
+);
 let context: Parameters<typeof readPostwarIndustryRefineryCoverage>[0],
   runtime: Readonly<PostwarIndustryLogisticsRuntime>;
 beforeAll(async () => {
