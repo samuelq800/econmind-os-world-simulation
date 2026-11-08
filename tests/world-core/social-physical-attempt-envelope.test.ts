@@ -14,8 +14,10 @@ import {
   type CanonicalCommand,
   type LabourSkill,
   type SocialEmploymentReadFacts,
+  type SocialEmploymentServiceCreationReadFacts,
   type SocialEmploymentServiceState,
 } from '@econmind/core';
+import { projectPostwarSocialServiceCreationPlanning } from '../../apps/world-worker/src/persistence/postwar-social-service-creation-originals.js';
 import {
   assertSocialPhysicalAttemptEnvelope,
   assertSocialPhysicalCapacityState,
@@ -659,38 +661,39 @@ describe('programme child pools retain the original physical desk', () => {
       },
       digest,
     );
+    const creationFacts: SocialEmploymentServiceCreationReadFacts = {
+      boundary: createE01DailyBoundary('0'),
+      simTime: '10000',
+      populationAvailability: f.facts().populationAvailability,
+      worldId: state.worldId,
+      head: { worldVersion: '0', eventSequence: '0' },
+      countryId,
+      governmentEntityId: 'ENTITY_GOVERNMENT_01',
+      localCurrency: 'XAA',
+      sourceRef: 'SOURCE_TEST_ONLY',
+      sourceFingerprint: `sha256:${'1'.repeat(64)}`,
+      sourceRevocations: [],
+      usageLicence: {
+        licenseId: 'LICENCE_TEST_ONLY',
+        licensorEntityId: 'ENTITY_OPERATOR_01',
+        beneficiaryEntityId: 'ENTITY_GOVERNMENT_01',
+        locationId,
+        validFromDayIndex: '0',
+        validUntilDayIndex: '1',
+        dutyAssignmentIds: ['DUTY_TEST_ONLY_INTAKE', 'DUTY_TEST_ONLY_VERIFY'],
+        maximumWorkerMinutes: '960',
+        scope: 'PUBLIC_REFERRALS_ONLY_NOT_EMPLOYER_TRANSFER',
+        state: 'GENESIS_USAGE_LICENSE_NOT_PAID_PURCHASE',
+        additionalFeeAmount: '0',
+        futurePaymentCondition:
+          'NEW_PUBLIC_PURCHASE_REQUIRES_SEPARATE_LAWFUL_FUNDED_CONTRACT',
+      },
+    };
     const result = prepareSocialEmploymentServiceCreation({
       command,
       state,
       sha256Hex: digest,
-      readFacts: {
-        boundary: createE01DailyBoundary('0'),
-        simTime: '10000',
-        populationAvailability: f.facts().populationAvailability,
-        worldId: state.worldId,
-        head: { worldVersion: '0', eventSequence: '0' },
-        countryId,
-        governmentEntityId: 'ENTITY_GOVERNMENT_01',
-        localCurrency: 'XAA',
-        sourceRef: 'SOURCE_TEST_ONLY',
-        sourceFingerprint: `sha256:${'1'.repeat(64)}`,
-        sourceRevocations: [],
-        usageLicence: {
-          licenseId: 'LICENCE_TEST_ONLY',
-          licensorEntityId: 'ENTITY_OPERATOR_01',
-          beneficiaryEntityId: 'ENTITY_GOVERNMENT_01',
-          locationId,
-          validFromDayIndex: '0',
-          validUntilDayIndex: '1',
-          dutyAssignmentIds: ['DUTY_TEST_ONLY_INTAKE', 'DUTY_TEST_ONLY_VERIFY'],
-          maximumWorkerMinutes: '960',
-          scope: 'PUBLIC_REFERRALS_ONLY_NOT_EMPLOYER_TRANSFER',
-          state: 'GENESIS_USAGE_LICENSE_NOT_PAID_PURCHASE',
-          additionalFeeAmount: '0',
-          futurePaymentCondition:
-            'NEW_PUBLIC_PURCHASE_REQUIRES_SEPARATE_LAWFUL_FUNDED_CONTRACT',
-        },
-      },
+      readFacts: creationFacts,
     });
     // This envelope is DATA, not a claimed real staff licence.
     const body = (version: string) => ({
@@ -708,9 +711,143 @@ describe('programme child pools retain the original physical desk', () => {
       before: state,
       created: result.state,
       child: result.result.servicePoolId,
+      creationFacts,
       body,
     };
   }
+  function planningFixture() {
+    const f = createdDesk();
+    const document = {
+      inputs: {
+        worldId: f.before.worldId,
+        fundingAccounts: [
+          {
+            countryId,
+            payerEntityId: 'ENTITY_GOVERNMENT_01',
+            payerRole: 'GOV' as const,
+            currency: 'XAA',
+          },
+        ],
+      },
+      countries: [
+        {
+          countryId,
+          minimumWage: f.facts().minimumWage,
+          validationReadFacts: {
+            classification: 'VALIDATION_ONLY_NOT_ACTIVE_OFFER' as const,
+            facts: f.facts(),
+          },
+          npcUsageLicenses: [
+            {
+              ...f.creationFacts.usageLicence,
+              validFromDayIndex: '0' as const,
+              validUntilDayIndex: '1' as const,
+            },
+          ],
+          physicalDayBodies: [f.body('0')],
+        },
+      ],
+    };
+    const input = {
+      document,
+      source: {
+        sourceId: 'SOURCE_TEST_ONLY',
+        payloadHash: f.creationFacts.sourceFingerprint,
+      },
+      countryId,
+      state: f.created,
+      head: { worldVersion: '1', eventSequence: '1' },
+      simTime: '10000',
+      servicePoolIds: ['POOL_HIGH_D0', f.child],
+      sha256Hex: digest,
+    };
+    return { f, input };
+  }
+  it('projects only the requested current page with the original licence/LC and already-partitioned root capacity', () => {
+    const { f, input } = planningFixture();
+    const pending = apply(
+      plan(110, 'HIGH', '2', '1', '0'),
+      f.created,
+      f.facts(),
+    ).state;
+    const data = projectPostwarSocialServiceCreationPlanning({
+      ...input,
+      state: pending,
+    });
+    expect(data.rootTargets).toEqual([
+      {
+        poolId: 'POOL_HIGH_D0',
+        locationId,
+        skill: 'HIGH',
+        dayIndex: '0',
+        capacitySlots: '6',
+        usedSlots: '0',
+        reservedSlots: '2',
+        actualUnemployedCount: '6',
+      },
+    ]);
+    expect(data.usageLicences).toEqual([f.creationFacts.usageLicence]);
+    expect(data.localCurrency).toBe('XAA');
+    expect(data.creations).toEqual([
+      {
+        programmeId: 'PROGRAMME_TEST_ONLY',
+        parentPoolId: 'POOL_HIGH_D0',
+        childPoolId: f.child,
+        capacitySlots: '4',
+      },
+    ]);
+    const childOnly = projectPostwarSocialServiceCreationPlanning({
+      ...input,
+      servicePoolIds: [f.child],
+    });
+    expect(childOnly.rootTargets).toEqual([]);
+    expect(childOnly.creations).toEqual(data.creations);
+  });
+  it('keeps a true absent licence distinct from a failed source, and rejects unknown page scope or expired day', () => {
+    const { input } = planningFixture();
+    const noLicence = {
+      ...input.document,
+      countries: input.document.countries.map((c) => ({
+        ...c,
+        npcUsageLicenses: [],
+      })),
+    };
+    expect(
+      projectPostwarSocialServiceCreationPlanning({
+        ...input,
+        document: noLicence,
+      }).usageLicences,
+    ).toEqual([]);
+    for (const servicePoolIds of [
+      ['POOL_FOREIGN'],
+      ['POOL_HIGH_D0', 'POOL_HIGH_D0'],
+      Array.from({ length: 101 }, (_, n) => 'POOL_' + n),
+    ])
+      expect(() =>
+        projectPostwarSocialServiceCreationPlanning({
+          ...input,
+          servicePoolIds,
+        }),
+      ).toThrow('EXACT_CURRENT_PAGE_SERVICE_POOL_IDS_REQUIRED');
+    expect(() =>
+      projectPostwarSocialServiceCreationPlanning({
+        ...input,
+        simTime: '86400000',
+      }),
+    ).toThrow('ACTUAL_T0_PLANNING_COUNTRY_REQUIRED');
+    expect(() =>
+      projectPostwarSocialServiceCreationPlanning({
+        ...input,
+        countryId: 'COUNTRY_02',
+      }),
+    ).toThrow('ACTUAL_T0_PLANNING_COUNTRY_REQUIRED');
+    expect(() =>
+      projectPostwarSocialServiceCreationPlanning({
+        ...input,
+        source: { ...input.source, payloadHash: 'sha256:invalid' },
+      }),
+    ).toThrow('ACTUAL_OPERATING_SOURCE_FINGERPRINT_REQUIRED');
+  });
   it('partitions ten slots without increasing the physical lane or issuing work', () => {
     const f = createdDesk();
     const read = (state: SocialEmploymentServiceState) =>

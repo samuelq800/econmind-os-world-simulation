@@ -34,7 +34,12 @@ import {
   readPreparedSocialPagedLineage,
   type PreparedPostwarSocialSource,
 } from './prepared-postwar-social-source.js';
-import { projectPostwarSocialServiceCreationFacts } from './postwar-social-service-creation-originals.js';
+import {
+  projectPostwarSocialServiceCreationFacts,
+  projectPostwarSocialServiceCreationPlanning,
+  type PostwarSocialServiceCreationPlanningData,
+} from './postwar-social-service-creation-originals.js';
+export type { PostwarSocialServiceCreationPlanningData } from './postwar-social-service-creation-originals.js';
 import { assertSocialPhysicalCapacityState } from './social-physical-attempt-envelope.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
 import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
@@ -123,6 +128,17 @@ export interface PostwarSocialEmploymentServiceCreationRuntime {
     readonly observedAtReal: string;
   }): Promise<void>;
   authorizeIntake(command: CanonicalCommand): Promise<AuthorizedOfficeContext>;
+  readPlanningFrom(
+    tx: SqlExecutor,
+    selection: {
+      readonly countryId: string;
+      readonly servicePoolIds: readonly string[];
+      readonly expectedHead: Readonly<{
+        worldVersion: string;
+        eventSequence: string;
+      }>;
+    },
+  ): Promise<Readonly<PostwarSocialServiceCreationPlanningData>>;
 }
 export function createPostwarSocialEmploymentServiceCreationRuntime(configuration: {
   readonly worldId: string;
@@ -169,7 +185,9 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
       invalid('GENUINE_CURRENT_SOCIAL_PROOF_REQUIRED');
     await reauthorizeCommitAuthorizationProof(p);
   }
-  const deriveFrom = async (tx: SqlExecutor, command: CanonicalCommand) => {
+  // The shared Social database establishes RR before its first query; callers
+  // supply that same held executor, never another Clock/pool transaction.
+  const readCurrentFrom = async (tx: SqlExecutor, countryId: string) => {
     const scope = registeredWorldExecutionClockScope(configuration.clock);
     if (
       !scope ||
@@ -184,16 +202,12 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
     if (execution.consumerRole !== configuration.workerRole)
       invalid('ACTUAL_REGISTERED_CONSUMER_ROLE_REQUIRED');
     const ticks = execution.simTime;
-    if (
-      !/^(0|[1-9][0-9]*)$/u.test(ticks) ||
-      BigInt(ticks) >= 86400000n ||
-      command.simTime.ticks > BigInt(ticks)
-    )
+    if (!/^(0|[1-9][0-9]*)$/u.test(ticks) || BigInt(ticks) >= 86400000n)
       invalid('ACTUAL_CURRENT_T0_CLOCK_REQUIRED');
     const source = await roles.withSourceReaderFrom(tx, () =>
       originals.withOriginalsFrom(
         tx,
-        { worldId: command.worldId, countryId: command.countryId! },
+        { worldId: configuration.worldId, countryId },
         async (v) => v,
       ),
     );
@@ -205,6 +219,48 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
     )
       invalid('ACTUAL_CLOCK_SOURCE_ADMISSION_PINS_DIFFER');
     const paged = readPreparedSocialPagedLineage(lineage);
+    const country = replayPostwarSocialEmploymentLineage({
+        document,
+        lineage,
+      }).countries.find((c) => c.countryId === countryId),
+      originalCountry = document.countries.find(
+        (c) => c.countryId === countryId,
+      );
+    if (!country || !originalCountry)
+      invalid('ACTUAL_CURRENT_COUNTRY_REQUIRED');
+    if (
+      paged
+        ? BigInt(ticks) < BigInt(paged.metadata.maxCommandSimTimeTicks)
+        : lineage.transitions === null ||
+          lineage.transitions.some((t) =>
+            t.transition.events.some((e) => e.simTime.ticks > BigInt(ticks)),
+          )
+    )
+      invalid('ACTUAL_CLOCK_PRECEDES_CURRENT_PREFIX');
+    return {
+      execution,
+      ticks,
+      source,
+      lineage,
+      document,
+      registration,
+      paged,
+      country,
+      originalCountry,
+    };
+  };
+  const deriveFrom = async (tx: SqlExecutor, command: CanonicalCommand) => {
+    const {
+      ticks,
+      source,
+      lineage,
+      document,
+      registration,
+      paged,
+      country,
+      originalCountry,
+    } = await readCurrentFrom(tx, command.countryId!);
+    if (command.simTime.ticks > BigInt(ticks)) invalid('FUTURE_COMMAND_TIME');
     if (
       lineage.headWorldVersion !== command.expectedWorldVersion ||
       command.simTime.ticks >= 86400000n
@@ -221,15 +277,7 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
           )
     )
       invalid('COMMAND_PRECEDES_CURRENT_PREFIX');
-    const country = replayPostwarSocialEmploymentLineage({
-        document,
-        lineage,
-      }).countries.find((c) => c.countryId === command.countryId),
-      originalCountry = document.countries.find(
-        (c) => c.countryId === command.countryId,
-      );
-    if (!country || !originalCountry)
-      invalid('ACTUAL_CURRENT_COUNTRY_REQUIRED');
+
     const facts = projectPostwarSocialServiceCreationFacts({
       command,
       document,
@@ -490,6 +538,49 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
   return Object.freeze({
     candidateFactory,
     sourceCommitProtectionPort,
+    async readPlanningFrom(
+      tx: SqlExecutor,
+      selection: {
+        readonly countryId: string;
+        readonly servicePoolIds: readonly string[];
+        readonly expectedHead: Readonly<{
+          worldVersion: string;
+          eventSequence: string;
+        }>;
+      },
+    ): Promise<Readonly<PostwarSocialServiceCreationPlanningData>> {
+      if (
+        !Array.isArray(selection.servicePoolIds) ||
+        selection.servicePoolIds.length > 100 ||
+        new Set(selection.servicePoolIds).size !==
+          selection.servicePoolIds.length ||
+        selection.servicePoolIds.some(
+          (id) => typeof id !== 'string' || !id.length || id.length > 512,
+        ) ||
+        !/^(0|[1-9][0-9]*)$/u.test(
+          selection.expectedHead?.worldVersion ?? '',
+        ) ||
+        !/^(0|[1-9][0-9]*)$/u.test(selection.expectedHead?.eventSequence ?? '')
+      )
+        invalid('EXACT_BOUNDED_PLANNING_PAGE_REQUIRED');
+      const current = await readCurrentFrom(tx, selection.countryId),
+        head = {
+          worldVersion: current.lineage.headWorldVersion,
+          eventSequence: current.lineage.headEventSequence,
+        };
+      if (!same(selection.expectedHead, head))
+        invalid('PLANNING_CURRENT_HEAD_DIFFERS');
+      return projectPostwarSocialServiceCreationPlanning({
+        document: current.document,
+        source: current.source.source,
+        countryId: selection.countryId,
+        servicePoolIds: selection.servicePoolIds,
+        state: current.country.lifecycle.employment,
+        head,
+        simTime: current.ticks,
+        sha256Hex: digest,
+      });
+    },
     async assertSourceBeforeClaim(request: {
       readonly command: CanonicalCommand;
       readonly observedAtReal: string;

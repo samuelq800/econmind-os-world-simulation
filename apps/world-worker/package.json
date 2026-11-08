@@ -83,6 +83,10 @@
     "./postwar-industry-utility-planning-read": {
       "types": "./dist/runtime-preparation/postwar-industry-utility-planning-exports.d.ts",
       "default": "./dist/runtime-preparation/postwar-industry-utility-planning-exports.js"
+    },
+    "./postwar-social-service-creation-planning-read": {
+      "types": "./dist/persistence/postwar-social-service-creation-planning-read.d.ts",
+      "default": "./dist/persistence/postwar-social-service-creation-planning-read.js"
     }
   },
   "scripts": {
