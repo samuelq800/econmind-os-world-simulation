@@ -36,6 +36,13 @@ do $$declare t text;begin foreach t in array array['postwar_beneficial_rent_sour
  execute format('create trigger rent_no_truncate before truncate on world_v2.%I for each statement execute function world_v2.reject_authoritative_history_mutation()',t);
 end loop;end;$$;
 grant select on world_v2.world_head,world_v2.runtime_opening_admission,world_v2.runtime_admission_publication_permit,world_v2.runtime_admission_publication_revocation to world_v2_beneficial_rent_source_owner;
+-- The baseline PUBLIC admission policy reads seat(world_id,auth_subject),
+-- whose own PUBLIC policy reads these current-authorization columns. PostgreSQL
+-- checks that complete nested dependency even alongside our exact-world policy.
+-- Only the inaccessible definer receives these SELECT columns: neither the
+-- publisher nor the runtime reader gains metadata, raw seed or UPDATE access.
+grant select(world_id,auth_subject)on world_v2.runtime_read_seat to world_v2_beneficial_rent_source_owner;
+grant select(world_id,auth_subject,country_id,office_id,team_id,authorization_version,active)on world_v2.current_commit_authorization to world_v2_beneficial_rent_source_owner;
 grant select(world_id,seed_id,seed_fingerprint,replay_binding,canonical_payload)on world_v2.opening_seed to world_v2_beneficial_rent_source_owner;
 grant update(world_version)on world_v2.world_head to world_v2_beneficial_rent_source_owner;
 grant update(seed_id)on world_v2.runtime_opening_admission to world_v2_beneficial_rent_source_owner;

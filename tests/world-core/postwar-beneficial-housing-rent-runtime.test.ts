@@ -1,8 +1,8 @@
 /** Complete tiny TEST_ONLY Core source; source/admission/publication SQL below
  * is embedded protocol evidence only, never production admission or a Clock.
  * No 70-country generator, existing cfc seed, service loop or credentials. */
-import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { createHash, generateKeyPairSync, sign } from 'node:crypto';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { describe, it, expect } from 'vitest';
 import * as C from '@econmind/core';
@@ -17,6 +17,8 @@ import {
   isPostwarBeneficialHousingRentSourceCommitProtectionPort,
   BENEFICIAL_HOUSING_RENT_SOURCE_PURPOSE,
 } from '../../apps/world-worker/src/persistence/postwar-beneficial-housing-rent-runtime.js';
+import { startGOwnedPg16Cluster } from '../support/g-owned-pg16-cluster.js';
+import { OPENING_PUBLICATION_SIGNATURE_DOMAIN } from '../../apps/world-worker/src/admission/private-opening-admission-authority.js';
 import type {
   SqlDatabase,
   SqlExecutor,
@@ -211,6 +213,419 @@ function fixture() {
   return { input, token, data, command };
 }
 const clock = { nowReal: () => at, simTime: async () => '11' };
+/** Complete published metadata DDL, including both nested PUBLIC RLS policies.
+ * The small Core seed and Ed25519 permit are TEST_ONLY; no Owner authority,
+ * existing World, external credentials or production enrollment is used. */
+async function fullRlsRegistrationFixture() {
+  const f = fixture();
+  const native =
+    process.env.ECONMIND_RENT_SOURCE_RLS_NATIVE === '1'
+      ? await startGOwnedPg16Cluster()
+      : null;
+  const client = native ? await native.admin.connect() : null;
+  const db: {
+    exec(statement: string): Promise<unknown>;
+    query<Row extends object = Record<string, unknown>>(
+      statement: string,
+      parameters?: unknown[],
+    ): Promise<{ rows: Row[] }>;
+    close(): Promise<void>;
+  } =
+    client && native
+      ? {
+          async exec(statement) {
+            await client.query(statement);
+          },
+          async query<Row extends object>(
+            statement: string,
+            parameters: unknown[] = [],
+          ) {
+            return {
+              rows: (await client.query(statement, parameters)).rows as Row[],
+            };
+          },
+          async close() {
+            client.release();
+            try {
+              native.assertHealthy();
+            } finally {
+              await native.close();
+            }
+            const directory = process.env.ECONMIND_RENT_SOURCE_RLS_EVIDENCE_DIR;
+            if (directory) {
+              await mkdir(directory, { recursive: true });
+              await writeFile(
+                directory + '/' + native.ownership.nonce + '.json',
+                JSON.stringify(
+                  {
+                    status: 'OWNED_PG16_15_CLEANED',
+                    ownership: native.ownership,
+                    referenceAccessed: false,
+                    production: false,
+                  },
+                  null,
+                  2,
+                ) + '\n',
+              );
+            }
+          },
+        }
+      : new PGlite();
+  const principal = (
+    await db.query<{ principal: string }>('select session_user as principal')
+  ).rows[0]!.principal;
+  const load = async (p: string) =>
+    db.exec(await readFile(new URL('../../' + p, import.meta.url), 'utf8'));
+  const admin = () =>
+    db.exec('reset role;set session authorization ' + principal);
+  async function asRole<T>(role: string, operation: () => Promise<T>) {
+    await admin();
+    await db.exec('set session authorization ' + role);
+    await db.exec('begin isolation level repeatable read');
+    try {
+      const result = await operation();
+      await db.exec('commit');
+      return result;
+    } catch (error) {
+      await db.exec('rollback');
+      throw error;
+    } finally {
+      await admin();
+    }
+  }
+  try {
+    await db.exec(`create schema storage;create table storage.objects(bucket_id text);
+      alter table storage.objects enable row level security;
+      create role anon nologin;create role authenticated nologin;create role service_role nologin;`);
+    const manifest = JSON.parse(
+      await readFile(
+        new URL('../../database/migrations/manifest.json', import.meta.url),
+        'utf8',
+      ),
+    ) as { migrations: { path: string }[] };
+    for (const migration of manifest.migrations) await load(migration.path);
+    await load('database/proposals/runtime-read-binding-storage.sql');
+    await load('database/proposals/runtime-admission-publication.sql');
+    await load(
+      'database/proposals/postwar-beneficial-housing-rent-custody.sql',
+    );
+    const { fingerprint, ...intent } = f.input.seed;
+    const replay = C.canonicalSerialize(f.input.seed.replayBinding);
+    await db.query('insert into world_v2.world_head values($1,0,0)', [world]);
+    await db.query(
+      'insert into world_v2.opening_seed values($1,$2,0,$3,$4,$5,$6)',
+      [
+        world,
+        f.input.seed.seedId,
+        replay,
+        C.canonicalSerialize(intent),
+        fingerprint,
+        at,
+      ],
+    );
+    const caller = 'world_v2_opening_admission_rent_rls';
+    await db.exec(`create role ${caller} nologin noinherit nosuperuser nobypassrls nocreatedb nocreaterole noreplication;
+      grant usage on schema world_v2 to ${caller};
+      grant execute on function world_v2.publish_runtime_admission_publication(text,text,text) to ${caller};`);
+    const claims = {
+      schemaVersion: 'opening-publication-authorization-v1',
+      purpose: 'AUTHORIZE_OFFICIAL_OPENING_ADMISSION_PUBLICATION',
+      authorizationId: 'AUTHORIZATION_TEST_ONLY_RENT_RLS',
+      keyId: 'TEST_ONLY_RENT_KEY',
+      ownerIdentity: 'TEST_ONLY_NOT_OWNER',
+      issuedAtReal: new Date(Date.now() - 86400000).toISOString(),
+      expiresAtReal: new Date(Date.now() + 86400000).toISOString(),
+      worldId: world,
+      seedId: f.input.seed.seedId,
+      seedFingerprint: fingerprint,
+      modelVersion: f.input.seed.replayBinding.modelVersion,
+      replayBinding: replay,
+      sourceBundleSha256: f.data.bundleSha256,
+    };
+    const bytes = C.canonicalSerialize(claims),
+      hash = sha(bytes);
+    const signature = sign(
+      null,
+      Buffer.from(OPENING_PUBLICATION_SIGNATURE_DOMAIN + bytes),
+      generateKeyPairSync('ed25519').privateKey,
+    ).toString('base64url');
+    await asRole('world_v2_admission_release', () =>
+      db.query(
+        `insert into world_v2.runtime_admission_publication_permit(authorization_id,authorization_sha256,canonical_authorization,signature_base64url,world_id,seed_id,seed_fingerprint,model_version,replay_binding,source_bundle_sha256,caller_session_role,valid_from,valid_until)values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+        [
+          claims.authorizationId,
+          hash,
+          bytes,
+          signature,
+          world,
+          f.input.seed.seedId,
+          fingerprint,
+          claims.modelVersion,
+          replay,
+          f.data.bundleSha256,
+          caller,
+          claims.issuedAtReal,
+          claims.expiresAtReal,
+        ],
+      ),
+    );
+    await asRole(caller, () =>
+      db.query(
+        'select world_v2.publish_runtime_admission_publication($1,$2,$3)',
+        [claims.authorizationId, hash, f.data.bundleSha256],
+      ),
+    );
+    const publisher = 'world_v2_beneficial_rent_source_publisher',
+      reader = 'world_v2_beneficial_rent_source_reader';
+    const register = (bundle = f.data.bundleBytes, targetWorld = world) =>
+      asRole(publisher, () =>
+        db.query<{ count: number }>(
+          'select world_v2.register_postwar_beneficial_rent_source($1,$2,$3) as count',
+          [targetWorld, bundle, sha(bundle)],
+        ),
+      );
+    const header = () =>
+      asRole(reader, () =>
+        db.query(
+          'select * from world_v2.lock_postwar_beneficial_rent_header($1,$2)',
+          [world, 'COUNTRY_01'],
+        ),
+      );
+    return {
+      ...f,
+      db,
+      asRole,
+      register,
+      header,
+      publisher,
+      reader,
+      permit: claims.authorizationId,
+      async close() {
+        retireBeneficialHousingRentSource(f.token);
+        await db.close();
+      },
+    };
+  } catch (error) {
+    retireBeneficialHousingRentSource(f.token);
+    await db.close();
+    throw error;
+  }
+}
+describe('rent registration through complete baseline admission and seat RLS', () => {
+  it('registers and re-reads exact originals using only the separated NOLOGIN publisher and reader', async () => {
+    const f = await fullRlsRegistrationFixture();
+    try {
+      expect((await f.register()).rows).toEqual([{ count: 1 }]);
+      const first = (await f.header()).rows;
+      expect(first).toHaveLength(1);
+      expect((await f.register()).rows).toEqual([{ count: 1 }]);
+      expect((await f.header()).rows).toEqual(first);
+      const flags = await f.db.query<{
+        relname: string;
+        relrowsecurity: boolean;
+        relforcerowsecurity: boolean;
+      }>(
+        "select relname,relrowsecurity,relforcerowsecurity from pg_class where oid in('world_v2.runtime_read_seat'::regclass,'world_v2.runtime_opening_admission'::regclass)",
+      );
+      expect(flags.rows).toHaveLength(2);
+      expect(
+        flags.rows.every((r) => r.relrowsecurity && r.relforcerowsecurity),
+      ).toBe(true);
+      const owner = 'world_v2_beneficial_rent_source_owner';
+      const required = {
+        runtime_read_seat: ['world_id', 'auth_subject'],
+        current_commit_authorization: [
+          'world_id',
+          'auth_subject',
+          'country_id',
+          'office_id',
+          'team_id',
+          'authorization_version',
+          'active',
+        ],
+      };
+      for (const [table, columns] of Object.entries(required)) {
+        const visible = await f.db.query<{ column_name: string }>(
+          `select column_name from information_schema.columns where table_schema='world_v2' and table_name=$1 and has_column_privilege($2,'world_v2.'||table_name,column_name,'SELECT') order by column_name`,
+          [table, owner],
+        );
+        expect(visible.rows.map((r) => r.column_name)).toEqual(
+          [...columns].sort(),
+        );
+        expect(
+          (
+            await f.db.query<{ allowed: boolean }>(
+              `select has_table_privilege($1,$2,'SELECT') as allowed`,
+              [owner, 'world_v2.' + table],
+            )
+          ).rows,
+        ).toEqual([{ allowed: false }]);
+        // Every newly granted column is a real policy dependency, not a broad
+        // convenience grant. Removing any one recreates the exact ACL failure.
+        for (const column of columns) {
+          await f.db.exec(
+            `revoke select(${column})on world_v2.${table} from ${owner}`,
+          );
+          await expect(f.register()).rejects.toMatchObject({
+            code: '42501',
+            message: 'permission denied for table ' + table,
+          });
+          await f.db.exec(
+            `grant select(${column})on world_v2.${table} to ${owner}`,
+          );
+        }
+      }
+      expect((await f.header()).rows).toEqual(first);
+      for (const role of [owner, f.publisher, f.reader]) {
+        const attributes = (
+          await f.db.query<{
+            rolcanlogin: boolean;
+            rolsuper: boolean;
+            rolbypassrls: boolean;
+            rolcreatedb: boolean;
+            rolcreaterole: boolean;
+            rolreplication: boolean;
+          }>(
+            'select rolcanlogin,rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,rolreplication from pg_roles where rolname=$1',
+            [role],
+          )
+        ).rows[0]!;
+        expect(Object.values(attributes).every((v) => v === false)).toBe(true);
+      }
+      for (const role of [f.publisher, f.reader]) {
+        const principal = await f.asRole(role, () =>
+          f.db.query<{ session: string; effective: string }>(
+            'select session_user as session,current_user as effective',
+          ),
+        );
+        expect(principal.rows).toEqual([{ session: role, effective: role }]);
+        for (const table of [
+          'runtime_read_seat',
+          'current_commit_authorization',
+          'opening_seed',
+        ]) {
+          await expect(
+            f.asRole(role, () => f.db.query('select * from world_v2.' + table)),
+          ).rejects.toMatchObject({ code: '42501' });
+        }
+        await expect(
+          f.asRole(role, () => f.db.exec('set role ' + owner)),
+        ).rejects.toMatchObject({ code: '42501' });
+      }
+    } finally {
+      await f.close();
+    }
+  });
+  it('denies an unentitled publisher, mismatched World, revoked source and revoked real admission without restoring authority', async () => {
+    const f = await fullRlsRegistrationFixture();
+    try {
+      await expect(
+        f.asRole(f.reader, () =>
+          f.db.query(
+            'select world_v2.register_postwar_beneficial_rent_source($1,$2,$3)',
+            [world, f.data.bundleBytes, f.data.bundleSha256],
+          ),
+        ),
+      ).rejects.toMatchObject({ code: '42501' });
+      await expect(
+        f.register(f.data.bundleBytes, 'WORLD_TEST_ONLY_RENT_OTHER'),
+      ).rejects.toMatchObject({
+        code: '55000',
+        message: 'BENEFICIAL_RENT_REAL_ADMISSION_REQUIRED',
+      });
+      await f.register();
+      expect((await f.header()).rows).toHaveLength(1);
+      await f.asRole('world_v2_beneficial_rent_source_owner', async () => {
+        await f.db.query(
+          "select set_config('econmind.beneficial_rent_world',$1,true)",
+          ['WORLD_TEST_ONLY_RENT_OTHER'],
+        );
+        expect(
+          (
+            await f.db.query(
+              'select world_id from world_v2.runtime_opening_admission where world_id=$1',
+              [world],
+            )
+          ).rows,
+        ).toEqual([]);
+      });
+      await f.asRole(f.publisher, () =>
+        f.db.query(
+          'select world_v2.revoke_postwar_beneficial_rent_source($1,$2,$3)',
+          [world, 'COUNTRY_01', 'TEST_ONLY_SOURCE_REVOKED'],
+        ),
+      );
+      expect((await f.header()).rows).toEqual([]);
+      await f.register(); // Immutable registration never deletes revocation.
+      expect((await f.header()).rows).toEqual([]);
+      await f.asRole('world_v2_admission_release', () =>
+        f.db.query(
+          'insert into world_v2.runtime_admission_publication_revocation(authorization_id,reason_ref)values($1,$2)',
+          [f.permit, 'TEST_ONLY_ADMISSION_REVOKED'],
+        ),
+      );
+      await expect(f.register()).rejects.toMatchObject({
+        code: '55000',
+        message: 'BENEFICIAL_RENT_REAL_ADMISSION_REQUIRED',
+      });
+      expect((await f.header()).rows).toEqual([]);
+      expect(
+        (
+          await f.db.query(
+            'select count(*)::int as count from world_v2.postwar_beneficial_rent_source',
+          )
+        ).rows,
+      ).toEqual([{ count: 1 }]);
+    } finally {
+      await f.close();
+    }
+  });
+  it('rolls back partial source registration on invalid bundle and on a confirmed caller abort, then retries exact bytes only', async () => {
+    const f = await fullRlsRegistrationFixture();
+    try {
+      const duplicate = JSON.parse(f.data.bundleBytes) as {
+        receipts: unknown[];
+      };
+      duplicate.receipts.push(duplicate.receipts[0]);
+      await expect(
+        f.register(C.canonicalSerialize(duplicate)),
+      ).rejects.toMatchObject({
+        code: '23514',
+        message: 'BENEFICIAL_RENT_COMPLETE_BUNDLE_REQUIRED',
+      });
+      const sourceCount = async () =>
+        (
+          await f.db.query(
+            'select count(*)::int as count from world_v2.postwar_beneficial_rent_source',
+          )
+        ).rows;
+      expect(await sourceCount()).toEqual([{ count: 0 }]);
+      await expect(
+        f.asRole(f.publisher, async () => {
+          await f.db.query(
+            'select world_v2.register_postwar_beneficial_rent_source($1,$2,$3)',
+            [world, f.data.bundleBytes, f.data.bundleSha256],
+          );
+          throw Error('TEST_ONLY_CONFIRMED_CALLER_ABORT');
+        }),
+      ).rejects.toThrow('TEST_ONLY_CONFIRMED_CALLER_ABORT');
+      expect(await sourceCount()).toEqual([{ count: 0 }]);
+      expect((await f.register()).rows).toEqual([{ count: 1 }]);
+      expect((await f.header()).rows).toHaveLength(1);
+      expect(
+        (
+          await f.db.query(
+            `select (select count(*)::int from world_v2.authoritative_event) as events,(select count(*)::int from world_v2.command_submission) as commands,(select count(*)::int from world_v2.command_receipt) as receipts,(select count(*)::int from world_v2.financial_posting_batch) as financial,(select count(*)::int from world_v2.inventory_posting) as inventory`,
+          )
+        ).rows,
+      ).toEqual([
+        { events: 0, commands: 0, receipts: 0, financial: 0, inventory: 0 },
+      ]);
+    } finally {
+      await f.close();
+    }
+  });
+});
 describe('small complete Core source and fixed rent runtime prerequisites', () => {
   it('reconstructs every actual child and retains the same legal household claim without minting admission', () => {
     const f = fixture();
@@ -350,7 +765,8 @@ async function embeddedFixture(testClock = clock) {
       '0016_world_v2_opening_seed.sql',
     ])
       await load('database/migrations/artifacts/' + name);
-    await db.exec(`create table world_v2.runtime_opening_admission(world_id text,seed_id text,seed_fingerprint text,replay_binding text,model_version text,admission_ref text primary key,admitted_at_real timestamptz);
+    await db.exec(`create table world_v2.runtime_read_seat(world_id text,auth_subject uuid);
+create table world_v2.runtime_opening_admission(world_id text,seed_id text,seed_fingerprint text,replay_binding text,model_version text,admission_ref text primary key,admitted_at_real timestamptz);
 create table world_v2.runtime_admission_publication_permit(authorization_id text primary key,authorization_sha256 text,world_id text,seed_id text,seed_fingerprint text,model_version text,replay_binding text,valid_from timestamptz,valid_until timestamptz);
 create table world_v2.runtime_admission_publication_revocation(authorization_id text);`);
     await load('database/proposals/financial-posting-decimal-validation.sql');
