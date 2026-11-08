@@ -15,16 +15,16 @@ import { readRetainedPostwarPowerCatalogFrom } from './postwar-retained-power-up
 import { readRegisteredCurrentEconomicSnapshotFrom } from './registered-current-read-repair-checkpoint.js';
 import { preparePostwarIndustryFirstDayDomesticModelForward } from './postwar-industry-first-day-domestic-model-forward.js';
 
-const directory = '/workspace/.cloud-setup/evidence/power-current-native-02';
+const directory = '/workspace/.cloud-setup/evidence/power-current-native-03';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT =
   directory + '/pg/retained-checkpoint.json';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256 =
-  'bda4a29adc22d2c2a616392182e31ebc294b8d8344447a5867ec02b1c402f8e5';
+  '2e35e77e21db62a172187d4ee144fe3951fc3c7409ee38b14f9e03e01e839a93';
 const hashes = {
   'power-reuse/reuse-receipt.json':
-    '19f9192d26102070159756af2cf20e55dcb626c23f2f329a8383e9a724834283',
+    'c14954da1de6867599c27a0b6a9ccdab64d85967c7b6e6bdf818057876b59e4e',
   'independent-checkpoint-readback.json':
-    'f6fbf40ae3bc0be00035120a7333f31e3df98f05634a372fc3abd5ceb321f55d',
+    '769b148e0a96cc7ea9d800244f3f9fe078b6680ec5e4bd7f02eca3c24050d6d3',
 } as const;
 const sha = (raw: string) => createHash('sha256').update(raw).digest('hex');
 type Catalog = Awaited<ReturnType<typeof readRetainedPostwarPowerCatalogFrom>>;
@@ -113,11 +113,11 @@ export async function reuseRetainedPostwarPowerClone(input: {
   const readback = await pinned('independent-checkpoint-readback.json');
   assert.equal(
     receipt.status,
-    'REUSED_H3_AND_SINGLE_FORWARD_VERIFIED_NOT_SOURCE_READY',
+    'REUSED_POST_FORWARD_H3_READBACK_VERIFIED_NOT_SOURCE_READY',
   );
   assert.equal(
     receipt.expectedCommit,
-    '60ef8156ce3e9552daa9e3aed8770fe66fcf6787',
+    '4a5850586ae1f13b6b34e38e5c6c828dc7b16fd5',
   );
   assert.equal(receipt.database, checkpoint.templateDatabase);
   assert.equal(
@@ -133,7 +133,10 @@ export async function reuseRetainedPostwarPowerClone(input: {
     event_sequence: '3',
   });
   assert.equal(receipt.fiveUpgradesAndTwoFreshReplayed, false);
-  assert.equal(receipt.singleFunctionForwardStatus, 'DDL_COMMITTED');
+  assert.equal(
+    receipt.singleFunctionForwardStatus,
+    'ALREADY_APPLIED_CATALOG_VERIFIED_NOT_REPLAYED',
+  );
   const forward = await preparePostwarIndustryFirstDayDomesticModelForward(
     input.repositoryRoot,
   );

@@ -22,9 +22,9 @@ it('keeps ordinary cold preparation at its existing 600s bound', () => {
   expect(registeredFinalColdPreparationBudget({})).toBe(600000);
   expect(registeredFinalColdPreparationBudget(descriptor)).toBe(600000);
 });
-it('uses 1200s only for the explicit isolated refinery21 preparation path', () => {
+it('uses 3600s only for the explicit isolated refinery21 preparation path', () => {
   flags.forEach((key) => (process.env[key] = '1'));
-  expect(registeredFinalColdPreparationBudget(descriptor)).toBe(1200000);
+  expect(registeredFinalColdPreparationBudget(descriptor)).toBe(3600000);
   expect(
     registeredFinalColdPreparationBudget({
       ...descriptor,

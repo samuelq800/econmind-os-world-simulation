@@ -10,7 +10,8 @@ export interface RegisteredChildReply {
   readonly diagnostics?: unknown;
 }
 /** Startup only: the measured 434s proof plus 21 x 13.5s publications needs
- * a separate finite budget. HTTP/RPC operation bounds remain unchanged. */
+ * a separate finite budget; the complete one-time 21 utility and POWER
+ * phases are additional measured startup work. HTTP/RPC operation bounds remain unchanged. */
 export function registeredFinalColdPreparationBudget(
   configuration: unknown,
 ): number {
@@ -25,7 +26,7 @@ export function registeredFinalColdPreparationBudget(
   return explicit &&
     process.env.ECONMIND_REGISTERED_REFINERY21_SOURCE_PREPARATION === '1' &&
     process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE === '1'
-    ? 1200000
+    ? 3600000
     : 600000;
 }
 export async function startPostwarRegisteredFinalNodeChild(input: {
