@@ -5,6 +5,8 @@ import {
   DomainError,
   DOMAIN_ERROR_CODES,
   SOCIAL_SERVICE_PLAN_EVENT,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
+  resolveSocialEmploymentPhysicalServicePool,
   canonicalHashInput,
   canonicalSha256,
   parseSocialEmploymentServiceCommand,
@@ -26,6 +28,7 @@ import {
   type FinanceSocialReplayContinuationView,
 } from '@econmind/core/finance-social-replay-continuation';
 import { consumePreparedPostwarSocialFinancialReplayBase } from './prepared-postwar-social-source.js';
+import { readPostwarSocialServiceCreationOriginalsForBase } from './postwar-social-service-creation-originals.js';
 import {
   readPreparedPostwarFinanceSocialFxPageOriginalsFrom,
   projectPostwarOpeningFinancialEncumbrances,
@@ -140,8 +143,12 @@ function assertHistoricalPlanPhysicalOriginals(
           body.dayIndex === parsed.intent.dueDayIndex &&
           body.pools.some(
             (pool) =>
-              pool.poolId === parsed.intent.servicePoolId &&
-              pool.skill === parsed.intent.skill,
+              pool.poolId ===
+                resolveSocialEmploymentPhysicalServicePool(
+                  checkpoint.beforeEmployment,
+                  parsed.intent.servicePoolId,
+                  sha,
+                ) && pool.skill === parsed.intent.skill,
           ),
       );
       if (bodies.length !== 1)
@@ -240,6 +247,8 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
           b.funding,
         ),
         fxOriginals: [],
+        socialCreationOriginals:
+          readPostwarSocialServiceCreationOriginalsForBase(input.baseline),
         ...(receipts === undefined
           ? {}
           : { beneficialHousingRentReceipts: receipts }),
@@ -307,7 +316,8 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
           const kind =
             event.eventType === 'SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'
               ? 'POSITION'
-              : event.eventType === 'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1' ||
+              : event.eventType === SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT ||
+                  event.eventType === 'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1' ||
                   event.eventType === 'SOCIAL_JOB_MATCH_SETTLED_V1'
                 ? 'SERVICE'
                 : null;

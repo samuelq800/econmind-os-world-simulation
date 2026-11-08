@@ -431,6 +431,15 @@ export function consumePreparedPostwarSocialFinancialReplayBase(
     invalid('GENUINE_LIVE_FINANCIAL_REPLAY_BASE_REQUIRED');
   return value;
 }
+/** Issued immutable source identity DATA only, never admission/currentness. */
+export function readPreparedPostwarSocialSourceMetadataForBase(
+  value: Readonly<PreparedPostwarSocialFinancialReplayBase>,
+): Readonly<SourceMetadata> {
+  consumePreparedPostwarSocialFinancialReplayBase(value);
+  const preparation = issuedFinancialReplayBases.get(value);
+  if (!preparation) invalid('GENUINE_LIVE_FINANCIAL_REPLAY_BASE_REQUIRED');
+  return baseOf(preparation).source;
+}
 export async function readPreparedPostwarSocialLineageFrom(input: {
   readonly preparation: PreparedPostwarSocialSource;
   readonly executor: SqlExecutor;

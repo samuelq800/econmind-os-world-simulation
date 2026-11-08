@@ -823,3 +823,6 @@ export function createPostwarSocialPositionRuntime(configuration: {
     },
   });
 }
+
+/** Same fixed held-executor authorizer used by other Social source guards. */
+export { currentAuthorization as authorizePostwarSocialOperatingCommandFrom };

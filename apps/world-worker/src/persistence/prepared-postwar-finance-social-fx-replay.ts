@@ -1,3 +1,4 @@
+import { readPostwarSocialServiceCreationOriginalsForBase } from './postwar-social-service-creation-originals.js';
 import { readPostwarIndustryLogisticsPageOriginalsFrom } from './postwar-industry-logistics-source.js';
 import { readPostwarIndustryUtilityPageOriginalsFrom } from './postwar-industry-utility-source.js';
 /** Reconstruct actual effects using a private live H0 DATA preparation and
@@ -461,6 +462,9 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(
         b.funding,
       ),
       fxOriginals: facts.fxOriginals,
+      socialCreationOriginals: readPostwarSocialServiceCreationOriginalsForBase(
+        input.baseline,
+      ),
       ...(facts.industryLogisticsSources === undefined
         ? {}
         : { industryLogisticsSources: facts.industryLogisticsSources }),

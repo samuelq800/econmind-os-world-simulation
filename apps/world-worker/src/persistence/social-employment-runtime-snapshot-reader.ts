@@ -32,6 +32,7 @@ import {
   type Sha256Hex,
   type IndustryPersistenceSchemaReadContextV1,
 } from '@econmind/core';
+import { resolveSocialEmploymentPhysicalServicePool } from '@econmind/core';
 import {
   parseGoverningSourceReadBinding,
   assertGoverningSourceCommitRequestConsistent,
@@ -1093,8 +1094,12 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
                     body.dayIndex === parsed.intent.dueDayIndex &&
                     body.pools.some(
                       (pool) =>
-                        pool.poolId === parsed.intent.servicePoolId &&
-                        pool.skill === parsed.intent.skill,
+                        pool.poolId ===
+                          resolveSocialEmploymentPhysicalServicePool(
+                            checkpoint.beforeEmployment,
+                            parsed.intent.servicePoolId,
+                            digest,
+                          ) && pool.skill === parsed.intent.skill,
                     ),
                 );
                 if (bodies.length !== 1)
@@ -1181,7 +1186,11 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
     );
     if (parsedPlan.kind !== 'PLAN') invalid('historical plan command required');
     const payload = parsedPlan.intent;
-    const poolId = payload.servicePoolId,
+    const poolId = resolveSocialEmploymentPhysicalServicePool(
+        state,
+        payload.servicePoolId,
+        digest,
+      ),
       dayIndex = payload.dueDayIndex;
     const bodies = verified.originals.filter(
       (r) =>

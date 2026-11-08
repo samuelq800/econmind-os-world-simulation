@@ -12,6 +12,7 @@ import {
   type IndustryPersistenceSchemaReadContextV1,
   parseIndustryPersistenceSchemaBoundaryContext,
 } from '@econmind/core';
+import { resolveSocialEmploymentPhysicalServicePool } from '@econmind/core';
 import {
   readPostwarOperatingGenesisFromSeed,
   POSTWAR_OPERATING_USER_RECEIPT,
@@ -565,8 +566,12 @@ export function createPostgresSocialOperatingCustody(configuration: {
           b.dayIndex === request.commandBinding.dueDayIndex &&
           b.pools.some(
             (p) =>
-              p.poolId === request.commandBinding.servicePoolId &&
-              p.skill === request.commandBinding.skill,
+              p.poolId ===
+                resolveSocialEmploymentPhysicalServicePool(
+                  lifecycle.lifecycle.employment,
+                  request.commandBinding.servicePoolId,
+                  sha,
+                ) && p.skill === request.commandBinding.skill,
           ),
       );
       if (bodyIndex < 0) invalid('no existing finite physical day original');
