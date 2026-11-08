@@ -11,6 +11,10 @@ import {
   type SocialEmploymentPlanDraft,
 } from '../social-employment/plan-form.js';
 import {
+  buildSocialEmploymentServiceCreateRequest,
+  type SocialEmploymentServiceCreateDraft,
+} from '../social-employment/create-form.js';
+import {
   buildCaptainCapitalRequest,
   type CaptainCapitalDraft,
 } from '../captain-capital/form.js';
@@ -299,10 +303,13 @@ export function createOfficeCommandController(
       utilityPlanningCode = null;
     }
   }
-  function clearUnsubmittedSocialPlan() {
+  function clearUnsubmittedSocialEmploymentIntent() {
     if (
       !attempted &&
-      intent?.request.commandType === 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1'
+      (intent?.request.commandType ===
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1' ||
+        intent?.request.commandType ===
+          'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1')
     ) {
       intent = null;
       status = 'CURRENT_AUTHORIZED_HEAD';
@@ -311,7 +318,7 @@ export function createOfficeCommandController(
   }
   async function readSocialPools(previous?: RuntimePage) {
     if (!socialPoolsReader || !currentHead()) return;
-    clearUnsubmittedSocialPlan();
+    clearUnsubmittedSocialEmploymentIntent();
     socialPoolsPage = null;
     socialPoolsCode = 'READING';
     notify();
@@ -353,7 +360,7 @@ export function createOfficeCommandController(
     utilityPlanningCode = null;
     socialPoolsPage = null;
     socialPoolsCode = null;
-    clearUnsubmittedSocialPlan();
+    clearUnsubmittedSocialEmploymentIntent();
     status = 'READING';
     notify();
     if (runtimeReader) {
@@ -756,6 +763,42 @@ export function createOfficeCommandController(
         return Promise.resolve();
       const previous = socialPoolsPage;
       return operation(() => readSocialPools(previous));
+    },
+    stageSocialEmploymentServiceCreate(
+      draft: SocialEmploymentServiceCreateDraft,
+    ) {
+      const h = currentHead();
+      if (
+        !b ||
+        busy ||
+        attempted ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        !socialPoolsPage ||
+        !h ||
+        socialPoolsPage.authority.readback.worldVersion !== h.worldVersion ||
+        socialPoolsPage.authority.readback.eventSequence !== h.eventSequence
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildSocialEmploymentServiceCreateRequest({
+            page: socialPoolsPage,
+            draft,
+            programmeId: 'EMPLOYMENT_PROGRAMME_' + id,
+            requestId: requestId(),
+            commandId: 'SOCIAL_SERVICE_CREATE_' + id,
+            idempotencyKey: 'SOCIAL_SERVICE_CREATE_KEY_' + id,
+          }),
+        );
+      } catch {
+        intent = null;
+        status = 'UNAVAILABLE';
+        code = 'SOCIAL_SERVICE_CREATE_CURRENT_SOURCE_REQUIRED';
+        notify();
+        return false;
+      }
     },
     stageSocialEmploymentPlan(draft: SocialEmploymentPlanDraft) {
       if (

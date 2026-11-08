@@ -4,6 +4,7 @@ import {
 } from '@econmind/core/postwar-industry-utility-planning-contract';
 import { renderIndustryUtilityForm } from '../industry-utility/form.js';
 import { renderSocialEmploymentPlanForm } from '../social-employment/plan-form.js';
+import { renderSocialEmploymentServiceCreateForm } from '../social-employment/create-form.js';
 import {
   parsePostwarCaptainAllocationOptions,
   parsePostwarCaptainPoliticalCapitalRow,
@@ -271,6 +272,15 @@ export function installOfficeCommand(
       dialog.append(section);
     }
     if (currentView()?.role === 'social') {
+      dialog.append(
+        renderSocialEmploymentServiceCreateForm(document, {
+          page: state.socialPoolsPage,
+          enabled: state.canStage,
+          stage: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialEmploymentServiceCreate(draft),
+        }),
+      );
       dialog.append(
         renderSocialEmploymentPlanForm(document, {
           positions:

@@ -44,7 +44,14 @@ export function readSocialServiceContext(
     page.source.dataNature !== 'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX'
   )
     throw Error('CURRENT_SOCIAL_SERVICE_CONTEXT_REQUIRED');
-  return page.rows.map((value) => {
+  return parseSocialServicePoolRows(page.rows, countryId);
+}
+/** Row DATA only; callers separately validate their exact source profile. */
+export function parseSocialServicePoolRows(
+  rows: RuntimePage['rows'],
+  countryId: string,
+): readonly ServicePool[] {
+  return rows.map((value) => {
     const p = row(value);
     if (
       !p ||
