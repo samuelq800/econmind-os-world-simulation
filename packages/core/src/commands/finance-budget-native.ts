@@ -166,6 +166,10 @@ import {
   type SocialPositionPayrollReservation,
 } from './social-employment-position-lifecycle.js';
 import {
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
+  reduceSocialEmploymentServiceCreatedEvent,
+  type SocialEmploymentServiceCreationReadFacts,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
   SOCIAL_SERVICE_PLAN_EVENT,
@@ -696,6 +700,10 @@ interface MixedSocialCountryCursor {
 /** In-process deterministic data only. It is issued by the same existing fold,
  * not reconstructed from a snapshot DTO, a supplied head or a database cache. */
 interface MixedPrefixFoldState {
+  readonly socialCreationOriginals: ReadonlyMap<
+    string,
+    FinanceNativeBudgetSocialCreationOriginals
+  >;
   readonly industryPowerState: IndustryFirstDayPowerState | undefined;
   readonly industryWaterState: IndustryFirstDayWaterExecutionState | undefined;
   readonly industryWaterOriginals: ReadonlyMap<
@@ -948,7 +956,20 @@ export function readFinanceNativeBudgetMixedPrefix(
 /** Whole ordered canonical groups only. The existing Budget/Social reducers
  * establish effects; no caller no-effect classification or filtered/rebased
  * budget prefix exists. All foreign families remain unsupported. */
+/** Immutable source DATA from the held genuine opening source, not actor,
+ * licence currentness, admission or commit authority. */
+export interface FinanceNativeBudgetSocialCreationOriginals {
+  readonly worldId: string;
+  readonly countryId: string;
+  readonly governmentEntityId: string;
+  readonly localCurrency: string;
+  readonly sourceRef: string;
+  readonly sourceFingerprint: string;
+  readonly populationAvailability: SocialEmploymentServiceCreationReadFacts['populationAvailability'];
+  readonly usageLicences: readonly SocialEmploymentServiceCreationReadFacts['usageLicence'][];
+}
 export interface FinanceNativeBudgetMixedPrefixInput {
+  readonly socialCreationOriginals?: readonly FinanceNativeBudgetSocialCreationOriginals[];
   readonly worldId: string;
   readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
   readonly industryWorkSources?: readonly IndustryFirstDayWorkSiteSource[];
@@ -978,6 +999,7 @@ export function prepareFinanceNativeBudgetMixedPrefix(
  * evidence. Caller-supplied domain state/version cannot enter this seam. */
 export function continueFinanceNativeBudgetMixedPrefix(
   input: {
+    readonly socialCreationOriginals?: FinanceNativeBudgetMixedPrefixInput['socialCreationOriginals'];
     readonly previous: FinanceNativeBudgetMixedPrefixEvidence;
     readonly worldId: string;
     readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
@@ -1105,6 +1127,9 @@ export function continueFinanceNativeBudgetMixedPrefix(
       worldId: input.worldId,
       frames: input.frames,
       socialCountries: [],
+      ...(input.socialCreationOriginals === undefined
+        ? {}
+        : { socialCreationOriginals: input.socialCreationOriginals }),
       ...(input.industryPowerOriginals === undefined
         ? {}
         : { industryPowerOriginals: input.industryPowerOriginals }),
@@ -1445,6 +1470,39 @@ function foldFinanceNativeBudgetMixedPrefix(
     prior?.captains,
   );
   const originalReferences = new Map(prior?.originalReferences);
+  const socialCreationOriginals = new Map(prior?.socialCreationOriginals);
+  const creationOriginalCountries = new Set<string>();
+  for (const original of input.socialCreationOriginals ?? []) {
+    const key = original.countryId,
+      reference = 'SOCIAL_CREATION:' + key;
+    if (
+      creationOriginalCountries.has(original.countryId) ||
+      original.worldId !== input.worldId ||
+      !Array.isArray(original.usageLicences) ||
+      !original.usageLicences.length ||
+      original.usageLicences.length > 4096 ||
+      !Array.isArray(original.populationAvailability) ||
+      !/^sha256:[a-f0-9]{64}$/u.test(original.sourceFingerprint) ||
+      new Set(original.usageLicences.map((l) => l.licenseId)).size !==
+        original.usageLicences.length
+    )
+      invalid('EXACT_SAME_WORLD_SOCIAL_CREATION_ORIGINALS_REQUIRED');
+    creationOriginalCountries.add(original.countryId);
+    const fingerprint = hash(original, sha),
+      old = originalReferences.get(reference);
+    if (old !== undefined && old !== fingerprint)
+      invalid('CONTINUATION_IMMUTABLE_SOCIAL_CREATION_ORIGINAL_CHANGED');
+    originalReferences.set(reference, fingerprint);
+    socialCreationOriginals.set(
+      key,
+      freeze(
+        JSON.parse(
+          canonicalSerialize(original),
+        ) as FinanceNativeBudgetSocialCreationOriginals,
+      ),
+    );
+  }
+
   const retainUtilityOriginal = (
     kind: string,
     source: IndustryUtilitySource,
@@ -1634,7 +1692,11 @@ function foldFinanceNativeBudgetMixedPrefix(
       transition,
       receipt: frame.receipt,
     });
-    if (financialReplay || captainEnabled) {
+    if (
+      financialReplay ||
+      captainEnabled ||
+      command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
+    ) {
       const canonicalReceipt = createFinalCommandReceipt({
         command,
         transition,
@@ -2189,11 +2251,13 @@ function foldFinanceNativeBudgetMixedPrefix(
       const type =
         command.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND
           ? SOCIAL_POSITION_OFFER_CREATED_EVENT
-          : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
-            ? SOCIAL_SERVICE_PLAN_EVENT
-            : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
-              ? SOCIAL_JOB_MATCH_EVENT
-              : null;
+          : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
+            ? SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT
+            : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
+              ? SOCIAL_SERVICE_PLAN_EVENT
+              : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
+                ? SOCIAL_JOB_MATCH_EVENT
+                : null;
       const event = frame.events[0];
       if (
         type === null ||
@@ -2257,6 +2321,40 @@ function foldFinanceNativeBudgetMixedPrefix(
             eventSequence: event.sequence,
           },
         });
+      } else if (type === SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT) {
+        const original = socialCreationOriginals.get(country.countryId),
+          facts = payload.readFacts as SocialEmploymentServiceCreationReadFacts;
+        if (
+          !original ||
+          !facts ||
+          original.worldId !== facts.worldId ||
+          original.countryId !== facts.countryId ||
+          original.governmentEntityId !== facts.governmentEntityId ||
+          original.localCurrency !== facts.localCurrency ||
+          original.sourceRef !== facts.sourceRef ||
+          original.sourceFingerprint !== facts.sourceFingerprint ||
+          !same(
+            original.populationAvailability,
+            facts.populationAvailability,
+          ) ||
+          original.usageLicences.filter((l) => same(l, facts.usageLicence))
+            .length !== 1 ||
+          facts.head?.worldVersion !== budget.worldVersion ||
+          facts.head?.eventSequence !== budget.eventSequence
+        )
+          invalid('SOCIAL_CREATION_ACTUAL_T0_ORIGINALS_AND_HEAD_REQUIRED');
+        const employment = reduceSocialEmploymentServiceCreatedEvent({
+          state: beforeEmployment,
+          event: replayEvent,
+          sha256Hex: sha,
+        });
+        const created = employment.creations!.find(
+          (c) => c.commandFingerprint === command.fingerprint,
+        )!;
+        if (!created || poolCountries.has(created.servicePoolId))
+          invalid('GLOBAL_SERVICE_POOL_ID_ALREADY_OCCUPIED');
+        poolCountries.set(created.servicePoolId, country.countryId);
+        country.lifecycle = freeze({ ...country.lifecycle, employment });
       } else
         country.lifecycle = freeze({
           ...country.lifecycle,
@@ -2482,6 +2580,7 @@ function foldFinanceNativeBudgetMixedPrefix(
       : { completeFrames: true as const }),
     ...(financialReplay ? { financialBase: financialReplay.financial } : {}),
     foldState: {
+      socialCreationOriginals,
       industryPowerState,
       industryWaterState,
       industryWaterOriginals,

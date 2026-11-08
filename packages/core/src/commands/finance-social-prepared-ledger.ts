@@ -220,6 +220,9 @@ export interface PreparedFinanceSocialFxReplayResult {
 export function replayPreparedFinanceSocialFxLedger(input: {
   readonly prepared: PreparedFinanceSocialLedger;
   readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+  readonly socialCreationOriginals?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['socialCreationOriginals'];
   readonly socialCountries: Parameters<
     typeof prepareFinanceNativeBudgetMixedPrefix
   >[0]['socialCountries'];
@@ -272,6 +275,9 @@ export function replayPreparedFinanceSocialFxLedger(input: {
       worldId: base.worldId,
       frames: input.frames,
       socialCountries: input.socialCountries,
+      ...(input.socialCreationOriginals === undefined
+        ? {}
+        : { socialCreationOriginals: input.socialCreationOriginals }),
       financialReplay,
       ...(input.industryWorkSources === undefined
         ? {}

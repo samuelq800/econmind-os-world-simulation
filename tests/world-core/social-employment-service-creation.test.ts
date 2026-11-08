@@ -4,6 +4,10 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
+  EVENT_SCHEMA_VERSION,
+  parseAuthoritativeEvent,
+  createAuthoritativeTransition,
+  createFinalCommandReceipt,
   COMMAND_SCHEMA_VERSION,
   canonicalSerialize,
   createE01DailyBoundary,
@@ -453,5 +457,213 @@ describe('first-day service programme partitions one existing lawful desk', () =
       },
     };
     expect(() => birth(c, noTarget, f.creationFacts)).toThrow();
+  });
+});
+
+import {
+  prepareFinanceNativeBudgetMixedPrefix,
+  readFinanceNativeBudgetMixedPrefix,
+  type FinanceNativeBudgetCanonicalFrame,
+} from '../../packages/core/src/commands/finance-budget-native.js';
+function canonicalFrame(
+  c: CanonicalCommand,
+  eventType: string,
+  eventPayload: unknown,
+  sequence: string,
+): FinanceNativeBudgetCanonicalFrame {
+  const event = parseAuthoritativeEvent(
+    {
+      schemaVersion: EVENT_SCHEMA_VERSION,
+      eventId: 'EVENT_' + c.commandId,
+      eventType,
+      worldId: c.worldId,
+      causationCommandId: c.commandId,
+      correlationId: c.correlationId,
+      worldVersion: (BigInt(c.expectedWorldVersion!) + 1n).toString(),
+      sequence,
+      simTime: c.simTime.toCanonicalValue(),
+      recordedAtReal: '2026-11-08T00:00:00.000Z',
+      correctsEventId: null,
+      payload: eventPayload,
+    },
+    sha,
+  );
+  const transition = createAuthoritativeTransition({
+    command: c,
+    worldVersionBefore: c.expectedWorldVersion!,
+    worldVersionAfter: event.worldVersion,
+    events: [event],
+  });
+  return {
+    command: c,
+    events: [event],
+    transition,
+    receipt: createFinalCommandReceipt({
+      command: c,
+      transition,
+      outcome: 'COMMITTED',
+      reasonCode: null,
+      simTime: c.simTime,
+      recordedAtReal: '2026-11-08T00:00:00.000Z',
+    }),
+    inventoryPostings: [],
+    financialPostingBatches: [],
+  };
+}
+describe('CREATE in the actual complete ordered canonical Social prefix', () => {
+  function input() {
+    const f = fixture(),
+      c = create(),
+      operation = birth(c, f.state, f.creationFacts);
+    const {
+      worldId,
+      countryId,
+      governmentEntityId,
+      localCurrency,
+      sourceRef,
+      sourceFingerprint,
+      populationAvailability,
+      usageLicence,
+    } = f.creationFacts;
+    return {
+      f,
+      c,
+      operation,
+      frame: canonicalFrame(
+        c,
+        SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
+        operation.eventPayload,
+        '1',
+      ),
+      original: {
+        worldId,
+        countryId,
+        governmentEntityId,
+        localCurrency,
+        sourceRef,
+        sourceFingerprint,
+        populationAvailability,
+        usageLicences: [usageLicence],
+      },
+    };
+  }
+  it('reduces CREATE then old PLAN into the same global state without financial or inventory effects', () => {
+    const x = input(),
+      p = plan(x.operation.result.servicePoolId, '4', 'PLAN_AFTER_CREATE'),
+      prepared = allocate(p, x.operation.state, x.f.facts);
+    const frames = [
+      x.frame,
+      canonicalFrame(
+        p,
+        'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1',
+        prepared.eventPayload,
+        '2',
+      ),
+    ];
+    const evidence = prepareFinanceNativeBudgetMixedPrefix(
+      {
+        worldId: x.c.worldId,
+        frames,
+        socialCountries: [
+          { countryId: country, state: x.f.state, offers: [x.f.facts.offer] },
+        ],
+        socialCreationOriginals: [x.original],
+      },
+      sha,
+    );
+    const result = readFinanceNativeBudgetMixedPrefix(
+      evidence,
+      x.c.worldId,
+      frames,
+      sha,
+    );
+    expect(result.budgetState.worldVersion).toBe('2');
+    expect(result.socialCountries[0]!.lifecycle.employment).toEqual(
+      prepared.state,
+    );
+    expect(
+      result.socialCountries[0]!.lifecycle.employment.creations,
+    ).toHaveLength(1);
+  });
+  it('rejects missing or mismatched real licence/source/population originals and unknown families', () => {
+    const x = input(),
+      base = {
+        worldId: x.c.worldId,
+        frames: [x.frame],
+        socialCountries: [
+          { countryId: country, state: x.f.state, offers: [x.f.facts.offer] },
+        ],
+      };
+    expect(() => prepareFinanceNativeBudgetMixedPrefix(base, sha)).toThrow(
+      'SOCIAL_CREATION_ACTUAL_T0_ORIGINALS',
+    );
+    for (const original of [
+      { ...x.original, sourceFingerprint: 'sha256:' + '2'.repeat(64) },
+      {
+        ...x.original,
+        usageLicences: [
+          { ...x.original.usageLicences[0]!, maximumWorkerMinutes: '999' },
+        ],
+      },
+      { ...x.original, populationAvailability: [] },
+    ])
+      expect(() =>
+        prepareFinanceNativeBudgetMixedPrefix(
+          { ...base, socialCreationOriginals: [original] },
+          sha,
+        ),
+      ).toThrow();
+    const unknown = command(
+      'UNKNOWN_TEST_ONLY',
+      'CORE_UNKNOWN_SOCIAL_V1',
+      '0',
+      {},
+    );
+    expect(() =>
+      prepareFinanceNativeBudgetMixedPrefix(
+        {
+          ...base,
+          frames: [canonicalFrame(unknown, 'UNKNOWN_SOCIAL_EVENT_V1', {}, '1')],
+          socialCreationOriginals: [x.original],
+        },
+        sha,
+      ),
+    ).toThrow('UNSUPPORTED_MIXED_PREFIX_FAMILY');
+  });
+  it('rejects extra posting effects and receipt changes on an otherwise genuine CREATE frame', () => {
+    const x = input(),
+      base = {
+        worldId: x.c.worldId,
+        socialCountries: [
+          { countryId: country, state: x.f.state, offers: [x.f.facts.offer] },
+        ],
+        socialCreationOriginals: [x.original],
+      };
+    expect(() =>
+      prepareFinanceNativeBudgetMixedPrefix(
+        { ...base, frames: [{ ...x.frame, inventoryPostings: [{}] }] },
+        sha,
+      ),
+    ).toThrow('UNSUPPORTED_MIXED_PREFIX_POSTING_EFFECT');
+    expect(() =>
+      prepareFinanceNativeBudgetMixedPrefix(
+        { ...base, frames: [{ ...x.frame, financialPostingBatches: [{}] }] },
+        sha,
+      ),
+    ).toThrow('UNSUPPORTED_MIXED_PREFIX_POSTING_EFFECT');
+    expect(() =>
+      prepareFinanceNativeBudgetMixedPrefix(
+        {
+          ...base,
+          frames: [
+            {
+              ...x.frame,
+              receipt: { ...x.frame.receipt, outcome: 'REJECTED' },
+            },
+          ],
+        },
+        sha,
+      ),
+    ).toThrow();
   });
 });

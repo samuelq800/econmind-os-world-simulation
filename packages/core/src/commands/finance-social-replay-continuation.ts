@@ -59,6 +59,7 @@ export interface FinanceSocialReplayContinuationView {
   }>;
 }
 export interface FinanceSocialReplayPageOriginals {
+  readonly socialCreationOriginals?: FinanceNativeBudgetMixedPrefixInput['socialCreationOriginals'];
   readonly industryWorkSources?: FinanceNativeBudgetMixedPrefixInput['industryWorkSources'];
   readonly industryWageSources?: FinanceNativeBudgetMixedPrefixInput['industryWageSources'];
   readonly industryPowerOriginals?: FinanceNativeBudgetMixedPrefixInput['industryPowerOriginals'];
@@ -185,6 +186,7 @@ export function prepareFinanceSocialReplayContinuation(
   input: {
     readonly opening: Readonly<RebuiltV08Ledgers>;
     readonly expectedHead: FinanceSocialReplayHead;
+    readonly socialCreationOriginals?: FinanceNativeBudgetMixedPrefixInput['socialCreationOriginals'];
     readonly socialCountries: FinanceNativeBudgetMixedPrefixInput['socialCountries'];
     readonly captainCountries?: FinanceNativeBudgetMixedPrefixInput['captainCountries'];
     readonly industryWorkSources?: FinanceNativeBudgetMixedPrefixInput['industryWorkSources'];
@@ -243,6 +245,9 @@ export function prepareFinanceSocialReplayContinuation(
         frames,
         financialReplay,
         socialCountries: input.socialCountries,
+        ...(input.socialCreationOriginals === undefined
+          ? {}
+          : { socialCreationOriginals: input.socialCreationOriginals }),
         ...(input.captainCountries === undefined
           ? {}
           : { captainCountries: input.captainCountries }),
@@ -396,6 +401,11 @@ export function appendFinanceSocialReplayPage(input: {
         previous: prior.lastPage.evidence,
         worldId: prior.worldId,
         frames: page.frames,
+        ...(input.originals?.socialCreationOriginals === undefined
+          ? {}
+          : {
+              socialCreationOriginals: input.originals.socialCreationOriginals,
+            }),
         ...(financialReplay === undefined ? {} : { financialReplay }),
         ...(input.originals?.captainCountries === undefined
           ? {}
