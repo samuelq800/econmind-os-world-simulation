@@ -41,6 +41,10 @@ export const SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY = 'SOCIAL_LABOUR';
 export const SOCIAL_JOB_MATCH_RULE_VERSION = 'SOCIAL_JOB_MATCH_RULE_V1';
 export const SOCIAL_SERVICE_PLAN_EVENT = 'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1';
 export const SOCIAL_JOB_MATCH_EVENT = 'SOCIAL_JOB_MATCH_SETTLED_V1';
+export const SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND =
+  'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1';
+export const SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT =
+  'SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1';
 
 type RecordValue = Readonly<Record<string, unknown>>;
 function invalid(message: string): never {
@@ -237,6 +241,128 @@ export interface SocialEmploymentServiceState {
   readonly servicePools: readonly SocialEmploymentServicePool[];
   readonly plans: readonly SocialEmploymentServicePlan[];
   readonly appliedOperations: readonly SocialEmploymentOperationBinding[];
+  /** Absent in old history: do not normalize absence into [] or change hashes. */
+  readonly creations?: readonly SocialEmploymentServiceCreationRecord[];
+}
+export interface SocialEmploymentServiceCreateIntent {
+  readonly schemaVersion: 'social-employment-service-create-v1';
+  readonly programmeId: string;
+  readonly capacity: Readonly<{ amount: string; unit: 'person' }>;
+  readonly budget: Readonly<{ amount: string; currency: string }>;
+  readonly target: Readonly<{
+    servicePoolId: string;
+    locationId: string;
+    skill: LabourSkill;
+  }>;
+}
+export interface SocialEmploymentServiceCreationRecord {
+  readonly canonicalCommand: string;
+  readonly commandFingerprint: CanonicalSha256;
+  readonly servicePoolId: string;
+  readonly parentCapacityBefore: string;
+  readonly licenceRef: string;
+  readonly licenceFingerprint: CanonicalSha256;
+  readonly sourceRef: string;
+  readonly sourceFingerprint: CanonicalSha256;
+}
+export interface SocialEmploymentPopulationReadFacts {
+  readonly boundary: E01DailyBoundary;
+  readonly simTime: string;
+  readonly populationAvailability: readonly LabourPopulationAvailability[];
+}
+export interface SocialEmploymentServiceCreationReadFacts extends SocialEmploymentPopulationReadFacts {
+  readonly worldId: string;
+  readonly head: Readonly<{ worldVersion: string; eventSequence: string }>;
+  readonly countryId: string;
+  readonly governmentEntityId: string;
+  readonly localCurrency: string;
+  readonly sourceRef: string;
+  readonly sourceFingerprint: CanonicalSha256;
+  readonly sourceRevocations: readonly Readonly<{
+    sourceRef: string;
+    revocationRef: string;
+  }>[];
+  readonly usageLicence: Readonly<{
+    licenseId: string;
+    licensorEntityId: string;
+    beneficiaryEntityId: string;
+    locationId: string;
+    validFromDayIndex: string;
+    validUntilDayIndex: string;
+    dutyAssignmentIds: readonly string[];
+    maximumWorkerMinutes: string;
+    scope: 'PUBLIC_REFERRALS_ONLY_NOT_EMPLOYER_TRANSFER';
+    state: 'GENESIS_USAGE_LICENSE_NOT_PAID_PURCHASE';
+    additionalFeeAmount: '0';
+    futurePaymentCondition: 'NEW_PUBLIC_PURCHASE_REQUIRES_SEPARATE_LAWFUL_FUNDED_CONTRACT';
+  }>;
+}
+
+export function parseSocialEmploymentServiceCreateIntent(
+  value: unknown,
+): Readonly<SocialEmploymentServiceCreateIntent> {
+  const r = inert(value);
+  keys(r, ['schemaVersion', 'programmeId', 'capacity', 'budget', 'target']);
+  if (r.schemaVersion !== 'social-employment-service-create-v1')
+    invalid('Unsupported employment service creation schema');
+  const capacity = inert(r.capacity),
+    budget = inert(r.budget),
+    target = inert(r.target);
+  keys(capacity, ['amount', 'unit']);
+  keys(budget, ['amount', 'currency']);
+  keys(target, ['servicePoolId', 'locationId', 'skill']);
+  if (capacity.unit !== 'person') invalid('Service capacity is a person count');
+  const requestedBudget = Money.from(
+    text(budget.amount),
+    text(budget.currency),
+  );
+  if (
+    canonicalSerialize(requestedBudget.toCanonicalValue()) !==
+      canonicalSerialize(budget) ||
+    requestedBudget.amount.isNegative()
+  )
+    invalid('Exact nonnegative local-currency budget required');
+  return freeze({
+    schemaVersion: r.schemaVersion,
+    programmeId: idempotencyKey(text(r.programmeId)),
+    capacity: { amount: integer(capacity.amount, true), unit: 'person' },
+    budget: requestedBudget.toCanonicalValue(),
+    target: {
+      servicePoolId: idempotencyKey(text(target.servicePoolId)),
+      locationId: idempotencyKey(text(target.locationId)),
+      skill: skill(target.skill),
+    },
+  });
+}
+function parseCreationCommand(command: CanonicalCommand, digest: Sha256Hex) {
+  validateCanonicalCommand(command, digest);
+  if (
+    command.commandType !== SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+    command.officeId !== 'SOCIAL' ||
+    command.expectedWorldVersion === null ||
+    command.idempotencyKey === null
+  )
+    invalid('Current manual Social service creation command required');
+  return parseSocialEmploymentServiceCreateIntent(
+    JSON.parse(command.canonicalPayload),
+  );
+}
+function createdPoolId(command: CanonicalCommand, digest: Sha256Hex): string {
+  const intent = parseCreationCommand(command, digest);
+  return (
+    'SOCIAL_PROGRAMME_POOL_' +
+    hash(
+      [
+        command.worldId,
+        command.countryId,
+        command.commandId,
+        intent.programmeId,
+      ],
+      digest,
+    )
+      .slice(7)
+      .toUpperCase()
+  );
 }
 /** Current legal offer/rule facts are server-read, not values/booleans in intent. */
 export interface SocialEmploymentWageOffer {
@@ -381,6 +507,30 @@ export function validateSocialEmploymentServiceState(
   readFacts: SocialEmploymentReadFacts,
   digest: Sha256Hex,
 ): SocialEmploymentServiceState {
+  return validateServiceStateFromPopulation(input, facts(readFacts), digest);
+}
+function populationFacts(value: unknown): SocialEmploymentPopulationReadFacts {
+  const r = inert(value);
+  keys(r, ['boundary', 'simTime', 'populationAvailability']);
+  const b = inert(r.boundary);
+  keys(b, ['kind', 'dayIndex']);
+  if (b.kind !== 'E01_DAILY_BOUNDARY')
+    invalid('Existing E01 boundary required');
+  const simTime = SimTime.fromTicks(text(r.simTime)).toCanonicalValue();
+  if (simTime !== r.simTime) invalid('Exact current SimTime required');
+  return freeze({
+    boundary: createE01DailyBoundary(integer(b.dayIndex)),
+    simTime,
+    populationAvailability: array(
+      r.populationAvailability,
+    ) as unknown as readonly LabourPopulationAvailability[],
+  });
+}
+function validateServiceStateFromPopulation(
+  input: SocialEmploymentServiceState,
+  boundaryFacts: SocialEmploymentPopulationReadFacts,
+  digest: Sha256Hex,
+): SocialEmploymentServiceState {
   const r = inert(input);
   keys(r, [
     'schemaVersion',
@@ -389,10 +539,10 @@ export function validateSocialEmploymentServiceState(
     'servicePools',
     'plans',
     'appliedOperations',
+    ...(Object.hasOwn(r, 'creations') ? ['creations'] : []),
   ]);
   if (r.schemaVersion !== 'social-employment-service-state-v1')
     invalid('Unsupported social service state');
-  const boundaryFacts = facts(readFacts);
   const labour = applyLabourFacts({
     boundary: boundaryFacts.boundary,
     populationAvailability: boundaryFacts.populationAvailability,
@@ -438,6 +588,14 @@ export function validateSocialEmploymentServiceState(
     })
     .sort((a, b) => (a.poolId < b.poolId ? -1 : a.poolId === b.poolId ? 0 : 1));
   const planIds = new Set<string>();
+  const creations = Object.hasOwn(r, 'creations')
+    ? validateCreationRecords(
+        r.creations,
+        servicePools,
+        text(r.worldId),
+        digest,
+      )
+    : undefined;
   const plans = array(r.plans)
     .map((value) => {
       const p = inert(value);
@@ -669,7 +827,445 @@ export function validateSocialEmploymentServiceState(
     servicePools,
     plans,
     appliedOperations,
+    ...(creations ? { creations } : {}),
   });
+}
+
+function validateCreationRecords(
+  value: unknown,
+  pools: readonly SocialEmploymentServicePool[],
+  world: string,
+  digest: Sha256Hex,
+): readonly SocialEmploymentServiceCreationRecord[] {
+  const ids = new Set<string>(),
+    programmes = new Set<string>();
+  const records = array(value)
+    .map((value) => {
+      const r = inert(value);
+      keys(r, [
+        'canonicalCommand',
+        'commandFingerprint',
+        'servicePoolId',
+        'parentCapacityBefore',
+        'licenceRef',
+        'licenceFingerprint',
+        'sourceRef',
+        'sourceFingerprint',
+      ]);
+      const canonicalCommand = text(r.canonicalCommand),
+        command = parseCanonicalCommand(JSON.parse(canonicalCommand), digest),
+        intent = parseCreationCommand(command, digest);
+      if (
+        canonicalSerialize(wire(command)) !== canonicalCommand ||
+        command.fingerprint !== r.commandFingerprint ||
+        command.worldId !== world ||
+        intent.budget.amount !== '0' ||
+        SimTime.fromTicks('86400000').ticks <= command.simTime.ticks ||
+        createdPoolId(command, digest) !== r.servicePoolId
+      )
+        invalid('Creation does not bind its immutable first-day command');
+      const key = command.countryId + '\n' + intent.programmeId;
+      if (ids.has(command.commandId) || programmes.has(key))
+        invalid('Duplicate service creation');
+      ids.add(command.commandId);
+      programmes.add(key);
+      const parent = pools.find(
+          (p) => p.poolId === intent.target.servicePoolId,
+        ),
+        child = pools.find((p) => p.poolId === r.servicePoolId);
+      if (
+        !parent ||
+        !child ||
+        parent.countryId !== command.countryId ||
+        child.countryId !== command.countryId ||
+        parent.locationId !== intent.target.locationId ||
+        parent.skill !== intent.target.skill ||
+        parent.dayIndex !== '0' ||
+        child.locationId !== parent.locationId ||
+        child.skill !== parent.skill ||
+        child.dayIndex !== parent.dayIndex ||
+        child.ruleVersion !== parent.ruleVersion ||
+        child.capacitySlots !== intent.capacity.amount
+      )
+        invalid('Programme pool must partition the same real parent scope');
+      return freeze({
+        canonicalCommand,
+        commandFingerprint: sha(r.commandFingerprint),
+        servicePoolId: idempotencyKey(text(r.servicePoolId)),
+        parentCapacityBefore: integer(r.parentCapacityBefore, true),
+        licenceRef: idempotencyKey(text(r.licenceRef)),
+        licenceFingerprint: sha(r.licenceFingerprint),
+        sourceRef: idempotencyKey(text(r.sourceRef)),
+        sourceFingerprint: sha(r.sourceFingerprint),
+      });
+    })
+    .sort((a, b) => {
+      const head = (r: SocialEmploymentServiceCreationRecord) =>
+        BigInt(
+          parseCanonicalCommand(JSON.parse(r.canonicalCommand), digest)
+            .expectedWorldVersion!,
+        );
+      return head(a) < head(b)
+        ? -1
+        : head(a) > head(b)
+          ? 1
+          : a.servicePoolId < b.servicePoolId
+            ? -1
+            : a.servicePoolId === b.servicePoolId
+              ? 0
+              : 1;
+    });
+  const children = new Set<string>(records.map((r) => r.servicePoolId));
+  const remaining = new Map<string, bigint>();
+  const heads = new Set<string>();
+  for (const r of records) {
+    const c = parseCanonicalCommand(JSON.parse(r.canonicalCommand), digest),
+      intent = parseCreationCommand(c, digest),
+      parent = intent.target.servicePoolId;
+    if (heads.has(c.expectedWorldVersion!))
+      invalid('Two creations cannot share a global predecessor version');
+    heads.add(c.expectedWorldVersion!);
+    if (children.has(parent))
+      invalid('Nested programme pool partitions are forbidden');
+    const before = remaining.get(parent) ?? BigInt(r.parentCapacityBefore);
+    if (
+      before !== BigInt(r.parentCapacityBefore) ||
+      before < BigInt(intent.capacity.amount)
+    )
+      invalid('Creation capacity chain is not conserved');
+    remaining.set(parent, before - BigInt(intent.capacity.amount));
+  }
+  for (const [id, capacity] of remaining)
+    if (BigInt(pools.find((p) => p.poolId === id)!.capacitySlots) !== capacity)
+      invalid('Parent capacity differs from exact creation partitions');
+  return records;
+}
+
+/** DATA mapping only. Worker must consume the genuine current replay state and
+ * recheck the same original desk/people/time sources; this grants no authority. */
+export function resolveSocialEmploymentPhysicalServicePool(
+  state: SocialEmploymentServiceState,
+  servicePoolId: string,
+  digest: Sha256Hex,
+): string {
+  const records = validateCreationRecords(
+    state.creations ?? [],
+    state.servicePools,
+    state.worldId,
+    digest,
+  );
+  const creation = records.find((r) => r.servicePoolId === servicePoolId);
+  if (!state.servicePools.some((p) => p.poolId === servicePoolId))
+    invalid('Unknown service pool');
+  return creation
+    ? parseCreationCommand(
+        parseCanonicalCommand(JSON.parse(creation.canonicalCommand), digest),
+        digest,
+      ).target.servicePoolId
+    : servicePoolId;
+}
+
+export interface SocialEmploymentServiceCreationOutcome {
+  readonly programmeId: string;
+  readonly servicePoolId: string;
+  readonly parentServicePoolId: string;
+  readonly parentCapacityBefore: string;
+  readonly parentCapacityAfter: string;
+  readonly capacitySlots: string;
+  readonly budget: Readonly<{ amount: string; currency: string }>;
+  readonly classification: 'CAPACITY_PARTITION_NOT_WORK_MATCH_OR_PAYMENT';
+}
+function creationOutcome(
+  record: SocialEmploymentServiceCreationRecord,
+  digest: Sha256Hex,
+): SocialEmploymentServiceCreationOutcome {
+  const intent = parseCreationCommand(
+    parseCanonicalCommand(JSON.parse(record.canonicalCommand), digest),
+    digest,
+  );
+  return freeze({
+    programmeId: intent.programmeId,
+    servicePoolId: record.servicePoolId,
+    parentServicePoolId: intent.target.servicePoolId,
+    parentCapacityBefore: record.parentCapacityBefore,
+    parentCapacityAfter: (
+      BigInt(record.parentCapacityBefore) - BigInt(intent.capacity.amount)
+    ).toString(),
+    capacitySlots: intent.capacity.amount,
+    budget: intent.budget,
+    classification: 'CAPACITY_PARTITION_NOT_WORK_MATCH_OR_PAYMENT',
+  });
+}
+export interface SocialEmploymentServiceCreationPreparedOperation {
+  readonly source: 'APPLIED' | 'EXACT_DUPLICATE';
+  readonly state: SocialEmploymentServiceState;
+  readonly result: SocialEmploymentServiceCreationOutcome;
+  readonly eventPayload: unknown | null;
+}
+/** Only the already-established first-day, no-additional-fee licence is usable.
+ * Facts are deterministic DATA; Worker must freshly lock their real issuer,
+ * admission, revocations, auth and head. No DTO here is commit authority. */
+export function prepareSocialEmploymentServiceCreation(input: {
+  readonly command: CanonicalCommand;
+  readonly state: SocialEmploymentServiceState;
+  readonly readFacts: SocialEmploymentServiceCreationReadFacts;
+  readonly sha256Hex: Sha256Hex;
+}): SocialEmploymentServiceCreationPreparedOperation {
+  const command = input.command,
+    digest = input.sha256Hex,
+    intent = parseCreationCommand(command, digest),
+    r = inert(input.readFacts);
+  keys(r, [
+    'worldId',
+    'boundary',
+    'simTime',
+    'populationAvailability',
+    'head',
+    'countryId',
+    'governmentEntityId',
+    'localCurrency',
+    'sourceRef',
+    'sourceFingerprint',
+    'sourceRevocations',
+    'usageLicence',
+  ]);
+  const population = populationFacts({
+    boundary: r.boundary,
+    simTime: r.simTime,
+    populationAvailability: r.populationAvailability,
+  });
+  const state = validateServiceStateFromPopulation(
+    input.state,
+    population,
+    digest,
+  );
+  if (
+    state.worldId !== command.worldId ||
+    r.worldId !== command.worldId ||
+    r.countryId !== command.countryId
+  )
+    invalid('Creation World/country differs from actual source');
+  const duplicate = state.creations?.find(
+    (record) =>
+      parseCanonicalCommand(JSON.parse(record.canonicalCommand), digest)
+        .commandId === command.commandId,
+  );
+  if (duplicate) {
+    if (
+      duplicate.commandFingerprint !== command.fingerprint ||
+      duplicate.canonicalCommand !== canonicalSerialize(wire(command))
+    )
+      invalid('Creation idempotency conflict');
+    return freeze({
+      source: 'EXACT_DUPLICATE',
+      state,
+      result: creationOutcome(duplicate, digest),
+      eventPayload: null,
+    });
+  }
+  const head = inert(r.head);
+  keys(head, ['worldVersion', 'eventSequence']);
+  integer(head.eventSequence);
+  if (
+    integer(head.worldVersion) !== command.expectedWorldVersion ||
+    population.simTime !== command.simTime.toCanonicalValue() ||
+    population.boundary.dayIndex !== '0' ||
+    command.simTime.ticks >= 86400000n
+  )
+    invalid('Exact current first-day source/head required');
+  const licence = inert(r.usageLicence);
+  keys(licence, [
+    'licenseId',
+    'licensorEntityId',
+    'beneficiaryEntityId',
+    'locationId',
+    'validFromDayIndex',
+    'validUntilDayIndex',
+    'dutyAssignmentIds',
+    'maximumWorkerMinutes',
+    'scope',
+    'state',
+    'additionalFeeAmount',
+    'futurePaymentCondition',
+  ]);
+  const duties = array(licence.dutyAssignmentIds).map((id) =>
+    idempotencyKey(text(id)),
+  );
+  integer(licence.maximumWorkerMinutes, true);
+  if (
+    !duties.length ||
+    new Set(duties).size !== duties.length ||
+    licence.validFromDayIndex !== '0' ||
+    licence.validUntilDayIndex !== '1' ||
+    licence.scope !== 'PUBLIC_REFERRALS_ONLY_NOT_EMPLOYER_TRANSFER' ||
+    licence.state !== 'GENESIS_USAGE_LICENSE_NOT_PAID_PURCHASE' ||
+    licence.additionalFeeAmount !== '0' ||
+    licence.futurePaymentCondition !==
+      'NEW_PUBLIC_PURCHASE_REQUIRES_SEPARATE_LAWFUL_FUNDED_CONTRACT' ||
+    licence.locationId !== intent.target.locationId ||
+    legalEntityId(text(licence.beneficiaryEntityId)) !==
+      legalEntityId(text(r.governmentEntityId)) ||
+    legalEntityId(text(licence.licensorEntityId)) === r.governmentEntityId
+  )
+    invalid('Actual finite T0 public-referral licence required');
+  if (
+    intent.budget.amount !== '0' ||
+    intent.budget.currency !== text(r.localCurrency)
+  )
+    invalid(
+      'Additional purchase or nonlocal budget is outside the no-fee licence',
+    );
+  const sourceRef = idempotencyKey(text(r.sourceRef)),
+    sourceFingerprint = sha(r.sourceFingerprint);
+  for (const value of array(r.sourceRevocations)) {
+    const revocation = inert(value);
+    keys(revocation, ['sourceRef', 'revocationRef']);
+    idempotencyKey(text(revocation.revocationRef));
+    if (
+      text(revocation.sourceRef) === sourceRef ||
+      revocation.sourceRef === licence.licenseId
+    )
+      invalid('Creation source/licence revoked');
+  }
+  const parent = state.servicePools.find(
+    (p) => p.poolId === intent.target.servicePoolId,
+  );
+  if (
+    !parent ||
+    parent.countryId !== command.countryId ||
+    parent.locationId !== intent.target.locationId ||
+    parent.skill !== intent.target.skill ||
+    parent.dayIndex !== '0' ||
+    state.creations?.some((c) => c.servicePoolId === parent.poolId)
+  )
+    invalid(
+      'Existing same-scope root desk pool required; no nested partitions',
+    );
+  const target = state.labour.aggregates.find(
+    (p) =>
+      p.countryId === command.countryId &&
+      p.locationId === parent.locationId &&
+      p.skill === parent.skill &&
+      p.status === 'UNEMPLOYED_SEARCHING',
+  );
+  if (!target)
+    invalid('Actual current same-country job-seeking target missing, not zero');
+  const available =
+      BigInt(parent.capacitySlots) -
+      BigInt(parent.usedSlots) -
+      BigInt(parent.reservedSlots),
+    amount = BigInt(intent.capacity.amount);
+  if (amount > available)
+    invalid('Creation would reuse already allocated desk capacity');
+  const record: SocialEmploymentServiceCreationRecord = freeze({
+    canonicalCommand: canonicalSerialize(wire(command)),
+    commandFingerprint: command.fingerprint,
+    servicePoolId: createdPoolId(command, digest),
+    parentCapacityBefore: parent.capacitySlots,
+    licenceRef: idempotencyKey(text(licence.licenseId)),
+    licenceFingerprint: hash(licence, digest),
+    sourceRef,
+    sourceFingerprint,
+  });
+  if (state.servicePools.some((p) => p.poolId === record.servicePoolId))
+    invalid('Programme pool identity already exists');
+  const next = validateServiceStateFromPopulation(
+    {
+      ...state,
+      servicePools: [
+        ...state.servicePools.map((p) =>
+          p.poolId === parent.poolId
+            ? {
+                ...p,
+                capacitySlots: (BigInt(p.capacitySlots) - amount).toString(),
+              }
+            : p,
+        ),
+        {
+          ...parent,
+          poolId: record.servicePoolId,
+          capacitySlots: intent.capacity.amount,
+          usedSlots: '0',
+          reservedSlots: '0',
+        },
+      ],
+      creations: [...(state.creations ?? []), record],
+    },
+    population,
+    digest,
+  );
+  const result = creationOutcome(record, digest);
+  return freeze({
+    source: 'APPLIED',
+    state: next,
+    result,
+    eventPayload: {
+      schemaVersion: 'social-employment-service-created-v1',
+      command: wire(command),
+      readFacts: r,
+      beforeStateHash: hash(state, digest),
+      afterStateHash: hash(next, digest),
+      result,
+    },
+  });
+}
+
+export function reduceSocialEmploymentServiceCreatedEvent(input: {
+  readonly state: SocialEmploymentServiceState;
+  readonly event: ReplayReducerEvent;
+  readonly sha256Hex: Sha256Hex;
+}): SocialEmploymentServiceState {
+  const r = inert(input.event.payload);
+  keys(r, [
+    'schemaVersion',
+    'command',
+    'readFacts',
+    'beforeStateHash',
+    'afterStateHash',
+    'result',
+  ]);
+  if (r.schemaVersion !== 'social-employment-service-created-v1')
+    invalid('Unsupported creation event');
+  const command = parseCanonicalCommand(r.command, input.sha256Hex);
+  parseCreationCommand(command, input.sha256Hex);
+  if (
+    input.event.eventType !== SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT ||
+    input.event.causationCommandId !== command.commandId ||
+    input.event.transitionId !== command.commandId ||
+    input.event.worldId !== command.worldId ||
+    input.event.worldVersionBefore !== command.expectedWorldVersion ||
+    input.event.worldVersionAfter !==
+      (BigInt(command.expectedWorldVersion!) + 1n).toString() ||
+    input.event.simTime.ticks !== command.simTime.ticks ||
+    input.event.correctsEventId !== null
+  )
+    invalid('Creation event causation/version/SimTime mismatch');
+  const f = r.readFacts as unknown as SocialEmploymentServiceCreationReadFacts;
+  if (input.event.sequence !== (BigInt(f.head.eventSequence) + 1n).toString())
+    invalid('Creation event sequence differs from actual source head');
+  const state = validateServiceStateFromPopulation(
+    input.state,
+    populationFacts({
+      boundary: f.boundary,
+      simTime: f.simTime,
+      populationAvailability: f.populationAvailability,
+    }),
+    input.sha256Hex,
+  );
+  if (hash(state, input.sha256Hex) !== sha(r.beforeStateHash))
+    invalid('Creation replay predecessor differs');
+  const operation = prepareSocialEmploymentServiceCreation({
+    command,
+    state,
+    readFacts: f,
+    sha256Hex: input.sha256Hex,
+  });
+  if (
+    operation.source !== 'APPLIED' ||
+    canonicalSerialize(operation.eventPayload) !== canonicalSerialize(r)
+  )
+    invalid('Creation replay differs from actual Core calculation');
+  return operation.state;
 }
 
 export interface SocialEmploymentPreparedOperation {
@@ -1037,5 +1633,11 @@ export function createSocialEmploymentServiceReplayReducers(
   return Object.freeze({
     [SOCIAL_SERVICE_PLAN_EVENT]: reducer,
     [SOCIAL_JOB_MATCH_EVENT]: reducer,
+    [SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT]: ({ state, event }) =>
+      reduceSocialEmploymentServiceCreatedEvent({
+        state: state as SocialEmploymentServiceState,
+        event,
+        sha256Hex: digest,
+      }),
   });
 }
