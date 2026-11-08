@@ -30,6 +30,8 @@ import {
   reuseRetainedPostwarPowerClone,
   RETAINED_UPGRADED_POWER_CHECKPOINT,
   RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256,
+  RETAINED_OPENING_BASE_CHECKPOINT,
+  RETAINED_OPENING_BASE_CHECKPOINT_SHA256,
 } from './postwar-retained-power-reuse.js';
 import { upgradeRetainedPostwarPowerClone } from './postwar-retained-power-upgrade.js';
 import {
@@ -104,7 +106,8 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     | 'RU_C2_05_H2'
     | 'TRADE_REPAIRED_H3'
     | 'POWER_LABOUR_H3'
-    | 'POWER_UPGRADED_H3';
+    | 'POWER_UPGRADED_H3'
+    | 'C10_OPENING_BASES_H3';
   readonly expectedCommit?: string;
   /** Explicit TEST_ONLY C10 Industry identity; default remains C1/C2. */
   readonly includeC10Industry?: true;
@@ -132,13 +135,15 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
       input.checkpoint === 'RU_C2_05_H2' ||
       input.checkpoint === 'TRADE_REPAIRED_H3' ||
       input.checkpoint === 'POWER_LABOUR_H3' ||
-      input.checkpoint === 'POWER_UPGRADED_H3',
+      input.checkpoint === 'POWER_UPGRADED_H3' ||
+      input.checkpoint === 'C10_OPENING_BASES_H3',
     'FIXED_CHECKPOINT_MODE_REQUIRED',
   );
   const readRepair =
     input.checkpoint === 'TRADE_REPAIRED_H3' ||
     input.checkpoint === 'POWER_LABOUR_H3' ||
-    input.checkpoint === 'POWER_UPGRADED_H3'
+    input.checkpoint === 'POWER_UPGRADED_H3' ||
+    input.checkpoint === 'C10_OPENING_BASES_H3'
       ? await loadRegisteredCurrentReadRepairCheckpoint(input.repositoryRoot)
       : undefined;
   const sourceDirectory =
@@ -151,14 +156,20 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
   await mkdir(pg, { recursive: true });
   const powerLabour =
     input.checkpoint === 'POWER_LABOUR_H3' ||
-    input.checkpoint === 'POWER_UPGRADED_H3';
-  const powerReuse = input.checkpoint === 'POWER_UPGRADED_H3';
-  const powerCheckpointPath = powerReuse
-    ? RETAINED_UPGRADED_POWER_CHECKPOINT
-    : labourCheckpointPath;
-  const powerCheckpointSha256 = powerReuse
-    ? RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256
-    : labourCheckpointSha256;
+    input.checkpoint === 'POWER_UPGRADED_H3' ||
+    input.checkpoint === 'C10_OPENING_BASES_H3';
+  const openingBases = input.checkpoint === 'C10_OPENING_BASES_H3';
+  const powerReuse = input.checkpoint === 'POWER_UPGRADED_H3' || openingBases;
+  const powerCheckpointPath = openingBases
+    ? RETAINED_OPENING_BASE_CHECKPOINT
+    : powerReuse
+      ? RETAINED_UPGRADED_POWER_CHECKPOINT
+      : labourCheckpointPath;
+  const powerCheckpointSha256 = openingBases
+    ? RETAINED_OPENING_BASE_CHECKPOINT_SHA256
+    : powerReuse
+      ? RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256
+      : labourCheckpointSha256;
   if (powerLabour) {
     must(
       input.expectedCommit && /^[a-f0-9]{40}$/u.test(input.expectedCommit),
@@ -469,6 +480,9 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
         evidenceDirectory: path.join(input.evidenceDirectory, 'power-reuse'),
         marker: originalMarker,
         clone,
+        ...(openingBases
+          ? { checkpointProfile: 'C10_OPENING_BASES_H3' as const }
+          : {}),
       });
       restoreEvidence.powerUpgradeReceipt = cp.powerUpgradeReceipt;
       restoreEvidence.powerReuseReceipt = reused.reuseReceipt;
