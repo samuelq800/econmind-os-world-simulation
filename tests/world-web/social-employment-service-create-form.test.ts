@@ -1,5 +1,6 @@
 /** TEST_ONLY browser DATA/DOM/transport vectors. No licence/source admission,
  * real JWT/Node/Chromium, queue execution or economic FINAL is established. */
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AUTHENTICATED_COMMAND_RECOVERY_SCHEMA } from '@econmind/core/authenticated-command-recovery-contract';
 import {
@@ -8,7 +9,10 @@ import {
   renderSocialEmploymentServiceCreateForm as render,
 } from '../../apps/world-web/src/social-employment/create-form.js';
 import { createOfficeCommandController } from '../../apps/world-web/src/office-command/controller.js';
-import { installOfficeCommand } from '../../apps/world-web/src/office-command/view.js';
+import {
+  installOfficeCommand,
+  SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING,
+} from '../../apps/world-web/src/office-command/view.js';
 import {
   POSTWAR_RUNTIME_SCHEMA,
   POSTWAR_RUNTIME_PATH,
@@ -16,7 +20,7 @@ import {
 } from '../../apps/world-web/src/postwar-office-runtime/client.js';
 import { readSocialServiceContext } from '../../apps/world-web/src/social-employment/service-context.js';
 import { officeCommandFixture } from './office-command-fixture.js';
-import { HostDocument, type HostElement } from './trusted-host-dom.js';
+import { HostDocument, HostElement } from './trusted-host-dom.js';
 afterEach(() => vi.unstubAllGlobals());
 const fp = 'sha256:' + 'a'.repeat(64);
 type MutableRuntimePage = Omit<RuntimePage, 'source'> & {
@@ -560,5 +564,168 @@ describe('first-day licensed service creation user intent (TEST_ONLY)', () => {
       doc.body.all().some((e) => e.dataset.officeCommandAction === 'review'),
     ).toBe(true);
     api.disconnect();
+  });
+  it.each(['country-module', 'country-room'] as const)(
+    'opens the finite CREATE form from actual rendered %s attributes while leaving unrelated and unbound entries blocked',
+    async (entry) => {
+      vi.stubGlobal(
+        'MutationObserver',
+        class {
+          observe() {}
+        },
+      );
+      vi.stubGlobal('Element', HostElement);
+      class CatalogDocument extends HostDocument {
+        capture: ((event: MouseEvent) => void) | null = null;
+        addEventListener(key: string, listener: (event: MouseEvent) => void) {
+          if (key === 'click') this.capture = listener;
+        }
+      }
+      const f = fixture(),
+        doc = new CatalogDocument('social');
+      const api = installOfficeCommand(
+        doc as unknown as Document,
+        { addEventListener() {} } as unknown as Window,
+        (b, v) =>
+          createOfficeCommandController(b, v, {
+            fetcher: f.fetcher,
+            requestId: () => f.f.request.requestId,
+          }),
+      );
+      try {
+        const source = readFileSync(
+          new URL(
+            '../../apps/world-web/public/season1-immersive/country-game.js',
+            import.meta.url,
+          ),
+          'utf8',
+        );
+        const template =
+          entry === 'country-module'
+            ? source.match(
+                /<button data-cmd="country-module" data-module="\$\{m\.id\}"/u,
+              )?.[0]
+            : source.match(
+                /<button data-cmd="country-room" data-id="\$\{i\}" data-module="\$\{module\}"/u,
+              )?.[0];
+        expect(template).toBeDefined();
+        const markup = template!
+          .replace('${m.id}', 'social-10')
+          .replace('${module}', 'social-10')
+          .replace('${i}', '0');
+        const module = doc.createElement('button') as HostElement & {
+          closest(selector: string): HostElement | null;
+        };
+        const key = (name: string) =>
+          name.replace(/-([a-z])/gu, (_, c: string) => c.toUpperCase());
+        for (const m of markup.matchAll(/data-([a-z-]+)="([^"]*)"/gu))
+          module.dataset[key(m[1]!)] = m[2]!;
+        // Exact renderer attributes: data-id is only the room ordinal.
+        expect(module.dataset.module).toBe('social-10');
+        if (entry === 'country-room') expect(module.dataset.id).toBe('0');
+        else expect(module.dataset.id).toBeUndefined();
+        module.closest = (selector) =>
+          selector
+            .split(',')
+            .some((s) =>
+              [...s.matchAll(/\[data-([a-z-]+)="([^"]*)"\]/gu)].every(
+                (m) => module.dataset[key(m[1]!)] === m[2],
+              ),
+            )
+            ? module
+            : null;
+        doc.root.append(module);
+        let prevented = 0,
+          stopped = 0;
+        const click = () =>
+          doc.capture?.({
+            target: module,
+            preventDefault() {
+              prevented++;
+            },
+            stopImmediatePropagation() {
+              stopped++;
+            },
+          } as unknown as MouseEvent);
+        click();
+        expect(prevented).toBe(0);
+        api.connect(f.binding);
+        module.dataset.module = 'social-9';
+        click();
+        expect(prevented).toBe(0);
+        module.dataset.module = 'social-11';
+        click();
+        expect(prevented).toBe(0);
+        module.dataset.module = 'social-10';
+        click();
+        await expect
+          .poll(() => api.getState().status)
+          .toBe('CURRENT_AUTHORIZED_HEAD');
+        expect(prevented).toBe(1);
+        expect(stopped).toBe(1);
+        const dialog = doc.root
+          .all()
+          .find((e) => Object.hasOwn(e.dataset, 'officeCommandDialog'))!;
+        expect(dialog.open).toBe(true);
+        expect(
+          dialog
+            .all()
+            .some((e) => e.dataset.socialServiceCreateAction === 'stage'),
+        ).toBe(true);
+        expect(dialog.textContent).toContain('0 XAA');
+        const field = (name: string) =>
+          dialog
+            .all()
+            .find(
+              (e) => e.dataset.socialServiceCreateField === name,
+            )! as HostElement & { value: string };
+        expect(field('servicePoolId').value).toBe('');
+        expect(field('capacity').value).toBe('');
+        field('servicePoolId').value = f.parent.poolId;
+        field('servicePoolId').listeners.get('change')!();
+        field('capacity').value = '4';
+        dialog
+          .all()
+          .find((e) => e.dataset.socialServiceCreateAction === 'stage')!
+          .click();
+        expect(api.getState().intent?.request.commandType).toBe(
+          'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
+        );
+        expect(api.getState().intent?.request.payload).toMatchObject({
+          capacity: { amount: '4', unit: 'person' },
+          budget: { amount: '0', currency: 'XAA' },
+          target: { servicePoolId: f.parent.poolId },
+        });
+        expect(
+          f.calls.filter((x) => x.path === '/v1/office-command'),
+        ).toHaveLength(0);
+        api.disconnect();
+        click();
+        expect(prevented).toBe(1);
+      } finally {
+        api.disconnect();
+      }
+    },
+  );
+  it('records exactly the three finite U0932 associations and leaves all six U0933/U0934 fields unconnected', () => {
+    const catalog = JSON.parse(
+      readFileSync(
+        new URL(
+          '../../apps/world-web/public/season1-immersive/catalog.json',
+          import.meta.url,
+        ),
+        'utf8',
+      ),
+    ) as { modules: { id: string; fields: { key: string }[] }[] };
+    const module = catalog.modules.find((m) => m.id === 'social-10')!;
+    expect(
+      Object.keys(SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING.fields),
+    ).toEqual(module.fields.slice(0, 3).map((f) => f.key));
+    expect(SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING.unsupportedFields).toEqual(
+      module.fields.slice(3).map((f) => f.key),
+    );
+    expect(SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING.budget).toBe(
+      'NO_ADDITIONAL_FEE_ZERO_ACTUAL_LOCAL_CURRENCY',
+    );
   });
 });

@@ -29,6 +29,29 @@ import {
 import { renderDecisionResult } from '../office-projection/decision-result-view.js';
 import { renderOfficeReadout } from '../office-projection/readout-view.js';
 
+/** Only the already licensed first-day CREATE subset of Social-10 is bound.
+ * The zero budget is an actual local-currency licence constraint, not a general
+ * budget input; the target is an existing referral desk, not new eligibility. */
+export const SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING = Object.freeze({
+  moduleId: 'social-10',
+  fields: Object.freeze({
+    'social-u0932-0': 'capacity.amount',
+    'social-u0932-1': 'budget',
+    'social-u0932-2': 'target.servicePoolId',
+  }),
+  scope: 'FIRST_DAY_LICENSED_REFERRAL_CAPACITY_PARTITION_ONLY',
+  budget: 'NO_ADDITIONAL_FEE_ZERO_ACTUAL_LOCAL_CURRENCY',
+  target: 'ACTUAL_EXISTING_ROOT_POOL_LOCATION_AND_SKILL_ONLY',
+  unsupportedFields: Object.freeze([
+    'social-u0933-0',
+    'social-u0933-1',
+    'social-u0933-2',
+    'social-u0934-0',
+    'social-u0934-1',
+    'social-u0934-2',
+  ]),
+} as const);
+
 /** Additive manual-intent drawer; no default economic payload or fixture data. */
 export function installOfficeCommand(
   document: Document,
@@ -608,11 +631,14 @@ export function installOfficeCommand(
     'click',
     (event) => {
       const role = currentView()?.role,
-        moduleId = INDUSTRY_RUN_CATALOG_BINDING.moduleId,
+        moduleId =
+          role === 'social'
+            ? SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING.moduleId
+            : INDUSTRY_RUN_CATALOG_BINDING.moduleId,
         selector =
           role === 'captain'
             ? '[data-module-card="captain-8"],[data-cmd="module"][data-id="captain-8"],[data-cmd="country-module"][data-id="captain-8"],[data-cmd="country-module"][data-module="captain-8"],[data-cmd="country-room"][data-module="captain-8"]'
-            : role === 'industry'
+            : role === 'industry' || role === 'social'
               ? `[data-module-card="${moduleId}"],[data-cmd="module"][data-id="${moduleId}"],[data-cmd="country-module"][data-id="${moduleId}"],[data-cmd="country-module"][data-module="${moduleId}"],[data-cmd="country-room"][data-module="${moduleId}"]`
               : null;
       const target =
