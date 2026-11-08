@@ -1,10 +1,12 @@
 /** TEST_ONLY restore of an actual owned H0/H2 checkpoint. No opening seed parse,
  * private proof, source publication, role/grant creation or World initialization.
+ * Optional C10 HTTP identity enrollment uses only existing fixture actors/roles,
+ * after actual C10 source checks; it establishes no OP title or service fact.
  * Independent Node children still issue their own genuine source proofs. */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { createHash, generateKeyPairSync, randomUUID, sign } from 'node:crypto';
+import { createHash, generateKeyPairSync, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { Pool } from 'pg';
 import { canonicalSerialize, WORLD_MODEL_VERSION } from '@econmind/core';
@@ -30,6 +32,11 @@ import {
   RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256,
 } from './postwar-retained-power-reuse.js';
 import { upgradeRetainedPostwarPowerClone } from './postwar-retained-power-upgrade.js';
+import {
+  prepareRegisteredC10HttpActorFrom,
+  createRegisteredUtilityFixtureTokenSigner,
+  type RegisteredUtilityHttpCountry,
+} from './registered-c10-http-actor.js';
 const exec = promisify(execFile);
 const labourCheckpointPath =
   '/workspace/.cloud-setup/evidence/industry-labour-function-forward-pg-20261108/retained-checkpoint.json';
@@ -74,13 +81,16 @@ export interface RegisteredUtilityResources {
 }
 export interface RegisteredUtilitySetup {
   readonly descriptor: unknown;
+  readonly c10HttpActor?: Awaited<
+    ReturnType<typeof prepareRegisteredC10HttpActorFrom>
+  >;
   readonly industrySource: Readonly<{
     sourceRef: string;
     sourceSha256: string;
   }>;
   readonly ddlReceipts: readonly unknown[];
   readonly directRpcEnrollment: readonly unknown[];
-  signToken(country: 'COUNTRY_01' | 'COUNTRY_02'): string;
+  signToken(country: RegisteredUtilityHttpCountry): string;
   counts(): Promise<RegisteredUtilityCounts>;
   close(): Promise<void>;
   rotateFiniteClock(
@@ -96,6 +106,8 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     | 'POWER_LABOUR_H3'
     | 'POWER_UPGRADED_H3';
   readonly expectedCommit?: string;
+  /** Explicit TEST_ONLY C10 Industry identity; default remains C1/C2. */
+  readonly includeC10Industry?: true;
   readonly sqlPlan: Readonly<{
     entries: readonly Readonly<{ name: string; sha256: string }>[];
     planSha256: string;
@@ -669,19 +681,39 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
         await preflightWorker.end();
       }
     }
+    const c10HttpActor =
+      input.includeC10Industry === true
+        ? await prepareRegisteredC10HttpActorFrom({
+            marker,
+            clone,
+            workerRole: roles.worker,
+            actorPublisherRole: await oneRole(
+              member('world_v2_actor_registry_publisher') +
+                ' and not ' +
+                member('world_v2_actor_registry_reader') +
+                ' and not ' +
+                member('world_v2_actor_registry_owner'),
+            ),
+          })
+        : undefined;
+    if (c10HttpActor) restoreEvidence.c10HttpActor = c10HttpActor;
+    const httpCountries: readonly RegisteredUtilityHttpCountry[] =
+      input.includeC10Industry === true
+        ? ['COUNTRY_01', 'COUNTRY_02', 'COUNTRY_10']
+        : ['COUNTRY_01', 'COUNTRY_02'];
     const bindings = await db.query<{
       country_id: string;
       auth_subject: string;
       actor_id: string;
     }>(
-      "select distinct a.country_id,a.auth_subject::text,b.actor_id from world_v2.current_commit_authorization a join world_v2.world_actor_binding b on b.world_id=a.world_id and b.auth_subject=a.auth_subject where a.world_id=$1 and a.office_id='INDUSTRY'and a.active and not exists(select 1 from world_v2.world_actor_binding_revocation r where r.world_id=b.world_id and r.binding_ref=b.binding_ref)order by a.country_id",
-      [marker.worldId],
+      "select distinct a.country_id,a.auth_subject::text,b.actor_id from world_v2.current_commit_authorization a join world_v2.world_actor_binding b on b.world_id=a.world_id and b.auth_subject=a.auth_subject where a.world_id=$1 and a.country_id=any($2::text[])and a.office_id='INDUSTRY'and a.active and not exists(select 1 from world_v2.world_actor_binding_revocation r where r.world_id=b.world_id and r.binding_ref=b.binding_ref)order by a.country_id",
+      [marker.worldId, httpCountries],
     );
     must(
-      bindings.rows.length === 2 &&
+      bindings.rows.length === httpCountries.length &&
         bindings.rows.map((x) => x.country_id).join(',') ===
-          'COUNTRY_01,COUNTRY_02',
-      'EXACT_C1_C2_ACTOR_BINDINGS_REQUIRED',
+          httpCountries.join(','),
+      'EXACT_FINITE_HTTP_ACTOR_BINDINGS_REQUIRED',
     );
     const subjects = Object.fromEntries(
       bindings.rows.map((x) => [x.country_id, x.auth_subject]),
@@ -691,14 +723,14 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
         'select country_id,source_sha256 from world_v2.finance_budget_capacity_original where world_id=$1 and country_id=any($2::text[])and seed_fingerprint=$3 and admission_ref=$4 order by country_id',
         [
           marker.worldId,
-          ['COUNTRY_01', 'COUNTRY_02'],
+          httpCountries,
           marker.seedFingerprint,
           marker.admissionRef,
         ],
       )
     ).rows;
     must(
-      countries.length === 2,
+      countries.length === httpCountries.length,
       'ACTUAL_EXISTING_COUNTRY_CAPACITY_PINS_REQUIRED',
     );
     const site = (
@@ -851,6 +883,12 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
       },
       routeOptions: { allowedOrigins: ['https://pages-test.example'] },
     };
+    const signToken = createRegisteredUtilityFixtureTokenSigner({
+      subjects,
+      issuer,
+      kid,
+      privateKey: keys.privateKey,
+    });
     const descriptor = {
       schemaVersion: 'test-only-registered-final-child-host-v1',
       repositoryRoot: input.repositoryRoot,
@@ -908,6 +946,7 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     );
     const setup: RegisteredUtilitySetup = {
       descriptor,
+      ...(c10HttpActor ? { c10HttpActor } : {}),
       industrySource: {
         sourceRef: site[0]!.source_ref,
         sourceSha256: site[0]!.source_sha256,
@@ -919,34 +958,7 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
       directRpcEnrollment: oldReport.directRpcEnrollment as unknown[],
       counts,
       close,
-      signToken(country) {
-        must(
-          country === 'COUNTRY_01' || country === 'COUNTRY_02',
-          'EXACT_ACTUAL_SUBJECT_COUNTRY_REQUIRED',
-        );
-        const now = Math.floor(Date.now() / 1000),
-          header = Buffer.from(
-            JSON.stringify({ alg: 'ES256', typ: 'JWT', kid }),
-          ).toString('base64url'),
-          body = Buffer.from(
-            JSON.stringify({
-              iss: issuer,
-              aud: 'authenticated',
-              sub: subjects[country],
-              iat: now,
-              exp: now + 3600,
-            }),
-          ).toString('base64url'),
-          raw = header + '.' + body;
-        return (
-          raw +
-          '.' +
-          sign('sha256', Buffer.from(raw), {
-            key: keys.privateKey,
-            dsaEncoding: 'ieee-p1363',
-          }).toString('base64url')
-        );
-      },
+      signToken,
       async rotateFiniteClock(request) {
         must(
           request.previousHostStopped === true && request.simTime === '0',
