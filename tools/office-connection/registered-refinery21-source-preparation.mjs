@@ -105,11 +105,25 @@ export async function prepareRegisteredRefinery21Sources(input) {
     }
     return rows;
   };
+  const progress = (type, countryId, status) => {
+    assert.match(countryId, /^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u);
+    process.stdout.write(
+      JSON.stringify({
+        kind: 'REFINERY_SOURCE_PREPARATION_PROGRESS',
+        type,
+        countryId,
+        status,
+        at: new Date().toISOString(),
+        pid: process.pid,
+      }) + '\n',
+    );
+  };
   const economicBefore = await economicSnapshot();
   const originals = [],
     utilitySources = [],
     powerSources = [];
-  for (const site of coverage.sites)
+  for (const site of coverage.sites) {
+    progress('FIRST_DAY', site.countryId, 'START');
     originals.push(
       await publish((tx) =>
         firstDay.registerPostwarIndustryRefineryFirstDayFrom(tx, {
@@ -121,12 +135,20 @@ export async function prepareRegisteredRefinery21Sources(input) {
         }),
       ),
     );
-  for (const proposal of proposals)
+    progress('FIRST_DAY', site.countryId, 'COMMITTED');
+  }
+  // Proposal order is the same fixed readPostwarIndustryRefineryCoverage map
+  // used by loadPostwarIndustryUtilitySourceProposals, not caller labels.
+  for (const [index, proposal] of proposals.entries()) {
+    const site = coverage.sites[index];
+    progress('UTILITY', site.countryId, 'START');
     utilitySources.push(
       await publish((tx) =>
         utility.publishPostwarIndustryUtilitySourcesFrom(tx, { proposal }),
       ),
     );
+    progress('UTILITY', site.countryId, 'COMMITTED');
+  }
   const preparations =
     await utility.preparePostwarIndustryUtilitySources(utilityInput);
   try {
@@ -139,7 +161,11 @@ export async function prepareRegisteredRefinery21Sources(input) {
         .sort(),
       coverage.sites.map((s) => s.countryId + '/' + s.facilityId).sort(),
     );
-    for (const preparation of preparations)
+    for (const preparation of preparations) {
+      const countryId =
+        utility.consumePostwarIndustryUtilitySource(preparation).compact
+          .countryId;
+      progress('POWER', countryId, 'START');
       powerSources.push(
         await publish((tx) =>
           power.publishPostwarIndustryPowerServiceSourceFrom(tx, {
@@ -148,6 +174,8 @@ export async function prepareRegisteredRefinery21Sources(input) {
           }),
         ),
       );
+      progress('POWER', countryId, 'COMMITTED');
+    }
   } finally {
     for (const p of preparations)
       utility.retireUnownedPostwarIndustryUtilitySource(p);

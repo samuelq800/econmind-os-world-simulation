@@ -438,6 +438,9 @@ export async function readRetainedPostwarPowerUpgradeLineage(
   };
 }
 
+// Fixed read-only catalog observation shared by the retained successor harness.
+export const readRetainedPostwarPowerCatalogFrom = catalog;
+
 async function catalog(tx: PoolClient): Promise<Catalog> {
   const r = await tx.query<{ catalog: Catalog }>(
     [

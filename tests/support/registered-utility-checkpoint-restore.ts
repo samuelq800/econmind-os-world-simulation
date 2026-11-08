@@ -24,6 +24,11 @@ import {
   assertRegisteredReadRepairReceiptCoverage,
   verifyRegisteredCurrentReadRepairFunctionsFrom,
 } from './registered-current-read-repair-checkpoint.js';
+import {
+  reuseRetainedPostwarPowerClone,
+  RETAINED_UPGRADED_POWER_CHECKPOINT,
+  RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256,
+} from './postwar-retained-power-reuse.js';
 import { upgradeRetainedPostwarPowerClone } from './postwar-retained-power-upgrade.js';
 const exec = promisify(execFile);
 const labourCheckpointPath =
@@ -85,7 +90,11 @@ export interface RegisteredUtilitySetup {
 export async function restoreRegisteredUtilityCheckpoint(input: {
   readonly repositoryRoot: string;
   readonly evidenceDirectory: string;
-  readonly checkpoint?: 'RU_C2_05_H2' | 'TRADE_REPAIRED_H3' | 'POWER_LABOUR_H3';
+  readonly checkpoint?:
+    | 'RU_C2_05_H2'
+    | 'TRADE_REPAIRED_H3'
+    | 'POWER_LABOUR_H3'
+    | 'POWER_UPGRADED_H3';
   readonly expectedCommit?: string;
   readonly sqlPlan: Readonly<{
     entries: readonly Readonly<{ name: string; sha256: string }>[];
@@ -110,12 +119,14 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     input.checkpoint === undefined ||
       input.checkpoint === 'RU_C2_05_H2' ||
       input.checkpoint === 'TRADE_REPAIRED_H3' ||
-      input.checkpoint === 'POWER_LABOUR_H3',
+      input.checkpoint === 'POWER_LABOUR_H3' ||
+      input.checkpoint === 'POWER_UPGRADED_H3',
     'FIXED_CHECKPOINT_MODE_REQUIRED',
   );
   const readRepair =
     input.checkpoint === 'TRADE_REPAIRED_H3' ||
-    input.checkpoint === 'POWER_LABOUR_H3'
+    input.checkpoint === 'POWER_LABOUR_H3' ||
+    input.checkpoint === 'POWER_UPGRADED_H3'
       ? await loadRegisteredCurrentReadRepairCheckpoint(input.repositoryRoot)
       : undefined;
   const sourceDirectory =
@@ -126,20 +137,29 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     await readRegisteredUtilityH2Evidence();
   const pg = path.join(input.evidenceDirectory, 'pg');
   await mkdir(pg, { recursive: true });
-  const powerLabour = input.checkpoint === 'POWER_LABOUR_H3';
+  const powerLabour =
+    input.checkpoint === 'POWER_LABOUR_H3' ||
+    input.checkpoint === 'POWER_UPGRADED_H3';
+  const powerReuse = input.checkpoint === 'POWER_UPGRADED_H3';
+  const powerCheckpointPath = powerReuse
+    ? RETAINED_UPGRADED_POWER_CHECKPOINT
+    : labourCheckpointPath;
+  const powerCheckpointSha256 = powerReuse
+    ? RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256
+    : labourCheckpointSha256;
   if (powerLabour) {
     must(
       input.expectedCommit && /^[a-f0-9]{40}$/u.test(input.expectedCommit),
       'POWER_FROZEN_COMMIT_REQUIRED',
     );
     must(
-      sha(await readFile(labourCheckpointPath, 'utf8')) ===
-        labourCheckpointSha256,
+      sha(await readFile(powerCheckpointPath, 'utf8')) ===
+        powerCheckpointSha256,
       'EXACT_LABOUR_CHECKPOINT_BYTES_REQUIRED',
     );
   }
   const cp = powerLabour
-    ? await read(labourCheckpointPath)
+    ? await read(powerCheckpointPath)
     : (readRepair?.checkpoint ??
       (await read(path.join(sourceDirectory, 'pg/retained-checkpoint.json'))));
   const originalMarker = await loadPostwarNativeReferenceMarker(
@@ -336,10 +356,13 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
           allowConnections: false,
           isTemplate: true,
           parentCheckpoint: powerLabour
-            ? labourCheckpointPath
+            ? powerCheckpointPath
             : path.join(sourceDirectory, 'pg/retained-checkpoint.json'),
           ...(powerLabour && restoreEvidence.powerUpgradeReceipt
             ? { powerUpgradeReceipt: restoreEvidence.powerUpgradeReceipt }
+            : {}),
+          ...(powerReuse && restoreEvidence.powerReuseReceipt
+            ? { powerReuseReceipt: restoreEvidence.powerReuseReceipt }
             : {}),
           restore: {
             startCommand: ['docker', 'start', marker.ownedContainer],
@@ -423,7 +446,24 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     } finally {
       await ready.end();
     }
-    if (powerLabour) {
+    if (powerReuse) {
+      clone = await clonePostwarNativeReference(
+        { ...originalMarker, database: cp.templateDatabase },
+        'power_reuse',
+      );
+      const reused = await reuseRetainedPostwarPowerClone({
+        repositoryRoot: input.repositoryRoot,
+        expectedCommit: input.expectedCommit!,
+        evidenceDirectory: path.join(input.evidenceDirectory, 'power-reuse'),
+        marker: originalMarker,
+        clone,
+      });
+      restoreEvidence.powerUpgradeReceipt = cp.powerUpgradeReceipt;
+      restoreEvidence.powerReuseReceipt = reused.reuseReceipt;
+      restoreEvidence.inheritedPowerUpgradeReceipt = cp.powerUpgradeReceipt;
+      restoreEvidence.schemaLineage =
+        'REUSED_76_REPAIR_LABOUR_AND_5_PLUS_2_WITH_ONE_EXACT_DOMESTIC_FORWARD';
+    } else if (powerLabour) {
       const upgraded = await upgradeRetainedPostwarPowerClone({
         repositoryRoot: input.repositoryRoot,
         expectedCommit: input.expectedCommit!,

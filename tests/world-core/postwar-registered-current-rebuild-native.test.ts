@@ -67,7 +67,7 @@ native(
         candidate: expectedCommit,
         status: 'RUNNING',
         scope:
-          'ONE_OS_POWER_UPGRADED_H3_REFINERY21_PREPARATION_DERIVED_REBUILD_TCP_AND_BROWSER_READ_ONLY',
+          'ONE_OS_REUSED_POWER_H3_SINGLE_FORWARD_REFINERY21_PREPARATION_DERIVED_REBUILD_TCP_AND_BROWSER_READ_ONLY',
         fixedRefinerySourcePreparation: 'SAME_LIVE_COLD_PROOF_AFTER_PRECHECK',
         economicCommandsPosted: 0,
         consumerSteps: 0,
@@ -114,7 +114,7 @@ native(
           repositoryRoot,
           evidenceDirectory,
           sqlPlan,
-          checkpoint: 'POWER_LABOUR_H3',
+          checkpoint: 'POWER_UPGRADED_H3',
           expectedCommit,
         });
         f = restored.fixture;
