@@ -60,7 +60,10 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
       sqlPlanSha256: sqlPlan.planSha256,
       status: 'RUNNING',
       classification: 'TEST_ONLY_C2_REGISTERED_CONNECTION_NOT_PRODUCTION',
-      previousChildDatabaseCheckpoint: 'NOT_RECOVERABLE_DB_CHECKPOINT',
+      previousChildDatabaseCheckpoint:
+        restoreFlag === '1'
+          ? 'ACTUAL_RETAINED_H0_NONCE_CHECKPOINT_REUSED'
+          : 'NOT_RECOVERABLE_DB_CHECKPOINT',
       scope: 'RUN_POWER_BOOK_WATER_GRANT_AND_SAME_DATABASE_NODE_RESTART',
       notCovered: [
         'POWER_DELIVERY',
