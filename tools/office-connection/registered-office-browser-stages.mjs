@@ -29,6 +29,39 @@ function ownedOrigin(value) {
   assert.equal(u.username + u.password + u.search + u.hash, '');
   return u.origin;
 }
+async function verifyBorrowedApplication(application) {
+  const origin = ownedOrigin(application.baseURL);
+  assert.match(
+    application.bundleSha256,
+    /^[a-f0-9]{64}$/u,
+    'ACTUAL_APPLICATION_BUNDLE_SHA256_REQUIRED',
+  );
+  const response = await fetch(origin + '/bundle.mjs', {
+    redirect: 'error',
+    credentials: 'omit',
+    cache: 'no-store',
+    signal: AbortSignal.timeout(10000),
+  });
+  assert.equal(response.status, 200, 'ACTUAL_APPLICATION_BUNDLE_REQUIRED');
+  assert.match(
+    response.headers.get('content-type') ?? '',
+    /(?:javascript|ecmascript)/iu,
+  );
+  assert.ok(
+    Number(response.headers.get('content-length') ?? 0) <= 8388608,
+    'BOUNDED_APPLICATION_BUNDLE_REQUIRED',
+  );
+  const bytes = Buffer.from(await response.arrayBuffer());
+  assert.ok(
+    bytes.length > 0 && bytes.length <= 8388608,
+    'BOUNDED_APPLICATION_BUNDLE_REQUIRED',
+  );
+  assert.equal(
+    createHash('sha256').update(bytes).digest('hex'),
+    application.bundleSha256,
+    'APPLICATION_BYTES_DIFFER_FROM_DECLARED_BUNDLE',
+  );
+}
 const head = (value) =>
   value
     ? { worldVersion: value.worldVersion, eventSequence: value.eventSequence }
@@ -43,6 +76,7 @@ export async function createRegisteredOfficeBrowserStages(input) {
   assert.ok(path.isAbsolute(input.evidenceDir));
   let backend = ownedOrigin(input.actualOrigin),
     ownedBrowser = false,
+    ownedApplication = false,
     browser = input.browser,
     application,
     closed = false;
@@ -122,13 +156,19 @@ export async function createRegisteredOfficeBrowserStages(input) {
       ownedBrowser = true;
     }
     assert.equal(browser.browserType().name(), 'chromium');
-    application = await createFixedOfficeBrowserApplication();
+    application = input.application;
+    if (!application) {
+      application = await createFixedOfficeBrowserApplication();
+      ownedApplication = true;
+    } else await verifyBorrowedApplication(application);
+    evidence.applicationOwnedHere = ownedApplication;
+    evidence.borrowedApplicationBytesVerified = !ownedApplication;
     evidence.bundleSha256 = application.bundleSha256;
     manager = await makeManager();
   } catch (error) {
     const failures = [];
     try {
-      await application?.close();
+      if (ownedApplication) await application?.close();
     } catch (e) {
       failures.push(e);
     }
@@ -523,12 +563,388 @@ export async function createRegisteredOfficeBrowserStages(input) {
         originalPayloadSha256: digest(dto.request.payload),
       });
     }
+    async function currentSocialPages(selection, withPositions) {
+      live();
+      assert.equal(retired, false);
+      assert.equal(role, 'social', 'SOCIAL_BROWSER_SESSION_REQUIRED');
+      for (const v of [
+        selection.expectedHead?.worldVersion,
+        selection.expectedHead?.eventSequence,
+      ])
+        assert.match(v, /^(0|[1-9][0-9]*)$/u);
+      const offsets = [
+        selection.poolPageOffset,
+        ...(withPositions ? [selection.positionPageOffset] : []),
+      ];
+      assert.ok(
+        offsets.every((v) => Number.isSafeInteger(v) && v >= 0),
+        'ACTUAL_AUTHORIZED_PAGE_OFFSETS_REQUIRED',
+      );
+      let current = await read({ expectedHead: selection.expectedHead });
+      assert.equal(
+        current.canStage,
+        true,
+        'CURRENT_UNUSED_BROWSER_INTENT_REQUIRED',
+      );
+      for (const [field, offset, action] of [
+        ...(withPositions
+          ? [
+              [
+                'runtimePage',
+                selection.positionPageOffset,
+                'social-next-positions',
+              ],
+            ]
+          : []),
+        ['socialPoolsPage', selection.poolPageOffset, 'social-next-pools'],
+      ]) {
+        for (let n = 0; current[field]?.page.offset !== offset; n++) {
+          assert.ok(n < 64, 'BOUNDED_SOCIAL_PAGE_SELECTION_EXCEEDED');
+          const p = current[field];
+          assert.ok(
+            p &&
+              p.page.offset < offset &&
+              p.page.nextOffset !== null &&
+              p.page.nextOffset <= offset,
+            'ACTUAL_SOCIAL_PAGE_NOT_REACHABLE',
+          );
+          const next = page.locator(`[data-office-command-action="${action}"]`);
+          assert.equal(await next.isDisabled(), false);
+          await next.click();
+          await page.waitForFunction(() => {
+            const s = window.EconMindFixedOfficeProbe.state();
+            return s.canRead || s.status === 'DENIED' || s.status === 'MISSING';
+          });
+          current = await state();
+          assert.equal(
+            current.canStage,
+            true,
+            'SOCIAL_PAGE_READ_FAILED_OR_RETIRED',
+          );
+        }
+      }
+      for (const p of [
+        current.socialPoolsPage,
+        ...(withPositions ? [current.runtimePage] : []),
+      ]) {
+        assert.ok(
+          p && p.status === 'PAGE',
+          'ACTUAL_SOCIAL_SELECTION_PAGE_REQUIRED',
+        );
+        assert.equal(p.authority.identity.officeId, 'SOCIAL');
+        assert.equal(p.authority.identity.countryId, input.countryId);
+        assert.equal(p.authority.identity.authSubjectId, input.authSubject);
+        assert.deepEqual(
+          head(p.authority.readback),
+          head(selection.expectedHead),
+        );
+      }
+      assert.equal(current.socialPoolsPage.dataset, 'service-pools');
+      return current;
+    }
+    async function reviewAndSubmitSocial(
+      dto,
+      before,
+      captured,
+      operation,
+      expectedStatus,
+    ) {
+      assert.equal(
+        count(requests, '/v1/office-command'),
+        before,
+        'STAGING_MUST_NOT_SUBMIT',
+      );
+      await page.locator('[data-office-command-action="review"]').click();
+      const reviewed = await state();
+      assert.equal(reviewed.status, 'REVIEWED');
+      assert.deepEqual(reviewed.intent, dto);
+      assert.equal(
+        count(requests, '/v1/office-command'),
+        before,
+        'REVIEW_MUST_NOT_SUBMIT',
+      );
+      original = dto;
+      await page.locator('[data-office-command-action="confirm"]').click();
+      await page.waitForFunction(
+        () => window.EconMindFixedOfficeProbe.state().status !== 'SUBMITTING',
+      );
+      const result = await state();
+      assert.deepEqual(networkFailures, []);
+      assert.equal(
+        count(requests, '/v1/office-command') - before,
+        1,
+        'ONE_EXPLICIT_SOCIAL_FORM_SUBMIT_REQUIRED',
+      );
+      assert.equal(submissions.length - captured, 1);
+      assert.deepEqual(
+        submissions.at(-1),
+        dto,
+        'ACTUAL_HTTP_ORIGINAL_DIFFERS_FROM_REVIEWED_FORM',
+      );
+      assert.equal(result.status, expectedStatus);
+      assert.equal(
+        result.receipt,
+        null,
+        'ACK_OR_UNKNOWN_IS_NOT_AN_ECONOMIC_FINAL',
+      );
+      return record(operation, result, {
+        commandType: dto.request.commandType,
+        originalPayloadSha256: digest(dto.request.payload),
+      });
+    }
+    function socialOriginal(staged, selection, family) {
+      assert.equal(
+        staged.status,
+        'REVIEW_REQUIRED',
+        'ACTUAL_SOCIAL_FORM_DID_NOT_STAGE',
+      );
+      const dto = staged.intent;
+      assert.ok(dto);
+      assert.equal(dto.request.commandType, family);
+      assert.equal(dto.request.officeId, 'SOCIAL');
+      assert.equal(
+        dto.request.worldId,
+        input.readConfiguration.admittedWorldPins.worldId,
+      );
+      assert.equal(dto.request.countryId, input.countryId);
+      assert.equal(
+        dto.request.expectedWorldVersion,
+        selection.expectedHead.worldVersion,
+      );
+      return dto;
+    }
+    async function submitSocialEmploymentServiceCreateFromCurrent(
+      selection,
+      { expectedStatus = 'QUEUE_ACK' } = {},
+    ) {
+      assert.ok(selection && typeof selection === 'object');
+      assert.deepEqual(
+        Object.keys(selection).sort(),
+        [
+          'servicePoolId',
+          'capacity',
+          'sourceVersion',
+          'expectedHead',
+          'poolPageOffset',
+        ].sort(),
+        'EXACT_SOCIAL_CREATE_SELECTION_REQUIRED',
+      );
+      assert.match(selection.capacity, /^[1-9][0-9]{0,77}$/u);
+      assert.match(selection.sourceVersion, /^sha256:[a-f0-9]{64}$/u);
+      const current = await currentSocialPages(selection, false),
+        pool = current.socialPoolsPage;
+      assert.equal(
+        pool.source.sourceVersion,
+        selection.sourceVersion,
+        'ACTUAL_SOCIAL_POOL_VERSION_CHANGED',
+      );
+      const options = pool.source.currentEmploymentServiceCreationOptions;
+      assert.equal(
+        options?.status,
+        'AVAILABLE',
+        'ACTUAL_LICENSED_CREATION_OPTIONS_REQUIRED',
+      );
+      const data = options.data;
+      assert.equal(
+        data.classification,
+        'CURRENT_T0_SERVICE_CREATION_PLANNING_DATA_NOT_AUTHORITY',
+      );
+      assert.equal(
+        data.worldId,
+        input.readConfiguration.admittedWorldPins.worldId,
+      );
+      assert.equal(data.countryId, input.countryId);
+      assert.deepEqual(head(data.head), head(selection.expectedHead));
+      assert.equal(data.dayIndex, '0');
+      const targets = data.rootTargets.filter(
+        (r) => r.poolId === selection.servicePoolId,
+      );
+      assert.equal(
+        targets.length,
+        1,
+        'ONE_ACTUAL_LICENSED_ROOT_TARGET_REQUIRED',
+      );
+      const target = targets[0];
+      assert.ok(
+        data.usageLicences.some((l) => l.locationId === target.locationId),
+        'ACTUAL_LICENCE_REQUIRED',
+      );
+      assert.ok(
+        BigInt(selection.capacity) <=
+          BigInt(target.capacitySlots) -
+            BigInt(target.usedSlots) -
+            BigInt(target.reservedSlots),
+      );
+      const before = count(requests, '/v1/office-command'),
+        captured = submissions.length;
+      await page
+        .locator('[data-social-service-create-field="servicePoolId"]')
+        .selectOption(selection.servicePoolId);
+      await page
+        .locator('[data-social-service-create-field="capacity"]')
+        .fill(selection.capacity);
+      await page.locator('[data-social-service-create-action="stage"]').click();
+      const dto = socialOriginal(
+          await state(),
+          selection,
+          'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
+        ),
+        payload = dto.request.payload;
+      assert.equal(
+        payload.schemaVersion,
+        'social-employment-service-create-v1',
+      );
+      assert.equal(typeof payload.programmeId, 'string');
+      assert.notEqual(payload.programmeId, '');
+      assert.deepEqual(
+        Object.keys(payload).sort(),
+        ['schemaVersion', 'programmeId', 'capacity', 'budget', 'target'].sort(),
+      );
+      assert.deepEqual(payload.capacity, {
+        amount: selection.capacity,
+        unit: 'person',
+      });
+      assert.deepEqual(payload.budget, {
+        amount: '0',
+        currency: data.localCurrency,
+      });
+      assert.deepEqual(payload.target, {
+        servicePoolId: target.poolId,
+        locationId: target.locationId,
+        skill: target.skill,
+      });
+      return reviewAndSubmitSocial(
+        dto,
+        before,
+        captured,
+        'ONE_ACTUAL_SOCIAL_CREATE_FORM_SUBMIT',
+        expectedStatus,
+      );
+    }
+    async function submitSocialProgrammePlanFromCurrent(
+      selection,
+      { expectedStatus = 'QUEUE_ACK' } = {},
+    ) {
+      assert.ok(selection && typeof selection === 'object');
+      assert.deepEqual(
+        Object.keys(selection).sort(),
+        [
+          'programmeId',
+          'servicePoolId',
+          'positionId',
+          'requestedMatches',
+          'poolSourceVersion',
+          'positionSourceVersion',
+          'expectedHead',
+          'poolPageOffset',
+          'positionPageOffset',
+        ].sort(),
+        'EXACT_SOCIAL_PROGRAMME_PLAN_SELECTION_REQUIRED',
+      );
+      assert.match(selection.requestedMatches, /^[1-9][0-9]{0,77}$/u);
+      for (const version of [
+        selection.poolSourceVersion,
+        selection.positionSourceVersion,
+      ])
+        assert.match(version, /^sha256:[a-f0-9]{64}$/u);
+      const current = await currentSocialPages(selection, true),
+        pools = current.socialPoolsPage,
+        positions = current.runtimePage;
+      assert.equal(positions.dataset, 'positions');
+      assert.equal(pools.source.sourceVersion, selection.poolSourceVersion);
+      assert.equal(
+        positions.source.sourceVersion,
+        selection.positionSourceVersion,
+      );
+      const options = pools.source.currentEmploymentServiceCreationOptions;
+      assert.equal(
+        options?.status,
+        'AVAILABLE',
+        'ACTUAL_PROGRAMME_CHILD_METADATA_REQUIRED',
+      );
+      assert.equal(
+        options.data.classification,
+        'CURRENT_T0_SERVICE_CREATION_PLANNING_DATA_NOT_AUTHORITY',
+      );
+      assert.equal(
+        options.data.worldId,
+        input.readConfiguration.admittedWorldPins.worldId,
+      );
+      assert.equal(options.data.countryId, input.countryId);
+      assert.deepEqual(head(options.data.head), head(selection.expectedHead));
+      const children = options.data.creations.filter(
+        (c) =>
+          c.programmeId === selection.programmeId &&
+          c.childPoolId === selection.servicePoolId,
+      );
+      assert.equal(
+        children.length,
+        1,
+        'ACTUAL_COMMITTED_PROGRAMME_CHILD_REQUIRED',
+      );
+      const child = pools.rows.filter(
+          (r) => r.poolId === selection.servicePoolId,
+        ),
+        position = positions.rows.filter(
+          (r) => r.positionId === selection.positionId,
+        );
+      assert.equal(child.length, 1);
+      assert.equal(position.length, 1);
+      const c = child[0],
+        p = position[0];
+      assert.equal(c.countryId, input.countryId);
+      assert.equal(p.countryId, input.countryId);
+      assert.equal(c.locationId, p.locationId);
+      assert.equal(c.skill, p.skill);
+      assert.equal(c.capacitySlots, children[0].capacitySlots);
+      assert.ok(
+        BigInt(selection.requestedMatches) <=
+          BigInt(c.capacitySlots) -
+            BigInt(c.usedSlots) -
+            BigInt(c.reservedSlots),
+      );
+      const before = count(requests, '/v1/office-command'),
+        captured = submissions.length;
+      await page
+        .locator('[data-social-plan-field="positionId"]')
+        .selectOption(selection.positionId);
+      await page
+        .locator('[data-social-plan-field="servicePoolId"]')
+        .selectOption(selection.servicePoolId);
+      await page
+        .locator('[data-social-plan-field="requestedMatches"]')
+        .fill(selection.requestedMatches);
+      await page.locator('[data-social-plan-action="stage"]').click();
+      const dto = socialOriginal(
+        await state(),
+        selection,
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
+      );
+      assert.deepEqual(dto.request.payload, {
+        schemaVersion: 'social-employment-service-plan-v1',
+        locationId: c.locationId,
+        skill: c.skill,
+        positionId: p.positionId,
+        servicePoolId: c.poolId,
+        requestedMatches: selection.requestedMatches,
+        dueDayIndex: c.dayIndex,
+      });
+      return reviewAndSubmitSocial(
+        dto,
+        before,
+        captured,
+        'ONE_ACTUAL_SOCIAL_PROGRAMME_PLAN_FORM_SUBMIT',
+        expectedStatus,
+      );
+    }
     const session = Object.freeze({
       role,
       page,
       state,
       read,
       submitIndustryPowerFromPlanning,
+      submitSocialEmploymentServiceCreateFromCurrent,
+      submitSocialProgrammePlanFromCurrent,
       async submitOnce(dto, { expectedStatus = 'QUEUE_ACK' } = {}) {
         live();
         assert.equal(retired, false);
@@ -725,7 +1141,9 @@ export async function createRegisteredOfficeBrowserStages(input) {
         async () => {
           for (const m of managers) await m.close();
         },
-        async () => application.close(),
+        async () => {
+          if (ownedApplication) await application.close();
+        },
         async () => {
           if (ownedBrowser) await browser.close();
         },

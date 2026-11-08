@@ -35,6 +35,9 @@ export interface RegisteredOfficeBrowserStageInput {
   }>;
   /** Existing Chromium instance; if absent, this tool owns Chromium only. */
   readonly browser?: unknown;
+  /** Borrowed existing shipped UI asset server. Its owner closes it. No
+   * additional application build/server is created when supplied. */
+  readonly application?: Readonly<{ baseURL: string; bundleSha256: string }>;
   readonly playwrightModule?: string;
   readonly chromiumExecutable?: string;
   /** Actual credential provider, never written to evidence. */
@@ -55,6 +58,26 @@ export type RegisteredIndustryPowerFormSelection = Readonly<{
       }>
     | Readonly<{ action: 'DELIVER' }>
   );
+export interface RegisteredSocialServiceCreateSelection {
+  readonly servicePoolId: string;
+  readonly capacity: string;
+  readonly sourceVersion: string;
+  readonly expectedHead: RegisteredOfficeBrowserHead;
+  /** Actual authorized service-pools page offset, not a guessed root index. */
+  readonly poolPageOffset: number;
+}
+export interface RegisteredSocialProgrammePlanSelection {
+  /** From the actual CREATE original/FINAL and current child-pool metadata. */
+  readonly programmeId: string;
+  readonly servicePoolId: string;
+  readonly positionId: string;
+  readonly requestedMatches: string;
+  readonly poolSourceVersion: string;
+  readonly positionSourceVersion: string;
+  readonly expectedHead: RegisteredOfficeBrowserHead;
+  readonly poolPageOffset: number;
+  readonly positionPageOffset: number;
+}
 export interface RegisteredOfficeBrowserSession {
   readonly role: RegisteredOfficeBrowserRole;
   /** Opaque real Playwright Page; use the finite stages below. */
@@ -71,6 +94,22 @@ export interface RegisteredOfficeBrowserSession {
    * caller must separately consume and recoverFinal. An ACK is never FINAL. */
   submitIndustryPowerFromPlanning(
     selection: RegisteredIndustryPowerFormSelection,
+    expectation?: Readonly<{
+      expectedStatus?: RegisteredOfficeBrowserState['status'];
+    }>,
+  ): Promise<RegisteredOfficeBrowserState>;
+  /** Source-backed shipped form -> review -> one explicit POST. Native owns
+   * consumption and must separately recover actual FINAL/publication. */
+  submitSocialEmploymentServiceCreateFromCurrent(
+    selection: RegisteredSocialServiceCreateSelection,
+    expectation?: Readonly<{
+      expectedStatus?: RegisteredOfficeBrowserState['status'];
+    }>,
+  ): Promise<RegisteredOfficeBrowserState>;
+  /** Use a fresh session after CREATE FINAL/F5 recovery (the old controller
+   * intentionally remains attempted). Child must exist in actual metadata. */
+  submitSocialProgrammePlanFromCurrent(
+    selection: RegisteredSocialProgrammePlanSelection,
     expectation?: Readonly<{
       expectedStatus?: RegisteredOfficeBrowserState['status'];
     }>,
