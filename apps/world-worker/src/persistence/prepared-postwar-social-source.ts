@@ -1,3 +1,4 @@
+import { projectPostwarSocialServiceCreationOriginals } from './postwar-social-service-creation-originals.js';
 /** Explicit offline immutable DATA preparation. No auth/head/lease/view or
  * admission authority survives preparation. Every online use locks the actual
  * source/admission again and reads/replays the complete bounded current prefix. */
@@ -533,6 +534,10 @@ export async function readPreparedPostwarSocialLineageFrom(input: {
       {
         worldId: input.worldId,
         frames: prefix.frames,
+        socialCreationOriginals: projectPostwarSocialServiceCreationOriginals(
+          b.document,
+          b.source,
+        ),
         socialCountries: b.document.countries.map((c) => ({
           countryId: c.countryId,
           state: c.state,

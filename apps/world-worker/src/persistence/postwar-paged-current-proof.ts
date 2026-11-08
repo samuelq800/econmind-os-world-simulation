@@ -169,6 +169,7 @@ export function advancePostwarPagedCurrentProof(input: {
     if (
       [
         'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
         'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
         'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1',
       ].includes(f.command.commandType)

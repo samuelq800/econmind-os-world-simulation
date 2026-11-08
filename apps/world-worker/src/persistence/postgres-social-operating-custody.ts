@@ -849,3 +849,6 @@ export function createPostgresSocialOperatingCustody(configuration: {
     },
   });
 }
+
+/** Fixed immutable Core seed interpretation, DATA only; no DB admission. */
+export { sourceFrom as readPostwarSocialOperatingOriginalsFromSeed };

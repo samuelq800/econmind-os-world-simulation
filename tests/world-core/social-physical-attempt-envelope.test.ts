@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   COMMAND_SCHEMA_VERSION,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  prepareSocialEmploymentServiceCreation,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
   SOCIAL_JOB_MATCH_RULE_VERSION,
   createE01DailyBoundary,
@@ -16,6 +18,7 @@ import {
 } from '@econmind/core';
 import {
   assertSocialPhysicalAttemptEnvelope,
+  assertSocialPhysicalCapacityState,
   type SocialPhysicalAttemptEnvelope,
 } from '../../apps/world-worker/src/persistence/social-physical-attempt-envelope.js';
 
@@ -31,6 +34,7 @@ function plan(
   amount = '3',
   version = '0',
   day = '1',
+  pool = `POOL_${skill}_D${day}`,
 ) {
   return parseCanonicalCommand(
     {
@@ -52,7 +56,7 @@ function plan(
         locationId,
         skill,
         positionId: `POSITION_${skill}`,
-        servicePoolId: `POOL_${skill}_D${day}`,
+        servicePoolId: pool,
         requestedMatches: amount,
         dueDayIndex: day,
       },
@@ -60,7 +64,7 @@ function plan(
     digest,
   );
 }
-function due(original: CanonicalCommand, version = '1') {
+function due(original: CanonicalCommand, version = '1', day = '1') {
   return parseCanonicalCommand(
     {
       schemaVersion: COMMAND_SCHEMA_VERSION,
@@ -80,7 +84,7 @@ function due(original: CanonicalCommand, version = '1') {
         schemaVersion: 'social-job-match-settlement-v1',
         planCommandId: original.commandId,
         planFingerprint: original.fingerprint,
-        dueDayIndex: '1',
+        dueDayIndex: day,
         ruleVersion: SOCIAL_JOB_MATCH_RULE_VERSION,
       },
     },
@@ -614,5 +618,175 @@ describe('daily physical preallocation — no persistence or source authority', 
       assess(plan(), f.state, f.facts('HIGH', false, 'REVOKED')),
     ).toThrow();
     expect(JSON.stringify(f.state)).toBe(before);
+  });
+});
+
+// Actual Core operations over explicit TEST_ONLY DATA; no admitted source or
+// SQL/actor/Clock authority is supplied by these feasibility checks.
+describe('programme child pools retain the original physical desk', () => {
+  function createdDesk() {
+    const f = fixture('10', '2');
+    const state = {
+      ...f.state,
+      servicePools: f.state.servicePools.map((p) => ({
+        ...p,
+        poolId: p.poolId.replace('_D1', '_D0'),
+        dayIndex: '0',
+      })),
+    };
+    const command = parseCanonicalCommand(
+      {
+        schemaVersion: COMMAND_SCHEMA_VERSION,
+        worldId: state.worldId,
+        countryId,
+        officeId: 'SOCIAL',
+        actorId: 'ACTOR_SOCIAL',
+        authSubject: '11111111-1111-4111-8111-111111111111',
+        commandId: 'CREATE_TEST_ONLY_PROGRAMME',
+        commandType: SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+        correlationId: 'TRACE_TEST',
+        expectedWorldVersion: '0',
+        idempotencyKey: 'CREATE_TEST_ONLY_PROGRAMME',
+        simTime: '10000',
+        submittedAtReal: at,
+        payload: {
+          schemaVersion: 'social-employment-service-create-v1',
+          programmeId: 'PROGRAMME_TEST_ONLY',
+          capacity: { amount: '4', unit: 'person' },
+          budget: { amount: '0', currency: 'XAA' },
+          target: { servicePoolId: 'POOL_HIGH_D0', locationId, skill: 'HIGH' },
+        },
+      },
+      digest,
+    );
+    const result = prepareSocialEmploymentServiceCreation({
+      command,
+      state,
+      sha256Hex: digest,
+      readFacts: {
+        boundary: createE01DailyBoundary('0'),
+        simTime: '10000',
+        populationAvailability: f.facts().populationAvailability,
+        worldId: state.worldId,
+        head: { worldVersion: '0', eventSequence: '0' },
+        countryId,
+        governmentEntityId: 'ENTITY_GOVERNMENT_01',
+        localCurrency: 'XAA',
+        sourceRef: 'SOURCE_TEST_ONLY',
+        sourceFingerprint: `sha256:${'1'.repeat(64)}`,
+        sourceRevocations: [],
+        usageLicence: {
+          licenseId: 'LICENCE_TEST_ONLY',
+          licensorEntityId: 'ENTITY_OPERATOR_01',
+          beneficiaryEntityId: 'ENTITY_GOVERNMENT_01',
+          locationId,
+          validFromDayIndex: '0',
+          validUntilDayIndex: '1',
+          dutyAssignmentIds: ['DUTY_TEST_ONLY_INTAKE', 'DUTY_TEST_ONLY_VERIFY'],
+          maximumWorkerMinutes: '960',
+          scope: 'PUBLIC_REFERRALS_ONLY_NOT_EMPLOYER_TRANSFER',
+          state: 'GENESIS_USAGE_LICENSE_NOT_PAID_PURCHASE',
+          additionalFeeAmount: '0',
+          futurePaymentCondition:
+            'NEW_PUBLIC_PURCHASE_REQUIRES_SEPARATE_LAWFUL_FUNDED_CONTRACT',
+        },
+      },
+    });
+    // This envelope is DATA, not a claimed real staff licence.
+    const body = (version: string) => ({
+      ...envelope(version, '0'),
+      stages: [
+        {
+          resourceKey: 'TEST_SHARED_STAGE',
+          availableMinutes: '100',
+          minutesPerOpportunity: { LOW: '2', MEDIUM: '3', HIGH: '4' },
+        },
+      ],
+    });
+    return {
+      ...f,
+      before: state,
+      created: result.state,
+      child: result.result.servicePoolId,
+      body,
+    };
+  }
+  it('partitions ten slots without increasing the physical lane or issuing work', () => {
+    const f = createdDesk();
+    const read = (state: SocialEmploymentServiceState) =>
+      assertSocialPhysicalCapacityState({
+        state,
+        readFacts: f.facts(),
+        sourceEnvelope: f.body('1'),
+        sha256Hex: digest,
+      });
+    expect(read(f.created)).toEqual(read(f.before));
+    expect(read(f.created).lanes.find((l) => l.skill === 'HIGH')).toMatchObject(
+      {
+        capacity: '10',
+        charged: '0',
+        poolId: 'POOL_HIGH_D0',
+      },
+    );
+    expect(f.created.labour).toEqual(f.before.labour);
+  });
+  it('charges parent and programme PLANs to the same root desk', () => {
+    const f = createdDesk(),
+      childPlan = plan(101, 'HIGH', '4', '1', '0', f.child);
+    const first = assess(childPlan, f.created, f.facts(), f.body('1'));
+    expect(first.lanes.find((l) => l.skill === 'HIGH')).toMatchObject({
+      capacity: '10',
+      chargedAfter: '4',
+    });
+    const pending = apply(childPlan, f.created, f.facts()).state;
+    const rootPlan = plan(102, 'HIGH', '6', '2', '0');
+    expect(
+      assess(rootPlan, pending, f.facts(), f.body('2')).lanes.find(
+        (l) => l.skill === 'HIGH',
+      ),
+    ).toMatchObject({
+      capacity: '10',
+      chargedBefore: '4',
+      chargedAfter: '10',
+      remaining: '0',
+    });
+  });
+  it('retains child attempts after partial MATCH and prevents capacity laundering via the parent', () => {
+    const f = createdDesk(),
+      childPlan = plan(103, 'HIGH', '4', '1', '0', f.child);
+    const pending = apply(childPlan, f.created, f.facts()).state;
+    const match = due(childPlan, '2', '0');
+    const matchFacts = { ...f.facts(), simTime: '20000' };
+    expect(
+      assess(match, pending, matchFacts, f.body('2')).lanes.find(
+        (l) => l.skill === 'HIGH',
+      ),
+    ).toMatchObject({ chargedBefore: '4', chargedAfter: '4' });
+    const settled = apply(match, pending, matchFacts);
+    expect(settled.result.matched).toBe('2');
+    const rootPlan = plan(104, 'HIGH', '6', '3', '0');
+    const full = apply(rootPlan, settled.state, f.facts()).state;
+    const extra = plan(105, 'HIGH', '1', '4', '0', f.child);
+    expect(apply(extra, full, f.facts()).source).toBe('APPLIED');
+    expect(() => assess(extra, full, f.facts(), f.body('4'))).toThrow(
+      'PHYSICAL_LANE_EXHAUSTED',
+    );
+  });
+  it('rejects relabeling a physical original with the child pool ID', () => {
+    const f = createdDesk(),
+      body = f.body('1');
+    expect(() =>
+      assertSocialPhysicalCapacityState({
+        state: f.created,
+        readFacts: f.facts(),
+        sourceEnvelope: {
+          ...body,
+          pools: body.pools.map((p) =>
+            p.skill === 'HIGH' ? { ...p, poolId: f.child } : p,
+          ),
+        },
+        sha256Hex: digest,
+      }),
+    ).toThrow('INCOMPLETE_OR_ALIASED_POOL_SCOPE');
   });
 });

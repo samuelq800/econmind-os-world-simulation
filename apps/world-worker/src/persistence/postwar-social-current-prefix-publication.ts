@@ -1,3 +1,5 @@
+import { projectPostwarSocialServiceCreationOriginals } from './postwar-social-service-creation-originals.js';
+import { readPostwarSocialOperatingOriginalsFromSeed } from './postgres-social-operating-custody.js';
 /** Offline controlled publication only. Never imported by the online store.
  * The full prefix is read by the genuine same-executor lifetime-bound reader;
  * Core evidence and submitted hash pins are validation, never DB authority. */
@@ -67,9 +69,16 @@ export async function publishPostwarSocialCurrentPrefixProjectionsFrom(
         opening = readPostwarOperatingGenesisFromSeed(lineage.seed);
       if (!opening.socialEmployment)
         throw Error('POSTWAR_SOCIAL_PREFIX_FULL_E03_REQUIRED');
+      const actualOriginal = readPostwarSocialOperatingOriginalsFromSeed(
+        lineage.seed,
+      );
       const shared = replayPostwarSharedOfficePrefix({
         lineage,
         document: opening.socialEmployment,
+        socialCreationOriginals: projectPostwarSocialServiceCreationOriginals(
+          opening.socialEmployment,
+          actualOriginal.source,
+        ),
       });
       const publications: PostwarSocialCurrentPrefixPublication[] = [];
       for (const country of countries) {

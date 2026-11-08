@@ -1,3 +1,4 @@
+import { readPostwarSocialServiceCreationOriginalsForBase } from './postwar-social-service-creation-originals.js';
 /** Server-only Trade current originals. No source admission, OP representation,
  * route, cash, consumer, or production installation is created here. */
 import { createHash } from 'node:crypto';
@@ -200,6 +201,7 @@ export class PostwarNarrowTradeCurrentSourceMissing extends DomainError {
 const families = new Set([
   'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
   'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
+  'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
   'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
   'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1',
   POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
@@ -347,6 +349,8 @@ async function replay(
   const replayed = replayPreparedFinanceSocialFxLedger({
     ...history,
     prepared: b.prepared,
+    socialCreationOriginals:
+      readPostwarSocialServiceCreationOriginalsForBase(baseline),
     frames: prefix.frames,
     socialCountries: b.document.countries.map((c) => ({
       countryId: c.countryId,

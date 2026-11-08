@@ -11,6 +11,7 @@ import {
 import {
   prepareFinanceNativeBudgetMixedPrefix,
   readFinanceNativeBudgetMixedPrefix,
+  type FinanceNativeBudgetSocialCreationOriginals,
 } from '@econmind/core/finance-budget-native';
 import {
   validatePostwarSocialEmploymentStateDocument,
@@ -34,6 +35,7 @@ function freeze<T>(v: T): T {
 export function replayPostwarSharedOfficePrefix(input: {
   readonly lineage: Readonly<PostwarSocialReplayLineage>;
   readonly document: PostwarSocialEmploymentStateDocument;
+  readonly socialCreationOriginals?: readonly FinanceNativeBudgetSocialCreationOriginals[];
 }) {
   const { lineage } = input;
   const paged = readPreparedSocialPagedLineage(lineage);
@@ -63,6 +65,9 @@ export function replayPostwarSharedOfficePrefix(input: {
       {
         worldId: lineage.worldId,
         frames: frames!,
+        ...(input.socialCreationOriginals === undefined
+          ? {}
+          : { socialCreationOriginals: input.socialCreationOriginals }),
         socialCountries: document.countries.map((c) => ({
           countryId: c.countryId,
           state: c.state,
