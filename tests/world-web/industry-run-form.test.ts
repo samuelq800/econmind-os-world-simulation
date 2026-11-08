@@ -1,11 +1,13 @@
 /** Pure request/DOM unit checks, explicit TEST_ONLY authorized row shape.
  * Actual API/SQL data and native economics are separate acceptance. */
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   buildIndustryRunRequest,
   renderIndustryRunForm,
+  INDUSTRY_RUN_CATALOG_BINDING,
 } from '../../apps/world-web/src/industry-run/form.js';
-import { HostDocument } from './trusted-host-dom.js';
+import { HostDocument, type HostElement } from './trusted-host-dom.js';
 const row = {
   schemaVersion: 'postwar-industry-run-parameter-row-v1' as const,
   countryId: 'COUNTRY_TEST_ONLY',
@@ -45,6 +47,62 @@ const build = (d = draft) =>
     runId: 'RUN_TEST_ONLY',
   });
 describe('source-bound Industry RUN form', () => {
+  it('binds exactly the two U0282 catalog fields and leaves utilization/resource priorities outside RUN', () => {
+    const catalog = JSON.parse(
+        readFileSync(
+          new URL(
+            '../../apps/world-web/public/season1-immersive/catalog.json',
+            import.meta.url,
+          ),
+          'utf8',
+        ),
+      ) as {
+        modules: { id: string; fields: { key: string; source: string }[] }[];
+      },
+      module = catalog.modules.find(
+        (m) => m.id === INDUSTRY_RUN_CATALOG_BINDING.moduleId,
+      )!;
+    expect(INDUSTRY_RUN_CATALOG_BINDING.fields).toEqual({
+      'industry-u0282-0': 'facilityId',
+      'industry-u0282-1': 'quantity',
+    });
+    for (const id of Object.keys(INDUSTRY_RUN_CATALOG_BINDING.fields))
+      expect(module.fields.find((f) => f.key === id)?.source).toBe(
+        'INDUSTRY-U0282',
+      );
+    expect(INDUSTRY_RUN_CATALOG_BINDING.unsupportedFields).toEqual(
+      module.fields
+        .filter((f) => f.source !== 'INDUSTRY-U0282')
+        .map((f) => f.key),
+    );
+  });
+  it('marks the two exact controls and requires explicit quantity, window and cost instead of copying catalog defaults', () => {
+    const doc = new HostDocument('industry'),
+      panel = renderIndustryRunForm(
+        doc as unknown as Document,
+        [row],
+        true,
+        () => false,
+      ) as unknown as HostElement;
+    const fields = panel
+      .all()
+      .filter((el) => Object.hasOwn(el.dataset, 'industryRunField'));
+    expect(panel.dataset.catalogModuleBinding).toBe('industry-13');
+    expect(
+      fields
+        .filter((el) => el.dataset.catalogFieldId)
+        .map((el) => [el.dataset.catalogFieldId, el.dataset.industryRunField]),
+    ).toEqual([
+      ['industry-u0282-0', 'facilityId'],
+      ['industry-u0282-1', 'quantity'],
+    ]);
+    for (const field of fields.filter(
+      (el) => el.dataset.industryRunField !== 'facilityId',
+    ))
+      expect((field as unknown as HTMLInputElement).value).toBe('');
+    expect(panel.textContent).toContain('利用率目标、设施与资源优先级尚未接通');
+    expect(panel.textContent).toContain('source unit · XBB');
+  });
   it('copies policy/source/unit/currency from authorized data while preserving explicit user terms/head/identity', () => {
     expect(build()).toMatchObject({
       request: {

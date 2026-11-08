@@ -12,7 +12,10 @@ import {
   INDUSTRY_RUN_PARAMETERS_DATASET,
   parseIndustryRunParameterRow,
 } from '@econmind/core/postwar-industry-run-parameters-contract';
-import { renderIndustryRunForm } from '../industry-run/form.js';
+import {
+  INDUSTRY_RUN_CATALOG_BINDING,
+  renderIndustryRunForm,
+} from '../industry-run/form.js';
 import {
   createOfficeCommandController,
   type OfficeCommandBinding,
@@ -450,18 +453,19 @@ export function installOfficeCommand(
   document.addEventListener?.(
     'click',
     (event) => {
+      const role = currentView()?.role,
+        moduleId = INDUSTRY_RUN_CATALOG_BINDING.moduleId,
+        selector =
+          role === 'captain'
+            ? '[data-module-card="captain-8"],[data-cmd="module"][data-id="captain-8"],[data-cmd="country-module"][data-id="captain-8"],[data-cmd="country-module"][data-module="captain-8"],[data-cmd="country-room"][data-module="captain-8"]'
+            : role === 'industry'
+              ? `[data-module-card="${moduleId}"],[data-cmd="module"][data-id="${moduleId}"],[data-cmd="country-module"][data-id="${moduleId}"],[data-cmd="country-module"][data-module="${moduleId}"],[data-cmd="country-room"][data-module="${moduleId}"]`
+              : null;
       const target =
-        event.target instanceof Element
-          ? event.target.closest<HTMLElement>(
-              '[data-module-card="captain-8"],[data-cmd="module"][data-id="captain-8"],[data-cmd="country-module"][data-id="captain-8"],[data-cmd="country-module"][data-module="captain-8"],[data-cmd="country-room"][data-module="captain-8"]',
-            )
+        selector && event.target instanceof Element
+          ? event.target.closest<HTMLElement>(selector)
           : null;
-      if (
-        !target ||
-        currentView()?.role !== 'captain' ||
-        !root?.contains(target)
-      )
-        return;
+      if (!target || !root?.contains(target)) return;
       sync();
       const state = controller.getState();
       if (state.status === 'MISSING' || state.status === 'DENIED' || !dialog)

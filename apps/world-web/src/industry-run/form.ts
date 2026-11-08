@@ -8,6 +8,28 @@ import {
   AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
   type AuthenticatedOfficeCommandRequestDto,
 } from '@econmind/core/authenticated-office-command-contract';
+/** Exact catalog subset. Other Industry-13 actions are not RUN scheduling. */
+export const INDUSTRY_RUN_CATALOG_BINDING = Object.freeze({
+  moduleId: 'industry-13',
+  normativeUnit: 'INDUSTRY-U0282',
+  commandType: 'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+  fields: Object.freeze({
+    'industry-u0282-0': 'facilityId',
+    'industry-u0282-1': 'quantity',
+  }),
+  unsupportedFields: Object.freeze([
+    'industry-u0283-0',
+    'industry-u0283-1',
+    'industry-u0284-0',
+    'industry-u0284-1',
+  ] as const),
+  requiredAdditionalInputs: Object.freeze([
+    'startsAtSimTime',
+    'endsAtSimTime',
+    'maximumExpense',
+  ] as const),
+  operation: 'SOURCE_BOUND_FACILITY_RUN_PLAN_NOT_ACHIEVED_OUTPUT',
+} as const);
 export interface IndustryRunDraft {
   readonly facilityId: string;
   readonly quantity: string;
@@ -82,9 +104,15 @@ export function renderIndustryRunForm(
 ) {
   const panel = document.createElement('section');
   panel.dataset.industryRunForm = '';
+  panel.dataset.catalogModuleBinding = INDUSTRY_RUN_CATALOG_BINDING.moduleId;
   const title = document.createElement('h3');
   title.textContent = '设施排产计划';
   panel.append(title);
+  const scope = document.createElement('p');
+  scope.dataset.industryRunCatalogScope = '';
+  scope.textContent =
+    '生产目标仅连接本次设施与目标产量。起止时间、最高费用须明确填写；载入或排队不表示已生产。利用率目标、设施与资源优先级尚未接通。';
+  panel.append(scope);
   if (!enabled || rows.length === 0) {
     const msg = document.createElement('p');
     msg.dataset.industryRunUnavailable = '';
@@ -95,6 +123,7 @@ export function renderIndustryRunForm(
   const sources = rows.map(parseIndustryRunParameterRow),
     facility = document.createElement('select');
   facility.dataset.industryRunField = 'facilityId';
+  facility.dataset.catalogFieldId = 'industry-u0282-0';
   facility.setAttribute('aria-label', '生产设施');
   for (const row of sources) {
     const option = document.createElement('option');
@@ -122,6 +151,7 @@ export function renderIndustryRunForm(
     field.autocomplete = 'off';
     field.maxLength = 128;
     field.dataset.industryRunField = key;
+    if (key === 'quantity') field.dataset.catalogFieldId = 'industry-u0282-1';
     field.setAttribute('aria-label', label);
     caption.append(field);
     fields.set(key, field);

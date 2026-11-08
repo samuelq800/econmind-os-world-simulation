@@ -1,7 +1,10 @@
 /** Actual shipped clients/controller with explicit TEST_ONLY intercepted wire
  * DTOs. No server source, queue, receipt or economic acceptance is asserted. */
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { createOfficeCommandController } from '../../apps/world-web/src/office-command/controller.js';
+import { installOfficeCommand } from '../../apps/world-web/src/office-command/view.js';
+import { HostDocument, HostElement } from './trusted-host-dom.js';
 import { officeProjectionFixture } from './office-projection-fixture.js';
 import {
   POSTWAR_RUNTIME_SCHEMA,
@@ -221,21 +224,29 @@ function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
     }
     throw Error('UNEXPECTED_TEST_TRANSPORT');
   };
-  const controller = createOfficeCommandController(
-    {
+  const binding = {
       read,
       view,
       endpoint: {
         origin: read.endpoints.origin,
-        path: '/v1/office-command',
+        path: '/v1/office-command' as const,
         deploymentRef: read.endpoints.deploymentRef,
       },
     },
-    () => view,
-    { fetcher, requestId: () => requestId },
-  );
-  return { controller, calls, invalidate: base.invalidate, row };
+    controller = createOfficeCommandController(binding, () => view, {
+      fetcher,
+      requestId: () => requestId,
+    });
+  return {
+    controller,
+    calls,
+    invalidate: base.invalidate,
+    row,
+    binding,
+    fetcher,
+  };
 }
+afterEach(() => vi.unstubAllGlobals());
 const draft = {
   facilityId: 'FACILITY_FROM_SOURCE',
   quantity: '2',
@@ -244,6 +255,169 @@ const draft = {
   maximumExpense: '3',
 };
 describe('Industry typed RUN plan lifecycle', () => {
+  it.each([
+    { entry: 'country-module', mode: 'OK' },
+    { entry: 'country-room', mode: 'OK' },
+    { entry: 'country-module', mode: 'MISSING' },
+  ] as const)(
+    'opens source-bound RUN from actual $entry attributes ($mode), blocks legacy continuation and stages only explicit user terms',
+    async ({ entry, mode }) => {
+      vi.stubGlobal(
+        'MutationObserver',
+        class {
+          observe() {}
+        },
+      );
+      vi.stubGlobal('Element', HostElement);
+      class CatalogDocument extends HostDocument {
+        capture: ((event: MouseEvent) => void) | null = null;
+        addEventListener(key: string, fn: (event: MouseEvent) => void) {
+          if (key === 'click') this.capture = fn;
+        }
+      }
+      const f = setup(mode),
+        doc = new CatalogDocument('industry'),
+        ui = installOfficeCommand(
+          doc as unknown as Document,
+          { addEventListener() {} } as unknown as Window,
+          (binding, view) =>
+            createOfficeCommandController(binding, view, {
+              fetcher: f.fetcher,
+              requestId: () => requestId,
+            }),
+        );
+      try {
+        const source = readFileSync(
+            new URL(
+              '../../apps/world-web/public/season1-immersive/country-game.js',
+              import.meta.url,
+            ),
+            'utf8',
+          ),
+          template =
+            entry === 'country-module'
+              ? source.match(
+                  /<button data-cmd="country-module" data-module="\$\{m\.id\}"/u,
+                )?.[0]
+              : source.match(
+                  /<button data-cmd="country-room" data-id="\$\{i\}" data-module="\$\{module\}"/u,
+                )?.[0];
+        expect(template).toBeDefined();
+        const markup = template!
+            .replace('${m.id}', 'industry-13')
+            .replace('${module}', 'industry-13')
+            .replace('${i}', '0'),
+          module = doc.createElement('button') as HostElement & {
+            closest(selector: string): HostElement | null;
+          };
+        const key = (name: string) =>
+          name.replace(/-([a-z])/gu, (_, c: string) => c.toUpperCase());
+        for (const match of markup.matchAll(/data-([a-z-]+)="([^"]*)"/gu))
+          module.dataset[key(match[1]!)] = match[2]!;
+        module.closest = (selector) =>
+          selector
+            .split(',')
+            .some((s) =>
+              [...s.matchAll(/\[data-([a-z-]+)="([^"]*)"\]/gu)].every(
+                (m) => module.dataset[key(m[1]!)] === m[2],
+              ),
+            )
+            ? module
+            : null;
+        doc.root.append(module);
+        let prevented = 0,
+          stopped = 0;
+        const click = () =>
+          doc.capture?.({
+            target: module,
+            preventDefault() {
+              prevented++;
+            },
+            stopImmediatePropagation() {
+              stopped++;
+            },
+          } as unknown as MouseEvent);
+        click();
+        expect(prevented).toBe(0);
+        ui.connect(f.binding);
+        module.dataset.module = 'industry-14';
+        click();
+        expect(prevented).toBe(0);
+        module.dataset.module = 'industry-13';
+        click();
+        await expect
+          .poll(() => ui.getState().status)
+          .toBe('CURRENT_AUTHORIZED_HEAD');
+        expect(prevented).toBe(1);
+        expect(stopped).toBe(1);
+        const dialog = doc.root
+          .all()
+          .find((e) => Object.hasOwn(e.dataset, 'officeCommandDialog'))!;
+        expect(dialog.open).toBe(true);
+        const form = dialog
+          .all()
+          .find((e) => Object.hasOwn(e.dataset, 'industryRunForm'))!;
+        expect(form.textContent).toContain(
+          '利用率目标、设施与资源优先级尚未接通',
+        );
+        if (mode === 'MISSING') {
+          expect(ui.getState().runParametersPage).toBeNull();
+          expect(form.textContent).toContain('排产参数当前不可用');
+          expect(
+            form.all().some((e) => e.dataset.industryRunAction === 'stage'),
+          ).toBe(false);
+          expect(
+            f.calls.filter((c) => c.path === '/v1/office-command'),
+          ).toHaveLength(0);
+          return;
+        }
+        expect(ui.getState().runParametersPage?.dataset).toBe(
+          'industry-run-parameters',
+        );
+        expect(form.textContent).toContain('tonne · XBB');
+        const values: Record<string, string> = {
+          facilityId: f.row.facilityId,
+          quantity: '2',
+          startsAtSimTime: '10',
+          endsAtSimTime: '20',
+          maximumExpense: '3',
+        };
+        for (const el of form.all())
+          if (el.dataset.industryRunField) {
+            if (el.dataset.industryRunField !== 'facilityId')
+              expect((el as unknown as HTMLInputElement).value).toBe('');
+            (el as unknown as HTMLInputElement).value =
+              values[el.dataset.industryRunField]!;
+          }
+        form
+          .all()
+          .find((e) => e.dataset.industryRunAction === 'stage')!
+          .click();
+        expect(ui.getState().status).toBe('REVIEW_REQUIRED');
+        expect(ui.getState().intent?.request.payload).toMatchObject({
+          facilityId: f.row.facilityId,
+          quantity: { amount: '2', unit: 'tonne' },
+          maximumExpense: { amount: '3', currency: 'XBB' },
+          sourceRef: f.row.sourceRef,
+          sourceRawSha256: f.row.sourceRawSha256,
+          policyVersion: f.row.policyVersion,
+        });
+        expect(
+          f.calls.filter((c) => c.path === '/v1/office-command'),
+        ).toHaveLength(0);
+        expect(
+          dialog.all().find((e) => e.dataset.officeCommandAction === 'confirm')
+            ?.disabled,
+        ).toBe(true);
+        doc.root.dataset.office = 'captain';
+        click();
+        expect(prevented).toBe(1);
+      } finally {
+        f.invalidate();
+        f.controller.disconnect();
+      }
+    },
+  );
   it('stages actual source references with explicit user inputs then uses the original request recovery, without exposing automatic authority', async () => {
     const f = setup();
     try {
