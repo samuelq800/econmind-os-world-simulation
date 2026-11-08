@@ -657,9 +657,59 @@ export function createRegisteredFinalDriver(
       await checkpoint('CHILD_READY', { pid: child.pid });
       return r;
     },
-    async start() {
-      await rpc('START');
-      await checkpoint('SOLE_CONSUMER_STARTED');
+    async assertPreparationStartDenied() {
+      const stateBefore = registeredFinalRecord(await rpc('STATE'));
+      const economicCounts = async () => {
+        const result = await input.installer.query<Record<string, string>>(
+          `select h.world_version::text,h.event_sequence::text,
+          (select count(*)::text from world_v2.command_submission where world_id=$1)commands,
+          (select count(*)::text from world_v2.command_receipt where world_id=$1)receipts,
+          (select count(*)::text from world_v2.authoritative_event where world_id=$1)events,
+          (select count(*)::text from world_v2.financial_posting_batch where world_id=$1)batches,
+          (select count(*)::text from world_v2.inventory_posting where world_id=$1)inventory,
+          (select count(*)::text from world_v2.command_queue where world_id=$1)queues
+          from world_v2.world_head h where h.world_id=$1`,
+          [input.worldId],
+        );
+        registeredFinalAssert(
+          result.rows.length === 1 &&
+            Object.keys(result.rows[0]!).length === 8 &&
+            Object.values(result.rows[0]!).every(uint),
+          'EXACT_ECONOMIC_COUNTS_REQUIRED',
+        );
+        return result.rows[0]!;
+      };
+      const before = await economicCounts();
+      const reply = await current().rpc('START');
+      const error = registeredFinalRecord(reply.error);
+      registeredFinalAssert(
+        reply.ok === false &&
+          error.name === 'DomainError' &&
+          error.code === 'TRANSITION_EVIDENCE_INVALID' &&
+          error.message ===
+            'Production finite consumer cannot be activated through preparation',
+        'FORMAL_FINITE_PREPARATION_START_MUST_BE_DENIED',
+      );
+      // Formal MANUAL_FINITE remains PREPARED. Each subsequent CONSUME is
+      // authorized by the real registered control/clock, without activation.
+      const stateAfter = registeredFinalRecord(await rpc('STATE'));
+      const after = await economicCounts();
+      registeredFinalAssert(
+        stateBefore.pid === current().pid &&
+          stateBefore.ready === true &&
+          stateBefore.formalBinding === true &&
+          stateBefore.consumerState === 'PREPARED' &&
+          JSON.stringify(stateAfter) === JSON.stringify(stateBefore) &&
+          JSON.stringify(after) === JSON.stringify(before),
+        'START_DENIAL_MUST_PRESERVE_PREPARED_READY_AND_ECONOMY',
+      );
+      await checkpoint('PREPARATION_START_DENIED', {
+        error,
+        stateBefore,
+        stateAfter,
+        countsBefore: before,
+        countsAfter: after,
+      });
     },
     stop,
     async finish(status: 'PASS' | 'FAIL', failure?: unknown) {

@@ -444,7 +444,7 @@ native('actual registered child finite cross-office acceptance', () => {
         getAccessToken: () => 'Bearer ' + s.signToken('COUNTRY_01'),
         evidenceDir: path.join(evidenceDirectory, 'browser'),
       });
-      await d.start();
+      await d.assertPreparationStartDenied();
       const id = nonce();
       const budget = async (
         operation: 'SET_ENVELOPE' | 'APPROVE_NEW_LINE',
@@ -814,7 +814,7 @@ native('actual registered child finite cross-office acceptance', () => {
             );
             expect(await s.counts()).toEqual(before);
             await browser!.setActualOrigin(d.origin());
-            await d.start();
+            await d.assertPreparationStartDenied();
             for (const original of d.originals) await d.recover(original);
             await financeBrowser.reloadRestore(line, { recover: false });
             await financeBrowser.recoverFinal({ requireCurrent: false });
