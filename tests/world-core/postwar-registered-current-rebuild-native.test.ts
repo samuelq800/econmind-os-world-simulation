@@ -189,6 +189,79 @@ native(
           'END',
         );
         await phase('EXACT_FINAL13_H3_CHECKPOINT_AND_FUNCTION_BINDING', 'END');
+        // All 63 sources already exist in the sealed parent. Validate the
+        // complete low-role read surface before the expensive cold proof.
+        await phase('ACTUAL_21_SOURCE_READS_AND_420_FOREIGN_DENIALS', 'START');
+        const scopeInspection = await inspectPostwarRefinery21RetainedClone({
+          marker: f.marker,
+          clone: f.clone,
+          sourceContext: await loadPostwarSourceContext(repositoryRoot),
+          workerRole: String(descriptor.workerRole),
+          existingInspectionActors: prepared.inspectionActors,
+        });
+        must(
+          scopeInspection.inspection.sites.length === 21 &&
+            scopeInspection.inspection.sites.every(
+              (site) =>
+                site.original.status === 'PRESENT' &&
+                site.firstDay.status === 'PRESENT' &&
+                site.utility.status === 'PRESENT' &&
+                site.power.status === 'PRESENT',
+            ),
+          'ALL_21_REGISTERED_SOURCE_READS_REQUIRED',
+        );
+        report.refineryScopeInspection = scopeInspection;
+        await phase('ACTUAL_21_SOURCE_READS_AND_420_FOREIGN_DENIALS', 'END');
+        await phase('BROWSER_SUBJECT_AND_SOCIAL_ORIGINAL_PRECHECK', 'START');
+        const subjectRows =
+          await f.clone.installer.query<RegisteredCurrentBrowserActorBinding>(
+            REGISTERED_CURRENT_BROWSER_SUBJECT_QUERY,
+            [f.marker.worldId],
+          );
+        const authSubject = registeredCurrentC2BrowserSubject(
+          subjectRows.rows,
+          s.signToken('COUNTRY_02'),
+        );
+        // Independent expected non-emptiness: actual admitted opening rows,
+        // plus proof that this H3 prefix never executed a Social transition.
+        // Never infer a PAGE/EMPTY expectation from the HTTP response itself.
+        const socialOriginals = await f.clone.installer.query<{
+          seed_fingerprint: string;
+          admission_ref: string;
+          scope_sha256: string;
+          service_pool_count: number;
+          committed_social_count: number;
+        }>(
+          `select x.seed_fingerprint,x.admission_ref,x.scope_sha256,
+          jsonb_array_length(x.scope_document::jsonb->'servicePools') as service_pool_count,
+          (select count(*)::int from world_v2.command_submission c join world_v2.command_receipt r
+            on r.world_id=c.world_id and r.command_id=c.command_id
+            where c.world_id=x.world_id and c.country_id=x.country_id and r.outcome='COMMITTED'
+            and c.command_type in('CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1','CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1')) as committed_social_count
+          from world_v2.postwar_social_prefix_scope x where x.world_id=$1 and x.country_id='COUNTRY_02'`,
+          [f.marker.worldId],
+        );
+        must(
+          socialOriginals.rows.length === 1,
+          'EXACT_ADMITTED_C2_SOCIAL_SCOPE_REQUIRED',
+        );
+        const original = socialOriginals.rows[0]!;
+        must(
+          original.seed_fingerprint === f.marker.seedFingerprint &&
+            original.admission_ref === f.marker.admissionRef &&
+            /^[a-f0-9]{64}$/u.test(original.scope_sha256) &&
+            Number.isSafeInteger(original.service_pool_count) &&
+            original.service_pool_count >= 0 &&
+            original.committed_social_count === 0,
+          'H3_UNCHANGED_ADMITTED_SOCIAL_POOL_ORIGINALS_REQUIRED',
+        );
+        report.socialServiceExpectation = {
+          basis:
+            'ACTUAL_SAME_SEED_ADMITTED_SCOPE_NO_COMMITTED_SOCIAL_TRANSITION',
+          ...original,
+          expectedStatus: original.service_pool_count === 0 ? 'EMPTY' : 'PAGE',
+        };
+        await phase('BROWSER_SUBJECT_AND_SOCIAL_ORIGINAL_PRECHECK', 'END');
         d = createRegisteredFinalDriver({
           repositoryRoot,
           evidenceDirectory,
@@ -269,27 +342,6 @@ native(
           'ONE_NODE_GENUINE_COLD_PROOF_AND_FIXED21_SOURCE_PREPARATION',
           'END',
         );
-        await phase('ACTUAL_21_SOURCE_READS_AND_420_FOREIGN_DENIALS', 'START');
-        const scopeInspection = await inspectPostwarRefinery21RetainedClone({
-          marker: f.marker,
-          clone: f.clone,
-          sourceContext: await loadPostwarSourceContext(repositoryRoot),
-          workerRole: String(descriptor.workerRole),
-          existingInspectionActors: prepared.inspectionActors,
-        });
-        must(
-          scopeInspection.inspection.sites.length === 21 &&
-            scopeInspection.inspection.sites.every(
-              (site) =>
-                site.original.status === 'PRESENT' &&
-                site.firstDay.status === 'PRESENT' &&
-                site.utility.status === 'PRESENT' &&
-                site.power.status === 'PRESENT',
-            ),
-          'ALL_21_REGISTERED_SOURCE_READS_REQUIRED',
-        );
-        report.refineryScopeInspection = scopeInspection;
-        await phase('ACTUAL_21_SOURCE_READS_AND_420_FOREIGN_DENIALS', 'END');
         await d.assertPreparationStartDenied();
         await d.recover(resume.run, { duplicateProbe: false });
         await d.recover(resume.book, { duplicateProbe: false });
@@ -544,15 +596,6 @@ native(
           );
           return value;
         };
-        const subjectRows =
-          await f.clone.installer.query<RegisteredCurrentBrowserActorBinding>(
-            REGISTERED_CURRENT_BROWSER_SUBJECT_QUERY,
-            [f.marker.worldId],
-          );
-        const authSubject = registeredCurrentC2BrowserSubject(
-          subjectRows.rows,
-          s.signToken('COUNTRY_02'),
-        );
         const browserInput: RegisteredTradeCbReadbackBrowserInput = {
           browser,
           application,
@@ -591,45 +634,6 @@ native(
           'ADDITIVE_SHIPPED_SOCIAL_SERVICE_READ_COMPONENT_SAME_NODE',
           'START',
         );
-        // Independent expected non-emptiness: actual admitted opening rows,
-        // plus proof that this H3 prefix never executed a Social transition.
-        // Never infer a PAGE/EMPTY expectation from the HTTP response itself.
-        const socialOriginals = await f.clone.installer.query<{
-          seed_fingerprint: string;
-          admission_ref: string;
-          scope_sha256: string;
-          service_pool_count: number;
-          committed_social_count: number;
-        }>(
-          `select x.seed_fingerprint,x.admission_ref,x.scope_sha256,
-          jsonb_array_length(x.scope_document::jsonb->'servicePools') as service_pool_count,
-          (select count(*)::int from world_v2.command_submission c join world_v2.command_receipt r
-            on r.world_id=c.world_id and r.command_id=c.command_id
-            where c.world_id=x.world_id and c.country_id=x.country_id and r.outcome='COMMITTED'
-            and c.command_type in('CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1','CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1')) as committed_social_count
-          from world_v2.postwar_social_prefix_scope x where x.world_id=$1 and x.country_id='COUNTRY_02'`,
-          [f.marker.worldId],
-        );
-        must(
-          socialOriginals.rows.length === 1,
-          'EXACT_ADMITTED_C2_SOCIAL_SCOPE_REQUIRED',
-        );
-        const original = socialOriginals.rows[0]!;
-        must(
-          original.seed_fingerprint === f.marker.seedFingerprint &&
-            original.admission_ref === f.marker.admissionRef &&
-            /^[a-f0-9]{64}$/u.test(original.scope_sha256) &&
-            Number.isSafeInteger(original.service_pool_count) &&
-            original.service_pool_count >= 0 &&
-            original.committed_social_count === 0,
-          'H3_UNCHANGED_ADMITTED_SOCIAL_POOL_ORIGINALS_REQUIRED',
-        );
-        report.socialServiceExpectation = {
-          basis:
-            'ACTUAL_SAME_SEED_ADMITTED_SCOPE_NO_COMMITTED_SOCIAL_TRANSITION',
-          ...original,
-          expectedStatus: original.service_pool_count === 0 ? 'EMPTY' : 'PAGE',
-        };
         const social =
           await createRegisteredSocialServiceContextBrowserProbe(browserInput);
         try {

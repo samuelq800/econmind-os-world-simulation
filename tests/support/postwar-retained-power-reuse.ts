@@ -15,16 +15,16 @@ import { readRetainedPostwarPowerCatalogFrom } from './postwar-retained-power-up
 import { readRegisteredCurrentEconomicSnapshotFrom } from './registered-current-read-repair-checkpoint.js';
 import { preparePostwarIndustryFirstDayDomesticModelForward } from './postwar-industry-first-day-domestic-model-forward.js';
 
-const directory = '/workspace/.cloud-setup/evidence/power-current-native-04';
+const directory = '/workspace/.cloud-setup/evidence/power-current-native-05';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT =
   directory + '/pg/retained-checkpoint.json';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256 =
-  '9487e1e98af58d16dbc1d3e4fc19858ebc5fc659323067cdfeeb3d562a915594';
+  'f7ada9091ce0e8bbfa9e00b63a25fb071bcbbc8e1d7850af28c011028bcb1eb0';
 const hashes = {
   'power-reuse/reuse-receipt.json':
-    'b12cbc4ccabd008f6c4d1859a55bd3150b9f340f98f645e10710bd07efe014b5',
+    '7380ee561ea79dbf986029b4061c871a463ea84c5aced827dad25d653271cf16',
   'independent-checkpoint-readback.json':
-    '1b94dc82dddc6f5306e2ee907365eb1d774395db9098ffa0fedb52c27c5597b3',
+    '5415c7abb9a20bcdae7834bee0cbd67638af26520d801c8795ac494128fcfaf5',
 } as const;
 const sha = (raw: string) => createHash('sha256').update(raw).digest('hex');
 type Catalog = Awaited<ReturnType<typeof readRetainedPostwarPowerCatalogFrom>>;
@@ -117,7 +117,7 @@ export async function reuseRetainedPostwarPowerClone(input: {
   );
   assert.equal(
     receipt.expectedCommit,
-    '79b67f32f14e8c45d98f5e3cecc4a16cb96cbf1b',
+    'cfb9ed174058185a3339e1caef1205e831ffb82b',
   );
   assert.equal(receipt.database, checkpoint.templateDatabase);
   assert.equal(

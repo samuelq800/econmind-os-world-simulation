@@ -46,6 +46,27 @@ function record(v: unknown): Record<string, unknown> {
     throw Error('REFINERY21_EXACT_RECORD_REQUIRED');
   return v as Record<string, unknown>;
 }
+/** Mirrors the production reader's lossless original decoding. Never recover
+ * decimal lexemes by stringifying an already rounded JavaScript Number. */
+export function inspectRefinery21OriginalText(bytes: string) {
+  const parse = JSON.parse as (
+    bytes: string,
+    revive: (
+      key: string,
+      value: unknown,
+      context: { source?: string },
+    ) => unknown,
+  ) => unknown;
+  return inspectPostwarIndustryOriginalDocument(
+    parse(bytes, (_key, value, context) => {
+      if (typeof value !== 'number') return value;
+      if (typeof context.source !== 'string' || !context.source)
+        throw Error('REFINERY21_EXACT_NUMERIC_SOURCE_LEXEME_REQUIRED');
+      return context.source;
+    }),
+  );
+}
+
 /** DATA decoder; never issues an operating/admission/payment authority. */
 export function decodeRefinery21UtilityPacket(
   row: SourceRow,
@@ -359,9 +380,7 @@ export function createPostwarRefinery21AssemblyCheck(
                 d.admission_ref !== input.pins.admissionRef
               )
                 throw Error('REFINERY21_ORIGINAL_HASH_OR_PINS_DIFFERS');
-              const parsed = inspectPostwarIndustryOriginalDocument(
-                JSON.parse(d.document_text) as unknown,
-              );
+              const parsed = inspectRefinery21OriginalText(d.document_text);
               if (
                 parsed.scope.worldId !== input.pins.worldId ||
                 parsed.scope.countryId !== site.countryId ||

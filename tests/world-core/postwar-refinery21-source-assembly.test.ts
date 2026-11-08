@@ -5,6 +5,7 @@ import { it, expect } from 'vitest';
 import {
   createPostwarRefinery21AssemblyCheck,
   decodeRefinery21UtilityPacket,
+  inspectRefinery21OriginalText,
 } from '../support/postwar-refinery21-source-assembly.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const scope = {
@@ -57,4 +58,26 @@ it('does not accept serialized source context as a genuine adopted refinery plan
       { source: {} },
     ]),
   ).toThrow('REFINERY_GENUINE_PINNED_CONTEXT_REQUIRED');
+});
+
+it('retains exact numeric original lexemes through the real original inspector', () => {
+  const raw = `{
+    "worldId":"WORLD_TEST_ONLY_CODEC","countryId":"COUNTRY_10",
+    "locationId":"REGION_10_E1","operatorId":"TEST_ONLY_OP",
+    "sourceFacility":{"id":"TEST_ONLY_FACILITY","recipeId":"TEST_ONLY_RECIPE",
+      "commodityId":"TEST_ONLY_OUTPUT","constructionStatusProposal":"OPENING_EXISTING_ASSET",
+      "projectId":"PROJECT-15","capacity":9007199254740993,"capacityUnit":"unit/sim-day",
+      "installedMachineryUnits":1},
+    "recipe":{"id":"TEST_ONLY_RECIPE","commodityId":"TEST_ONLY_OUTPUT","outputUnit":"unit",
+      "authority":"TEST_ONLY_NOT_APPROVAL","inputsPerUnit":{"TEST_ONLY_INPUT":5e-05},
+      "electricityMWhPerUnit":1e-7,"waterM3PerUnit":0,"workersPerDailyOutputUnit":0.125},
+    "productionPlans":[],"technologyProposals":[],"licenseProposals":[],
+    "commodityCatalog":[{"id":"TEST_ONLY_INPUT","unit":"unit"}]
+  }`;
+  const result = inspectRefinery21OriginalText(raw);
+  expect(result.physical.sourceCapacity).toBe('9007199254740993');
+  expect(result.recipe.materials[0]!.perOutput.amount).toBe('0.00005');
+  expect(result.recipe.energyPerOutput.amount).toBe('0.0000001');
+  expect(result.recipe.waterPerOutput.amount).toBe('0');
+  expect(result.authority).toBe(false);
 });
