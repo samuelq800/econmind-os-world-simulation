@@ -1,3 +1,16 @@
+import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
+import {
+  isPostwarIndustryUtilityRuntime,
+  PostwarIndustryUtilitySourceMissing,
+  type PostwarIndustryUtilityRuntime,
+  type IndustryUtilitySourceCommitProtectionPort,
+} from '../persistence/postwar-industry-utility-runtime.js';
+import {
+  isPostwarIndustryLogisticsRuntime,
+  PostwarIndustryLogisticsSourceMissing,
+  type PostwarIndustryLogisticsRuntime,
+  type IndustryLogisticsSourceCommitProtectionPort,
+} from '../persistence/postwar-industry-logistics-runtime.js';
 import type { PostwarIndustryOperatingWageRuntime } from '../persistence/postwar-industry-operating-wage-runtime.js';
 import type { PostwarIndustryWorkRuntime } from '../persistence/postwar-industry-work-runtime.js';
 import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
@@ -113,6 +126,8 @@ import {
 export interface ManualOfficeRuntimeReaders {
   readonly industryOperatingWage?: Readonly<PostwarIndustryOperatingWageRuntime> | null;
   readonly industryWork?: Readonly<PostwarIndustryWorkRuntime> | null;
+  readonly industryUtility?: Readonly<PostwarIndustryUtilityRuntime> | null;
+  readonly industryLogistics?: Readonly<PostwarIndustryLogisticsRuntime> | null;
   readonly industryRun?: Readonly<PostwarIndustryRunRuntime> | null;
   readonly industry?: Readonly<PostwarIndustryRuntime> | null;
   readonly beneficialHousingRent?: Readonly<PostwarBeneficialHousingRentRuntime> | null;
@@ -144,6 +159,9 @@ export interface ManualOfficeRuntimeReaders {
 
 export function manualOfficeCapability(command: CanonicalCommand) {
   switch (command.commandType) {
+    case INDUSTRY_UTILITY_COMMANDS.POWER:
+    case INDUSTRY_UTILITY_COMMANDS.WATER:
+    case INDUSTRY_UTILITY_COMMANDS.LOGISTICS:
     case INDUSTRY_RUN_SCHEDULE_COMMAND:
     case INDUSTRY_PRODUCTION_COMMAND:
       return command.officeId === 'INDUSTRY'
@@ -261,6 +279,8 @@ export function createManualOfficeCommandComposition(input: {
   readonly readers: ManualOfficeRuntimeReaders;
 }): {
   readonly factory: AtomicTransitionCandidateFactory;
+  readonly industryUtilitySourceCommitProtectionPort?: IndustryUtilitySourceCommitProtectionPort;
+  readonly industryLogisticsSourceCommitProtectionPort?: IndustryLogisticsSourceCommitProtectionPort;
   readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
   readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
@@ -278,6 +298,41 @@ export function createManualOfficeCommandComposition(input: {
   const cap = manualOfficeCapability(command);
   if (cap === null) invalid('Manual factory requires a supported family');
   switch (command.commandType) {
+    case INDUSTRY_UTILITY_COMMANDS.POWER:
+    case INDUSTRY_UTILITY_COMMANDS.WATER: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.industryUtility;
+      if (
+        !isPostwarIndustryUtilityRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryUtilitySourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (at) =>
+          runtime.assertSourceBeforeClaim(command, at),
+      };
+    }
+    case INDUSTRY_UTILITY_COMMANDS.LOGISTICS: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.industryLogistics;
+      if (
+        !isPostwarIndustryLogisticsRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryLogisticsSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (at) =>
+          runtime.assertSourceBeforeClaim(command, at),
+      };
+    }
     case INDUSTRY_RUN_SCHEDULE_COMMAND: {
       validateManualOfficeCommandIntent(command);
       const runtime = input.readers.industryRun;
@@ -603,6 +658,8 @@ export function createManualOfficeCommandComposition(input: {
 export function isManualOfficeSourceMissing(error: unknown): boolean {
   return (
     error instanceof PostwarIndustryRuntimeMissing ||
+    error instanceof PostwarIndustryUtilitySourceMissing ||
+    error instanceof PostwarIndustryLogisticsSourceMissing ||
     error instanceof CaptainPoliticalCapitalSourceMissing ||
     error instanceof PostwarNarrowTradeCurrentSourceMissing ||
     error instanceof CentralBankOmoOriginalsMissing ||

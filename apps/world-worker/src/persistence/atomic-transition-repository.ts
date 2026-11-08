@@ -1,3 +1,17 @@
+import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
+import {
+  INDUSTRY_UTILITY_SOURCE_PURPOSE,
+  isPostwarIndustryUtilitySourceCommitProtectionPort,
+  isPostwarIndustryWaterGrantCommand,
+  type IndustryUtilitySourceCommitProtectionPort,
+  type IndustryUtilitySourceCommitRequest,
+} from './postwar-industry-utility-runtime.js';
+import {
+  INDUSTRY_LOGISTICS_SOURCE_PURPOSE,
+  isPostwarIndustryLogisticsSourceCommitProtectionPort,
+  type IndustryLogisticsSourceCommitProtectionPort,
+  type IndustryLogisticsSourceCommitRequest,
+} from './postwar-industry-logistics-runtime.js';
 import { INDUSTRY_OPERATING_WAGE_COMMAND } from '@econmind/core/industry-operating-wage-payment';
 import {
   INDUSTRY_OPERATING_WAGE_SOURCE_PURPOSE,
@@ -1007,6 +1021,8 @@ export class AtomicTransitionRepository {
   readonly #narrowTransferApprovalGuard: AtomicNarrowTransferApprovalGuard | null;
   readonly #industryOperatingWageSourceCommitProtectionPort: IndustryOperatingWageSourceCommitProtectionPort | null;
   readonly #industryWorkSourceCommitProtectionPort: IndustryWorkSourceCommitProtectionPort | null;
+  readonly #industryUtilitySourceCommitProtectionPort: IndustryUtilitySourceCommitProtectionPort | null;
+  readonly #industryLogisticsSourceCommitProtectionPort: IndustryLogisticsSourceCommitProtectionPort | null;
   readonly #industryRunSourceCommitProtectionPort: IndustryRunSourceCommitProtectionPort | null;
   readonly #sourceCommitProtectionPort: SourceCommitProtectionPort | null;
   readonly #industryProductionCutoffGuard: IndustryProductionCutoffGuard | null;
@@ -1029,6 +1045,8 @@ export class AtomicTransitionRepository {
     readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
     readonly industryOperatingWageSourceCommitProtectionPort?: IndustryOperatingWageSourceCommitProtectionPort;
     readonly industryWorkSourceCommitProtectionPort?: IndustryWorkSourceCommitProtectionPort;
+    readonly industryUtilitySourceCommitProtectionPort?: IndustryUtilitySourceCommitProtectionPort;
+    readonly industryLogisticsSourceCommitProtectionPort?: IndustryLogisticsSourceCommitProtectionPort;
     readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
     readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
     readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
@@ -1080,6 +1098,28 @@ export class AtomicTransitionRepository {
       input.industryOperatingWageSourceCommitProtectionPort ?? null;
     this.#industryWorkSourceCommitProtectionPort =
       input.industryWorkSourceCommitProtectionPort ?? null;
+    if (
+      input.industryUtilitySourceCommitProtectionPort !== undefined &&
+      !isPostwarIndustryUtilitySourceCommitProtectionPort(
+        input.industryUtilitySourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'Industry utility source guard must come from the fixed live runtime',
+      );
+    this.#industryUtilitySourceCommitProtectionPort =
+      input.industryUtilitySourceCommitProtectionPort ?? null;
+    if (
+      input.industryLogisticsSourceCommitProtectionPort !== undefined &&
+      !isPostwarIndustryLogisticsSourceCommitProtectionPort(
+        input.industryLogisticsSourceCommitProtectionPort,
+      )
+    )
+      invalid(
+        'Industry logistics source guard must come from the fixed live runtime',
+      );
+    this.#industryLogisticsSourceCommitProtectionPort =
+      input.industryLogisticsSourceCommitProtectionPort ?? null;
     this.#industryRunSourceCommitProtectionPort =
       input.industryRunSourceCommitProtectionPort ?? null;
     this.#dayOneFxSourceCommitProtectionPort =
@@ -1348,6 +1388,16 @@ export class AtomicTransitionRepository {
             candidate,
             head,
           );
+        await this.#assertIndustryUtilitySourceCurrent(
+          transaction,
+          candidate,
+          head,
+        );
+        await this.#assertIndustryLogisticsSourceCurrent(
+          transaction,
+          candidate,
+          head,
+        );
         await this.#assertIndustryRunSourceCurrent(
           transaction,
           candidate,
@@ -1436,6 +1486,125 @@ export class AtomicTransitionRepository {
       transition: candidate.transition,
     });
     return Object.freeze({ source, receipt, transition: candidate.transition });
+  }
+
+  async #assertIndustryUtilitySourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    if (
+      candidate.command.commandType !== INDUSTRY_UTILITY_COMMANDS.POWER &&
+      candidate.command.commandType !== INDUSTRY_UTILITY_COMMANDS.WATER
+    )
+      return;
+    const automatic = isPostwarIndustryWaterGrantCommand(candidate.command);
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding,
+      port = this.#industryUtilitySourceCommitProtectionPort;
+    if (
+      !isPostwarIndustryUtilitySourceCommitProtectionPort(port) ||
+      (automatic
+        ? candidate.authorityKind !== 'VERSIONED_AUTOMATIC' ||
+          candidate.command.officeId !== null ||
+          candidate.commitAuthorization !== null
+        : candidate.authorityKind !== 'DISCRETIONARY_USER' ||
+          candidate.command.officeId !== 'INDUSTRY' ||
+          !isCommitAuthorizationProof(candidate.commitAuthorization)) ||
+      captured.captureFailed ||
+      captured.canonicalData === null ||
+      candidate.outboxMessages.length !== 0
+    )
+      invalid(
+        'Fresh Industry utility requires its live fixed guard, authorization and source binding',
+      );
+    const request: Readonly<IndustryUtilitySourceCommitRequest> = Object.freeze(
+      {
+        phase: 'BEFORE_EVENTS',
+        purpose: INDUSTRY_UTILITY_SOURCE_PURPOSE,
+        command: candidate.command,
+        transition: candidate.transition,
+        currentHead: Object.freeze({
+          worldId: candidate.command.worldId,
+          ...head,
+        }),
+        observedAtReal: candidate.observedAtReal,
+        readBinding: JSON.parse(captured.canonicalData) as unknown,
+        commitAuthorization: candidate.commitAuthorization,
+        financialPostingBatches: candidate.financialPostingBatches,
+        inventoryPostings: candidate.inventoryPostings,
+        currentMaterializations: candidate.currentMaterializations,
+      },
+    );
+    const audit = await port.assertCurrentFrom(transaction, request);
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: request.purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(request.readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    if (canonicalSerialize(audit) !== canonicalSerialize(expected))
+      invalid('Industry utility fixed source audit differs');
+  }
+
+  async #assertIndustryLogisticsSourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    if (
+      !(candidate.command.commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS)
+    )
+      return;
+    const captured = candidate.deferredOfficeOperatingSourceReadBinding,
+      port = this.#industryLogisticsSourceCommitProtectionPort;
+    if (
+      !isPostwarIndustryLogisticsSourceCommitProtectionPort(port) ||
+      candidate.authorityKind !== 'DISCRETIONARY_USER' ||
+      candidate.command.officeId !== 'INDUSTRY' ||
+      !isCommitAuthorizationProof(candidate.commitAuthorization) ||
+      captured.captureFailed ||
+      captured.canonicalData === null ||
+      candidate.outboxMessages.length !== 0
+    )
+      invalid(
+        'Fresh Industry logistics requires its live fixed guard, authorization and source binding',
+      );
+    const request: Readonly<IndustryLogisticsSourceCommitRequest> =
+      Object.freeze({
+        phase: 'BEFORE_EVENTS',
+        purpose: INDUSTRY_LOGISTICS_SOURCE_PURPOSE,
+        command: candidate.command,
+        transition: candidate.transition,
+        currentHead: Object.freeze({
+          worldId: candidate.command.worldId,
+          ...head,
+        }),
+        observedAtReal: candidate.observedAtReal,
+        readBinding: JSON.parse(captured.canonicalData) as unknown,
+        commitAuthorization: candidate.commitAuthorization,
+        financialPostingBatches: candidate.financialPostingBatches,
+        inventoryPostings: candidate.inventoryPostings,
+        currentMaterializations: candidate.currentMaterializations,
+      });
+    const audit = await port.assertCurrentFrom(transaction, request);
+    const expected = {
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: request.purpose,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      readBindingFingerprint: canonicalSha256(
+        canonicalHashInput(request.readBinding),
+        this.#sha256Hex,
+      ),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    };
+    if (canonicalSerialize(audit) !== canonicalSerialize(expected))
+      invalid('Industry logistics fixed source audit differs');
   }
 
   async #assertIndustryRunSourceCurrent(

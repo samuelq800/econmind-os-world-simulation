@@ -76,9 +76,11 @@ function harness(
               ? 'CAPTAIN'
               : commandType === 'CORE_CENTRAL_BANK_OMO_V1'
                 ? 'CENTRAL_BANK'
-                : commandType === 'CORE_GOODS_TRANSFER_V1'
-                  ? 'TRADE'
-                  : 'FINANCE',
+                : commandType.startsWith('INDUSTRY_FIRST_DAY_')
+                  ? 'INDUSTRY'
+                  : commandType === 'CORE_GOODS_TRANSFER_V1'
+                    ? 'TRADE'
+                    : 'FINANCE',
         commandType,
         expectedWorldVersion: '0',
         simTime: '10',
@@ -356,6 +358,9 @@ describe('fixed Finance/Social global FIFO boundary', () => {
   it.each(
     [
       'UNKNOWN_TEST_ONLY_ECONOMY',
+      'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
+      'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1',
+      'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
       'CORE_CENTRAL_BANK_OMO_V1',
       'CORE_GOODS_TRANSFER_V1',
       'CORE_GOODS_SHIPMENT_V1',

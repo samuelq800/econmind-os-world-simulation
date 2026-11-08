@@ -1,3 +1,5 @@
+import type { IndustryUtilitySourceCommitProtectionPort } from './persistence/postwar-industry-utility-runtime.js';
+import type { IndustryLogisticsSourceCommitProtectionPort } from './persistence/postwar-industry-logistics-runtime.js';
 import type { IndustryOperatingWageSourceCommitProtectionPort } from './persistence/postwar-industry-operating-wage-runtime.js';
 import type { IndustryWorkSourceCommitProtectionPort } from './persistence/postwar-industry-work-runtime.js';
 import type { IndustryRunSourceCommitProtectionPort } from './persistence/postwar-industry-run-runtime.js';
@@ -238,6 +240,8 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
   readonly industryOperatingWageSourceCommitProtectionPort?: IndustryOperatingWageSourceCommitProtectionPort;
   readonly industryWorkSourceCommitProtectionPort?: IndustryWorkSourceCommitProtectionPort;
+  readonly industryUtilitySourceCommitProtectionPort?: IndustryUtilitySourceCommitProtectionPort;
+  readonly industryLogisticsSourceCommitProtectionPort?: IndustryLogisticsSourceCommitProtectionPort;
   readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
   readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
   readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
@@ -278,6 +282,18 @@ export function createAuthoritativeWorkerExecution(input: {
       : {
           industryWorkSourceCommitProtectionPort:
             input.industryWorkSourceCommitProtectionPort,
+        }),
+    ...(input.industryUtilitySourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          industryUtilitySourceCommitProtectionPort:
+            input.industryUtilitySourceCommitProtectionPort,
+        }),
+    ...(input.industryLogisticsSourceCommitProtectionPort === undefined
+      ? {}
+      : {
+          industryLogisticsSourceCommitProtectionPort:
+            input.industryLogisticsSourceCommitProtectionPort,
         }),
     ...(input.industryRunSourceCommitProtectionPort === undefined
       ? {}

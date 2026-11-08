@@ -1,3 +1,13 @@
+import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
+import {
+  isPostwarIndustryUtilityRuntime,
+  isPostwarIndustryWaterGrantCommand,
+  isPreparedPostwarIndustryUtilityRuntime,
+} from '../persistence/postwar-industry-utility-runtime.js';
+import {
+  isPostwarIndustryLogisticsRuntime,
+  isPreparedPostwarIndustryLogisticsRuntime,
+} from '../persistence/postwar-industry-logistics-runtime.js';
 import { INDUSTRY_OPERATING_WAGE_COMMAND } from '@econmind/core/industry-operating-wage-payment';
 import { isPostwarIndustryOperatingWageRuntime } from '../persistence/postwar-industry-operating-wage-runtime.js';
 import { INDUSTRY_FIRST_DAY_WORK_COMMAND } from '@econmind/core/industry-first-day-work';
@@ -663,6 +673,24 @@ function createDurableCommandConsumer(
         isPostwarIndustryWorkRuntime(industryWorkRuntime) &&
         industryWorkRuntime.database === input.database &&
         industryWorkRuntime.worldId === world;
+      const industryUtilityRuntime = officeReaders.industryUtility;
+      const industryUtilityInstalled =
+        financeSocialBinding !== null &&
+        (command.officeId === 'INDUSTRY' ||
+          isPostwarIndustryWaterGrantCommand(command)) &&
+        (command.commandType === INDUSTRY_UTILITY_COMMANDS.POWER ||
+          command.commandType === INDUSTRY_UTILITY_COMMANDS.WATER) &&
+        isPostwarIndustryUtilityRuntime(industryUtilityRuntime) &&
+        industryUtilityRuntime.database === input.database &&
+        industryUtilityRuntime.worldId === world;
+      const industryLogisticsRuntime = officeReaders.industryLogistics;
+      const industryLogisticsInstalled =
+        financeSocialBinding !== null &&
+        command.officeId === 'INDUSTRY' &&
+        command.commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS &&
+        isPostwarIndustryLogisticsRuntime(industryLogisticsRuntime) &&
+        industryLogisticsRuntime.database === input.database &&
+        industryLogisticsRuntime.worldId === world;
       const industryRunInstalled =
         financeSocialBinding !== null &&
         command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND &&
@@ -695,6 +723,16 @@ function createDurableCommandConsumer(
         officeReaders.tradeReservation.database === input.database &&
         officeReaders.tradeAutomatic.database === input.database;
       if (
+        (industryUtilityInstalled &&
+          !isPreparedPostwarIndustryUtilityRuntime(industryUtilityRuntime)) ||
+        (industryLogisticsInstalled &&
+          !isPreparedPostwarIndustryLogisticsRuntime(industryLogisticsRuntime))
+      )
+        return blocked(
+          'FINANCE_SOCIAL_INDUSTRY_UTILITY_SOURCE_NOT_PREPARED',
+          command.commandId,
+        );
+      if (
         captainInstalled &&
         !isPreparedPostwarSocialRuntimeConnection(
           readFinanceSocialSourceBinding(financeSocialBinding!)
@@ -707,7 +745,9 @@ function createDurableCommandConsumer(
           command.commandId,
         );
       if (
-        (centralBankInstalled ||
+        (industryUtilityInstalled ||
+          industryLogisticsInstalled ||
+          centralBankInstalled ||
           tradeInstalled ||
           rentInstalled ||
           industryRunInstalled ||
@@ -726,6 +766,8 @@ function createDurableCommandConsumer(
         !centralBankInstalled &&
         !tradeInstalled &&
         !rentInstalled &&
+        !industryUtilityInstalled &&
+        !industryLogisticsInstalled &&
         !industryRunInstalled &&
         !industryWorkInstalled &&
         !industryWageInstalled &&
@@ -772,6 +814,8 @@ function createDurableCommandConsumer(
         command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
         !socialMatch &&
         !rentInstalled &&
+        !industryUtilityInstalled &&
+        !industryLogisticsInstalled &&
         !industryRunInstalled &&
         !industryWorkInstalled &&
         !industryWageInstalled &&
@@ -904,6 +948,45 @@ function createDurableCommandConsumer(
           receipt: result.receipt,
         });
       }
+      if (
+        industryUtilityInstalled &&
+        industryUtilityRuntime &&
+        isPostwarIndustryWaterGrantCommand(command)
+      ) {
+        // Only the fixed source issuer may derive this automatic right. The
+        // recognizer routes DATA; the private guard independently locks its
+        // actual publication, committed RUN, quota and claimed queue at commit.
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: industryUtilityRuntime.candidateFactory,
+          industryUtilitySourceCommitProtectionPort:
+            industryUtilityRuntime.sourceCommitProtectionPort,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        await industryUtilityRuntime.assertSourceBeforeClaim(command, at);
+        await claimAutomatic(command, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'VERSIONED_AUTOMATIC',
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
       if (rentInstalled && rentRuntime) {
         const execution = createAuthoritativeWorkerExecution({
           database: input.database,
@@ -998,6 +1081,20 @@ function createDurableCommandConsumer(
           workerId: holder,
           sha256Hex: input.sha256Hex,
           candidateFactory: composition.factory,
+          ...(composition.industryUtilitySourceCommitProtectionPort ===
+          undefined
+            ? {}
+            : {
+                industryUtilitySourceCommitProtectionPort:
+                  composition.industryUtilitySourceCommitProtectionPort,
+              }),
+          ...(composition.industryLogisticsSourceCommitProtectionPort ===
+          undefined
+            ? {}
+            : {
+                industryLogisticsSourceCommitProtectionPort:
+                  composition.industryLogisticsSourceCommitProtectionPort,
+              }),
           ...(composition.industryRunSourceCommitProtectionPort === undefined
             ? {}
             : {

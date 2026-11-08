@@ -1,4 +1,17 @@
 import {
+  createPostwarIndustryUtilityRuntime,
+  type PostwarIndustryUtilityRuntime,
+} from '../persistence/postwar-industry-utility-runtime.js';
+import {
+  createPostwarIndustryLogisticsRuntime,
+  type PostwarIndustryLogisticsRuntime,
+} from '../persistence/postwar-industry-logistics-runtime.js';
+import {
+  preparePostwarIndustryUtilitySource,
+  retireUnownedPostwarIndustryUtilitySource,
+  type PostwarIndustryUtilitySourceInput,
+} from '../persistence/postwar-industry-utility-source.js';
+import {
   createPostwarIndustryOperatingWageRuntime,
   type PostwarIndustryOperatingWageRuntime,
 } from '../persistence/postwar-industry-operating-wage-runtime.js';
@@ -140,6 +153,11 @@ export interface PostwarFinanceSocialRuntimeConnectionInput {
     /** Separate existing Industry publisher principal; never reader enrollment. */
     readonly publicationDatabase?: SqlDatabase;
     readonly preparedRuns?: readonly Readonly<PostwarIndustryPreparedRun>[];
+    /** Explicit fixed, deferred source preparation; old Industry installation does not enable utilities. */
+    readonly utilityPreparation?: Omit<
+      PostwarIndustryUtilitySourceInput,
+      'socialConnection'
+    >;
   };
   readonly industryLabour?: { readonly enabled: true };
   readonly beneficialRent?: {
@@ -169,6 +187,8 @@ export interface PostwarFinanceSocialRuntimeConnectionInput {
   };
 }
 export interface PostwarFinanceSocialRuntimePorts {
+  readonly industryUtility: Readonly<PostwarIndustryUtilityRuntime> | null;
+  readonly industryLogistics: Readonly<PostwarIndustryLogisticsRuntime> | null;
   readonly industryRun: Readonly<PostwarIndustryRunRuntime> | null;
   readonly industry: Readonly<PostwarIndustryRuntime> | null;
   readonly beneficialRent: Readonly<PostwarBeneficialHousingRentRuntime> | null;
@@ -265,6 +285,11 @@ export interface ProductionPostwarFinanceSocialRuntimeConnectionInput {
     /** Separate existing Industry publisher principal; never reader enrollment. */
     readonly publicationDatabase?: SqlDatabase;
     readonly preparedRuns?: readonly Readonly<PostwarIndustryPreparedRun>[];
+    /** Explicit fixed, deferred source preparation; old Industry installation does not enable utilities. */
+    readonly utilityPreparation?: Omit<
+      PostwarIndustryUtilitySourceInput,
+      'socialConnection'
+    >;
   };
   readonly industryLabour?: { readonly enabled: true };
   readonly beneficialRent?: {
@@ -557,11 +582,27 @@ function constructFinanceSocialRuntimeConnection(
     const industryRun = input.industry
       ? createPostwarIndustryRunRuntime({ database, socialConnection: social })
       : null;
+    const industryUtility = input.industry?.utilityPreparation
+      ? createPostwarIndustryUtilityRuntime({
+          database,
+          socialConnection: social,
+        })
+      : null;
+    const industryLogistics = input.industry?.utilityPreparation
+      ? createPostwarIndustryLogisticsRuntime({
+          database,
+          socialConnection: social,
+          clock: input.clock,
+          sourceContext: input.industry.sourceContext,
+        })
+      : null;
     let readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
       ...social.readers,
       financeBudget: budget,
       ...(industry ? { industry } : {}),
       ...(industryRun ? { industryRun } : {}),
+      ...(industryUtility ? { industryUtility } : {}),
+      ...(industryLogistics ? { industryLogistics } : {}),
       ...(industryWork ? { industryWork } : {}),
       ...(treasuryFx ? { treasuryFx } : {}),
       ...(captain ? { captainNative: captain } : {}),
@@ -672,6 +713,34 @@ function constructFinanceSocialRuntimeConnection(
     let stopped = false,
       stopping: Promise<void> | null = null;
     let fxPrepared = false;
+    let utilityPreparing: Promise<void> | null = null;
+    let utilityPrepared =
+      industryUtility === null && industryLogistics === null;
+    const prepareUtilities = async () => {
+      const config = input.industry?.utilityPreparation;
+      if (!config || !industryUtility || !industryLogistics) return;
+      requireLive();
+      utilityPreparing ??= (async () => {
+        const source = await preparePostwarIndustryUtilitySource({
+          ...config,
+          socialConnection: social,
+        });
+        try {
+          requireLive();
+          await industryUtility.prepare(source);
+        } catch (error) {
+          // No consumer can run before successful shared preparation. A token
+          // rejected before the fixed runtime accepts ownership stays ours.
+          retireUnownedPostwarIndustryUtilitySource(source);
+          throw error;
+        }
+        requireLive();
+        await industryLogistics.prepare(config);
+        requireLive();
+        utilityPrepared = true;
+      })();
+      await utilityPreparing;
+    };
     let fxPreparing: Promise<void> | null = null;
     let fxPreparationPin: string | null = null;
     let fxSourcePreparation: PreparedBeneficialHousingRentSource | undefined;
@@ -683,7 +752,8 @@ function constructFinanceSocialRuntimeConnection(
       requireLive();
       if (
         !isPreparedPostwarSocialRuntimeConnection(social, world) ||
-        (treasuryFx !== null && !fxPrepared)
+        (treasuryFx !== null && !fxPrepared) ||
+        !utilityPrepared
       )
         throw Error('FINANCE_SOCIAL_SOURCE_NOT_PREPARED');
       rentPreparation?.assertPrepared();
@@ -744,8 +814,11 @@ function constructFinanceSocialRuntimeConnection(
               throw Error('FINANCE_SOCIAL_CHILD_PROOF_REQUIRES_RENT_OWNER');
             await social.prepare(configuration);
           }
+          requireLive();
           if (centralBankOmo) await centralBankOmo.prepareFromSocial();
+          requireLive();
           if (industry) await industry.prepare();
+          await prepareUtilities();
           requireLive();
         },
         prepareTreasuryFx,
@@ -833,6 +906,9 @@ function constructFinanceSocialRuntimeConnection(
             if (fxPreparing) await Promise.allSettled([fxPreparing]);
             await treasuryFx?.close();
             await centralBankOmo?.close();
+            if (utilityPreparing) await Promise.allSettled([utilityPreparing]);
+            await industryLogistics?.close();
+            await industryUtility?.close();
             await industryOperatingWage?.close();
             await industryWork?.close();
             await industryRun?.close();
@@ -868,6 +944,8 @@ function constructFinanceSocialRuntimeConnection(
         centralBankOmo,
         industry,
         industryRun,
+        industryUtility,
+        industryLogistics,
         beneficialRent,
         trade,
         treasuryFx,

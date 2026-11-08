@@ -1,3 +1,6 @@
+import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
+import { isPreparedPostwarIndustryUtilityRuntime } from '../persistence/postwar-industry-utility-runtime.js';
+import { isPreparedPostwarIndustryLogisticsRuntime } from '../persistence/postwar-industry-logistics-runtime.js';
 import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
 import { isPostwarIndustryRunRuntime } from '../persistence/postwar-industry-run-runtime.js';
 import { isPreparedPostwarIndustryRuntime } from '../persistence/postwar-industry-runtime.js';
@@ -430,6 +433,35 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
 ): boolean {
   if (!runtime) return false;
   const construction = constructions.get(runtime as ManualOfficeIntakeRuntime);
+  if (
+    commandType === INDUSTRY_UTILITY_COMMANDS.POWER ||
+    commandType === INDUSTRY_UTILITY_COMMANDS.WATER ||
+    commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS
+  ) {
+    if (!construction?.financeSocialBinding) return false;
+    const fixed = readFinanceSocialSourceBinding(
+      construction.financeSocialBinding,
+    );
+    const candidate =
+      commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS
+        ? construction.readers.industryLogistics
+        : construction.readers.industryUtility;
+    if (
+      !candidate ||
+      candidate.worldId !== construction.worldId ||
+      candidate.database !== construction.workerDatabase
+    )
+      return false;
+    return (
+      isPreparedPostwarSocialRuntimeConnection(
+        fixed.socialConnection,
+        construction.worldId,
+      ) &&
+      (commandType === INDUSTRY_UTILITY_COMMANDS.LOGISTICS
+        ? isPreparedPostwarIndustryLogisticsRuntime(candidate)
+        : isPreparedPostwarIndustryUtilityRuntime(candidate))
+    );
+  }
   if (commandType === INDUSTRY_RUN_SCHEDULE_COMMAND) {
     if (!construction?.financeSocialBinding) return false;
     const fixed = readFinanceSocialSourceBinding(
