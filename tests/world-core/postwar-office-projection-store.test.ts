@@ -1,3 +1,4 @@
+import { createPostwarCentralBankOpeningInstrumentReader } from '../../apps/world-worker/src/persistence/postwar-central-bank-opening-instruments.js';
 /** SQL/RLS infrastructure uses explicit TEST_ONLY small sources. Genuine full
  * source publication is separately exercised against the shared native reference. */
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
@@ -129,6 +130,50 @@ beforeAll(async () => {
             payload: {
               schemaVersion: 'postwar-operating-genesis-seed-source-v1',
               carrier: {
+                documents: [
+                  {
+                    documentId: 'POSTWAR_FINANCIAL_OFFICE_ORIGINALS',
+                    bytes: C.canonicalSerialize({
+                      contract: {
+                        countries: ['COUNTRY_01', 'COUNTRY_02'].map(
+                          (countryId) => ({
+                            countryId,
+                            cbRegister: {
+                              categories: [
+                                {
+                                  category: 'DOMESTIC_GOVERNMENT_SECURITIES',
+                                  disposition: 'NO_DECLARED_INSTRUMENT',
+                                  source: {
+                                    documentId: 'TEST_ONLY_FINANCIAL_REGISTER',
+                                    pointer: '/no-declared-security',
+                                  },
+                                },
+                              ],
+                              holdings: [
+                                {
+                                  holdingId: 'TGA_' + countryId,
+                                  category: 'TREASURY_GOVERNMENT_DEPOSIT',
+                                  kind: 'CLAIM',
+                                  amount: '100',
+                                  currency: 'GBP',
+                                  holderId: 'CB_' + countryId,
+                                  counterpartyId: 'GOV_' + countryId,
+                                  usableStatus:
+                                    'EXACT_SOURCE_CLAIM_NOT_ADDITIONAL_CASH',
+                                  source: {
+                                    documentId: 'TEST_ONLY_FINANCIAL_REGISTER',
+                                    pointer: '/treasury-claim',
+                                  },
+                                },
+                              ],
+                            },
+                            bankLoans: [],
+                          }),
+                        ),
+                      },
+                    }),
+                  },
+                ],
                 socialEmployment: { countries },
                 facts: {
                   regions: [
@@ -259,6 +304,82 @@ afterAll(async () => {
   await db.close();
 });
 describe('bounded exact-country projection SQL and runtime reader', () => {
+  it('reads a verified empty CB security declaration from admitted bounded source docs without OMO adoption or synthetic accounts', async () => {
+    await admin();
+    await db.query(
+      "insert into world_v2.current_commit_authorization values($1,$2::uuid,'COUNTRY_01','CENTRAL_BANK','CENTRAL_BANK_MONETARY_POLICY','TEAM_TEST_ONLY','REV_TEST_ONLY',true,now())",
+      [world, subject],
+    );
+    await db.query(
+      "insert into world_v2.runtime_read_seat(world_id,auth_subject,country_id,office_id,team_id,authorization_revision)values($1,$2::uuid,'COUNTRY_01','CENTRAL_BANK','TEAM_TEST_ONLY','REV_TEST_ONLY')",
+      [world, subject],
+    );
+    const scopeKey = 'OFFICE_434F554E5452595F3031_43454E5452414C5F42414E4B';
+    await db.query(
+      "insert into world_v2.projection_entitlement values($1,$2::uuid,'OFFICE_PRIVATE',$3,'REV_TEST_ONLY',true,now(),null)",
+      [world, subject, scopeKey],
+    );
+    await db.exec('set role ' + publisher);
+    for (const dataset of ['cb-categories', 'cb-holdings', 'bank-loans'])
+      await db.query(POSTWAR_PROJECTION_PUBLISH_QUERY, [
+        world,
+        'COUNTRY_01',
+        'CENTRAL_BANK',
+        dataset,
+        seed.fingerprint,
+        seedIntentHash,
+        sourceHash,
+        admissionRef,
+      ]);
+    const cb = createPostwarCentralBankOpeningInstrumentReader({
+      runtimeReaderRole: reader,
+      authorizationPublisherRole: publisher,
+    });
+    await readerSession();
+    const result = await cb.readFrom(executor, { worldId: world });
+    expect(result?.instruments.status).toBe(
+      'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY',
+    );
+    expect(result?.instruments.governmentSecurityHoldingCount).toBe(0);
+    expect(result?.instruments.bankLoanRecordCount).toBe(0);
+    expect(result?.instruments.sourcePages).toHaveLength(3);
+    expect(result?.instruments.seedFingerprint).toBe(seed.fingerprint);
+    expect(result?.instruments.originWorldVersion).toBe('0');
+    expect(JSON.stringify(result)).not.toContain('COUNTRY_02');
+    expect(result?.instruments).not.toHaveProperty('quote');
+    const claims = await store.readPageFrom(executor, {
+      worldId: world,
+      officeId: 'CENTRAL_BANK',
+      dataset: 'cb-holdings',
+      offset: 0,
+      limit: 100,
+    });
+    if (!('source' in claims)) throw Error('ACTUAL_CB_CLAIMS_REQUIRED');
+    expect(claims.rows).toContainEqual(
+      expect.objectContaining({
+        category: 'TREASURY_GOVERNMENT_DEPOSIT',
+        kind: 'CLAIM',
+        amount: '100',
+      }),
+    );
+    await admin();
+    await db.query(
+      "insert into world_v2.postwar_office_projection_revocation(document_ref,world_id,reason_ref)select document_ref,world_id,'TEST_ONLY_REVOKE_CB'from world_v2.postwar_office_projection_document where world_id=$1 and office_id='CENTRAL_BANK' and dataset='cb-categories'",
+      [world],
+    );
+    await readerSession();
+    expect(await cb.readFrom(executor, { worldId: world })).toBeNull();
+    await admin();
+    await db.query(
+      "update world_v2.current_commit_authorization set active=false where world_id=$1 and auth_subject=$2::uuid and office_id='CENTRAL_BANK'",
+      [world, subject],
+    );
+    await db.query(
+      'update world_v2.projection_entitlement set active=false,revoked_at=clock_timestamp() where world_id=$1 and auth_subject=$2::uuid and scope_key=$3',
+      [world, subject, scopeKey],
+    );
+  });
+
   it('publishes only stored-source rows with exact seed/admission hashes, immutable pages and no arbitrary JSON input', async () => {
     const p = await publish(),
       r = p.rows[0]!;

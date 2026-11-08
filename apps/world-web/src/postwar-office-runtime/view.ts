@@ -1,3 +1,4 @@
+import { parsePostwarCentralBankOpeningInstruments } from '@econmind/core/postwar-financial-mixed-current-contract';
 import type { ProductionReadConfig } from '../production-read/contract.js';
 import {
   createPostwarRuntimeClient,
@@ -172,6 +173,21 @@ export function createPostwarRuntimeView(
                 `Financial posting legs ${String(coverage.financialPostingCount)} · Batches ${String(coverage.financialBatchCount)} · ${String(coverage.financialPostingsFingerprint)}`,
               ),
             );
+        }
+        if (page.source.centralBankOpeningInstruments !== undefined) {
+          const opening = parsePostwarCentralBankOpeningInstruments(
+            page.source.centralBankOpeningInstruments,
+          );
+          section.append(
+            text(
+              'p',
+              opening.status === 'SOURCE_UNAVAILABLE'
+                ? '开局证券原件不可用；这不表示证券余额为零。'
+                : opening.status === 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY'
+                  ? '已核对央行开局持仓原件：未声明本国政府证券。当前资金见本页；证券交易仍需实际证券条款和有效报价。'
+                  : '央行开局原件载有政府证券；当前可交易性仍需实际证券条款和有效报价。',
+            ),
+          );
         }
         if (
           page.source.dataNature ===

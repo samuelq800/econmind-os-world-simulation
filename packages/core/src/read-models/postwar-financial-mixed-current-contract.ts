@@ -339,3 +339,105 @@ export function parsePostwarMixedTreasuryCapacityRow(
     governmentGcuAccountIds: [...r.governmentGcuAccountIds],
   }) as unknown as PostwarMixedTreasuryCapacityRow;
 }
+
+/** Original instrument declarations, not a current inventory or OMO permission. */
+export interface PostwarCentralBankOpeningInstruments {
+  readonly schemaVersion: 'postwar-cb-opening-instruments-v1';
+  readonly measurement: 'ADMITTED_OPENING_DECLARATION_NOT_CURRENT_TRADABILITY';
+  readonly countryId: string;
+  readonly seedFingerprint: string;
+  readonly admissionRef: string;
+  readonly canonicalSeedSha256: string;
+  readonly sourceBundleSha256: string;
+  readonly originWorldVersion: '0';
+  readonly originEventSequence: '0';
+  readonly status:
+    | 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY'
+    | 'DECLARED_REQUIRES_INSTRUMENT_TERMS_AND_QUOTE'
+    | 'SOURCE_UNAVAILABLE';
+  readonly governmentSecurityHoldingCount: number | null;
+  readonly bankLoanRecordCount: number | null;
+  readonly sourcePages: readonly Readonly<{
+    dataset: string;
+    sourceVersion: string;
+    pageHash: string;
+    returnedRowsHash: string;
+  }>[];
+}
+export function parsePostwarCentralBankOpeningInstruments(
+  value: unknown,
+): Readonly<PostwarCentralBankOpeningInstruments> {
+  const r = object(value);
+  exact(r, [
+    'schemaVersion',
+    'measurement',
+    'countryId',
+    'seedFingerprint',
+    'admissionRef',
+    'canonicalSeedSha256',
+    'sourceBundleSha256',
+    'originWorldVersion',
+    'originEventSequence',
+    'status',
+    'governmentSecurityHoldingCount',
+    'bankLoanRecordCount',
+    'sourcePages',
+  ]);
+  if (
+    r.schemaVersion !== 'postwar-cb-opening-instruments-v1' ||
+    r.measurement !== 'ADMITTED_OPENING_DECLARATION_NOT_CURRENT_TRADABILITY' ||
+    !id(r.countryId) ||
+    !id(r.admissionRef) ||
+    !/^sha256:[a-f0-9]{64}$/u.test(String(r.seedFingerprint)) ||
+    ![r.canonicalSeedSha256, r.sourceBundleSha256].every(
+      (v) => typeof v === 'string' && /^[a-f0-9]{64}$/u.test(v),
+    ) ||
+    r.originWorldVersion !== '0' ||
+    r.originEventSequence !== '0' ||
+    !Array.isArray(r.sourcePages)
+  )
+    invalid('CB_OPENING_INSTRUMENT_BINDING_REQUIRED');
+  if (r.status === 'SOURCE_UNAVAILABLE') {
+    if (
+      r.governmentSecurityHoldingCount !== null ||
+      r.bankLoanRecordCount !== null ||
+      r.sourcePages.length !== 0
+    )
+      invalid('CB_UNKNOWN_NOT_ZERO');
+  } else {
+    if (
+      ![
+        'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY',
+        'DECLARED_REQUIRES_INSTRUMENT_TERMS_AND_QUOTE',
+      ].includes(String(r.status)) ||
+      !Number.isSafeInteger(r.governmentSecurityHoldingCount) ||
+      Number(r.governmentSecurityHoldingCount) < 0 ||
+      !Number.isSafeInteger(r.bankLoanRecordCount) ||
+      Number(r.bankLoanRecordCount) < 0 ||
+      r.sourcePages.length !== 3 ||
+      (r.status === 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY') !==
+        (r.governmentSecurityHoldingCount === 0)
+    )
+      invalid('CB_EXACT_OPENING_DECLARATION_REQUIRED');
+    const datasets = new Set<string>();
+    for (const value of r.sourcePages) {
+      const p = object(value);
+      exact(p, ['dataset', 'sourceVersion', 'pageHash', 'returnedRowsHash']);
+      if (
+        !['cb-categories', 'cb-holdings', 'bank-loans'].includes(
+          String(p.dataset),
+        ) ||
+        datasets.has(String(p.dataset)) ||
+        !/^sha256:[a-f0-9]{64}$/u.test(String(p.sourceVersion)) ||
+        ![p.pageHash, p.returnedRowsHash].every(
+          (v) => typeof v === 'string' && /^[a-f0-9]{64}$/u.test(v),
+        )
+      )
+        invalid('CB_EXACT_OPENING_PAGE_BINDING_REQUIRED');
+      datasets.add(String(p.dataset));
+    }
+  }
+  return immutable(
+    r,
+  ) as unknown as Readonly<PostwarCentralBankOpeningInstruments>;
+}

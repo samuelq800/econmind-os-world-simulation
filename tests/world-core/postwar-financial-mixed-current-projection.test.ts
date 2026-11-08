@@ -1,3 +1,4 @@
+import { POSTWAR_PROJECTION_PAGE_QUERY } from '../../apps/world-worker/src/persistence/postwar-office-projection-store.js';
 /** TEST_ONLY protocol vectors, not native source/currentness evidence. */
 import { createHash } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
@@ -15,6 +16,7 @@ const store = createPostwarFinancialMixedCurrentProjectionStore({
 function protocol(
   current = true,
   changes: (row: Record<string, unknown>) => void = () => {},
+  openingMode?: 'empty' | 'missing' | 'wrong-seed',
 ) {
   const raw = '[]',
     row: Record<string, unknown> = {
@@ -77,8 +79,61 @@ function protocol(
       rows_text: raw,
     };
   changes(row);
+  const selectedStore = openingMode
+    ? createPostwarFinancialMixedCurrentProjectionStore({
+        runtimeReaderRole: 'test_financial_reader',
+        authorizationPublisherRole: 'test_financial_publisher',
+        includeCentralBankOpeningInstruments: true,
+      })
+    : store;
   const tx: SqlExecutor = {
-    async query<Row extends object>(q: string) {
+    async query<Row extends object>(q: string, args: readonly unknown[] = []) {
+      if (q === POSTWAR_PROJECTION_PAGE_QUERY) {
+        if (openingMode === 'missing')
+          return { rowCount: 1, rows: [{ status: 'UNAVAILABLE' }] as Row[] };
+        const dataset = args[2],
+          items =
+            dataset === 'cb-categories'
+              ? [
+                  {
+                    category: 'DOMESTIC_GOVERNMENT_SECURITIES',
+                    disposition: 'NO_DECLARED_INSTRUMENT',
+                  },
+                ]
+              : dataset === 'cb-holdings'
+                ? [{ category: 'TREASURY_GOVERNMENT_DEPOSIT', amount: '100' }]
+                : [],
+          raw = JSON.stringify(items),
+          h = createHash('sha256').update(raw).digest('hex');
+        return {
+          rowCount: 1,
+          rows: [
+            {
+              status: items.length ? 'PAGE' : 'EMPTY',
+              scope_json: row.scope,
+              source_json: {
+                ...(row.source as object),
+                dataNature: 'DERIVED_RAW_FROM_ADMITTED_H0_NOT_AUTHORITY',
+                worldVersion: '0',
+                eventSequence: '0',
+                pageHash: h,
+                returnedRowsHash: h,
+                ...(openingMode === 'wrong-seed'
+                  ? { seedFingerprint: 'sha256:' + 'd'.repeat(64) }
+                  : {}),
+              },
+              page_json: {
+                offset: 0,
+                limit: 100,
+                returned: items.length,
+                total: items.length,
+                nextOffset: null,
+              },
+              rows_text: raw,
+            },
+          ] as Row[],
+        };
+      }
       return {
         rowCount: 1,
         rows: (q === POSTWAR_FINANCIAL_MIXED_CURRENT_PAGE_QUERY
@@ -91,15 +146,17 @@ function protocol(
                 isolation: 'repeatable read',
                 unsafe: false,
                 publisher: false,
+                unsafe_role: false,
+                publisher_member: false,
               },
             ]) as Row[],
       };
     },
   };
   return () =>
-    store.readPageFrom(tx, {
+    selectedStore.readPageFrom(tx, {
       worldId: 'WORLD_TEST',
-      officeId: 'FINANCE',
+      officeId: openingMode ? 'CENTRAL_BANK' : 'FINANCE',
       dataset: current ? 'ledger-balances' : 'currency-fx',
     });
 }
@@ -172,5 +229,69 @@ describe('bounded posting-aware financial current protocol', () => {
         (r.scope as Record<string, unknown>).countryId = 'COUNTRY_02';
       })(),
     ).rejects.toThrow('ACTUAL_SCOPE_MISMATCH');
+  });
+});
+
+function cbRow(row: Record<string, unknown>) {
+  const scope = row.scope as Record<string, unknown>;
+  scope.officeId = 'CENTRAL_BANK';
+  scope.scopeKey = 'OFFICE_434F554E5452595F3031_43454E5452414C5F42414E4B';
+  const rows = [
+      {
+        schemaVersion: 'postwar-current-financial-balance-row-v2',
+        countryId: 'COUNTRY_01',
+        accountId: 'BANK_GCU_CASH_TEST',
+        ownerEntityId: 'BANK_TEST',
+        ownerKind: 'BANK',
+        currency: 'GCU',
+        accountClass: 'CASH',
+        claimId: null,
+        counterpartyEntityId: null,
+        netDebitBalance: '12.34',
+        balanceNature: 'GCU_CASH',
+      },
+    ],
+    raw = JSON.stringify(rows),
+    h = createHash('sha256').update(raw).digest('hex');
+  row.status = 'PAGE';
+  row.rows_text = raw;
+  row.page = { offset: 0, limit: 25, returned: 1, total: 1, nextOffset: null };
+  Object.assign(row.source as object, { pageHash: h, returnedRowsHash: h });
+}
+describe('CB actual financial rows with separately bound opening instrument declarations', () => {
+  it('keeps BANK GCU current rows and origin0 no-declared source status without an OMO adoption or 24 dummy accounts', async () => {
+    const page = await protocol(true, cbRow, 'empty')();
+    if (!('source' in page)) throw Error('PAGE_REQUIRED');
+    expect(page.rows).toHaveLength(1);
+    expect(page.rows[0]).toMatchObject({
+      accountId: 'BANK_GCU_CASH_TEST',
+      netDebitBalance: '12.34',
+    });
+    expect(page.source.observedHead).toEqual({
+      worldVersion: '6',
+      eventSequence: '10',
+    });
+    expect(page.source.centralBankOpeningInstruments).toMatchObject({
+      status: 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY',
+      originWorldVersion: '0',
+      governmentSecurityHoldingCount: 0,
+      bankLoanRecordCount: 0,
+    });
+  });
+  it('keeps actual current funds but marks missing source unknown rather than zero', async () => {
+    const page = await protocol(true, cbRow, 'missing')();
+    if (!('source' in page)) throw Error('PAGE_REQUIRED');
+    expect(page.rows).toHaveLength(1);
+    expect(page.source.centralBankOpeningInstruments).toMatchObject({
+      status: 'SOURCE_UNAVAILABLE',
+      governmentSecurityHoldingCount: null,
+      bankLoanRecordCount: null,
+      sourcePages: [],
+    });
+  });
+  it('refuses source seed substitution', async () => {
+    await expect(protocol(true, cbRow, 'wrong-seed')()).rejects.toThrow(
+      'CB_OPENING_SOURCE_DIFFERS',
+    );
   });
 });

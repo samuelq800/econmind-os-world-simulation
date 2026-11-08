@@ -931,4 +931,104 @@ describe('posting-aware mixed current page wire', () => {
     );
     view.disconnect();
   });
+  it('shows verified CB opening absence beside actual current BANK funds and keeps unknown source distinct', async () => {
+    const f = fixture();
+    f.config.identity.officeId = 'CENTRAL_BANK';
+    let missing = false,
+      wrongSeed = false;
+    const opening = () => ({
+      schemaVersion: 'postwar-cb-opening-instruments-v1',
+      measurement: 'ADMITTED_OPENING_DECLARATION_NOT_CURRENT_TRADABILITY',
+      countryId: f.config.identity.countryId,
+      seedFingerprint: wrongSeed
+        ? 'sha256:' + 'd'.repeat(64)
+        : f.config.world.contentHash,
+      admissionRef: f.config.world.admissionRef,
+      canonicalSeedSha256: 'a'.repeat(64),
+      sourceBundleSha256: 'b'.repeat(64),
+      originWorldVersion: '0',
+      originEventSequence: '0',
+      status: missing
+        ? 'SOURCE_UNAVAILABLE'
+        : 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY',
+      governmentSecurityHoldingCount: missing ? null : 0,
+      bankLoanRecordCount: missing ? null : 0,
+      sourcePages: missing
+        ? []
+        : ['cb-categories', 'cb-holdings', 'bank-loans'].map((dataset) => ({
+            dataset,
+            sourceVersion: hash,
+            pageHash: 'a'.repeat(64),
+            returnedRowsHash: 'b'.repeat(64),
+          })),
+    });
+    const make = (id: string) => {
+      const original = f.body('ledger-balances', 0, 1);
+      original.authority.readback.worldVersion = '7';
+      original.authority.readback.eventSequence = '12';
+      return {
+        ...original,
+        requestId: id,
+        source: {
+          ...original.source,
+          officeId: 'CENTRAL_BANK',
+          dataNature: 'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX',
+          worldVersion: '7',
+          eventSequence: '12',
+          originWorldVersion: '0',
+          originEventSequence: '0',
+          observedHead: { worldVersion: '7', eventSequence: '12' },
+          currentFinancialCoverage: coverage(f.config.identity.countryId),
+          canonicalSeedSha256: 'a'.repeat(64),
+          sourceBundleSha256: 'b'.repeat(64),
+          centralBankOpeningInstruments: opening(),
+        },
+        rows: [
+          {
+            schemaVersion: 'postwar-current-financial-balance-row-v2',
+            countryId: f.config.identity.countryId,
+            accountId: 'TEST_BANK_GCU_CURRENT',
+            ownerEntityId: 'TEST_BANK',
+            ownerKind: 'BANK',
+            currency: 'GCU',
+            accountClass: 'CASH',
+            claimId: null,
+            counterpartyEntityId: null,
+            netDebitBalance: '12.34',
+            balanceNature: 'GCU_CASH',
+          },
+        ],
+      };
+    };
+    vi.stubGlobal('fetch', async (_u: unknown, init?: RequestInit) => {
+      const q = JSON.parse(String(init?.body));
+      return Response.json(make(q.requestId));
+    });
+    const doc = new HostDocument('central-bank'),
+      view = createPostwarRuntimeView(f.config, () => undefined);
+    const rendered = view.render(doc as unknown as Document) as unknown as {
+      all: () => { tag: string; listeners: Map<string, () => void> }[];
+    };
+    const select = rendered.all().find((n) => n.tag === 'select')!;
+    Object.assign(select, { value: 'ledger-balances' });
+    select.listeners.get('change')!();
+    await vi.waitFor(() => expect(view.state().status).toBe('CURRENT'));
+    let text = view.render(doc as unknown as Document).textContent;
+    expect(text).toContain('TEST_BANK_GCU_CURRENT');
+    expect(text).toContain('12.34');
+    expect(text).toContain('央行开局持仓原件：未声明本国政府证券');
+    missing = true;
+    await view.refresh();
+    text = view.render(doc as unknown as Document).textContent;
+    expect(text).toContain('TEST_BANK_GCU_CURRENT');
+    expect(text).toContain('原件不可用');
+    expect(text).toContain('不表示证券余额为零');
+    wrongSeed = true;
+    await view.refresh();
+    expect(view.state().status).toBe('UNAVAILABLE');
+    expect(view.render(doc as unknown as Document).textContent).not.toContain(
+      'TEST_BANK_GCU_CURRENT',
+    );
+    view.disconnect();
+  });
 });
