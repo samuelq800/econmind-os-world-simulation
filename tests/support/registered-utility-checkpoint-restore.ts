@@ -19,6 +19,10 @@ import {
   readRegisteredUtilityH2ResumeFrom,
   type RegisteredUtilityH2Resume,
 } from './registered-utility-h2-checkpoint.js';
+import {
+  loadRegisteredCurrentReadRepairCheckpoint,
+  verifyRegisteredCurrentReadRepairFunctionsFrom,
+} from './registered-current-read-repair-checkpoint.js';
 const exec = promisify(execFile);
 const initializationDirectory = '/workspace/.cloud-setup/evidence/ru-c2-02';
 const childFingerprint =
@@ -75,7 +79,7 @@ export interface RegisteredUtilitySetup {
 export async function restoreRegisteredUtilityCheckpoint(input: {
   readonly repositoryRoot: string;
   readonly evidenceDirectory: string;
-  readonly checkpoint?: 'RU_C2_05_H2';
+  readonly checkpoint?: 'RU_C2_05_H2' | 'TRADE_REPAIRED_H3';
   readonly sqlPlan: Readonly<{
     entries: readonly Readonly<{ name: string; sha256: string }>[];
     planSha256: string;
@@ -96,20 +100,26 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     'OWNED_EVIDENCE_DIRECTORY_REQUIRED',
   );
   must(
-    input.checkpoint === undefined || input.checkpoint === 'RU_C2_05_H2',
+    input.checkpoint === undefined ||
+      input.checkpoint === 'RU_C2_05_H2' ||
+      input.checkpoint === 'TRADE_REPAIRED_H3',
     'FIXED_CHECKPOINT_MODE_REQUIRED',
   );
+  const readRepair =
+    input.checkpoint === 'TRADE_REPAIRED_H3'
+      ? await loadRegisteredCurrentReadRepairCheckpoint(input.repositoryRoot)
+      : undefined;
   const sourceDirectory =
     input.checkpoint === 'RU_C2_05_H2'
       ? REGISTERED_UTILITY_H2_DIRECTORY
-      : initializationDirectory;
+      : (readRepair?.originalDirectory ?? initializationDirectory);
   if (input.checkpoint === 'RU_C2_05_H2')
     await readRegisteredUtilityH2Evidence();
   const pg = path.join(input.evidenceDirectory, 'pg');
   await mkdir(pg, { recursive: true });
-  const cp = await read(
-    path.join(sourceDirectory, 'pg/retained-checkpoint.json'),
-  );
+  const cp =
+    readRepair?.checkpoint ??
+    (await read(path.join(sourceDirectory, 'pg/retained-checkpoint.json')));
   const originalMarker = await loadPostwarNativeReferenceMarker(
     path.join(sourceDirectory, 'pg/reference-db.json'),
   );
@@ -146,6 +156,16 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
       'EXACT_SQL_RECEIPT_REQUIRED',
     );
     installed[d.name] = d.sha256;
+  }
+  if (readRepair) {
+    const originalEntries = input.sqlPlan.entries.filter(
+      (x) => x.name !== readRepair.extraReceipt.name,
+    );
+    must(
+      originalEntries.length === 76 || originalEntries.length === 78,
+      'EXACT_ORIGINAL_76_OR_78_RECEIPTS_REQUIRED',
+    );
+    installed[readRepair.extraReceipt.name] = readRepair.extraReceipt.sha256;
   }
   for (const entry of input.sqlPlan.entries)
     must(
@@ -211,6 +231,7 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
     rolesOrGrantsChanged: false,
     WorldClockStarted: false,
     sqlPlanSha256: input.sqlPlan.planSha256,
+    ...(readRepair ? { readRepair: readRepair.evidence } : {}),
   };
   const close = () =>
     (closed ??= (async () => {
@@ -389,9 +410,14 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
       must(r.rows.length === 1, 'ACTUAL_SINGLE_HEAD_REQUIRED');
       return r.rows[0]!;
     };
+    if (readRepair) {
+      restoreEvidence.actualReadRepairFunctions =
+        await verifyRegisteredCurrentReadRepairFunctionsFrom(db, readRepair);
+      restoreEvidence.additionalSqlReceipts = [readRepair.extraReceipt];
+    }
     const initialCounts = await counts();
     const resume =
-      input.checkpoint === 'RU_C2_05_H2'
+      input.checkpoint === 'RU_C2_05_H2' || readRepair
         ? await readRegisteredUtilityH2ResumeFrom({
             pool: db,
             worldId: marker.worldId,
@@ -751,7 +777,10 @@ export async function restoreRegisteredUtilityCheckpoint(input: {
         sourceRef: site[0]!.source_ref,
         sourceSha256: site[0]!.source_sha256,
       },
-      ddlReceipts: oldReport.ddlReceipts,
+      ddlReceipts: [
+        ...(oldReport.ddlReceipts as unknown[]),
+        ...(readRepair ? [readRepair.extraReceipt] : []),
+      ],
       directRpcEnrollment: oldReport.directRpcEnrollment as unknown[],
       counts,
       close,
