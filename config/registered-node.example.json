@@ -1,6 +1,12 @@
 {
   "schemaVersion": "registered-postwar-node-v1",
   "environment": "staging",
+  "install": {
+    "centralBankOmo": true,
+    "trade": true,
+    "industry": true,
+    "industryUtilities": true
+  },
   "workerId": "WORKER_REPLACE",
   "executionRegistrationRef": "EXECUTION_REPLACE",
   "port": 4101,

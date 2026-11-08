@@ -125,3 +125,16 @@ WORK. It accepts no amount, actor override or caller clock. Wage settlement uses
 the shared FIFO and fixed current-source cutoff; scheduling a wage task does not
 prove payment or production. Existing publication/FINAL recovery precedes new
 issuance. These task issuers are server methods, not browser command families.
+
+### First-day Industry utility installation
+
+`install.industryUtilities: true` explicitly selects the adopted first-day
+POWER, WATER and internal LOGISTICS connections and requires `install.industry:
+true`. Existing configurations that omit the flag keep their previous behavior.
+The example selects all office families; its placeholder pins must still be
+replaced with the actual reviewed bindings. Enabling a flag does not install
+SQL, register originals, grant roles, publish service orders or start consumption.
+Only existing admitted, country-scoped sources and actually recorded labour,
+payment and resource movements may produce a delivery. The source adapter takes
+its opening calendar from the immutable opening evidence, never the server's
+wall clock or a new user-supplied date.

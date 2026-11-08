@@ -75,6 +75,14 @@
     "./postwar-industry-run-parameters-read": {
       "types": "./dist/runtime-preparation/postwar-industry-run-parameters-exports.d.ts",
       "default": "./dist/runtime-preparation/postwar-industry-run-parameters-exports.js"
+    },
+    "./postwar-trade-current-read": {
+      "types": "./dist/persistence/postwar-trade-current-read.d.ts",
+      "default": "./dist/persistence/postwar-trade-current-read.js"
+    },
+    "./postwar-industry-utility-planning-read": {
+      "types": "./dist/runtime-preparation/postwar-industry-utility-planning-exports.d.ts",
+      "default": "./dist/runtime-preparation/postwar-industry-utility-planning-exports.js"
     }
   },
   "scripts": {

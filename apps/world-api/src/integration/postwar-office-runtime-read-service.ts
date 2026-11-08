@@ -1,3 +1,22 @@
+import {
+  INDUSTRY_UTILITY_PLANNING_DATASET,
+  INDUSTRY_UTILITY_PLANNING_NATURE,
+  parseIndustryUtilityPlanningRow,
+  parseIndustryUtilityPlanningCoverage,
+  type IndustryUtilityPlanningCoverage,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
+import {
+  isPostwarIndustryUtilityPlanningReader,
+  type PostwarIndustryUtilityPlanningReader,
+} from '@econmind/world-worker/postwar-industry-utility-planning-read';
+import {
+  POSTWAR_TRADE_CURRENT_DATASETS,
+  type PostwarTradeCurrentDataset,
+} from '@econmind/core/postwar-trade-current-contract';
+import {
+  createPostwarTradeCurrentProjectionStore,
+  type PostwarTradeCurrentSource,
+} from '@econmind/world-worker/postwar-trade-current-read';
 import { INDUSTRY_RUN_PARAMETERS_DATASET } from '@econmind/core/postwar-industry-run-parameters-contract';
 import { createPostwarIndustryRunParametersReader } from '@econmind/world-worker/postwar-industry-run-parameters-read';
 /** Online reads are bounded derived pages and metadata only. Full canonical
@@ -70,10 +89,22 @@ type OriginalSuccessPage = Extract<
 >;
 type FinancialReadSource =
   PostwarFinancialCurrentSource | PostwarFinancialMixedCurrentSource;
+type PageSourceNature =
+  | OriginalSuccessPage['source']['dataNature']
+  | FinancialReadSource['dataNature']
+  | PostwarSocialMixedCurrentSource['dataNature']
+  | PostwarCaptainCurrentSource['dataNature']
+  | PostwarIndustryLabourCurrentSource['dataNature']
+  | PostwarTradeCurrentSource['dataNature']
+  | 'ADMITTED_IMMUTABLE_OPENING_FACTS'
+  | typeof INDUSTRY_UTILITY_PLANNING_NATURE;
 type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
   readonly source: Omit<
     OriginalSuccessPage['source'],
-    'dataNature' | 'currentPrefixCoverage' | 'currentStateBinding'
+    | 'dataNature'
+    | 'currentPrefixCoverage'
+    | 'currentStateBinding'
+    | 'canonicalSeedSha256'
   > & {
     readonly currentPrefixCoverage?:
       | OriginalSuccessPage['source']['currentPrefixCoverage']
@@ -81,15 +112,11 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
     readonly currentStateBinding?:
       | OriginalSuccessPage['source']['currentStateBinding']
       | PostwarSocialMixedCurrentSource['currentStateBinding'];
-    readonly dataNature:
-      | OriginalSuccessPage['source']['dataNature']
-      | FinancialReadSource['dataNature']
-      | PostwarSocialMixedCurrentSource['dataNature']
-      | PostwarCaptainCurrentSource['dataNature']
-      | PostwarIndustryLabourCurrentSource['dataNature']
-      | 'ADMITTED_IMMUTABLE_OPENING_FACTS';
+    readonly dataNature: PageSourceNature;
+    readonly currentIndustryUtilityPlanningCoverage?: IndustryUtilityPlanningCoverage;
     readonly currentFinancialCoverage?: FinancialReadSource['currentFinancialCoverage'];
     readonly currentCaptainCoverage?: PostwarCaptainCurrentSource['currentCaptainCoverage'];
+    readonly currentTradeCoverage?: PostwarTradeCurrentSource['currentTradeCoverage'];
     readonly currentIndustryLabourCoverage?: PostwarIndustryLabourCurrentSource['currentIndustryLabourCoverage'];
     readonly originWorldVersion?: string;
     readonly originEventSequence?: string;
@@ -97,15 +124,32 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
       worldVersion: string;
       eventSequence: string;
     }>;
-  };
+  } & (
+      | Readonly<{
+          dataNature: typeof INDUSTRY_UTILITY_PLANNING_NATURE;
+          canonicalSeedSha256?: never;
+        }>
+      | Readonly<{
+          dataNature: Exclude<
+            PageSourceNature,
+            typeof INDUSTRY_UTILITY_PLANNING_NATURE
+          >;
+          canonicalSeedSha256: string;
+        }>
+    );
 };
 const OFFICE_RUNTIME_DATASETS = Object.freeze({
   ...POSTWAR_PROJECTION_DATASETS,
   ...POSTWAR_FINANCIAL_CURRENT_DATASETS,
   INDUSTRY: [
+    INDUSTRY_UTILITY_PLANNING_DATASET,
     INDUSTRY_RUN_PARAMETERS_DATASET,
     POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
     ...POSTWAR_PROJECTION_DATASETS.INDUSTRY,
+  ],
+  TRADE: [
+    ...POSTWAR_TRADE_CURRENT_DATASETS,
+    ...POSTWAR_PROJECTION_DATASETS.TRADE,
   ],
   CAPTAIN: [
     POSTWAR_CAPTAIN_CURRENT_DATASET,
@@ -150,10 +194,12 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             returnedRowsHash: string;
             hashAlgorithm: string;
             sourcePointer: SuccessPage['source']['sourcePointer'];
+            currentIndustryUtilityPlanningCoverage?: IndustryUtilityPlanningCoverage;
             currentStateBinding?: SuccessPage['source']['currentStateBinding'];
             currentPrefixCoverage?: SuccessPage['source']['currentPrefixCoverage'];
             currentFinancialCoverage?: SuccessPage['source']['currentFinancialCoverage'];
             currentCaptainCoverage?: SuccessPage['source']['currentCaptainCoverage'];
+            currentTradeCoverage?: SuccessPage['source']['currentTradeCoverage'];
             originWorldVersion?: string;
             originEventSequence?: string;
             observedHead?: Readonly<{
@@ -361,6 +407,15 @@ function pageBody(
               currentIndustryLabourCoverage:
                 page.source.currentIndustryLabourCoverage,
             }),
+        ...(page.source.currentTradeCoverage === undefined
+          ? {}
+          : { currentTradeCoverage: page.source.currentTradeCoverage }),
+        ...(page.source.currentIndustryUtilityPlanningCoverage === undefined
+          ? {}
+          : {
+              currentIndustryUtilityPlanningCoverage:
+                page.source.currentIndustryUtilityPlanningCoverage,
+            }),
         ...(page.source.currentCaptainCoverage === undefined
           ? {}
           : { currentCaptainCoverage: page.source.currentCaptainCoverage }),
@@ -386,8 +441,22 @@ function pageBody(
  * office enum in the request is a selector, independently authorized in SQL. */
 export function createPostwarOfficeRuntimeReadService(
   config: ExplicitReadPreparationConfig | null = null,
+  dependencies: Readonly<{
+    industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+  }> = {},
 ) {
   const c = explicitReadConfig(config);
+  const industryUtilityPlanningReader =
+    dependencies.industryUtilityPlanningReader ?? null;
+  if (
+    industryUtilityPlanningReader &&
+    (!c ||
+      !isPostwarIndustryUtilityPlanningReader(
+        industryUtilityPlanningReader,
+        c.admittedWorldPins.worldId,
+      ))
+  )
+    throw Error('GENUINE_INDUSTRY_UTILITY_PLANNING_READER_REQUIRED');
   const verifier = c ? createSupabaseJwksSignatureVerifier(c.auth) : null;
   const snapshots = c ? createPostgresServerReadBindingSnapshotReader(c) : null;
   const store = c
@@ -416,6 +485,12 @@ export function createPostwarOfficeRuntimeReadService(
     : null;
   const industryLabourStore = c
     ? createPostwarIndustryLabourCurrentProjectionStore({
+        runtimeReaderRole: c.readerRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+      })
+    : null;
+  const tradeStore = c
+    ? createPostwarTradeCurrentProjectionStore({
         runtimeReaderRole: c.readerRole,
         authorizationPublisherRole: c.authorizationPublisherRole,
       })
@@ -525,6 +600,174 @@ export function createPostwarOfficeRuntimeReadService(
         const signal = input.signal ?? new AbortController().signal;
         if (signal.aborted) return fail(499, 'CANCELLED');
         const claims = await claimsFor(input.authorization, signal);
+        if (
+          request.office === 'INDUSTRY' &&
+          request.dataset === INDUSTRY_UTILITY_PLANNING_DATASET
+        ) {
+          // Release each bounded read connection before using the independent
+          // worker source transaction. Nesting a second checkout deadlocks a
+          // valid single-connection pool; an RR snapshot is not fresh authority.
+          type HeaderSelection =
+            | Readonly<{ failure: PostwarOfficeRuntimeServiceResponse }>
+            | Readonly<{ header: PostwarOfficeProjectionSeatHeader }>;
+          const selectHeader = (identity: ValidatedJwtClaims) =>
+            snapshots.withReadOnlyExecutor(
+              {
+                verifiedSubject: identity.authSubject,
+                worldId: c.admittedWorldPins.worldId,
+                signal,
+              },
+              async (read): Promise<HeaderSelection> => {
+                try {
+                  const headers = await store.readCurrentSeatHeadersFrom(read, {
+                    worldId: c.admittedWorldPins.worldId,
+                  });
+                  if (headers.some((h) => !validHeader(h, identity)))
+                    return { failure: fail(503, 'READ_BINDING_UNAVAILABLE') };
+                  const selected = headers.filter(
+                    (h) => h.scope.officeId === 'INDUSTRY',
+                  );
+                  if (selected.length !== 1)
+                    return {
+                      failure: fail(403, 'CURRENT_INDUSTRY_SEAT_REQUIRED'),
+                    };
+                  return { header: selected[0]! };
+                } catch (error) {
+                  const failure = errorCode(error);
+                  return {
+                    failure: fail(
+                      failure.status,
+                      failure.code,
+                      failure.retryable,
+                    ),
+                  };
+                }
+              },
+            );
+          const planningResponse = await trackRequestCompletion(
+            (async (): Promise<PostwarOfficeRuntimeServiceResponse> => {
+              const selection = await selectHeader(claims);
+              if (!selection) return fail(503, 'READ_BINDING_UNAVAILABLE');
+              if ('failure' in selection) return selection.failure;
+              const before = selection.header;
+              if (
+                !industryUtilityPlanningReader ||
+                !isPostwarIndustryUtilityPlanningReader(
+                  industryUtilityPlanningReader,
+                  c.admittedWorldPins.worldId,
+                )
+              )
+                return fail(503, 'INDUSTRY_UTILITY_PLANNING_NOT_INSTALLED');
+              const planning = await industryUtilityPlanningReader.readPage({
+                countryId: before.scope.countryId,
+                expectedHead: {
+                  worldVersion: before.source.worldVersion,
+                  eventSequence: before.source.eventSequence,
+                },
+                offset: request.offset,
+                limit: request.limit,
+                ...(request.expectedVersion
+                  ? { expectedVersion: request.expectedVersion }
+                  : {}),
+              });
+              if (signal.aborted) return fail(499, 'CANCELLED');
+              if (!('source' in planning))
+                return fail(
+                  planning.status === 'STALE' ? 409 : 503,
+                  planning.code,
+                );
+              // This is a fresh signature/expiry and seat/admission read after the
+              // worker transaction, not another SELECT in the old RR snapshot.
+              const freshClaims = await claimsFor(input.authorization, signal);
+              const checked = await snapshots.withReadOnlyExecutor(
+                {
+                  verifiedSubject: freshClaims.authSubject,
+                  worldId: c.admittedWorldPins.worldId,
+                  signal,
+                },
+                async (read) => {
+                  const headers = await store.readCurrentSeatHeadersFrom(read, {
+                    worldId: c.admittedWorldPins.worldId,
+                  });
+                  if (headers.some((h) => !validHeader(h, freshClaims)))
+                    return fail(503, 'READ_BINDING_UNAVAILABLE');
+                  const selected = headers.filter(
+                    (h) => h.scope.officeId === 'INDUSTRY',
+                  );
+                  if (selected.length !== 1)
+                    return fail(403, 'CURRENT_INDUSTRY_SEAT_REQUIRED');
+                  const fresh = selected[0]!;
+                  if (
+                    !fresh ||
+                    canonicalSerialize(before.scope) !==
+                      canonicalSerialize(fresh.scope)
+                  )
+                    return fail(409, 'STALE_SOURCE_SCOPE');
+                  const ps = planning.source,
+                    h = fresh.source;
+                  if (
+                    !isPostwarIndustryUtilityPlanningReader(
+                      industryUtilityPlanningReader,
+                      c.admittedWorldPins.worldId,
+                    )
+                  )
+                    return fail(503, 'INDUSTRY_UTILITY_PLANNING_NOT_INSTALLED');
+                  for (const key of [
+                    'seedId',
+                    'seedFingerprint',
+                    'admissionRef',
+                    'worldVersion',
+                    'eventSequence',
+                  ] as const)
+                    if (ps[key] !== h[key] || before.source[key] !== h[key])
+                      return fail(409, 'STALE_SOURCE_SCOPE');
+                  if (
+                    ps.worldId !== fresh.scope.worldId ||
+                    ps.countryId !== fresh.scope.countryId
+                  )
+                    return fail(403, 'CURRENT_SCOPE_NOT_AUTHORIZED');
+                  const coverage = parseIndustryUtilityPlanningCoverage(
+                    ps.currentIndustryUtilityPlanningCoverage,
+                  );
+                  const rows = planning.rows.map(
+                    parseIndustryUtilityPlanningRow,
+                  );
+                  if (
+                    coverage.countryId !== fresh.scope.countryId ||
+                    coverage.globalWorldVersion !== h.worldVersion ||
+                    coverage.globalEventSequence !== h.eventSequence ||
+                    rows.some((r) => r.countryId !== fresh.scope.countryId) ||
+                    new Set(rows.map((r) => r.planningRef)).size !== rows.length
+                  )
+                    return fail(503, 'READ_BINDING_UNAVAILABLE');
+                  const result = pageBody(
+                    {
+                      status: planning.status,
+                      scope: fresh.scope,
+                      source: {
+                        ...h,
+                        ...ps,
+                        sourceRevision: coverage.reducerVersion,
+                        dataNature: INDUSTRY_UTILITY_PLANNING_NATURE,
+                      },
+                      page: planning.page,
+                      rows,
+                    },
+                    request,
+                  );
+                  if (
+                    new TextEncoder().encode(JSON.stringify(result.body))
+                      .byteLength > 65536
+                  )
+                    return fail(503, 'RESPONSE_LIMIT_EXCEEDED');
+                  return result;
+                },
+              );
+              return checked ?? fail(503, 'READ_BINDING_UNAVAILABLE');
+            })(),
+          );
+          return signal.aborted ? fail(499, 'CANCELLED') : planningResponse;
+        }
         const result = await trackRequestCompletion(
           snapshots.withReadOnlyExecutor(
             {
@@ -555,10 +798,13 @@ export function createPostwarOfficeRuntimeReadService(
                 };
                 const head = selected[0]!.source;
                 const page =
-                  request.office === 'INDUSTRY' &&
-                  request.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
-                    ? await industryParametersStore!.readPageFrom(read, {
+                  request.office === 'TRADE' &&
+                  POSTWAR_TRADE_CURRENT_DATASETS.some(
+                    (x) => x === request.dataset,
+                  )
+                    ? await tradeStore!.readPageFrom(read, {
                         worldId: pageRequest.worldId,
+                        dataset: request.dataset as PostwarTradeCurrentDataset,
                         offset: pageRequest.offset,
                         limit: pageRequest.limit,
                         ...(pageRequest.expectedVersion
@@ -566,9 +812,8 @@ export function createPostwarOfficeRuntimeReadService(
                           : {}),
                       })
                     : request.office === 'INDUSTRY' &&
-                        request.dataset ===
-                          POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET
-                      ? await industryLabourStore!.readPageFrom(read, {
+                        request.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
+                      ? await industryParametersStore!.readPageFrom(read, {
                           worldId: pageRequest.worldId,
                           offset: pageRequest.offset,
                           limit: pageRequest.limit,
@@ -576,9 +821,10 @@ export function createPostwarOfficeRuntimeReadService(
                             ? { expectedVersion: pageRequest.expectedVersion }
                             : {}),
                         })
-                      : request.office === 'CAPTAIN' &&
-                          request.dataset === POSTWAR_CAPTAIN_CURRENT_DATASET
-                        ? await captainStore!.readPageFrom(read, {
+                      : request.office === 'INDUSTRY' &&
+                          request.dataset ===
+                            POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET
+                        ? await industryLabourStore!.readPageFrom(read, {
                             worldId: pageRequest.worldId,
                             offset: pageRequest.offset,
                             limit: pageRequest.limit,
@@ -586,42 +832,56 @@ export function createPostwarOfficeRuntimeReadService(
                               ? { expectedVersion: pageRequest.expectedVersion }
                               : {}),
                           })
-                        : (request.office === 'FINANCE' ||
-                              request.office === 'CENTRAL_BANK') &&
-                            (head.worldVersion !== '0' ||
-                              ['ledger-balances', 'treasury-capacity'].includes(
-                                request.dataset,
-                              ))
-                          ? await financialStore!.readPageFrom(read, {
-                              ...pageRequest,
-                              officeId: request.office,
+                        : request.office === 'CAPTAIN' &&
+                            request.dataset === POSTWAR_CAPTAIN_CURRENT_DATASET
+                          ? await captainStore!.readPageFrom(read, {
+                              worldId: pageRequest.worldId,
+                              offset: pageRequest.offset,
+                              limit: pageRequest.limit,
+                              ...(pageRequest.expectedVersion
+                                ? {
+                                    expectedVersion:
+                                      pageRequest.expectedVersion,
+                                  }
+                                : {}),
                             })
-                          : request.office === 'SOCIAL' &&
-                              head.worldVersion !== '0' &&
-                              ['positions', 'service-pools'].includes(
-                                request.dataset,
-                              )
-                            ? await socialStore!.readPageFrom(read, {
+                          : (request.office === 'FINANCE' ||
+                                request.office === 'CENTRAL_BANK') &&
+                              (head.worldVersion !== '0' ||
+                                [
+                                  'ledger-balances',
+                                  'treasury-capacity',
+                                ].includes(request.dataset))
+                            ? await financialStore!.readPageFrom(read, {
                                 ...pageRequest,
-                                officeId: 'SOCIAL',
+                                officeId: request.office,
                               })
-                            : (request.office === 'INDUSTRY' ||
-                                  request.office === 'TRADE' ||
-                                  request.office === 'CAPTAIN') &&
-                                head.worldVersion !== '0'
-                              ? await (
-                                  request.dataset ===
-                                  'opening-inventory-entries'
-                                    ? inventoryStore!
-                                    : physicalStore!
-                                ).readPageFrom(read, {
+                            : request.office === 'SOCIAL' &&
+                                head.worldVersion !== '0' &&
+                                ['positions', 'service-pools'].includes(
+                                  request.dataset,
+                                )
+                              ? await socialStore!.readPageFrom(read, {
                                   ...pageRequest,
-                                  officeId: request.office,
+                                  officeId: 'SOCIAL',
                                 })
-                              : await store.readPageFrom(read, {
-                                  ...pageRequest,
-                                  officeId: request.office,
-                                });
+                              : (request.office === 'INDUSTRY' ||
+                                    request.office === 'TRADE' ||
+                                    request.office === 'CAPTAIN') &&
+                                  head.worldVersion !== '0'
+                                ? await (
+                                    request.dataset ===
+                                    'opening-inventory-entries'
+                                      ? inventoryStore!
+                                      : physicalStore!
+                                  ).readPageFrom(read, {
+                                    ...pageRequest,
+                                    officeId: request.office,
+                                  })
+                                : await store.readPageFrom(read, {
+                                    ...pageRequest,
+                                    officeId: request.office,
+                                  });
                 if (!('scope' in page))
                   return fail(
                     page.status === 'DENIED'
@@ -634,8 +894,12 @@ export function createPostwarOfficeRuntimeReadService(
                 if (
                   !validHeader(page, claims) ||
                   page.scope.officeId !== request.office ||
-                  (((request.office === 'CAPTAIN' &&
-                    request.dataset === POSTWAR_CAPTAIN_CURRENT_DATASET) ||
+                  (((request.office === 'TRADE' &&
+                    POSTWAR_TRADE_CURRENT_DATASETS.some(
+                      (x) => x === request.dataset,
+                    )) ||
+                    (request.office === 'CAPTAIN' &&
+                      request.dataset === POSTWAR_CAPTAIN_CURRENT_DATASET) ||
                     (request.office === 'INDUSTRY' &&
                       request.dataset ===
                         POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET)) &&

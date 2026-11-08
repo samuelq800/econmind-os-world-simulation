@@ -1,3 +1,4 @@
+import type { PostwarIndustryUtilityPlanningReader } from '@econmind/world-worker/postwar-industry-utility-planning-read';
 import {
   AUTHENTICATED_CURRENT_SEAT_PATH,
   AUTHENTICATED_CURRENT_SEAT_SCHEMA,
@@ -32,6 +33,9 @@ export const POSTWAR_OFFICE_RUNTIME_READ_PATH =
 function createBoundedPostwarFetchHandler(
   config: ExplicitReadPreparationConfig | null,
   target: 'OFFICE_PAGE' | 'CURRENT_SEAT',
+  dependencies: Readonly<{
+    industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+  }> = {},
 ) {
   const path =
     target === 'OFFICE_PAGE'
@@ -49,7 +53,9 @@ function createBoundedPostwarFetchHandler(
       c.endpointPins.finalLookupPath === AUTHENTICATED_CURRENT_SEAT_PATH)
   )
     throw new TypeError('POSTWAR_READ_ENDPOINT_PINS_INVALID');
-  const service = c ? createPostwarOfficeRuntimeReadService(c) : null;
+  const service = c
+    ? createPostwarOfficeRuntimeReadService(c, dependencies)
+    : null;
   return async (request: Request): Promise<Response | null> => {
     const url = new URL(request.url);
     if (
@@ -174,8 +180,11 @@ function createBoundedPostwarFetchHandler(
 /** Explicit bounded office page read. */
 export function createPostwarOfficeRuntimeFetchHandler(
   config: ExplicitReadPreparationConfig | null = null,
+  dependencies: Readonly<{
+    industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+  }> = {},
 ) {
-  return createBoundedPostwarFetchHandler(config, 'OFFICE_PAGE');
+  return createBoundedPostwarFetchHandler(config, 'OFFICE_PAGE', dependencies);
 }
 /** Same existing URL/schema; metadata-only Native header hydration. */
 export function createPostwarCurrentSeatFetchHandler(

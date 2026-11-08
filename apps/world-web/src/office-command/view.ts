@@ -1,4 +1,9 @@
 import {
+  INDUSTRY_UTILITY_PLANNING_DATASET,
+  parseIndustryUtilityPlanningRow,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
+import { renderIndustryUtilityForm } from '../industry-utility/form.js';
+import {
   INDUSTRY_RUN_PARAMETERS_DATASET,
   parseIndustryRunParameterRow,
 } from '@econmind/core/postwar-industry-run-parameters-contract';
@@ -145,7 +150,7 @@ export function installOfficeCommand(
     dialog.append(
       node(
         'p',
-        'Only a current server-authorized seat can submit an installed manual family. Industry supports a source-bound RUN plan; an acknowledgement does not establish work, wages or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
+        'Only a current server-authorized seat can submit an installed manual family. Industry supports source-bound RUN plans and service schedules selected from current data; an acknowledgement does not establish work, wages, delivery or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
       ),
     );
     if (currentView()?.role === 'industry') {
@@ -163,6 +168,29 @@ export function installOfficeCommand(
         ),
       );
     }
+    if (currentView()?.role === 'industry') {
+      const planning =
+        state.utilityPlanningPage?.dataset === INDUSTRY_UTILITY_PLANNING_DATASET
+          ? state.utilityPlanningPage
+          : null;
+      dialog.append(
+        renderIndustryUtilityForm(
+          document,
+          planning ? planning.rows.map(parseIndustryUtilityPlanningRow) : [],
+          state.canStage,
+          planning?.status ?? 'UNAVAILABLE',
+          (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageIndustryUtility(draft),
+        ),
+      );
+      if (planning?.page.nextOffset !== null && planning)
+        dialog.append(
+          button('更多服务调度', 'next-utility-planning', state.canStage, () =>
+            owner.nextIndustryUtilityPlanningPage(),
+          ),
+        );
+    }
     const draft = document.createElement('textarea');
     draft.setAttribute('aria-label', 'Original manual Office request JSON');
     draft.dataset.officeCommandDraft = '';
@@ -171,7 +199,7 @@ export function installOfficeCommand(
     dialog.append(
       node(
         'p',
-        'For a new command, read the current projection and load an explicit public request. To recover after a page reload, paste the exact submitted request and choose recovery only; its old head is retained and it cannot be submitted again. No IDs or economic terms are generated here.',
+        'For a new command, read the current projection and load an explicit public request. To recover after a page reload, paste the exact submitted request and choose recovery only; its old head is retained and it cannot be submitted again. Reference forms generate only new command/booking IDs; source references and economic facts come from the authorized page.',
       ),
       draft,
     );

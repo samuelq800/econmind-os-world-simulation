@@ -125,26 +125,29 @@ export function createPostwarRuntimeView(
         section.append(
           text(
             'p',
-            page.source.dataNature ===
-              'ADMITTED_CURRENT_POLITICAL_CAPITAL_MIXED_PREFIX'
-              ? `Verified current political capital · World version ${page.source.worldVersion} · Capital origin ${String(page.source.originWorldVersion)}`
+            page.source.dataNature === 'ADMITTED_CURRENT_TRADE_COMPLETE_PREFIX'
+              ? `Current inventory and committed transfers · World version ${page.source.worldVersion}`
               : page.source.dataNature ===
-                    'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX' ||
-                  page.source.dataNature ===
-                    'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX'
-                ? `Current ledger claims and reserved capacity · World version ${page.source.worldVersion}`
-                : page.source.dataNature === 'ADMITTED_IMMUTABLE_OPENING_FACTS'
-                  ? `Opening facts (historical) · Checked at World version ${page.authority.readback.worldVersion}`
+                  'ADMITTED_CURRENT_POLITICAL_CAPITAL_MIXED_PREFIX'
+                ? `Verified current political capital · World version ${page.source.worldVersion} · Capital origin ${String(page.source.originWorldVersion)}`
+                : page.source.dataNature ===
+                      'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX' ||
+                    page.source.dataNature ===
+                      'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX'
+                  ? `Current ledger claims and reserved capacity · World version ${page.source.worldVersion}`
                   : page.source.dataNature ===
-                        'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX' &&
-                      page.source.originWorldVersion === '0'
-                    ? `Verified current state from admitted opening · World version ${page.source.worldVersion} · State origin 0`
+                      'ADMITTED_IMMUTABLE_OPENING_FACTS'
+                    ? `Opening facts (historical) · Checked at World version ${page.authority.readback.worldVersion}`
                     : page.source.dataNature ===
-                          'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
-                        page.source.dataNature ===
-                          'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX'
-                      ? `Committed current state · World version ${page.source.worldVersion} · State origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)}`
-                      : 'Admitted opening snapshot · World version 0',
+                          'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX' &&
+                        page.source.originWorldVersion === '0'
+                      ? `Verified current state from admitted opening · World version ${page.source.worldVersion} · State origin 0`
+                      : page.source.dataNature ===
+                            'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
+                          page.source.dataNature ===
+                            'ADMITTED_CURRENT_SOCIAL_MIXED_FINANCIAL_PREFIX'
+                        ? `Committed current state · World version ${page.source.worldVersion} · State origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)}`
+                        : 'Admitted opening snapshot · World version 0',
           ),
           text(
             'p',
@@ -191,6 +194,29 @@ export function createPostwarRuntimeView(
           );
         else {
           const fields: Readonly<Record<string, readonly string[]>> = {
+            'inventory-current': [
+              'commodityId',
+              'batchId',
+              'quantity',
+              'unit',
+              'bucket',
+              'physicalLocationId',
+              'titleHolderId',
+              'riskBearerId',
+              'reservationId',
+              'shipmentId',
+            ],
+            'goods-transfers-current': [
+              'transferCommandId',
+              'sellerCountryId',
+              'buyerCountryId',
+              'commodityId',
+              'quantity',
+              'unit',
+              'status',
+              'reservationId',
+              'shipmentId',
+            ],
             'political-capital-current': [
               'bucket',
               'balance',

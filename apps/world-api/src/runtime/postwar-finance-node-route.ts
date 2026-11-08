@@ -1,3 +1,4 @@
+import type { PostwarIndustryUtilityPlanningReader } from '@econmind/world-worker/postwar-industry-utility-planning-read';
 /** Explicit Node transport only. All JWT/current-seat/CORS/intent decisions
  * remain in the installed Fetch handler. Pools and manual execution stay with
  * the owner of that installation; no environment or Host header is consulted. */
@@ -263,9 +264,17 @@ export function createPostwarOfficeNodeRoute(
  * Pool lifetime belongs to the explicit shared owner, never this transport. */
 export function createPostwarOfficeReadNodeRoute(
   configuration: ExplicitReadPreparationConfig,
-  options: Readonly<{ timeoutMs?: number }> = {},
+  options: Readonly<{
+    timeoutMs?: number;
+    industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>;
+  }> = {},
 ) {
-  const pages = createPostwarOfficeRuntimeFetchHandler(configuration);
+  const pages = createPostwarOfficeRuntimeFetchHandler(
+    configuration,
+    options.industryUtilityPlanningReader
+      ? { industryUtilityPlanningReader: options.industryUtilityPlanningReader }
+      : {},
+  );
   const seats = createPostwarCurrentSeatFetchHandler(configuration);
   return createNodeCommandRoute(
     {

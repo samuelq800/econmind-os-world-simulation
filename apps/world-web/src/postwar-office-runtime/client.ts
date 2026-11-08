@@ -1,4 +1,17 @@
 import {
+  POSTWAR_TRADE_CURRENT_DATASETS,
+  POSTWAR_TRADE_CURRENT_NATURE,
+  parsePostwarTradeCurrentCoverage,
+  parsePostwarTradeInventoryRow,
+  parsePostwarTradeTransferRow,
+} from '@econmind/core/postwar-trade-current-contract';
+import {
+  INDUSTRY_UTILITY_PLANNING_DATASET,
+  INDUSTRY_UTILITY_PLANNING_NATURE,
+  parseIndustryUtilityPlanningRow,
+  parseIndustryUtilityPlanningCoverage,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
+import {
   INDUSTRY_RUN_PARAMETERS_DATASET,
   parseIndustryRunParameterRow,
 } from '@econmind/core/postwar-industry-run-parameters-contract';
@@ -62,12 +75,13 @@ export const officeDatasets: Readonly<Record<string, readonly string[]>> =
       'ledger-balances',
     ],
     INDUSTRY: [
+      INDUSTRY_UTILITY_PLANNING_DATASET,
       INDUSTRY_RUN_PARAMETERS_DATASET,
       POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
       'opening-inventory-entries',
       'regional-source-capacity',
     ],
-    TRADE: ['opening-inventory-entries'],
+    TRADE: ['opening-inventory-entries', ...POSTWAR_TRADE_CURRENT_DATASETS],
     CAPTAIN: [
       POSTWAR_CAPTAIN_CURRENT_DATASET,
       'regional-source-capacity',
@@ -458,6 +472,47 @@ export function createPostwarRuntimeClient(
           (source.dataNature ===
             'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
             source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE);
+        const currentTrade =
+          c.identity.officeId === 'TRADE' &&
+          POSTWAR_TRADE_CURRENT_DATASETS.some((x) => x === dataset) &&
+          source.dataNature === POSTWAR_TRADE_CURRENT_NATURE;
+        if (
+          POSTWAR_TRADE_CURRENT_DATASETS.some((x) => x === dataset) &&
+          !currentTrade
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentTrade) {
+          const coverage = parsePostwarTradeCurrentCoverage(
+            source.currentTradeCoverage,
+          );
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== coverage.globalWorldVersion ||
+            source.originEventSequence !== coverage.globalEventSequence
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          if (dataset === 'inventory-current') {
+            if (
+              rows
+                .map(parsePostwarTradeInventoryRow)
+                .some((x) => x.countryId !== c.identity.countryId)
+            )
+              throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          } else if (
+            rows
+              .map(parsePostwarTradeTransferRow)
+              .some(
+                (x) =>
+                  x.sellerCountryId !== c.identity.countryId &&
+                  x.buyerCountryId !== c.identity.countryId,
+              )
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentTradeCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const currentCaptain =
           c.identity.officeId === 'CAPTAIN' &&
           dataset === POSTWAR_CAPTAIN_CURRENT_DATASET &&
@@ -514,6 +569,43 @@ export function createPostwarRuntimeClient(
           )
             throw Error('INDUSTRY_RUN_PARAMETER_SCOPE_MISMATCH');
         }
+        const currentUtilityPlanning =
+          dataset === INDUSTRY_UTILITY_PLANNING_DATASET &&
+          c.identity.officeId === 'INDUSTRY' &&
+          source.dataNature === INDUSTRY_UTILITY_PLANNING_NATURE;
+        if (
+          dataset === INDUSTRY_UTILITY_PLANNING_DATASET &&
+          !currentUtilityPlanning
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentUtilityPlanning) {
+          const coverage = parseIndustryUtilityPlanningCoverage(
+              source.currentIndustryUtilityPlanningCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            planning = rows.map(parseIndustryUtilityPlanningRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            !version(source.originWorldVersion) ||
+            !version(source.originEventSequence) ||
+            BigInt(source.originWorldVersion) >
+              BigInt(authority.readback.worldVersion) ||
+            BigInt(source.originEventSequence) >
+              BigInt(authority.readback.eventSequence) ||
+            pointer?.rowOrigin !== 'fixed-industry-utility-planning-runtime' ||
+            pointer.rowBinding !== 'planningRef+sourceRef+sourceRawSha256' ||
+            planning.some((p) => p.countryId !== c.identity.countryId) ||
+            new Set(planning.map((p) => p.planningRef)).size !==
+              planning.length ||
+            source.currentFinancialCoverage !== undefined ||
+            source.currentIndustryLabourCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentIndustryUtilityPlanningCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const currentIndustry =
           c.identity.officeId === 'INDUSTRY' &&
           dataset === POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET &&
@@ -585,7 +677,9 @@ export function createPostwarRuntimeClient(
           !opening &&
           !currentSocial &&
           !currentCaptain &&
+          !currentTrade &&
           !currentIndustry &&
+          !currentUtilityPlanning &&
           !financialCurrent &&
           !historicalFacts
         )

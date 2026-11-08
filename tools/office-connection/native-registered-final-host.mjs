@@ -326,47 +326,6 @@ async function initialize(d) {
         historyMode: 'BUDGET_SOCIAL',
       }),
   });
-  binding = Shared.createProductionPostwarFinanceSocialRuntimeConnection({
-    binding: server,
-    environment: 'staging',
-    publicationDatabase,
-    treasuryFx: { workerRole: d.workerRole },
-    captain: { workerRole: d.workerRole, mode: 'OFFICIAL_RUNTIME' },
-    ...(d.install?.centralBankOmo
-      ? {
-          centralBankOmo: {
-            workerRole: d.workerRole,
-            countryIds: d.countries.map((x) => x.countryId),
-            mode: 'OFFICIAL_RUNTIME',
-          },
-        }
-      : {}),
-    ...(d.install?.trade ? { trade: { workerRole: d.workerRole } } : {}),
-    ...(industryContext
-      ? {
-          industry: {
-            sourceContext: industryContext,
-            publicationDatabase: industryPublicationDatabase,
-          },
-          industryLabour: { enabled: true },
-        }
-      : {}),
-    beneficialRent: {
-      workerRole: d.workerRole,
-      clockBindingRef: d.beneficialRent.clockBindingRef,
-    },
-  });
-  const auth = {
-    ...d.configuration.auth,
-    fetch: async (url) => {
-      if (String(url) !== d.configuration.auth.jwksUrl)
-        throw Error('TEST_ONLY_EXACT_JWKS_URL_REQUIRED');
-      const r = Response.json(d.jwks);
-      Object.defineProperty(r, 'url', { value: String(url) });
-      return r;
-    },
-  };
-  const readConfiguration = { ...d.configuration, auth };
   // The product artifact loader performs the one true Core reconstruction.
   // The exact same private proof is then borrowed by FX, Social and Rent.
   // A JSON proof/manifest or parent-only canonical seed can never substitute.
@@ -402,6 +361,58 @@ async function initialize(d) {
       : 'NOT_CONFIGURED_NOT_EXECUTED',
   };
   proofExposed = true;
+  binding = Shared.createProductionPostwarFinanceSocialRuntimeConnection({
+    binding: server,
+    environment: 'staging',
+    publicationDatabase,
+    treasuryFx: { workerRole: d.workerRole },
+    captain: { workerRole: d.workerRole, mode: 'OFFICIAL_RUNTIME' },
+    ...(d.install?.centralBankOmo
+      ? {
+          centralBankOmo: {
+            workerRole: d.workerRole,
+            countryIds: d.countries.map((x) => x.countryId),
+            mode: 'OFFICIAL_RUNTIME',
+          },
+        }
+      : {}),
+    ...(d.install?.trade ? { trade: { workerRole: d.workerRole } } : {}),
+    ...(industryContext
+      ? {
+          industry: {
+            sourceContext: industryContext,
+            ...(d.install?.industryUtilities === true
+              ? {
+                  utilityPreparation: {
+                    repositoryRoot: d.repositoryRoot,
+                    startupSeed: seed,
+                    ...(rentSource
+                      ? { startupBeneficialHousingRentSource: rentSource }
+                      : {}),
+                  },
+                }
+              : {}),
+            publicationDatabase: industryPublicationDatabase,
+          },
+          industryLabour: { enabled: true },
+        }
+      : {}),
+    beneficialRent: {
+      workerRole: d.workerRole,
+      clockBindingRef: d.beneficialRent.clockBindingRef,
+    },
+  });
+  const auth = {
+    ...d.configuration.auth,
+    fetch: async (url) => {
+      if (String(url) !== d.configuration.auth.jwksUrl)
+        throw Error('TEST_ONLY_EXACT_JWKS_URL_REQUIRED');
+      const r = Response.json(d.jwks);
+      Object.defineProperty(r, 'url', { value: String(url) });
+      return r;
+    },
+  };
+  const readConfiguration = { ...d.configuration, auth };
   const policyBytes = await readFile(
     new URL('../../config/postwar-genesis/day-one-fx.v1.json', import.meta.url),
     'utf8',
@@ -503,7 +514,11 @@ process.on('message', async (m) => {
         value: wire(await node.retryDerivedPublication(m.commandId)),
         diagnostics: databaseDiagnostics,
       });
-    } else if (m.type === 'PUBLISH_WORK' || m.type === 'PUBLISH_WAGE') {
+    } else if (
+      m.type === 'PUBLISH_WORK' ||
+      m.type === 'PUBLISH_WAGE' ||
+      m.type === 'PUBLISH_WATER_GRANT'
+    ) {
       if (
         m.countryId !== 'COUNTRY_02' ||
         m.facilityId !== 'OPEN-02-REFINED_FUEL' ||
@@ -515,7 +530,9 @@ process.on('message', async (m) => {
       const method =
         m.type === 'PUBLISH_WORK'
           ? 'publishDueIndustryWork'
-          : 'publishIndustryDueWage';
+          : m.type === 'PUBLISH_WAGE'
+            ? 'publishIndustryDueWage'
+            : 'publishIndustryWaterGrant';
       if (typeof binding?.[method] !== 'function')
         throw Error('FIXED_INDUSTRY_PUBLISHER_NOT_INSTALLED:' + method);
       const result = await binding[method]({

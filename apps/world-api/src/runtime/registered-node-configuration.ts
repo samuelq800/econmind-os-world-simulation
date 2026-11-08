@@ -12,6 +12,7 @@ export interface RegisteredNodeConfiguration {
     trade: boolean;
     industryLabour?: boolean;
     industry?: boolean;
+    industryUtilities?: boolean;
   }>;
   readonly workerId: string;
   readonly executionRegistrationRef: string;
@@ -112,6 +113,9 @@ export function parseRegisteredNodeConfiguration(
           'centralBankOmo',
           'trade',
           ...(Object.hasOwn(c.install, 'industry') ? ['industry'] : []),
+          ...(Object.hasOwn(c.install, 'industryUtilities')
+            ? ['industryUtilities']
+            : []),
           ...(Object.hasOwn(c.install, 'industryLabour')
             ? ['industryLabour']
             : []),
@@ -121,6 +125,9 @@ export function parseRegisteredNodeConfiguration(
         (Object.hasOwn(c.install, 'industry') &&
           typeof c.install.industry !== 'boolean') ||
         (c.install.industry === true && c.install.industryLabour === false) ||
+        (Object.hasOwn(c.install, 'industryUtilities') &&
+          typeof c.install.industryUtilities !== 'boolean') ||
+        (c.install.industryUtilities === true && c.install.industry !== true) ||
         (Object.hasOwn(c.install, 'industryLabour') &&
           typeof c.install.industryLabour !== 'boolean'))) ||
     c.schemaVersion !== 'registered-postwar-node-v1' ||

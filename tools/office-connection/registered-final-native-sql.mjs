@@ -71,6 +71,7 @@ export const REGISTERED_FINAL_NATIVE_SQL_ORDER = Object.freeze([
   'postwar-mixed-goods-omo-current-effects',
   'postwar-mixed-beneficial-rent-current-effects',
   'postwar-paged-current-projection',
+  'postwar-captain-h0-current',
   'postwar-mixed-industry-current-effects',
   'postwar-industry-labour-current-read',
   'postwar-industry-run-parameters-read',
@@ -81,6 +82,10 @@ export const REGISTERED_FINAL_NATIVE_SQL_ORDER = Object.freeze([
   'world-actor-identity-registry',
   'world-command-execution-registration',
   'postwar-source-revocation-fence',
+  'postwar-industry-utility-custody',
+  'postwar-industry-logistics-custody',
+  'postwar-mixed-industry-utility-effects',
+  'postwar-trade-current-projection',
 ]);
 // The initializer needs only these source-custody proposals before publishing
 // H0 originals. Their relative order always comes from the SAME full plan;

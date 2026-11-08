@@ -1,3 +1,7 @@
+import {
+  createPostwarIndustryUtilityPlanningReader,
+  isPostwarIndustryUtilityPlanningReader,
+} from '../../apps/world-worker/src/persistence/postwar-industry-utility-planning-read.js';
 /** Fixed issuer and ownership protocol. No DB source/admission is fabricated;
  * real ordered Finance/Social execution is verified by the native fixture. */
 import { beforeAll, describe, it, expect } from 'vitest';
@@ -88,6 +92,46 @@ function fixtures(worldId: string) {
   };
 }
 describe('fixed Finance/Social single World issuer', () => {
+  it('keeps planning reads bound to the genuine live owner and reports an absent utility installation without SQL', async () => {
+    const f = fixtures('WORLD_SHARED_PLANNING_LIFECYCLE');
+    expect(() =>
+      createPostwarIndustryUtilityPlanningReader({ binding: {} as never }),
+    ).toThrow('GENUINE_FINANCE_SOCIAL_RUNTIME_CONNECTION_REQUIRED');
+    const connection = createPostwarFinanceSocialRuntimeConnection(f.input);
+    const reader = createPostwarIndustryUtilityPlanningReader({
+      binding: connection,
+    });
+    expect(
+      isPostwarIndustryUtilityPlanningReader(reader, connection.worldId),
+    ).toBe(true);
+    expect(
+      isPostwarIndustryUtilityPlanningReader({ ...reader }, connection.worldId),
+    ).toBe(false);
+    expect(isPostwarIndustryUtilityPlanningReader(reader, 'WORLD_OTHER')).toBe(
+      false,
+    );
+    const request = {
+      countryId: 'COUNTRY_01',
+      expectedHead: { worldVersion: '0', eventSequence: '0' },
+    };
+    await expect(reader.readPage({ ...request, offset: 1 })).rejects.toThrow(
+      'EXACT_BOUNDED_PAGE_REQUIRED',
+    );
+    await expect(reader.readPage(request)).resolves.toEqual({
+      status: 'UNAVAILABLE',
+      code: 'INDUSTRY_UTILITY_RUNTIME_NOT_INSTALLED',
+    });
+    expect(f.worker.queries).toEqual([]);
+    expect(f.intake.queries).toEqual([]);
+    await connection.stop();
+    expect(
+      isPostwarIndustryUtilityPlanningReader(reader, connection.worldId),
+    ).toBe(false);
+    await expect(reader.readPage(request)).rejects.toThrow(
+      'LIVE_BINDING_REQUIRED',
+    );
+  });
+
   it('rejects Industry installation without a distinct derived-source database before reserving the World', async () => {
     const f = fixtures('WORLD_SHARED_INDUSTRY_DATABASE');
     for (const publicationDatabase of [undefined, f.social.database])

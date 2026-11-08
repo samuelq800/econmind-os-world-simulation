@@ -130,6 +130,35 @@ describe('explicit registered host configuration, without network or credentials
         ),
       ).toThrow();
   });
+  it('keeps utility installation explicit and requires the existing Industry host', () => {
+    const config = {
+      ...configuration(),
+      install: { centralBankOmo: true, trade: true, industry: true },
+    };
+    expect(
+      parseRegisteredNodeConfiguration(JSON.stringify(config)).install
+        ?.industryUtilities,
+    ).toBeUndefined();
+    expect(
+      parseRegisteredNodeConfiguration(
+        JSON.stringify({
+          ...config,
+          install: { ...config.install, industryUtilities: true },
+        }),
+      ).install?.industryUtilities,
+    ).toBe(true);
+    for (const install of [
+      { centralBankOmo: true, trade: true, industryUtilities: true },
+      { ...config.install, industry: false, industryUtilities: true },
+      { ...config.install, industryUtilities: 'true' },
+    ]) {
+      expect(() =>
+        parseRegisteredNodeConfiguration(
+          JSON.stringify({ ...config, install }),
+        ),
+      ).toThrow();
+    }
+  });
   it('accepts only the exact optional rent artifact segment without restoring caller proofs', () => {
     const beneficialRent = {
       parentSeedPath: '/reviewed/parent.json',

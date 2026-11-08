@@ -25,6 +25,11 @@ import {
 } from '../../apps/world-worker/src/persistence/postwar-industry-first-day-source.js';
 import { loadPostwarSourceContext as loadPostwarIndustryRuntimeSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
 import { createPostwarIndustryProductionSource } from '../../apps/world-worker/src/persistence/postwar-industry-production-source.js';
+import { createPostwarSocialRuntimeConnection } from '../../apps/world-worker/src/runtime-preparation/social-runtime-connection.js';
+import {
+  loadPostwarIndustryUtilitySourceProposal,
+  publishPostwarIndustryUtilitySourcesFrom,
+} from '../../apps/world-worker/src/persistence/postwar-industry-utility-source.js';
 import { publishPostwarPhysicalInventoryProvenanceFrom } from '../../apps/world-worker/src/persistence/postwar-physical-inventory-provenance.js';
 import {
   installRegisteredFinalNativeSqlFrom,
@@ -539,6 +544,44 @@ export async function createRegisteredFinalNodeSetup(input: {
       derivation: f.financeSocialDerivation,
       countryIds: countries,
     });
+    // The owned initializer publishes fixed source DATA before the registered
+    // host starts. Startup itself never grants or invents a utility original.
+    const utilitySocial = createPostwarSocialRuntimeConnection({
+      worldId: m.worldId,
+      workerId,
+      workerPool: open(roles.worker),
+      workerRole: roles.worker,
+      openingAdoption: industryContext.labourSocial,
+    });
+    try {
+      await utilitySocial.prepare({
+        observedAtReal: new Date().toISOString(),
+        admittedWorldPins: {
+          worldId: m.worldId,
+          seedRef: m.seedId,
+          contentHash: m.seedFingerprint,
+          admissionRef: m.admissionRef,
+        },
+        modelVersion: C.WORLD_MODEL_VERSION,
+        startupSeed: f.seed,
+        startupBeneficialHousingRentSource: f.preparation,
+      });
+      const proposal = await loadPostwarIndustryUtilitySourceProposal({
+        repositoryRoot: input.repositoryRoot,
+        socialConnection: utilitySocial,
+        startupSeed: f.seed,
+        startupBeneficialHousingRentSource: f.preparation,
+      });
+      await new PostgresSqlDatabase(
+        open(roles.industryPublication),
+      ).transaction(async (tx) => {
+        await tx.query('set transaction isolation level repeatable read');
+        await tx.query('set local role world_v2_industry_source_publisher');
+        await publishPostwarIndustryUtilitySourcesFrom(tx, { proposal });
+      });
+    } finally {
+      await utilitySocial.close();
+    }
     const inventoryProvenance = [];
     for (const countryId of countries)
       inventoryProvenance.push(
@@ -770,7 +813,12 @@ export async function createRegisteredFinalNodeSetup(input: {
       })),
       configuration,
       jwks,
-      install: { centralBankOmo: true, trade: true, industry: true },
+      install: {
+        centralBankOmo: true,
+        trade: true,
+        industry: true,
+        industryUtilities: true,
+      },
       beneficialRent: {
         parentSeedPath:
           '/workspace/.cloud-setup/evidence/postwar-gcu-opening-fresh-20261029T020748Z/final-seed.json',

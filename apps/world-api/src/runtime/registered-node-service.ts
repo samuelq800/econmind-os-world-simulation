@@ -210,6 +210,17 @@ export async function startConfiguredRegisteredNodeService(input: {
         ? {
             industry: {
               sourceContext: industryContext,
+              ...(c.install?.industryUtilities
+                ? {
+                    utilityPreparation: {
+                      repositoryRoot: input.repositoryRoot,
+                      startupSeed: seed,
+                      ...(rentSource
+                        ? { startupBeneficialHousingRentSource: rentSource }
+                        : {}),
+                    },
+                  }
+                : {}),
               ...(pools.industryPublication
                 ? {
                     publicationDatabase: new PostgresSqlDatabase(
@@ -293,6 +304,19 @@ export async function startConfiguredRegisteredNodeService(input: {
         if (closing || !started.ready())
           throw Error('CONFIGURED_NODE_NOT_READY');
         return shared.publishDueIndustryWork(scope);
+      },
+      publishIndustryWaterGrant(
+        scope: Readonly<{
+          countryId: string;
+          facilityId: string;
+          runId: string;
+        }>,
+      ): ReturnType<
+        PostwarFinanceSocialRuntimeConnection['publishIndustryWaterGrant']
+      > {
+        if (closing || !started.ready())
+          throw Error('CONFIGURED_NODE_NOT_READY');
+        return shared.publishIndustryWaterGrant(scope);
       },
       publishIndustryDueWage(
         scope: Readonly<{

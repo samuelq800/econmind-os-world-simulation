@@ -9,7 +9,7 @@ import {
   preparePostwarSchemaDelta,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const sha = (v: Buffer) => createHash('sha256').update(v).digest('hex');
-// Explicit source inventory: companion fixed 72-proposal policy, with its
+// Explicit source inventory: companion fixed 77-proposal policy, with its
 // isolated Clock deliberately excluded. New proposals require an explicit
 // inventory update; never accept an arbitrary directory count or widen scope.
 const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
@@ -27,6 +27,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-bounded-prefix-read.sql',
   'postwar-bounded-prefix-pages.sql',
   'postwar-captain-current-derived-read.sql',
+  'postwar-captain-h0-current.sql',
   'postwar-captain-intake-binding.sql',
   'postwar-captain-mixed-read.sql',
   'postwar-captain-source-publication.sql',
@@ -38,6 +39,10 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-industry-operating-receipts.sql',
   'postwar-industry-production-source.sql',
   'postwar-industry-first-day-source.sql',
+  'postwar-industry-utility-custody.sql',
+  'postwar-industry-logistics-custody.sql',
+  'postwar-mixed-industry-utility-effects.sql',
+  'postwar-trade-current-projection.sql',
   'postwar-industry-intake-binding.sql',
   'postwar-industry-labour-current-read.sql',
   'postwar-paged-office-history-originals.sql',
@@ -331,14 +336,35 @@ describe('unapproved postwar schema delta package boundary', () => {
       'VALID_UTF8_SQL_REQUIRED',
     );
   });
-  it('classifies the complete seventy-one non-Clock source proposal paths without running or editing SQL', async () => {
+  it('packages only the exact additive Trade CHECK replacement and still rejects other DROP operations', () => {
+    const extension =
+      "alter table world_v2.postwar_paged_current_document drop constraint postwar_paged_current_document_office_id_check;\nalter table world_v2.postwar_paged_current_document add constraint postwar_paged_current_document_office_id_check check(office_id in('FINANCE','CENTRAL_BANK','SOCIAL','CAPTAIN','TRADE'));";
+    expect(
+      classifyDeltaTransaction(
+        Buffer.from('begin;\n' + extension + '\ncommit;'),
+      ).sourceEnvelope,
+    ).toBe('SOURCE_BEGIN_COMMIT');
+    for (const changed of [
+      extension.split('\n')[0]!,
+      extension.replace(",'CAPTAIN'", ''),
+      extension.replace(/postwar_paged_current_document/g, 'another_document'),
+      extension.replace("'TRADE'", "'UNAPPROVED_OFFICE'"),
+      extension + '\ndrop table world_v2.postwar_paged_current_document;',
+    ])
+      expect(() =>
+        classifyDeltaTransaction(
+          Buffer.from('begin;\n' + changed + '\ncommit;'),
+        ),
+      ).toThrow('DESTRUCTIVE_CREDENTIAL_OR_NONTRANSACTIONAL_SQL_DENIED');
+  });
+  it('classifies the complete seventy-six non-Clock source proposal paths without running or editing SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
     const selected = names
       .filter((n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql')
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(71);
+    expect(selected).toHaveLength(76);
     expect(selected).not.toContain('isolated-world-clock.sql');
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));
