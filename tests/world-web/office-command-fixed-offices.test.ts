@@ -33,7 +33,7 @@ describe('fixed Trade/CB submit and original-request recovery, bounded real wire
       });
       expect(
         f.controller.getState().runtimePage?.source.originWorldVersion,
-      ).toBe('0');
+      ).toBe(role === 'trade' ? '2' : '0');
       expect(f.controller.stage(f.request)).toBe(true);
       expect(f.controller.review()).toBe(true);
       await Promise.all([f.controller.confirm(), f.controller.confirm()]);
@@ -92,7 +92,7 @@ describe('fixed Trade/CB submit and original-request recovery, bounded real wire
       f.controller.disconnect();
     },
   );
-  it('distinguishes a valid EMPTY page from fetch failure and never treats an opening inventory origin as current stock', async () => {
+  it('distinguishes a valid EMPTY current page from fetch failure and never treats an opening inventory origin as current stock', async () => {
     const f = setup('trade');
     f.read('empty');
     await f.controller.refresh();
@@ -101,7 +101,8 @@ describe('fixed Trade/CB submit and original-request recovery, bounded real wire
       runtimePage: {
         status: 'EMPTY',
         rows: [],
-        source: { worldVersion: '0', originWorldVersion: '0' },
+        dataset: 'inventory-current',
+        source: { worldVersion: '2', originWorldVersion: '2' },
       },
       currentHead: { worldVersion: '2' },
     });

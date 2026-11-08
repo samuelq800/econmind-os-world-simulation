@@ -161,6 +161,114 @@ export function installOfficeCommand(
         'Only a current server-authorized seat can submit an installed manual family. Industry supports source-bound RUN plans and service schedules selected from current data; an acknowledgement does not establish work, wages, delivery or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
       ),
     );
+    if (state.tradeDataset) {
+      const section = document.createElement('section');
+      section.dataset.tradeCurrentReadout = '';
+      for (const [dataset, label] of [
+        ['inventory-current', '当前库存'],
+        ['goods-transfers-current', '已提交转移'],
+      ] as const) {
+        const select = button(
+          label,
+          dataset === 'inventory-current'
+            ? 'trade-inventory'
+            : 'trade-transfers',
+          state.canRead,
+          () => owner.selectTradeDataset(dataset),
+        );
+        select.setAttribute(
+          'aria-pressed',
+          String(state.tradeDataset === dataset),
+        );
+        section.append(select);
+      }
+      if (state.canReadTradeOpeningH0)
+        section.append(
+          button('仅查看已授权 H0 开局库存', 'trade-opening-h0', true, () =>
+            owner.readTradeOpeningH0(),
+          ),
+        );
+      const page = state.runtimePage;
+      if (page) {
+        const opening = page.dataset === 'opening-inventory-entries';
+        section.append(
+          node(
+            'p',
+            opening
+              ? 'H0 开局库存 · 仅已核验零头、零事件时显示；不是 H>0 当前库存。刷新返回所选当前数据。'
+              : page.dataset === 'inventory-current'
+                ? '当前库存 · 包含实际预留、在途与可用数量。'
+                : '已提交转移 · RESERVED / SHIPPED / DELIVERED 来自实际账本，不是本地订单预览。',
+          ),
+        );
+        section.append(
+          node(
+            'p',
+            `World ${page.authority.readback.worldVersion} / event ${page.authority.readback.eventSequence} · ${page.page.offset + (page.page.returned ? 1 : 0)}–${page.page.offset + page.page.returned} / ${page.page.total}`,
+          ),
+        );
+        if (page.status === 'EMPTY')
+          section.append(
+            node(
+              'p',
+              opening ? '已授权开局库存页无记录。' : '当前已授权数据页无记录。',
+            ),
+          );
+        else {
+          const columns = opening
+            ? ['account', 'quantity']
+            : page.dataset === 'inventory-current'
+              ? [
+                  'commodityId',
+                  'batchId',
+                  'quantity',
+                  'unit',
+                  'bucket',
+                  'physicalLocationId',
+                  'titleHolderId',
+                  'riskBearerId',
+                  'reservationId',
+                  'shipmentId',
+                ]
+              : [
+                  'transferCommandId',
+                  'sellerCountryId',
+                  'buyerCountryId',
+                  'commodityId',
+                  'quantity',
+                  'unit',
+                  'status',
+                  'reservationId',
+                  'shipmentId',
+                ];
+          const table = document.createElement('table'),
+            header = document.createElement('tr');
+          for (const column of columns) header.append(node('th', column));
+          table.append(header);
+          for (const row of page.rows) {
+            const line = document.createElement('tr');
+            for (const column of columns)
+              line.append(
+                node(
+                  'td',
+                  typeof row[column] === 'string'
+                    ? (row[column] as string)
+                    : JSON.stringify(row[column] ?? null),
+                ),
+              );
+            table.append(line);
+          }
+          section.append(table);
+        }
+        if (page.page.nextOffset !== null)
+          section.append(
+            button('下一页', 'trade-next-page', state.canRead, () =>
+              owner.nextTradePage(),
+            ),
+          );
+      }
+      dialog.append(section);
+    }
     if (currentView()?.role === 'captain') {
       try {
         const page = state.runtimePage;

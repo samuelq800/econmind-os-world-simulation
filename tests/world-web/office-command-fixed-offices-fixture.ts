@@ -18,6 +18,12 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
   const base = officeProjectionFixture(role),
     identity = {
       ...base.config.identity,
+      ...(role === 'trade'
+        ? {
+            countryId: 'COUNTRY_01',
+            scopeKey: 'OFFICE_434F554E5452595F3031_5452414445',
+          }
+        : {}),
       projectionVersion: POSTWAR_RUNTIME_SCHEMA,
     };
   let alive = true,
@@ -61,7 +67,7 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
           schemaVersion: 'core-goods-transfer-v1',
           commodityId: 'GRAIN',
           sellerCountryId: identity.countryId,
-          buyerCountryId: 'BUYER_TEST_ONLY',
+          buyerCountryId: 'COUNTRY_02',
           quantity: { amount: '1', unit: 'tonne' },
           price: { amount: '1', currency: 'GCU', perUnit: 'tonne' },
           assetSource: {
@@ -136,7 +142,9 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
     source: {
       dataNature:
         role === 'trade'
-          ? 'ADMITTED_IMMUTABLE_OPENING_FACTS'
+          ? dataset === 'opening-inventory-entries'
+            ? 'ADMITTED_IMMUTABLE_OPENING_FACTS'
+            : 'ADMITTED_CURRENT_TRADE_COMPLETE_PREFIX'
           : 'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX',
       sourceVersion: hash,
       bindingVersion: hash,
@@ -155,11 +163,50 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
       seedRef: config.world.seedRef,
       contentHash: config.world.contentHash,
       admissionRef: config.world.admissionRef,
-      worldVersion: role === 'trade' ? '0' : head,
-      eventSequence: role === 'trade' ? '0' : head,
-      originWorldVersion: '0',
-      originEventSequence: '0',
+      worldVersion:
+        role === 'trade' && dataset === 'opening-inventory-entries'
+          ? '0'
+          : head,
+      eventSequence:
+        role === 'trade' && dataset === 'opening-inventory-entries'
+          ? '0'
+          : head,
+      originWorldVersion:
+        role === 'trade' && dataset !== 'opening-inventory-entries'
+          ? head
+          : '0',
+      originEventSequence:
+        role === 'trade' && dataset !== 'opening-inventory-entries'
+          ? head
+          : '0',
       observedHead: { worldVersion: head, eventSequence: head },
+      ...(role === 'trade' && dataset !== 'opening-inventory-entries'
+        ? {
+            currentTradeCoverage: {
+              schemaVersion: 'postwar-trade-current-page-chain-coverage-v1',
+              reducerVersion: 'POSTWAR_COMPLETE_MIXED_PAGED_PREFIX_V1',
+              countryId: identity.countryId,
+              coverageRef: 'COVERAGE_TEST_ONLY_TRADE',
+              globalWorldVersion: head,
+              globalEventSequence: head,
+              prefixFingerprint: hash,
+              knownEffectsFingerprint: hash,
+              coveredThroughEventId: 'EVENT_TEST_ONLY_LAST',
+              coveredThroughEventFingerprint: hash,
+              financialPostingCount: '0',
+              financialBatchCount: '0',
+              financialPostingsFingerprint: hash,
+              pageProof: {
+                schemaVersion: 'postwar-complete-page-proof-v1',
+                hashAlgorithm: 'COMPLETE_CANONICAL_PAGE_CHAINS_SHA256_V1',
+                pageCount: '1',
+                frameCount: head,
+              },
+              inventoryRowsHash: hash,
+              transferRowsHash: hash,
+            },
+          }
+        : {}),
       ...(role === 'central_bank'
         ? {
             currentFinancialCoverage: {
@@ -191,16 +238,51 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
       pageMode === 'empty'
         ? []
         : role === 'trade'
-          ? [
-              {
-                account: {
+          ? dataset === 'inventory-current'
+            ? [
+                {
+                  schemaVersion: 'postwar-trade-current-inventory-row-v1',
                   countryId: identity.countryId,
                   commodityId: 'GRAIN',
+                  batchId: 'BATCH_TEST_ONLY',
+                  unit: 'tonne',
+                  physicalLocationId: 'LOCATION_TEST_ONLY',
                   bucket: 'AVAILABLE',
+                  reservationId: null,
+                  shipmentId: null,
+                  titleHolderId: 'ENTITY_TEST_ONLY_OWNER',
+                  riskBearerId: 'ENTITY_TEST_ONLY_OWNER',
+                  economicRecognitionId: null,
+                  quantity: '1',
                 },
-                quantity: { amount: '1', unit: 'tonne' },
-              },
-            ]
+              ]
+            : dataset === 'goods-transfers-current'
+              ? [
+                  {
+                    schemaVersion: 'postwar-trade-current-transfer-row-v1',
+                    transferCommandId: request.request.commandId,
+                    transferFingerprint: hash,
+                    sellerCountryId: identity.countryId,
+                    buyerCountryId: 'COUNTRY_02',
+                    commodityId: 'GRAIN',
+                    batchId: 'BATCH_TEST_ONLY',
+                    quantity: '0.000001',
+                    unit: 'tonne',
+                    reservationId: 'RESERVATION_TEST_ONLY',
+                    shipmentId: 'SHIPMENT_TEST_ONLY',
+                    status: 'DELIVERED',
+                  },
+                ]
+              : [
+                  {
+                    account: {
+                      countryId: identity.countryId,
+                      commodityId: 'GRAIN',
+                      bucket: 'AVAILABLE',
+                    },
+                    quantity: { amount: '1', unit: 'tonne' },
+                  },
+                ]
           : [
               {
                 schemaVersion: 'postwar-current-financial-balance-row-v2',
@@ -343,6 +425,9 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
     },
     read: (mode: typeof pageMode) => {
       pageMode = mode;
+    },
+    setHead: (value: string) => {
+      head = value;
     },
     invalidate() {
       alive = false;

@@ -18,6 +18,10 @@ import {
   buildIndustryRunRequest,
   type IndustryRunDraft,
 } from '../industry-run/form.js';
+import {
+  POSTWAR_TRADE_CURRENT_DATASETS,
+  type PostwarTradeCurrentDataset,
+} from '@econmind/core/postwar-trade-current-contract';
 import type {
   AuthenticatedOfficeCommandRequestDto,
   ManualOfficeQueueAcknowledgementDto,
@@ -30,6 +34,7 @@ import {
 import {
   canonicalId,
   hash,
+  row,
   validConfig,
   type ProductionReadConfig,
 } from '../production-read/contract.js';
@@ -148,6 +153,9 @@ export function createOfficeCommandController(
     lookup: FinalLookupIdentity | null = null,
     receipt: BrowserFinalReceipt | null = null;
   let floor = b?.read.world.minimumWorldVersion ?? '0';
+  // Local read selection only. It cannot change the server's dataset, source
+  // custody, current head or command authority.
+  let tradeDataset: PostwarTradeCurrentDataset = 'inventory-current';
   let submitStatus: Status | null = null;
   let submitCode: string | null = null;
   // Local presentation metadata only; never source freshness or authority.
@@ -276,7 +284,7 @@ export function createOfficeCommandController(
       utilityPlanningCode = null;
     }
   }
-  async function read() {
+  async function read(tradeOpeningH0 = false, previous?: RuntimePage) {
     if (!b || !reader) return;
     model = null;
     runtimePage = null;
@@ -292,20 +300,66 @@ export function createOfficeCommandController(
           : b.read.identity.officeId === 'CENTRAL_BANK'
             ? 'ledger-balances'
             : b.read.identity.officeId === 'TRADE'
-              ? 'opening-inventory-entries'
+              ? tradeOpeningH0
+                ? 'opening-inventory-entries'
+                : tradeDataset
               : b.read.identity.officeId === 'SOCIAL'
                 ? 'positions'
                 : b.read.identity.officeId === 'CAPTAIN'
                   ? 'political-capital-current'
                   : 'ledger-balances';
-      const result = await runtimeReader.readPage(dataset, requestId());
+      const result = await runtimeReader.readPage(
+        dataset,
+        requestId(),
+        previous,
+      );
       if (!checkLiveness()) return;
       if (result.status !== 'PAGE' && result.status !== 'EMPTY') {
         fail(result.status);
         return;
       }
+      if (
+        previous &&
+        (previous.authority.readback.worldVersion !==
+          result.authority.readback.worldVersion ||
+          previous.authority.readback.eventSequence !==
+            result.authority.readback.eventSequence)
+      ) {
+        fail('STALE');
+        return;
+      }
       if (BigInt(result.authority.readback.worldVersion) < BigInt(floor)) {
         fail('STALE');
+        return;
+      }
+      const observedOpeningHead = tradeOpeningH0
+        ? row(result.source.observedHead)
+        : null;
+      if (
+        tradeOpeningH0 &&
+        (floor !== '0' ||
+          result.dataset !== 'opening-inventory-entries' ||
+          result.authority.readback.worldVersion !== '0' ||
+          result.authority.readback.eventSequence !== '0' ||
+          result.source.worldVersion !== '0' ||
+          result.source.eventSequence !== '0' ||
+          (result.source.originWorldVersion !== undefined &&
+            result.source.originWorldVersion !== '0') ||
+          (result.source.originEventSequence !== undefined &&
+            result.source.originEventSequence !== '0') ||
+          (result.source.observedHead !== undefined &&
+            (!observedOpeningHead ||
+              observedOpeningHead.worldVersion !== '0' ||
+              observedOpeningHead.eventSequence !== '0')) ||
+          ![
+            'ADMITTED_IMMUTABLE_OPENING_FACTS',
+            'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY',
+          ].includes(String(result.source.dataNature)))
+      ) {
+        // A verified positive head is still a real lower bound, even though
+        // these historical rows cannot be used as the current Trade readout.
+        floor = result.authority.readback.worldVersion;
+        fail('TRADE_OPENING_REQUIRES_EXACT_H0');
         return;
       }
       floor = result.authority.readback.worldVersion;
@@ -510,6 +564,16 @@ export function createOfficeCommandController(
           ? (JSON.parse(JSON.stringify(utilityPlanningPage)) as RuntimePage)
           : null,
         utilityPlanningCode,
+        tradeDataset:
+          b?.read.identity.officeId === 'TRADE' && runtimeReader
+            ? tradeDataset
+            : null,
+        canReadTradeOpeningH0:
+          !retired &&
+          !busy &&
+          !!runtimeReader &&
+          b?.read.identity.officeId === 'TRADE' &&
+          floor === '0',
         currentHead: currentHead()
           ? {
               worldVersion: currentHead()!.worldVersion,
@@ -559,6 +623,47 @@ export function createOfficeCommandController(
       operation(async () => {
         await read();
       }),
+    selectTradeDataset(dataset: PostwarTradeCurrentDataset) {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'TRADE' ||
+        !runtimeReader ||
+        !POSTWAR_TRADE_CURRENT_DATASETS.includes(dataset)
+      )
+        return Promise.resolve();
+      return operation(async () => {
+        tradeDataset = dataset;
+        await read();
+      });
+    },
+    readTradeOpeningH0() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'TRADE' ||
+        !runtimeReader ||
+        floor !== '0'
+      )
+        return Promise.resolve();
+      return operation(() => read(true));
+    },
+    nextTradePage() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'TRADE' ||
+        !runtimeReader ||
+        !runtimePage ||
+        runtimePage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = runtimePage,
+        opening = previous.dataset === 'opening-inventory-entries';
+      if (
+        (!opening && previous.dataset !== tradeDataset) ||
+        (opening && floor !== '0')
+      )
+        return Promise.resolve();
+      return operation(() => read(opening, previous));
+    },
     stage: stageIntent,
     restoreOriginalForRecovery,
     stageCaptainCapital(draft: CaptainCapitalDraft) {
