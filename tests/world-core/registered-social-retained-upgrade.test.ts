@@ -1,4 +1,4 @@
-/** Catalogue-only protocol tests. Synthetic additions are not installed SQL,
+/** Catalogue-only protocol tests. Synthetic catalogues are not installed SQL,
  * source authority, actor permissions or a genuine runtime preparation. */
 import { readFile } from 'node:fs/promises';
 import { it, expect } from 'vitest';
@@ -6,16 +6,9 @@ import {
   assertRegisteredSocialForwardCatalog,
   type SocialForwardMetadata,
 } from '../support/registered-social-retained-upgrade.js';
-import { readRetainedOpeningBaseEvidence } from '../support/postwar-retained-opening-base-evidence.js';
 import type { readRetainedPostwarPowerCatalogFrom } from '../support/postwar-retained-power-upgrade.js';
 type Catalog = Awaited<ReturnType<typeof readRetainedPostwarPowerCatalogFrom>>;
 type Row = Record<string, unknown>;
-const before = JSON.parse(
-  await readFile(
-    '/workspace/.cloud-setup/evidence/c10-opening-base-repair-03/catalog-after.json',
-    'utf8',
-  ),
-) as Catalog;
 const manifest = JSON.parse(
   await readFile(
     new URL(
@@ -25,8 +18,52 @@ const manifest = JSON.parse(
     'utf8',
   ),
 ) as SocialForwardMetadata;
+// Only the committed manifest is an input. These small invented metadata rows
+// exercise the unchanged delta validator; actual retained evidence is checked
+// by the dedicated Native upgrade entry, not by this portable protocol suite.
 const owner = 'world_v2_postwar_projection_owner',
-  ownerId = (before.roles as Row[]).find((r) => r.rolname === owner)!.oid;
+  ownerId = '7001';
+const before: Catalog = {
+  functions: [
+    ...manifest.functions.map((spec, i) => ({
+      signature: spec.signature,
+      oid: 8000 + i,
+      owner,
+      body_sha256: spec.oldBodySha256,
+      acl: null,
+      readers: [],
+      security_definer: true,
+      config: ['search_path=pg_catalog'],
+    })),
+    {
+      signature: 'world_v2.reject_authoritative_history_mutation()',
+      oid: 9000,
+      owner,
+      body_sha256: 'a'.repeat(64),
+      acl: null,
+      readers: [],
+      security_definer: false,
+      config: null,
+    },
+  ],
+  tables: ['postwar_social_prefix_scope', 'runtime_opening_admission'].map(
+    (relname, i) => ({ oid: String(7100 + i), relname, relowner: ownerId }),
+  ),
+  roles: [
+    { oid: ownerId, rolname: owner, rolsuper: false, rolbypassrls: false },
+  ],
+  memberships: [],
+  policies: [
+    {
+      oid: '7200',
+      polname: 'TEST_ONLY_EXISTING_POLICY',
+      polrelid: '7100',
+      polpermissive: false,
+    },
+  ],
+  triggers: [{ oid: '7300', tgname: 'TEST_ONLY_EXISTING_TRIGGER' }],
+  grantKey: 'TEST_ONLY_SYNTHETIC_CATALOG_NOT_DATABASE_EVIDENCE',
+};
 const parentIds = (before.tables as Row[])
   .filter((r) =>
     ['postwar_social_prefix_scope', 'runtime_opening_admission'].includes(
@@ -125,15 +162,18 @@ const check = (after: Catalog, expressions = policyExpressions) =>
     foreignKeyFunctionIds: ids,
     policyExpressions: expressions,
   });
-it('pins the separately repaired catalogue and preserves all 16 real C10 documents', async () => {
-  const e = await readRetainedOpeningBaseEvidence(
-    new URL('../..', import.meta.url).pathname,
-  );
-  expect(e.documents).toHaveLength(16);
-  expect(e.provenance).toHaveLength(2);
-  expect(e.catalog).toEqual(before);
+it('preserves the synthetic predecessor catalogue without mutating its fixture', () => {
+  const saved = structuredClone(before);
+  check(fixture());
+  expect(before).toEqual(saved);
+  expect(before.functions).toHaveLength(14);
+  expect(
+    before.functions.some(
+      (f) => f.signature === manifest.functions[0]!.signature,
+    ),
+  ).toBe(true);
 });
-it('matches all 13 actual predecessor bodies and permits exactly the known DATA delta', () =>
+it('matches all 13 manifest-pinned predecessor hashes and permits exactly the known DATA delta', () =>
   expect(() => check(fixture())).not.toThrow());
 it.each([
   'unknown-function',
