@@ -51,6 +51,7 @@ let node,
   actor,
   closing,
   starting = false;
+let configuredPublicationCountries = new Set();
 const send = (m) => {
   if (process.connected) process.send(m);
 };
@@ -114,6 +115,7 @@ async function stop() {
   return closing;
 }
 async function initialize(d) {
+  configuredPublicationCountries = new Set(d.countries.map((c) => c.countryId));
   if (starting || node) throw Error('REGISTERED_CHILD_ALREADY_STARTED');
   starting = true;
   if (
@@ -575,6 +577,36 @@ process.on('message', async (m) => {
         ok: true,
         value: wire(await node.retryDerivedPublication(m.commandId)),
         diagnostics: databaseDiagnostics,
+      });
+    } else if (m.type === 'PUBLISH_CURRENT_COUNTRIES') {
+      if (
+        !binding ||
+        !Array.isArray(m.countryIds) ||
+        m.countryIds.length !== 1 ||
+        m.countryIds[0] !== 'COUNTRY_10' ||
+        !configuredPublicationCountries.has('COUNTRY_10') ||
+        !m.expectedHead ||
+        Object.keys(m.expectedHead).sort().join(',') !==
+          'eventSequence,worldVersion' ||
+        !['worldVersion', 'eventSequence'].every(
+          (k) =>
+            typeof m.expectedHead[k] === 'string' &&
+            /^[1-9][0-9]*$/u.test(m.expectedHead[k]),
+        ) ||
+        Object.keys(m).some(
+          (k) => !['id', 'type', 'countryIds', 'expectedHead'].includes(k),
+        )
+      )
+        throw Error('FIXED_CONFIGURED_C10_CURRENT_PUBLICATION_REQUIRED');
+      send({
+        id: m.id,
+        ok: true,
+        value: wire(
+          await binding.publishCurrentCountries({
+            countryIds: m.countryIds,
+            expectedHead: m.expectedHead,
+          }),
+        ),
       });
     } else if (
       m.type === 'PUBLISH_WORK' ||

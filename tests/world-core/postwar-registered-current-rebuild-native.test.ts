@@ -45,6 +45,11 @@ import {
 import { readRegisteredCurrentEconomicSnapshotFrom } from '../support/registered-current-read-repair-checkpoint.js';
 import { prepareRegisteredFinalNativeSqlPlan } from '../../tools/office-connection/registered-final-native-sql.mjs';
 import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
+import { upgradeRegisteredSocialRetainedClone } from '../support/registered-social-retained-upgrade.js';
+import { runRegisteredSocialCreateBrowserChain } from '../support/registered-social-create-browser-chain.js';
+import { inspectRegisteredC10LogisticsPreflight } from '../support/registered-c10-logistics-preflight.js';
+const socialCreation =
+  process.env.ECONMIND_REGISTERED_SOCIAL_CREATION_UPGRADE_NATIVE === '1';
 const gate = process.env.ECONMIND_REGISTERED_CURRENT_REBUILD_NATIVE;
 if (gate !== undefined && gate !== '1')
   throw Error('CURRENT_REBUILD_NATIVE_FLAG_MUST_BE_1');
@@ -52,9 +57,11 @@ const native = gate === '1' ? describe : describe.skip;
 const repositoryRoot = path.resolve(import.meta.dirname, '../..');
 
 native(
-  'one actual registered H3 current rebuild without economic writes',
+  socialCreation
+    ? 'one actual retained Node for current reads and finite Social creation'
+    : 'one actual registered H3 current rebuild without economic writes',
   () => {
-    it('retries derived publication, reads Trade, CB and existing Social services on one Node, and preserves every economic byte', async () => {
+    it('runs retained current reads and the explicitly selected finite Social branch', async () => {
       must(
         process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE === '1',
         'REGISTERED_NODE_NATIVE_OPT_IN_REQUIRED',
@@ -84,8 +91,10 @@ native(
         scope:
           'ONE_OS_REUSED_POWER_H3_SINGLE_FORWARD_REFINERY21_PREPARATION_DERIVED_REBUILD_TCP_AND_BROWSER_READ_ONLY',
         fixedRefinerySourcePreparation: 'SAME_LIVE_COLD_PROOF_AFTER_PRECHECK',
-        economicCommandsPosted: 0,
-        consumerSteps: 0,
+        economicCommandsPosted: socialCreation
+          ? 'ACTUAL_SOCIAL_DRIVER_REPORT_ONLY'
+          : 0,
+        consumerSteps: socialCreation ? 'ACTUAL_SOCIAL_DRIVER_REPORT_ONLY' : 0,
         WorldOrOpeningSeedInitialization: false,
         fixedSourceRegistration:
           'EXPLICIT_ADOPTED_REFINERY21_OFFLINE_PREPARATION',
@@ -129,7 +138,10 @@ native(
           repositoryRoot,
           evidenceDirectory,
           sqlPlan,
-          checkpoint: 'POWER_UPGRADED_H3',
+          checkpoint: socialCreation
+            ? 'C10_OPENING_BASES_H3'
+            : 'POWER_UPGRADED_H3',
+          ...(socialCreation ? { includeC10Industry: true as const } : {}),
           expectedCommit,
         });
         f = restored.fixture;
@@ -139,6 +151,23 @@ native(
           resume?.grant.state === 'FINALIZED',
           'ALL_THREE_EXISTING_FINALS_REQUIRED',
         );
+        if (socialCreation) {
+          await phase(
+            'EXACT_SOCIAL_FORWARD_AND_EXPLICIT_ADMITTED_LICENCE_PREPARATION',
+            'START',
+          );
+          report.socialUpgrade = await upgradeRegisteredSocialRetainedClone({
+            repositoryRoot,
+            expectedCommit,
+            evidenceDirectory: path.join(evidenceDirectory, 'social-forward'),
+            fixture: f,
+            setup: s,
+          });
+          await phase(
+            'EXACT_SOCIAL_FORWARD_AND_EXPLICIT_ADMITTED_LICENCE_PREPARATION',
+            'END',
+          );
+        }
         const before = await readRegisteredCurrentEconomicSnapshotFrom(
           f.clone.installer,
           f.marker.worldId,
@@ -262,6 +291,23 @@ native(
           expectedStatus: original.service_pool_count === 0 ? 'EMPTY' : 'PAGE',
         };
         await phase('BROWSER_SUBJECT_AND_SOCIAL_ORIGINAL_PRECHECK', 'END');
+        if (socialCreation) {
+          must(s.c10HttpActor, 'REAL_C10_HTTP_ACTOR_REQUIRED');
+          report.c10PreflightBeforeNode =
+            await inspectRegisteredC10LogisticsPreflight({
+              marker: f.marker,
+              clone: f.clone,
+              descriptor: {
+                ...prepared.descriptor,
+                workerId: String(descriptor.workerId),
+                workerRole: String(descriptor.workerRole),
+                readRole: String(descriptor.readRole),
+                intakeRole: String(descriptor.intakeRole),
+                registrationRef: String(descriptor.registrationRef),
+              },
+              authSubject: s.c10HttpActor.authSubject,
+            });
+        }
         d = createRegisteredFinalDriver({
           repositoryRoot,
           evidenceDirectory,
@@ -270,7 +316,9 @@ native(
           allowedOrigin: 'https://pages-test.example',
           signToken: (cid) => {
             must(
-              cid === 'COUNTRY_01' || cid === 'COUNTRY_02',
+              cid === 'COUNTRY_01' ||
+                cid === 'COUNTRY_02' ||
+                (socialCreation && cid === 'COUNTRY_10'),
               'EXACT_EXISTING_SUBJECT_REQUIRED',
             );
             return s!.signToken(cid);
@@ -338,6 +386,16 @@ native(
           );
         }
         report.refinerySourcePublication = sourcePublication;
+        if (socialCreation) {
+          must(
+            sourcePublication.preparationActions
+              .map(record)
+              .every((a) => a.status === 'REUSED_VERIFIED'),
+            'SOCIAL_TARGET_REQUIRES_ALL63_EXISTING_SOURCES_REUSED_NOT_REGISTERED',
+          );
+          report.fixedSourceRegistration =
+            'ALL63_ACTUAL_CURRENT_READ_VERIFIED_NO_NEW_PUBLICATION';
+        }
         await phase(
           'ONE_NODE_GENUINE_COLD_PROOF_AND_FIXED21_SOURCE_PREPARATION',
           'END',
@@ -699,14 +757,170 @@ native(
           crossCountryRecoveryStatus: cross.status,
         };
         expect(await d.inspect(resume.grant.commandId)).toEqual(grantBefore);
+        if (socialCreation) {
+          report.scope =
+            'ONE_GENUINE_NODE_EXISTING_READS_ACTUAL_SOCIAL_CREATE_PLAN_MATCH_AND_EXPLICIT_C10_CURRENT';
+          await phase(
+            'ACTUAL_SOCIAL_CREATE_CHILD_PLAN_MATCH_AND_FINAL_RECOVERY',
+            'START',
+          );
+          report.socialCreation = await runRegisteredSocialCreateBrowserChain({
+            driver: d,
+            evidencePath: path.join(
+              evidenceDirectory,
+              'social-create-browser-chain.json',
+            ),
+            browserInput: {
+              actualOrigin: d.origin(),
+              applicationOrigin: browserInput.applicationOrigin,
+              evidenceDir: path.join(
+                evidenceDirectory,
+                'social-create-browser',
+              ),
+              authSubject,
+              countryId: 'COUNTRY_02',
+              countryDisplayId: '02',
+              readConfiguration: browserInput.readConfiguration,
+              browser,
+              application,
+              getAccessToken: browserInput.getAccessToken,
+            },
+          });
+          await phase(
+            'ACTUAL_SOCIAL_CREATE_CHILD_PLAN_MATCH_AND_FINAL_RECOVERY',
+            'END',
+          );
+          const beforeC10 = await readRegisteredCurrentEconomicSnapshotFrom(
+              f.clone.installer,
+              f.marker.worldId,
+            ),
+            finalHead = await d.readHead();
+          await phase(
+            'EXPLICIT_CONFIGURED_C10_CURRENT_AT_ACTUAL_FINAL_HEAD',
+            'START',
+          );
+          const current = record(
+            await d.rpc('PUBLISH_CURRENT_COUNTRIES', {
+              countryIds: ['COUNTRY_10'],
+              expectedHead: {
+                worldVersion: finalHead.worldVersion,
+                eventSequence: finalHead.eventSequence,
+              },
+            }),
+          );
+          must(
+            current.status === 'PUBLISHED',
+            'ACTUAL_C10_CURRENT_PUBLICATION_REQUIRED',
+          );
+          expect(current.head).toEqual({
+            worldId: f.marker.worldId,
+            ...finalHead,
+          });
+          expect(current.countries).toEqual(['COUNTRY_10']);
+          const c10 = await d.post(
+            '/v1/postwar-office-runtime',
+            readBody('INDUSTRY', 'industry-labour-current'),
+            'COUNTRY_10',
+          );
+          must(
+            c10.status === 200 &&
+              c10.body.ok === true &&
+              Array.isArray(c10.body.rows),
+            'ACTUAL_C10_RESTRICTED_CURRENT_READ_REQUIRED',
+          );
+          const c10Source = record(c10.body.source);
+          must(
+            c10Source.countryId === 'COUNTRY_10' &&
+              c10Source.worldVersion === finalHead.worldVersion &&
+              c10Source.eventSequence === finalHead.eventSequence,
+            'ACTUAL_C10_SAME_FINAL_HEAD_REQUIRED',
+          );
+          must(s.c10HttpActor, 'REAL_C10_HTTP_ACTOR_REQUIRED');
+          report.c10 = {
+            publication: current,
+            http: c10,
+            preflight: await inspectRegisteredC10LogisticsPreflight({
+              marker: f.marker,
+              clone: f.clone,
+              descriptor: {
+                ...prepared.descriptor,
+                workerId: text(descriptor.workerId),
+                workerRole: text(descriptor.workerRole),
+                readRole: text(descriptor.readRole),
+                intakeRole: text(descriptor.intakeRole),
+                registrationRef: text(descriptor.registrationRef),
+              },
+              authSubject: s.c10HttpActor.authSubject,
+            }),
+          };
+          const afterC10 = await readRegisteredCurrentEconomicSnapshotFrom(
+            f.clone.installer,
+            f.marker.worldId,
+          );
+          expect(afterC10.economic).toEqual(beforeC10.economic);
+          report.c10EconomicPreservation = {
+            before: beforeC10,
+            after: afterC10,
+          };
+          await phase(
+            'EXPLICIT_CONFIGURED_C10_CURRENT_AT_ACTUAL_FINAL_HEAD',
+            'END',
+          );
+        }
         const after = await readRegisteredCurrentEconomicSnapshotFrom(
           f.clone.installer,
           f.marker.worldId,
         );
-        must(
-          isDeepStrictEqual(before.economic, after.economic),
-          'CURRENT_REBUILD_MUST_PRESERVE_EVERY_ECONOMIC_ROW_HASH',
-        );
+        if (!socialCreation) {
+          must(
+            isDeepStrictEqual(before.economic, after.economic),
+            'CURRENT_REBUILD_MUST_PRESERVE_EVERY_ECONOMIC_ROW_HASH',
+          );
+        } else {
+          expect(after.economic.financial_posting_batch).toEqual(
+            before.economic.financial_posting_batch,
+          );
+          expect(after.economic.inventory_posting).toEqual(
+            before.economic.inventory_posting,
+          );
+          await d.recover(resume.run, { duplicateProbe: false });
+          await d.recover(resume.book, { duplicateProbe: false });
+          expect(await d.inspect(resume.grant.commandId)).toEqual(grantBefore);
+          const stored = await f.clone.installer.query<{
+            command_id: string;
+          }>(
+            "select command_id from world_v2.command_submission where world_id=$1 and country_id='COUNTRY_02' and command_type in('CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1','CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1') order by command_id",
+            [f.marker.worldId],
+          );
+          const stages = record(report.socialCreation).stages;
+          must(Array.isArray(stages), 'ACTUAL_SOCIAL_STAGE_EVIDENCE_REQUIRED');
+          const actualIds = stages
+            .map(record)
+            .filter((v) => v.actual)
+            .map((v) => String(record(v.actual).commandId))
+            .sort();
+          expect(stored.rows.map((v) => v.command_id)).toEqual(actualIds);
+          report.actualSocialCommandIds = actualIds;
+          report.economicCommandsPosted = actualIds.filter(
+            (id) =>
+              id.startsWith('SOCIAL_SERVICE_CREATE_') ||
+              id.startsWith('SOCIAL_PLAN_'),
+          ).length;
+          report.consumerSteps = actualIds.length;
+          for (const table of [
+            'command_submission',
+            'command_queue',
+            'command_receipt',
+            'authoritative_event',
+          ])
+            expect(
+              BigInt(String(record(after.economic[table]).count)) -
+                BigInt(String(record(before.economic[table]).count)),
+            ).toBe(BigInt(actualIds.length));
+          expect(BigInt((await d.readHead()).worldVersion) - 3n).toBe(
+            BigInt(actualIds.length),
+          );
+        }
         report.after = after;
         await d.stop();
         await d.finish('PASS');
@@ -731,6 +945,14 @@ native(
           () => browser?.close(),
           () => d?.stop(),
           () => s?.close(),
+          async () => {
+            if (f)
+              report.finalEconomicReadbackAfterDrain =
+                await readRegisteredCurrentEconomicSnapshotFrom(
+                  f.clone.installer,
+                  f.marker.worldId,
+                );
+          },
           () => f?.cleanup(),
         ])
           try {
