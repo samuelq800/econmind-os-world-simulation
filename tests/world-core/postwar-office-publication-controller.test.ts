@@ -55,6 +55,15 @@ vi.mock(
     }),
   }),
 );
+vi.mock(
+  '../../apps/world-worker/src/runtime-preparation/social-runtime-connection.js',
+  () => ({
+    readPostwarSocialRuntimeConnectionResources: () => ({
+      workerRole: 'test_worker',
+      countryIds: ['COUNTRY_02', 'COUNTRY_10'],
+    }),
+  }),
+);
 import { createPostwarOfficePublicationController } from '../../apps/world-worker/src/persistence/postwar-office-publication-controller.js';
 const world = 'WORLD_TEST';
 const command = {
@@ -75,7 +84,11 @@ const step = {
   source: 'NEW_FINAL',
   receipt,
 } as unknown as Extract<DurableConsumptionStep, { status: 'PROCESSED' }>;
-function controller(industryLabour = false, tradeCurrent = false) {
+function controller(
+  industryLabour = false,
+  tradeCurrent = false,
+  currentCountryIds?: readonly string[],
+) {
   const database = {
     async query(sql: string) {
       fixture.queries.push(sql);
@@ -100,6 +113,7 @@ function controller(industryLabour = false, tradeCurrent = false) {
   return createPostwarOfficePublicationController({
     worldId: world,
     database,
+    ...(currentCountryIds === undefined ? {} : { currentCountryIds }),
     ...(tradeCurrent ? { tradeCurrent: true as const } : {}),
     ...(industryLabour ? { industryLabour: true as const } : {}),
     workerRole: 'test_worker',
@@ -150,6 +164,187 @@ beforeEach(() => {
   fixture.close.mockResolvedValue(undefined);
 });
 describe('fixed post-commit derived publication', () => {
+  it('explicitly rebuilds configured C10 current pages at the held expected head without inventing a Command or FINAL', async () => {
+    const c = controller(true, true, ['COUNTRY_02', 'COUNTRY_10']);
+    fixture.publish.mockResolvedValueOnce({
+      head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+      captain: [{}],
+      financial: Array.from({ length: 10 }, () => ({})),
+      social: [{}, {}],
+      trade: [{}, {}],
+    });
+    const result = await c.publishCurrentCountries({
+      countryIds: ['COUNTRY_10'],
+      expectedHead: { worldVersion: '3', eventSequence: '4' },
+    });
+    expect(result).toEqual({
+      status: 'PUBLISHED',
+      head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+      countries: ['COUNTRY_10'],
+      publications: [
+        {
+          countryId: 'COUNTRY_10',
+          documentCount: 16,
+          captain: 'PUBLISHED',
+          industryLabour: 'PUBLISHED',
+        },
+      ],
+    });
+    expect(fixture.publish).toHaveBeenCalledExactlyOnceWith('COUNTRY_10', {
+      requireCaptain: false,
+      includeTrade: true,
+      expectedHead: { worldId: world, worldVersion: '3', eventSequence: '4' },
+    });
+    expect(fixture.industryPublish).toHaveBeenCalledWith(
+      'COUNTRY_10',
+      result.head,
+    );
+    expect(fixture.readCommand).not.toHaveBeenCalled();
+    expect(fixture.readReceipt).not.toHaveBeenCalled();
+    await c.close();
+  });
+  it('does not enable the current rebuild for legacy controllers or unconfigured/foreign countries and malformed heads', async () => {
+    const legacy = controller(),
+      c = controller(false, false, ['COUNTRY_10']);
+    const request = {
+      countryIds: ['COUNTRY_10'],
+      expectedHead: { worldVersion: '3', eventSequence: '4' },
+    };
+    await expect(legacy.publishCurrentCountries(request)).rejects.toThrow(
+      'REGISTERED_CURRENT_PUBLICATION_SCOPE_REQUIRED',
+    );
+    for (const bad of [
+      { ...request, countryIds: [] },
+      { ...request, countryIds: ['COUNTRY_10', 'COUNTRY_10'] },
+      { ...request, countryIds: ['COUNTRY_02'] },
+      { ...request, countryIds: ['COUNTRY_03'] },
+      { ...request, expectedHead: { worldVersion: '0', eventSequence: '0' } },
+      { ...request, expectedHead: { worldVersion: '4', eventSequence: '3' } },
+      {
+        ...request,
+        expectedHead: { worldVersion: '3', eventSequence: '4', simTime: '0' },
+      },
+      { ...request, simTime: '0' },
+    ])
+      await expect(c.publishCurrentCountries(bad)).rejects.toThrow(
+        'EXACT_CONFIGURED_CURRENT_COUNTRIES_AND_POSITIVE_HEAD_REQUIRED',
+      );
+    const invalidScope = controller(false, false, ['COUNTRY_03']);
+    await expect(
+      invalidScope.publishCurrentCountries({
+        ...request,
+        countryIds: ['COUNTRY_03'],
+      }),
+    ).rejects.toThrow(
+      'EXACT_CONFIGURED_CURRENT_COUNTRIES_AND_POSITIVE_HEAD_REQUIRED',
+    );
+    expect(fixture.publish).not.toHaveBeenCalled();
+    expect(fixture.readCommand).not.toHaveBeenCalled();
+    await legacy.close();
+    await c.close();
+    await invalidScope.close();
+  });
+  it('reuses the separate publisher identity check before current source work', async () => {
+    const c = controller(false, false, ['COUNTRY_10']);
+    fixture.publisherRole = 'test_worker';
+    await expect(
+      c.publishCurrentCountries({
+        countryIds: ['COUNTRY_10'],
+        expectedHead: { worldVersion: '3', eventSequence: '4' },
+      }),
+    ).rejects.toThrow('EXACT_SEPARATE_DERIVED_PUBLISHER_REQUIRED');
+    expect(fixture.publish).not.toHaveBeenCalled();
+    expect(fixture.readCommand).not.toHaveBeenCalled();
+    await c.close();
+  });
+  it('passes the expected head to the existing held-snapshot publisher and refuses drift or a withdrawn source without economic retry', async () => {
+    const c = controller(true, false, ['COUNTRY_10']);
+    const request = {
+      countryIds: ['COUNTRY_10'],
+      expectedHead: { worldVersion: '4', eventSequence: '5' },
+    };
+    await expect(c.publishCurrentCountries(request)).rejects.toThrow(
+      'CURRENT_COUNTRIES_EXPECTED_PUBLICATION_HEAD_MISMATCH',
+    );
+    expect(fixture.publish).toHaveBeenCalledWith('COUNTRY_10', {
+      requireCaptain: false,
+      expectedHead: { worldId: world, worldVersion: '4', eventSequence: '5' },
+    });
+    expect(fixture.industryPublish).not.toHaveBeenCalled();
+    const rejection = Object.assign(Error('ACTUAL_SOURCE_REVOKED'), {
+      code: '55000',
+    });
+    fixture.publish.mockRejectedValueOnce(rejection);
+    await expect(
+      c.publishCurrentCountries({
+        ...request,
+        expectedHead: { worldVersion: '3', eventSequence: '4' },
+      }),
+    ).rejects.toBe(rejection);
+    expect(fixture.readReceipt).not.toHaveBeenCalled();
+    await c.close();
+  });
+  it('keeps acknowledged derived countries on a later failure and can repeat the same finite list/head without inventing FINALs', async () => {
+    const c = controller(false, false, ['COUNTRY_02', 'COUNTRY_10']);
+    const request = {
+      countryIds: ['COUNTRY_02', 'COUNTRY_10'],
+      expectedHead: { worldVersion: '3', eventSequence: '4' },
+    };
+    fixture.publish
+      .mockResolvedValueOnce({
+        head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+        captain: [{}],
+        financial: Array(10).fill({}),
+        social: [{}, {}],
+        trade: [],
+      })
+      .mockRejectedValueOnce(Error('DERIVED_WRITE_ACK_UNKNOWN'));
+    await expect(c.publishCurrentCountries(request)).rejects.toThrow(
+      'DERIVED_WRITE_ACK_UNKNOWN',
+    );
+    expect(fixture.publish.mock.calls.map((c) => c[0])).toEqual([
+      'COUNTRY_02',
+      'COUNTRY_10',
+    ]);
+    expect((await c.publishCurrentCountries(request)).countries).toEqual(
+      request.countryIds,
+    );
+    expect(fixture.readCommand).not.toHaveBeenCalled();
+    expect(fixture.readReceipt).not.toHaveBeenCalled();
+    await c.close();
+  });
+  it('joins an explicit current rebuild before retiring the source and refuses another rebuild after close starts', async () => {
+    const c = controller(false, false, ['COUNTRY_10']);
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    fixture.publish.mockImplementationOnce(async () => {
+      await gate;
+      return {
+        head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+        captain: [{}],
+        financial: Array(10).fill({}),
+        social: [{}, {}],
+        trade: [],
+      };
+    });
+    const request = {
+      countryIds: ['COUNTRY_10'],
+      expectedHead: { worldVersion: '3', eventSequence: '4' },
+    };
+    const work = c.publishCurrentCountries(request);
+    await vi.waitFor(() => expect(fixture.publish).toHaveBeenCalledOnce());
+    const closing = c.close();
+    expect(fixture.close).not.toHaveBeenCalled();
+    await expect(c.publishCurrentCountries(request)).rejects.toThrow(
+      'PUBLICATION_CONTROLLER_CLOSED',
+    );
+    release();
+    await work;
+    await closing;
+    expect(fixture.close).toHaveBeenCalledOnce();
+  });
   it('publishes finite configured Captain H0 countries before any economic command, without a country01 fallback', async () => {
     const c = controller();
     expect(

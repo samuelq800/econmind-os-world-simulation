@@ -118,6 +118,17 @@ function fixture() {
     step,
   };
 }
+it('does not expose explicit current rebuild authority through the local legacy shared fixture', async () => {
+  const f = fixture();
+  await expect(async () =>
+    f.connection.publishCurrentCountries({
+      countryIds: ['COUNTRY_01'],
+      expectedHead: { worldVersion: '3', eventSequence: '3' },
+    }),
+  ).rejects.toThrow('REGISTERED_CURRENT_PUBLICATION_SCOPE_REQUIRED');
+  expect(f.publication.retryCommitted).not.toHaveBeenCalled();
+  await f.connection.stop();
+});
 describe('same consumer derived-publication lifecycle binding', () => {
   it('constructs only the fixed helper with actual same-World role, source and explicit borrowed DB', async () => {
     const f = fixture();

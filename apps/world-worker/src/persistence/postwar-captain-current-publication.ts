@@ -148,13 +148,24 @@ export function createPostwarCaptainCurrentPublisher(input: {
       options: {
         readonly requireCaptain: boolean;
         readonly includeTrade?: boolean;
+        readonly expectedHead?: Readonly<{
+          worldId: string;
+          worldVersion: string;
+          eventSequence: string;
+        }>;
       } = { requireCaptain: true },
     ) {
       return input.source.withCaptainSnapshot(
         countryId,
         async (tx, token) => {
-          const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token),
-            captain =
+          const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token);
+          if (
+            options.expectedHead &&
+            canonicalSerialize(options.expectedHead) !==
+              canonicalSerialize(f.head)
+          )
+            throw Error('CURRENT_COUNTRIES_EXPECTED_PUBLICATION_HEAD_MISMATCH');
+          const captain =
               f.captainOriginalStatus === 'PRESENT'
                 ? derivePostwarCaptainCurrentFrom(tx, token)
                 : null,

@@ -9,7 +9,10 @@ import {
   parseNarrowTreasuryGcuDeliveryTerms,
 } from '@econmind/core';
 import type { DurableConsumptionStep } from '../preparation/durable-command-consumption.js';
-import type { PostwarSocialRuntimeConnection } from '../runtime-preparation/social-runtime-connection.js';
+import {
+  readPostwarSocialRuntimeConnectionResources,
+  type PostwarSocialRuntimeConnection,
+} from '../runtime-preparation/social-runtime-connection.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
 import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import { createPostwarMixedCurrentProjectionSource } from './postwar-mixed-current-projection-publication.js';
@@ -66,10 +69,38 @@ export type PostwarOpeningCaptainPublicationResult =
         admissionRef: string;
       }>[];
     }>;
+export interface PostwarCurrentCountriesPublicationRequest {
+  readonly countryIds: readonly string[];
+  readonly expectedHead: Readonly<{
+    worldVersion: string;
+    eventSequence: string;
+  }>;
+}
+export interface PostwarCurrentCountriesPublicationResult {
+  readonly status: 'PUBLISHED';
+  readonly head: Readonly<{
+    worldId: string;
+    worldVersion: string;
+    eventSequence: string;
+  }>;
+  readonly countries: readonly string[];
+  readonly publications: readonly Readonly<{
+    countryId: string;
+    documentCount: number;
+    captain: 'PUBLISHED' | 'NO_REGISTERED_ORIGINAL';
+    industryLabour?: 'PUBLISHED';
+  }>[];
+}
 export interface PostwarOfficePublicationController {
   publishOpeningCaptainCountries(
     countryIds: readonly string[],
   ): Promise<PostwarOpeningCaptainPublicationResult>;
+  /** Explicit current derived rebuild; no Command or FINAL is required or
+   * created. Countries are acknowledged separately; failure can follow a prior
+   * country publication and a same-head retry rechecks all originals again. */
+  publishCurrentCountries(
+    input: PostwarCurrentCountriesPublicationRequest,
+  ): Promise<PostwarCurrentCountriesPublicationResult>;
   afterCommitted(
     step: DurableConsumptionStep,
   ): Promise<PostwarOfficeConsumptionStep>;
@@ -86,8 +117,15 @@ export function createPostwarOfficePublicationController(input: {
   readonly publicationDatabase: SqlDatabase;
   readonly industryLabour?: true;
   readonly tradeCurrent?: true;
+  /** Fixed registered host scope, installed by the genuine shared composition.
+   * Absence leaves this new explicit method disabled on legacy controllers. */
+  readonly currentCountryIds?: readonly string[];
 }): PostwarOfficePublicationController {
   const world = worldId(input.worldId);
+  const currentCountries =
+    input.currentCountryIds === undefined
+      ? null
+      : Object.freeze([...input.currentCountryIds]);
   if (!/^[a-z][a-z0-9_]{0,62}$/u.test(input.workerRole))
     throw Error('EXACT_PUBLICATION_WORKER_ROLE_REQUIRED');
   const lineage = new DurableV08LedgerLineageReader({
@@ -322,6 +360,113 @@ export function createPostwarOfficePublicationController(input: {
     return task;
   }
   return Object.freeze({
+    publishCurrentCountries(
+      request: PostwarCurrentCountriesPublicationRequest,
+    ): Promise<PostwarCurrentCountriesPublicationResult> {
+      if (closed) return Promise.reject(Error('PUBLICATION_CONTROLLER_CLOSED'));
+      if (!currentCountries)
+        return Promise.reject(
+          Error('REGISTERED_CURRENT_PUBLICATION_SCOPE_REQUIRED'),
+        );
+      const configured = readPostwarSocialRuntimeConnectionResources(
+        input.socialConnection,
+      );
+      const uint = (v: unknown): v is string =>
+        typeof v === 'string' &&
+        /^[1-9][0-9]*$/u.test(v) &&
+        BigInt(v) <= 9223372036854775807n;
+      if (
+        !request ||
+        Object.keys(request).sort().join('|') !== 'countryIds|expectedHead' ||
+        !Array.isArray(request.countryIds) ||
+        request.countryIds.length === 0 ||
+        request.countryIds.length > 70 ||
+        new Set(request.countryIds).size !== request.countryIds.length ||
+        !request.expectedHead ||
+        Object.keys(request.expectedHead).sort().join('|') !==
+          'eventSequence|worldVersion' ||
+        !uint(request.expectedHead.worldVersion) ||
+        !uint(request.expectedHead.eventSequence) ||
+        BigInt(request.expectedHead.worldVersion) >
+          BigInt(request.expectedHead.eventSequence) ||
+        currentCountries.length === 0 ||
+        currentCountries.length > 70 ||
+        new Set(currentCountries).size !== currentCountries.length ||
+        configured.workerRole !== input.workerRole ||
+        currentCountries.some((c) => !configured.countryIds.includes(c)) ||
+        request.countryIds.some(
+          (c) =>
+            !/^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(c) ||
+            !currentCountries.includes(c),
+        )
+      )
+        return Promise.reject(
+          Error(
+            'EXACT_CONFIGURED_CURRENT_COUNTRIES_AND_POSITIVE_HEAD_REQUIRED',
+          ),
+        );
+      const countries = Object.freeze([...request.countryIds]),
+        head = Object.freeze({ worldId: world, ...request.expectedHead });
+      const task =
+        (async (): Promise<PostwarCurrentCountriesPublicationResult> => {
+          await requirePublisher();
+          const publications: PostwarCurrentCountriesPublicationResult['publications'][number][] =
+            [];
+          for (const countryId of countries) {
+            // Do not borrow the worker pool around this call: the existing
+            // publisher holds its own genuine source/H snapshot (max1 safe).
+            // expectedHead is checked on that snapshot BEFORE any publisher SQL.
+            const result = await publisher.publishOfficeCurrentCountry(
+              countryId,
+              {
+                requireCaptain: false,
+                ...(input.tradeCurrent ? { includeTrade: true } : {}),
+                expectedHead: head,
+              },
+            );
+            if (canonicalSerialize(result.head) !== canonicalSerialize(head))
+              throw Error(
+                'CURRENT_COUNTRIES_EXPECTED_PUBLICATION_HEAD_MISMATCH',
+              );
+            const industry = await industryPublisher?.publishCountry(
+              countryId,
+              head,
+            );
+            if (
+              industry &&
+              canonicalSerialize(industry.head) !== canonicalSerialize(head)
+            )
+              throw Error('INDUSTRY_EXPECTED_PUBLICATION_HEAD_MISMATCH');
+            publications.push(
+              Object.freeze({
+                countryId,
+                documentCount:
+                  result.captain.length +
+                  result.financial.length +
+                  result.social.length +
+                  result.trade.length +
+                  (industry?.documents.length ?? 0),
+                captain: result.captain.length
+                  ? 'PUBLISHED'
+                  : 'NO_REGISTERED_ORIGINAL',
+                ...(industry ? { industryLabour: 'PUBLISHED' as const } : {}),
+              }),
+            );
+          }
+          return Object.freeze({
+            status: 'PUBLISHED',
+            head,
+            countries,
+            publications: Object.freeze(publications),
+          });
+        })();
+      pending.add(task);
+      void task.then(
+        () => pending.delete(task),
+        () => pending.delete(task),
+      );
+      return task;
+    },
     /** Startup-only derived data. The real shared owner is prepared before
      * this call; H is held while the separate fixed publisher derives H0.
      * No event, command, Clock, lease or original source is created. */

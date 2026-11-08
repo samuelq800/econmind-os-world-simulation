@@ -102,6 +102,8 @@ import {
   createPostwarOfficePublicationController,
   type PostwarOfficeConsumptionStep,
   type PostwarDerivedPublicationResult,
+  type PostwarCurrentCountriesPublicationRequest,
+  type PostwarCurrentCountriesPublicationResult,
 } from '../persistence/postwar-office-publication-controller.js';
 import { createPostwarCaptainMixedSource } from '../persistence/postwar-captain-mixed-source.js';
 import { createPostwarCaptainRuntime } from '../persistence/postwar-captain-runtime.js';
@@ -244,6 +246,10 @@ export interface PostwarFinanceSocialRuntimeConnection {
   retryDerivedPublication(
     commandId: string,
   ): Promise<PostwarDerivedPublicationResult>;
+  /** Explicit registered-host derived rebuild, never Command submission. */
+  publishCurrentCountries(
+    input: PostwarCurrentCountriesPublicationRequest,
+  ): Promise<PostwarCurrentCountriesPublicationResult>;
   stop(): Promise<void>;
 }
 const connections = new WeakMap<
@@ -743,12 +749,15 @@ function constructFinanceSocialRuntimeConnection(
           workerRole: resources.workerRole,
           socialConnection: social,
           publicationDatabase: input.publicationDatabase,
+          ...(formalBinding ? { currentCountryIds: scope.countryIds } : {}),
           ...(input.industryLabour ? { industryLabour: true as const } : {}),
           ...(input.trade ? { tradeCurrent: true as const } : {}),
         })
       : null;
     let combinedActive: Promise<PostwarOfficeConsumptionStep> | null = null;
     let retryActive: Promise<PostwarDerivedPublicationResult> | null = null;
+    let currentPublicationActive: Promise<PostwarCurrentCountriesPublicationResult> | null =
+      null;
     let stopped = false,
       stopping: Promise<void> | null = null;
     let fxPrepared = false;
@@ -910,7 +919,7 @@ function constructFinanceSocialRuntimeConnection(
         consumeOnce() {
           requirePrepared();
           if (!publication) return runtime.consumer.consumeOnce();
-          if (combinedActive || retryActive)
+          if (combinedActive || retryActive || currentPublicationActive)
             return Promise.resolve(
               Object.freeze({
                 status: 'BLOCKED' as const,
@@ -936,7 +945,7 @@ function constructFinanceSocialRuntimeConnection(
           requirePrepared();
           if (!publication)
             throw Error('FINANCE_SOCIAL_PUBLICATION_NOT_INSTALLED');
-          if (combinedActive || retryActive)
+          if (combinedActive || retryActive || currentPublicationActive)
             return Promise.resolve(
               Object.freeze({
                 status: 'UNAVAILABLE' as const,
@@ -958,14 +967,46 @@ function constructFinanceSocialRuntimeConnection(
           );
           return work;
         },
+        publishCurrentCountries(
+          request: PostwarCurrentCountriesPublicationRequest,
+        ): Promise<PostwarCurrentCountriesPublicationResult> {
+          requirePrepared();
+          if (!formalBinding)
+            throw Error('REGISTERED_CURRENT_PUBLICATION_SCOPE_REQUIRED');
+          if (!publication)
+            throw Error('FINANCE_SOCIAL_PUBLICATION_NOT_INSTALLED');
+          if (combinedActive || retryActive || currentPublicationActive)
+            return Promise.reject(
+              Error('CURRENT_PUBLICATION_STEP_ALREADY_RUNNING'),
+            );
+          const work = Promise.resolve().then(() =>
+            publication.publishCurrentCountries(request),
+          );
+          currentPublicationActive = work;
+          void work.then(
+            () => {
+              if (currentPublicationActive === work)
+                currentPublicationActive = null;
+            },
+            () => {
+              if (currentPublicationActive === work)
+                currentPublicationActive = null;
+            },
+          );
+          return work;
+        },
         stop() {
           if (stopping) return stopping;
           stopped = true;
           deferredUtilityPreparation = undefined;
           preparedTreasuryFxConnections.delete(connection);
           stopping = (async () => {
-            if (combinedActive || retryActive)
-              await Promise.allSettled([combinedActive, retryActive]);
+            if (combinedActive || retryActive || currentPublicationActive)
+              await Promise.allSettled([
+                combinedActive,
+                retryActive,
+                currentPublicationActive,
+              ]);
             await runtime.consumer.stop();
             await publication?.close();
             if (fxPreparing) await Promise.allSettled([fxPreparing]);
