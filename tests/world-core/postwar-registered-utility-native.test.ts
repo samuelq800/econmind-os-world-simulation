@@ -2,6 +2,8 @@
  * regenerates genesis or reuses a serialized proof. Each Node OS proves its
  * source anew; the second OS recovers the same disposable database. */
 import { randomUUID } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -14,6 +16,7 @@ import {
   deriveRegisteredFinalIndustryRunPlan,
   registeredFinalPublishedCommand,
   registeredFinalAssert as must,
+  registeredFinalRecord as object,
 } from '../support/postwar-registered-final-driver.js';
 import { prepareRegisteredFinalNativeSqlPlan } from '../../tools/office-connection/registered-final-native-sql.mjs';
 import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
@@ -23,6 +26,7 @@ if (gate !== undefined && gate !== '1')
   throw Error('REGISTERED_UTILITY_NATIVE_FLAG_MUST_BE_1');
 const native = gate === '1' ? describe : describe.skip;
 const repositoryRoot = path.resolve(import.meta.dirname, '../..');
+const exec = promisify(execFile);
 
 native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
   it('uses one finite consumer and recovers FINAL in a new cold Node OS without economic resubmission', async () => {
@@ -72,6 +76,8 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
     let setup:
       Awaited<ReturnType<typeof createRegisteredFinalNodeSetup>> | undefined;
     let driver: ReturnType<typeof createRegisteredFinalDriver> | undefined;
+    let primaryFailure: unknown;
+    const cleanupErrors: string[] = [];
     const phases: Readonly<Record<string, unknown>>[] = [];
     const began = performance.now();
     let currentPhase = 'NOT_STARTED';
@@ -332,15 +338,21 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
       report.status = 'PASS';
       await d.finish('PASS');
     } catch (error) {
-      await phase(currentPhase, 'FAILED');
+      primaryFailure = error;
       report.status = 'FAIL';
       report.error = wireColdError(error);
-      await driver?.finish('FAIL', error);
-      throw error;
+      for (const record of [
+        () => phase(currentPhase, 'FAILED'),
+        () => driver?.finish('FAIL', error),
+      ])
+        try {
+          await record();
+        } catch (recordError) {
+          cleanupErrors.push(String(recordError));
+        }
     } finally {
-      const cleanupErrors: string[] = [];
-      await phase('DRAIN_AND_RETAIN_OWNED_STOPPED_CHECKPOINT', 'START');
       for (const close of [
+        () => phase('DRAIN_AND_RETAIN_OWNED_STOPPED_CHECKPOINT', 'START'),
         () => driver?.stop(),
         () => setup?.close(),
         () => fixture?.cleanup(),
@@ -351,37 +363,122 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
           cleanupErrors.push(String(e));
         }
       report.cleanup = cleanupErrors.length === 0 ? 'COMPLETED' : cleanupErrors;
-      if (fixture) {
-        try {
-          report.resourceCheckpoint = JSON.parse(
-            await readFile(
-              path.join(evidenceDirectory, 'pg', 'retained-checkpoint.json'),
-              'utf8',
+      let resourceState = 'UNCONFIRMED';
+      try {
+        const pg = path.join(evidenceDirectory, 'pg');
+        const cleanup = object(
+          JSON.parse(await readFile(path.join(pg, 'cleanup.json'), 'utf8')),
+        );
+        report.resourceCleanup = cleanup;
+        must(
+          cleanup.complete === true,
+          'ACTUAL_FIXTURE_RESOURCE_CLEANUP_NOT_CONFIRMED',
+        );
+        if (cleanup.resourceState === 'RETAINED_STOPPED') {
+          const checkpoint = object(
+            JSON.parse(
+              await readFile(path.join(pg, 'retained-checkpoint.json'), 'utf8'),
             ),
-          ) as unknown;
-        } catch (error) {
+          );
+          const marker = object(
+            JSON.parse(
+              await readFile(path.join(pg, 'reference-db.json'), 'utf8'),
+            ),
+          );
+          const owned = object(
+            JSON.parse(
+              await readFile(path.join(pg, 'owned-container.json'), 'utf8'),
+            ),
+          );
+          const volume = object(checkpoint.volume);
+          must(
+            checkpoint.ownershipNonce === owned.ownershipNonce &&
+              marker.ownershipNonce === owned.ownershipNonce &&
+              checkpoint.ownedContainer === owned.ownedContainer &&
+              marker.ownedContainer === owned.ownedContainer &&
+              volume.name === object(owned.pgDataStorage).name &&
+              checkpoint.runtimeReady === false &&
+              ['INITIALIZATION_INTERRUPTED', 'FIXTURE_RETURNED'].includes(
+                String(checkpoint.initializationState),
+              ),
+            'EXACT_THIS_RUN_CHECKPOINT_NONCE_REQUIRED',
+          );
+          must(
+            typeof checkpoint.ownedContainer === 'string' &&
+              typeof volume.name === 'string',
+            'EXACT_OWNED_RESOURCE_IDENTIFIERS_REQUIRED',
+          );
+          const actual = await exec(
+            'docker',
+            [
+              'inspect',
+              checkpoint.ownedContainer,
+              '--format',
+              '{{index .Config.Labels "econmind.reference.nonce"}} {{.State.Status}} {{.State.ExitCode}} {{.State.OOMKilled}}',
+            ],
+            { maxBuffer: 1048576 },
+          );
+          const actualVolume = await exec(
+            'docker',
+            [
+              'volume',
+              'inspect',
+              volume.name,
+              '--format',
+              '{{index .Labels "econmind.reference.nonce"}}',
+            ],
+            { maxBuffer: 1048576 },
+          );
+          must(
+            actual.stdout.trim() ===
+              String(owned.ownershipNonce) + ' exited 0 false' &&
+              actualVolume.stdout.trim() === owned.ownershipNonce,
+            'ACTUAL_NONCE_MATCHED_STOPPED_CHECKPOINT_REQUIRED',
+          );
+          report.resourceCheckpoint = checkpoint;
+          resourceState = 'RETAINED_STOPPED';
+        } else if (
+          cleanup.resourceState === 'DISPOSED' &&
+          cleanup.recoverableDatabase === false
+        )
+          resourceState = 'DISPOSED';
+        else must(false, 'EXACT_FIXTURE_RESOURCE_STATE_REQUIRED');
+      } catch (error) {
+        // Before any fixture is issued, an early initialization error may have
+        // no resource record. Never infer a recoverable checkpoint from that.
+        if (fixture || (error as { code?: unknown }).code !== 'ENOENT')
           cleanupErrors.push(String(error));
-        }
       }
       if (cleanupErrors.length) {
         report.cleanup = cleanupErrors;
         report.status = 'FAIL_CLEANUP';
       }
-      await phase(
-        'DRAIN_AND_RETAIN_OWNED_STOPPED_CHECKPOINT',
-        cleanupErrors.length ? 'FAILED' : 'END',
-        {
-          resourceState:
-            fixture && cleanupErrors.length === 0
-              ? 'RETAINED_STOPPED'
-              : 'UNCONFIRMED',
-        },
-      );
-      await save();
-      must(
-        cleanupErrors.length === 0,
-        'OWNED_CHILD_CLEANUP_REQUIRED:' + cleanupErrors.join(';'),
-      );
+      try {
+        await phase(
+          'DRAIN_AND_RETAIN_OWNED_STOPPED_CHECKPOINT',
+          cleanupErrors.length ? 'FAILED' : 'END',
+          {
+            resourceState:
+              cleanupErrors.length === 0 ? resourceState : 'UNCONFIRMED',
+          },
+        );
+      } catch (recordError) {
+        cleanupErrors.push(String(recordError));
+      }
+      if (cleanupErrors.length) {
+        report.cleanup = cleanupErrors;
+        report.status = 'FAIL_CLEANUP';
+      }
+      try {
+        await save();
+      } catch (recordError) {
+        cleanupErrors.push(String(recordError));
+      }
     }
+    // Preserve the original business failure; cleanup/report failures cannot
+    // replace it. A successful business run still fails if cleanup is unproven.
+    if (primaryFailure !== undefined) throw primaryFailure;
+    if (cleanupErrors.length)
+      throw new AggregateError(cleanupErrors, 'OWNED_CHILD_CLEANUP_REQUIRED');
   }, 1800000);
 });
