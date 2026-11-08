@@ -32,6 +32,7 @@ import {
 } from './prepared-postwar-social-source.js';
 import {
   readPostwarIndustryFirstDaySourceFrom,
+  decodePostwarIndustryFirstDaySourceRow,
   type PostwarIndustryFirstDaySourceData,
 } from './postwar-industry-first-day-source.js';
 import type { SqlExecutor } from './sql-database.js';
@@ -551,4 +552,173 @@ export async function readPostwarIndustryLogisticsReplaySourcesFrom(
   });
   if (!projected.source) fail('ACTUAL_RUN_REPLAY_SOURCE_REQUIRED');
   return Object.freeze({ ...projected, source: projected.source });
+}
+
+/** Actual COMMITTED historical originals use the current HOST lane, never a
+ * target Industry seat. Later target revocation cannot erase an applied journal.
+ * The complete Core fold still verifies every supplied canonical frame/effect. */
+export const INDUSTRY_LOGISTICS_COMMITTED_SOURCE_QUERY =
+  'select * from world_v2.read_postwar_industry_logistics_committed_source($1,$2,$3,$4,$5,$6,$7,$8,$9::bigint,$10::bigint,$11,$12)';
+export const INDUSTRY_LOGISTICS_COMMITTED_ORDERS_QUERY =
+  'select * from world_v2.read_postwar_industry_logistics_committed_orders($1,$2,$3,$4,$5,$6,$7,$8,$9::bigint,$10::bigint,$11,$12)';
+export async function readPostwarIndustryLogisticsPageOriginalsFrom(
+  tx: SqlExecutor,
+  input: Readonly<{
+    baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>;
+    worldId: string;
+    hostCountryId: string;
+    officeId: 'SOCIAL' | 'FINANCE';
+    expectedHead: Readonly<{ worldVersion: string; eventSequence: string }>;
+    frames: readonly import('@econmind/core/finance-budget-native').FinanceNativeBudgetCanonicalFrame[];
+  }>,
+) {
+  const b = consumePreparedPostwarSocialFinancialReplayBase(input.baseline);
+  if (
+    b.pins.worldId !== input.worldId ||
+    input.frames.length > 256 ||
+    Buffer.byteLength(canonicalSerialize(input.frames), 'utf8') > 1048576
+  )
+    fail('EXACT_BOUNDED_ACTUAL_HISTORY_PAGE_REQUIRED');
+  const frames = input.frames.filter(
+    (f) => f.command.commandType === 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+  );
+  if (!frames.length)
+    return Object.freeze({ industryLogisticsSources: Object.freeze([]) });
+  const configuration = installed.get(input.baseline);
+  if (!configuration)
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'HISTORICAL_LOGISTICS_CONFIGURATION_NOT_PREPARED',
+    );
+  const found = new Map<
+    string,
+    {
+      firstday: Readonly<PostwarIndustryFirstDaySourceData>;
+      runs: Set<string>;
+      work: Map<string, IndustryLogisticsExpenseOriginal>;
+      pay: Map<string, IndustryLogisticsExpenseOriginal>;
+    }
+  >();
+  let totalBytes = 0;
+  for (const frame of frames) {
+    const intent = JSON.parse(frame.command.canonicalPayload) as Record<
+      string,
+      unknown
+    >;
+    if (
+      intent.serviceKind !== 'LOGISTICS' ||
+      frame.command.worldId !== input.worldId ||
+      frame.command.officeId !== 'INDUSTRY'
+    )
+      fail('ACTUAL_FIXED_LOGISTICS_HISTORY_REQUIRED');
+    const countryId = text(frame.command.countryId),
+      facilityId = text(intent.facilityId),
+      runId = text(intent.runId);
+    const parameters = [
+      input.worldId,
+      input.hostCountryId,
+      input.officeId,
+      countryId,
+      facilityId,
+      runId,
+      frame.command.commandId,
+      frame.command.fingerprint,
+      input.expectedHead.worldVersion,
+      input.expectedHead.eventSequence,
+      b.pins.contentHash,
+      b.pins.admissionRef,
+    ];
+    const rows = await tx.query<Record<string, unknown>>(
+      INDUSTRY_LOGISTICS_COMMITTED_SOURCE_QUERY,
+      parameters,
+    );
+    if (rows.rows.length !== 1)
+      fail('EXACT_HISTORICAL_FIRSTDAY_ORIGINAL_REQUIRED');
+    const firstday = decodePostwarIndustryFirstDaySourceRow(
+      {
+        source_text: text(rows.rows[0]!.source_text),
+        source_sha256: text(rows.rows[0]!.source_sha256),
+        source_ref: text(rows.rows[0]!.source_ref),
+        world_version: text(rows.rows[0]!.world_version),
+        event_sequence: text(rows.rows[0]!.event_sequence),
+      },
+      {
+        worldId: input.worldId,
+        countryId,
+        facilityId,
+        head: input.expectedHead,
+        expectedPins: {
+          seedId: b.pins.seedRef,
+          seedFingerprint: b.pins.contentHash,
+          admissionRef: b.pins.admissionRef,
+        },
+      },
+    );
+    const key = countryId + '\0' + facilityId,
+      old = found.get(key);
+    if (
+      old &&
+      (old.firstday.rawSha256 !== firstday.rawSha256 ||
+        old.firstday.rawText !== firstday.rawText ||
+        old.firstday.sourceRef !== firstday.sourceRef)
+    )
+      fail('HISTORICAL_FIRSTDAY_IMMUTABLE_IDENTITY_CHANGED');
+    const group = old ?? {
+      firstday,
+      runs: new Set<string>(),
+      work: new Map<string, IndustryLogisticsExpenseOriginal>(),
+      pay: new Map<string, IndustryLogisticsExpenseOriginal>(),
+    };
+    group.runs.add(runId);
+    found.set(key, group);
+    const orders = await tx.query<Record<string, unknown>>(
+      INDUSTRY_LOGISTICS_COMMITTED_ORDERS_QUERY,
+      parameters,
+    );
+    if (orders.rows.length > 1)
+      fail('EXACT_REFERENCED_HISTORICAL_ORDER_REQUIRED');
+    for (const r of orders.rows) {
+      if (
+        r.world_version !== input.expectedHead.worldVersion ||
+        r.event_sequence !== input.expectedHead.eventSequence ||
+        r.seed_fingerprint !== b.pins.contentHash ||
+        r.admission_ref !== b.pins.admissionRef ||
+        (r.kind !== 'WORK' && r.kind !== 'PAY')
+      )
+        fail('HISTORICAL_ORDER_ACTUAL_PINS_CHANGED');
+      const reference = text(r.original_ref),
+        rawText = text(r.original_text),
+        rawSha256 = text(r.original_sha256),
+        table = r.kind === 'WORK' ? group.work : group.pay;
+      if (
+        Buffer.byteLength(rawText, 'utf8') > 65536 ||
+        sha(rawText) !== rawSha256 ||
+        canonicalSerialize(JSON.parse(rawText)) !== rawText
+      )
+        fail('EXACT_HISTORICAL_ORDER_BYTES_REQUIRED');
+      const prior = table.get(reference);
+      if (prior && (prior.rawText !== rawText || prior.rawSha256 !== rawSha256))
+        fail('HISTORICAL_ORDER_REFERENCE_CHANGED');
+      if (!prior) {
+        totalBytes += Buffer.byteLength(rawText, 'utf8');
+        if (totalBytes > 1048576)
+          fail('BOUNDED_ACTUAL_HISTORY_ORDERS_REQUIRED');
+        table.set(reference, Object.freeze({ reference, rawText, rawSha256 }));
+      }
+    }
+  }
+  const sources: IndustryInternalLogisticsReplaySources[] = [];
+  for (const group of found.values()) {
+    const projected = projectPostwarIndustryLogisticsReplaySources({
+      baseline: input.baseline,
+      context: configuration.context,
+      firstday: group.firstday,
+      runIds: [...group.runs],
+      policyBytes: configuration.policyBytes,
+      workOriginals: [...group.work.values()],
+      expenseOriginals: [...group.pay.values()],
+    });
+    if (!projected.source) fail('ACTUAL_HISTORICAL_RUN_SOURCE_REQUIRED');
+    sources.push(projected.source);
+  }
+  return Object.freeze({ industryLogisticsSources: Object.freeze(sources) });
 }

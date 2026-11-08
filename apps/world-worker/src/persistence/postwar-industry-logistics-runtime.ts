@@ -109,6 +109,13 @@ export interface PostwarIndustryLogisticsRuntime {
     command: CanonicalCommand,
     observedAtReal: string,
   ): Promise<void>;
+  readPlanningScope(
+    countryId: string,
+  ): Readonly<{
+    worldId: string;
+    countryId: string;
+    facilityId: string;
+  }> | null;
   readPlanningFrom(
     tx: SqlExecutor,
     input: Readonly<{
@@ -944,6 +951,18 @@ export function createPostwarIndustryLogisticsRuntime(config: {
     database: config.database,
     candidateFactory,
     sourceCommitProtectionPort: port,
+    readPlanningScope(countryId: string) {
+      if (!ready() || !source) return null;
+      const policy = JSON.parse(source.policyBytes.policy) as {
+        scope?: { country?: unknown; facility?: unknown };
+      };
+      if (policy.scope?.country !== countryId) return null;
+      return Object.freeze({
+        worldId: world,
+        countryId,
+        facilityId: text(policy.scope.facility),
+      });
+    },
     readPlanningFrom: (
       tx: SqlExecutor,
       input: Parameters<typeof readPlanningFrom>[1],
