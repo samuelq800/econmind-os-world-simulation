@@ -74,7 +74,14 @@ export const waterExecutionScenario = createIndustryFirstDayWaterScenario(
   },
   sha,
 );
-export function createIndustryWaterExecutionFixture(powerBookedMWh = '0.1') {
+export function createIndustryWaterExecutionFixture(
+  powerBookedMWh = '0.1',
+  sourceBasePins: Readonly<{
+    WATER?: Readonly<{ sourceRef: string; sourceRawSha256: string }>;
+    POWER?: Readonly<{ sourceRef: string; sourceRawSha256: string }>;
+    automaticWaterGrant?: true;
+  }> = {},
+) {
   const world = C.worldId('WORLD_TEST_ONLY_WATER_EXECUTION'),
     country = C.countryId('COUNTRY_02'),
     op = C.legalEntityId('ENTITY_OPERATOR_02'),
@@ -262,6 +269,7 @@ export function createIndustryWaterExecutionFixture(powerBookedMWh = '0.1') {
       admissionRef,
       sourceRef: 'SOURCE_TEST_ONLY_' + kind,
       sourceRawSha256: sha(kind),
+      ...sourceBasePins[kind],
       policyVersion:
         kind === 'WATER' ? POLICY.version : POWER_POLICY.policyVersion,
       policyRawSha256:
@@ -309,7 +317,7 @@ export function createIndustryWaterExecutionFixture(powerBookedMWh = '0.1') {
     maximumRawQuotaPerDay: { amount: '4221.590388', unit: 'm3/sim-day' },
     validFromTicks: '0',
     validUntilTicks: '86400000',
-    sourceRef: 'SOURCE_TEST_ONLY_WATER',
+    sourceRef: sourceBasePins.WATER?.sourceRef ?? 'SOURCE_TEST_ONLY_WATER',
     userAdoptionRawSha256: POLICY.userAdoptionSha256,
     sourceAllocationRawSha256: CONSERVATIVE_OPENING_WATER_SOURCES.allocations,
     grantAuthorityOriginalRef: 'TEST_ONLY_ELIGIBILITY_NOT_NATIVE_AUTHORITY',
@@ -538,11 +546,46 @@ export function createIndustryWaterExecutionFixture(powerBookedMWh = '0.1') {
     );
   }
   schedule(target, 'RUN_TARGET_TEST_ONLY');
-  const beforeGrant = replay(frames),
-    grantDraft = waterDraft(
-      beforeGrant,
-      utility('WATER', 'GRANT_TEST_ONLY', '1', '0', { action: 'GRANT_RIGHT' }),
-    ),
+  const beforeGrant = replay(frames);
+  let grantCommand = utility('WATER', 'GRANT_TEST_ONLY', '1', '0', {
+    action: 'GRANT_RIGHT',
+  });
+  if (sourceBasePins.automaticWaterGrant) {
+    const run = frames[0]!.command;
+    const id =
+      'COMMAND_INDUSTRY_WATER_GRANT_' +
+      sha(
+        C.canonicalSerialize([
+          world,
+          run.fingerprint,
+          waterOriginal.source.sourceRawSha256,
+          'INDUSTRY_BOUNDED_WATER_GRANT_V1',
+        ]),
+      ).toUpperCase();
+    grantCommand = C.parseCanonicalCommand(
+      {
+        schemaVersion: C.COMMAND_SCHEMA_VERSION,
+        commandId: id,
+        commandType: grantCommand.commandType,
+        worldId: world,
+        countryId: country,
+        officeId: null,
+        actorId: run.actorId,
+        authSubject: run.authSubject,
+        expectedWorldVersion: '1',
+        idempotencyKey: id,
+        correlationId: run.correlationId,
+        submittedAtReal: now,
+        simTime: '0',
+        payload: {
+          ...JSON.parse(grantCommand.canonicalPayload),
+          operationRef: id,
+        },
+      },
+      sha,
+    );
+  }
+  const grantDraft = waterDraft(beforeGrant, grantCommand),
     grant = commit(grantDraft);
   frames.push(grant);
   const waterGranted = {

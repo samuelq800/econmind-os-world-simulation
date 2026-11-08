@@ -60,6 +60,7 @@ import {
   mergeIndustryInternalLogisticsReplaySources,
   readIndustryInternalLogisticsReplaySources,
   readIndustryInternalLogisticsExecutionState,
+  readIndustryInternalLogisticsPaidOpeningReleases,
   replayIndustryInternalLogisticsFrame,
   synchronizeIndustryInternalLogisticsExecutionState,
   type IndustryInternalLogisticsReplaySources,
@@ -1377,6 +1378,51 @@ function foldFinanceNativeBudgetMixedPrefix(
         ),
       );
     }
+    const paidBatches = new Set<string>();
+    for (const state of industryLogisticsState)
+      for (const r of readIndustryInternalLogisticsPaidOpeningReleases(state)) {
+        const account = financial?.accounts.find(
+          (a) => a.accountId === r.accountId,
+        );
+        if (
+          !financial ||
+          !account ||
+          account.countryId !== r.countryId ||
+          account.ownerId !== r.operatorId ||
+          account.currency !== r.currency ||
+          financial.appliedBatches.filter(
+            (b) =>
+              b.batchId === r.batchId && b.fingerprint === r.batchFingerprint,
+          ).length !== 1 ||
+          seen.has(r.reservationId) ||
+          paidBatches.has(r.batchId)
+        )
+          invalid('EXACT_APPLIED_LOGISTICS_OPENING_RELEASE_REQUIRED');
+        seen.add(r.reservationId);
+        paidBatches.add(r.batchId);
+        const matched = financialReplay.openingEncumbrances.filter(
+          (o) => o.accountId === r.accountId,
+        );
+        // A conditional model may have no opening reservation for this account;
+        // an actual payment cannot create or release an invented reference.
+        if (matched.length === 0) continue;
+        if (matched.length !== 1 || matched[0]!.currency !== r.currency)
+          invalid('UNIQUE_LOGISTICS_OPENING_RESERVATION_REQUIRED');
+        const original = matched[0]!,
+          amount = Money.from(r.amount, r.currency);
+        if (!amount.amount.greaterThan(0))
+          invalid('POSITIVE_ACTUAL_LOGISTICS_RELEASE_REQUIRED');
+        const total = (
+          released.get(original.reference) ?? Money.from('0', r.currency)
+        ).add(amount);
+        if (
+          total.amount.greaterThan(
+            Money.from(original.amount, r.currency).amount,
+          )
+        )
+          invalid('LOGISTICS_PAYMENT_EXCEEDS_OPENING_RESERVATION');
+        released.set(original.reference, total);
+      }
     return financialReplay.openingEncumbrances.map((r) => {
       const paid = released.get(r.reference) ?? Money.from('0', r.currency);
       const remaining = Money.from(r.amount, r.currency).subtract(paid);
@@ -1731,6 +1777,39 @@ function foldFinanceNativeBudgetMixedPrefix(
         },
         sha,
       );
+      if (intent.operation.action === 'SERVICE_WORK') {
+        // The full domain frame has already been rederived above. Its opening
+        // staff range is not proof that these people remain employed now.
+        const country = countries.get(command.countryId);
+        if (!country)
+          invalid('ACTUAL_LOGISTICS_CURRENT_LABOUR_COUNTRY_REQUIRED');
+        const allocations = intent.operation.allocations;
+        if (!Array.isArray(allocations))
+          invalid('EXACT_LOGISTICS_WORK_ALLOCATIONS_REQUIRED');
+        for (const allocation of allocations) {
+          if (
+            !allocation ||
+            typeof allocation !== 'object' ||
+            Array.isArray(allocation)
+          )
+            invalid('EXACT_LOGISTICS_WORK_ALLOCATION_REQUIRED');
+          const a = allocation as Readonly<Record<string, unknown>>;
+          const positions =
+            country.lifecycle.employment.labour.positions.filter(
+              (p) => p.positionId === a.positionId,
+            );
+          if (
+            positions.length !== 1 ||
+            positions[0]!.countryId !== command.countryId ||
+            positions[0]!.locationId !== a.regionId ||
+            positions[0]!.skill !== a.skill ||
+            typeof a.count !== 'string' ||
+            !/^[1-9][0-9]*$/u.test(a.count) ||
+            BigInt(positions[0]!.employedCount) < BigInt(a.count)
+          )
+            invalid('ACTUAL_CURRENT_LOGISTICS_EMPLOYMENT_REQUIRED');
+        }
+      }
       if (reduced.execution !== null)
         invalid('UTILITY_REPLAY_MUST_NOT_MINT_DELIVERY_BEFORE_COMPLETE_PREFIX');
       industryLogisticsState = [

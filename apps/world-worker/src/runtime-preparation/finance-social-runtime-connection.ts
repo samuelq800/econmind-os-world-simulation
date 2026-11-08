@@ -224,6 +224,9 @@ export interface PostwarFinanceSocialRuntimeConnection {
   ): Promise<void>;
   /** Complete the fixed FX source first so a host can release its large seed. */
   prepareTreasuryFx(opening: PostwarDayOneFxPreparationInput): Promise<void>;
+  publishIndustryWaterGrant(
+    scope: Parameters<PostwarIndustryUtilityRuntime['publishWaterGrant']>[0],
+  ): ReturnType<PostwarIndustryUtilityRuntime['publishWaterGrant']>;
   publishDueIndustryWork(
     scope: Parameters<PostwarIndustryWorkRuntime['publishDueWork']>[0],
   ): ReturnType<PostwarIndustryWorkRuntime['publishDueWork']>;
@@ -586,6 +589,17 @@ function constructFinanceSocialRuntimeConnection(
       ? createPostwarIndustryUtilityRuntime({
           database,
           socialConnection: social,
+          ...(input.industry.publicationDatabase
+            ? {
+                publication: {
+                  database: input.industry.publicationDatabase,
+                  clock: Object.freeze({
+                    nowReal: () => input.clock.nowReal(),
+                    simTime: () => input.clock.simTime(world),
+                  }),
+                },
+              }
+            : {}),
         })
       : null;
     const industryLogistics = input.industry?.utilityPreparation
@@ -706,6 +720,7 @@ function constructFinanceSocialRuntimeConnection(
           socialConnection: social,
           publicationDatabase: input.publicationDatabase,
           ...(input.industryLabour ? { industryLabour: true as const } : {}),
+          ...(input.trade ? { tradeCurrent: true as const } : {}),
         })
       : null;
     let combinedActive: Promise<PostwarOfficeConsumptionStep> | null = null;
@@ -822,6 +837,16 @@ function constructFinanceSocialRuntimeConnection(
           requireLive();
         },
         prepareTreasuryFx,
+        publishIndustryWaterGrant(
+          scope: Parameters<
+            PostwarIndustryUtilityRuntime['publishWaterGrant']
+          >[0],
+        ) {
+          requirePrepared();
+          if (!industryUtility)
+            throw Error('INDUSTRY_UTILITY_RUNTIME_NOT_INSTALLED');
+          return industryUtility.publishWaterGrant(scope);
+        },
         publishDueIndustryWork(
           scope: Parameters<PostwarIndustryWorkRuntime['publishDueWork']>[0],
         ) {

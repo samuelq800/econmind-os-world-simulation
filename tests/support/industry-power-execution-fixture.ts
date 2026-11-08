@@ -28,7 +28,11 @@ import type { FinanceNativeBudgetCanonicalFrame as Frame } from '../../packages/
 export const industryPowerExecutionTestSha = (s: string) =>
   createHash('sha256').update(s).digest('hex');
 const sha = industryPowerExecutionTestSha;
-export function createIndustryPowerExecutionFixture() {
+export function createIndustryPowerExecutionFixture(
+  options: Readonly<{
+    sourceBasePins?: Readonly<{ sourceRef: string; sourceRawSha256: string }>;
+  }> = {},
+) {
   const f = createIndustryOperatingWageCanonicalFixture(false),
     now = f.observedAtReal,
     service = {
@@ -94,6 +98,7 @@ export function createIndustryPowerExecutionFixture() {
     admissionRef: f.site.admissionRef,
     sourceRef: 'TEST_ONLY_ADOPTED_POWER_SOURCE',
     sourceRawSha256: '8'.repeat(64),
+    ...options.sourceBasePins,
     policyVersion: DAY_ONE_STORAGE_SELF_USE_POLICY.policyVersion,
     policyRawSha256: DAY_ONE_STORAGE_SELF_USE_POLICY.policyRawSha256,
     userAdoptionRawSha256: DAY_ONE_STORAGE_SELF_USE_POLICY.adoptionRawSha256,
