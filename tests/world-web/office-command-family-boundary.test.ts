@@ -87,9 +87,9 @@ describe('browser manual Office transport permits only the registered manual fam
         'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
       ];
       readonly SOCIAL: readonly [
-        'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
         'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
         'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
       ];
       readonly FINANCE: readonly [
         'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
