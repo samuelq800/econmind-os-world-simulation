@@ -12,6 +12,7 @@ import {
   createInventoryPosting,
   isValidatedOpeningSeed,
   Money,
+  WorldDecimal,
   type InventoryPosting,
   type CanonicalCommand,
   type CommitAuthorizationProof,
@@ -43,10 +44,16 @@ import {
   projectPostwarIndustryLogisticsReplaySources,
   retirePostwarIndustryLogisticsSourceConfiguration,
   readPostwarIndustryLogisticsReplaySourcesFrom,
+  readPostwarIndustryLogisticsPolicyForCountry,
   PostwarIndustryLogisticsSourceMissing,
   type PostwarIndustryLogisticsPolicyBytes,
 } from './postwar-industry-logistics-source.js';
-import type { PostwarIndustryUtilitySourceInput } from './postwar-industry-utility-source.js';
+import {
+  readPostwarIndustryUtilitySourceForBase,
+  consumePostwarIndustryUtilitySource,
+  type PostwarIndustryUtilitySourceInput,
+} from './postwar-industry-utility-source.js';
+import { readPostwarIndustryRefineryCoverage } from './postwar-industry-refinery-sites.js';
 import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
 import { requirePostwarSocialSourceRevocationFence } from './postwar-social-position-runtime.js';
 import {
@@ -188,6 +195,9 @@ export function createPostwarIndustryLogisticsRuntime(config: {
           policyBytes: PostwarIndustryLogisticsPolicyBytes;
         }>
       | undefined;
+  let planningSites: ReturnType<
+    typeof readPostwarIndustryRefineryCoverage
+  >['sites'] = [];
   let preparing: Promise<void> | undefined;
   let preparedBase:
     ReturnType<typeof readPostwarSocialRuntimeFinancialReplayBase> | undefined;
@@ -950,15 +960,47 @@ export function createPostwarIndustryLogisticsRuntime(config: {
     candidateFactory,
     sourceCommitProtectionPort: port,
     readPlanningScope(countryId: string) {
-      if (!ready() || !source) return null;
-      const policy = JSON.parse(source.policyBytes.policy) as {
-        scope?: { country?: unknown; facility?: unknown };
-      };
-      if (policy.scope?.country !== countryId) return null;
+      if (!ready() || !source || !preparedBase) return null;
+      // Installed source DATA only. Currentness/authority remain the held
+      // readPlanningFrom/commit guards; no country string creates a source.
+      const site = planningSites.find((s) => s.countryId === countryId);
+      if (
+        !site ||
+        !new WorldDecimal(
+          text(site.domesticAccess.distanceKmEstimate),
+        ).greaterThan('0')
+      )
+        return null;
+      const token = readPostwarIndustryUtilitySourceForBase(preparedBase, site);
+      if (!token) return null;
+      const { compact } = consumePostwarIndustryUtilitySource(token, social),
+        b = consumePreparedPostwarSocialFinancialReplayBase(preparedBase);
+      if (
+        compact.worldId !== world ||
+        compact.countryId !== site.countryId ||
+        compact.facilityId !== site.facilityId ||
+        compact.operatorId !== site.operatorId ||
+        compact.seedId !== b.pins.seedRef ||
+        compact.seedFingerprint !== b.pins.contentHash ||
+        compact.admissionRef !== b.pins.admissionRef ||
+        compact.sourceChecksumsSha256 !==
+          b.document.inputs.sourceChecksumsSha256
+      )
+        fail('ACTUAL_REGISTERED_LOGISTICS_PLANNING_SCOPE_DIFFERS');
+      try {
+        readPostwarIndustryLogisticsPolicyForCountry(
+          source.policyBytes,
+          compact.countryId,
+          compact.facilityId,
+        );
+      } catch (error) {
+        if (error instanceof PostwarIndustryLogisticsSourceMissing) return null;
+        throw error;
+      }
       return Object.freeze({
-        worldId: world,
-        countryId,
-        facilityId: text(policy.scope.facility),
+        worldId: compact.worldId,
+        countryId: compact.countryId,
+        facilityId: compact.facilityId,
       });
     },
     readPlanningFrom: (
@@ -993,12 +1035,14 @@ export function createPostwarIndustryLogisticsRuntime(config: {
         )
           fail('ACTUAL_E03_SOURCE_CHECKSUMS_REQUIRED');
         const configuration = Object.freeze({ context, policyBytes });
+        const sites = readPostwarIndustryRefineryCoverage(context).sites;
         bindPostwarIndustryLogisticsSourceConfiguration(
           baseline,
           configuration,
         );
         source = configuration;
         preparedBase = baseline;
+        planningSites = sites;
       });
       preparing = operation;
       try {
@@ -1023,6 +1067,7 @@ export function createPostwarIndustryLogisticsRuntime(config: {
       if (preparedBase)
         retirePostwarIndustryLogisticsSourceConfiguration(preparedBase);
       preparedBase = undefined;
+      planningSites = [];
       source = undefined;
     },
   });
