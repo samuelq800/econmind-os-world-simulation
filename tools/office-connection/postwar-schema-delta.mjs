@@ -216,6 +216,8 @@ export function createUnapprovedSchemaDeltaPlan(candidate, sources) {
  * the default fresh-delta plan are deliberately not extended or relabeled. */
 export const LOGISTICS_FORWARD_MANIFEST_PATH =
   'database/upgrades/postwar-industry-logistics-multicountry-scope.manifest.json';
+export const SOCIAL_CREATION_FORWARD_MANIFEST_PATH =
+  'database/upgrades/postwar-social-employment-creation.manifest.json';
 export function createUnapprovedSchemaForwardPlan(
   candidate,
   forward,
@@ -367,6 +369,154 @@ export function createUnapprovedSchemaForwardPlan(
   };
 }
 
+/** One additional fixed increment, verified by its already pinned read-only
+ * loader. No arbitrary manifest, SQL, source initializer or execution callback. */
+export async function createUnapprovedSocialCreationForwardPlan(
+  candidate,
+  sourceRoot,
+) {
+  if (!path.isAbsolute(sourceRoot)) throw Error('ABSOLUTE_PATHS_REQUIRED');
+  const loaderPath =
+    'tests/support/postwar-social-employment-creation-forward.ts';
+  const loaderBytes = await regular(path.join(sourceRoot, loaderPath));
+  const { preparePostwarSocialEmploymentCreationForward } = await import(
+    pathToFileURL(path.join(sourceRoot, loaderPath)).href
+  );
+  const prepared =
+    await preparePostwarSocialEmploymentCreationForward(sourceRoot);
+  const manifestBytes = await regular(
+    path.join(sourceRoot, SOCIAL_CREATION_FORWARD_MANIFEST_PATH),
+  );
+  const forward = JSON.parse(manifestBytes.toString('utf8'));
+  const { pins, manifest } = candidate;
+  const newSignatures = [
+    'world_v2.prepare_postwar_social_employment_creation_licences(text)',
+    'world_v2.postwar_social_employment_creation_effect_scoped(text,text,jsonb,jsonb,bigint)',
+    'world_v2.postwar_social_created_pool(text,text,text,bigint)',
+  ];
+  if (
+    !/^[a-f0-9]{40}$/u.test(pins.sourceCommit ?? '') ||
+    pins.installationAllowed !== false ||
+    manifest.production_publisher !== 'main-site-release-chain' ||
+    forward.id !== 'postwar-social-employment-creation-dc5-v1' ||
+    forward.schemaVersion !== 'postwar-function-forward-manifest-v1' ||
+    forward.classification !==
+      'UNAPPROVED_FIXED_INCREMENT_NOT_FRESH_PROPOSAL_REPLAY' ||
+    forward.installationAllowed !== false ||
+    forward.productionApproval !== 'NOT_GRANTED' ||
+    sha(manifestBytes) !== prepared.manifestSha256 ||
+    forward.upgrade.sha256 !== prepared.sha256 ||
+    forward.upgrade.existingFunctionCount !== 13 ||
+    forward.upgrade.newFunctionCount !== 3 ||
+    forward.upgrade.newRelationCount !== 1 ||
+    prepared.functions.length !== 13 ||
+    JSON.stringify(forward.newSupplementFunctions.map((f) => f.signature)) !==
+      JSON.stringify(newSignatures) ||
+    [
+      ...forward.sourcePins.map((p) => ({ path: p.path, sha256: p.newSha256 })),
+      forward.newSupplement,
+    ].some(
+      (p) =>
+        !pins.proposals.some(
+          (actual) => actual.path === p.path && actual.sha256 === p.sha256,
+        ),
+    )
+  )
+    throw Error('EXACT_SOCIAL_CREATION_FORWARD_AND_CANDIDATE_PINS_REQUIRED');
+  const bytes = Buffer.from(prepared.sql, 'utf8');
+  const transaction = classifyDeltaTransaction(bytes);
+  if (
+    transaction.wrapped ||
+    bytes.length !== forward.upgrade.bytes ||
+    sha(bytes) !== prepared.sha256
+  )
+    throw Error('SOCIAL_CREATION_EXACT_TRANSACTION_REQUIRED');
+  const entry = {
+    id: 'postwar-social-employment-creation',
+    disposition: forward.classification,
+    sourcePath: prepared.forwardPath,
+    sourceSha256: prepared.sha256,
+    sourceBytes: bytes.length,
+    packagedSourcePath: 'source/01-postwar-social-employment-creation.sql',
+    transactionPath: 'transactions/01-postwar-social-employment-creation.sql',
+    transactionSha256: sha(transaction.bytes),
+    transactionBytes: transaction.bytes.length,
+    transactionEnvelope: transaction.sourceEnvelope,
+    nonTransactionalParts: [],
+    executionAllowed: false,
+    preconditions: {
+      functions: forward.functions,
+      newSupplement: forward.newSupplement,
+      newFunctions: forward.newSupplementFunctions,
+      newRelation: 'postwar_social_employment_creation_licence',
+      metadataPolicy:
+        'EXACT_PREDECESSOR_OR_SUCCESSOR_AND_COMPLETE_SUPPLEMENT_STRUCTURE',
+      operator: forward.operatorPreconditions,
+      observed: false,
+    },
+    recovery: {
+      uncertainCommit: prepared.uncertainCommit,
+      automaticRollback: false,
+      destructiveRollback: false,
+    },
+  };
+  return {
+    chunks: [{ entry, source: bytes, transaction: transaction.bytes }],
+    forwardSource: {
+      path: SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
+      bytes: manifestBytes,
+    },
+    forwardLoader: { path: loaderPath, sha256: sha(loaderBytes) },
+    manifest: {
+      schemaVersion: 'postwar-schema-forward-review-package-v1',
+      classification: 'UNAPPROVED_EXPLICIT_SOCIAL_INCREMENT_NOT_INSTALLATION',
+      sourceCommit: pins.sourceCommit,
+      sourceTree: pins.sourceTree,
+      baselineManifestSha256: pins.manifestSha256,
+      companionPolicySha256: pins.expandedPolicySha256,
+      baseline: manifest.migrations.map((m) => ({
+        id: m.migration_id,
+        releaseOrder: m.release_order,
+        path: m.path,
+        sha256: m.sha256,
+        sourceCommit: m.artifact_source_commit,
+      })),
+      explicitForwardManifest: {
+        path: SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
+        sha256: prepared.manifestSha256,
+        predecessorCommit: prepared.predecessorWorldCommit,
+        targetSourceCommit: prepared.targetSourceCommit,
+      },
+      fixedReadOnlyLoader: { path: loaderPath, sha256: sha(loaderBytes) },
+      packagedProposalCount: 0,
+      packagedForwardCount: 1,
+      replacedExistingFunctionCount: 13,
+      addedFunctionCount: 3,
+      addedRelationCount: 1,
+      steps: [entry],
+      installationPath:
+        'EXACT_DC5_SCHEMA_INCREMENT_WITH_LICENCE_SUPPLEMENT_ONLY',
+      mutuallyExclusiveWith: 'FRESH_SCHEMA_DELTA_FROM_SAME_CANDIDATE',
+      freshProposalSqlIncluded: false,
+      installationAllowed: false,
+      productionApproval: 'NOT_GRANTED',
+      migrationRegistrationPerformed: false,
+      databaseOperations: 0,
+      networkRequests: 0,
+      credentialsCreated: 0,
+      isolatedClockSqlIncluded: false,
+      acrossFilesAtomic: false,
+      targetSchemaObserved: false,
+      historicalUpgradeManifestsModified: false,
+      sourceInitializer: prepared.sourceInitializer,
+      operatorPrecondition: prepared.operatorPrecondition,
+      targetApplicability:
+        'EXACT_SEALED_PREDECESSOR_CATALOG_OR_EXACT_SUCCESSOR_ONLY_NO_HOT_UPGRADE',
+      independentChangesNotCovered: forward.notCovered,
+    },
+  };
+}
+
 async function regular(file) {
   if (!(await lstat(file)).isFile() || (await realpath(file)) !== file)
     throw Error('REGULAR_COMPANION_MODULE_REQUIRED');
@@ -424,9 +574,16 @@ export async function preparePostwarSchemaDelta({
     ),
   );
   let plan;
-  if (forwardManifestPath !== undefined) {
+  if (forwardManifestPath === SOCIAL_CREATION_FORWARD_MANIFEST_PATH) {
+    plan = await createUnapprovedSocialCreationForwardPlan(
+      candidate,
+      sourceRoot,
+    );
+    for (const chunk of plan.chunks)
+      sources.set(chunk.entry.sourcePath, chunk.source);
+  } else if (forwardManifestPath !== undefined) {
     if (forwardManifestPath !== LOGISTICS_FORWARD_MANIFEST_PATH)
-      throw Error('ONLY_EXPLICIT_LOGISTICS_FORWARD_MANIFEST_ALLOWED');
+      throw Error('ONLY_EXPLICIT_LOGISTICS_OR_SOCIAL_FORWARD_MANIFEST_ALLOWED');
     const forwardBytes = await regular(
       path.join(sourceRoot, forwardManifestPath),
     );
@@ -483,6 +640,12 @@ export async function preparePostwarSchemaDelta({
       sha(plan.forwardSource.bytes)
   )
     throw Error('FORWARD_MANIFEST_CHANGED_DURING_PACKAGING');
+  if (
+    plan.forwardLoader &&
+    sha(await regular(path.join(sourceRoot, plan.forwardLoader.path))) !==
+      plan.forwardLoader.sha256
+  )
+    throw Error('FIXED_SOCIAL_FORWARD_LOADER_CHANGED');
   plan.manifest.generatorSha256 = sha(
     await readFile(fileURLToPath(import.meta.url)),
   );
@@ -498,9 +661,11 @@ export async function preparePostwarSchemaDelta({
   );
   await writeFile(
     path.join(outputDirectory, 'RECOVERY.md'),
-    (plan.forwardSource
-      ? '# Explicit function-only forward\n\nThis mode packages only the selected later upgrade for an existing exact schema. It is mutually exclusive with the fresh schema-delta path from this same candidate; never execute fresh proposals followed by this forward as one chain. Inspect its exact predecessor/successor body hashes and preserved owner/ACL before applying. Do not install the fresh proposals or rerun/relabel the historical five-upgrade/two-fresh manifest. No database version is inferred.\n\n'
-      : '') +
+    (plan.forwardLoader
+      ? '# Explicit Social schema increment review\n\nThis fixed alternative adds one licence supplement table and three functions, and replaces thirteen exact existing bodies. It is mutually exclusive with fresh proposal installation and does not include other logistics/opening-repair receipts. Stop and drain all consumers and source-publication transactions first; no hot upgrade. Source licence initialization is a separate controlled publisher transaction after a confirmed schema receipt and is NOT performed by this package. Unknown COMMIT requires STOP and actual catalog/receipt inspection, not automatic retry.\n\n'
+      : plan.forwardSource
+        ? '# Explicit function-only forward\n\nThis mode packages only the selected later upgrade for an existing exact schema. It is mutually exclusive with the fresh schema-delta path from this same candidate; never execute fresh proposals followed by this forward as one chain. Inspect its exact predecessor/successor body hashes and preserved owner/ACL before applying. Do not install the fresh proposals or rerun/relabel the historical five-upgrade/two-fresh manifest. No database version is inferred.\n\n'
+        : '') +
       `# Unapproved schema delta\n\nNo SQL has run. No production registration or approval is granted.\n\nReview the exact baseline release ledger and preflight/catalog.sql output first. Resolve every existing relation/role conflict; do not drop or silently reuse objects. Check existing function signatures, owners, search paths and definition hashes against each approved predecessor. Catalog names alone cannot establish compatible bodies. Optional offline group enrollment remains separately reviewed; online readers must never inherit raw-seed access.\n\nTransactions are per source file, not one atomic ${plan.chunks.length}-file operation. Source files with BEGIN/COMMIT retain their exact envelope; files without one receive an explicit single transaction in transactions/. Both hashes are recorded. No nontransactional part is accepted by the conservative classifier; this is not a complete SQL semantic proof.\n\nIf failure occurs before known COMMIT, only the current open transaction may be rolled back. Earlier committed chunks remain. If COMMIT acknowledgement is uncertain, stop with UNKNOWN_STOP_NO_RETRY and inspect catalogs plus the controlled release ledger; never rerun CREATE ROLE/TABLE blindly. After committed DDL or economic facts, prepare a new reviewed forward-fix. No destructive or automatic rollback script is supplied. The catalog query's ROLLBACK only ends its read-only inspection.\n\nThis package omits isolated-world-clock SQL and starts no World/Clock. Publish only through a separately approved exact delta in main-site-release-chain; the existing historic workflow is not automatically enabled for this package. Production acceptance remains 0/6.\n`,
     { flag: 'wx' },
   );
@@ -519,6 +684,12 @@ export async function preparePostwarSchemaDelta({
       ).some(Boolean))
   )
     throw Error('FORWARD_SOURCE_CHANGED_DURING_PACKAGING');
+  if (
+    plan.forwardLoader &&
+    sha(await regular(path.join(sourceRoot, plan.forwardLoader.path))) !==
+      plan.forwardLoader.sha256
+  )
+    throw Error('FIXED_SOCIAL_FORWARD_LOADER_CHANGED');
   // The completion manifest is last: an interrupted package cannot look final.
   for (const dependency of dependencies)
     if (sha(await regular(dependency.path)) !== dependency.sha256)
@@ -562,7 +733,10 @@ if (
     !flags.every((f, i) => args[i * 2] === f) ||
     (args.length === 10 &&
       (args[8] !== '--forward-manifest' ||
-        args[9] !== LOGISTICS_FORWARD_MANIFEST_PATH))
+        ![
+          LOGISTICS_FORWARD_MANIFEST_PATH,
+          SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
+        ].includes(args[9])))
   )
     throw Error('ONLY_SOURCE_SHA_COMPANION_FRESH_OUTPUT_ARGUMENTS_ALLOWED');
   const result = await preparePostwarSchemaDelta({
