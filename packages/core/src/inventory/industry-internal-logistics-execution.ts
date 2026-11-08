@@ -74,6 +74,7 @@ import {
   inheritProductionDepositInstruments,
   isSettledOriginalProductionDeposit,
   readProductionWageDepositAccounts,
+  bindBeneficialProductionDepositRecipients,
 } from '../finance/production-deposit-funding.js';
 import {
   authorizeFinancialLedgerState,
@@ -85,6 +86,10 @@ import {
   readIndustryFirstDayWorkState,
   type IndustryFirstDayWorkAllocation,
 } from '../industry/industry-first-day-work.js';
+import {
+  createBeneficialHousingRentState,
+  type BeneficialHousingReclassificationReceipt,
+} from '../finance/beneficial-housing-rent.js';
 import { Money } from '../numeric/money.js';
 import { Quantity } from '../numeric/quantity.js';
 import { canonicalDecimal } from '../numeric/world-decimal.js';
@@ -204,6 +209,8 @@ interface SourceData {
   readonly labourSource: Readonly<IndustryLogisticsLabourSource>;
   readonly utilitySources: readonly Readonly<IndustryUtilitySource>[];
   readonly expenseOriginals: readonly Readonly<IndustryLogisticsExpenseOriginal>[];
+  readonly workOriginals: readonly Readonly<IndustryLogisticsExpenseOriginal>[];
+  readonly beneficialReceipt?: BeneficialHousingReclassificationReceipt;
   readonly sourceFingerprint: string;
 }
 const replaySources = new WeakMap<object, Readonly<SourceData>>();
@@ -388,6 +395,8 @@ export function prepareIndustryInternalLogisticsReplaySources(
     readonly labourSource: IndustryLogisticsLabourSource;
     readonly utilitySources: readonly IndustryUtilitySource[];
     readonly expenseOriginals?: readonly IndustryLogisticsExpenseOriginal[];
+    readonly workOriginals?: readonly IndustryLogisticsExpenseOriginal[];
+    readonly beneficialReceipt?: BeneficialHousingReclassificationReceipt;
   },
   sha: Sha256Hex,
 ): IndustryInternalLogisticsReplaySources {
@@ -474,6 +483,32 @@ export function prepareIndustryInternalLogisticsReplaySources(
     )
       invalid('ACTUAL_POSITIVE_SOURCE_EMPLOYMENT_AND_WAGE_REQUIRED');
   }
+  if (input.beneficialReceipt) {
+    createBeneficialHousingRentState(input.beneficialReceipt);
+    if (
+      input.beneficialReceipt.worldId !== p.worldId ||
+      input.beneficialReceipt.countryId !== p.countryId
+    )
+      invalid('GENUINE_SAME_WORLD_BENEFICIAL_LOGISTICS_RECIPIENTS_REQUIRED');
+  }
+  const workOriginals = freeze(
+    JSON.parse(
+      canonicalSerialize(input.workOriginals ?? []),
+    ) as IndustryLogisticsExpenseOriginal[],
+  );
+  if (workOriginals.length > 256) invalid('BOUNDED_WORK_ORDERS_REQUIRED');
+  const workRefs = new Set<string>();
+  for (const o of workOriginals) {
+    if (
+      workRefs.has(o.reference) ||
+      o.rawText.length > 65536 ||
+      sha(o.rawText) !== o.rawSha256
+    )
+      invalid('EXACT_UNIQUE_WORK_ORDER_BYTES_REQUIRED');
+    text(o.reference);
+    rawHash(o.rawSha256);
+    workRefs.add(o.reference);
+  }
   const expenseOriginals = freeze(
     JSON.parse(
       canonicalSerialize(input.expenseOriginals ?? []),
@@ -501,8 +536,21 @@ export function prepareIndustryInternalLogisticsReplaySources(
       labourSource: l,
       utilitySources,
       expenseOriginals,
+      workOriginals,
+      ...(input.beneficialReceipt
+        ? { beneficialReceipt: input.beneficialReceipt }
+        : {}),
       sourceFingerprint: hash(
-        { source: p, labourSource: l, utilitySources, expenseOriginals },
+        {
+          source: p,
+          labourSource: l,
+          utilitySources,
+          expenseOriginals,
+          workOriginals,
+          ...(input.beneficialReceipt
+            ? { beneficialReceipt: input.beneficialReceipt }
+            : {}),
+        },
         sha,
       ),
     }),
@@ -522,6 +570,8 @@ export function readIndustryInternalLogisticsReplaySources(
     labourSource: d.labourSource,
     utilitySources: d.utilitySources,
     expenseOriginals: d.expenseOriginals,
+    workOriginals: d.workOriginals,
+    ...(d.beneficialReceipt ? { beneficialReceipt: d.beneficialReceipt } : {}),
   });
 }
 export function mergeIndustryInternalLogisticsReplaySources(
@@ -550,7 +600,8 @@ export function mergeIndustryInternalLogisticsReplaySources(
         readIndustryInternalLogisticsSource(oldData.source),
         readIndustryInternalLogisticsSource(replaySources.get(token)!.source),
       ) ||
-      !same(old.labourSource, d.labourSource)
+      !same(old.labourSource, d.labourSource) ||
+      !same(old.beneficialReceipt ?? null, d.beneficialReceipt ?? null)
     )
       invalid('IMMUTABLE_LOGISTICS_SOURCE_REFERENCE_CONFLICT');
     const originals = new Map<string, IndustryUtilitySource>(),
@@ -569,6 +620,15 @@ export function mergeIndustryInternalLogisticsReplaySources(
         invalid('IMMUTABLE_LOGISTICS_EXPENSE_REFERENCE_CONFLICT');
       expenses.set(expense.reference, expense);
     }
+    const works = new Map<string, IndustryLogisticsExpenseOriginal>();
+    for (const original of [...old.workOriginals, ...d.workOriginals]) {
+      if (
+        works.has(original.reference) &&
+        !same(works.get(original.reference), original)
+      )
+        invalid('IMMUTABLE_WORK_ORDER_REFERENCE_CONFLICT');
+      works.set(original.reference, original);
+    }
     scoped.set(
       key,
       prepareIndustryInternalLogisticsReplaySources(
@@ -577,6 +637,10 @@ export function mergeIndustryInternalLogisticsReplaySources(
           labourSource: old.labourSource,
           utilitySources: [...originals.values()],
           expenseOriginals: [...expenses.values()],
+          workOriginals: [...works.values()],
+          ...(old.beneficialReceipt
+            ? { beneficialReceipt: old.beneficialReceipt }
+            : {}),
         },
         sha,
       ),
@@ -627,6 +691,11 @@ function contextState(input: {
       Object.freeze({ source, productionRun: actual[0]! }),
     );
   }
+  if (data.beneficialReceipt)
+    bindBeneficialProductionDepositRecipients(
+      c.financial,
+      data.beneficialReceipt,
+    );
   const old = input.state ? current(input.state) : undefined;
   if (old && !same(readIndustryInternalLogisticsSource(old.source), p))
     invalid('LOGISTICS_CONTEXT_SOURCE_IDENTITY_CHANGED');
@@ -676,6 +745,7 @@ function contextState(input: {
 export function createIndustryInternalLogisticsExecutionState(
   input: {
     readonly preparation: IndustryUtilityExecutionPreparation;
+    readonly state?: IndustryInternalLogisticsExecutionState;
     readonly sourceInputs: IndustryInternalLogisticsReplaySources;
   },
   sha: Sha256Hex,
@@ -691,7 +761,23 @@ export function createIndustryInternalLogisticsExecutionState(
     !industryWorkState
   )
     invalid('GENUINE_COMPLETE_LOGISTICS_PREPARATION_REQUIRED');
+  const prior = d.replay.result.industryLogisticsState ?? [];
+  if (input.state && !prior.includes(input.state))
+    invalid('ACTUAL_COMPLETE_PREFIX_LOGISTICS_STATE_REQUIRED');
+  if (
+    !input.state &&
+    prior.some((state) =>
+      same(
+        readIndustryInternalLogisticsExecutionState(state).source,
+        readIndustryInternalLogisticsSource(
+          replaySources.get(input.sourceInputs)!.source,
+        ),
+      ),
+    )
+  )
+    invalid('EXISTING_LOGISTICS_STATE_CANNOT_BE_RESET');
   const token = contextState({
+    ...(input.state ? { state: input.state } : {}),
     sourceInputs: input.sourceInputs,
     context: {
       head: d.replay.head,
@@ -888,15 +974,38 @@ function original(
           uint(p.startOrdinal) + uint(p.count),
     );
     if (!p) invalid('ACTUAL_SERVICE_WAGE_SOURCE_REQUIRED');
-    if (p.householdAccountId !== account) continue;
+    const beneficiary = replaySources.get(s.sourceInputs)!.beneficialReceipt;
+    let personMilliseconds = uint(a.personMilliseconds);
+    if (beneficiary) {
+      const subaccount = beneficiary.subaccounts.find(
+        (r) => r.account.accountId === account,
+      );
+      if (!subaccount) invalid('ACTUAL_CHILD_BENEFICIAL_SUBACCOUNT_REQUIRED');
+      const groups = beneficiary.groups.filter(
+        (g) => g.groupId === subaccount.groupId && g.locationId === a.regionId,
+      );
+      let people = 0n;
+      for (const g of groups) {
+        const left =
+          uint(g.firstPersonOrdinal) > uint(a.startOrdinal)
+            ? uint(g.firstPersonOrdinal)
+            : uint(a.startOrdinal);
+        const right =
+          uint(g.firstPersonOrdinal) + uint(g.population) <
+          uint(a.startOrdinal) + uint(a.count)
+            ? uint(g.firstPersonOrdinal) + uint(g.population)
+            : uint(a.startOrdinal) + uint(a.count);
+        if (right > left) people += right - left;
+      }
+      personMilliseconds =
+        people * (uint(a.endsAtSimTime) - uint(a.startsAtSimTime));
+      if (!personMilliseconds) continue;
+    } else if (p.householdAccountId !== account) continue;
     if (p.currency !== currency) invalid('EXACT_SOURCE_WAGE_CURRENCY_REQUIRED');
     const annual = decimal(p.annualWage);
     earned = add(
       earned,
-      rational(
-        annual.n * uint(a.personMilliseconds),
-        annual.d * 360n * 480n * 60000n,
-      ),
+      rational(annual.n * personMilliseconds, annual.d * 360n * 480n * 60000n),
     );
   }
   let paid = decimal(String(o.amount));
@@ -1289,17 +1398,72 @@ export function prepareIndustryInternalLogisticsFrame(
         quantity: p.request.quantity,
       };
     } else if (action === 'SERVICE_WORK') {
-      keys(op, ['action', 'transferId', 'allocations']);
+      let actualAllocations: unknown = op.allocations;
+      let workOrder: IndustryLogisticsExpenseOriginal | undefined;
+      if (Object.hasOwn(op, 'workOrderRef')) {
+        keys(op, ['action', 'transferId', 'workOrderRef', 'workOrderSha256']);
+        workOrder = replaySources
+          .get(s.sourceInputs)!
+          .workOriginals.find(
+            (o) =>
+              o.reference === op.workOrderRef &&
+              o.rawSha256 === op.workOrderSha256,
+          );
+        if (!workOrder) invalid('REGISTERED_LOGISTICS_WORK_ORDER_REQUIRED');
+        const order = object(JSON.parse(workOrder.rawText));
+        keys(order, [
+          'schemaVersion',
+          'purpose',
+          'inputRef',
+          'worldId',
+          'countryId',
+          'facilityId',
+          'operatorId',
+          'runId',
+          'seedFingerprint',
+          'transferId',
+          'labourSourceRef',
+          'labourSourceRawSha256',
+          'allocations',
+        ]);
+        if (
+          canonicalSerialize(order) !== workOrder.rawText ||
+          order.schemaVersion !== 'industry-logistics-service-work-order-v1' ||
+          order.purpose !== 'DISTINCT_LOGISTICS_SERVICE_WORK' ||
+          order.inputRef !== workOrder.reference ||
+          order.transferId !== transferId ||
+          order.runId !== intent.runId ||
+          order.labourSourceRef !== s.labour.sourceRef ||
+          order.labourSourceRawSha256 !== s.labour.sourceRawSha256
+        )
+          invalid('EXACT_REGISTERED_SERVICE_WORK_ORDER_REQUIRED');
+        for (const k of [
+          'worldId',
+          'countryId',
+          'facilityId',
+          'operatorId',
+          'seedFingerprint',
+        ] as const)
+          if (order[k] !== source[k])
+            invalid('WORK_ORDER_ADMITTED_SCOPE_CHANGED');
+        actualAllocations = order.allocations;
+      } else keys(op, ['action', 'transferId', 'allocations']);
       if (
         old.status !== 'IN_TRANSIT' ||
         old.work ||
         now < uint(p.request.endsAtSimTime)
       )
         invalid('ACTUAL_SHIPPED_ELAPSED_INDEPENDENT_SERVICE_REQUIRED');
-      const allocations = validateWork(s, old, op.allocations, now);
+      const allocations = validateWork(s, old, actualAllocations, now);
       bookings = Object.freeze([...s.bookings, ...allocations]);
       eventPayload = {
         schemaVersion: 'industry-logistics-service-work-v1',
+        ...(workOrder
+          ? {
+              workOrderRef: workOrder.reference,
+              workOrderSha256: workOrder.rawSha256,
+            }
+          : {}),
         action,
         transferId,
         runId: intent.runId,
@@ -1327,7 +1491,20 @@ export function prepareIndustryInternalLogisticsFrame(
       canonicalHash(op.workEventFingerprint);
       rawHash(op.expenseOrderSha256);
       text(op.expenseOrderRef);
-      payment = original(s, old, op, input.expenseOriginal, sha);
+      payment = original(
+        s,
+        old,
+        op,
+        input.expenseOriginal ??
+          replaySources
+            .get(s.sourceInputs)!
+            .expenseOriginals.find(
+              (o) =>
+                o.reference === op.expenseOrderRef &&
+                o.rawSha256 === op.expenseOrderSha256,
+            ),
+        sha,
+      );
       eventPayload = {
         schemaVersion: 'industry-logistics-paid-input-v1',
         action,
@@ -1704,6 +1881,46 @@ export function readIndustryInternalLogisticsExecutionState(
     frames: s.frames,
     transfers: Object.freeze([...s.transfers.values()]),
   });
+}
+/** Actual cash releases only. The caller must match each account to its
+ * genuine opening aggregate and its applied batch; unearned carry and route
+ * budgets never appear here. A state DTO cannot issue these records. */
+export function readIndustryInternalLogisticsPaidOpeningReleases(
+  state: IndustryInternalLogisticsExecutionState,
+) {
+  const s = current(state),
+    source = readIndustryInternalLogisticsSource(s.source);
+  return Object.freeze(
+    [...s.transfers.values()].flatMap((t) =>
+      t.payments.map((p) => {
+        const payment = p.batch.legs[1];
+        if (
+          !payment ||
+          payment.direction !== 'CREDIT' ||
+          payment.account.ownerId !== source.operatorId ||
+          payment.account.countryId !== source.countryId ||
+          payment.amount.currency !== p.currency ||
+          canonicalDecimal(payment.amount.amount) !== p.amount ||
+          !s.financial.appliedBatches.some(
+            (b) =>
+              b.batchId === p.batch.batchId &&
+              b.fingerprint === p.batch.fingerprint,
+          )
+        )
+          invalid('ACTUAL_REPLAYED_LOGISTICS_CASH_RELEASE_REQUIRED');
+        return Object.freeze({
+          reservationId: 'LOGISTICS_PAID_' + p.frame.command.commandId,
+          accountId: payment.account.accountId,
+          countryId: source.countryId,
+          operatorId: source.operatorId,
+          currency: p.currency,
+          amount: p.amount,
+          batchId: p.batch.batchId,
+          batchFingerprint: p.batch.fingerprint,
+        });
+      }),
+    ),
+  );
 }
 export function readIndustryFirstDayLogisticsExecution(
   token: IndustryFirstDayLogisticsExecution,

@@ -138,7 +138,7 @@ function fullView(
     {
       opening: c.f.opening,
       expectedHead: head,
-      socialCountries: [],
+      socialCountries: [c.f.social],
       fxOriginals: [],
       openingEncumbrances: [],
       industryWorkSources: [c.f.workSource],
@@ -403,7 +403,7 @@ describe('independent internal logistics full Core frames and named handover', (
       {
         opening: f.opening,
         expectedHead: through,
-        socialCountries: [],
+        socialCountries: [f.social],
         fxOriginals: [],
         openingEncumbrances: [],
         industryWorkSources: [f.workSource],

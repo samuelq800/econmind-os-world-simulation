@@ -38,7 +38,9 @@ export const logisticsSha = (s: string) =>
 const bytes = (p: string) =>
   readFileSync(new URL('../../' + p, import.meta.url), 'utf8');
 export const logisticsAt = '2026-11-01T00:00:00.000Z';
-export function createIndustryLogisticsExecutionFixture() {
+export function createIndustryLogisticsExecutionFixture(
+  options: Readonly<{ beneficial?: boolean }> = {},
+) {
   const sha = logisticsSha,
     w = C.worldId('WORLD_LOGISTICS_EXECUTION_TEST_ONLY'),
     country = C.countryId('COUNTRY_02');
@@ -122,7 +124,7 @@ export function createIndustryLogisticsExecutionFixture() {
     riskBearerId: operator,
     economicRecognitionId: null,
   });
-  const seed = C.createOpeningSeed(
+  const parentSeed = C.createOpeningSeed(
     {
       schemaVersion: C.OPENING_SEED_SCHEMA_VERSION,
       seedId: C.openingSeedId('SEED_LOGISTICS_TEST_ONLY'),
@@ -162,6 +164,64 @@ export function createIndustryLogisticsExecutionFixture() {
     },
     sha,
   );
+  const child = options.beneficial
+    ? C.reclassifyBeneficialHousingSeed(
+        {
+          seed: parentSeed,
+          allocationId: 'TEST_LOGISTICS_CHILD',
+          policyRef: 'TEST_ONLY_EXISTING_CHILD_RULE',
+          sourcePopulationRef: 'TEST_ONLY_TWO_PEOPLE',
+          countryId: country,
+          householdEntityId: household,
+          parentAccountId: hh.asset.accountId,
+          regions: [
+            { locationId: 'REGION_02_E1', households: '4', population: '4' },
+          ],
+          groups: [
+            {
+              groupId: 'TEST_GROUP_ONE',
+              locationId: 'REGION_02_E1',
+              role: 'OWNER_OCCUPIER',
+              firstHouseholdOrdinal: '0',
+              households: '1',
+              firstPersonOrdinal: '0',
+              population: '1',
+            },
+            {
+              groupId: 'TEST_GROUP_TWO',
+              locationId: 'REGION_02_E1',
+              role: 'DISPLACED',
+              firstHouseholdOrdinal: '1',
+              households: '1',
+              firstPersonOrdinal: '1',
+              population: '1',
+            },
+            {
+              groupId: 'TEST_GROUP_THREE',
+              locationId: 'REGION_02_E1',
+              role: 'PRIVATE_RENTER',
+              firstHouseholdOrdinal: '2',
+              households: '1',
+              firstPersonOrdinal: '2',
+              population: '1',
+            },
+            {
+              groupId: 'TEST_GROUP_FOUR',
+              locationId: 'REGION_02_E1',
+              role: 'PUBLIC_RENTER',
+              firstHouseholdOrdinal: '3',
+              households: '1',
+              firstPersonOrdinal: '3',
+              population: '1',
+            },
+          ],
+          pools: [],
+          leases: [],
+        },
+        sha,
+      )
+    : undefined;
+  const seed = child?.seed ?? parentSeed;
   const workSource: IndustryFirstDayWorkSiteSource = {
     worldId: w,
     countryId: country,
@@ -246,11 +306,64 @@ export function createIndustryLogisticsExecutionFixture() {
     sha,
   );
   const opening = C.rebuildV08LedgersFromLineage({ seed, sha256Hex: sha });
+  const labourScope = {
+    countryId: country,
+    locationId: 'REGION_02_E1',
+    skill: 'LOW' as const,
+  };
+  const socialLabour = C.materializeOpeningLabourState({
+    targets: [{ ...labourScope, count: '11' }],
+    positions: [
+      { positionId: 'TEST_POSITION', count: '10', sector: 'REFINED_FUEL' },
+      {
+        positionId: 'POSTWAR_SOURCE_' + sha('WAREHOUSE-02/LOW').toUpperCase(),
+        count: '1',
+        sector: 'LOGISTICS',
+      },
+    ].map((p) => ({
+      ...labourScope,
+      positionId: p.positionId,
+      requiredCount: p.count,
+      sourceWeight: '1',
+      owner: 'PRIVATE_SECTOR' as const,
+      classificationId: p.sector,
+      employerId: operator,
+      employerRole: 'OP' as const,
+      occupation: 'GENERAL',
+      wageAmount: '172800',
+      wageCurrency: 'XBB',
+      wagePeriod: 'SIM_YEAR' as const,
+      wageVersion: 'TEST_ONLY_LOGISTICS_WAGE',
+      payrollFundingRef: op.asset.accountId,
+    })),
+    populationAvailability: [
+      {
+        countryId: country,
+        locationId: labourScope.locationId,
+        workingAgeAvailable: '11',
+      },
+    ],
+    skillAvailability: [{ ...labourScope, count: '11' }],
+    nonEmployedAggregates: [],
+    employers: [{ countryId: country, employerId: operator, role: 'OP' }],
+  });
+  const social = {
+    countryId: country,
+    state: {
+      schemaVersion: 'social-employment-service-state-v1' as const,
+      worldId: w,
+      labour: socialLabour.state,
+      servicePools: [],
+      plans: [],
+      appliedOperations: [],
+    },
+    offers: [],
+  };
   const start = prepareFinanceSocialReplayContinuation(
     {
       opening,
       expectedHead: { worldVersion: '1', eventSequence: '1' },
-      socialCountries: [],
+      socialCountries: [social],
       fxOriginals: [],
       openingEncumbrances: [],
       industryWorkSources: [workSource],
@@ -382,6 +495,7 @@ export function createIndustryLogisticsExecutionFixture() {
   };
   const sourceInput = (
     expenseOriginals: readonly IndustryLogisticsExpenseOriginal[] = [],
+    workOriginals: readonly IndustryLogisticsExpenseOriginal[] = [],
   ) =>
     prepareIndustryInternalLogisticsReplaySources(
       {
@@ -389,6 +503,8 @@ export function createIndustryLogisticsExecutionFixture() {
         labourSource: labour,
         utilitySources: [utilitySource],
         expenseOriginals,
+        workOriginals,
+        ...(child ? { beneficialReceipt: child.receipt } : {}),
       },
       sha,
     );
@@ -476,6 +592,8 @@ export function createIndustryLogisticsExecutionFixture() {
   };
   return {
     seed,
+    social,
+    child,
     op,
     hh,
     world: w,
