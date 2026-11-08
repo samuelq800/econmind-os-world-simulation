@@ -7,6 +7,7 @@ import {
   canonicalSerialize,
   createFoundationFact,
   Money,
+  WorldDecimal,
   type FoundationTraceRequest,
 } from '@econmind/core';
 import { readPreparedFinanceSocialOpening } from '@econmind/core/finance-social-prepared-ledger';
@@ -93,6 +94,50 @@ export async function loadPostwarIndustryLogisticsPolicy(
     fail('ADOPTED_POLICY_BYTES_REQUIRED');
   return Object.freeze({ policy, adoption, multiCountryPolicy });
 }
+/** Immutable policy selection DATA only. Actual source/OP/stock/route and
+ * E03 joins are still checked by the held read and complete projection below. */
+export function readPostwarIndustryLogisticsPolicyForCountry(
+  bytes: PostwarIndustryLogisticsPolicyBytes,
+  countryId: string,
+  facilityId: string,
+) {
+  if (
+    sha(bytes.policy) !== INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256 ||
+    sha(bytes.adoption) !== INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256
+  )
+    fail('ADOPTED_POLICY_BYTES_REQUIRED');
+  const actual = /^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.exec(countryId);
+  if (!actual || facilityId !== 'OPEN-' + actual[1] + '-REFINED_FUEL')
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'ADOPTED_LOGISTICS_SCOPE_UNAVAILABLE',
+    );
+  const selected =
+    countryId === 'COUNTRY_02' ? bytes.policy : bytes.multiCountryPolicy;
+  if (!selected)
+    throw new PostwarIndustryLogisticsSourceMissing(
+      'ADOPTED_LOGISTICS_SCOPE_UNAVAILABLE',
+    );
+  const rawSha256 = sha(selected),
+    multiCountry = countryId !== 'COUNTRY_02';
+  if (
+    rawSha256 !==
+    (multiCountry
+      ? INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256
+      : INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256)
+  )
+    fail('ADOPTED_POLICY_BYTES_REQUIRED');
+  return Object.freeze({
+    policy: object(JSON.parse(selected)),
+    policyRawBytes: selected,
+    policyVersion: multiCountry
+      ? INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION
+      : INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION,
+    rawSha256,
+    multiCountry,
+    classification:
+      'IMMUTABLE_POLICY_DATA_NOT_SOURCE_WORK_OR_PAYMENT_AUTHORITY' as const,
+  });
+}
 export function projectPostwarIndustryLogisticsReplaySources(
   input: Readonly<{
     baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>;
@@ -113,41 +158,23 @@ export function projectPostwarIndustryLogisticsReplaySources(
     d = input.firstday.data,
     f = object(d.sourceFacility),
     opening = readPreparedFinanceSocialOpening(b.prepared);
-  if (
-    sha(input.policyBytes.policy) !==
-      INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256 ||
-    sha(input.policyBytes.adoption) !==
-      INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256
-  )
-    fail('ADOPTED_POLICY_BYTES_REQUIRED');
-  const selectedPolicy =
-    d.countryId === 'COUNTRY_02'
-      ? input.policyBytes.policy
-      : input.policyBytes.multiCountryPolicy;
-  if (!selectedPolicy)
-    throw new PostwarIndustryLogisticsSourceMissing(
-      'ADOPTED_LOGISTICS_SCOPE_UNAVAILABLE',
-    );
-  const selectedHash = sha(selectedPolicy),
-    multiCountry =
-      selectedHash ===
-      INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_RAW_SHA256;
-  if (
-    !multiCountry &&
-    selectedHash !== INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256
-  )
-    fail('ADOPTED_POLICY_BYTES_REQUIRED');
+  const selection = readPostwarIndustryLogisticsPolicyForCountry(
+      input.policyBytes,
+      text(d.countryId),
+      text(d.facilityId),
+    ),
+    multiCountry = selection.multiCountry;
   if (
     multiCountry &&
-    /^0(?:[.]0+)?$/u.test(String(object(d.domesticAccess).distanceKmEstimate))
+    !new WorldDecimal(
+      text(object(d.domesticAccess).distanceKmEstimate),
+    ).greaterThan('0')
   )
     throw new PostwarIndustryLogisticsSourceMissing(
       'POSITIVE_LOGISTICS_DISTANCE_REQUIRED_ZERO_SOURCE_NOT_OPERATIONAL',
     );
-  const policyVersion = multiCountry
-    ? INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_POLICY_VERSION
-    : INDUSTRY_INTERNAL_LOGISTICS_POLICY_VERSION;
-  const policy = object(JSON.parse(selectedPolicy)),
+  const policyVersion = selection.policyVersion;
+  const policy = selection.policy,
     scope = object(policy.scope),
     mass = object(policy.massBasis);
   if (
@@ -226,7 +253,7 @@ export function projectPostwarIndustryLogisticsReplaySources(
         sourceOperatorId: text(f.operatorId),
       },
     }),
-    policyRawBytes: selectedPolicy,
+    policyRawBytes: selection.policyRawBytes,
     adoptionRawBytes: input.policyBytes.adoption,
     sourceBytes: {
       'facilities.json':
@@ -405,7 +432,7 @@ export function projectPostwarIndustryLogisticsReplaySources(
           seedFingerprint: b.pins.contentHash,
           admissionRef: b.pins.admissionRef,
           policyVersion,
-          policyRawSha256: selectedHash,
+          policyRawSha256: selection.rawSha256,
           userAdoptionRawSha256:
             INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256,
           originals: [
@@ -519,16 +546,11 @@ export async function readPostwarIndustryLogisticsReplaySourcesFrom(
     throw new PostwarIndustryLogisticsSourceMissing(
       'PRIVATE_STARTUP_CONFIGURATION_MISSING',
     );
-  const fixedScope = object(
-    object(JSON.parse(configuration.policyBytes.policy)).scope,
+  readPostwarIndustryLogisticsPolicyForCountry(
+    configuration.policyBytes,
+    input.countryId,
+    input.facilityId,
   );
-  if (
-    input.countryId !== fixedScope.country ||
-    input.facilityId !== fixedScope.facility
-  )
-    throw new PostwarIndustryLogisticsSourceMissing(
-      'ADOPTED_LOGISTICS_SCOPE_UNAVAILABLE',
-    );
   if (
     input.worldId !== b.pins.worldId ||
     !input.runIds.length ||
