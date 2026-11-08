@@ -7,6 +7,14 @@ import { it, expect } from 'vitest';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const read = (p: string) =>
   readFile(new URL('../../' + p, import.meta.url), 'utf8');
+// This historical upgrade ends at 4b6d400c. The later domestic-model forward
+// has its own tests; it must not rewrite this upgrade's target or receipt.
+const readTarget = (name: string) =>
+  read(
+    name === 'postwar-industry-first-day-source'
+      ? 'tests/fixtures/sql/postwar-industry-first-day-source.4b6d400c.sql'
+      : 'database/proposals/' + name + '.sql',
+  );
 const names = [
   'postwar-captain-current-derived-read',
   'postwar-captain-h0-current',
@@ -102,9 +110,7 @@ it('installs exact predecessor proposals and upgrades in place, preserving rows/
       const old = await read('tests/fixtures/sql/' + n + '.0cf65bc0.sql');
       expect(sha(old)).toBe(manifest.oldProposalSha256[n]);
       legacy.set(n, old);
-      expect(sha(await read('database/proposals/' + n + '.sql'))).toBe(
-        manifest.newProposalSha256[n],
-      );
+      expect(sha(await readTarget(n))).toBe(manifest.newProposalSha256[n]);
     }
     const tableChange = manifest.tableChanges[0];
     if (!tableChange) throw Error('EXACT_TARGET_PRIMARY_KEY_RECORD_REQUIRED');
@@ -246,10 +252,7 @@ it('installs exact predecessor proposals and upgrades in place, preserving rows/
       });
       expect(after[0]?.prosrc).not.toBe(before[0]?.prosrc);
       expect(await stable()).toEqual(baseline);
-      const current = declaration(
-        await read('database/proposals/' + source + '.sql'),
-        signature,
-      );
+      const current = declaration(await readTarget(source), signature);
       expect(after[0]?.prosrc).toBe(
         current.match(/as \$\$([\s\S]*?)\$\$;/u)?.[1],
       );
