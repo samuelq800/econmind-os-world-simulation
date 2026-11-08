@@ -205,7 +205,9 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
         childPid: first.pid,
         sourceProofOrdinal: restoreFlag === '1' ? 1 : 2,
       });
-      await d.start();
+      await phase('FORMAL_FINITE_START_DENIAL', 'START');
+      await d.assertPreparationStartDenied();
+      await phase('FORMAL_FINITE_START_DENIAL', 'END');
       const terms = deriveRegisteredFinalIndustryRunPlan(
         await d.rpc('INDUSTRY_SELECTORS', {
           countryId: 'COUNTRY_02',
@@ -350,6 +352,7 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
         childPid: second.pid,
         sourceProofOrdinal: restoreFlag === '1' ? 2 : 3,
       });
+      await d.assertPreparationStartDenied();
       must(first.pid !== second.pid, 'DISTINCT_COLD_OS_PID_REQUIRED');
       report.coldStarts = [first, second];
       await phase('DURABLE_FINAL_RECOVERY_NO_RESUBMISSION', 'START', {

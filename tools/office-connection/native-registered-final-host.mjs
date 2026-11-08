@@ -492,7 +492,19 @@ process.on('message', async (m) => {
   try {
     if (m.type === 'INIT')
       send({ id: m.id, ok: true, value: await initialize(m.configuration) });
-    else if (m.type === 'START') {
+    else if (m.type === 'STATE') {
+      const ports = Shared.readPostwarFinanceSocialRuntimeBinding(binding);
+      send({
+        id: m.id,
+        ok: true,
+        value: {
+          pid: process.pid,
+          ready: node.ready(),
+          formalBinding: !!ports.formalBinding,
+          consumerState: ports.runtime.consumer.state(),
+        },
+      });
+    } else if (m.type === 'START') {
       node.consumer.startPreparation();
       send({ id: m.id, ok: true, value: { started: true, pid: process.pid } });
     } else if (m.type === 'CONSUME') {
