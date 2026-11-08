@@ -40,6 +40,21 @@ export interface RegisteredOfficeBrowserStageInput {
   /** Actual credential provider, never written to evidence. */
   readonly getAccessToken: () => string | Promise<string>;
 }
+export type RegisteredIndustryPowerFormSelection = Readonly<{
+  /** Selected from a real current utilityPlanningPage; never a sample/default. */
+  planningRef: string;
+  sourceVersion: string;
+  expectedHead: RegisteredOfficeBrowserHead;
+}> &
+  (
+    | Readonly<{
+        action: 'BOOK';
+        quantity: string;
+        startsAtSimTime: string;
+        endsAtSimTime: string;
+      }>
+    | Readonly<{ action: 'DELIVER' }>
+  );
 export interface RegisteredOfficeBrowserSession {
   readonly role: RegisteredOfficeBrowserRole;
   /** Opaque real Playwright Page; use the finite stages below. */
@@ -49,6 +64,15 @@ export interface RegisteredOfficeBrowserSession {
     expectation?: Readonly<{
       status?: RegisteredOfficeBrowserState['status'];
       expectedHead?: RegisteredOfficeBrowserHead;
+    }>,
+  ): Promise<RegisteredOfficeBrowserState>;
+  /** Read the real planning page, operate the shipped form, review and submit
+   * once. Returns its actual original in state.intent for reloadRestore;
+   * caller must separately consume and recoverFinal. An ACK is never FINAL. */
+  submitIndustryPowerFromPlanning(
+    selection: RegisteredIndustryPowerFormSelection,
+    expectation?: Readonly<{
+      expectedStatus?: RegisteredOfficeBrowserState['status'];
     }>,
   ): Promise<RegisteredOfficeBrowserState>;
   submitOnce(

@@ -152,6 +152,7 @@ export async function createRegisteredOfficeBrowserStages(input) {
       page = base.page,
       requests = [],
       responses = [],
+      submissions = [],
       networkFailures = [];
     const apiOrigin = input.readConfiguration.endpointPins.origin;
     // Fixed passthrough only, including after an owned child restarts on a new
@@ -169,6 +170,16 @@ export async function createRegisteredOfficeBrowserStages(input) {
         delete headers.host;
         delete headers.cookie;
         const body = request.postDataBuffer();
+        if (
+          u.pathname === '/v1/office-command' &&
+          request.method() === 'POST'
+        ) {
+          try {
+            submissions.push(JSON.parse(body?.toString('utf8') ?? ''));
+          } catch {
+            submissions.push(null);
+          } // Still forward the actual bytes.
+        }
         const response = await page
           .context()
           .request.fetch(backend + u.pathname + u.search, {
@@ -268,6 +279,18 @@ export async function createRegisteredOfficeBrowserStages(input) {
               observedRowsSha256: digest(p.rows),
             }
           : null,
+        utilityPlanning: s?.utilityPlanningPage
+          ? {
+              status: s.utilityPlanningPage.status,
+              dataset: s.utilityPlanningPage.dataset,
+              currentHead: head(s.utilityPlanningPage.authority.readback),
+              sourceVersion: s.utilityPlanningPage.source.sourceVersion,
+              bindingVersion: s.utilityPlanningPage.source.bindingVersion,
+              rows: s.utilityPlanningPage.page.returned,
+              total: s.utilityPlanningPage.page.total,
+              observedRowsSha256: digest(s.utilityPlanningPage.rows),
+            }
+          : null,
         requestCounts: {
           submit: count(requests, '/v1/office-command'),
           recover: count(requests, '/v1/command-recovery'),
@@ -320,11 +343,192 @@ export async function createRegisteredOfficeBrowserStages(input) {
       }
       return record('ACTUAL_DOM_READ', s);
     }
+    async function submitIndustryPowerFromPlanning(
+      selection,
+      { expectedStatus = 'QUEUE_ACK' } = {},
+    ) {
+      live();
+      assert.equal(retired, false);
+      assert.equal(role, 'industry', 'INDUSTRY_BROWSER_SESSION_REQUIRED');
+      const common = ['planningRef', 'sourceVersion', 'expectedHead', 'action'];
+      assert.ok(
+        selection && typeof selection === 'object' && !Array.isArray(selection),
+      );
+      assert.ok(['BOOK', 'DELIVER'].includes(selection.action));
+      const fields =
+        selection.action === 'BOOK'
+          ? [...common, 'quantity', 'startsAtSimTime', 'endsAtSimTime']
+          : common;
+      assert.deepEqual(
+        Object.keys(selection).sort(),
+        fields.sort(),
+        'EXACT_POWER_FORM_SELECTION_REQUIRED',
+      );
+      assert.equal(typeof selection.planningRef, 'string');
+      assert.match(selection.sourceVersion, /^sha256:[a-f0-9]{64}$/u);
+      assert.ok(
+        selection.expectedHead && typeof selection.expectedHead === 'object',
+      );
+      // A real readback may also carry seed/world metadata. Only its actual
+      // two head counters participate in this selection assertion.
+      for (const value of [
+        selection.expectedHead.worldVersion,
+        selection.expectedHead.eventSequence,
+      ])
+        assert.match(value, /^(0|[1-9][0-9]*)$/u);
+      const current = await read({ expectedHead: selection.expectedHead });
+      assert.equal(
+        current.canStage,
+        true,
+        'CURRENT_UNUSED_BROWSER_INTENT_REQUIRED',
+      );
+      const planning = current.utilityPlanningPage;
+      assert.ok(
+        planning && planning.status === 'PAGE',
+        'ACTUAL_UTILITY_PLANNING_PAGE_REQUIRED',
+      );
+      assert.equal(planning.dataset, 'industry-utility-planning');
+      assert.equal(planning.authority.identity.officeId, 'INDUSTRY');
+      assert.equal(planning.authority.identity.countryId, input.countryId);
+      assert.equal(
+        planning.authority.identity.authSubjectId,
+        input.authSubject,
+      );
+      assert.deepEqual(
+        head(planning.authority.readback),
+        head(selection.expectedHead),
+      );
+      assert.equal(
+        planning.source.sourceVersion,
+        selection.sourceVersion,
+        'ACTUAL_PLANNING_SELECTION_VERSION_CHANGED',
+      );
+      const rows = planning.rows.filter(
+        (row) => row.planningRef === selection.planningRef,
+      );
+      assert.equal(rows.length, 1, 'ONE_ACTUAL_SELECTED_PLANNING_ROW_REQUIRED');
+      const row = rows[0];
+      assert.equal(row.serviceKind, 'POWER');
+      assert.equal(row.action, selection.action);
+      assert.equal(row.countryId, input.countryId);
+      const before = count(requests, '/v1/office-command'),
+        beforeCaptured = submissions.length;
+      await page
+        .locator('[data-industry-utility-field="planningRef"]')
+        .selectOption(selection.planningRef);
+      for (const [key, value] of [
+        ['quantity', selection.quantity],
+        ['startsAtSimTime', selection.startsAtSimTime],
+        ['endsAtSimTime', selection.endsAtSimTime],
+      ]) {
+        const field = page.locator(`[data-industry-utility-field="${key}"]`);
+        if (selection.action === 'BOOK') {
+          assert.equal(typeof value, 'string');
+          assert.notEqual(value, '');
+          assert.equal(await field.isDisabled(), false);
+          await field.fill(value);
+        } else {
+          assert.equal(await field.isDisabled(), true);
+          assert.equal(await field.inputValue(), '');
+        }
+      }
+      await page.locator('[data-industry-utility-action="stage"]').click();
+      const staged = await state(),
+        dto = staged.intent;
+      assert.equal(
+        staged.status,
+        'REVIEW_REQUIRED',
+        'ACTUAL_POWER_FORM_DID_NOT_STAGE',
+      );
+      assert.ok(dto);
+      assert.equal(dto.request.officeId, 'INDUSTRY');
+      assert.equal(
+        dto.request.commandType,
+        'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
+      );
+      assert.equal(
+        dto.request.worldId,
+        input.readConfiguration.admittedWorldPins.worldId,
+      );
+      assert.equal(dto.request.countryId, input.countryId);
+      assert.equal(
+        dto.request.expectedWorldVersion,
+        selection.expectedHead.worldVersion,
+      );
+      assert.equal(dto.request.payload.serviceKind, 'POWER');
+      for (const key of ['facilityId', 'runId', 'sourceRef', 'sourceRawSha256'])
+        assert.equal(dto.request.payload[key], row[key]);
+      const operation = dto.request.payload.operation;
+      assert.equal(operation.action, selection.action);
+      if (selection.action === 'DELIVER') {
+        assert.deepEqual(
+          operation,
+          row.parameters.operation,
+          'PROTECTED_DELIVERY_REFERENCES_CHANGED',
+        );
+        assert.deepEqual(Object.keys(operation).sort(), [
+          'action',
+          'bookingRef',
+          'paymentEventFingerprint',
+          'workEventFingerprint',
+        ]);
+      } else {
+        assert.equal(operation.outputMWh, selection.quantity);
+        assert.equal(operation.fromSimTime, selection.startsAtSimTime);
+        assert.equal(operation.throughSimTime, selection.endsAtSimTime);
+        assert.equal(operation.purpose, row.parameters.purpose);
+      }
+      assert.equal(
+        count(requests, '/v1/office-command'),
+        before,
+        'STAGING_MUST_NOT_SUBMIT',
+      );
+      await page.locator('[data-office-command-action="review"]').click();
+      const reviewed = await state();
+      assert.equal(reviewed.status, 'REVIEWED');
+      assert.deepEqual(reviewed.intent, dto);
+      assert.equal(
+        count(requests, '/v1/office-command'),
+        before,
+        'REVIEW_MUST_NOT_SUBMIT',
+      );
+      original = dto;
+      await page.locator('[data-office-command-action="confirm"]').click();
+      await page.waitForFunction(
+        () => window.EconMindFixedOfficeProbe.state().status !== 'SUBMITTING',
+      );
+      const result = await state();
+      assert.deepEqual(networkFailures, []);
+      assert.equal(
+        count(requests, '/v1/office-command') - before,
+        1,
+        'ONE_EXPLICIT_POWER_FORM_SUBMIT_REQUIRED',
+      );
+      assert.equal(submissions.length - beforeCaptured, 1);
+      assert.deepEqual(
+        submissions.at(-1),
+        dto,
+        'ACTUAL_HTTP_ORIGINAL_DIFFERS_FROM_REVIEWED_FORM',
+      );
+      assert.equal(result.status, expectedStatus);
+      assert.equal(
+        result.receipt,
+        null,
+        'ACK_OR_UNKNOWN_IS_NOT_AN_ECONOMIC_FINAL',
+      );
+      return record('ONE_ACTUAL_POWER_FORM_SUBMIT', result, {
+        commandType: dto.request.commandType,
+        action: selection.action,
+        selectedPlanningRefSha256: digest(selection.planningRef),
+        originalPayloadSha256: digest(dto.request.payload),
+      });
+    }
     const session = Object.freeze({
       role,
       page,
       state,
       read,
+      submitIndustryPowerFromPlanning,
       async submitOnce(dto, { expectedStatus = 'QUEUE_ACK' } = {}) {
         live();
         assert.equal(retired, false);
@@ -448,6 +652,7 @@ export async function createRegisteredOfficeBrowserStages(input) {
           'acknowledgement',
           'runtimePage',
           'runParametersPage',
+          'utilityPlanningPage',
           'model',
         ])
           assert.equal(s[k], null, k + '_MUST_BE_CLEARED');
@@ -467,6 +672,8 @@ export async function createRegisteredOfficeBrowserStages(input) {
         if (retired) return;
         retired = true;
         await base.close();
+        original = null;
+        submissions.length = 0;
         sessions.delete(session);
       },
     });
