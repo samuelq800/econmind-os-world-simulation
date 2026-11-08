@@ -1,3 +1,4 @@
+import { isManualIndustryUtilityPayload } from './authenticated-office-command-contract.js';
 /** Common conditional execution DATA for the three adopted first-day utility
  * services. The fixed domain reducers establish actual labour, payment and
  * resource effects. Neither this preparation nor a source policy is delivery,
@@ -109,6 +110,30 @@ function utf8Bytes(v: string): number {
   }
   return n;
 }
+/** Schema only. The private fixed issuer must additionally bind the actual
+ * COMMITTED RUN, its audit identity and the current quota/source on the same
+ * executor; copied fields or this parser cannot issue commit authority. */
+function automaticWaterGrantShape(
+  command: CanonicalCommand,
+  payload: Record<string, unknown>,
+): boolean {
+  const operation = object(payload.operation);
+  return (
+    command.commandType === INDUSTRY_UTILITY_COMMANDS.WATER &&
+    command.officeId === null &&
+    command.expectedWorldVersion !== null &&
+    /^COMMAND_INDUSTRY_WATER_GRANT_[A-F0-9]{64}$/u.test(command.commandId) &&
+    command.idempotencyKey !== null &&
+    command.idempotencyKey.toString() === command.commandId &&
+    payload.operationRef === command.commandId &&
+    payload.serviceKind === 'WATER' &&
+    rawSha(payload.sourceRawSha256) &&
+    payload.sourceRef ===
+      'INDUSTRY_UTILITY_' + payload.sourceRawSha256.toUpperCase() + '_WATER' &&
+    Object.keys(operation).length === 1 &&
+    operation.action === 'GRANT_RIGHT'
+  );
+}
 export function parseIndustryUtilityIntent(
   command: CanonicalCommand,
   sha: Sha256Hex,
@@ -130,9 +155,10 @@ export function parseIndustryUtilityIntent(
     keys.some((k) => !Object.hasOwn(b, k)) ||
     b.schemaVersion !== 'industry-first-day-utility-command-v1' ||
     !Object.hasOwn(INDUSTRY_UTILITY_COMMANDS, String(b.serviceKind)) ||
-    command.officeId !== 'INDUSTRY' ||
-    command.expectedWorldVersion === null ||
-    command.idempotencyKey === null ||
+    (!automaticWaterGrantShape(command, b) &&
+      (command.officeId !== 'INDUSTRY' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null)) ||
     ![b.operationRef, b.facilityId, b.runId, b.sourceRef].every(ref) ||
     !rawSha(b.sourceRawSha256) ||
     // A whole first-day service may complete exactly at its end tick. Domain
@@ -150,6 +176,25 @@ export function parseIndustryUtilityIntent(
     ...b,
     operation,
   }) as unknown as Readonly<IndustryUtilityIntent>;
+}
+export function parseIndustryUtilityAutomaticWaterGrantIntent(
+  command: CanonicalCommand,
+  sha: Sha256Hex,
+): Readonly<IndustryUtilityIntent> {
+  const intent = parseIndustryUtilityIntent(command, sha);
+  if (!automaticWaterGrantShape(command, object(intent)))
+    invalid('FIXED_AUTOMATIC_WATER_GRANT_SHAPE_REQUIRED');
+  return intent;
+}
+/** Public manual scheduling is narrower than historical conditional DATA. */
+export function parseIndustryUtilityManualIntent(
+  command: CanonicalCommand,
+  sha: Sha256Hex,
+): Readonly<IndustryUtilityIntent> {
+  const intent = parseIndustryUtilityIntent(command, sha);
+  if (!isManualIndustryUtilityPayload(command.commandType, intent))
+    invalid('FIXED_MANUAL_UTILITY_SCHEDULING_ACTION_REQUIRED');
+  return intent;
 }
 function source(input: IndustryUtilitySource): Readonly<IndustryUtilitySource> {
   // Canonical copy prevents mutable caller objects or getters becoming retained

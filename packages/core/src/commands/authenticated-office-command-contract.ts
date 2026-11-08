@@ -14,12 +14,123 @@ export const AUTHENTICATED_OFFICE_COMMAND_PATH = '/v1/office-command' as const;
 export const FINANCE_BUDGET_APPROPRIATION_COMMAND =
   'CORE_FINANCE_BUDGET_APPROPRIATION_V1' as const;
 
+/** Fixed public scheduling families. These literals and the payload gate are
+ * browser-safe transport only; they issue no work, payment, right or delivery. */
+export const MANUAL_INDUSTRY_UTILITY_COMMANDS = Object.freeze({
+  POWER: 'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
+  WATER: 'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1',
+  LOGISTICS: 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+} as const);
+export type ManualIndustryUtilityCommandFamily =
+  (typeof MANUAL_INDUSTRY_UTILITY_COMMANDS)[keyof typeof MANUAL_INDUSTRY_UTILITY_COMMANDS];
+export function isManualIndustryUtilityCommandFamily(
+  family: unknown,
+): family is ManualIndustryUtilityCommandFamily {
+  return Object.values(MANUAL_INDUSTRY_UTILITY_COMMANDS).some(
+    (f) => f === family,
+  );
+}
+/** Only these user scheduling actions may cross the manual boundary. Historical
+ * conditional DATA reducers retain their other stages for fixed issuers. */
+export function isManualIndustryUtilityPayload(
+  family: unknown,
+  value: unknown,
+): boolean {
+  const record = (v: unknown): Record<string, unknown> | null =>
+    v !== null && typeof v === 'object' && !Array.isArray(v)
+      ? (v as Record<string, unknown>)
+      : null;
+  const exact = (v: Record<string, unknown>, keys: readonly string[]) =>
+    Object.keys(v).length === keys.length &&
+    keys.every((k) => Object.hasOwn(v, k));
+  const payload = record(value),
+    operation = record(payload?.operation);
+  if (
+    !payload ||
+    !operation ||
+    !exact(payload, [
+      'schemaVersion',
+      'serviceKind',
+      'operationRef',
+      'facilityId',
+      'runId',
+      'sourceRef',
+      'sourceRawSha256',
+      'operation',
+    ]) ||
+    payload.schemaVersion !== 'industry-first-day-utility-command-v1' ||
+    !Object.hasOwn(
+      MANUAL_INDUSTRY_UTILITY_COMMANDS,
+      String(payload.serviceKind),
+    ) ||
+    family !==
+      MANUAL_INDUSTRY_UTILITY_COMMANDS[
+        payload.serviceKind as keyof typeof MANUAL_INDUSTRY_UTILITY_COMMANDS
+      ]
+  )
+    return false;
+  switch (family) {
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.POWER:
+      return (
+        operation.action === 'BOOK' &&
+        exact(operation, [
+          'action',
+          'bookingRef',
+          'purpose',
+          'fromSimTime',
+          'throughSimTime',
+          'outputMWh',
+        ])
+      );
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.WATER:
+      // References locate real prior records. They never attest paid work or
+      // create a water right; the fixed source and reducer check every record.
+      return (
+        operation.action === 'DELIVER' &&
+        exact(operation, [
+          'action',
+          'workEventFingerprint',
+          'paymentEventFingerprint',
+          'powerEventFingerprints',
+          'additionalProtectedClaims',
+        ])
+      );
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.LOGISTICS:
+      if (operation.action === 'BOOK')
+        return (
+          exact(operation, ['action', 'transferId', 'request']) &&
+          record(operation.request) !== null
+        );
+      if (operation.action === 'SHIP' || operation.action === 'DELIVER')
+        return exact(operation, ['action', 'transferId']);
+      if (operation.action === 'SERVICE_WORK')
+        return exact(operation, [
+          'action',
+          'transferId',
+          'workOrderRef',
+          'workOrderSha256',
+        ]);
+      if (operation.action === 'PAY_INPUTS')
+        return exact(operation, [
+          'action',
+          'transferId',
+          'workEventFingerprint',
+          'expenseOrderRef',
+          'expenseOrderSha256',
+        ]);
+      return false;
+    default:
+      return false;
+  }
+}
+
 export type ManualOfficeCommandFamily =
   | 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'
   | 'CORE_CENTRAL_BANK_OMO_V1'
   | 'CORE_GOODS_TRANSFER_V1'
   | 'CORE_INDUSTRY_PRODUCTION_V1'
   | 'CORE_INDUSTRY_RUN_SCHEDULE_V1'
+  | ManualIndustryUtilityCommandFamily
   | 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1'
   | 'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'
   | typeof FINANCE_BUDGET_APPROPRIATION_COMMAND

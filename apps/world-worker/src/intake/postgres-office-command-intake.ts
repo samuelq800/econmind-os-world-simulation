@@ -32,6 +32,8 @@ import {
 } from '@econmind/core';
 import type { FinancialIntakeBindingDto } from '@econmind/core/authenticated-financial-intake-contract';
 import {
+  isManualIndustryUtilityCommandFamily,
+  isManualIndustryUtilityPayload,
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
   POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
   type ManualOfficeSourceRejectionDto,
@@ -120,7 +122,8 @@ export function parseManualOfficeCommandRequest(
       row.commandType === CENTRAL_BANK_OMO_COMMAND) ||
     (row.officeId === 'INDUSTRY' &&
       (row.commandType === 'CORE_INDUSTRY_PRODUCTION_V1' ||
-        row.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND)) ||
+        row.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+        isManualIndustryUtilityCommandFamily(row.commandType))) ||
     (row.officeId === 'TRADE' &&
       row.commandType === 'CORE_GOODS_TRANSFER_V1') ||
     (row.officeId === 'SOCIAL' &&
@@ -130,6 +133,11 @@ export function parseManualOfficeCommandRequest(
       (row.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
         row.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND))
   ))
+    invalid();
+  if (
+    isManualIndustryUtilityCommandFamily(row.commandType) &&
+    !isManualIndustryUtilityPayload(row.commandType, row.payload)
+  )
     invalid();
   return Object.freeze(row) as unknown as ManualOfficeCommandRequestDto;
 }
@@ -144,7 +152,8 @@ export function manualOfficeCommandCapability(request: {
   if (
     office === 'INDUSTRY' &&
     (family === 'CORE_INDUSTRY_PRODUCTION_V1' ||
-      family === INDUSTRY_RUN_SCHEDULE_COMMAND)
+      family === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+      isManualIndustryUtilityCommandFamily(family))
   )
     return 'INDUSTRY_PRODUCTION' as const;
   if (office === 'TRADE' && family === 'CORE_GOODS_TRANSFER_V1')

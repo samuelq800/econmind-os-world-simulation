@@ -139,19 +139,16 @@ describe('W1 Office private DOM lifecycle / shipped view and bounded transport',
     expect(s.f.commands).toHaveLength(0);
   });
   it.each(['industry', 'trade'] as const)(
-    'unsupported or mismatched %s binding creates no private shell',
+    'mismatched %s binding creates no private shell',
     (role) => {
       const s = setup(role);
-      const binding =
-        role === 'trade'
-          ? {
-              ...s.f.binding,
-              read: {
-                ...s.f.binding.read,
-                identity: { ...s.f.binding.read.identity, officeId: 'FINANCE' },
-              },
-            }
-          : s.f.binding;
+      const binding = {
+        ...s.f.binding,
+        read: {
+          ...s.f.binding.read,
+          identity: { ...s.f.binding.read.identity, officeId: 'FINANCE' },
+        },
+      };
       expect(s.connect(s.f, binding)).toBe('MISSING');
       s.flush();
       expect(privateNodes(s.doc)).toEqual([]);
@@ -159,14 +156,17 @@ describe('W1 Office private DOM lifecycle / shipped view and bounded transport',
       expect(s.f.commands).toHaveLength(0);
     },
   );
-  it('Finance transport mounts only after a trusted binding and performs no automatic request', () => {
-    const s = setup('finance');
-    expect(s.connect()).toBe('READY_TO_READ');
-    s.flush();
-    expect(privateNodes(s.doc).length).toBeGreaterThan(0);
-    expect(s.f.f.calls).toHaveLength(0);
-    expect(s.f.commands).toHaveLength(0);
-  });
+  it.each(['finance', 'industry', 'trade'] as const)(
+    '%s transport mounts only after a trusted binding and performs no automatic request',
+    (role) => {
+      const s = setup(role);
+      expect(s.connect()).toBe('READY_TO_READ');
+      s.flush();
+      expect(privateNodes(s.doc).length).toBeGreaterThan(0);
+      expect(s.f.f.calls).toHaveLength(0);
+      expect(s.f.commands).toHaveLength(0);
+    },
+  );
   it('invalid binding is missing with no private accessibility controls or dispatch', () => {
     const s = setup();
     s.connect(s.f, {

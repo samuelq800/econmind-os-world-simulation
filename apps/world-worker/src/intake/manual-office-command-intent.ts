@@ -1,3 +1,4 @@
+import { parseIndustryUtilityManualIntent } from '@econmind/core/industry-utility-execution';
 import {
   INDUSTRY_RUN_SCHEDULE_COMMAND,
   parseIndustryRunScheduleIntent,
@@ -27,6 +28,8 @@ import {
   type CanonicalCommand,
 } from '@econmind/core';
 import {
+  MANUAL_INDUSTRY_UTILITY_COMMANDS,
+  isManualIndustryUtilityCommandFamily,
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
   POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
   type ManualOfficeCommandRequestDto,
@@ -89,6 +92,7 @@ export function decodeStoredManualOfficeCommand(
   )
     conflict();
   if (
+    isManualIndustryUtilityCommandFamily(original.commandType) ||
     original.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
     original.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
     original.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
@@ -111,6 +115,11 @@ export function validateManualOfficeCommandIntent(
 ): void {
   validateCanonicalCommand(command, sha);
   switch (command.commandType) {
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.POWER:
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.WATER:
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.LOGISTICS:
+      parseIndustryUtilityManualIntent(command, sha);
+      return;
     case INDUSTRY_RUN_SCHEDULE_COMMAND:
       if (command.idempotencyKey === null) invalid();
       parseIndustryRunScheduleIntent(command, sha);

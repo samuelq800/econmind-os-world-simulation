@@ -1,3 +1,4 @@
+import { isManualIndustryUtilityCommandFamily } from '@econmind/core/authenticated-office-command-contract';
 import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
 import { INDUSTRY_PRODUCTION_COMMAND } from '@econmind/core/industry-production-command';
 /** Explicit server-only HTTP borrower of one genuinely issued Industry
@@ -210,7 +211,8 @@ export function createPostwarIndustryConnection(
         const r = parseOfficeEnvelope(input.request);
         if (
           (r.request.commandType !== INDUSTRY_PRODUCTION_COMMAND &&
-            r.request.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND) ||
+            r.request.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND &&
+            !isManualIndustryUtilityCommandFamily(r.request.commandType)) ||
           r.request.officeId !== 'INDUSTRY'
         )
           return fail(400, 'UNSUPPORTED_INDUSTRY_COMMAND');
@@ -249,7 +251,8 @@ export function createPostwarIndustryConnection(
           o = r.request.originalRequest.request;
         if (
           (o.commandType !== INDUSTRY_PRODUCTION_COMMAND &&
-            o.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND) ||
+            o.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND &&
+            !isManualIndustryUtilityCommandFamily(o.commandType)) ||
           o.officeId !== 'INDUSTRY'
         )
           return fail(400, 'UNSUPPORTED_INDUSTRY_RECOVERY');

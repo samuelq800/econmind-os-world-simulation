@@ -3,6 +3,9 @@ import {
   type AuthenticatedCommandRecoveryRequestDto,
 } from '@econmind/core/authenticated-command-recovery-contract';
 import {
+  MANUAL_INDUSTRY_UTILITY_COMMANDS,
+  isManualIndustryUtilityCommandFamily,
+  isManualIndustryUtilityPayload,
   AUTHENTICATED_OFFICE_COMMAND_PATH,
   AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
   type AuthenticatedOfficeCommandRequestDto,
@@ -54,6 +57,9 @@ export const officeFamilies = Object.freeze({
   INDUSTRY: Object.freeze([
     'CORE_INDUSTRY_PRODUCTION_V1',
     'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+    MANUAL_INDUSTRY_UTILITY_COMMANDS.POWER,
+    MANUAL_INDUSTRY_UTILITY_COMMANDS.WATER,
+    MANUAL_INDUSTRY_UTILITY_COMMANDS.LOGISTICS,
   ] as const),
   SOCIAL: Object.freeze([
     'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
@@ -127,6 +133,8 @@ export function parseOfficeIntent(
       ) ||
       !version(r.expectedWorldVersion) ||
       !row(r.payload) ||
+      (isManualIndustryUtilityCommandFamily(r.commandType) &&
+        !isManualIndustryUtilityPayload(r.commandType, r.payload)) ||
       r.worldId !== c.identity.worldId ||
       r.countryId !== c.identity.countryId ||
       r.officeId !== c.identity.officeId ||

@@ -1,3 +1,4 @@
+import { isManualIndustryUtilityCommandFamily } from '@econmind/core/authenticated-office-command-contract';
 import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
 import type { PostwarIndustryConnection } from './postwar-industry-connection.js';
 import { INDUSTRY_PRODUCTION_COMMAND } from '@econmind/core/industry-production-command';
@@ -181,7 +182,8 @@ export function createPostwarOfficeCommandFetchHandler(
           const target =
             selector.officeId === 'INDUSTRY' &&
             (selector.commandType === INDUSTRY_PRODUCTION_COMMAND ||
-              selector.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND)
+              selector.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+              isManualIndustryUtilityCommandFamily(selector.commandType))
               ? industry
               : selector.officeId === 'CENTRAL_BANK' &&
                   selector.commandType === CENTRAL_BANK_OMO_COMMAND
