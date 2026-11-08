@@ -1,4 +1,12 @@
 import {
+  INDUSTRY_UTILITY_PLANNING_DATASET,
+  parseIndustryUtilityPlanningRow,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
+import {
+  buildIndustryUtilityRequest,
+  type IndustryUtilityDraft,
+} from '../industry-utility/form.js';
+import {
   INDUSTRY_RUN_PARAMETERS_DATASET,
   parseIndustryRunParameterRow,
 } from '@econmind/core/postwar-industry-run-parameters-contract';
@@ -104,6 +112,10 @@ export function createOfficeCommandController(
       b?.read.identity.projectionVersion === POSTWAR_RUNTIME_SCHEMA
         ? createPostwarRuntimeClient(b.read, options)
         : null,
+    industryUtilityReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
     industryRunReader =
       b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
@@ -124,6 +136,8 @@ export function createOfficeCommandController(
     code: string | null = b ? null : 'OFFICE_BINDING_MISSING_OR_UNSUPPORTED';
   let runtimePage: RuntimePage | null = null;
   let runParametersPage: RuntimePage | null = null;
+  let utilityPlanningPage: RuntimePage | null = null;
+  let utilityPlanningCode: string | null = null;
   let model: OfficeProjectionModel | null = null,
     intent: AuthenticatedOfficeCommandRequestDto | null = null,
     acknowledgement: ManualOfficeQueueAcknowledgementDto | null = null,
@@ -148,6 +162,8 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    utilityPlanningPage = null;
+    utilityPlanningCode = null;
     intent = null;
     acknowledgement = null;
     lookup = null;
@@ -156,6 +172,7 @@ export function createOfficeCommandController(
     reader?.disconnect();
     runtimeReader?.disconnect();
     industryRunReader?.disconnect();
+    industryUtilityReader?.disconnect();
     recoverer?.disconnect();
     writer?.disconnect();
     const cleanup = stop;
@@ -203,6 +220,8 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    utilityPlanningPage = null;
+    utilityPlanningCode = null;
     status = 'UNAVAILABLE';
     code = reason;
   }
@@ -221,11 +240,45 @@ export function createOfficeCommandController(
       }
     }
   }
+  async function readUtilityPlanning(previous?: RuntimePage) {
+    if (!industryUtilityReader || !currentHead()) return;
+    const next = await industryUtilityReader.readPage(
+      INDUSTRY_UTILITY_PLANNING_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    utilityPlanningPage = null;
+    utilityPlanningCode = next.status;
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      utilityPlanningPage = next;
+      utilityPlanningCode = null;
+    }
+  }
   async function read() {
     if (!b || !reader) return;
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    utilityPlanningPage = null;
+    utilityPlanningCode = null;
     status = 'READING';
     notify();
     if (runtimeReader) {
@@ -276,6 +329,8 @@ export function createOfficeCommandController(
           runParametersPage = parameters;
         }
       }
+      await readUtilityPlanning();
+      if (!checkLiveness() || !runtimePage) return;
       try {
         lastAuthorizedReadAtClient = new Date().toISOString();
       } catch {
@@ -447,6 +502,10 @@ export function createOfficeCommandController(
         runParametersPage: runParametersPage
           ? (JSON.parse(JSON.stringify(runParametersPage)) as RuntimePage)
           : null,
+        utilityPlanningPage: utilityPlanningPage
+          ? (JSON.parse(JSON.stringify(utilityPlanningPage)) as RuntimePage)
+          : null,
+        utilityPlanningCode,
         currentHead: currentHead()
           ? {
               worldVersion: currentHead()!.worldVersion,
@@ -523,6 +582,49 @@ export function createOfficeCommandController(
             commandId: 'INDUSTRY_RUN_' + id,
             idempotencyKey: 'INDUSTRY_RUN_KEY_' + id,
             runId: 'INDUSTRY_PLAN_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
+    },
+    nextIndustryUtilityPlanningPage: () =>
+      operation(async () => {
+        if (
+          !attempted &&
+          utilityPlanningPage?.page.nextOffset !== null &&
+          utilityPlanningPage
+        )
+          await readUtilityPlanning(utilityPlanningPage);
+      }),
+    stageIndustryUtility(draft: IndustryUtilityDraft) {
+      if (
+        !b ||
+        !checkLiveness() ||
+        !currentHead() ||
+        utilityPlanningPage?.dataset !== INDUSTRY_UTILITY_PLANNING_DATASET ||
+        utilityPlanningPage.authority.readback.worldVersion !==
+          currentHead()!.worldVersion ||
+        utilityPlanningPage.authority.readback.eventSequence !==
+          currentHead()!.eventSequence
+      )
+        return false;
+      try {
+        const row = utilityPlanningPage.rows
+          .map(parseIndustryUtilityPlanningRow)
+          .find((r) => r.planningRef === draft.planningRef);
+        if (!row) return false;
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildIndustryUtilityRequest({
+            row,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: currentHead()!.worldVersion,
+            requestId: requestId(),
+            commandId: 'INDUSTRY_UTILITY_' + id,
+            idempotencyKey: 'INDUSTRY_UTILITY_KEY_' + id,
           }),
         );
       } catch {
