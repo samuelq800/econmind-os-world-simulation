@@ -29,8 +29,22 @@ import {
   WORKER_REVOKED_AUTHORIZATION_LOCK_QUERY,
 } from '../../apps/world-worker/src/persistence/worker-authorization-sql.js';
 import { DurableV08LedgerLineageReader } from '../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.js';
+import { POSTWAR_SOURCE_REVOCATION_FENCE_QUERY } from '../../apps/world-worker/src/persistence/postwar-source-revocation-fence.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const at = '2026-10-30T00:00:00.000Z';
+const workerRole = 'worker_captain_shared_protocol';
+const workerIdentityQuery =
+  "select current_user as role_name,r.rolsuper,r.rolbypassrls,r.rolcreaterole,r.rolcreatedb,r.rolreplication,pg_has_role(current_user,'world_v2_social_source_reader','MEMBER')as source_member,pg_has_role(current_user,'world_v2_social_source_owner','MEMBER')as owner_member,pg_has_role(current_user,'world_v2_social_source_publisher','MEMBER')as publisher_member from pg_roles r where r.rolname=current_user";
+const transactionProtocol = new Set([
+  'begin',
+  'commit',
+  'rollback',
+  'set transaction isolation level repeatable read',
+  'set local role world_v2_social_source_reader',
+  `set local role ${workerRole}`,
+  workerIdentityQuery,
+  POSTWAR_SOURCE_REVOCATION_FENCE_QUERY,
+]);
 let adoption: OfficialLabourSocialOpeningAdoption;
 let serial = 0;
 beforeAll(async () => {
@@ -62,41 +76,77 @@ function harness(options: { captain?: boolean; fx?: boolean } = {}) {
     );
   let selected = command(CAPTAIN_POLITICAL_CAPITAL_COMMAND);
   const queries: string[] = [];
+  let actualRole = workerRole;
   const end = vi.fn(async () => {
     throw Error('BORROWED_POOL_MUST_NOT_END');
   });
-  const query = vi.fn(async (sql: string) => {
-    queries.push(sql);
-    if (sql.includes('from world_v2.command_queue'))
-      return {
-        rows: [
-          {
-            command_id: selected.commandId,
-            authority_kind: 'DISCRETIONARY_USER',
-            queue_state: 'PENDING',
-            available_at_sim_time: '0',
-            claimed_by: null,
-            claim_fencing_token: null,
-          },
-        ],
-        rowCount: 1,
-      };
-    if (
-      [
-        'begin',
-        'commit',
-        'rollback',
-        'set transaction isolation level repeatable read',
-      ].includes(sql)
-    )
-      return { rows: [], rowCount: 0 };
-    if (
-      sql.includes('world_v2.lock_postwar_captain_current_authorization') ||
-      sql.includes('world_v2.lock_postwar_captain_revoked_authorization')
-    )
-      return { rows: [], rowCount: 0 };
-    throw Error('NO_SOURCE_OR_CLAIM_SQL_EXPECTED:' + sql);
-  });
+  const query = vi.fn(
+    async (sql: string, parameters: readonly unknown[] = []) => {
+      queries.push(sql);
+      if (sql === workerIdentityQuery)
+        return {
+          rows: [
+            {
+              role_name: actualRole,
+              rolsuper: false,
+              rolbypassrls: false,
+              rolcreaterole: false,
+              rolcreatedb: false,
+              rolreplication: false,
+              source_member: true,
+              owner_member: false,
+              publisher_member: false,
+            },
+          ],
+          rowCount: 1,
+        };
+      if (sql === 'set local role world_v2_social_source_reader') {
+        actualRole = 'world_v2_social_source_reader';
+        return { rows: [], rowCount: 0 };
+      }
+      if (sql === `set local role ${workerRole}`) {
+        actualRole = workerRole;
+        return { rows: [], rowCount: 0 };
+      }
+      if (sql === POSTWAR_SOURCE_REVOCATION_FENCE_QUERY) {
+        expect(actualRole).toBe('world_v2_social_source_reader');
+        expect(parameters).toEqual([world]);
+        return {
+          rows: [{ lock_postwar_source_revocation_fences: null }],
+          rowCount: 1,
+        };
+      }
+      if (sql.includes('from world_v2.command_queue'))
+        return {
+          rows: [
+            {
+              command_id: selected.commandId,
+              authority_kind: 'DISCRETIONARY_USER',
+              queue_state: 'PENDING',
+              available_at_sim_time: '0',
+              claimed_by: null,
+              claim_fencing_token: null,
+            },
+          ],
+          rowCount: 1,
+        };
+      if (
+        [
+          'begin',
+          'commit',
+          'rollback',
+          'set transaction isolation level repeatable read',
+        ].includes(sql)
+      )
+        return { rows: [], rowCount: 0 };
+      if (
+        sql.includes('world_v2.lock_postwar_captain_current_authorization') ||
+        sql.includes('world_v2.lock_postwar_captain_revoked_authorization')
+      )
+        return { rows: [], rowCount: 0 };
+      throw Error('NO_SOURCE_OR_CLAIM_SQL_EXPECTED:' + sql);
+    },
+  );
   const worker = {
     query,
     connect: async () => ({ query, release() {} }),
@@ -227,10 +277,17 @@ describe('fixed Captain port on the same Finance/Social/FX consumer', () => {
           commandId: h.command.commandId,
         });
         expect(
-          h.queries.some((sql) =>
-            /source|lease|authorization|insert|update/iu.test(sql),
+          h.queries.every(
+            (sql) =>
+              transactionProtocol.has(sql) ||
+              sql.includes('from world_v2.command_queue'),
           ),
-        ).toBe(false);
+        ).toBe(true);
+        expect(
+          h.queries.filter(
+            (sql) => sql === POSTWAR_SOURCE_REVOCATION_FENCE_QUERY,
+          ),
+        ).toHaveLength(1);
       } finally {
         await connection.stop();
       }
@@ -265,10 +322,17 @@ describe('fixed Captain port on the same Finance/Social/FX consumer', () => {
         }
         expect(h.read).toHaveBeenCalledTimes(2);
         expect(
-          h.queries.some((sql) =>
-            /source|lease|authorization|insert|update/iu.test(sql),
+          h.queries.every(
+            (sql) =>
+              transactionProtocol.has(sql) ||
+              sql.includes('from world_v2.command_queue'),
           ),
-        ).toBe(false);
+        ).toBe(true);
+        expect(
+          h.queries.filter(
+            (sql) => sql === POSTWAR_SOURCE_REVOCATION_FENCE_QUERY,
+          ),
+        ).toHaveLength(2);
       } finally {
         await connection.stop();
       }

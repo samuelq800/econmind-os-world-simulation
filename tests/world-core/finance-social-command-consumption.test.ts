@@ -23,11 +23,25 @@ import { boundManualOfficeIntakeRuntime } from '../../apps/world-worker/src/inta
 import * as reservation from '../../apps/world-worker/src/preparation/local-narrow-reservation-worker.js';
 import * as shipment from '../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-shipment-preparation-source.js';
 import * as delivery from '../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js';
+import { POSTWAR_SOURCE_REVOCATION_FENCE_QUERY } from '../../apps/world-worker/src/persistence/postwar-source-revocation-fence.js';
 const adoption = await loadPostwarSocialConnectionOpeningAdoption(
   path.resolve(import.meta.dirname, '../..'),
 );
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const at = '2026-10-29T00:00:00.000Z';
+const workerRole = 'fixture_shared_boundary_worker';
+const workerIdentityQuery =
+  "select current_user as role_name,r.rolsuper,r.rolbypassrls,r.rolcreaterole,r.rolcreatedb,r.rolreplication,pg_has_role(current_user,'world_v2_social_source_reader','MEMBER')as source_member,pg_has_role(current_user,'world_v2_social_source_owner','MEMBER')as owner_member,pg_has_role(current_user,'world_v2_social_source_publisher','MEMBER')as publisher_member from pg_roles r where r.rolname=current_user";
+const transactionProtocol = new Set([
+  'begin',
+  'commit',
+  'rollback',
+  'set transaction isolation level repeatable read',
+  'set local role world_v2_social_source_reader',
+  `set local role ${workerRole}`,
+  workerIdentityQuery,
+  POSTWAR_SOURCE_REVOCATION_FENCE_QUERY,
+]);
 let serial = 0;
 function deferred() {
   let resolve!: () => void;
@@ -81,10 +95,47 @@ function harness(
     );
   const statements: { sql: string; parameters: readonly unknown[] }[] = [];
   let selectorGate: Promise<void> | null = null;
+  let actualRole = workerRole;
+  let fenceFailure: Error | undefined;
   const entered = deferred();
   const query = vi.fn(
     async (sql: string, parameters: readonly unknown[] = []) => {
       statements.push({ sql, parameters });
+      if (sql === workerIdentityQuery)
+        return {
+          rows: [
+            {
+              role_name: actualRole,
+              rolsuper: false,
+              rolbypassrls: false,
+              rolcreaterole: false,
+              rolcreatedb: false,
+              rolreplication: false,
+              source_member: true,
+              owner_member: false,
+              publisher_member: false,
+            },
+          ],
+          rowCount: 1,
+        };
+      if (sql === 'set local role world_v2_social_source_reader') {
+        actualRole = 'world_v2_social_source_reader';
+        return { rows: [], rowCount: 0 };
+      }
+      if (sql === `set local role ${workerRole}`) {
+        actualRole = workerRole;
+        return { rows: [], rowCount: 0 };
+      }
+      if (sql === POSTWAR_SOURCE_REVOCATION_FENCE_QUERY) {
+        expect(actualRole).toBe('world_v2_social_source_reader');
+        expect(parameters).toEqual([world]);
+        if (fenceFailure) throw fenceFailure;
+        // Protocol-only acknowledgement, NOT source/admission/actor facts.
+        return {
+          rows: [{ lock_postwar_source_revocation_fences: null }],
+          rowCount: 1,
+        };
+      }
       if (sql.includes('from world_v2.command_queue')) {
         entered.resolve();
         if (selectorGate) await selectorGate;
@@ -189,6 +240,9 @@ function harness(
     entered,
     setSelectorGate(gate: Promise<void>) {
       selectorGate = gate;
+    },
+    failFence(error: Error) {
+      fenceFailure = error;
     },
   };
 }
@@ -356,11 +410,21 @@ describe('fixed Finance/Social global FIFO boundary', () => {
             /^\s*(insert|update|delete)\b/iu.test(s.sql),
           ),
         ).toBe(false);
+        // The current transaction has a mandatory source revocation fence.
+        // Permit only that exact transport protocol, never original/source,
+        // authorization, lease, claim or economic queries on an unknown head.
         expect(
-          h.statements.some((s) =>
-            /lease|source|authorization|for update/iu.test(s.sql),
+          h.statements.every(
+            (s) =>
+              transactionProtocol.has(s.sql) ||
+              s.sql.includes('from world_v2.command_queue'),
           ),
-        ).toBe(false);
+        ).toBe(true);
+        expect(
+          h.statements.filter(
+            (s) => s.sql === POSTWAR_SOURCE_REVOCATION_FENCE_QUERY,
+          ),
+        ).toHaveLength(2);
         expect(reserve).not.toHaveBeenCalled();
         expect(ship).not.toHaveBeenCalled();
         expect(deliver).not.toHaveBeenCalled();
@@ -371,6 +435,38 @@ describe('fixed Finance/Social global FIFO boundary', () => {
       }
     },
   );
+  it('keeps an operational fence/RLS error FAILED, without claiming that an unexamined head was semantically BLOCKED', async () => {
+    const h = harness(),
+      error = Object.assign(Error('TEST_ONLY_FIXED_FENCE_ACCESS_DENIED'), {
+        code: '42501',
+      });
+    h.failFence(error);
+    try {
+      const consumer = h.ports.runtime.consumer;
+      consumer.startPreparation();
+      expect(await consumer.consumeOnce()).toEqual({
+        status: 'FAILED',
+        reason: 'OPERATIONAL_FAILURE_REQUIRES_RECOVERY',
+        commandId: null,
+      });
+      expect(consumer.state()).toBe('FAULTED');
+      expect(h.read).not.toHaveBeenCalled();
+      expect(
+        h.statements.some((s) => s.sql.includes('from world_v2.command_queue')),
+      ).toBe(false);
+      expect(
+        h.statements.some((s) => /^\s*(insert|update|delete)\b/iu.test(s.sql)),
+      ).toBe(false);
+      expect(h.statements.at(-1)?.sql).toBe('rollback');
+      expect(h.release).toHaveBeenCalledOnce();
+      expect(h.release.mock.calls[0]?.[0]).toMatchObject({
+        outcome: 'ROLLED_BACK',
+        cause: error,
+      });
+    } finally {
+      await h.connection.stop();
+    }
+  });
   it('allows one pending finite step, joins it at stop, and retains the World reservation until drain completes', async () => {
     const h = harness(),
       gate = deferred();
