@@ -14,6 +14,13 @@ import { pathToFileURL } from 'node:url';
 import { preparePostwarRefinery21RetainedHostDescriptor } from '../support/postwar-refinery21-retained-inspection.js';
 import { createFixedOfficeBrowserApplication } from '../../tools/office-connection/fixed-office-command-browser.mjs';
 import { runRegisteredTradeCbReadbackBrowserProbe } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
+import type { RegisteredTradeCbReadbackBrowserInput } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
+import { createRegisteredSocialServiceContextBrowserProbe } from '../../tools/office-connection/registered-social-service-browser-probe.mjs';
+import {
+  REGISTERED_CURRENT_BROWSER_SUBJECT_QUERY,
+  registeredCurrentC2BrowserSubject,
+  type RegisteredCurrentBrowserActorBinding,
+} from '../support/registered-current-browser-subject.js';
 import { isDeepStrictEqual } from 'node:util';
 import { describe, it, expect } from 'vitest';
 import {
@@ -43,7 +50,7 @@ const repositoryRoot = path.resolve(import.meta.dirname, '../..');
 native(
   'one actual registered H3 current rebuild without economic writes',
   () => {
-    it('retries derived publication, reads Trade and CB over TCP, and preserves every economic byte', async () => {
+    it('retries derived publication, reads Trade, CB and existing Social services on one Node, and preserves every economic byte', async () => {
       must(
         process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE === '1',
         'REGISTERED_NODE_NATIVE_OPT_IN_REQUIRED',
@@ -508,25 +515,28 @@ native(
           );
           return value;
         };
-        const subjectRows = await f.clone.installer.query<{
-          auth_subject: string;
-        }>(
-          "select distinct auth_subject::text from world_v2.current_commit_authorization where world_id=$1 and country_id='COUNTRY_02' and office_id='INDUSTRY' and active",
-          [f.marker.worldId],
+        const subjectRows =
+          await f.clone.installer.query<RegisteredCurrentBrowserActorBinding>(
+            REGISTERED_CURRENT_BROWSER_SUBJECT_QUERY,
+            [f.marker.worldId],
+          );
+        const authSubject = registeredCurrentC2BrowserSubject(
+          subjectRows.rows,
+          s.signToken('COUNTRY_02'),
         );
-        must(
-          subjectRows.rows.length === 1,
-          'SAME_EXISTING_C2_AUTH_SUBJECT_REQUIRED',
-        );
-        report.browser = await runRegisteredTradeCbReadbackBrowserProbe({
+        const browserInput: RegisteredTradeCbReadbackBrowserInput = {
           browser,
           application,
           apiBaseURL: d.origin(),
           applicationOrigin: 'https://pages-test.example',
-          authSubject: subjectRows.rows[0]!.auth_subject,
+          authSubject,
           countryId: 'COUNTRY_02',
           countryDisplayId: '02',
-          getAccessToken: () => 'Bearer ' + s!.signToken('COUNTRY_02'),
+          getAccessToken: () => {
+            const token = s!.signToken('COUNTRY_02');
+            registeredCurrentC2BrowserSubject(subjectRows.rows, token);
+            return 'Bearer ' + token;
+          },
           expectedHead: { worldVersion: '3', eventSequence: '3' },
           readConfiguration: {
             modelVersion: text(config.modelVersion),
@@ -544,8 +554,81 @@ native(
               deploymentRef: text(endpoints.deploymentRef),
             },
           },
-        });
+        };
+        report.browser =
+          await runRegisteredTradeCbReadbackBrowserProbe(browserInput);
         await phase('SHIPPED_CHROMIUM_TRADE_AND_CB_READBACK_SAME_NODE', 'END');
+        await phase(
+          'ADDITIVE_SHIPPED_SOCIAL_SERVICE_READ_COMPONENT_SAME_NODE',
+          'START',
+        );
+        // Independent expected non-emptiness: actual admitted opening rows,
+        // plus proof that this H3 prefix never executed a Social transition.
+        // Never infer a PAGE/EMPTY expectation from the HTTP response itself.
+        const socialOriginals = await f.clone.installer.query<{
+          seed_fingerprint: string;
+          admission_ref: string;
+          scope_sha256: string;
+          service_pool_count: number;
+          committed_social_count: number;
+        }>(
+          `select x.seed_fingerprint,x.admission_ref,x.scope_sha256,
+          jsonb_array_length(x.scope_document::jsonb->'servicePools') as service_pool_count,
+          (select count(*)::int from world_v2.command_submission c join world_v2.command_receipt r
+            on r.world_id=c.world_id and r.command_id=c.command_id
+            where c.world_id=x.world_id and c.country_id=x.country_id and r.outcome='COMMITTED'
+            and c.command_type in('CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1','CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1')) as committed_social_count
+          from world_v2.postwar_social_prefix_scope x where x.world_id=$1 and x.country_id='COUNTRY_02'`,
+          [f.marker.worldId],
+        );
+        must(
+          socialOriginals.rows.length === 1,
+          'EXACT_ADMITTED_C2_SOCIAL_SCOPE_REQUIRED',
+        );
+        const original = socialOriginals.rows[0]!;
+        must(
+          original.seed_fingerprint === f.marker.seedFingerprint &&
+            original.admission_ref === f.marker.admissionRef &&
+            /^[a-f0-9]{64}$/u.test(original.scope_sha256) &&
+            Number.isSafeInteger(original.service_pool_count) &&
+            original.service_pool_count >= 0 &&
+            original.committed_social_count === 0,
+          'H3_UNCHANGED_ADMITTED_SOCIAL_POOL_ORIGINALS_REQUIRED',
+        );
+        report.socialServiceExpectation = {
+          basis:
+            'ACTUAL_SAME_SEED_ADMITTED_SCOPE_NO_COMMITTED_SOCIAL_TRANSITION',
+          ...original,
+          expectedStatus: original.service_pool_count === 0 ? 'EMPTY' : 'PAGE',
+        };
+        const social =
+          await createRegisteredSocialServiceContextBrowserProbe(browserInput);
+        try {
+          const expectation = {
+            status:
+              original.service_pool_count === 0
+                ? ('EMPTY' as const)
+                : ('PAGE' as const),
+            head: browserInput.expectedHead,
+          };
+          const first = await social.read(expectation);
+          await social.reload();
+          const refreshed = await social.read(expectation);
+          expect(refreshed).toEqual(first);
+          report.socialServiceBrowser = {
+            ...social.report(),
+            mounting:
+              'ADDITIVE_SHIPPED_READ_COMPONENT_NOT_MAIN_APPLICATION_INTEGRATION',
+            originalRequestRecovery: 'NOT_RUN_READ_ONLY_COMPONENT',
+            createServiceInputsConnected: 0,
+          };
+        } finally {
+          await social.close();
+        }
+        await phase(
+          'ADDITIVE_SHIPPED_SOCIAL_SERVICE_READ_COMPONENT_SAME_NODE',
+          'END',
+        );
         const denied = await fetch(d.origin() + '/v1/postwar-office-runtime', {
           method: 'POST',
           headers: {
