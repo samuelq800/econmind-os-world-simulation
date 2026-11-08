@@ -298,6 +298,28 @@ it('appends complete inventory from exact adopted seed without changing legacy p
       await admin();
     }
 
+    const supplementalStock = seed.inventoryEntries.find(
+      (e) =>
+        e.account.countryId === 'COUNTRY_01' &&
+        e.sourceId === 'SOURCE_TEST_ONLY_SUPPLEMENT',
+    );
+    if (!supplementalStock)
+      throw Error('ACTUAL_SUPPLEMENTAL_OPENING_STOCK_REQUIRED');
+    await db.exec('begin;set local role world_v2_postwar_projection_owner');
+    await db.query(
+      "select set_config('econmind.postwar_projection_world',$1,true)",
+      [world],
+    );
+    await expect(
+      db.query(
+        'select world_v2.postwar_projection_current_inventory_balance($1,$2::jsonb,0)',
+        [world, C.canonicalSerialize(supplementalStock.account)],
+      ),
+    ).rejects.toMatchObject({
+      code: '55000',
+      message: 'MIXED_COMPLETE_OPENING_INVENTORY_REQUIRED',
+    });
+    await admin();
     const publish = async (bad = false) => {
       await admin();
       await db.exec(
@@ -391,6 +413,20 @@ it('appends complete inventory from exact adopted seed without changing legacy p
       headBefore,
     );
     expect(await publish()).toHaveLength(2);
+    await db.exec('begin;set local role world_v2_postwar_projection_owner');
+    await db.query(
+      "select set_config('econmind.postwar_projection_world',$1,true)",
+      [world],
+    );
+    expect(
+      (
+        await db.query<{ amount: string }>(
+          'select world_v2.postwar_projection_current_inventory_balance($1,$2::jsonb,0)::text as amount',
+          [world, C.canonicalSerialize(supplementalStock.account)],
+        )
+      ).rows[0]?.amount,
+    ).toBe('7');
+    await admin();
     await db.exec(
       'set session authorization fixture_inventory_reader;set role world_v2_postwar_projection_reader;begin isolation level repeatable read read only',
     );

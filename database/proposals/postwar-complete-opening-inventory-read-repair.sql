@@ -101,6 +101,8 @@ grant execute on function world_v2.publish_postwar_complete_opening_inventory(te
 
 
 
+
+
 -- Fixed adaptation: world_v2.publish_postwar_office_projection(text,text,text,text,text,text,text,text)
 do $adapt$declare f record;definition text;replacement text;begin
  select p.*,pg_get_functiondef(p.oid)as definition into f from pg_proc p where p.oid=to_regprocedure('world_v2.publish_postwar_office_projection(text,text,text,text,text,text,text,text)');
@@ -730,6 +732,27 @@ begin
 end;$newbody$;
  execute replace(f.definition,f.prosrc,replacement);
  if(select encode(sha256(convert_to(prosrc,'UTF8')),'hex')from pg_proc where oid=f.oid)<>'5ada845e0009edd1b61bfa842c0519a0c715df1a091f40d8533270e78247edc3'then raise exception 'COMPLETE_INVENTORY_EXACT_NEW_FUNCTION_REQUIRED'using errcode='55000';end if;
+end;$adapt$;
+
+-- Fixed adaptation: world_v2.postwar_projection_current_inventory_balance(text,jsonb,bigint)
+do $adapt$declare f record;definition text;replacement text;begin
+ select p.*,pg_get_functiondef(p.oid)as definition into f from pg_proc p where p.oid=to_regprocedure('world_v2.postwar_projection_current_inventory_balance(text,jsonb,bigint)');
+ if not found or pg_get_userbyid(f.proowner)<>'world_v2_postwar_projection_owner'or not f.prosecdef or f.proconfig is distinct from array['search_path=pg_catalog']::text[]or encode(sha256(convert_to(f.prosrc,'UTF8')),'hex')<>'95f1d3974e9af89510e50fb4d56a7ae4fbb5e3c7607f1848c61787d2c2f15db0'then raise exception 'COMPLETE_INVENTORY_EXACT_INSTALLED_FUNCTION_REQUIRED:postwar_projection_current_inventory_balance'using errcode='55000';end if;
+ replacement:=$newbody$
+declare a record;entry jsonb;total numeric:=0;begin
+ select * into strict a from world_v2.postwar_projection_admission_header(p_world);
+ if world_v2.postwar_complete_opening_inventory_document(p_world,p_account->>'countryId','TRADE')is null then raise exception 'MIXED_COMPLETE_OPENING_INVENTORY_REQUIRED'using errcode='55000';end if;
+ for entry in select x from world_v2.postwar_office_projection_document d join world_v2.postwar_office_projection_page pg on pg.document_ref=d.document_ref cross join lateral jsonb_array_elements(pg.rows_text::jsonb)x where d.world_id=p_world and d.office_id='TRADE'and d.document_ref=world_v2.postwar_complete_opening_inventory_document(p_world,p_account->>'countryId','TRADE')and d.seed_fingerprint=a.seed_fingerprint and d.admission_ref=a.admission_ref and d.world_version=0 and d.event_sequence=0 and x->'account'=p_account loop
+  if entry->'quantity'->>'unit'is distinct from p_account->>'unit'then raise exception 'MIXED_H0_INVENTORY_UNIT_REQUIRED'using errcode='23514';end if;
+  total:=total+(entry->'quantity'->>'amount')::numeric;
+ end loop;
+ for entry in select e from world_v2.inventory_posting p cross join lateral jsonb_array_elements(p.canonical_payload::jsonb->'entries')e where p.world_id=p_world and p.world_version_after<=p_before and e->'account'=p_account loop
+  if entry->'delta'->>'unit'is distinct from p_account->>'unit'then raise exception 'MIXED_CURRENT_INVENTORY_UNIT_REQUIRED'using errcode='23514';end if;
+  total:=total+(entry->'delta'->>'amount')::numeric;
+ end loop;return total;
+end;$newbody$;
+ execute replace(f.definition,f.prosrc,replacement);
+ if(select encode(sha256(convert_to(prosrc,'UTF8')),'hex')from pg_proc where oid=f.oid)<>'03215136ec048d9eb60efa91c14c3a92e4bdab4e86b75405d2b6a29b0020f38b'then raise exception 'COMPLETE_INVENTORY_EXACT_NEW_FUNCTION_REQUIRED'using errcode='55000';end if;
 end;$adapt$;
 
 revoke create on schema world_v2 from world_v2_postwar_projection_owner;
