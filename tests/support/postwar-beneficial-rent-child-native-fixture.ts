@@ -51,6 +51,7 @@ import {
   createPostwarNativeReferenceDatabase,
   clonePostwarNativeReference,
   loadPostwarNativeReferenceMarker,
+  sealPostwarReferenceClone,
   POSTWAR_REFERENCE_IMAGE,
 } from './postwar-native-reference-db.js';
 const run = promisify(execFile),
@@ -89,6 +90,9 @@ export type PostwarBeneficialRentChildRehearsalInput = {
   sourcePreparation?: PreparedBeneficialHousingRentSource;
   startupSeed?: Readonly<OpeningSeed>;
   financeSocialDerivation?: PostwarFinanceSocialSourceDerivation;
+  /** Only this newly created disposable registered fixture. Keep its owned
+   * cluster stopped and its clone sealed after all borrowers have drained. */
+  retainOwnedCheckpointOnCleanup?: true;
 };
 /** Warm same-brand process: publishers only. It deliberately makes NO claim
  * about runtime modules that may already have been cached before the freeze. */
@@ -136,9 +140,16 @@ async function runChildRehearsal(
   input: PostwarBeneficialRentChildRehearsalInput,
   scope: 'SOURCE_PUBLICATION_ONLY' | 'COLD_RUNTIME' | 'REGISTERED_FIXTURE',
 ) {
+  must(
+    input.retainOwnedCheckpointOnCleanup === undefined ||
+      (scope === 'REGISTERED_FIXTURE' &&
+        input.retainOwnedCheckpointOnCleanup === true),
+    'RETAIN_ONLY_NEW_OWNED_REGISTERED_FIXTURE',
+  );
   const started = Date.now(),
     stages: object[] = [],
     pools: Pool[] = [];
+  let registeredFixtureIssued = false;
   let marker:
       | Awaited<ReturnType<typeof createPostwarNativeReferenceDatabase>>
       | undefined,
@@ -485,6 +496,7 @@ async function runChildRehearsal(
           marker && clone && token,
           'ACTUAL_INITIALIZED_CHILD_RESOURCES_REQUIRED',
         );
+        registeredFixtureIssued = true;
         return Object.freeze({
           fixtureKind: 'ACTUAL_REGISTERED_CHILD_H0_FIXTURE' as const,
           marker,
@@ -690,15 +702,140 @@ async function runChildRehearsal(
         } catch (error) {
           cleanupErrors.push(String(error));
         }
-      try {
-        await clone?.drop();
-      } catch (error) {
-        cleanupErrors.push(String(error));
+      const retain =
+        input.retainOwnedCheckpointOnCleanup === true &&
+        registeredFixtureIssued;
+      let retained = false;
+      if (retain && marker && clone && cleanupErrors.length === 0) {
+        try {
+          await loadPostwarNativeReferenceMarker(marker.markerPath);
+          const sessions = await clone.installer.query<{ count: string }>(
+            'select count(*)::text count from pg_stat_activity where datname=$1 and pid<>pg_backend_pid()',
+            [clone.database],
+          );
+          must(
+            sessions.rows[0]?.count === '0',
+            'NO_OTHER_OWNED_CLONE_CONNECTIONS_BEFORE_RETAIN',
+          );
+          const head = await clone.installer.query(
+            'select world_version::text,event_sequence::text from world_v2.world_head where world_id=$1',
+            [marker.worldId],
+          );
+          must(head.rows.length === 1, 'ACTUAL_CHECKPOINT_HEAD_REQUIRED');
+          await clone.close();
+          await sealPostwarReferenceClone(marker, clone.database);
+          await run('docker', ['stop', '--time', '10', marker.ownedContainer], {
+            maxBuffer: 1048576,
+          });
+          const state = await run(
+            'docker',
+            ['inspect', marker.ownedContainer, '--format', '{{json .State}}'],
+            { maxBuffer: 1048576 },
+          );
+          const volume = await run(
+            'docker',
+            [
+              'volume',
+              'inspect',
+              marker.pgDataStorage.name,
+              '--format',
+              '{{json .Labels}}',
+            ],
+            { maxBuffer: 1048576 },
+          );
+          const stoppedState = JSON.parse(state.stdout) as {
+            Status: string;
+            ExitCode: number;
+            OOMKilled: boolean;
+          };
+          must(
+            stoppedState.Status === 'exited' &&
+              stoppedState.ExitCode === 0 &&
+              stoppedState.OOMKilled === false &&
+              (JSON.parse(volume.stdout) as Record<string, string>)[
+                'econmind.reference.nonce'
+              ] === marker.ownershipNonce,
+            'ACTUAL_OWNED_STOPPED_CONTAINER_AND_VOLUME_REQUIRED',
+          );
+          const checkpoint = {
+            resourceState: 'RETAINED_STOPPED',
+            recoverableDatabase: true,
+            runtimeReady: false,
+            containerState: stoppedState,
+            classification:
+              'TEST_ONLY_OWNED_DATABASE_STATE_NOT_RESTORED_AUTHORITY',
+            ownedContainer: marker.ownedContainer,
+            ownershipNonce: marker.ownershipNonce,
+            volume: marker.pgDataStorage,
+            markerPath: marker.markerPath,
+            templateDatabase: clone.database,
+            head: head.rows[0],
+            allowConnections: false,
+            isTemplate: true,
+            restore: {
+              startCommand: ['docker', 'start', marker.ownedContainer],
+              helperModule: 'tests/support/postwar-native-reference-db.ts',
+              steps: [
+                'loadPostwarNativeReferenceMarker(markerPath) validates the actual owned nonce/container/volume',
+                'clonePostwarNativeReference({...marker,database:templateDatabase}, newOwnedName) restores into a new disposable clone',
+                'Node startup must issue its genuine proof anew; execution/actor/clock registrations must be checked or renewed by the controlled TEST_ONLY registrar. No runtime authority is restored from this JSON.',
+              ],
+            },
+            cleanup: {
+              container: ['docker', 'rm', '--force', marker.ownedContainer],
+              volume: ['docker', 'volume', 'rm', marker.pgDataStorage.name],
+              scope:
+                'ONLY_THE_NONCE_MATCHED_CONTAINER_AND_VOLUME_CREATED_BY_THIS_FIXTURE',
+            },
+          };
+          await writeFile(
+            path.join(input.evidenceDirectory, 'retained-checkpoint.json'),
+            JSON.stringify(checkpoint, null, 2) + '\n',
+          );
+          await writeFile(
+            marker.markerPath,
+            JSON.stringify(
+              {
+                ...marker,
+                resourceState: 'RETAINED_STOPPED',
+                recoverableDatabase: true,
+                retainedCheckpoint: path.join(
+                  input.evidenceDirectory,
+                  'retained-checkpoint.json',
+                ),
+              },
+              null,
+              2,
+            ) + '\n',
+          );
+          retained = true;
+        } catch (error) {
+          cleanupErrors.push(String(error));
+          try {
+            await clone.close();
+          } catch (closeError) {
+            cleanupErrors.push(String(closeError));
+          }
+        }
+      } else if (!retain) {
+        try {
+          await clone?.drop();
+        } catch (error) {
+          cleanupErrors.push(String(error));
+        }
+      } else {
+        // An earlier drain failed. Preserve the owned cluster for diagnosis,
+        // close our inspection pools, and report UNCONFIRMED rather than delete.
+        try {
+          await clone?.close();
+        } catch (error) {
+          cleanupErrors.push(String(error));
+        }
       }
       // The local fixture issued this token; after the sole owner drains it is
       // safe to retire once more, including failure before ownership transfer.
       if (createdToken && token) retireBeneficialHousingRentSource(token);
-      if (marker) {
+      if (marker && !retain) {
         try {
           await loadPostwarNativeReferenceMarker(marker.markerPath);
           await run('docker', ['rm', '--force', marker.ownedContainer], {
@@ -707,6 +844,19 @@ async function runChildRehearsal(
           await run('docker', ['volume', 'rm', marker.pgDataStorage.name], {
             maxBuffer: 1048576,
           });
+          await writeFile(
+            marker.markerPath,
+            JSON.stringify(
+              {
+                ...marker,
+                baselineSealed: false,
+                resourceState: 'DISPOSED',
+                recoverableDatabase: false,
+              },
+              null,
+              2,
+            ) + '\n',
+          );
         } catch (error) {
           cleanupErrors.push(String(error));
         }
@@ -827,7 +977,16 @@ async function runChildRehearsal(
       await writeFile(
         path.join(input.evidenceDirectory, 'cleanup.json'),
         JSON.stringify(
-          { complete: cleanupErrors.length === 0, errors: cleanupErrors },
+          {
+            complete: cleanupErrors.length === 0,
+            resourceState: retained
+              ? 'RETAINED_STOPPED'
+              : cleanupErrors.length === 0
+                ? 'DISPOSED'
+                : 'UNCONFIRMED',
+            recoverableDatabase: retained,
+            errors: cleanupErrors,
+          },
           null,
           2,
         ) + '\n',
