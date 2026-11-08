@@ -1,3 +1,5 @@
+import { createPostwarFinancialMixedCurrentProjectionStore } from '../../apps/world-worker/src/persistence/postwar-financial-mixed-current-projection.js';
+import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
 /** New mixed projection SQL infrastructure uses explicit TEST_ONLY small sources. Genuine full
  * source publication is separately exercised against the shared native reference. */
 import { readFile } from 'node:fs/promises';
@@ -207,6 +209,40 @@ beforeAll(async () => {
             payload: {
               schemaVersion: 'postwar-operating-genesis-seed-source-v1',
               carrier: {
+                documents: [
+                  {
+                    documentId: 'POSTWAR_FINANCIAL_OFFICE_ORIGINALS',
+                    bytes: C.canonicalSerialize({
+                      contract: {
+                        countries: ['COUNTRY_01', 'COUNTRY_02'].map(
+                          (countryId) => ({
+                            countryId,
+                            cbRegister: {
+                              categories: [
+                                {
+                                  category: 'DOMESTIC_GOVERNMENT_SECURITIES',
+                                  disposition: 'NO_DECLARED_INSTRUMENT',
+                                },
+                              ],
+                              holdings: [
+                                {
+                                  holdingId: 'TGA_' + countryId,
+                                  category: 'TREASURY_GOVERNMENT_DEPOSIT',
+                                  kind: 'CLAIM',
+                                  amount: '1000',
+                                  currency: 'XAA',
+                                  holderId: 'CB_' + countryId,
+                                  counterpartyId: 'GOV_' + countryId,
+                                },
+                              ],
+                            },
+                            bankLoans: [],
+                          }),
+                        ),
+                      },
+                    }),
+                  },
+                ],
                 socialEmployment: {
                   schemaVersion: 'postwar-social-employment-state-v1',
                   inputs: {
@@ -235,9 +271,85 @@ beforeAll(async () => {
           },
           sha,
         ),
+        C.createOpeningSource(
+          {
+            schemaVersion: C.OPENING_SOURCE_SCHEMA_VERSION,
+            sourceId: C.openingSourceId('SOURCE_TEST_ONLY_FINANCIAL'),
+            sourceKind: 'DOCUMENTED_ASSUMPTION',
+            locator: 'TEST_ONLY_CB_FINANCIAL_SQL_SOURCE',
+            sourceVersion: 'TEST_ONLY_NO_DECLARED_INSTRUMENT_V1',
+            payload: {
+              schemaVersion: 'adopted-financial-opening-source-v2',
+              assembly: {
+                countries: ['COUNTRY_01', 'COUNTRY_02'].map((countryId) => ({
+                  countryId,
+                  roster: {
+                    government: 'GOV_' + countryId,
+                    centralBank: 'CB_' + countryId,
+                    bank: 'BANK_' + countryId,
+                  },
+                })),
+              },
+            },
+          },
+          sha,
+        ),
       ],
       inventoryEntries: [],
-      financialBatches: [],
+      financialBatches: [
+        {
+          batchId: C.financialOpeningBatchId('CB_READ_TEST_ONLY_OPENING'),
+          sourceId: C.openingSourceId('SOURCE_TEST_ONLY_FINANCIAL'),
+          settlementCurrency: 'XAA',
+          legs: [
+            [
+              'GOV_COUNTRY_01',
+              'CB_COUNTRY_01',
+              'ASSET',
+              'CLAIM_CB_READ_TGA',
+              '1000',
+            ],
+            [
+              'CB_COUNTRY_01',
+              'GOV_COUNTRY_01',
+              'LIABILITY',
+              'CLAIM_CB_READ_TGA',
+              '1000',
+            ],
+            [
+              'BANK_COUNTRY_01',
+              'CB_COUNTRY_01',
+              'ASSET',
+              'CLAIM_CB_READ_RESERVE',
+              '100',
+            ],
+            [
+              'CB_COUNTRY_01',
+              'BANK_COUNTRY_01',
+              'LIABILITY',
+              'CLAIM_CB_READ_RESERVE',
+              '100',
+            ],
+          ].map(([owner, counterparty, accountClass, claim, amount], i) => ({
+            legId: C.financialOpeningLegId('CB_READ_LEG_' + i),
+            counterpartLegId: C.financialOpeningLegId(
+              'CB_READ_LEG_' + (i % 2 ? i - 1 : i + 1),
+            ),
+            account: C.createFinancialAccount({
+              worldId: C.worldId(world),
+              countryId: C.countryId('COUNTRY_01'),
+              accountId: C.financialAccountId('CB_READ_ACCOUNT_' + i),
+              ownerId: C.legalEntityId(owner!),
+              counterpartyEntityId: C.legalEntityId(counterparty!),
+              accountClass: accountClass === 'ASSET' ? 'ASSET' : 'LIABILITY',
+              claimId: C.financialClaimId(claim!),
+              currency: 'XAA',
+            }),
+            direction: i % 2 ? ('CREDIT' as const) : ('DEBIT' as const),
+            amount: C.Money.from(amount!, 'XAA'),
+          })),
+        },
+      ],
     },
     sha,
   );
@@ -360,9 +472,11 @@ type Frame = C.V08AuthoritativeLedgerTransition & {
 let frames: Frame[] = [];
 const coreHash = (v: unknown) =>
   'sha256:' + sha('SHA-256\n' + C.canonicalSerialize(v));
-async function begin() {
+async function begin(repeatableRead = false) {
   await admin();
-  await db.exec('begin');
+  await db.exec(
+    repeatableRead ? 'begin isolation level repeatable read' : 'begin',
+  );
   frames = [];
 }
 async function position(
@@ -718,13 +832,190 @@ async function mixedPage(
     [world, 'SOCIAL', dataset, offset, limit, version],
   );
 }
-async function prepare() {
-  await begin();
+async function prepare(repeatableRead = false) {
+  await begin(repeatableRead);
   await db.query('select world_v2.prepare_postwar_social_prefix_scopes($1)', [
     world,
   ]);
 }
 describe('mixed current SQL infrastructure (TEST_ONLY, not native/Core adoption)', () => {
+  it('reads CB current funds and immutable opening declarations together at actual H1 without the stale H0 RPC', async () => {
+    await prepare(true);
+    const country = 'COUNTRY_01';
+    await db.query(
+      "insert into world_v2.current_commit_authorization values($1,$2::uuid,$3,'CENTRAL_BANK','CENTRAL_BANK_MONETARY_POLICY','TEAM_TEST_ONLY','REV_TEST_ONLY',true,now())",
+      [world, subject, country],
+    );
+    await db.query(
+      "insert into world_v2.runtime_read_seat(world_id,auth_subject,country_id,office_id,team_id,authorization_revision)values($1,$2::uuid,$3,'CENTRAL_BANK','TEAM_TEST_ONLY','REV_TEST_ONLY')",
+      [world, subject, country],
+    );
+    await db.query(
+      "insert into world_v2.projection_entitlement values($1,$2::uuid,'OFFICE_PRIVATE','OFFICE_434F554E5452595F3031_43454E5452414C5F42414E4B','REV_TEST_ONLY',true,now(),null)",
+      [world, subject],
+    );
+    await db.exec('set local role ' + publisher);
+    for (const dataset of [
+      'cb-categories',
+      'cb-holdings',
+      'bank-loans',
+      'opening-financial-legs',
+    ])
+      await db.query(POSTWAR_PROJECTION_PUBLISH_QUERY, [
+        world,
+        country,
+        'CENTRAL_BANK',
+        dataset,
+        seed.fingerprint,
+        seedIntentHash,
+        sourceHash,
+        admissionRef,
+      ]);
+    await db.exec('reset role');
+    await position(0);
+    await db.exec('set local role world_v2_postwar_projection_owner');
+    const actual = (
+      await db.query<{
+        prefix_fingerprint: string;
+        effects_fingerprint: string;
+        last_event_id: string;
+        last_event_fingerprint: string;
+        financial_posting_count: string;
+        financial_batch_count: string;
+        financial_postings_fingerprint: string;
+      }>('select * from world_v2.postwar_mixed_current_prefix($1)', [world])
+    ).rows[0]!;
+    const coverage = {
+      schemaVersion: 'postwar-financial-current-prefix-coverage-v2',
+      reducerVersion: 'POSTWAR_FINANCIAL_SOCIAL_FX_COMPLETE_PREFIX_V2',
+      coverageRef: 'CB_H1_TEST_ONLY',
+      countryId: country,
+      globalWorldVersion: '1',
+      globalEventSequence: '1',
+      prefixFingerprint: actual.prefix_fingerprint,
+      knownEffectsFingerprint: actual.effects_fingerprint,
+      coveredThroughEventId: actual.last_event_id,
+      coveredThroughEventFingerprint: actual.last_event_fingerprint,
+      financialPostingCount: actual.financial_posting_count,
+      financialBatchCount: actual.financial_batch_count,
+      financialPostingsFingerprint: actual.financial_postings_fingerprint,
+    };
+    const financial = C.rebuildV08LedgersFromLineage({
+      seed,
+      transitions: frames,
+      sha256Hex: sha,
+    }).financial;
+    expect(financial.worldVersion).toBe('1');
+    const funds = financial.positions
+      .filter((p) =>
+        ['CB_' + country, 'BANK_' + country].includes(p.account.ownerId),
+      )
+      .map((p) => ({
+        schemaVersion: 'postwar-current-financial-balance-row-v2',
+        countryId: country,
+        accountId: p.account.accountId,
+        ownerEntityId: p.account.ownerId,
+        ownerKind: p.account.ownerId === 'CB_' + country ? 'CB' : 'BANK',
+        currency: p.account.currency,
+        accountClass: p.account.accountClass,
+        claimId: p.account.claimId,
+        counterpartyEntityId: p.account.counterpartyEntityId,
+        netDebitBalance: p.netDebitBalance.toCanonicalValue().amount,
+        balanceNature: 'RECIPROCAL_LEDGER_CLAIM',
+      }));
+    for (const dataset of [
+      'ledger-balances',
+      'cb-categories',
+      'cb-holdings',
+      'bank-loans',
+    ]) {
+      const parent = (
+        await db.query<{
+          document_ref: string;
+          source_pointer: unknown;
+          rows: unknown;
+        }>(
+          "select d.document_ref,d.source_pointer,p.rows_text::jsonb as rows from world_v2.postwar_office_projection_document d join world_v2.postwar_office_projection_page p using(document_ref)where d.world_id=$1 and d.office_id='CENTRAL_BANK'and d.dataset=$2",
+          [
+            world,
+            dataset === 'ledger-balances' ? 'opening-financial-legs' : dataset,
+          ],
+        )
+      ).rows[0]!;
+      await db.query(
+        'select world_v2.postwar_write_mixed_current_document($1,$2,$3,$4,$5,0,0,$6::jsonb,$7::jsonb,$8::jsonb)',
+        [
+          world,
+          country,
+          'CENTRAL_BANK',
+          dataset,
+          parent.document_ref,
+          C.canonicalSerialize(
+            dataset === 'ledger-balances' ? funds : parent.rows,
+          ),
+          C.canonicalSerialize(coverage),
+          C.canonicalSerialize(parent.source_pointer),
+        ],
+      );
+    }
+    // Fixture setup only; the actual reader below runs under READ ONLY and
+    // the real low-privilege session/role on the same H1 snapshot.
+    await db.exec('set local transaction_read_only=on');
+    await db.exec(
+      'set local session authorization projection_test_reader;set local role ' +
+        reader,
+    );
+    await db.query("select set_config('request.jwt.claim.sub',$1,true)", [
+      subject,
+    ]);
+    const legacy = (
+      await db.query<{ status: string }>(
+        'select * from world_v2.read_postwar_office_projection_page($1,$2,$3,0,100,null)',
+        [world, 'CENTRAL_BANK', 'cb-categories'],
+      )
+    ).rows[0]!;
+    expect(legacy.status).toBe('STALE');
+    const queries: string[] = [];
+    const executor: SqlExecutor = {
+      async query<Row extends object>(
+        q: string,
+        args: readonly unknown[] = [],
+      ) {
+        queries.push(q);
+        const result = await db.query<Row>(q, [...args]);
+        return { rows: result.rows, rowCount: result.rows.length };
+      },
+    };
+    const current = createPostwarFinancialMixedCurrentProjectionStore({
+      runtimeReaderRole: reader,
+      authorizationPublisherRole: publisher,
+      includeCentralBankOpeningInstruments: true,
+    });
+    const result = await current.readPageFrom(executor, {
+      worldId: world,
+      officeId: 'CENTRAL_BANK',
+      dataset: 'ledger-balances',
+    });
+    if (!('source' in result)) throw Error('ACTUAL_CB_CURRENT_PAGE_REQUIRED');
+    expect(result.rows).toEqual(JSON.parse(C.canonicalSerialize(funds)));
+    expect(result.source.observedHead).toEqual({
+      worldVersion: '1',
+      eventSequence: '1',
+    });
+    expect(result.source.centralBankOpeningInstruments).toMatchObject({
+      status: 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY',
+      originWorldVersion: '0',
+      originEventSequence: '0',
+      seedFingerprint: seed.fingerprint,
+    });
+    expect(
+      queries.filter((q) => q.includes('read_postwar_mixed_current_page')),
+    ).toHaveLength(4);
+    expect(
+      queries.some((q) => q.includes('read_postwar_office_projection_page')),
+    ).toBe(false);
+  });
+
   it('installs fixed functions with no reader table SELECT or private-helper execution', async () => {
     await readerSession();
     await expect(
