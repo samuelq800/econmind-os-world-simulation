@@ -1,3 +1,4 @@
+import { derivePostwarTradeCurrentFrom } from './postwar-trade-current-publication.js';
 /** Fixed offline publisher over an existing genuine transaction-bound complete
  * mixed replay. No initial capital, receipt, approval, source or Clock created. */
 import { createHash } from 'node:crypto';
@@ -144,7 +145,10 @@ export function createPostwarCaptainCurrentPublisher(input: {
      * Does not resend a command, acquire a lease, deliver another outbox or loop. */
     publishOfficeCurrentCountry(
       countryId: string,
-      options: { readonly requireCaptain: boolean } = { requireCaptain: true },
+      options: {
+        readonly requireCaptain: boolean;
+        readonly includeTrade?: boolean;
+      } = { requireCaptain: true },
     ) {
       return input.source.withCaptainSnapshot(
         countryId,
@@ -155,7 +159,10 @@ export function createPostwarCaptainCurrentPublisher(input: {
                 ? derivePostwarCaptainCurrentFrom(tx, token)
                 : null,
             financial = derivePostwarMixedFinancialCurrentFrom(tx, token),
-            social = derivePostwarMixedSocialCurrentFrom(tx, token);
+            social = derivePostwarMixedSocialCurrentFrom(tx, token),
+            trade = options.includeTrade
+              ? derivePostwarTradeCurrentFrom(tx, token)
+              : null;
           return input.publicationDatabase.transaction(async (pub) => {
             const paged = 'pageProof' in f.coverage;
             if (paged)
@@ -189,13 +196,26 @@ export function createPostwarCaptainCurrentPublisher(input: {
                 : 'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',
               [f.head.worldId, countryId, social],
             );
+            const trd = trade
+              ? await pub.query<Record<string, unknown>>(
+                  'select * from world_v2.publish_postwar_paged_trade_current($1,$2,$3)',
+                  [f.head.worldId, countryId, trade.assertion],
+                )
+              : { rows: [] };
+            if (trd.rows.length !== (trade ? 2 : 0))
+              throw Error('EXACT_TWO_TRADE_CURRENT_DOCUMENTS_REQUIRED');
             if (
               cap.rows.length !== (captain ? 1 : 0) ||
               fin.rows.length !== 10 ||
               soc.rows.length !== 2
             )
               throw Error('EXACT_THIRTEEN_CURRENT_DOCUMENTS_REQUIRED');
-            for (const row of [...cap.rows, ...fin.rows, ...soc.rows])
+            for (const row of [
+              ...cap.rows,
+              ...fin.rows,
+              ...soc.rows,
+              ...trd.rows,
+            ])
               if (
                 String(row.world_version) !== f.head.worldVersion ||
                 String(row.event_sequence) !== f.head.eventSequence
@@ -210,11 +230,17 @@ export function createPostwarCaptainCurrentPublisher(input: {
                 captain: cap.rows.length,
                 financial: fin.rows.length,
                 social: soc.rows.length,
-                total: cap.rows.length + fin.rows.length + soc.rows.length,
+                trade: trd.rows.length,
+                total:
+                  cap.rows.length +
+                  fin.rows.length +
+                  soc.rows.length +
+                  trd.rows.length,
               }),
               captain: Object.freeze(cap.rows),
               financial: Object.freeze(fin.rows),
               social: Object.freeze(soc.rows),
+              trade: Object.freeze(trd.rows),
             });
           });
         },

@@ -1,7 +1,13 @@
 /** Fixed admitted-opening and post-commit derived publication. A failed projection never changes a
  * durable FINAL or retries an economic command. No consumer/Clock is created. */
 import { createHash } from 'node:crypto';
-import { canonicalSerialize, worldId } from '@econmind/core';
+import {
+  canonicalSerialize,
+  worldId,
+  parseNarrowTreasuryGcuTransferTerms,
+  parseNarrowTreasuryGcuShipmentTerms,
+  parseNarrowTreasuryGcuDeliveryTerms,
+} from '@econmind/core';
 import type { DurableConsumptionStep } from '../preparation/durable-command-consumption.js';
 import type { PostwarSocialRuntimeConnection } from '../runtime-preparation/social-runtime-connection.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
@@ -79,6 +85,7 @@ export function createPostwarOfficePublicationController(input: {
   /** Explicit borrowed publisher identity; no credentials or pool discovered. */
   readonly publicationDatabase: SqlDatabase;
   readonly industryLabour?: true;
+  readonly tradeCurrent?: true;
 }): PostwarOfficePublicationController {
   const world = worldId(input.worldId);
   if (!/^[a-z][a-z0-9_]{0,62}$/u.test(input.workerRole))
@@ -157,47 +164,105 @@ export function createPostwarOfficePublicationController(input: {
         // Miswired ordinary worker pools fail here, not while nesting a second
         // checkout behind a held source transaction.
         await requirePublisher();
-        const command = await input.database.transaction(async (tx) => {
-          await tx.query('set transaction isolation level repeatable read');
-          // Immutable command/FINAL readback only. A formal database guard
-          // retains its existing execution-control SHARE lock; PostgreSQL
-          // rejects that lock in a READ ONLY transaction. This fixed read
-          // sequence performs no business writes and retains all guard checks.
-          // Source/H locks and Core replay are acquired afresh afterward.
-          const identity = await tx.query<{
-            role_name: string;
-            rolsuper: boolean;
-            rolbypassrls: boolean;
-          }>(
-            'select current_user as role_name,r.rolsuper,r.rolbypassrls from pg_roles r where r.rolname=current_user',
-          );
-          if (
-            identity.rows.length !== 1 ||
-            identity.rows[0]?.role_name !== input.workerRole ||
-            identity.rows[0]?.rolsuper !== false ||
-            identity.rows[0]?.rolbypassrls !== false
-          )
-            throw Error('ACTUAL_PUBLICATION_WORKER_ROLE_REQUIRED');
-          const cmd = await lineage.readCommandReadOnlyFrom(
-            tx,
-            world,
-            commandId,
-          );
-          const receipt = await readFinalReceiptFrom(tx, cmd);
-          if (
-            cmd.worldId !== world ||
-            cmd.commandId !== commandId ||
-            receipt?.outcome !== 'COMMITTED' ||
-            receipt.commandFingerprint !== cmd.fingerprint ||
-            (expected &&
-              canonicalSerialize(receipt) !== canonicalSerialize(expected))
-          )
-            throw Error('EXACT_DURABLE_COMMITTED_RECEIPT_REQUIRED');
-          return cmd;
-        });
+        const { command, tradeCountries } = await input.database.transaction(
+          async (tx) => {
+            await tx.query('set transaction isolation level repeatable read');
+            // Immutable command/FINAL readback only. A formal database guard
+            // retains its existing execution-control SHARE lock; PostgreSQL
+            // rejects that lock in a READ ONLY transaction. This fixed read
+            // sequence performs no business writes and retains all guard checks.
+            // Source/H locks and Core replay are acquired afresh afterward.
+            const identity = await tx.query<{
+              role_name: string;
+              rolsuper: boolean;
+              rolbypassrls: boolean;
+            }>(
+              'select current_user as role_name,r.rolsuper,r.rolbypassrls from pg_roles r where r.rolname=current_user',
+            );
+            if (
+              identity.rows.length !== 1 ||
+              identity.rows[0]?.role_name !== input.workerRole ||
+              identity.rows[0]?.rolsuper !== false ||
+              identity.rows[0]?.rolbypassrls !== false
+            )
+              throw Error('ACTUAL_PUBLICATION_WORKER_ROLE_REQUIRED');
+            const cmd = await lineage.readCommandReadOnlyFrom(
+              tx,
+              world,
+              commandId,
+            );
+            const receipt = await readFinalReceiptFrom(tx, cmd);
+            if (
+              cmd.worldId !== world ||
+              cmd.commandId !== commandId ||
+              receipt?.outcome !== 'COMMITTED' ||
+              receipt.commandFingerprint !== cmd.fingerprint ||
+              (expected &&
+                canonicalSerialize(receipt) !== canonicalSerialize(expected))
+            )
+              throw Error('EXACT_DURABLE_COMMITTED_RECEIPT_REQUIRED');
+            let tradeCountries: readonly string[] = [];
+            if (
+              input.tradeCurrent &&
+              [
+                'CORE_GOODS_TRANSFER_V1',
+                'CORE_GOODS_SHIPMENT_V1',
+                'CORE_GOODS_DELIVERY_V1',
+              ].includes(cmd.commandType)
+            ) {
+              const body = JSON.parse(cmd.canonicalPayload) as {
+                transferCommandId?: unknown;
+              };
+              if (
+                cmd.commandType !== 'CORE_GOODS_TRANSFER_V1' &&
+                typeof body.transferCommandId !== 'string'
+              )
+                throw Error('TRADE_CURRENT_EXACT_TRANSFER_REFERENCE_REQUIRED');
+              const original =
+                cmd.commandType === 'CORE_GOODS_TRANSFER_V1'
+                  ? cmd
+                  : await lineage.readCommandReadOnlyFrom(
+                      tx,
+                      world,
+                      String(body.transferCommandId),
+                    );
+              const originalFinal = await readFinalReceiptFrom(tx, original);
+              if (
+                originalFinal?.outcome !== 'COMMITTED' ||
+                originalFinal.commandFingerprint !== original.fingerprint
+              )
+                throw Error('TRADE_CURRENT_COMMITTED_TRANSFER_REQUIRED');
+              const sha256Hex = (text: string) =>
+                createHash('sha256').update(text).digest('hex');
+              if (cmd.commandType === 'CORE_GOODS_SHIPMENT_V1')
+                parseNarrowTreasuryGcuShipmentTerms({
+                  shipmentCommand: cmd,
+                  transferCommand: original,
+                  sha256Hex,
+                });
+              if (cmd.commandType === 'CORE_GOODS_DELIVERY_V1')
+                parseNarrowTreasuryGcuDeliveryTerms({
+                  deliveryCommand: cmd,
+                  transferCommand: original,
+                  sha256Hex,
+                });
+              const terms = parseNarrowTreasuryGcuTransferTerms(original);
+              tradeCountries = Object.freeze([
+                terms.sellerCountryId,
+                terms.buyerCountryId,
+              ]);
+              if (!tradeCountries.includes(cmd.countryId))
+                throw Error('TRADE_CURRENT_COMMAND_PARTY_REQUIRED');
+            }
+            return { command: cmd, tradeCountries };
+          },
+        );
         const result = await publisher.publishOfficeCurrentCountry(
           command.countryId,
-          { requireCaptain: command.officeId === 'CAPTAIN' },
+          {
+            requireCaptain: command.officeId === 'CAPTAIN',
+            ...(input.tradeCurrent ? { includeTrade: true } : {}),
+          },
         );
         const industry = await industryPublisher?.publishCountry(
           command.countryId,
@@ -208,6 +273,24 @@ export function createPostwarOfficePublicationController(input: {
           canonicalSerialize(industry.head) !== canonicalSerialize(result.head)
         )
           throw Error('INDUSTRY_EXPECTED_PUBLICATION_HEAD_MISMATCH');
+        let counterpartDocuments = 0;
+        for (const country of tradeCountries.filter(
+          (x) => x !== command.countryId,
+        )) {
+          const other = await publisher.publishOfficeCurrentCountry(country, {
+            requireCaptain: false,
+            includeTrade: true,
+          });
+          if (
+            canonicalSerialize(other.head) !== canonicalSerialize(result.head)
+          )
+            throw Error('TRADE_CURRENT_PARTIES_SAME_OBSERVED_HEAD_REQUIRED');
+          counterpartDocuments +=
+            other.captain.length +
+            other.financial.length +
+            other.social.length +
+            other.trade.length;
+        }
         return Object.freeze({
           status: 'PUBLISHED',
           commandId,
@@ -217,6 +300,8 @@ export function createPostwarOfficePublicationController(input: {
             result.captain.length +
             result.financial.length +
             result.social.length +
+            result.trade.length +
+            counterpartDocuments +
             (industry?.documents.length ?? 0),
           ...(industry ? { industryLabour: 'PUBLISHED' as const } : {}),
           captain: result.captain.length

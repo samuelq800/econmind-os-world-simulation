@@ -1,6 +1,8 @@
 /** Lifecycle/protocol tests only. SQL/source admission remains a separate
  * native acceptance gate; these fixtures do not issue economic authority. */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createHash } from 'node:crypto';
+import { parseCanonicalCommand, COMMAND_SCHEMA_VERSION } from '@econmind/core';
 import type { DurableConsumptionStep } from '../../apps/world-worker/src/preparation/durable-command-consumption.js';
 import type { PostwarSocialRuntimeConnection } from '../../apps/world-worker/src/runtime-preparation/social-runtime-connection.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
@@ -73,7 +75,7 @@ const step = {
   source: 'NEW_FINAL',
   receipt,
 } as unknown as Extract<DurableConsumptionStep, { status: 'PROCESSED' }>;
-function controller(industryLabour = false) {
+function controller(industryLabour = false, tradeCurrent = false) {
   const database = {
     async query(sql: string) {
       fixture.queries.push(sql);
@@ -98,6 +100,7 @@ function controller(industryLabour = false) {
   return createPostwarOfficePublicationController({
     worldId: world,
     database,
+    ...(tradeCurrent ? { tradeCurrent: true as const } : {}),
     ...(industryLabour ? { industryLabour: true as const } : {}),
     workerRole: 'test_worker',
     publicationDatabase: {
@@ -138,6 +141,7 @@ beforeEach(() => {
     captain: [{}],
     financial: Array.from({ length: 10 }, () => ({})),
     social: [{}, {}],
+    trade: [],
   });
   fixture.industryPublish.mockResolvedValue({
     head: { worldId: world, worldVersion: '3', eventSequence: '4' },
@@ -338,6 +342,7 @@ describe('fixed post-commit derived publication', () => {
         captain: [{}],
         financial: Array(10).fill({}),
         social: [{}, {}],
+        trade: [],
       };
     });
     const pending = c.afterCommitted(step);
@@ -354,4 +359,97 @@ describe('fixed post-commit derived publication', () => {
     expect(fixture.close).toHaveBeenCalledOnce();
     expect(fixture.publish).toHaveBeenCalledOnce();
   });
+});
+
+it('publishes both actual committed Trade parties at one observed head, and retries projection only when their heads differ', async () => {
+  const sha = (text: string) => createHash('sha256').update(text).digest('hex');
+  const original = parseCanonicalCommand(
+    {
+      schemaVersion: COMMAND_SCHEMA_VERSION,
+      worldId: world,
+      countryId: 'COUNTRY_01',
+      officeId: 'TRADE',
+      actorId: 'ACTOR_TEST_TRADE',
+      authSubject: '11111111-1111-4111-8111-111111111111',
+      commandId: 'COMMAND_TEST_TRADE_CURRENT',
+      commandType: 'CORE_GOODS_TRANSFER_V1',
+      expectedWorldVersion: '0',
+      idempotencyKey: 'KEY_TEST_TRADE_CURRENT',
+      correlationId: 'CORRELATION_TEST_TRADE_CURRENT',
+      simTime: '0',
+      submittedAtReal: '2026-11-08T00:00:00.000Z',
+      payload: {
+        schemaVersion: 'core-goods-transfer-v1',
+        commodityId: 'GRAIN',
+        sellerCountryId: 'COUNTRY_01',
+        buyerCountryId: 'COUNTRY_02',
+        quantity: { amount: '1', unit: 'tonne' },
+        price: { amount: '1', currency: 'GCU', perUnit: 'tonne' },
+        assetSource: {
+          batchId: 'BATCH_TEST',
+          physicalLocationId: 'LOCATION_TEST',
+          titleHolderId: 'ENTITY_TEST',
+          riskBearerId: 'ENTITY_TEST',
+          economicRecognitionId: null,
+        },
+        paymentSource: 'BUYER_TREASURY_GCU',
+        policyVersion: 'V10_TREASURY_GCU_V1',
+        threshold: {
+          policyVersion: 'V10_TREASURY_GCU_THRESHOLD_V1',
+          maxSettlement: { amount: '6', currency: 'GCU' },
+        },
+        expiresAtReal: '2026-11-08T01:00:00.000Z',
+      },
+    },
+    sha,
+  );
+  fixture.readCommand.mockResolvedValue(original);
+  fixture.readReceipt.mockResolvedValue({
+    outcome: 'COMMITTED',
+    commandFingerprint: original.fingerprint,
+    commandId: original.commandId,
+  });
+  fixture.publish.mockResolvedValue({
+    head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+    captain: [{}],
+    financial: Array(10).fill({}),
+    social: [{}, {}],
+    trade: [{}, {}],
+  });
+  const c = controller(false, true);
+  try {
+    expect(await c.retryCommitted(original.commandId)).toMatchObject({
+      status: 'PUBLISHED',
+      countryId: 'COUNTRY_01',
+      documentCount: 30,
+    });
+    expect(fixture.publish.mock.calls.map((x) => x[0])).toEqual([
+      'COUNTRY_01',
+      'COUNTRY_02',
+    ]);
+    expect(
+      fixture.publish.mock.calls.every((x) => x[1].includeTrade === true),
+    ).toBe(true);
+    fixture.publish
+      .mockResolvedValueOnce({
+        head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+        captain: [],
+        financial: Array(10).fill({}),
+        social: [{}, {}],
+        trade: [{}, {}],
+      })
+      .mockResolvedValueOnce({
+        head: { worldId: world, worldVersion: '4', eventSequence: '5' },
+        captain: [],
+        financial: Array(10).fill({}),
+        social: [{}, {}],
+        trade: [{}, {}],
+      });
+    expect(await c.retryCommitted(original.commandId)).toMatchObject({
+      status: 'UNAVAILABLE',
+      reason: 'DERIVED_PUBLICATION_REQUIRES_RETRY',
+    });
+  } finally {
+    await c.close();
+  }
 });
