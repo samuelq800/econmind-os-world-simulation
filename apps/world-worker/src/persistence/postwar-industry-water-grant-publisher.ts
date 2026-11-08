@@ -100,12 +100,26 @@ export function createPostwarIndustryWaterGrantPublisher(
     if (failure !== undefined) throw failure;
     return result!;
   }
-  function published(rows: readonly Record<string, unknown>[]) {
+  function published(
+    rows: readonly Record<string, unknown>[],
+    scope: Readonly<{ countryId: string; facilityId: string; runId: string }>,
+  ) {
     if (rows.length !== 1) fail('ONE_FIXED_PUBLICATION_REQUIRED');
     const r = rows[0]!,
       command = parseCanonicalCommand(r.command_json, sha);
-    parseIndustryUtilityAutomaticWaterGrantIntent(command, sha);
+    const intent = parseIndustryUtilityAutomaticWaterGrantIntent(command, sha),
+      expectedSource = utilitySourceForRun(
+        config.sourcePreparation,
+        'WATER',
+        scope.runId,
+      );
     if (
+      command.worldId !== world ||
+      command.countryId !== scope.countryId ||
+      intent.facilityId !== scope.facilityId ||
+      intent.runId !== scope.runId ||
+      intent.sourceRef !== expectedSource.sourceRef ||
+      intent.sourceRawSha256 !== expectedSource.sourceRawSha256 ||
       command.fingerprint !== r.command_fingerprint ||
       (r.publication_status !== 'QUEUED' && r.publication_status !== 'FINAL')
     )
@@ -129,11 +143,11 @@ export function createPostwarIndustryWaterGrantPublisher(
       const operation = (async () => {
         const old = await config.publicationDatabase.transaction((tx) =>
           tx.query<Record<string, unknown>>(
-            'select * from world_v2.read_postwar_industry_water_grant_publication($1,$2)',
-            [world, scope.runId],
+            'select * from world_v2.read_postwar_industry_water_grant_publication($1,$2,$3,$4)',
+            [world, scope.countryId, scope.facilityId, scope.runId],
           ),
         );
-        if (old.rows.length) return published(old.rows);
+        if (old.rows.length) return published(old.rows, scope);
         const sim = await config.clock.simTime(),
           at = config.clock.nowReal();
         if (
@@ -256,7 +270,7 @@ export function createPostwarIndustryWaterGrantPublisher(
                 );
               },
             );
-            const actual = published(issued.rows);
+            const actual = published(issued.rows, scope);
             if (actual.command.fingerprint !== command.fingerprint)
               fail('SQL_CORE_COMMAND_DIFFERS');
             return actual;

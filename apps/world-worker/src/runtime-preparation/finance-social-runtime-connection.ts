@@ -8,6 +8,7 @@ import {
 } from '../persistence/postwar-industry-logistics-runtime.js';
 import {
   preparePostwarIndustryUtilitySource,
+  preparePostwarIndustryUtilitySources,
   retireUnownedPostwarIndustryUtilitySource,
   type PostwarIndustryUtilitySourceInput,
 } from '../persistence/postwar-industry-utility-source.js';
@@ -363,6 +364,14 @@ function constructFinanceSocialRuntimeConnection(
   },
   serverBinding: ServerCommandHostBinding | null = null,
 ): Readonly<PostwarFinanceSocialRuntimeConnection> {
+  // Retain the large startup seed only until the one deferred preparation
+  // finishes. The long-lived transport/consumer closure keeps no seed carrier.
+  let deferredUtilityPreparation = input.industry?.utilityPreparation;
+  if (input.industry) {
+    const retainedIndustry = { ...input.industry };
+    delete retainedIndustry.utilityPreparation;
+    input = { ...input, industry: retainedIndustry };
+  }
   const social = input.socialConnection,
     world = social?.worldId;
   if (!isPostwarSocialRuntimeConnection(social, world))
@@ -585,31 +594,33 @@ function constructFinanceSocialRuntimeConnection(
     const industryRun = input.industry
       ? createPostwarIndustryRunRuntime({ database, socialConnection: social })
       : null;
-    const industryUtility = input.industry?.utilityPreparation
-      ? createPostwarIndustryUtilityRuntime({
-          database,
-          socialConnection: social,
-          ...(input.industry.publicationDatabase
-            ? {
-                publication: {
-                  database: input.industry.publicationDatabase,
-                  clock: Object.freeze({
-                    nowReal: () => input.clock.nowReal(),
-                    simTime: () => input.clock.simTime(world),
-                  }),
-                },
-              }
-            : {}),
-        })
-      : null;
-    const industryLogistics = input.industry?.utilityPreparation
-      ? createPostwarIndustryLogisticsRuntime({
-          database,
-          socialConnection: social,
-          clock: input.clock,
-          sourceContext: input.industry.sourceContext,
-        })
-      : null;
+    const industryUtility =
+      deferredUtilityPreparation && input.industry
+        ? createPostwarIndustryUtilityRuntime({
+            database,
+            socialConnection: social,
+            ...(input.industry.publicationDatabase
+              ? {
+                  publication: {
+                    database: input.industry.publicationDatabase,
+                    clock: Object.freeze({
+                      nowReal: () => input.clock.nowReal(),
+                      simTime: () => input.clock.simTime(world),
+                    }),
+                  },
+                }
+              : {}),
+          })
+        : null;
+    const industryLogistics =
+      deferredUtilityPreparation && input.industry
+        ? createPostwarIndustryLogisticsRuntime({
+            database,
+            socialConnection: social,
+            clock: input.clock,
+            sourceContext: input.industry.sourceContext,
+          })
+        : null;
     let readers: Readonly<ManualOfficeRuntimeReaders> = Object.freeze({
       ...social.readers,
       financeBudget: budget,
@@ -732,27 +743,42 @@ function constructFinanceSocialRuntimeConnection(
     let utilityPrepared =
       industryUtility === null && industryLogistics === null;
     const prepareUtilities = async () => {
-      const config = input.industry?.utilityPreparation;
+      if (utilityPreparing) return utilityPreparing;
+      const config = deferredUtilityPreparation;
       if (!config || !industryUtility || !industryLogistics) return;
       requireLive();
-      utilityPreparing ??= (async () => {
-        const source = await preparePostwarIndustryUtilitySource({
-          ...config,
-          socialConnection: social,
-        });
+      utilityPreparing = (async () => {
         try {
+          // An explicit server-only site remains exact; default host assembly
+          // prepares only the approved/actually-registered 21-site intersection.
+          const prepared = config.site
+            ? [
+                await preparePostwarIndustryUtilitySource({
+                  ...config,
+                  socialConnection: social,
+                }),
+              ]
+            : await preparePostwarIndustryUtilitySources({
+                ...config,
+                socialConnection: social,
+              });
+          try {
+            for (const source of prepared) {
+              requireLive();
+              await industryUtility.prepare(source);
+            }
+          } catch (error) {
+            for (const source of prepared)
+              retireUnownedPostwarIndustryUtilitySource(source);
+            throw error;
+          }
           requireLive();
-          await industryUtility.prepare(source);
-        } catch (error) {
-          // No consumer can run before successful shared preparation. A token
-          // rejected before the fixed runtime accepts ownership stays ours.
-          retireUnownedPostwarIndustryUtilitySource(source);
-          throw error;
+          await industryLogistics.prepare(config);
+          requireLive();
+          utilityPrepared = true;
+        } finally {
+          deferredUtilityPreparation = undefined;
         }
-        requireLive();
-        await industryLogistics.prepare(config);
-        requireLive();
-        utilityPrepared = true;
       })();
       await utilityPreparing;
     };
@@ -922,6 +948,7 @@ function constructFinanceSocialRuntimeConnection(
         stop() {
           if (stopping) return stopping;
           stopped = true;
+          deferredUtilityPreparation = undefined;
           preparedTreasuryFxConnections.delete(connection);
           stopping = (async () => {
             if (combinedActive || retryActive)

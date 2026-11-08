@@ -23,7 +23,7 @@ import {
 import { createHash } from 'node:crypto';
 import { canonicalSerialize } from '@econmind/core';
 import { projectPostwarIndustryPowerServiceSource } from './postwar-industry-utility-service-source.js';
-import { readPostwarIndustryUtilitySourceForBase } from './postwar-industry-utility-source.js';
+import { readPostwarIndustryUtilitySourceForPowerFacility } from './postwar-industry-utility-source.js';
 import { INDUSTRY_FIRST_DAY_READ_QUERY } from './postwar-industry-first-day-source.js';
 import type { SqlExecutor } from './sql-database.js';
 export const INDUSTRY_RUN_HISTORY_ORIGINAL_QUERY =
@@ -58,7 +58,10 @@ export function projectPostwarIndustryRunSiteSource(
   )
     fail('GENUINE_BASE_AND_REGISTERED_SOURCE_DIFFER');
   if (d.serviceKind === 'POWER') {
-    const preparation = readPostwarIndustryUtilitySourceForBase(baseline);
+    const preparation = readPostwarIndustryUtilitySourceForPowerFacility(
+      baseline,
+      { countryId: text(d.countryId), facilityId: text(d.facilityId) },
+    );
     if (!preparation) fail('REGISTERED_POWER_SOURCE_NOT_PREPARED');
     const projected = projectPostwarIndustryPowerServiceSource({
       baseline,
@@ -248,7 +251,10 @@ export function decodePostwarIndustryRunSourceRow(
 ): Readonly<PostwarIndustryFirstDaySourceData> {
   if (!row.source_ref.startsWith('INDUSTRY_POWER_STAFF_'))
     return decodePostwarIndustryFirstDaySourceRow(row, input);
-  const preparation = readPostwarIndustryUtilitySourceForBase(input.baseline);
+  const preparation = readPostwarIndustryUtilitySourceForPowerFacility(
+    input.baseline,
+    { countryId: input.countryId, facilityId: input.facilityId },
+  );
   if (!preparation) fail('REGISTERED_POWER_SOURCE_NOT_PREPARED');
   const expected = projectPostwarIndustryPowerServiceSource({
     baseline: input.baseline,

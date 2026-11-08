@@ -16,7 +16,7 @@ import {
 } from './prepared-postwar-social-source.js';
 import {
   consumePostwarIndustryUtilitySource,
-  readPostwarIndustryUtilitySourceForBase,
+  readPostwarIndustryUtilitySourceForPowerFacility,
   assertPostwarIndustryUtilitySourceFrom,
   PostwarIndustryUtilitySourceMissing,
   type PreparedPostwarIndustryUtilitySource,
@@ -318,7 +318,10 @@ export async function readPostwarIndustryPowerServiceSourceFrom(
     )
   )
     return null;
-  const preparation = readPostwarIndustryUtilitySourceForBase(input.baseline);
+  const preparation = readPostwarIndustryUtilitySourceForPowerFacility(
+    input.baseline,
+    { countryId: input.countryId, facilityId: input.facilityId },
+  );
   if (!preparation)
     throw new PostwarIndustryUtilitySourceMissing(
       'REGISTERED_POWER_SOURCE_NOT_PREPARED',

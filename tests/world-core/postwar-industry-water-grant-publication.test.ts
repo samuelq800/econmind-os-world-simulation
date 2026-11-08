@@ -202,6 +202,176 @@ describe('fixed automatic water quota publisher', () => {
           sourceSha,
         ],
       );
+      // Explicit TEST_ONLY second-country source metadata. The authoritative
+      // SQL recovery contract must distinguish country/site even when two real
+      // Core RUN frames use the same local runId. This is not a 70-country E03
+      // source/admission or consumer-authority positive.
+      const secondCountry = 'COUNTRY_10',
+        secondFacility = 'OPEN-10-REFINED_FUEL',
+        secondOperator = 'ENTITY_OPERATOR_10',
+        secondLocation = 'REGION_10_E1',
+        secondSourceText = C.canonicalSerialize({
+          worldId: world,
+          countryId: secondCountry,
+          facilityId: secondFacility,
+        }),
+        secondSourceSha = sha(secondSourceText),
+        secondSourceRef = 'INDUSTRY_FIRST_DAY_' + secondSourceSha.toUpperCase(),
+        secondRegistration = reg + '_COUNTRY_10';
+      await f.db.query(
+        `insert into world_v2.postwar_industry_original(world_id,country_id,facility_id,registration_ref,seed_fingerprint,admission_ref,operating_source_id,operating_source_hash,checksums_sha256,owner_original_sha256,document_text,document_sha256)
+select world_id,$2,$3,$4,seed_fingerprint,admission_ref,operating_source_id,operating_source_hash,checksums_sha256,owner_original_sha256,$5,$6 from world_v2.postwar_industry_original where world_id=$1 and registration_ref=$7`,
+        [
+          world,
+          secondCountry,
+          secondFacility,
+          secondRegistration,
+          secondSourceText,
+          secondSourceSha,
+          reg,
+        ],
+      );
+      await f.db.query(
+        `insert into world_v2.postwar_industry_first_day_source
+select world_id,$2,$3,$4,$5,seed_id,seed_fingerprint,admission_ref,policy_version,policy_raw_sha256,user_adoption_raw_sha256,$6,$7 from world_v2.postwar_industry_first_day_source where world_id=$1 and source_ref=$8`,
+        [
+          world,
+          secondCountry,
+          secondFacility,
+          secondSourceRef,
+          secondRegistration,
+          secondSourceText,
+          secondSourceSha,
+          site.sourceRef,
+        ],
+      );
+      const secondCompact = C.canonicalSerialize({
+          worldId: world,
+          countryId: secondCountry,
+          facilityId: secondFacility,
+          rawQuotaPerDay: '1',
+        }),
+        secondCompactSha = sha(secondCompact),
+        secondCompactRef = 'INDUSTRY_UTILITY_' + secondCompactSha.toUpperCase();
+      await f.db.query(
+        'insert into world_v2.postwar_industry_utility_source values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+        [
+          world,
+          secondCountry,
+          secondFacility,
+          secondRegistration,
+          f.f.seed.seedId,
+          f.f.seed.fingerprint,
+          f.f.admissionRef,
+          secondCompactRef,
+          secondCompact,
+          secondCompactSha,
+        ],
+      );
+      const secondSite = {
+          ...site,
+          countryId: secondCountry,
+          facilityId: secondFacility,
+          locationId: secondLocation,
+          operatorId: secondOperator,
+          sourceRef: secondSourceRef,
+          sourceRawSha256: secondSourceSha,
+          positions: site.positions.map((p) => ({
+            ...p,
+            positionId: p.positionId + '_COUNTRY_10',
+            poolId: p.poolId + '_COUNTRY_10',
+            cohortRef: p.cohortRef + '_COUNTRY_10',
+            regionId: secondLocation,
+          })),
+        },
+        secondScheduleCommand = C.parseCanonicalCommand(
+          {
+            schemaVersion: 'command-v1',
+            worldId: world,
+            commandId: 'COMMAND_TEST_ONLY_SECOND_WATER_RUN',
+            commandType: 'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+            countryId: secondCountry,
+            officeId: 'INDUSTRY',
+            actorId: 'ACTOR_TEST_ONLY_SECOND_WATER',
+            authSubject: f.f.subject,
+            expectedWorldVersion: '1',
+            idempotencyKey: 'RUN_TEST_ONLY_SECOND_WATER',
+            correlationId: 'CORRELATION_TEST_ONLY_SECOND_WATER',
+            simTime: '0',
+            submittedAtReal: now,
+            payload: {
+              ...raw.terms,
+              runId,
+              sourceRef: secondSourceRef,
+              sourceRawSha256: secondSourceSha,
+              facilityId: secondFacility,
+            },
+          },
+          sha,
+        ),
+        secondScheduled = prepareIndustryRunScheduleFrame(
+          {
+            state: createIndustryFirstDayWorkState([secondSite]),
+            command: secondScheduleCommand,
+            head: { worldVersion: '1', eventSequence: '1' },
+            observedAtReal: now,
+          },
+          sha,
+        ),
+        secondEvent = secondScheduled.frame.events[0]!,
+        secondReceipt = secondScheduled.frame.receipt;
+      await f.db.query(
+        'insert into world_v2.command_submission(world_id,command_id,idempotency_key,command_type,schema_version,canonical_payload,payload_sha256,command_fingerprint,auth_subject,actor_id,country_id,office_id,expected_world_version,sim_time,correlation_id,submitted_at_real)values($1,$2,$3,$4,$5,$6,$7,$8,$9::uuid,$10,$11,$12,1,0,$13,$14::timestamptz)',
+        [
+          world,
+          secondScheduleCommand.commandId,
+          secondScheduleCommand.idempotencyKey,
+          secondScheduleCommand.commandType,
+          secondScheduleCommand.schemaVersion,
+          secondScheduleCommand.canonicalPayload,
+          secondScheduleCommand.payloadHash,
+          secondScheduleCommand.fingerprint,
+          secondScheduleCommand.authSubject,
+          secondScheduleCommand.actorId,
+          secondCountry,
+          'INDUSTRY',
+          secondScheduleCommand.correlationId,
+          now,
+        ],
+      );
+      await f.db.query(
+        'insert into world_v2.authoritative_event(world_id,event_id,event_sequence,world_version,causation_command_id,correlation_id,event_type,schema_version,canonical_payload,payload_sha256,event_fingerprint,sim_time,recorded_at_real)values($1,$2,2,2,$3,$4,$5,$6,$7,$8,$9,0,$10::timestamptz)',
+        [
+          world,
+          secondEvent.eventId,
+          secondScheduleCommand.commandId,
+          secondScheduleCommand.correlationId,
+          secondEvent.eventType,
+          secondEvent.schemaVersion,
+          secondEvent.canonicalPayload,
+          secondEvent.payloadHash,
+          secondEvent.fingerprint,
+          now,
+        ],
+      );
+      await f.db.query(
+        'insert into world_v2.command_receipt(world_id,command_id,idempotency_key,schema_version,command_fingerprint,outcome,reason_code,transition_id,world_version_before,world_version_after,sim_time,event_ids,recorded_at_real)values($1,$2,$3,$4,$5,$6,null,$7,1,2,0,$8::jsonb,$9::timestamptz)',
+        [
+          world,
+          secondScheduleCommand.commandId,
+          secondScheduleCommand.idempotencyKey,
+          secondReceipt.schemaVersion,
+          secondScheduleCommand.fingerprint,
+          secondReceipt.outcome,
+          secondReceipt.transitionId,
+          JSON.stringify(secondReceipt.eventIds),
+          now,
+        ],
+      );
+      await f.db.query(
+        'update world_v2.world_head set world_version=2,event_sequence=2 where world_id=$1',
+        [world],
+      );
       const id =
           'COMMAND_INDUSTRY_WATER_GRANT_' +
           sha(
@@ -222,7 +392,7 @@ describe('fixed automatic water quota publisher', () => {
             officeId: null,
             actorId: scheduleCommand.actorId,
             authSubject: scheduleCommand.authSubject,
-            expectedWorldVersion: '1',
+            expectedWorldVersion: '2',
             idempotencyKey: id,
             correlationId: scheduleCommand.correlationId,
             simTime: '0',
@@ -330,10 +500,10 @@ describe('fixed automatic water quota publisher', () => {
       let cursor = prepareFinanceSocialReplayContinuation(
         {
           opening,
-          expectedHead: { worldVersion: '1', eventSequence: '1' },
+          expectedHead: { worldVersion: '2', eventSequence: '2' },
           socialCountries: [],
           fxOriginals: [],
-          industryWorkSources: [site],
+          industryWorkSources: [site, secondSite],
           industryWaterOriginals: [
             {
               source: waterSource,
@@ -356,11 +526,11 @@ describe('fixed automatic water quota publisher', () => {
           worldId: world,
           seedFingerprint: f.f.seed.fingerprint,
           fromHead: { worldVersion: '0', eventSequence: '0' },
-          throughHead: { worldVersion: '1', eventSequence: '1' },
-          expectedHead: { worldVersion: '1', eventSequence: '1' },
-          frames: [scheduled.frame],
+          throughHead: { worldVersion: '2', eventSequence: '2' },
+          expectedHead: { worldVersion: '2', eventSequence: '2' },
+          frames: [scheduled.frame, secondScheduled.frame],
           framesSha256: C.canonicalSha256(
-            C.canonicalHashInput([scheduled.frame]),
+            C.canonicalHashInput([scheduled.frame, secondScheduled.frame]),
             sha,
           ),
         },
@@ -387,7 +557,7 @@ describe('fixed automatic water quota publisher', () => {
         );
         try {
           const result = await f.db.query<Record<string, unknown>>(
-            'select * from world_v2.publish_postwar_industry_water_grant($1,$2,$3,$4,$5,1,1,$6::timestamptz,$7,$8)',
+            'select * from world_v2.publish_postwar_industry_water_grant($1,$2,$3,$4,$5,2,2,$6::timestamptz,$7,$8)',
             [world, country, facility, runId, worker, now, '0', fp],
           );
           await f.db.exec('commit');
@@ -408,6 +578,94 @@ describe('fixed automatic water quota publisher', () => {
       expect(actual.fingerprint).toBe(command.fingerprint);
       parseIndustryUtilityAutomaticWaterGrantIntent(actual, sha);
       expect(rows[0]!.publication_status).toBe('QUEUED');
+      expect((await pub())[0]!.command_fingerprint).toBe(command.fingerprint);
+      const secondId =
+          'COMMAND_INDUSTRY_WATER_GRANT_' +
+          sha(
+            C.canonicalSerialize([
+              world,
+              secondScheduleCommand.fingerprint,
+              secondCompactSha,
+              'INDUSTRY_BOUNDED_WATER_GRANT_V1',
+            ]),
+          ).toUpperCase(),
+        secondCommand = C.parseCanonicalCommand(
+          {
+            schemaVersion: 'command-v1',
+            worldId: world,
+            commandId: secondId,
+            commandType: 'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1',
+            countryId: secondCountry,
+            officeId: null,
+            actorId: secondScheduleCommand.actorId,
+            authSubject: secondScheduleCommand.authSubject,
+            expectedWorldVersion: '2',
+            idempotencyKey: secondId,
+            correlationId: secondScheduleCommand.correlationId,
+            simTime: '0',
+            submittedAtReal: now,
+            payload: {
+              schemaVersion: 'industry-first-day-utility-command-v1',
+              serviceKind: 'WATER',
+              operationRef: secondId,
+              facilityId: secondFacility,
+              runId,
+              sourceRef: secondCompactRef + '_WATER',
+              sourceRawSha256: secondCompactSha,
+              operation: { action: 'GRANT_RIGHT' },
+            },
+          },
+          sha,
+        );
+      expect(secondId).not.toBe(id);
+      await f.db.exec(
+        'set session authorization test_water_publisher;begin isolation level repeatable read;set local role world_v2_industry_source_publisher',
+      );
+      try {
+        const secondIssued = await f.db.query<Record<string, unknown>>(
+          'select * from world_v2.publish_postwar_industry_water_grant($1,$2,$3,$4,$5,2,2,$6::timestamptz,$7,$8)',
+          [
+            world,
+            secondCountry,
+            secondFacility,
+            runId,
+            worker,
+            now,
+            '0',
+            secondCommand.fingerprint,
+          ],
+        );
+        expect(secondIssued.rows[0]!.command_fingerprint).toBe(
+          secondCommand.fingerprint,
+        );
+        const scopedRead = async (cid: string, facilityId: string) =>
+          f.db.query<Record<string, unknown>>(
+            'select * from world_v2.read_postwar_industry_water_grant_publication($1,$2,$3,$4)',
+            [world, cid, facilityId, runId],
+          );
+        expect(
+          (await scopedRead(country, facility)).rows[0]!.command_fingerprint,
+        ).toBe(command.fingerprint);
+        expect(
+          (await scopedRead(secondCountry, secondFacility)).rows[0]!
+            .command_fingerprint,
+        ).toBe(secondCommand.fingerprint);
+        expect((await scopedRead(secondCountry, facility)).rows).toEqual([]);
+        expect(
+          (await scopedRead('COUNTRY_03', 'OPEN-03-REFINED_FUEL')).rows,
+        ).toEqual([]);
+        const legacy = await f.db.query<Record<string, unknown>>(
+          'select * from world_v2.read_postwar_industry_water_grant_publication($1,$2)',
+          [world, runId],
+        );
+        expect(legacy.rows[0]!.command_fingerprint).toBe(command.fingerprint);
+        await f.db.exec('commit');
+      } catch (error) {
+        await f.db.exec('rollback');
+        throw error;
+      } finally {
+        await f.f.reset();
+      }
       expect((await pub())[0]!.command_fingerprint).toBe(command.fingerprint);
       const count = await f.db.query<{ n: number }>(
         'select count(*)::int n from world_v2.command_queue where world_id=$1 and command_id=$2',
@@ -489,6 +747,25 @@ describe('fixed automatic water quota publisher', () => {
       });
     try {
       expect(isPreparedPostwarIndustryUtilityRuntime(runtime)).toBe(false);
+      expect(runtime.readPreparedSites()).toEqual([]);
+      expect(runtime.readPlanningScope('COUNTRY_02')).toBeNull();
+      expect(runtime.readPlanningScope('COUNTRY_03')).toBeNull();
+      await expect(
+        runtime.prepare({
+          compact: {
+            countryId: 'COUNTRY_03',
+            facilityId: 'OPEN-03-REFINED_FUEL',
+          },
+        } as never),
+      ).rejects.toThrow('GENUINE_LIVE_SAME_SOCIAL_UTILITY_SOURCE_REQUIRED');
+      expect(runtime.readPreparedSites()).toEqual([]);
+      await expect(
+        runtime.publishWaterGrant({
+          countryId: 'COUNTRY_03',
+          facilityId: 'OPEN-03-REFINED_FUEL',
+          runId: 'RUN_TEST_ONLY_FOREIGN_SCOPE',
+        }),
+      ).rejects.toThrow('REGISTERED_UTILITY_SITE_NOT_PREPARED');
       expect(
         isPostwarIndustryUtilitySourceCommitProtectionPort(
           runtime.sourceCommitProtectionPort,
@@ -556,7 +833,8 @@ describe('fixed automatic water quota publisher', () => {
       ).rejects.toThrow('SOURCE_NOT_PREPARED');
       expect(queries).toBe(0);
     } finally {
-      await runtime.close();
+      await Promise.all([runtime.close(), runtime.close()]);
+      expect(runtime.readPreparedSites()).toEqual([]);
       await social.close();
     }
     expect(

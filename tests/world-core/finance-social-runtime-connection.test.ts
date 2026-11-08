@@ -1,3 +1,5 @@
+import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
+import { loadPostwarSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
 import {
   createPostwarIndustryUtilityPlanningReader,
   isPostwarIndustryUtilityPlanningReader,
@@ -584,5 +586,51 @@ describe('fixed Finance/Social single World issuer', () => {
       other.input,
     );
     await replacement.stop();
+  });
+  it('releases deferred utility startup configuration on stop without reading seed bytes or mutating caller input', async () => {
+    const f = fixtures('WORLD_SHARED_UTILITY_DEFERRED_STOP'),
+      publisher = transport(),
+      context = await loadPostwarSourceContext(process.cwd());
+    let seedReads = 0,
+      configurationReads = 0;
+    const preparation = Object.freeze({
+      repositoryRoot: process.cwd(),
+      get startupSeed(): never {
+        seedReads++;
+        throw Error('STOPPED_STARTUP_MUST_NOT_READ_SEED');
+      },
+    });
+    const industry = Object.freeze({
+      sourceContext: context,
+      get utilityPreparation() {
+        configurationReads++;
+        return preparation;
+      },
+    });
+    const input = Object.freeze({
+        ...f.input,
+        industry,
+        publicationDatabase: new PostgresSqlDatabase(publisher.pool),
+      }),
+      originalDescriptor = Object.getOwnPropertyDescriptor(
+        industry,
+        'utilityPreparation',
+      ),
+      c = createPostwarFinanceSocialRuntimeConnection(input),
+      ports = readPostwarFinanceSocialRuntimeBinding(c),
+      capturedReads = configurationReads;
+    expect(capturedReads).toBeGreaterThan(0);
+    expect(ports.industryUtility?.readPreparedSites()).toEqual([]);
+    await Promise.all([c.stop(), c.stop()]);
+    await expect(c.prepare({} as never)).rejects.toThrow('RETIRED');
+    expect(seedReads).toBe(0);
+    expect(publisher.queries).toEqual([]);
+    expect(configurationReads).toBe(capturedReads);
+    expect(input.industry).toBe(industry);
+    expect(
+      Object.getOwnPropertyDescriptor(industry, 'utilityPreparation'),
+    ).toEqual(originalDescriptor);
+    expect(f.worker.queries).toEqual([]);
+    expect(f.intake.queries).toEqual([]);
   });
 });

@@ -101,6 +101,12 @@ export interface PostwarIndustryUtilityRuntime {
   publishWaterGrant(
     scope: Readonly<{ countryId: string; facilityId: string; runId: string }>,
   ): ReturnType<PostwarIndustryWaterGrantPublisher['publish']>;
+  /** Transport DATA only: exactly the genuine sources accepted by this owner. */
+  readPreparedSites(): readonly Readonly<{
+    worldId: string;
+    countryId: string;
+    facilityId: string;
+  }>[];
   readPlanningScope(countryId: string): Readonly<{
     worldId: string;
     countryId: string;
@@ -181,22 +187,54 @@ export function createPostwarIndustryUtilityRuntime(config: {
   const world = social.worldId,
     worker = social.workerId,
     { workerRole } = readPostwarSocialRuntimeConnectionResources(social);
-  let publisher: Readonly<PostwarIndustryWaterGrantPublisher> | undefined;
+  interface InstalledSite {
+    readonly source: Readonly<PreparedPostwarIndustryUtilitySource>;
+    publisher: Readonly<PostwarIndustryWaterGrantPublisher> | undefined;
+  }
+  const installed = new Map<string, InstalledSite>();
+  const siteKey = (site: Readonly<{ countryId: string; facilityId: string }>) =>
+    site.countryId + '\0' + site.facilityId;
   let closed = false,
-    source: Readonly<PreparedPostwarIndustryUtilitySource> | undefined;
+    closing: Promise<void> | undefined;
   const pending = new Set<Promise<unknown>>(),
     active = new WeakSet<object>(),
     owner = Object.freeze({}),
     live = () => !closed && isPostwarSocialRuntimeConnection(social, world),
     ready = () => {
-      if (!live() || !source) return false;
+      if (!live() || !installed.size) return false;
       try {
-        consumePostwarIndustryUtilitySource(source, social);
+        for (const entry of installed.values())
+          consumePostwarIndustryUtilitySource(entry.source, social);
         return true;
       } catch {
         return false;
       }
     };
+  function sourceFor(
+    site: Readonly<{ countryId: string; facilityId: string }>,
+  ): InstalledSite {
+    if (!live()) fail('RUNTIME_RETIRED');
+    const entry = installed.get(siteKey(site));
+    if (!entry)
+      throw new PostwarIndustryUtilitySourceMissing(
+        'REGISTERED_UTILITY_SITE_NOT_PREPARED',
+      );
+    const p = consumePostwarIndustryUtilitySource(entry.source, social);
+    if (
+      p.compact.worldId !== world ||
+      p.compact.countryId !== site.countryId ||
+      p.compact.facilityId !== site.facilityId
+    )
+      fail('EXACT_INSTALLED_SITE_SOURCE_REQUIRED');
+    return entry;
+  }
+  function sitesForCountry(countryId: string) {
+    return [...installed.values()].filter(
+      (entry) =>
+        consumePostwarIndustryUtilitySource(entry.source, social).compact
+          .countryId === countryId,
+    );
+  }
   function track<T>(run: () => Promise<T>): Promise<T> {
     if (!live()) return Promise.reject(Error('INDUSTRY_UTILITY_RETIRED'));
     const p = Promise.resolve().then(run);
@@ -231,12 +269,16 @@ export function createPostwarIndustryUtilityRuntime(config: {
     at: string,
     beforeClaim = false,
   ) {
-    if (!ready() || !source)
+    if (!ready())
       throw new PostwarIndustryUtilitySourceMissing('SOURCE_NOT_PREPARED');
     const automatic = isPostwarIndustryWaterGrantCommand(c);
     const intent = automatic
         ? parseIndustryUtilityAutomaticWaterGrantIntent(c, sha)
         : parseIndustryUtilityManualIntent(c, sha),
+      source = sourceFor({
+        countryId: c.countryId,
+        facilityId: intent.facilityId,
+      }).source,
       p = consumePostwarIndustryUtilitySource(source, social);
     if (
       c.worldId !== world ||
@@ -483,13 +525,20 @@ export function createPostwarIndustryUtilityRuntime(config: {
     sourceCommitProtectionPort: port,
     async prepare(preparation: Readonly<PreparedPostwarIndustryUtilitySource>) {
       if (!live()) fail('RUNTIME_RETIRED_BEFORE_SOURCE_TRANSFER');
-      consumePostwarIndustryUtilitySource(preparation, social);
-      if (source && source !== preparation)
-        fail('UTILITY_SOURCE_ALREADY_PREPARED');
+      const p = consumePostwarIndustryUtilitySource(preparation, social),
+        key = siteKey(p.compact),
+        existing = installed.get(key);
+      if (p.compact.worldId !== world) fail('SAME_WORLD_SOURCE_REQUIRED');
+      if (existing && existing.source !== preparation)
+        fail('UTILITY_SITE_SOURCE_ALREADY_PREPARED');
       takePostwarIndustryUtilitySourceOwnership(preparation, owner);
-      source = preparation;
-      if (config.publication && !publisher)
-        publisher = createPostwarIndustryWaterGrantPublisher({
+      const entry: InstalledSite = existing ?? {
+        source: preparation,
+        publisher: undefined,
+      };
+      installed.set(key, entry);
+      if (config.publication && !entry.publisher)
+        entry.publisher = createPostwarIndustryWaterGrantPublisher({
           database: config.database,
           publicationDatabase: config.publication.database,
           socialConnection: social,
@@ -506,33 +555,65 @@ export function createPostwarIndustryUtilityRuntime(config: {
     ) {
       if (!ready())
         throw new PostwarIndustryUtilitySourceMissing('SOURCE_NOT_PREPARED');
+      const intent = isPostwarIndustryWaterGrantCommand(command)
+        ? parseIndustryUtilityAutomaticWaterGrantIntent(command, sha)
+        : parseIndustryUtilityManualIntent(command, sha);
+      sourceFor({
+        countryId: command.countryId,
+        facilityId: intent.facilityId,
+      });
       return track(async () => {
         await config.database.transaction(async (tx) => {
           await derive(tx, command, observedAtReal, true);
         });
       });
     },
-    publishWaterGrant(
+    async publishWaterGrant(
       scope: Readonly<{ countryId: string; facilityId: string; runId: string }>,
     ) {
-      if (!live() || !publisher)
+      if (!live()) return Promise.reject(Error('INDUSTRY_UTILITY_RETIRED'));
+      const publisher = sourceFor(scope).publisher;
+      if (!publisher)
         return Promise.reject(
           new PostwarIndustryUtilitySourceMissing(
             'WATER_GRANT_PUBLISHER_NOT_INSTALLED',
           ),
         );
-      return track(() => publisher!.publish(scope));
+      return track(() => publisher.publish(scope));
+    },
+    readPreparedSites() {
+      if (!live()) return Object.freeze([]);
+      return Object.freeze(
+        [...installed.values()]
+          .map((entry) => {
+            const p = consumePostwarIndustryUtilitySource(entry.source, social);
+            return Object.freeze({
+              worldId: world,
+              countryId: p.compact.countryId,
+              facilityId: p.compact.facilityId,
+            });
+          })
+          .sort(
+            (a, b) =>
+              a.countryId.localeCompare(b.countryId) ||
+              a.facilityId.localeCompare(b.facilityId),
+          ),
+      );
     },
     readPlanningScope(countryId: string) {
-      if (!ready() || !source) return null;
-      const p = consumePostwarIndustryUtilitySource(source, social);
-      return p.compact.countryId === countryId
-        ? Object.freeze({
-            worldId: world,
-            countryId,
-            facilityId: p.compact.facilityId,
-          })
-        : null;
+      if (!ready()) return null;
+      const matches = sitesForCountry(countryId);
+      if (!matches.length) return null;
+      if (matches.length !== 1)
+        throw new PostwarIndustryUtilitySourceMissing(
+          'EXACT_PLANNING_SITE_SELECTION_REQUIRED',
+        );
+      const p = consumePostwarIndustryUtilitySource(matches[0]!.source, social);
+      return Object.freeze({
+        worldId: world,
+        countryId,
+        facilityId: p.compact.facilityId,
+      });
     },
     async readPlanningFrom(
       tx: SqlExecutor,
@@ -542,284 +623,312 @@ export function createPostwarIndustryUtilityRuntime(config: {
         context: Readonly<PostwarIndustryRunStateContext>;
       }>,
     ) {
-      if (!ready() || !source)
-        throw new PostwarIndustryUtilitySourceMissing('SOURCE_NOT_PREPARED');
-      const p = consumePostwarIndustryUtilitySource(source, social),
-        facts = consumePostwarIndustryRunStateFrom(tx, input.context);
-      if (
-        input.countryId !== p.compact.countryId ||
-        facts.head.worldId !== world ||
-        facts.head.worldVersion !== input.expectedHead.worldVersion ||
-        facts.head.eventSequence !== input.expectedHead.eventSequence ||
-        facts.seedPins.seedFingerprint !== p.compact.seedFingerprint
-      )
-        fail('SAME_EXECUTOR_CURRENT_PLANNING_SCOPE_REQUIRED');
-      const session = await tx.query<{ role_name: string }>(
-        'select current_user as role_name',
-      );
-      if (
-        session.rows.length !== 1 ||
-        session.rows[0]?.role_name !== workerRole
-      )
-        fail('ACTUAL_WORKER_EXECUTOR_REQUIRED');
-      let failure: unknown;
-      try {
-        await tx.query('set local role world_v2_industry_source_reader');
-        await assertPostwarIndustryUtilitySourceFrom(tx, {
-          preparation: source,
-          head: input.expectedHead,
-        });
-      } catch (e) {
-        failure = e;
-      }
-      try {
-        await tx.query('set local role "' + workerRole + '"');
-      } catch (restore) {
-        if (failure !== undefined)
-          throw new AggregateError(
-            [failure, restore],
-            'Planning source role restore failed',
-            { cause: restore },
-          );
-        throw restore;
-      }
-      if (failure !== undefined) throw failure;
-      const state = facts.pagedReplay.result.industryPowerState,
-        power = state ? readIndustryFirstDayPowerState(state, sha) : undefined,
-        capacityFacts = [
-          {
-            name: '原储能能量容量',
-            value: p.compact.power.originalEnergyCapacityMWh,
-            unit: 'MWh',
-          },
-          {
-            name: '原储能放电功率',
-            value: p.compact.power.originalStorageDischargeMW,
-            unit: 'MW',
-          },
-          {
-            name: '原电网功率',
-            value: p.compact.power.originalGridMW,
-            unit: 'MW',
-          },
-          {
-            name: '保留线路损耗比例',
-            value: p.compact.power.originalLossFraction,
-            unit: 'ratio',
-          },
-          ...(power?.physicalLedgerSnapshots.flatMap((x) => [
-            {
-              name: '当前剩余储能',
-              value:
-                x.remainingSocMWh.numerator +
-                '/' +
-                x.remainingSocMWh.denominator,
-              unit: 'MWh',
-            },
-            {
-              name: '当前已预约未结算储能',
-              value:
-                x.pendingStoredEnergyMWh.numerator +
-                '/' +
-                x.pendingStoredEnergyMWh.denominator,
-              unit: 'MWh',
-            },
-            {
-              name: '保留优先用途储能',
-              value:
-                x.protectedStoredEnergyMWh.numerator +
-                '/' +
-                x.protectedStoredEnergyMWh.denominator,
-              unit: 'MWh',
-            },
-          ]) ?? []),
-        ],
-        rows: IndustryUtilityPlanningRow[] = [];
-      for (const run of readIndustryFirstDayWorkState(
-        facts.workState,
-      ).runs.filter(
-        (r) =>
-          r.source.countryId === input.countryId &&
-          r.source.facilityId === p.compact.facilityId,
-      )) {
-        const src = utilitySourceForRun(source, 'POWER', run.terms.runId);
-        for (const purpose of [
-          'INDUSTRY_SELF_USE',
-          'PROCESS_WATER_PUMPING_SELF_USE',
-        ] as const)
-          rows.push(
-            Object.freeze({
-              schemaVersion: 'postwar-industry-utility-planning-row-v1',
-              planningRef:
-                'POWER_PLAN_' +
-                sha(
-                  canonicalSerialize([
-                    world,
-                    facts.head,
-                    run.frame.command.fingerprint,
-                    purpose,
-                  ]),
-                ).toUpperCase(),
-              countryId: src.countryId,
-              facilityId: src.facilityId,
-              locationId: src.locationId,
-              operatorId: src.operatorId,
-              runId: src.runId,
-              sourceRef: src.sourceRef,
-              sourceRawSha256: src.sourceRawSha256,
-              runStartsAtSimTime: run.terms.startsAtSimTime,
-              runEndsAtSimTime: run.terms.endsAtSimTime,
-              measurement: 'PLANNING_DATA_NOT_AUTHORITY',
-              serviceKind: 'POWER',
-              action: 'BOOK',
-              parameters: Object.freeze({
-                purpose,
-                quantityUnit: 'MWh',
-                capacityFacts: Object.freeze(capacityFacts),
-              }),
-            }),
-          );
-      }
-      // Only actual folded BOOK + distinct committed service WORK/WAGE refs
-      // can produce a DELIVER planning row. No amount or result comes from UI.
-      if (power) {
-        const works = facts.completedWorks.map(readIndustryCompletedWork);
-        for (const snapshot of power.physicalLedgerSnapshots) {
-          for (const booking of snapshot.bookings) {
-            const request = booking.request;
-            if (
-              booking.status !== 'BOOKED_NOT_DELIVERED' ||
-              request.worldId !== world ||
-              request.countryId !== input.countryId ||
-              request.operatorId !== p.compact.operatorId ||
-              request.storageId !== p.compact.power.storageId ||
-              request.gridId !== p.compact.power.gridId
-            )
-              continue;
-            const run = readIndustryFirstDayWorkState(
-              facts.workState,
-            ).runs.find(
-              (r) =>
-                r.source.countryId === input.countryId &&
-                r.source.facilityId === p.compact.facilityId &&
-                r.terms.runId === request.runRef,
+      return track(async () => {
+        if (!ready())
+          throw new PostwarIndustryUtilitySourceMissing('SOURCE_NOT_PREPARED');
+        const facts = consumePostwarIndustryRunStateFrom(tx, input.context),
+          source = sourceFor({
+            countryId: input.countryId,
+            facilityId: text(facts.firstdayOriginal.data.facilityId),
+          }).source,
+          p = consumePostwarIndustryUtilitySource(source, social);
+        if (
+          input.countryId !== p.compact.countryId ||
+          facts.head.worldId !== world ||
+          facts.head.worldVersion !== input.expectedHead.worldVersion ||
+          facts.head.eventSequence !== input.expectedHead.eventSequence ||
+          facts.seedPins.seedFingerprint !== p.compact.seedFingerprint
+        )
+          fail('SAME_EXECUTOR_CURRENT_PLANNING_SCOPE_REQUIRED');
+        const session = await tx.query<{ role_name: string }>(
+          'select current_user as role_name',
+        );
+        if (
+          session.rows.length !== 1 ||
+          session.rows[0]?.role_name !== workerRole
+        )
+          fail('ACTUAL_WORKER_EXECUTOR_REQUIRED');
+        let failure: unknown;
+        try {
+          await tx.query('set local role world_v2_industry_source_reader');
+          await assertPostwarIndustryUtilitySourceFrom(tx, {
+            preparation: source,
+            head: input.expectedHead,
+          });
+        } catch (e) {
+          failure = e;
+        }
+        try {
+          await tx.query('set local role "' + workerRole + '"');
+        } catch (restore) {
+          if (failure !== undefined)
+            throw new AggregateError(
+              [failure, restore],
+              'Planning source role restore failed',
+              { cause: restore },
             );
-            if (!run) continue;
-            for (const payment of power.paymentFrames) {
-              const body = JSON.parse(
-                payment.events[0]?.canonicalPayload ?? 'null',
-              ) as unknown;
-              if (!body || typeof body !== 'object' || Array.isArray(body))
-                continue;
-              const paid = body as Record<string, unknown>,
-                event = payment.events[0];
-              if (
-                paid.schemaVersion !== 'industry-operating-wage-paid-v1' ||
-                !event ||
-                typeof paid.workEventFingerprint !== 'string' ||
-                power.usedPaidEventFingerprints.includes(
-                  paid.workEventFingerprint,
-                ) ||
-                power.usedPaidEventFingerprints.includes(event.fingerprint) ||
-                !facts.wageState?.paidWork.includes(paid.workEventFingerprint)
-              )
-                continue;
-              const work = works.find(
-                (w) =>
-                  w.frame.events[0]?.fingerprint === paid.workEventFingerprint,
-              );
-              if (
-                !work ||
-                work.data.countryId !== input.countryId ||
-                work.data.operatorId !== p.compact.operatorId ||
-                work.data.facilityId !== p.compact.power.storageId ||
-                work.data.runId !== 'UTILITY_POWER_SERVICE_' + run.terms.runId
-              )
-                continue;
-              const from = BigInt(request.fromSimTime),
-                through = BigInt(request.throughSimTime),
-                points = [
-                  ...new Set([
-                    from,
-                    through,
-                    ...work.data.allocations
-                      .flatMap((a) => [
-                        BigInt(a.startsAtSimTime),
-                        BigInt(a.endsAtSimTime),
-                      ])
-                      .filter((t) => t > from && t < through),
-                  ]),
-                ];
-              if (
-                points.some(
-                  (t) =>
-                    t < through &&
-                    !work.data.allocations.some(
-                      (a) =>
-                        BigInt(a.count) > 0n &&
-                        BigInt(a.startsAtSimTime) <= t &&
-                        BigInt(a.endsAtSimTime) > t,
-                    ),
-                )
-              )
-                continue;
-              const src = utilitySourceForRun(source, 'POWER', run.terms.runId);
-              rows.push(
-                Object.freeze({
-                  schemaVersion: 'postwar-industry-utility-planning-row-v1',
-                  planningRef:
-                    'POWER_DELIVER_PLAN_' +
-                    sha(
-                      canonicalSerialize([
-                        world,
-                        facts.head,
-                        request.bookingRef,
-                        event.fingerprint,
-                      ]),
-                    ).toUpperCase(),
-                  countryId: src.countryId,
-                  facilityId: src.facilityId,
-                  locationId: src.locationId,
-                  operatorId: src.operatorId,
-                  runId: src.runId,
-                  sourceRef: src.sourceRef,
-                  sourceRawSha256: src.sourceRawSha256,
-                  runStartsAtSimTime: run.terms.startsAtSimTime,
-                  runEndsAtSimTime: run.terms.endsAtSimTime,
-                  measurement: 'PLANNING_DATA_NOT_AUTHORITY',
-                  serviceKind: 'POWER',
-                  action: 'DELIVER',
-                  parameters: {
-                    operation: {
-                      action: 'DELIVER',
-                      bookingRef: request.bookingRef,
-                      workEventFingerprint: paid.workEventFingerprint,
-                      paymentEventFingerprint: event.fingerprint,
-                    },
-                  },
+          throw restore;
+        }
+        if (failure !== undefined) throw failure;
+        const state = facts.pagedReplay.result.industryPowerState,
+          power = state
+            ? readIndustryFirstDayPowerState(state, sha)
+            : undefined,
+          capacityFacts = [
+            {
+              name: '原储能能量容量',
+              value: p.compact.power.originalEnergyCapacityMWh,
+              unit: 'MWh',
+            },
+            {
+              name: '原储能放电功率',
+              value: p.compact.power.originalStorageDischargeMW,
+              unit: 'MW',
+            },
+            {
+              name: '原电网功率',
+              value: p.compact.power.originalGridMW,
+              unit: 'MW',
+            },
+            {
+              name: '保留线路损耗比例',
+              value: p.compact.power.originalLossFraction,
+              unit: 'ratio',
+            },
+            ...(power?.physicalLedgerSnapshots.flatMap((x) => [
+              {
+                name: '当前剩余储能',
+                value:
+                  x.remainingSocMWh.numerator +
+                  '/' +
+                  x.remainingSocMWh.denominator,
+                unit: 'MWh',
+              },
+              {
+                name: '当前已预约未结算储能',
+                value:
+                  x.pendingStoredEnergyMWh.numerator +
+                  '/' +
+                  x.pendingStoredEnergyMWh.denominator,
+                unit: 'MWh',
+              },
+              {
+                name: '保留优先用途储能',
+                value:
+                  x.protectedStoredEnergyMWh.numerator +
+                  '/' +
+                  x.protectedStoredEnergyMWh.denominator,
+                unit: 'MWh',
+              },
+            ]) ?? []),
+          ],
+          rows: IndustryUtilityPlanningRow[] = [];
+        for (const run of readIndustryFirstDayWorkState(
+          facts.workState,
+        ).runs.filter(
+          (r) =>
+            r.source.countryId === input.countryId &&
+            r.source.facilityId === p.compact.facilityId,
+        )) {
+          const src = utilitySourceForRun(source, 'POWER', run.terms.runId);
+          for (const purpose of [
+            'INDUSTRY_SELF_USE',
+            'PROCESS_WATER_PUMPING_SELF_USE',
+          ] as const)
+            rows.push(
+              Object.freeze({
+                schemaVersion: 'postwar-industry-utility-planning-row-v1',
+                planningRef:
+                  'POWER_PLAN_' +
+                  sha(
+                    canonicalSerialize([
+                      world,
+                      facts.head,
+                      run.frame.command.fingerprint,
+                      purpose,
+                    ]),
+                  ).toUpperCase(),
+                countryId: src.countryId,
+                facilityId: src.facilityId,
+                locationId: src.locationId,
+                operatorId: src.operatorId,
+                runId: src.runId,
+                sourceRef: src.sourceRef,
+                sourceRawSha256: src.sourceRawSha256,
+                runStartsAtSimTime: run.terms.startsAtSimTime,
+                runEndsAtSimTime: run.terms.endsAtSimTime,
+                measurement: 'PLANNING_DATA_NOT_AUTHORITY',
+                serviceKind: 'POWER',
+                action: 'BOOK',
+                parameters: Object.freeze({
+                  purpose,
+                  quantityUnit: 'MWh',
+                  capacityFacts: Object.freeze(capacityFacts),
                 }),
+              }),
+            );
+        }
+        // Only actual folded BOOK + distinct committed service WORK/WAGE refs
+        // can produce a DELIVER planning row. No amount or result comes from UI.
+        if (power) {
+          const works = facts.completedWorks.map(readIndustryCompletedWork);
+          for (const snapshot of power.physicalLedgerSnapshots) {
+            for (const booking of snapshot.bookings) {
+              const request = booking.request;
+              if (
+                booking.status !== 'BOOKED_NOT_DELIVERED' ||
+                request.worldId !== world ||
+                request.countryId !== input.countryId ||
+                request.operatorId !== p.compact.operatorId ||
+                request.storageId !== p.compact.power.storageId ||
+                request.gridId !== p.compact.power.gridId
+              )
+                continue;
+              const run = readIndustryFirstDayWorkState(
+                facts.workState,
+              ).runs.find(
+                (r) =>
+                  r.source.countryId === input.countryId &&
+                  r.source.facilityId === p.compact.facilityId &&
+                  r.terms.runId === request.runRef,
               );
+              if (!run) continue;
+              for (const payment of power.paymentFrames) {
+                const body = JSON.parse(
+                  payment.events[0]?.canonicalPayload ?? 'null',
+                ) as unknown;
+                if (!body || typeof body !== 'object' || Array.isArray(body))
+                  continue;
+                const paid = body as Record<string, unknown>,
+                  event = payment.events[0];
+                if (
+                  paid.schemaVersion !== 'industry-operating-wage-paid-v1' ||
+                  !event ||
+                  typeof paid.workEventFingerprint !== 'string' ||
+                  power.usedPaidEventFingerprints.includes(
+                    paid.workEventFingerprint,
+                  ) ||
+                  power.usedPaidEventFingerprints.includes(event.fingerprint) ||
+                  !facts.wageState?.paidWork.includes(paid.workEventFingerprint)
+                )
+                  continue;
+                const work = works.find(
+                  (w) =>
+                    w.frame.events[0]?.fingerprint ===
+                    paid.workEventFingerprint,
+                );
+                if (
+                  !work ||
+                  work.data.countryId !== input.countryId ||
+                  work.data.operatorId !== p.compact.operatorId ||
+                  work.data.facilityId !== p.compact.power.storageId ||
+                  work.data.runId !== 'UTILITY_POWER_SERVICE_' + run.terms.runId
+                )
+                  continue;
+                const from = BigInt(request.fromSimTime),
+                  through = BigInt(request.throughSimTime),
+                  points = [
+                    ...new Set([
+                      from,
+                      through,
+                      ...work.data.allocations
+                        .flatMap((a) => [
+                          BigInt(a.startsAtSimTime),
+                          BigInt(a.endsAtSimTime),
+                        ])
+                        .filter((t) => t > from && t < through),
+                    ]),
+                  ];
+                if (
+                  points.some(
+                    (t) =>
+                      t < through &&
+                      !work.data.allocations.some(
+                        (a) =>
+                          BigInt(a.count) > 0n &&
+                          BigInt(a.startsAtSimTime) <= t &&
+                          BigInt(a.endsAtSimTime) > t,
+                      ),
+                  )
+                )
+                  continue;
+                const src = utilitySourceForRun(
+                  source,
+                  'POWER',
+                  run.terms.runId,
+                );
+                rows.push(
+                  Object.freeze({
+                    schemaVersion: 'postwar-industry-utility-planning-row-v1',
+                    planningRef:
+                      'POWER_DELIVER_PLAN_' +
+                      sha(
+                        canonicalSerialize([
+                          world,
+                          facts.head,
+                          request.bookingRef,
+                          event.fingerprint,
+                        ]),
+                      ).toUpperCase(),
+                    countryId: src.countryId,
+                    facilityId: src.facilityId,
+                    locationId: src.locationId,
+                    operatorId: src.operatorId,
+                    runId: src.runId,
+                    sourceRef: src.sourceRef,
+                    sourceRawSha256: src.sourceRawSha256,
+                    runStartsAtSimTime: run.terms.startsAtSimTime,
+                    runEndsAtSimTime: run.terms.endsAtSimTime,
+                    measurement: 'PLANNING_DATA_NOT_AUTHORITY',
+                    serviceKind: 'POWER',
+                    action: 'DELIVER',
+                    parameters: {
+                      operation: {
+                        action: 'DELIVER',
+                        bookingRef: request.bookingRef,
+                        workEventFingerprint: paid.workEventFingerprint,
+                        paymentEventFingerprint: event.fingerprint,
+                      },
+                    },
+                  }),
+                );
+              }
             }
           }
         }
-      }
-      return Object.freeze({
-        head: facts.head,
-        rows: Object.freeze(rows),
-        prefixFingerprint: facts.prefixFingerprint,
-        pageChainFingerprint: facts.pageChainFingerprint,
-        sourceOriginalsFingerprint: hash([
-          p.compactSha256,
-          power?.originalsFingerprint ?? null,
-        ]),
+        return Object.freeze({
+          head: facts.head,
+          rows: Object.freeze(rows),
+          prefixFingerprint: facts.prefixFingerprint,
+          pageChainFingerprint: facts.pageChainFingerprint,
+          sourceOriginalsFingerprint: hash([
+            p.compactSha256,
+            power?.originalsFingerprint ?? null,
+          ]),
+        });
       });
     },
     async close() {
-      closed = true;
-      await Promise.allSettled([...pending]);
-      await publisher?.close();
-      if (source) retirePostwarIndustryUtilitySource(source, owner);
-      source = undefined;
+      closing ??= (async () => {
+        closed = true;
+        await Promise.allSettled([...pending]);
+        const failures: unknown[] = [];
+        for (const [key, entry] of installed) {
+          try {
+            await entry.publisher?.close();
+            retirePostwarIndustryUtilitySource(entry.source, owner);
+            installed.delete(key);
+          } catch (error) {
+            failures.push(error);
+          }
+        }
+        if (failures.length)
+          throw new AggregateError(
+            failures,
+            'Utility source owner cleanup failed',
+          );
+      })();
+      return closing;
     },
   });
   runtimes.set(runtime, { live, ready });
