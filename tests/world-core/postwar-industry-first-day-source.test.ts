@@ -15,6 +15,7 @@ import {
   INDUSTRY_FIRST_DAY_PUBLISH_QUERY,
 } from '../../apps/world-worker/src/persistence/postwar-industry-first-day-source.js';
 import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
+import { preparePostwarIndustryFirstDayDomesticModelForward } from '../support/postwar-industry-first-day-domestic-model-forward.js';
 const sha = (v: string) => createHash('sha256').update(v).digest('hex');
 const read = (file: string) =>
   readFile(new URL('../../' + file, import.meta.url), 'utf8');
@@ -40,7 +41,7 @@ describe('adopted Industry opening rules are registered originals, not execution
     ).rejects.toThrow('GENUINE_POLICY');
     expect(calls).toBe(0);
   });
-  it.each(['COUNTRY_02', 'COUNTRY_10'])(
+  it.each(['COUNTRY_02', 'COUNTRY_10', 'COUNTRY_20'])(
     'publishes %s exact adopted bytes and raw site once, with actual source/head/revocation and low-role denials',
     async (countryId) => {
       const db = new PGlite();
@@ -249,6 +250,125 @@ grant select on world_v2.command_submission,world_v2.command_receipt,world_v2.fi
           head: { worldVersion: '0', eventSequence: '0' },
           expectedPins: { seedId, seedFingerprint, admissionRef },
         };
+        if (countryId === 'COUNTRY_20') {
+          // Reproduce the exact already-installed Power publisher, not a test
+          // copy of its predicate. The historical 5+2 artifact stays unchanged.
+          const legacy = await read(
+            'database/upgrades/postwar-industry-first-day-refinery-upgrade.sql',
+          );
+          const statement = legacy.match(
+            /create or replace function world_v2\.publish_postwar_industry_first_day_source\([\s\S]*?\$\$;/u,
+          )?.[0];
+          if (!statement) throw Error('ACTUAL_PRIOR_PUBLISHER_REQUIRED');
+          await db.exec(statement);
+          const snapshot = async () =>
+            (
+              await db.query<{
+                oid: number;
+                owner: string;
+                acl: string;
+                body_sha256: string;
+              }>(
+                "select oid,pg_get_userbyid(proowner)as owner,proacl::text as acl,encode(sha256(convert_to(prosrc,'UTF8')),'hex')as body_sha256 from pg_proc where oid='world_v2.publish_postwar_industry_first_day_source(text,text,text,text,text,text,text)'::regprocedure",
+              )
+            ).rows[0]!;
+          const prior = await snapshot();
+          const forward =
+            await preparePostwarIndustryFirstDayDomesticModelForward(
+              process.cwd(),
+            );
+          expect(prior.body_sha256).toBe(forward.oldBodySha256);
+          await expect(
+            run('world_v2_industry_source_publisher', publish),
+          ).rejects.toMatchObject({
+            code: '23514',
+            message: 'INDUSTRY_FIRST_DAY_EXACT_BOUNDED_DOMESTIC_MODEL_REQUIRED',
+          });
+          // A failure after the real function replacement must restore its body,
+          // OID/ACL and all pre-existing data, rather than partially upgrading.
+          await expect(
+            db.exec(
+              forward.sql.replace(
+                /commit;\s*$/u,
+                () =>
+                  "do $$begin raise exception 'TEST_ONLY_AFTER_REAL_REPLACEMENT';end;$$;commit;",
+              ),
+            ),
+          ).rejects.toThrow('TEST_ONLY_AFTER_REAL_REPLACEMENT');
+          await db.exec('rollback');
+          expect(await snapshot()).toEqual(prior);
+          await db.exec(forward.sql);
+          expect(await snapshot()).toEqual({
+            ...prior,
+            body_sha256: forward.newBodySha256,
+          });
+          await expect(db.exec(forward.sql)).rejects.toMatchObject({
+            code: '55000',
+          });
+          await db.exec('rollback');
+          expect(
+            (
+              await db.query<{ n: number }>(
+                'select count(*)::int as n from world_v2.postwar_industry_first_day_source',
+              )
+            ).rows[0]?.n,
+          ).toBe(0);
+          // Negative or non-numeric distance remains invalid even in a tiny
+          // TEST_ONLY installation whose metadata permits these test raw bytes.
+          const routes = JSON.parse(
+            datasets['data/domestic-access.json']!,
+          ) as Record<string, unknown>[];
+          const manifest = JSON.parse(
+            context.sourceBytes.checksumsBytes,
+          ) as Record<string, unknown>[];
+          const policyRawBytes = await read(
+            'config/postwar-genesis/industry-first-day.v1.json',
+          );
+          const adoptionRawBytes = await read(
+            'docs/governance/owner-inputs/2026-11-01/INDUSTRY_FIRST_DAY_USER_ADOPTION.original.json',
+          );
+          for (const distance of [-1, null, '0']) {
+            const rawRoutes = JSON.stringify(
+              routes.map((r) =>
+                r.fromId === selected.facilityId
+                  ? { ...r, distanceKmEstimate: distance }
+                  : r,
+              ),
+            );
+            const checksums = JSON.stringify(
+              manifest.map((r) =>
+                r.path === 'data/domestic-access.json'
+                  ? { ...r, sha256: sha(rawRoutes) }
+                  : r,
+              ),
+            );
+            await db.query(
+              'update world_v2.postwar_industry_original set checksums_sha256=$1 where world_id=$2',
+              [sha(checksums), world],
+            );
+            await expect(
+              run('world_v2_industry_source_publisher', () =>
+                tx.query(INDUSTRY_FIRST_DAY_PUBLISH_QUERY, [
+                  world,
+                  countryId,
+                  selected.facilityId,
+                  policyRawBytes,
+                  adoptionRawBytes,
+                  checksums,
+                  rawRoutes,
+                ]),
+              ),
+            ).rejects.toMatchObject({
+              code: '23514',
+              message:
+                'INDUSTRY_FIRST_DAY_EXACT_BOUNDED_DOMESTIC_MODEL_REQUIRED',
+            });
+          }
+          await db.query(
+            'update world_v2.postwar_industry_original set checksums_sha256=$1 where world_id=$2',
+            [sha(context.sourceBytes.checksumsBytes), world],
+          );
+        }
         expect(
           await run('world_v2_industry_source_reader', () =>
             readPostwarIndustryFirstDaySourceFrom(tx, scope),

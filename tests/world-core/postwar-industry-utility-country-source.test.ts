@@ -85,7 +85,7 @@ describe('country-scoped actual refinery utility originals', () => {
       }),
     ).toThrow('EXACT_COUNTRY_FACILITY');
   });
-  it('publishes two actual different sites, denies substitution/roles/head, preserves history after revoke and rereads persistence', async () => {
+  it('publishes all 21 actual sites through first-day, utility and POWER sources, retaining isolation and revocation', async () => {
     const db = new PGlite();
     try {
       await db.exec(`create schema world_v2;
@@ -140,35 +140,33 @@ grant update(registration_ref)on world_v2.postwar_industry_original to world_v2_
         ) as Record<string, unknown>[];
       // Actual original staffing quantities, but TEST_ONLY person ranges; no
       // official E03/current-employment or performed-service claim is made.
-      const sourcePositions = coverage.sites
-        .filter((s) => ['COUNTRY_02', 'COUNTRY_10'].includes(s.countryId))
-        .flatMap((site) => {
-          const storage = rawFacilities.find(
-              (f) =>
-                f.countryId === site.sourceFacility.countryId &&
-                f.projectId === 'PROJECT-13' &&
-                f.constructionStatusProposal === 'OPENING_EXISTING_ASSET',
-            )!,
-            skills = storage.labourBySkill as Record<string, string>;
-          return ['LOW', 'MEDIUM', 'HIGH'].map((skill) => ({
-            positionId:
-              'POSTWAR_SOURCE_' +
-              sha(String(storage.id) + '/' + skill).toUpperCase(),
-            countryId: site.countryId,
-            locationId: site.locationId,
-            employerId: site.operatorId,
-            employerRole: 'OP',
-            sourceBucket: 'POWER',
-            sourceObjectId: String(storage.id),
-            skill,
-            filledCount: skills[skill.toLowerCase()]!,
-            personRange: {
-              poolId: 'TEST_ONLY_POOL_' + site.countryId + '_' + skill,
-              startOrdinal: '0',
-              count: skills[skill.toLowerCase()]!,
-            },
-          }));
-        });
+      const sourcePositions = coverage.sites.flatMap((site) => {
+        const storage = rawFacilities.find(
+            (f) =>
+              f.countryId === site.sourceFacility.countryId &&
+              f.projectId === 'PROJECT-13' &&
+              f.constructionStatusProposal === 'OPENING_EXISTING_ASSET',
+          )!,
+          skills = storage.labourBySkill as Record<string, string>;
+        return ['LOW', 'MEDIUM', 'HIGH'].map((skill) => ({
+          positionId:
+            'POSTWAR_SOURCE_' +
+            sha(String(storage.id) + '/' + skill).toUpperCase(),
+          countryId: site.countryId,
+          locationId: site.locationId,
+          employerId: site.operatorId,
+          employerRole: 'OP',
+          sourceBucket: 'POWER',
+          sourceObjectId: String(storage.id),
+          skill,
+          filledCount: skills[skill.toLowerCase()]!,
+          personRange: {
+            poolId: 'TEST_ONLY_POOL_' + site.countryId + '_' + skill,
+            startOrdinal: '0',
+            count: skills[skill.toLowerCase()]!,
+          },
+        }));
+      });
       const journal = await read(
           'database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql',
         ),
@@ -262,10 +260,9 @@ grant update(registration_ref)on world_v2.postwar_industry_original to world_v2_
             admissionRef,
           },
         }),
-        selected = data.sites.filter((x) =>
-          ['COUNTRY_02', 'COUNTRY_10'].includes(x.compact.countryId),
-        ),
+        selected = data.sites,
         rawdata = context.sourceBytes.datasets;
+      expect(selected).toHaveLength(21);
       const facilities = JSON.parse(
           rawdata['data/facilities.json']!,
           (_k: string, v: unknown, c?: { source?: string }) =>
@@ -323,6 +320,25 @@ grant update(registration_ref)on world_v2.postwar_industry_original to world_v2_
           ),
         );
       }
+      expect(
+        (
+          await db.query<{ n: number }>(
+            'select count(*)::int as n from world_v2.postwar_industry_first_day_source',
+          )
+        ).rows[0]?.n,
+      ).toBe(21);
+      const zeroDistance = (
+        await db.query<{ source_text: string }>(
+          "select source_text from world_v2.postwar_industry_first_day_source where country_id='COUNTRY_20'",
+        )
+      ).rows[0]!;
+      const zeroData = JSON.parse(zeroDistance.source_text);
+      expect(zeroData.domesticAccess.distanceKmEstimate).toBe(0);
+      expect(zeroData.execution).toMatchObject({
+        paymentBatchIds: null,
+        logisticsDelivered: null,
+        outputProduced: null,
+      });
       const pub = (
         d: (typeof selected)[number],
         override: unknown = d.compact,
@@ -352,6 +368,13 @@ grant update(registration_ref)on world_v2.postwar_industry_original to world_v2_
         expect(r.rows[0]!.source_text).toBe(C.canonicalSerialize(d.compact));
         expect(r.rows[0]!.source_sha256).toBe(sha(r.rows[0]!.source_text));
       }
+      expect(
+        (
+          await db.query<{ n: number }>(
+            'select count(*)::int as n from world_v2.postwar_industry_utility_source',
+          )
+        ).rows[0]?.n,
+      ).toBe(21);
       const a = selected[0]!,
         b = selected[1]!;
       expect(a.compact.power.originalOpeningSocMWh).not.toBe(
