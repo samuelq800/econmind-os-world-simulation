@@ -269,6 +269,15 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
         sha256Hex: sha,
         originals: {
           fxOriginals: originals.fxOriginals,
+          ...(originals.industryLogisticsSources === undefined
+            ? {}
+            : { industryLogisticsSources: originals.industryLogisticsSources }),
+          ...(originals.industryPowerOriginals === undefined
+            ? {}
+            : { industryPowerOriginals: originals.industryPowerOriginals }),
+          ...(originals.industryWaterOriginals === undefined
+            ? {}
+            : { industryWaterOriginals: originals.industryWaterOriginals }),
           ...(originals.industryWorkSources === undefined
             ? {}
             : { industryWorkSources: originals.industryWorkSources }),

@@ -1,3 +1,5 @@
+import { readPostwarIndustryLogisticsPageOriginalsFrom } from './postwar-industry-logistics-source.js';
+import { readPostwarIndustryUtilityPageOriginalsFrom } from './postwar-industry-utility-source.js';
 /** Reconstruct actual effects using a private live H0 DATA preparation and
  * immutable registered historical quotes. Current source/authority/lease/head
  * locks belong to the caller's fixed transaction and are never cached here. */
@@ -98,6 +100,9 @@ export interface PreparedPostwarFinanceSocialFxReplayRequest {
   }>;
 }
 export interface PreparedPostwarFinanceSocialFxPageOriginals {
+  readonly industryLogisticsSources?: readonly import('@econmind/core/industry-internal-logistics-execution').IndustryInternalLogisticsReplaySources[];
+  readonly industryPowerOriginals?: readonly import('@econmind/core/industry-first-day-power-execution').IndustryFirstDayPowerOriginal[];
+  readonly industryWaterOriginals?: readonly import('@econmind/core/industry-first-day-water-execution').IndustryFirstDayWaterReplayOriginal[];
   readonly industryWorkSources?: NonNullable<
     Parameters<
       typeof replayPreparedFinanceSocialFxLedger
@@ -345,6 +350,27 @@ export async function readPreparedPostwarFinanceSocialFxPageOriginalsFrom(
         }));
   const beneficialHousingRentReceipts =
     readPostwarBeneficialHousingRentMixedOriginalsForSocialBase(input.baseline);
+  const logistics = await readPostwarIndustryLogisticsPageOriginalsFrom(
+    input.executor,
+    {
+      baseline: input.baseline,
+      worldId: input.worldId,
+      hostCountryId: input.hostCountryId,
+      officeId: input.officeId,
+      expectedHead: input.expectedHead,
+      frames: input.frames,
+    },
+  );
+  const utilities = await readPostwarIndustryUtilityPageOriginalsFrom(
+    input.executor,
+    {
+      baseline: input.baseline,
+      worldId: input.worldId,
+      officeId: input.officeId,
+      expectedHead: input.expectedHead,
+      frames: input.frames,
+    },
+  );
   const industry = await readPostwarIndustryRunPageOriginalsFrom(
     input.executor,
     {
@@ -385,6 +411,15 @@ export async function readPreparedPostwarFinanceSocialFxPageOriginalsFrom(
   }
   return Object.freeze({
     fxOriginals: originals,
+    ...(logistics.industryLogisticsSources.length
+      ? { industryLogisticsSources: logistics.industryLogisticsSources }
+      : {}),
+    ...(utilities.industryPowerOriginals.length
+      ? { industryPowerOriginals: utilities.industryPowerOriginals }
+      : {}),
+    ...(utilities.industryWaterOriginals.length
+      ? { industryWaterOriginals: utilities.industryWaterOriginals }
+      : {}),
     ...(industry.industryWorkSources.length === 0
       ? {}
       : { industryWorkSources: industry.industryWorkSources }),
@@ -426,6 +461,15 @@ export async function replayPreparedPostwarFinanceSocialFxFrom(
         b.funding,
       ),
       fxOriginals: facts.fxOriginals,
+      ...(facts.industryLogisticsSources === undefined
+        ? {}
+        : { industryLogisticsSources: facts.industryLogisticsSources }),
+      ...(facts.industryPowerOriginals === undefined
+        ? {}
+        : { industryPowerOriginals: facts.industryPowerOriginals }),
+      ...(facts.industryWaterOriginals === undefined
+        ? {}
+        : { industryWaterOriginals: facts.industryWaterOriginals }),
       ...(facts.industryWorkSources === undefined
         ? {}
         : { industryWorkSources: facts.industryWorkSources }),
