@@ -987,8 +987,8 @@ export function createPostwarOfficeRuntimeReadService(
                   throw Error('SOCIAL_POOL_ID_REQUIRED');
                 return pool.poolId;
               });
-              // The page connection is released before the worker borrows its
-              // source transaction, including for valid single-connection pools.
+              // Release the page read connection before the independent worker
+              // transaction; fresh authorization is checked below afterward.
               options = await socialServiceCreationPlanningReader.read({
                 countryId: body.authority.identity.countryId,
                 expectedHead: {
