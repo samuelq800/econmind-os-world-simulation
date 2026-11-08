@@ -20,11 +20,19 @@ import {
 } from '../support/postwar-registered-final-driver.js';
 import { prepareRegisteredFinalNativeSqlPlan } from '../../tools/office-connection/registered-final-native-sql.mjs';
 import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
+import {
+  restoreRegisteredUtilityCheckpoint,
+  type RegisteredUtilityResources,
+  type RegisteredUtilitySetup,
+} from '../support/registered-utility-checkpoint-restore.js';
 
 const gate = process.env.ECONMIND_REGISTERED_UTILITY_NATIVE;
 if (gate !== undefined && gate !== '1')
   throw Error('REGISTERED_UTILITY_NATIVE_FLAG_MUST_BE_1');
 const native = gate === '1' ? describe : describe.skip;
+const restoreFlag = process.env.ECONMIND_REGISTERED_UTILITY_RESTORE;
+if (restoreFlag !== undefined && restoreFlag !== '1')
+  throw Error('REGISTERED_UTILITY_RESTORE_FLAG_MUST_BE_1');
 const repositoryRoot = path.resolve(import.meta.dirname, '../..');
 const exec = promisify(execFile);
 
@@ -62,19 +70,18 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
         'PRODUCTION',
       ],
       WorldClockStarted: false,
+      initializationMode:
+        restoreFlag === '1'
+          ? 'RESTORED_OWNED_H0_NO_SOURCE_REPUBLICATION'
+          : 'NEW_ISOLATED_CHILD_INITIALIZATION',
     };
     const save = () =>
       writeFile(
         path.join(evidenceDirectory, 'utility-native-report.json'),
         JSON.stringify(report, null, 2) + '\n',
       );
-    let fixture:
-      | Awaited<
-          ReturnType<typeof createPostwarBeneficialRentChildNativeFixture>
-        >
-      | undefined;
-    let setup:
-      Awaited<ReturnType<typeof createRegisteredFinalNodeSetup>> | undefined;
+    let fixture: RegisteredUtilityResources | undefined;
+    let setup: RegisteredUtilitySetup | undefined;
     let driver: ReturnType<typeof createRegisteredFinalDriver> | undefined;
     let primaryFailure: unknown;
     const cleanupErrors: string[] = [];
@@ -121,27 +128,54 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
     try {
       await save();
       const initialization = performance.now();
-      await phase('FIXTURE_SOURCE_PROOF_AND_NEW_OWNED_DATABASE', 'START');
-      fixture = await createPostwarBeneficialRentChildNativeFixture({
-        repositoryRoot,
-        evidenceDirectory: path.join(evidenceDirectory, 'pg'),
-        artifactDirectory:
-          '/workspace/.cloud-setup/evidence/beneficial-rent-candidate-20261101',
-        retainOwnedCheckpointOnCleanup: true,
-      });
-      await phase('FIXTURE_SOURCE_PROOF_AND_NEW_OWNED_DATABASE', 'END', {
-        head: 'H0',
-        sourceProofOrdinal: 1,
-      });
+      if (restoreFlag === '1') {
+        await phase(
+          'RESTORE_OWNED_H0_CHECKPOINT_NO_INITIALIZATION_PROOF',
+          'START',
+        );
+        const restored = await restoreRegisteredUtilityCheckpoint({
+          repositoryRoot,
+          evidenceDirectory,
+          sqlPlan,
+        });
+        fixture = restored.fixture;
+        setup = restored.setup;
+        await phase(
+          'RESTORE_OWNED_H0_CHECKPOINT_NO_INITIALIZATION_PROOF',
+          'END',
+          { head: 'H0', sourceProofsIssued: 0, sourceRowsReissued: 0 },
+        );
+      } else {
+        await phase('FIXTURE_SOURCE_PROOF_AND_NEW_OWNED_DATABASE', 'START');
+        const initializedFixture =
+          await createPostwarBeneficialRentChildNativeFixture({
+            repositoryRoot,
+            evidenceDirectory: path.join(evidenceDirectory, 'pg'),
+            artifactDirectory:
+              '/workspace/.cloud-setup/evidence/beneficial-rent-candidate-20261101',
+            retainOwnedCheckpointOnCleanup: true,
+          });
+        fixture = initializedFixture;
+        await phase('FIXTURE_SOURCE_PROOF_AND_NEW_OWNED_DATABASE', 'END', {
+          head: 'H0',
+          sourceProofOrdinal: 1,
+        });
+        report.initializationMs = performance.now() - initialization;
+        report.seedFingerprint = fixture.marker.seedFingerprint;
+        await phase('FIXED_SOURCE_PUBLICATION_AND_REGISTERED_SETUP', 'START');
+        setup = await createRegisteredFinalNodeSetup({
+          fixture: initializedFixture,
+          repositoryRoot,
+          sqlPlan,
+        });
+        await phase('FIXED_SOURCE_PUBLICATION_AND_REGISTERED_SETUP', 'END');
+      }
+      must(
+        fixture && setup,
+        'ACTUAL_OWNED_FIXTURE_AND_REGISTERED_SETUP_REQUIRED',
+      );
       report.initializationMs = performance.now() - initialization;
       report.seedFingerprint = fixture.marker.seedFingerprint;
-      await phase('FIXED_SOURCE_PUBLICATION_AND_REGISTERED_SETUP', 'START');
-      setup = await createRegisteredFinalNodeSetup({
-        fixture,
-        repositoryRoot,
-        sqlPlan,
-      });
-      await phase('FIXED_SOURCE_PUBLICATION_AND_REGISTERED_SETUP', 'END');
       const f = fixture,
         s = setup;
       driver = createRegisteredFinalDriver({
@@ -166,7 +200,7 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
       const first = await d.launch(s.descriptor);
       await phase('NODE_1_COLD_PROOF', 'END', {
         childPid: first.pid,
-        sourceProofOrdinal: 2,
+        sourceProofOrdinal: restoreFlag === '1' ? 1 : 2,
       });
       await d.start();
       const terms = deriveRegisteredFinalIndustryRunPlan(
@@ -311,7 +345,7 @@ native('actual registered C2 RUN POWER BOOK WATER GRANT', () => {
       const second = await d.launch(descriptor);
       await phase('NODE_2_COLD_PROOF_SAME_DATABASE', 'END', {
         childPid: second.pid,
-        sourceProofOrdinal: 3,
+        sourceProofOrdinal: restoreFlag === '1' ? 2 : 3,
       });
       must(first.pid !== second.pid, 'DISTINCT_COLD_OS_PID_REQUIRED');
       report.coldStarts = [first, second];
