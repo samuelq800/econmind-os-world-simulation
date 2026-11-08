@@ -412,18 +412,18 @@ export function bindPostwarIndustryLogisticsSourceConfiguration(
       INDUSTRY_INTERNAL_LOGISTICS_ADOPTION_RAW_SHA256
   )
     fail('EXACT_PRIVATE_STARTUP_CONFIGURATION_REQUIRED');
-  const old = installed.get(baseline);
+  const old = installed.get(b.prepared);
   if (
     old &&
     (old.context !== config.context || old.policyBytes !== config.policyBytes)
   )
     fail('LOGISTICS_BASE_ALREADY_CONFIGURED');
-  installed.set(baseline, Object.freeze(config));
+  installed.set(b.prepared, Object.freeze(config));
 }
 export function retirePostwarIndustryLogisticsSourceConfiguration(
   baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>,
 ): void {
-  installed.delete(baseline);
+  installed.delete(baseline.prepared);
 }
 export class PostwarIndustryLogisticsSourceMissing extends Error {
   readonly code = 'INDUSTRY_LOGISTICS_SOURCE_MISSING';
@@ -447,7 +447,7 @@ export async function readPostwarIndustryLogisticsReplaySourcesFrom(
   }>,
 ) {
   const b = consumePreparedPostwarSocialFinancialReplayBase(input.baseline),
-    configuration = installed.get(input.baseline);
+    configuration = installed.get(b.prepared);
   if (!configuration)
     throw new PostwarIndustryLogisticsSourceMissing(
       'PRIVATE_STARTUP_CONFIGURATION_MISSING',
@@ -584,7 +584,7 @@ export async function readPostwarIndustryLogisticsPageOriginalsFrom(
   );
   if (!frames.length)
     return Object.freeze({ industryLogisticsSources: Object.freeze([]) });
-  const configuration = installed.get(input.baseline);
+  const configuration = installed.get(b.prepared);
   if (!configuration)
     throw new PostwarIndustryLogisticsSourceMissing(
       'HISTORICAL_LOGISTICS_CONFIGURATION_NOT_PREPARED',
