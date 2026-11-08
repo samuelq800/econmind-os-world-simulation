@@ -109,9 +109,7 @@ export interface PostwarIndustryLogisticsRuntime {
     command: CanonicalCommand,
     observedAtReal: string,
   ): Promise<void>;
-  readPlanningScope(
-    countryId: string,
-  ): Readonly<{
+  readPlanningScope(countryId: string): Readonly<{
     worldId: string;
     countryId: string;
     facilityId: string;

@@ -1,6 +1,9 @@
 /** Pure finite first-day planning. This module issues no source authority,
  * completed WORK, paid expense, custody change or authoritative receipt. */
-import { readPreparedFinanceSocialOpening, type PreparedFinanceSocialLedger } from '../commands/finance-social-prepared-ledger.js';
+import {
+  readPreparedFinanceSocialOpening,
+  type PreparedFinanceSocialLedger,
+} from '../commands/finance-social-prepared-ledger.js';
 import type { Sha256Hex } from '../commands/command.js';
 import { canonicalSerialize } from '../serialization/canonical.js';
 import {
@@ -177,32 +180,57 @@ interface LogisticsSourceOriginalInput {
   readonly sha256Hex: Sha256Hex;
 }
 /** Legacy full genuine seed entrance remains strict and byte-compatible. */
-export function prepareIndustryInternalLogisticsSource(input: LogisticsSourceOriginalInput & {
-  readonly seed: OpeningSeed;
-  readonly openingInventoryEntryId: string;
-}): Readonly<IndustryInternalLogisticsSource> {
-  if (!isValidatedOpeningSeed(input.seed)) invalid('GENUINE_OPENING_SEED_REQUIRED');
+export function prepareIndustryInternalLogisticsSource(
+  input: LogisticsSourceOriginalInput & {
+    readonly seed: OpeningSeed;
+    readonly openingInventoryEntryId: string;
+  },
+): Readonly<IndustryInternalLogisticsSource> {
+  if (!isValidatedOpeningSeed(input.seed))
+    invalid('GENUINE_OPENING_SEED_REQUIRED');
   return deriveSource(input, {
-    worldId: input.seed.worldId, seedId: input.seed.seedId, fingerprint: input.seed.fingerprint,
-    entry: input.seed.inventoryEntries.find(e=>e.entryId===input.openingInventoryEntryId),
+    worldId: input.seed.worldId,
+    seedId: input.seed.seedId,
+    fingerprint: input.seed.fingerprint,
+    entry: input.seed.inventoryEntries.find(
+      (e) => e.entryId === input.openingInventoryEntryId,
+    ),
   });
 }
 /** The same raw originals against the private genuine paired H0 ledger. No
  * caller snapshot/boolean, full-seed retention or online raw SQL is needed. */
-export function prepareIndustryInternalLogisticsSourceFromPreparedOpening(input: LogisticsSourceOriginalInput & {
-  readonly prepared: PreparedFinanceSocialLedger;
-  readonly openingInventoryAccountSha256: string;
-}): Readonly<IndustryInternalLogisticsSource> {
-  const opening=readPreparedFinanceSocialOpening(input.prepared);
-  const matches=opening.inventory.balances.filter(b=>input.sha256Hex(canonicalSerialize(b.account))===input.openingInventoryAccountSha256);
-  if(matches.length!==1)invalid('EXACT_GENUINE_OPENING_STOCK_ACCOUNT_REQUIRED');
-  return deriveSource(input, {worldId:opening.inventory.worldId,seedId:opening.seedId,
-    fingerprint:opening.seedFingerprint,entry:matches[0]});
+export function prepareIndustryInternalLogisticsSourceFromPreparedOpening(
+  input: LogisticsSourceOriginalInput & {
+    readonly prepared: PreparedFinanceSocialLedger;
+    readonly openingInventoryAccountSha256: string;
+  },
+): Readonly<IndustryInternalLogisticsSource> {
+  const opening = readPreparedFinanceSocialOpening(input.prepared);
+  const matches = opening.inventory.balances.filter(
+    (b) =>
+      input.sha256Hex(canonicalSerialize(b.account)) ===
+      input.openingInventoryAccountSha256,
+  );
+  if (matches.length !== 1)
+    invalid('EXACT_GENUINE_OPENING_STOCK_ACCOUNT_REQUIRED');
+  return deriveSource(input, {
+    worldId: opening.inventory.worldId,
+    seedId: opening.seedId,
+    fingerprint: opening.seedFingerprint,
+    entry: matches[0],
+  });
 }
-function deriveSource(input: LogisticsSourceOriginalInput, seed: Readonly<{
-  worldId:string;seedId:string;fingerprint:string;
-  entry: Pick<OpeningSeed['inventoryEntries'][number],'account'|'quantity'>|undefined;
-}>): Readonly<IndustryInternalLogisticsSource> {
+function deriveSource(
+  input: LogisticsSourceOriginalInput,
+  seed: Readonly<{
+    worldId: string;
+    seedId: string;
+    fingerprint: string;
+    entry:
+      | Pick<OpeningSeed['inventoryEntries'][number], 'account' | 'quantity'>
+      | undefined;
+  }>,
+): Readonly<IndustryInternalLogisticsSource> {
   if (
     input.sha256Hex(input.policyRawBytes) !==
     INDUSTRY_INTERNAL_LOGISTICS_POLICY_RAW_SHA256
@@ -303,7 +331,8 @@ function deriveSource(input: LogisticsSourceOriginalInput, seed: Readonly<{
     stock.unit !== commodity.unit
   )
     invalid('EXACT_DOMESTIC_SOURCE_AND_SAME_OP_REQUIRED');
-  const entry = seed.entry, a = entry?.account;
+  const entry = seed.entry,
+    a = entry?.account;
   if (
     !a ||
     a.countryId !== site.countryRef ||
