@@ -39,6 +39,37 @@ encumbrances still reduce current Treasury capacity. This first contract creates
 one immutable department/period slot; it does not implement cap amendment,
 period rollover/release, strategic classification or a national budget workflow.
 
+## Coexistence with recorded FULL history
+
+The `FULL_UNCONDITIONAL` name describes the legacy funding rule; it does not by
+itself say that an envelope equals the entire TGA. The actual recorded cap amount
+is what counts. At the complete observed head, existing Core computes:
+
+`free = current actual TGA balance - all existing same-country/GOV/currency caps - protected encumbrances`.
+
+If an old Finance envelope already equals the full current TGA balance and no
+other capacity has become available, free capacity is zero (or negative with
+additional protected reservations). Every positive department cap is refused by
+`INSUFFICIENT_UNENCUMBERED_FISCAL_CAPACITY` or
+`EXISTING_ENCUMBRANCE_EXCEEDS_CURRENT_TREASURY`. For example, TGA 1000 and an
+existing Finance cap 1000 leave no room for a new department cap. A smaller old
+cap, or a genuinely increased current TGA balance, may leave a positive residual;
+that permits at most the residual, not reuse of the capacity already allocated.
+
+SET_ENVELOPE only appends a new immutable slot. It does not lower, replace or
+split the old Finance envelope. The aggregate does not drop old caps merely
+because another period/reference/revision is used, or because wall-clock time
+has passed. Thus this proposal **does not distribute an already fully allocated
+Finance budget to other departments in an existing World**. That requires a
+separately approved and implemented budget reallocation or ceiling-release
+transition, preserving all existing obligations and history. None is added here;
+no cash, envelope or opening balance is reset.
+
+A new scenario where the old envelope was never executed is a different case:
+there is no old Finance cap to subtract, but actual opening reservations, genuine
+current TGA, source adoption and the unresolved governance/current gates still
+apply. A new scenario is not an excuse to erase an existing World's FULL history.
+
 ## What is not connected or verified
 
 No SQL, source publisher, role, grant, UI form, API selector or current publisher
