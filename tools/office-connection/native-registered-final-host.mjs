@@ -246,6 +246,17 @@ async function initialize(d) {
   matchPublicationDatabase = new Finance.PostgresSqlDatabase(
     pool(d.matchPublicationRole),
   );
+  if (d.prepareRefinery21Sources !== undefined) {
+    const { requireRefinery21PreparationOptIn } =
+      await import('./registered-refinery21-source-preparation.mjs');
+    requireRefinery21PreparationOptIn({
+      enabled: d.prepareRefinery21Sources,
+      repositoryRoot: d.repositoryRoot,
+      industryInstalled: d.install?.industry === true,
+      utilitiesInstalled: d.install?.industryUtilities === true,
+      countries: d.countries,
+    });
+  }
   const industryContext =
     d.install?.industry === true
       ? await (
@@ -256,6 +267,21 @@ async function initialize(d) {
           )
         ).loadPostwarIndustryRuntimeSourceContext(d.repositoryRoot)
       : undefined;
+  if (d.prepareRefinery21Sources === true) {
+    // Validate the finite configured host scope before the expensive proof.
+    const { readPostwarIndustryRefineryCoverage } =
+      await import('../../apps/world-worker/dist/persistence/postwar-industry-refinery-sites.js');
+    const coverage = readPostwarIndustryRefineryCoverage(industryContext);
+    if (
+      coverage.sites.length !== 21 ||
+      coverage.notApplicableCountries.length !== 49 ||
+      coverage.sites.some(
+        (site) =>
+          !d.countries.some((country) => country.countryId === site.countryId),
+      )
+    )
+      throw Error('REFINERY21_ACTUAL_HOST_COUNTRY_CONFIGURATION_REQUIRED');
+  }
   const openingAdoption =
     industryContext?.labourSocial ??
     (await Social.loadPostwarSocialConnectionOpeningAdoption(d.repositoryRoot));
@@ -360,6 +386,30 @@ async function initialize(d) {
       ? 'GENUINE_COMPONENT_CONFIGURED_COMMANDS_NOT_YET_EXECUTED'
       : 'NOT_CONFIGURED_NOT_EXECUTED',
   };
+  // Explicit isolated preparation, before any formal Node/API is constructed.
+  // Reuses the loader's one live proof and the exact Worker/dist module graph.
+  if (d.prepareRefinery21Sources === true) {
+    const { prepareRegisteredRefinery21Sources } =
+      await import('./registered-refinery21-source-preparation.mjs');
+    sourceEvidence.refinery21Preparation =
+      await prepareRegisteredRefinery21Sources({
+        enabled: true,
+        repositoryRoot: d.repositoryRoot,
+        industryInstalled: d.install?.industry === true,
+        utilitiesInstalled: d.install?.industryUtilities === true,
+        countries: d.countries,
+        sourceContext: industryContext,
+        socialConnection: social,
+        publicationDatabase: industryPublisherBase,
+        configuration: {
+          observedAtReal: new Date().toISOString(),
+          admittedWorldPins: d.configuration.admittedWorldPins,
+          modelVersion: d.configuration.modelVersion,
+          startupSeed: seed,
+          startupBeneficialHousingRentSource: rentSource,
+        },
+      });
+  }
   proofExposed = true;
   binding = Shared.createProductionPostwarFinanceSocialRuntimeConnection({
     binding: server,

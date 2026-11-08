@@ -8,6 +8,7 @@ import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/pos
 import type { PostwarPhysicalSourceContext } from '../../apps/world-worker/src/preparation/postwar-physical-service-receipt.js';
 import type { PostwarNativeReferenceMarker } from './postwar-native-reference-db.js';
 import { createPostwarRefinery21AssemblyCheck } from './postwar-refinery21-source-assembly.js';
+import { loadPostwarSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
 
 type ExistingClone = Readonly<{ database: string; installer: Pool }>;
 const economicTables = [
@@ -107,4 +108,60 @@ export async function inspectPostwarRefinery21RetainedClone(
   } finally {
     await worker.end();
   }
+}
+
+/** Parent-only, before starting the sole cold Node. Preserves existing C1/C2
+ * selectors and every other descriptor field; derives the finite union from
+ * actual adopted refineries and each same-admission registered capacity SHA.
+ * No seed/Rent proof reconstruction or source publication occurs here. */
+export async function preparePostwarRefinery21RetainedHostDescriptor<
+  T extends Readonly<{
+    repositoryRoot: string;
+    worldId: string;
+    seedId: string;
+    seedFingerprint: string;
+    admissionRef: string;
+    database: string;
+    countries: readonly Readonly<{
+      countryId: string;
+      expectedRawSourceSHA256: string;
+    }>[];
+  }>,
+>(
+  input: Readonly<{
+    marker: PostwarNativeReferenceMarker;
+    clone: ExistingClone;
+    descriptor: T;
+  }>,
+) {
+  assert.equal(process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE, '1');
+  const d = input.descriptor;
+  for (const key of [
+    'worldId',
+    'seedId',
+    'seedFingerprint',
+    'admissionRef',
+  ] as const)
+    assert.equal(d[key], input.marker[key]);
+  assert.equal(d.database, input.clone.database);
+  const sourceContext = await loadPostwarSourceContext(d.repositoryRoot);
+  const checker = createPostwarRefinery21AssemblyCheck(sourceContext);
+  const metadata = await checker.configureTestOnlyInspectionActors({
+    marker: input.marker,
+    clone: input.clone,
+    existingHostCountries: d.countries,
+  });
+  return Object.freeze({
+    classification:
+      'TEST_ONLY_FINITE_HOST_DESCRIPTOR_AND_AUTH_METADATA_NOT_SOURCE_PUBLICATION' as const,
+    descriptor: Object.freeze({
+      ...d,
+      countries: metadata.countries,
+      prepareRefinery21Sources: true as const,
+    }),
+    inspectionActors: metadata.actors,
+    childEnvironment: Object.freeze({
+      ECONMIND_REGISTERED_REFINERY21_SOURCE_PREPARATION: '1',
+    }),
+  });
 }

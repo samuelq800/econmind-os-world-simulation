@@ -1,6 +1,6 @@
-/** Fixed source assembly and bounded post-registration inspection.
- * It borrows genuine live source preparations; it never parses a seed or starts
- * a command, consumer or Clock. Actor identities are isolated inspection data. */
+/** Bounded adopted source plan and post-registration inspection. No seed
+ * parsing, source publication, command, consumer or Clock. Actor identities
+ * are isolated inspection data; actual publication uses the same-dist host hook. */
 import { createHash, randomUUID } from 'node:crypto';
 import type { Pool } from 'pg';
 import { canonicalSerialize } from '@econmind/core';
@@ -16,20 +16,6 @@ import {
 } from '../../apps/world-worker/src/persistence/postwar-industry-first-day-source.js';
 import { INDUSTRY_UTILITY_READ_QUERY } from '../../apps/world-worker/src/persistence/postwar-industry-utility-source.js';
 import { INDUSTRY_CURRENT_AUTHORIZATION_LOCK_QUERY } from '../../apps/world-worker/src/persistence/postwar-industry-current-authorization.js';
-import {
-  loadPostwarIndustryFirstDayAdoptedPolicy,
-  registerPostwarIndustryRefineryFirstDayFrom,
-} from '../../apps/world-worker/src/persistence/postwar-industry-first-day-source.js';
-import {
-  loadPostwarIndustryUtilitySourceProposals,
-  publishPostwarIndustryUtilitySourcesFrom,
-  preparePostwarIndustryUtilitySources,
-  consumePostwarIndustryUtilitySource,
-  retireUnownedPostwarIndustryUtilitySource,
-  type PostwarIndustryUtilitySourceInput,
-} from '../../apps/world-worker/src/persistence/postwar-industry-utility-source.js';
-import { publishPostwarIndustryPowerServiceSourceFrom } from '../../apps/world-worker/src/persistence/postwar-industry-power-service-publication.js';
-import { readPostwarSocialRuntimeFinancialReplayBase } from '../../apps/world-worker/src/runtime-preparation/social-runtime-connection.js';
 import type {
   SqlDatabase,
   SqlExecutor,
@@ -142,88 +128,6 @@ export function createPostwarRefinery21AssemblyCheck(
     sites: coverage.sites.map((s) =>
       Object.freeze({ countryId: s.countryId, facilityId: s.facilityId }),
     ),
-    /** Same fixed calls as registered-final-node-setup(allExistingRefinerySources).
-     * Borrow an already genuine live preparation from the one initializer/cold
-     * proof; this method cannot create/recover it from a retained marker/DTO. */
-    async assemble(
-      input: Readonly<{
-        publicationDatabase: SqlDatabase;
-        utilityInput: PostwarIndustryUtilitySourceInput;
-      }>,
-    ) {
-      if (process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE !== '1')
-        throw Error('REFINERY21_ISOLATED_SOURCE_PUBLICATION_OPT_IN_REQUIRED');
-      const utility = input.utilityInput,
-        world = utility.socialConnection.worldId;
-      const policy = await loadPostwarIndustryFirstDayAdoptedPolicy(
-        utility.repositoryRoot,
-      );
-      const publish = <T>(run: (tx: SqlExecutor) => Promise<T>) =>
-        input.publicationDatabase.transaction(async (tx) => {
-          await tx.query('set transaction isolation level repeatable read');
-          await tx.query('set local role world_v2_industry_source_publisher');
-          return run(tx);
-        });
-      const proposals =
-        await loadPostwarIndustryUtilitySourceProposals(utility);
-      if (proposals.length !== coverage.sites.length)
-        throw Error('REFINERY21_EXACT_UTILITY_PROPOSALS_REQUIRED');
-      const registered = [];
-      for (const site of coverage.sites)
-        registered.push(
-          await publish((tx) =>
-            registerPostwarIndustryRefineryFirstDayFrom(tx, {
-              worldId: world,
-              countryId: site.countryId,
-              facilityId: site.facilityId,
-              adoptedPolicy: policy,
-              sourceContext,
-            }),
-          ),
-        );
-      for (const proposal of proposals)
-        await publish((tx) =>
-          publishPostwarIndustryUtilitySourcesFrom(tx, { proposal }),
-        );
-      const prepared = await preparePostwarIndustryUtilitySources(utility);
-      const powerSources = [];
-      try {
-        const expected = coverage.sites
-          .map((s) => s.countryId + '/' + s.facilityId)
-          .sort();
-        const actual = prepared
-          .map((p) => {
-            const c = consumePostwarIndustryUtilitySource(p).compact;
-            return c.countryId + '/' + c.facilityId;
-          })
-          .sort();
-        if (canonicalSerialize(actual) !== canonicalSerialize(expected))
-          throw Error('REFINERY21_EXACT_GENUINE_PREPARED_SITES_REQUIRED');
-        const baseline = readPostwarSocialRuntimeFinancialReplayBase(
-          utility.socialConnection,
-          world,
-        );
-        for (const preparation of prepared)
-          powerSources.push(
-            await publish((tx) =>
-              publishPostwarIndustryPowerServiceSourceFrom(tx, {
-                baseline,
-                preparation,
-              }),
-            ),
-          );
-      } finally {
-        for (const preparation of prepared)
-          retireUnownedPostwarIndustryUtilitySource(preparation);
-      }
-      return Object.freeze({
-        classification:
-          'ACTUAL_SOURCE_PUBLICATION_NOT_WORK_PAYMENT_DELIVERY_OR_PRODUCTION',
-        registered,
-        powerSources,
-        preparedSiteCount: prepared.length,
-      });
-    },
     /** Existing isolated fixture's auth/seat/entitlement mechanism, restricted
      * to these actual21 countries and one Industry capability. No roles,
      * membership, source custody, OP mandate, JWT or economic fact is created. */
@@ -231,6 +135,10 @@ export function createPostwarRefinery21AssemblyCheck(
       input: Readonly<{
         marker: Pins & { database: string; team: string };
         clone: { database: string; installer: Pool };
+        existingHostCountries?: readonly Readonly<{
+          countryId: string;
+          expectedRawSourceSHA256: string;
+        }>[];
       }>,
     ) {
       if (
@@ -241,6 +149,10 @@ export function createPostwarRefinery21AssemblyCheck(
         throw Error('REFINERY21_OWNED_TEST_ONLY_CLONE_REQUIRED');
       const client = await input.clone.installer.connect();
       const actors: Refinery21InspectionActor[] = [];
+      const countries: Readonly<{
+        countryId: string;
+        expectedRawSourceSHA256: string;
+      }>[] = [];
       try {
         await client.query('begin');
         const actual = await client.query<{
@@ -260,6 +172,59 @@ export function createPostwarRefinery21AssemblyCheck(
           actual.rows[0].admission_ref !== input.marker.admissionRef
         )
           throw Error('REFINERY21_ACTUAL_CLONE_ADMISSION_REQUIRED');
+        const existing = new Map(
+          (input.existingHostCountries ?? []).map((c) => [
+            c.countryId,
+            c.expectedRawSourceSHA256,
+          ]),
+        );
+        if (existing.size !== (input.existingHostCountries?.length ?? 0))
+          throw Error('REFINERY21_DUPLICATE_EXISTING_HOST_COUNTRY');
+        const union = [
+          ...new Set([
+            ...existing.keys(),
+            ...coverage.sites.map((s) => s.countryId),
+          ]),
+        ].sort();
+        for (const countryId of union) {
+          if (!/^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(countryId))
+            throw Error('REFINERY21_EXACT_HOST_COUNTRY_REQUIRED');
+          // Host selectors come from this same admitted published capacity
+          // original, never a reused C2 hash or a new departmental cap policy.
+          const capacity = await client.query<{ source_sha256: string }>(
+            "select source_sha256 from world_v2.finance_budget_capacity_original where world_id=$1 and country_id=$2 and seed_fingerprint=$3 and admission_ref=$4 and source_sha256=encode(sha256(convert_to(source_text,'UTF8')),'hex')",
+            [
+              input.marker.worldId,
+              countryId,
+              input.marker.seedFingerprint,
+              input.marker.admissionRef,
+            ],
+          );
+          const original = capacity.rows[0];
+          if (
+            capacity.rows.length !== 1 ||
+            !original ||
+            !/^[a-f0-9]{64}$/u.test(original.source_sha256)
+          )
+            throw Error(
+              'REFINERY21_ACTUAL_PUBLISHED_CAPACITY_SELECTOR_REQUIRED:' +
+                countryId,
+            );
+          if (
+            existing.has(countryId) &&
+            existing.get(countryId) !== original.source_sha256
+          )
+            throw Error(
+              'REFINERY21_EXISTING_HOST_SOURCE_SHA_DIFFERS:' + countryId,
+            );
+          countries.push(
+            Object.freeze({
+              countryId,
+              expectedRawSourceSHA256: original.source_sha256,
+            }),
+          );
+        }
+        // All source selectors were checked before adding test identities.
         for (const site of coverage.sites) {
           const subject = randomUUID();
           const revision =
@@ -301,6 +266,7 @@ export function createPostwarRefinery21AssemblyCheck(
           classification:
             'TEST_ONLY_WORKER_AUTHORIZATION_INSPECTION_IDENTITIES_NOT_HTTP_ACTOR_BINDINGS',
           actors: Object.freeze(actors),
+          countries: Object.freeze(countries),
         });
       } catch (error) {
         await client.query('rollback');
