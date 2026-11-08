@@ -27,6 +27,11 @@ export function prepareRegisteredRefinery21Sources(
     worldId: string;
     seedFingerprint: string;
     admissionRef: string;
+    preparationActions: readonly Readonly<{
+      type: 'FIRST_DAY' | 'UTILITY' | 'POWER';
+      countryId: string;
+      status: 'COMMITTED' | 'REUSED_VERIFIED';
+    }>[];
     originals: readonly Readonly<{
       countryId: string;
       facilityId: string;

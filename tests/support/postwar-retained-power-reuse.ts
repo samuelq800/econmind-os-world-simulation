@@ -1,6 +1,6 @@
 /** TEST_ONLY successor of the actually upgraded H3 checkpoint. The original
  * 76 receipts, inventory/labour forwards and committed 5+2 remain observations;
- * only the fixed domestic-model function forward can execute here. */
+ * the fixed domestic-model forward is already applied and is never replayed. */
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -15,16 +15,16 @@ import { readRetainedPostwarPowerCatalogFrom } from './postwar-retained-power-up
 import { readRegisteredCurrentEconomicSnapshotFrom } from './registered-current-read-repair-checkpoint.js';
 import { preparePostwarIndustryFirstDayDomesticModelForward } from './postwar-industry-first-day-domestic-model-forward.js';
 
-const directory = '/workspace/.cloud-setup/evidence/power-current-native-01';
+const directory = '/workspace/.cloud-setup/evidence/power-current-native-03';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT =
   directory + '/pg/retained-checkpoint.json';
 export const RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256 =
-  'cb8ebc85386700cd36c010a714294a087b7a1b2eef94a7b070e436bd89dd431b';
+  '2e35e77e21db62a172187d4ee144fe3951fc3c7409ee38b14f9e03e01e839a93';
 const hashes = {
-  'power-upgrade/upgrade-receipt.json':
-    'ceb664c85262c1a0b24ee1b4fc80daaf36f29887e31ebd43acfe91f1707288ca',
+  'power-reuse/reuse-receipt.json':
+    'c14954da1de6867599c27a0b6a9ccdab64d85967c7b6e6bdf818057876b59e4e',
   'independent-checkpoint-readback.json':
-    '0cc7a770e30427a27eb9e8a74182b7c3ae6edfdeb5a5a099b2d9a8f4b640425e',
+    '769b148e0a96cc7ea9d800244f3f9fe078b6680ec5e4bd7f02eca3c24050d6d3',
 } as const;
 const sha = (raw: string) => createHash('sha256').update(raw).digest('hex');
 type Catalog = Awaited<ReturnType<typeof readRetainedPostwarPowerCatalogFrom>>;
@@ -104,36 +104,38 @@ export async function reuseRetainedPostwarPowerClone(input: {
     ownershipNonce: string;
     ownedContainer: string;
     powerUpgradeReceipt: string;
+    powerReuseReceipt: string;
     isTemplate: boolean;
     allowConnections: boolean;
     head: unknown;
   };
-  const receipt = await pinned('power-upgrade/upgrade-receipt.json');
+  const receipt = await pinned('power-reuse/reuse-receipt.json');
   const readback = await pinned('independent-checkpoint-readback.json');
   assert.equal(
     receipt.status,
-    'UPGRADED_CATALOG_AND_ROWS_VERIFIED_NOT_SOURCE_READY',
+    'REUSED_POST_FORWARD_H3_READBACK_VERIFIED_NOT_SOURCE_READY',
   );
   assert.equal(
     receipt.expectedCommit,
-    '549642518b9ef2f90ccbe5e63d2b74732aec6a00',
+    '4a5850586ae1f13b6b34e38e5c6c828dc7b16fd5',
   );
   assert.equal(receipt.database, checkpoint.templateDatabase);
   assert.equal(
-    checkpoint.powerUpgradeReceipt,
-    path.join(directory, 'power-upgrade/upgrade-receipt.json'),
+    checkpoint.powerReuseReceipt,
+    path.join(directory, 'power-reuse/reuse-receipt.json'),
   );
   assert.equal(checkpoint.resourceState, 'RETAINED_STOPPED');
   assert(checkpoint.isTemplate && !checkpoint.allowConnections);
-  assert.equal(readback.status, 'READBACK_PASSED');
+  assert.equal(readback.status, 'RECONCILED_RETAINED_STOPPED');
   assert.equal(readback.economicHashesUnchanged, true);
   assert.deepEqual(checkpoint.head, {
     world_version: '3',
     event_sequence: '3',
   });
-  assert.deepEqual(
-    receipt.phases.map((p: { status: string }) => p.status),
-    Array(7).fill('DDL_COMMITTED'),
+  assert.equal(receipt.fiveUpgradesAndTwoFreshReplayed, false);
+  assert.equal(
+    receipt.singleFunctionForwardStatus,
+    'ALREADY_APPLIED_CATALOG_VERIFIED_NOT_REPLAYED',
   );
   const forward = await preparePostwarIndustryFirstDayDomesticModelForward(
     input.repositoryRoot,
@@ -152,13 +154,15 @@ export async function reuseRetainedPostwarPowerClone(input: {
   await mkdir(input.evidenceDirectory, { recursive: false });
   const report: Record<string, unknown> = {
     classification:
-      'RETAINED_UPGRADED_H3_REUSE_AND_ONE_FIXED_FUNCTION_FORWARD_NOT_WORLD_INITIALIZATION',
+      'RETAINED_POST_FORWARD_H3_CATALOG_DATA_READBACK_NO_DDL_OR_WORLD_INITIALIZATION',
     expectedCommit: input.expectedCommit,
     database: clone.database,
     parentCheckpoint: RETAINED_UPGRADED_POWER_CHECKPOINT,
     parentCheckpointSha256: RETAINED_UPGRADED_POWER_CHECKPOINT_SHA256,
     inheritedUpgradeReceipt: checkpoint.powerUpgradeReceipt,
-    inheritedUpgradeReceiptSha256: hashes['power-upgrade/upgrade-receipt.json'],
+    inheritedSingleForwardReceipt: checkpoint.powerReuseReceipt,
+    inheritedSingleForwardReceiptSha256:
+      hashes['power-reuse/reuse-receipt.json'],
     fiveUpgradesAndTwoFreshReplayed: false,
     singleFunctionForward: {
       signature: forward.signature,
@@ -190,7 +194,7 @@ export async function reuseRetainedPostwarPowerClone(input: {
     );
     const firstDaySources = (
       await client.query(
-        'select country_id,facility_id,source_ref,source_sha256,seed_fingerprint,admission_ref from world_v2.postwar_industry_first_day_source where world_id=$1 order by country_id,facility_id',
+        "select country_id,facility_id,source_ref,source_sha256,seed_fingerprint,admission_ref,(source_sha256=encode(sha256(convert_to(source_text,'UTF8')),'hex'))raw_hash_valid from world_v2.postwar_industry_first_day_source where world_id=$1 order by country_id,facility_id",
         [marker.worldId],
       )
     ).rows;
@@ -202,17 +206,12 @@ export async function reuseRetainedPostwarPowerClone(input: {
     ).rows;
     assert.deepEqual(
       firstDaySources,
-      readback.queries.find(
-        (q: { label: string }) =>
-          q.label === 'FIRST_DAY_SOURCE_COMMITTED_SCOPE',
-      ).rows,
+      readback.firstDaySources,
       'RETAINED_FIRSTDAY_ORIGINAL_SCOPE_DRIFT',
     );
     assert.deepEqual(
       utilitySources,
-      readback.queries.find(
-        (q: { label: string }) => q.label === 'UTILITY_SOURCE_COMMITTED_SCOPE',
-      ).rows,
+      readback.utilitySources,
       'RETAINED_UTILITY_ORIGINAL_SCOPE_DRIFT',
     );
     const seed = (
@@ -237,23 +236,50 @@ export async function reuseRetainedPostwarPowerClone(input: {
     };
 
     await save();
-    // This exact artifact owns its single transaction. An unknown outcome stops
-    // this clone for catalog reconciliation; it never triggers a second write.
-    await client.query(forward.sql);
-    report.singleFunctionForwardStatus = 'DDL_COMMITTED';
+    const alreadyForwarded = before.functions.filter(
+      (f) => f.signature === forward.signature,
+    );
+    assert.equal(alreadyForwarded.length, 1);
+    assert.equal(alreadyForwarded[0]!.body_sha256, forward.newBodySha256);
+    report.singleFunctionForwardStatus =
+      'ALREADY_APPLIED_CATALOG_VERIFIED_NOT_REPLAYED';
+    const revocations: Record<string, unknown> = {};
+    for (const [table, query] of [
+      [
+        'runtime_admission_publication_revocation',
+        'select count(*)::text count from world_v2.runtime_admission_publication_revocation r join world_v2.runtime_admission_publication_permit p using(authorization_id) where p.world_id=$1',
+      ],
+      [
+        'social_operating_source_revocation',
+        'select count(*)::text count from world_v2.social_operating_source_revocation r join world_v2.social_operating_source_registration s using(registration_ref) where s.world_id=$1',
+      ],
+      [
+        'postwar_industry_original_revocation',
+        'select count(*)::text count from world_v2.postwar_industry_original_revocation where world_id=$1',
+      ],
+      [
+        'postwar_industry_first_day_source_revocation',
+        'select count(*)::text count from world_v2.postwar_industry_first_day_source_revocation where world_id=$1',
+      ],
+    ] as const) {
+      const rows = (await client.query(query, [marker.worldId])).rows;
+      assert.equal(
+        rows[0]?.count,
+        '0',
+        'RETAINED_WORLD_SOURCE_OR_ADMISSION_REVOKED:' + table,
+      );
+      revocations[table] = rows;
+    }
+    report.revocations = revocations;
     const after = await observe(client);
-    assertRetainedPowerSuccessorCatalog({
-      actual: after,
-      expected: before,
-      forwardedFunction: forward,
-    });
+    assertRetainedPowerSuccessorCatalog({ actual: after, expected: before });
     const economicAfter = await readRegisteredCurrentEconomicSnapshotFrom(
       client,
       marker.worldId,
     );
     assert.deepEqual(economicAfter.economic, economicBefore.economic);
     report.after = { catalog: after, economic: economicAfter.economic };
-    report.status = 'REUSED_H3_AND_SINGLE_FORWARD_VERIFIED_NOT_SOURCE_READY';
+    report.status = 'REUSED_POST_FORWARD_H3_READBACK_VERIFIED_NOT_SOURCE_READY';
     await save();
     return {
       marker,

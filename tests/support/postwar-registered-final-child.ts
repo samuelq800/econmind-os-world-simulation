@@ -9,6 +9,26 @@ export interface RegisteredChildReply {
   readonly error?: unknown;
   readonly diagnostics?: unknown;
 }
+/** Startup only: the measured 434s proof plus 21 x 13.5s publications needs
+ * a separate finite budget; the complete one-time 21 utility and POWER
+ * phases are additional measured startup work. HTTP/RPC operation bounds remain unchanged. */
+export function registeredFinalColdPreparationBudget(
+  configuration: unknown,
+): number {
+  const explicit =
+    configuration !== null &&
+    typeof configuration === 'object' &&
+    'schemaVersion' in configuration &&
+    configuration.schemaVersion ===
+      'test-only-registered-final-child-host-v1' &&
+    'prepareRefinery21Sources' in configuration &&
+    configuration.prepareRefinery21Sources === true;
+  return explicit &&
+    process.env.ECONMIND_REGISTERED_REFINERY21_SOURCE_PREPARATION === '1' &&
+    process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE === '1'
+    ? 3600000
+    : 600000;
+}
 export async function startPostwarRegisteredFinalNodeChild(input: {
   repositoryRoot: string;
   configuration: unknown;
@@ -139,7 +159,7 @@ export async function startPostwarRegisteredFinalNodeChild(input: {
       // Actual complete 70-country private proof took 392,991ms in the
       // retained offline receipt. This is startup only; online HTTP remains
       // at its existing 10s bound. A JSON proof/cache may not replace it.
-      600000,
+      registeredFinalColdPreparationBudget(input.configuration),
     );
     if (!ready.ok)
       throw new Error('REGISTERED_CHILD_PREPARATION_FAILED', {

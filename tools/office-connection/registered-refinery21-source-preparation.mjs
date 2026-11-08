@@ -36,13 +36,15 @@ export function requireRefinery21PreparationOptIn(input) {
 
 export async function prepareRegisteredRefinery21Sources(input) {
   requireRefinery21PreparationOptIn(input);
-  const [sitesModule, firstDay, utility, power, social] = await Promise.all([
-    import('../../apps/world-worker/dist/persistence/postwar-industry-refinery-sites.js'),
-    import('../../apps/world-worker/dist/persistence/postwar-industry-first-day-source.js'),
-    import('../../apps/world-worker/dist/persistence/postwar-industry-utility-source.js'),
-    import('../../apps/world-worker/dist/persistence/postwar-industry-power-service-publication.js'),
-    import('../../apps/world-worker/dist/runtime-preparation/social-runtime-connection.js'),
-  ]);
+  const [sitesModule, firstDay, utility, power, social, powerSource] =
+    await Promise.all([
+      import('../../apps/world-worker/dist/persistence/postwar-industry-refinery-sites.js'),
+      import('../../apps/world-worker/dist/persistence/postwar-industry-first-day-source.js'),
+      import('../../apps/world-worker/dist/persistence/postwar-industry-utility-source.js'),
+      import('../../apps/world-worker/dist/persistence/postwar-industry-power-service-publication.js'),
+      import('../../apps/world-worker/dist/runtime-preparation/social-runtime-connection.js'),
+      import('../../apps/world-worker/dist/persistence/postwar-industry-utility-service-source.js'),
+    ]);
   const coverage = sitesModule.readPostwarIndustryRefineryCoverage(
     input.sourceContext,
   );
@@ -105,7 +107,10 @@ export async function prepareRegisteredRefinery21Sources(input) {
     }
     return rows;
   };
+  const preparationActions = [];
   const progress = (type, countryId, status) => {
+    if (status !== 'START')
+      preparationActions.push({ type, countryId, status });
     assert.match(countryId, /^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u);
     process.stdout.write(
       JSON.stringify({
@@ -118,67 +123,201 @@ export async function prepareRegisteredRefinery21Sources(input) {
       }) + '\n',
     );
   };
+  const { workerRole } = social.readPostwarSocialRuntimeConnectionResources(
+    input.socialConnection,
+  );
+  assert.match(workerRole, /^[a-z_][a-z0-9_]{0,62}$/u);
+  // The genuine Social wrapper already establishes RR. This fixed reader scope
+  // preserves both a source failure and a possible aborted-tx restore failure.
+  const readCurrent = (read) =>
+    input.socialConnection.database.transaction(async (tx) => {
+      const heads = await tx.query(
+        'select world_version::text,event_sequence::text from world_v2.world_head where world_id=$1',
+        [input.configuration.admittedWorldPins.worldId],
+      );
+      assert.equal(heads.rows.length, 1);
+      const head = {
+        worldVersion: heads.rows[0].world_version,
+        eventSequence: heads.rows[0].event_sequence,
+      };
+      let value, failure;
+      try {
+        await tx.query('set local role world_v2_industry_source_reader');
+        value = await read(tx, head);
+      } catch (error) {
+        failure = error;
+      }
+      try {
+        await tx.query('set local role "' + workerRole + '"');
+      } catch (restore) {
+        if (failure !== undefined)
+          throw new AggregateError(
+            [failure, restore],
+            'REFINERY_REUSE_SOURCE_AND_ROLE_RESTORE_FAILED',
+            { cause: restore },
+          );
+        throw restore;
+      }
+      if (failure !== undefined) throw failure;
+      return value;
+    });
+  const expectedPins = {
+    seedId: input.configuration.startupSeed.seedId,
+    seedFingerprint: input.configuration.startupSeed.fingerprint,
+    admissionRef: input.configuration.admittedWorldPins.admissionRef,
+  };
   const economicBefore = await economicSnapshot();
   const originals = [],
     utilitySources = [],
     powerSources = [];
-  for (const site of coverage.sites) {
-    progress('FIRST_DAY', site.countryId, 'START');
-    originals.push(
-      await publish((tx) =>
-        firstDay.registerPostwarIndustryRefineryFirstDayFrom(tx, {
+  const livePreparations = new Set();
+  try {
+    for (const site of coverage.sites) {
+      progress('FIRST_DAY', site.countryId, 'START');
+      const existing = await readCurrent((tx, head) =>
+        firstDay.readPostwarIndustryFirstDaySourceFrom(tx, {
           worldId: input.configuration.admittedWorldPins.worldId,
           countryId: site.countryId,
           facilityId: site.facilityId,
-          adoptedPolicy: policy,
-          sourceContext: input.sourceContext,
+          head,
+          expectedPins,
         }),
-      ),
-    );
-    progress('FIRST_DAY', site.countryId, 'COMMITTED');
-  }
-  // Proposal order is the same fixed readPostwarIndustryRefineryCoverage map
-  // used by loadPostwarIndustryUtilitySourceProposals, not caller labels.
-  for (const [index, proposal] of proposals.entries()) {
-    const site = coverage.sites[index];
-    progress('UTILITY', site.countryId, 'START');
-    utilitySources.push(
-      await publish((tx) =>
-        utility.publishPostwarIndustryUtilitySourcesFrom(tx, { proposal }),
-      ),
-    );
-    progress('UTILITY', site.countryId, 'COMMITTED');
-  }
-  const preparations =
-    await utility.preparePostwarIndustryUtilitySources(utilityInput);
-  try {
+      );
+      if (existing !== null) {
+        originals.push({
+          countryId: site.countryId,
+          facilityId: site.facilityId,
+          sourceRef: existing.sourceRef,
+          sourceSha256: existing.rawSha256,
+        });
+        progress('FIRST_DAY', site.countryId, 'REUSED_VERIFIED');
+      } else {
+        originals.push(
+          await publish((tx) =>
+            firstDay.registerPostwarIndustryRefineryFirstDayFrom(tx, {
+              worldId: input.configuration.admittedWorldPins.worldId,
+              countryId: site.countryId,
+              facilityId: site.facilityId,
+              adoptedPolicy: policy,
+              sourceContext: input.sourceContext,
+            }),
+          ),
+        );
+        progress('FIRST_DAY', site.countryId, 'COMMITTED');
+      }
+    }
+    // This API performs a new restricted DB read and exact genuine compact
+    // comparison per site. Its historical intersection is NOT readiness:
+    // CURRENT assertion below separately checks active parents/revocations.
+    const existingUtilities =
+      await utility.preparePostwarIndustryUtilitySources(utilityInput);
+    const existingBySite = new Map();
+    for (const preparation of existingUtilities) {
+      livePreparations.add(preparation);
+      const c =
+        utility.consumePostwarIndustryUtilitySource(preparation).compact;
+      existingBySite.set(c.countryId + '/' + c.facilityId, preparation);
+    }
+    for (const [index, proposal] of proposals.entries()) {
+      const site = coverage.sites[index];
+      progress('UTILITY', site.countryId, 'START');
+      const existing = existingBySite.get(
+        site.countryId + '/' + site.facilityId,
+      );
+      if (existing) {
+        await readCurrent((tx, head) =>
+          utility.assertPostwarIndustryUtilitySourceFrom(tx, {
+            preparation: existing,
+            head,
+          }),
+        );
+        const source = utility.consumePostwarIndustryUtilitySource(existing);
+        utilitySources.push({
+          sourceRef: 'INDUSTRY_UTILITY_' + source.compactSha256.toUpperCase(),
+          sourceSha256: source.compactSha256,
+        });
+        progress('UTILITY', site.countryId, 'REUSED_VERIFIED');
+      } else {
+        utilitySources.push(
+          await publish((tx) =>
+            utility.publishPostwarIndustryUtilitySourcesFrom(tx, { proposal }),
+          ),
+        );
+        progress('UTILITY', site.countryId, 'COMMITTED');
+      }
+    }
+    const preparations =
+      await utility.preparePostwarIndustryUtilitySources(utilityInput);
+    for (const preparation of preparations) livePreparations.add(preparation);
     assert.deepEqual(
       preparations
         .map((p) => {
-          const d = utility.consumePostwarIndustryUtilitySource(p).compact;
-          return d.countryId + '/' + d.facilityId;
+          const c = utility.consumePostwarIndustryUtilitySource(p).compact;
+          return c.countryId + '/' + c.facilityId;
         })
         .sort(),
-      coverage.sites.map((s) => s.countryId + '/' + s.facilityId).sort(),
+      coverage.sites
+        .map((site) => site.countryId + '/' + site.facilityId)
+        .sort(),
     );
     for (const preparation of preparations) {
-      const countryId =
-        utility.consumePostwarIndustryUtilitySource(preparation).compact
-          .countryId;
-      progress('POWER', countryId, 'START');
-      powerSources.push(
-        await publish((tx) =>
-          power.publishPostwarIndustryPowerServiceSourceFrom(tx, {
-            baseline,
-            preparation,
-          }),
-        ),
-      );
-      progress('POWER', countryId, 'COMMITTED');
+      const c =
+        utility.consumePostwarIndustryUtilitySource(preparation).compact;
+      progress('POWER', c.countryId, 'START');
+      const projected = powerSource.projectPostwarIndustryPowerServiceSource({
+        baseline,
+        preparation,
+      });
+      const existing = await readCurrent(async (tx, head) => {
+        await utility.assertPostwarIndustryUtilitySourceFrom(tx, {
+          preparation,
+          head,
+        });
+        const packets = await tx.query(firstDay.INDUSTRY_FIRST_DAY_READ_QUERY, [
+          c.worldId,
+          c.countryId,
+          c.power.storageId,
+          head.worldVersion,
+          head.eventSequence,
+        ]);
+        if (packets.rows.length === 0) return null;
+        assert.equal(packets.rows.length, 1);
+        const packet = packets.rows[0];
+        assert.equal(packet.source_text, projected.firstdayOriginal.rawText);
+        assert.equal(
+          packet.source_sha256,
+          projected.firstdayOriginal.rawSha256,
+        );
+        assert.equal(packet.source_ref, projected.firstdayOriginal.sourceRef);
+        assert.equal(packet.world_version, head.worldVersion);
+        assert.equal(packet.event_sequence, head.eventSequence);
+        assert.equal(
+          createHash('sha256').update(packet.source_text).digest('hex'),
+          packet.source_sha256,
+        );
+        return {
+          sourceRef: packet.source_ref,
+          sourceSha256: packet.source_sha256,
+        };
+      });
+      if (existing !== null) {
+        powerSources.push(existing);
+        progress('POWER', c.countryId, 'REUSED_VERIFIED');
+      } else {
+        powerSources.push(
+          await publish((tx) =>
+            power.publishPostwarIndustryPowerServiceSourceFrom(tx, {
+              baseline,
+              preparation,
+            }),
+          ),
+        );
+        progress('POWER', c.countryId, 'COMMITTED');
+      }
     }
   } finally {
-    for (const p of preparations)
-      utility.retireUnownedPostwarIndustryUtilitySource(p);
+    for (const preparation of livePreparations)
+      utility.retireUnownedPostwarIndustryUtilitySource(preparation);
   }
   const economicAfter = await economicSnapshot();
   assert.deepEqual(
@@ -193,6 +332,7 @@ export async function prepareRegisteredRefinery21Sources(input) {
     worldId: input.configuration.admittedWorldPins.worldId,
     seedFingerprint: input.configuration.startupSeed.fingerprint,
     admissionRef: input.configuration.admittedWorldPins.admissionRef,
+    preparationActions,
     originals,
     utilitySources,
     powerSources,

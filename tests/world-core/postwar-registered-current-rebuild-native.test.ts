@@ -218,6 +218,37 @@ native(
             sourcePublication.notApplicableCountries.length === 49,
           'OTHER_49_COUNTRIES_NOT_REFINERIES_REQUIRED',
         );
+        must(
+          Array.isArray(sourcePublication.preparationActions) &&
+            sourcePublication.preparationActions.length === 63,
+          'ACTUAL_21_SOURCE_ACTIONS_PER_FAMILY_REQUIRED',
+        );
+        const expectedSourceCountries = new Set(
+          (sourcePublication.originals as unknown[]).map(
+            (value) => record(value).countryId,
+          ),
+        );
+        must(
+          expectedSourceCountries.size === 21,
+          'EXACT_21_ORIGINAL_COUNTRIES_REQUIRED',
+        );
+        for (const type of ['FIRST_DAY', 'UTILITY', 'POWER']) {
+          const actions = sourcePublication.preparationActions
+            .map(record)
+            .filter((action) => action.type === type);
+          must(
+            actions.length === 21 &&
+              new Set(actions.map((action) => action.countryId)).size === 21 &&
+              actions.every(
+                (action) =>
+                  expectedSourceCountries.has(action.countryId) &&
+                  ['COMMITTED', 'REUSED_VERIFIED'].includes(
+                    String(action.status),
+                  ),
+              ),
+            'SOURCE_REUSE_AND_NEW_PUBLICATION_MUST_REMAIN_EXPLICIT:' + type,
+          );
+        }
         report.refinerySourcePublication = sourcePublication;
         await phase(
           'ONE_NODE_GENUINE_COLD_PROOF_AND_FIXED21_SOURCE_PREPARATION',
@@ -608,6 +639,8 @@ native(
       }
       if (failure !== undefined) throw failure;
       must(cleanupErrors.length === 0, 'CURRENT_REBUILD_CLEANUP_NOT_CONFIRMED');
-    }, 1500000);
+      // This one explicit refinery21 case includes cold proof, source checks and
+      // bounded cleanup/readback; ordinary suites and online bounds are unchanged.
+    }, 4200000);
   },
 );
