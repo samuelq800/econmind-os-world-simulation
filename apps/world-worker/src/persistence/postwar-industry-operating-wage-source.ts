@@ -21,7 +21,7 @@ import {
   type ValidatedCanonicalLineageView,
 } from './validated-canonical-lineage.js';
 import { projectPostwarIndustryOperatingWageSource } from './postwar-industry-operating-wage-originals.js';
-import { readPostwarIndustryFirstDaySourceFrom } from './postwar-industry-first-day-source.js';
+import { readPostwarIndustryRunSourceFrom } from './postwar-industry-run-originals.js';
 import {
   readPostwarSocialRuntimeFinancialReplayBase,
   type PostwarSocialRuntimeConnection,
@@ -92,7 +92,8 @@ export async function readIndustryOperatingWageSourceFrom(
     b.pins.admissionRef !== d.admissionRef
   )
     invalid('EXACT_PREPARED_SOURCE_AND_ADMISSION_REQUIRED');
-  const registered = await readPostwarIndustryFirstDaySourceFrom(tx, {
+  const registered = await readPostwarIndustryRunSourceFrom(tx, {
+    baseline: base,
     worldId: d.worldId,
     countryId: d.countryId,
     facilityId: d.facilityId,

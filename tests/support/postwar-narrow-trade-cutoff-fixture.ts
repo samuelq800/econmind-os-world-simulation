@@ -19,7 +19,10 @@ const read = (p: string) =>
   readFile(new URL('../../' + p, import.meta.url), 'utf8');
 export async function installPostwarNarrowTradeCutoffFixture(
   db: NarrowTradeTestDatabase,
-  options: Readonly<{ extraBuyerBankCash?: boolean }> = {},
+  options: Readonly<{
+    extraBuyerBankCash?: boolean;
+    operatingSocialEmployment?: Readonly<Record<string, unknown>>;
+  }> = {},
 ) {
   const sha = narrowCutoffSha,
     world = 'WORLD_TEST_ONLY_TRADE_CUTOFF',
@@ -160,7 +163,7 @@ export async function installPostwarNarrowTradeCutoffFixture(
       payload: {
         schemaVersion: 'postwar-operating-genesis-seed-source-v1',
         carrier: {
-          socialEmployment: {
+          socialEmployment: options.operatingSocialEmployment ?? {
             countries: [{ countryId: seller }, { countryId: buyer }],
           },
         },

@@ -648,6 +648,7 @@ function utilityWaterGrantEligibility(
 export function postwarIndustryUtilityOriginalsForRun(
   preparation: Readonly<PreparedPostwarIndustryUtilitySource>,
   runId: string,
+  paymentFrames: readonly import('@econmind/core/finance-budget-native').FinanceNativeBudgetCanonicalFrame[] = [],
 ): Readonly<{
   industryPowerOriginals: readonly import('@econmind/core/industry-first-day-power-execution').IndustryFirstDayPowerOriginal[];
   industryWaterOriginals: readonly import('@econmind/core/industry-first-day-water-execution').IndustryFirstDayWaterReplayOriginal[];
@@ -665,7 +666,7 @@ export function postwarIndustryUtilityOriginalsForRun(
         serviceRunId: 'UTILITY_POWER_SERVICE_' + runId,
         serviceWorkSourceRef: staff.reference,
         serviceWorkSourceRawSha256: staff.rawSha256,
-        paymentFrames: [],
+        paymentFrames,
       },
     ],
     industryWaterOriginals: [
@@ -722,6 +723,28 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
       const body = row(JSON.parse(c.canonicalPayload));
       if (body.facilityId === 'OPEN-02-REFINED_FUEL')
         runs.add(text(body.runId));
+      else if (
+        token &&
+        body.facilityId ===
+          consumePostwarIndustryUtilitySource(token).compact.power.storageId &&
+        typeof body.runId === 'string' &&
+        body.runId.startsWith('UTILITY_POWER_SERVICE_')
+      )
+        runs.add(body.runId.slice('UTILITY_POWER_SERVICE_'.length));
+    } else if (
+      c.commandType === 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1' &&
+      token
+    ) {
+      const body = row(JSON.parse(frame.events[0]?.canonicalPayload ?? 'null')),
+        source = row(body.source);
+      if (
+        source.countryId === 'COUNTRY_02' &&
+        source.facilityId ===
+          consumePostwarIndustryUtilitySource(token).compact.power.storageId &&
+        typeof source.runId === 'string' &&
+        source.runId.startsWith('UTILITY_POWER_SERVICE_')
+      )
+        runs.add(source.runId.slice('UTILITY_POWER_SERVICE_'.length));
     }
   }
   if (!token) {
@@ -772,7 +795,25 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
   }
   if (failure !== undefined) throw failure;
   const values = [...runs].map((run) =>
-    postwarIndustryUtilityOriginalsForRun(token, run),
+    postwarIndustryUtilityOriginalsForRun(
+      token,
+      run,
+      input.frames.filter((frame) => {
+        if (frame.command.commandType !== 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1')
+          return false;
+        const body = row(
+            JSON.parse(frame.events[0]?.canonicalPayload ?? 'null'),
+          ),
+          source = row(body.source);
+        return (
+          source.runId === 'UTILITY_POWER_SERVICE_' + run &&
+          source.countryId ===
+            consumePostwarIndustryUtilitySource(token).compact.countryId &&
+          source.facilityId ===
+            consumePostwarIndustryUtilitySource(token).compact.power.storageId
+        );
+      }),
+    ),
   );
   return Object.freeze({
     industryPowerOriginals: Object.freeze(

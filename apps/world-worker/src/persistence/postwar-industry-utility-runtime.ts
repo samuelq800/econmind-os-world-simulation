@@ -1,6 +1,9 @@
 import type { IndustryUtilityPlanningRow } from '@econmind/core/postwar-industry-utility-planning-contract';
 import { readIndustryFirstDayPowerState } from '@econmind/core/industry-first-day-power-execution';
-import { readIndustryFirstDayWorkState } from '@econmind/core/industry-first-day-work';
+import {
+  readIndustryFirstDayWorkState,
+  readIndustryCompletedWork,
+} from '@econmind/core/industry-first-day-work';
 import type { PostwarIndustryRunStateContext } from './postwar-industry-run-state.js';
 import {
   createPostwarIndustryWaterGrantPublisher,
@@ -676,6 +679,129 @@ export function createPostwarIndustryUtilityRuntime(config: {
               }),
             }),
           );
+      }
+      // Only actual folded BOOK + distinct committed service WORK/WAGE refs
+      // can produce a DELIVER planning row. No amount or result comes from UI.
+      if (power) {
+        const works = facts.completedWorks.map(readIndustryCompletedWork);
+        for (const snapshot of power.physicalLedgerSnapshots) {
+          for (const booking of snapshot.bookings) {
+            const request = booking.request;
+            if (
+              booking.status !== 'BOOKED_NOT_DELIVERED' ||
+              request.worldId !== world ||
+              request.countryId !== input.countryId ||
+              request.operatorId !== p.compact.operatorId ||
+              request.storageId !== p.compact.power.storageId ||
+              request.gridId !== p.compact.power.gridId
+            )
+              continue;
+            const run = readIndustryFirstDayWorkState(
+              facts.workState,
+            ).runs.find(
+              (r) =>
+                r.source.countryId === input.countryId &&
+                r.source.facilityId === p.compact.facilityId &&
+                r.terms.runId === request.runRef,
+            );
+            if (!run) continue;
+            for (const payment of power.paymentFrames) {
+              const body = JSON.parse(
+                payment.events[0]?.canonicalPayload ?? 'null',
+              ) as unknown;
+              if (!body || typeof body !== 'object' || Array.isArray(body))
+                continue;
+              const paid = body as Record<string, unknown>,
+                event = payment.events[0];
+              if (
+                paid.schemaVersion !== 'industry-operating-wage-paid-v1' ||
+                !event ||
+                typeof paid.workEventFingerprint !== 'string' ||
+                power.usedPaidEventFingerprints.includes(
+                  paid.workEventFingerprint,
+                ) ||
+                power.usedPaidEventFingerprints.includes(event.fingerprint) ||
+                !facts.wageState?.paidWork.includes(paid.workEventFingerprint)
+              )
+                continue;
+              const work = works.find(
+                (w) =>
+                  w.frame.events[0]?.fingerprint === paid.workEventFingerprint,
+              );
+              if (
+                !work ||
+                work.data.countryId !== input.countryId ||
+                work.data.operatorId !== p.compact.operatorId ||
+                work.data.facilityId !== p.compact.power.storageId ||
+                work.data.runId !== 'UTILITY_POWER_SERVICE_' + run.terms.runId
+              )
+                continue;
+              const from = BigInt(request.fromSimTime),
+                through = BigInt(request.throughSimTime),
+                points = [
+                  ...new Set([
+                    from,
+                    through,
+                    ...work.data.allocations
+                      .flatMap((a) => [
+                        BigInt(a.startsAtSimTime),
+                        BigInt(a.endsAtSimTime),
+                      ])
+                      .filter((t) => t > from && t < through),
+                  ]),
+                ];
+              if (
+                points.some(
+                  (t) =>
+                    t < through &&
+                    !work.data.allocations.some(
+                      (a) =>
+                        BigInt(a.count) > 0n &&
+                        BigInt(a.startsAtSimTime) <= t &&
+                        BigInt(a.endsAtSimTime) > t,
+                    ),
+                )
+              )
+                continue;
+              const src = utilitySourceForRun(source, 'POWER', run.terms.runId);
+              rows.push(
+                Object.freeze({
+                  schemaVersion: 'postwar-industry-utility-planning-row-v1',
+                  planningRef:
+                    'POWER_DELIVER_PLAN_' +
+                    sha(
+                      canonicalSerialize([
+                        world,
+                        facts.head,
+                        request.bookingRef,
+                        event.fingerprint,
+                      ]),
+                    ).toUpperCase(),
+                  countryId: src.countryId,
+                  facilityId: src.facilityId,
+                  locationId: src.locationId,
+                  operatorId: src.operatorId,
+                  runId: src.runId,
+                  sourceRef: src.sourceRef,
+                  sourceRawSha256: src.sourceRawSha256,
+                  runStartsAtSimTime: run.terms.startsAtSimTime,
+                  runEndsAtSimTime: run.terms.endsAtSimTime,
+                  measurement: 'PLANNING_DATA_NOT_AUTHORITY',
+                  serviceKind: 'POWER',
+                  action: 'DELIVER',
+                  parameters: {
+                    operation: {
+                      action: 'DELIVER',
+                      bookingRef: request.bookingRef,
+                      workEventFingerprint: paid.workEventFingerprint,
+                      paymentEventFingerprint: event.fingerprint,
+                    },
+                  },
+                }),
+              );
+            }
+          }
+        }
       }
       return Object.freeze({
         head: facts.head,

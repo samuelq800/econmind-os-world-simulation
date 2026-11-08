@@ -10,10 +10,8 @@ import {
   consumePreparedPostwarSocialFinancialReplayBase,
   type PreparedPostwarSocialFinancialReplayBase,
 } from './prepared-postwar-social-source.js';
-import {
-  decodePostwarIndustryFirstDaySourceRow,
-  type PostwarIndustryFirstDaySourceData,
-} from './postwar-industry-first-day-source.js';
+import { type PostwarIndustryFirstDaySourceData } from './postwar-industry-first-day-source.js';
+import { decodePostwarIndustryRunSourceRow } from './postwar-industry-run-originals.js';
 import type { SqlExecutor } from './sql-database.js';
 export const INDUSTRY_COMPLETED_WORK_ORIGINAL_QUERY =
   'select * from world_v2.read_postwar_industry_completed_work_original($1,$2,$3,$4,$5,$6,$7::bigint,$8::bigint,$9,$10)';
@@ -174,7 +172,7 @@ export async function readPostwarIndustryCompletedWorkOriginalFrom(
     body.admissionRef !== b.pins.admissionRef
   )
     invalid('ACTUAL_WORK_HEAD_HASH_OR_ADMISSION_DIFFERS');
-  const firstdayOriginal = decodePostwarIndustryFirstDaySourceRow(
+  const firstdayOriginal = decodePostwarIndustryRunSourceRow(
     {
       source_text: string(row.source_text),
       source_sha256: string(row.source_sha256),
@@ -183,6 +181,7 @@ export async function readPostwarIndustryCompletedWorkOriginalFrom(
       event_sequence: string(row.event_sequence),
     },
     {
+      baseline: input.baseline,
       worldId: input.worldId,
       countryId: input.sourceCountryId,
       facilityId: body.facilityId,

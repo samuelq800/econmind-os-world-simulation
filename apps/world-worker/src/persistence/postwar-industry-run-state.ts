@@ -23,11 +23,11 @@ import {
   consumePreparedPostwarSocialFinancialReplayBase,
   type PreparedPostwarSocialFinancialReplayBase,
 } from './prepared-postwar-social-source.js';
+import { type PostwarIndustryFirstDaySourceData } from './postwar-industry-first-day-source.js';
 import {
-  readPostwarIndustryFirstDaySourceFrom,
-  type PostwarIndustryFirstDaySourceData,
-} from './postwar-industry-first-day-source.js';
-import { projectPostwarIndustryRunSiteSource } from './postwar-industry-run-originals.js';
+  projectPostwarIndustryRunSiteSource,
+  readPostwarIndustryRunSourceFrom,
+} from './postwar-industry-run-originals.js';
 import {
   readPagedFromPreparedSocialBaseOnHeldExecutor,
   releasePostwarPagedFinanceSocialReplay,
@@ -134,7 +134,8 @@ export async function readPostwarIndustryRunStateFrom(
   let failure: unknown;
   try {
     await tx.query('set local role world_v2_industry_source_reader');
-    original = await readPostwarIndustryFirstDaySourceFrom(tx, {
+    original = await readPostwarIndustryRunSourceFrom(tx, {
+      baseline,
       worldId: input.worldId,
       countryId: input.countryId,
       facilityId: input.facilityId,

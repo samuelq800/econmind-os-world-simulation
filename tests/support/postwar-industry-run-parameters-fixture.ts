@@ -18,10 +18,15 @@ const read = (name: string) =>
     new URL('../../database/proposals/' + name + '.sql', import.meta.url),
     'utf8',
   );
-export async function createIndustryRunParametersSqlFixture() {
+export async function createIndustryRunParametersSqlFixture(
+  options: Readonly<{
+    operatingSocialEmployment?: Readonly<Record<string, unknown>>;
+  }> = {},
+) {
   const db = new PGlite(),
     f = await installPostwarNarrowTradeCutoffFixture(db, {
       extraBuyerBankCash: true,
+      ...options,
     }),
     tx: SqlExecutor = {
       async query<Row extends object>(q: string, p: readonly unknown[] = []) {

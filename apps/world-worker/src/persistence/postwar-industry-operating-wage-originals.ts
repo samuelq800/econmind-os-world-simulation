@@ -1,6 +1,7 @@
 /** Fixed wage/population/funding projection from private prepared originals.
  * This produces DATA only; SQL/current-context issuers protect its inputs. */
 import { createHash } from 'node:crypto';
+import { projectPostwarIndustryRunSiteSource } from './postwar-industry-run-originals.js';
 import { readPostwarIndustryCompletedWorkOriginalFrom } from './postwar-industry-completed-work-original.js';
 import {
   canonicalSerialize,
@@ -46,6 +47,10 @@ export function projectPostwarIndustryOperatingWageSource(input: {
     o.data.admissionRef !== d.admissionRef
   )
     invalid('EXACT_REGISTERED_SOURCE_AND_WORK_PINS_REQUIRED');
+  // Validate the fixed service projection before using its bucket. It cannot
+  // be selected merely by a caller-supplied serviceKind tag.
+  const isPower = o.data.serviceKind === 'POWER';
+  if (isPower) projectPostwarIndustryRunSiteSource(o, input.baseline);
   const document = b.document;
   const fundingAccounts = document.inputs.fundingAccounts.filter(
     (a) =>
@@ -86,7 +91,7 @@ export function projectPostwarIndustryOperatingWageSource(input: {
   const wages: IndustryOperatingWageSource['wages'][number][] = [];
   const sitePositions = document.inputs.sourcePositions.filter(
     (p) =>
-      p.sourceBucket === 'INDUSTRY' &&
+      p.sourceBucket === (isPower ? 'POWER' : 'INDUSTRY') &&
       p.sourceObjectId === d.facilityId &&
       p.countryId === d.countryId &&
       p.locationId === d.locationId &&

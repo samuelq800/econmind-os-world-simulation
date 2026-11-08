@@ -83,8 +83,10 @@ export const REGISTERED_FINAL_NATIVE_SQL_ORDER = Object.freeze([
   'world-command-execution-registration',
   'postwar-source-revocation-fence',
   'postwar-industry-utility-custody',
+  'postwar-industry-power-service-source',
   'postwar-industry-logistics-custody',
   'postwar-mixed-industry-utility-effects',
+  'postwar-industry-power-service-current',
   'postwar-trade-current-projection',
 ]);
 // The initializer needs only these source-custody proposals before publishing

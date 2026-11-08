@@ -25,11 +25,17 @@ import {
 } from '../../apps/world-worker/src/persistence/postwar-industry-first-day-source.js';
 import { loadPostwarSourceContext as loadPostwarIndustryRuntimeSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
 import { createPostwarIndustryProductionSource } from '../../apps/world-worker/src/persistence/postwar-industry-production-source.js';
-import { createPostwarSocialRuntimeConnection } from '../../apps/world-worker/src/runtime-preparation/social-runtime-connection.js';
+import {
+  createPostwarSocialRuntimeConnection,
+  readPostwarSocialRuntimeFinancialReplayBase,
+} from '../../apps/world-worker/src/runtime-preparation/social-runtime-connection.js';
 import {
   loadPostwarIndustryUtilitySourceProposal,
   publishPostwarIndustryUtilitySourcesFrom,
+  preparePostwarIndustryUtilitySource,
+  retireUnownedPostwarIndustryUtilitySource,
 } from '../../apps/world-worker/src/persistence/postwar-industry-utility-source.js';
+import { publishPostwarIndustryPowerServiceSourceFrom } from '../../apps/world-worker/src/persistence/postwar-industry-power-service-publication.js';
 import { publishPostwarPhysicalInventoryProvenanceFrom } from '../../apps/world-worker/src/persistence/postwar-physical-inventory-provenance.js';
 import {
   installRegisteredFinalNativeSqlFrom,
@@ -579,6 +585,31 @@ export async function createRegisteredFinalNodeSetup(input: {
         await tx.query('set local role world_v2_industry_source_publisher');
         await publishPostwarIndustryUtilitySourcesFrom(tx, { proposal });
       });
+      // Reuse this real prepared Social source only for controlled immutable
+      // staff-original publication. It issues no schedule, WORK, wage or power.
+      const utilityPreparation = await preparePostwarIndustryUtilitySource({
+        repositoryRoot: input.repositoryRoot,
+        socialConnection: utilitySocial,
+        startupSeed: f.seed,
+        startupBeneficialHousingRentSource: f.preparation,
+      });
+      try {
+        await new PostgresSqlDatabase(
+          open(roles.industryPublication),
+        ).transaction(async (tx) => {
+          await tx.query('set transaction isolation level repeatable read');
+          await tx.query('set local role world_v2_industry_source_publisher');
+          await publishPostwarIndustryPowerServiceSourceFrom(tx, {
+            baseline: readPostwarSocialRuntimeFinancialReplayBase(
+              utilitySocial,
+              m.worldId,
+            ),
+            preparation: utilityPreparation,
+          });
+        });
+      } finally {
+        retireUnownedPostwarIndustryUtilitySource(utilityPreparation);
+      }
     } finally {
       await utilitySocial.close();
     }

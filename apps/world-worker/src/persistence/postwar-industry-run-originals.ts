@@ -20,6 +20,11 @@ import {
   decodePostwarIndustryFirstDaySourceRow,
   type PostwarIndustryFirstDaySourceData,
 } from './postwar-industry-first-day-source.js';
+import { createHash } from 'node:crypto';
+import { canonicalSerialize } from '@econmind/core';
+import { projectPostwarIndustryPowerServiceSource } from './postwar-industry-utility-service-source.js';
+import { readPostwarIndustryUtilitySourceForBase } from './postwar-industry-utility-source.js';
+import { INDUSTRY_FIRST_DAY_READ_QUERY } from './postwar-industry-first-day-source.js';
 import type { SqlExecutor } from './sql-database.js';
 export const INDUSTRY_RUN_HISTORY_ORIGINAL_QUERY =
   'select * from world_v2.read_postwar_industry_run_original($1,$2,$3,$4,$5,$6::bigint,$7::bigint,$8,$9)';
@@ -52,6 +57,23 @@ export function projectPostwarIndustryRunSiteSource(
     d.admissionRef !== b.pins.admissionRef
   )
     fail('GENUINE_BASE_AND_REGISTERED_SOURCE_DIFFER');
+  if (d.serviceKind === 'POWER') {
+    const preparation = readPostwarIndustryUtilitySourceForBase(baseline);
+    if (!preparation) fail('REGISTERED_POWER_SOURCE_NOT_PREPARED');
+    const projected = projectPostwarIndustryPowerServiceSource({
+      baseline,
+      preparation,
+    });
+    if (
+      original.sourceRef !== projected.firstdayOriginal.sourceRef ||
+      original.rawText !== projected.firstdayOriginal.rawText ||
+      original.rawSha256 !== projected.firstdayOriginal.rawSha256 ||
+      canonicalSerialize(original.data) !==
+        canonicalSerialize(projected.firstdayOriginal.data)
+    )
+      fail('EXACT_PRIVATE_POWER_SERVICE_ORIGINAL_REQUIRED');
+    return projected.siteSource;
+  }
   const f = object(d.sourceFacility),
     recipe = object(d.recipe),
     countryId = text(d.countryId),
@@ -188,7 +210,8 @@ export async function readPostwarIndustryRunPageOriginalsFrom(
       frame.command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND
         ? text(object(event.terms).facilityId)
         : text(event.facilityId);
-    const original = decodePostwarIndustryFirstDaySourceRow(r.rows[0], {
+    const original = decodePostwarIndustryRunSourceRow(r.rows[0], {
+      baseline: input.baseline,
       worldId: input.worldId,
       countryId: frame.command.countryId,
       facilityId: facility,
@@ -212,4 +235,61 @@ export async function readPostwarIndustryRunPageOriginalsFrom(
   return Object.freeze({
     industryWorkSources: Object.freeze([...found.values()]),
   });
+}
+
+/** One fixed decoder for registered manufacturing and actual POWER staff DATA.
+ * The service branch re-derives the entire E03 array using the private live
+ * baseline; a caller-supplied service label or ref cannot mint a source. */
+export function decodePostwarIndustryRunSourceRow(
+  row: Parameters<typeof decodePostwarIndustryFirstDaySourceRow>[0],
+  input: Parameters<typeof decodePostwarIndustryFirstDaySourceRow>[1] & {
+    readonly baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>;
+  },
+): Readonly<PostwarIndustryFirstDaySourceData> {
+  if (!row.source_ref.startsWith('INDUSTRY_POWER_STAFF_'))
+    return decodePostwarIndustryFirstDaySourceRow(row, input);
+  const preparation = readPostwarIndustryUtilitySourceForBase(input.baseline);
+  if (!preparation) fail('REGISTERED_POWER_SOURCE_NOT_PREPARED');
+  const expected = projectPostwarIndustryPowerServiceSource({
+    baseline: input.baseline,
+    preparation,
+  });
+  const site = expected.siteSource;
+  if (
+    site.worldId !== input.worldId ||
+    site.countryId !== input.countryId ||
+    site.facilityId !== input.facilityId ||
+    site.seedId !== input.expectedPins.seedId ||
+    site.seedFingerprint !== input.expectedPins.seedFingerprint ||
+    site.admissionRef !== input.expectedPins.admissionRef ||
+    row.source_ref !== expected.firstdayOriginal.sourceRef ||
+    row.source_text !== expected.firstdayOriginal.rawText ||
+    row.source_sha256 !== expected.firstdayOriginal.rawSha256 ||
+    createHash('sha256').update(row.source_text).digest('hex') !==
+      row.source_sha256 ||
+    row.world_version !== input.head.worldVersion ||
+    row.event_sequence !== input.head.eventSequence
+  )
+    fail('ACTUAL_REGISTERED_POWER_BYTES_HEAD_OR_ADMISSION_DIFFERS');
+  return Object.freeze({
+    ...expected.firstdayOriginal,
+    head: Object.freeze({ ...input.head }),
+  });
+}
+export async function readPostwarIndustryRunSourceFrom(
+  tx: SqlExecutor,
+  input: Parameters<typeof decodePostwarIndustryRunSourceRow>[1],
+): Promise<Readonly<PostwarIndustryFirstDaySourceData> | null> {
+  const result = await tx.query<
+    Parameters<typeof decodePostwarIndustryRunSourceRow>[0]
+  >(INDUSTRY_FIRST_DAY_READ_QUERY, [
+    input.worldId,
+    input.countryId,
+    input.facilityId,
+    input.head.worldVersion,
+    input.head.eventSequence,
+  ]);
+  if (!result.rows.length) return null;
+  if (result.rows.length !== 1) fail('UNIQUE_ACTUAL_RUN_SOURCE_REQUIRED');
+  return decodePostwarIndustryRunSourceRow(result.rows[0]!, input);
 }

@@ -217,7 +217,7 @@ export function createPostwarIndustryWorkRuntime(
       (p) =>
         p.positionId === positionId &&
         p.countryId === c.countryId &&
-        p.sourceBucket === 'INDUSTRY' &&
+        (p.sourceBucket === 'INDUSTRY' || p.sourceBucket === 'POWER') &&
         p.employerRole === 'OP',
     );
     if (positions.length !== 1)

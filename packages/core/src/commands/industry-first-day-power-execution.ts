@@ -344,6 +344,9 @@ export function readIndustryFirstDayPowerState(
       readDayOneStorageSelfUseLedger,
     ),
     committedDeliveryEventFingerprints: [...s.entries.keys()],
+    /** Immutable replay DATA for server planning, not a payment/source grant. */
+    paymentFrames: [...s.payments.values()].map((p) => p.frame),
+    usedPaidEventFingerprints: [...s.usedPaidInputs],
   });
 }
 export interface IndustryFirstDayPowerReplayContext {
