@@ -1,3 +1,4 @@
+import { SOCIAL_SERVICE_CATALOG_CONTEXT } from '../social-employment/service-context.js';
 import {
   createOfficeProjectionController,
   type OfficeProjectionBinding,
@@ -255,6 +256,33 @@ export function installOfficeProjection(
   });
   host.addEventListener('pagehide', disconnect);
   sync();
+  // Fixed read-only catalog binding. Unknown modules retain the existing
+  // unavailable path; this never stages a PLAN or a CreateService request.
+  document.addEventListener?.(
+    'click',
+    (event) => {
+      if (
+        currentView()?.role !== 'social' ||
+        !runtime ||
+        !runtime.state().canRead ||
+        !dialog
+      )
+        return;
+      const id = SOCIAL_SERVICE_CATALOG_CONTEXT.moduleId;
+      const target =
+        event.target instanceof Element
+          ? event.target.closest(
+              `[data-module-card="${id}"],[data-cmd="module"][data-id="${id}"],[data-cmd="country-module"][data-id="${id}"],[data-cmd="country-module"][data-module="${id}"],[data-cmd="country-room"][data-module="${id}"]`,
+            )
+          : null;
+      if (!target || !root?.contains(target)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      dialog.showModal();
+      void runtime.readSocialEmploymentContext();
+    },
+    true,
+  );
   return Object.freeze({
     /** Explicit trusted host config only. Config strings do not grant seats. */
     connect(binding: OfficeProjectionBinding) {

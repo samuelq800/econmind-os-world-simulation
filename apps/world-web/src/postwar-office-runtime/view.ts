@@ -1,3 +1,7 @@
+import {
+  readSocialServiceContext,
+  renderSocialServiceContext,
+} from '../social-employment/service-context.js';
 import { parsePostwarCentralBankOpeningInstruments } from '@econmind/core/postwar-financial-mixed-current-contract';
 import type { ProductionReadConfig } from '../production-read/contract.js';
 import {
@@ -15,6 +19,7 @@ export function createPostwarRuntimeView(
 ) {
   const client = createPostwarRuntimeClient(config);
   const datasets = officeDatasets[config.identity.officeId] ?? [];
+  let socialServiceContext = false;
   let dataset = datasets[0] ?? '',
     result: RuntimeResult | null = null,
     busy = false,
@@ -52,6 +57,19 @@ export function createPostwarRuntimeView(
     if (closed || started !== epoch) return;
     busy = false;
     result = read;
+    if (
+      socialServiceContext &&
+      (read.status === 'PAGE' || read.status === 'EMPTY')
+    ) {
+      try {
+        readSocialServiceContext(read, config.identity.countryId);
+      } catch {
+        result = {
+          status: 'UNAVAILABLE',
+          code: 'SOCIAL_SERVICE_CONTEXT_INVALID',
+        };
+      }
+    }
     changed();
   }
   function disconnect() {
@@ -70,6 +88,20 @@ export function createPostwarRuntimeView(
       disconnect();
     },
     refresh: () => load(),
+    readSocialEmploymentContext() {
+      if (
+        closed ||
+        busy ||
+        config.identity.officeId !== 'SOCIAL' ||
+        !datasets.includes('service-pools')
+      )
+        return Promise.resolve();
+      epoch++;
+      dataset = 'service-pools';
+      socialServiceContext = true;
+      result = null;
+      return load();
+    },
     render(document: Document) {
       const section = document.createElement('section');
       section.dataset.postwarRuntimeReadout = '';
@@ -102,6 +134,7 @@ export function createPostwarRuntimeView(
       select.addEventListener('change', () => {
         epoch++;
         dataset = select.value;
+        socialServiceContext = false;
         result = null;
         void load();
       });
@@ -121,6 +154,23 @@ export function createPostwarRuntimeView(
         section.append(el);
       };
       button('Read current authorized page', !busy && !closed, () => load());
+      if (socialServiceContext) {
+        section.append(
+          renderSocialServiceContext(
+            document,
+            result,
+            config.identity.countryId,
+          ),
+        );
+        if (result && (result.status === 'PAGE' || result.status === 'EMPTY'))
+          button(
+            'Next authorized page',
+            !busy && !closed && result.page.nextOffset !== null,
+            () => load(true),
+          );
+        return section;
+      }
+
       if (result && 'page' in result) {
         const page: RuntimePage = result;
         section.append(
