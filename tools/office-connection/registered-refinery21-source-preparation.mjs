@@ -154,7 +154,7 @@ export async function prepareRegisteredRefinery21Sources(input) {
           throw new AggregateError(
             [failure, restore],
             'REFINERY_REUSE_SOURCE_AND_ROLE_RESTORE_FAILED',
-            { cause: failure },
+            { cause: restore },
           );
         throw restore;
       }
