@@ -48,7 +48,7 @@ begin
   if c.command_type='CORE_FINANCE_BUDGET_APPROPRIATION_V1'theN
    if c.office_id is distinct from 'FINANCE'or intent->>'operation'not in('SET_ENVELOPE','APPROVE_NEW_LINE')then raise exception 'MIXED_MATCH_UNKNOWN_BUDGET_OPERATION'using errcode='23514';end if;
    expected_count:=case when intent->>'operation'='SET_ENVELOPE'then 1 else 3 end;
-  elsif c.command_type in('POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1','CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1')then
+  elsif c.command_type in('POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1','CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1','CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1')then
    if c.office_id is distinct from (case when c.command_type='POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'then 'FINANCE'else'SOCIAL'end) then raise exception 'MIXED_MATCH_OFFICE_MISMATCH'using errcode='23514';end if;
   elsif c.command_type='CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1'then
    if c.office_id is not null then raise exception 'MIXED_MATCH_AUTOMATIC_FAMILY_REQUIRED'using errcode='23514';end if;
@@ -56,11 +56,15 @@ begin
   if jsonb_array_length(r.event_ids)<>expected_count then raise exception 'MIXED_MATCH_EVENT_GROUP_INCOMPLETE'using errcode='23514';end if;
   evs:='[]';idx:=0;
   for e in select x.* from world_v2.authoritative_event x join jsonb_array_elements_text(r.event_ids)with ordinality ids(id,n)on x.event_id=ids.id where x.world_id=p_world order by ids.n loop
-   expected_type:=case c.command_type when 'CORE_FINANCE_BUDGET_APPROPRIATION_V1'then case when expected_count=1 then'FINANCE_NATIVE_BUDGET_ENVELOPE_SET_V1'when idx=0 then'FINANCE_NATIVE_BUDGET_LINE_CREATED_V1'when idx=1 then'FINANCE_NATIVE_BUDGET_APPROPRIATED_V1'else'FINANCE_NATIVE_BUDGET_LINE_INITIALIZED_V1'end when'POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'then'POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_V1'when'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'then'SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'when'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1'then'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1'else'SOCIAL_JOB_MATCH_SETTLED_V1'end;
+   expected_type:=case c.command_type when 'CORE_FINANCE_BUDGET_APPROPRIATION_V1'then case when expected_count=1 then'FINANCE_NATIVE_BUDGET_ENVELOPE_SET_V1'when idx=0 then'FINANCE_NATIVE_BUDGET_LINE_CREATED_V1'when idx=1 then'FINANCE_NATIVE_BUDGET_APPROPRIATED_V1'else'FINANCE_NATIVE_BUDGET_LINE_INITIALIZED_V1'end when'POSTWAR_DAY_ONE_TREASURY_FX_SPOT_V1'then'POSTWAR_DAY_ONE_TREASURY_FX_SETTLED_V1'when'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'then'SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'when'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1'then'SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1'when'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1'then'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1'else'SOCIAL_JOB_MATCH_SETTLED_V1'end;
    byte_count:=byte_count+octet_length(e.canonical_payload)+octet_length(c.canonical_payload);
    if byte_count>2097152 or octet_length(e.canonical_payload)>65536 or octet_length(c.canonical_payload)>16384 or e.event_sequence<>seq+idx+1 or e.world_version<>r.world_version_after or e.causation_command_id<>c.command_id or e.event_type<>expected_type or e.sim_time<>c.sim_time or e.correlation_id<>c.correlation_id or e.corrects_event_id is not null or e.schema_version<>'event-v1'or e.canonical_payload<>world_v2.canonical_json(e.canonical_payload::jsonb)then raise exception 'MIXED_MATCH_EVENT_SCOPE_OR_SEQUENCE_CHANGED'using errcode='23514';end if;
    ev:=jsonb_build_object('causationCommandId',e.causation_command_id,'correlationId',e.correlation_id,'correctsEventId',e.corrects_event_id,'eventId',e.event_id,'eventType',e.event_type,'canonicalPayload',e.canonical_payload,'schemaVersion',e.schema_version,'sequence',e.event_sequence::text,'simTime',e.sim_time::text,'worldId',p_world,'worldVersion',e.world_version::text,'fingerprint',e.event_fingerprint,'payloadHash',e.payload_sha256,'recordedAtReal',to_char(e.recorded_at_real at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'));
    if e.payload_sha256 is distinct from 'sha256:'||world_v2.authoritative_sha256(E'SHA-256\n'||e.canonical_payload)or e.event_fingerprint is distinct from 'sha256:'||world_v2.authoritative_sha256(E'SHA-256\n'||world_v2.canonical_json(ev-'fingerprint'-'payloadHash'-'recordedAtReal'))then raise exception 'MIXED_MATCH_EVENT_HASH_CHANGED'using errcode='23514';end if;
+   if c.command_type='CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1'then
+    if to_regprocedure('world_v2.postwar_social_employment_creation_effect_scoped(text,text,jsonb,jsonb,bigint)')is null then raise exception 'MIXED_MATCH_CREATION_ORIGINALS_REQUIRED'using errcode='55000';end if;
+    if not world_v2.postwar_social_employment_creation_effect_scoped(p_world,c.country_id,cmd,e.canonical_payload::jsonb,e.event_sequence)then raise exception 'MIXED_MATCH_CREATION_ORIGINALS_INVALID'using errcode='23514';end if;
+   end if;
    evs:=evs||jsonb_build_array(ev);idx:=idx+1;
   end loop;
   if idx<>expected_count then raise exception 'MIXED_MATCH_EVENT_ROWS_INCOMPLETE'using errcode='23514';end if;

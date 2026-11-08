@@ -95,6 +95,10 @@ declare s jsonb;facts jsonb;intent jsonb;wage jsonb;fund jsonb;offer jsonb;origi
  select x.scope_document::jsonb into s from world_v2.finance_budget_mixed_social_original x where x.world_id=p_world and x.country_id=p_country;
  if not found or p_event->'command'->>'countryId'is distinct from p_country then return false;end if;
  facts:=p_event->'readFacts';intent:=(p_command->>'canonicalPayload')::jsonb;
+ if p_type='SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1'then
+  if to_regprocedure('world_v2.postwar_social_employment_creation_effect_scoped(text,text,jsonb,jsonb,bigint)')is null then return false;end if;
+  return world_v2.postwar_social_employment_creation_effect_scoped(p_world,p_country,p_command,p_event,p_sequence);
+ end if;
  if p_type='SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'then
   if p_event->>'schemaVersion'is distinct from 'social-employment-position-offer-event-v1'or p_command->>'commandType'is distinct from 'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'or p_command->>'officeId'is distinct from 'SOCIAL'then return false;end if;
   select x into wage from jsonb_array_elements(s->'wages')x where x->>'positionId'=facts->'wageSchedule'->>'scheduleId';
@@ -130,7 +134,13 @@ declare s jsonb;facts jsonb;intent jsonb;wage jsonb;fund jsonb;offer jsonb;origi
  position_id:=intent->>'positionId';pool_id:=intent->>'servicePoolId';location_id:=intent->>'locationId';offer:=facts->'offer';
  if facts->'populationAvailability'is distinct from s->'populationAvailability'or facts->'minimumWage'is distinct from s->'minimumWage'
  or offer->>'countryId'is distinct from p_country or offer->>'positionId'is distinct from position_id or offer->>'locationId'is distinct from location_id
- or not exists(select 1 from jsonb_array_elements(s->'servicePools')p where p->>'poolId'=pool_id and p->>'countryId'=p_country and p->>'locationId'=location_id and p->>'skill'=intent->>'skill')then return false;end if;
+ then return false;end if;
+ if not exists(select 1 from jsonb_array_elements(s->'servicePools')p where p->>'poolId'=pool_id and p->>'countryId'=p_country and p->>'locationId'=location_id and p->>'skill'=intent->>'skill')then
+  if to_regprocedure('world_v2.postwar_social_created_pool(text,text,text,bigint)')is null then return false;end if;
+  original_offer:=world_v2.postwar_social_created_pool(p_world,p_country,pool_id,p_sequence);
+  if original_offer is null or original_offer->>'countryId'is distinct from p_country or original_offer->>'locationId'is distinct from location_id or original_offer->>'skill'is distinct from intent->>'skill'then return false;end if;
+ end if;
+
  select x into original_offer from jsonb_array_elements(s->'offers')x where x->>'positionId'=position_id;
  if original_offer is null then
   select (e.canonical_payload::jsonb)->'offer'into original_offer from world_v2.authoritative_event e join world_v2.command_submission c on c.world_id=e.world_id and c.command_id=e.causation_command_id where e.world_id=p_world and c.country_id=p_country and e.event_type='SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'and e.event_sequence<p_sequence and(e.canonical_payload::jsonb)->'offer'->>'positionId'=position_id;
@@ -148,10 +158,10 @@ returns void language plpgsql security definer set search_path=pg_catalog as $$
 declare scope world_v2.finance_budget_mixed_social_original%rowtype;r record;command jsonb;
 begin
  perform set_config('econmind.finance_budget_source_world',p_world,true);
- if p_country<>p_finance_country and not exists(select 1 from world_v2.authoritative_event e join world_v2.command_submission c on c.world_id=e.world_id and c.command_id=e.causation_command_id where e.world_id=p_world and c.country_id=p_country and e.event_type in('FINANCE_NATIVE_BUDGET_ENVELOPE_SET_V1','FINANCE_NATIVE_BUDGET_LINE_CREATED_V1','FINANCE_NATIVE_BUDGET_APPROPRIATED_V1','FINANCE_NATIVE_BUDGET_LINE_INITIALIZED_V1','SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1'))then raise exception 'BUDGET_MIXED_ACTUAL_PARTICIPANT_REQUIRED'using errcode='42501';end if;
+ if p_country<>p_finance_country and not exists(select 1 from world_v2.authoritative_event e join world_v2.command_submission c on c.world_id=e.world_id and c.command_id=e.causation_command_id where e.world_id=p_world and c.country_id=p_country and e.event_type in('FINANCE_NATIVE_BUDGET_ENVELOPE_SET_V1','FINANCE_NATIVE_BUDGET_LINE_CREATED_V1','FINANCE_NATIVE_BUDGET_APPROPRIATED_V1','FINANCE_NATIVE_BUDGET_LINE_INITIALIZED_V1','SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1'))then raise exception 'BUDGET_MIXED_ACTUAL_PARTICIPANT_REQUIRED'using errcode='42501';end if;
  select * into strict scope from world_v2.finance_budget_mixed_social_original x where x.world_id=p_world and x.country_id=p_country for share;
  if scope.seed_fingerprint<>p_seed_fingerprint or scope.admission_ref<>p_admission_ref or scope.canonical_seed_sha256<>p_canonical_sha256 or scope.scope_sha256<>encode(sha256(convert_to(scope.scope_document,'UTF8')),'hex')then raise exception 'BUDGET_MIXED_SCOPE_SOURCE_MISMATCH'using errcode='23514';end if;
- for r in select e.event_type,e.event_sequence,e.canonical_payload as event_payload,c.canonical_payload as command_payload,c.command_type,c.office_id from world_v2.authoritative_event e join world_v2.command_submission c on c.world_id=e.world_id and c.command_id=e.causation_command_id where e.world_id=p_world and c.country_id=p_country and e.event_type in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')order by e.event_sequence limit 257 loop
+ for r in select e.event_type,e.event_sequence,e.canonical_payload as event_payload,c.canonical_payload as command_payload,c.command_type,c.office_id from world_v2.authoritative_event e join world_v2.command_submission c on c.world_id=e.world_id and c.command_id=e.causation_command_id where e.world_id=p_world and c.country_id=p_country and e.event_type in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')order by e.event_sequence limit 257 loop
   if r.event_sequence>256 or octet_length(r.event_payload)>65536 or octet_length(r.command_payload)>16384 then raise exception 'BUDGET_MIXED_SCOPE_PREFIX_CAPACITY_EXCEEDED'using errcode='54000';end if;
   command:=jsonb_build_object('canonicalPayload',r.command_payload,'commandType',r.command_type,'officeId',r.office_id);
   if not world_v2.finance_budget_mixed_social_effect_scoped(p_world,p_country,r.event_type,command,r.event_payload::jsonb,r.event_sequence)then raise exception 'BUDGET_MIXED_ACTUAL_SOCIAL_SCOPE_INVALID'using errcode='23514';end if;

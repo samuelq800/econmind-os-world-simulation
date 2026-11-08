@@ -56,14 +56,21 @@ begin
  or (select max(x.event_sequence)from world_v2.authoritative_event x where x.world_id=p_world)<>h.event_sequence
  or (select count(*)from world_v2.command_receipt x where x.world_id=p_world and x.outcome='COMMITTED')<>h.world_version
  or (select count(distinct x.world_version_after)from world_v2.command_receipt x where x.world_id=p_world and x.outcome='COMMITTED'and x.world_version_before>=0 and x.world_version_after<=h.world_version)<>h.world_version
- or exists(select 1 from world_v2.authoritative_event x join world_v2.command_submission q on q.world_id=x.world_id and q.command_id=x.causation_command_id left join world_v2.command_receipt z on z.world_id=x.world_id and z.command_id=x.causation_command_id where x.world_id=p_world and(z.outcome is distinct from 'COMMITTED'or z.world_version_after is distinct from x.world_version or z.command_fingerprint<>q.command_fingerprint or z.sim_time<>x.sim_time or not(z.event_ids @>jsonb_build_array(x.event_id))or q.country_id<>p_country or x.corrects_event_id is not null or x.event_type not in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')))
+ or exists(select 1 from world_v2.authoritative_event x join world_v2.command_submission q on q.world_id=x.world_id and q.command_id=x.causation_command_id left join world_v2.command_receipt z on z.world_id=x.world_id and z.command_id=x.causation_command_id where x.world_id=p_world and(z.outcome is distinct from 'COMMITTED'or z.world_version_after is distinct from x.world_version or z.command_fingerprint<>q.command_fingerprint or z.sim_time<>x.sim_time or not(z.event_ids @>jsonb_build_array(x.event_id))or q.country_id<>p_country or x.corrects_event_id is not null or x.event_type not in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')))
  or exists(select 1 from world_v2.command_receipt z where z.world_id=p_world and z.outcome='COMMITTED' and z.event_ids is distinct from (select jsonb_agg(x.event_id order by x.event_sequence)from world_v2.authoritative_event x where x.world_id=p_world and x.causation_command_id=z.command_id))then return;end if;
+ -- CREATE has a supplementary actual-source contract. The legacy witness
+ -- may expose it only after independent complete-prefix source/effect checks.
+ if exists(select 1 from world_v2.authoritative_event where world_id=p_world and event_type='SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1')then
+  if to_regprocedure('world_v2.postwar_social_complete_prefix(text)')is null then return;end if;
+  perform 1 from world_v2.postwar_social_complete_prefix(p_world);
+ end if;
  select * into e from world_v2.authoritative_event where world_id=p_world and authoritative_event.event_sequence=h.event_sequence and authoritative_event.world_version=h.world_version;
  if not found or octet_length(e.canonical_payload)>1048576 then return;end if;
  select * into strict c from world_v2.command_submission where world_id=p_world and command_id=e.causation_command_id;
  select * into strict r from world_v2.command_receipt where world_id=p_world and command_id=e.causation_command_id;
  if r.event_ids<>jsonb_build_array(e.event_id)or c.expected_world_version is distinct from h.world_version-1 then return;end if;
  if e.event_type='SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'then key:='SOCIAL_POSITION_LIFECYCLE_'||p_country;expected_command:='CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1';expected_schema:='social-employment-position-offer-event-v1';
+ elsif e.event_type='SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1'then key:='SOCIAL_EMPLOYMENT_SERVICE_'||p_country;expected_command:='CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1';expected_schema:='social-employment-service-created-v1';
  elsif e.event_type='SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1'then key:='SOCIAL_EMPLOYMENT_SERVICE_'||p_country;expected_command:='CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1';expected_schema:='social-employment-service-event-v1';
  elsif e.event_type='SOCIAL_JOB_MATCH_SETTLED_V1'then key:='SOCIAL_EMPLOYMENT_SERVICE_'||p_country;expected_command:='CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1';expected_schema:='social-employment-service-event-v1';else return;end if;
  select * into m from world_v2.current_materialization where world_id=p_world and materialization_key=key;

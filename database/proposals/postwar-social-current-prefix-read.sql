@@ -119,6 +119,10 @@ declare s jsonb;facts jsonb;intent jsonb;wage jsonb;fund jsonb;offer jsonb;origi
  select x.scope_document::jsonb into s from world_v2.postwar_social_prefix_scope x where x.world_id=p_world and x.country_id=p_country;
  if not found or p_event->'command'->>'countryId'is distinct from p_country then return false;end if;
  facts:=p_event->'readFacts';intent:=(p_command->>'canonicalPayload')::jsonb;
+ if p_type='SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1'then
+  if to_regprocedure('world_v2.postwar_social_employment_creation_effect_scoped(text,text,jsonb,jsonb,bigint)')is null then return false;end if;
+  return world_v2.postwar_social_employment_creation_effect_scoped(p_world,p_country,p_command,p_event,p_sequence);
+ end if;
  if p_type='SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'then
   if p_event->>'schemaVersion'is distinct from 'social-employment-position-offer-event-v1'or p_command->>'commandType'is distinct from 'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1'or p_command->>'officeId'is distinct from 'SOCIAL'then return false;end if;
   select x into wage from jsonb_array_elements(s->'wages')x where x->>'positionId'=facts->'wageSchedule'->>'scheduleId';
@@ -154,7 +158,13 @@ declare s jsonb;facts jsonb;intent jsonb;wage jsonb;fund jsonb;offer jsonb;origi
  position_id:=intent->>'positionId';pool_id:=intent->>'servicePoolId';location_id:=intent->>'locationId';offer:=facts->'offer';
  if facts->'populationAvailability'is distinct from s->'populationAvailability'or facts->'minimumWage'is distinct from s->'minimumWage'
  or offer->>'countryId'is distinct from p_country or offer->>'positionId'is distinct from position_id or offer->>'locationId'is distinct from location_id
- or not exists(select 1 from jsonb_array_elements(s->'servicePools')p where p->>'poolId'=pool_id and p->>'countryId'=p_country and p->>'locationId'=location_id and p->>'skill'=intent->>'skill')then return false;end if;
+ then return false;end if;
+ if not exists(select 1 from jsonb_array_elements(s->'servicePools')p where p->>'poolId'=pool_id and p->>'countryId'=p_country and p->>'locationId'=location_id and p->>'skill'=intent->>'skill')then
+  if to_regprocedure('world_v2.postwar_social_created_pool(text,text,text,bigint)')is null then return false;end if;
+  original_offer:=world_v2.postwar_social_created_pool(p_world,p_country,pool_id,p_sequence);
+  if original_offer is null or original_offer->>'countryId'is distinct from p_country or original_offer->>'locationId'is distinct from location_id or original_offer->>'skill'is distinct from intent->>'skill'then return false;end if;
+ end if;
+
  select x into original_offer from jsonb_array_elements(s->'offers')x where x->>'positionId'=position_id;
  if original_offer is null then
   select (e.canonical_payload::jsonb)->'offer'into original_offer from world_v2.authoritative_event e join world_v2.command_submission c on c.world_id=e.world_id and c.command_id=e.causation_command_id where e.world_id=p_world and c.country_id=p_country and e.event_type='SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'and e.event_sequence<p_sequence and(e.canonical_payload::jsonb)->'offer'->>'positionId'=position_id;
@@ -182,7 +192,7 @@ begin
   if r.world_version_before<>wv or r.world_version_after<>wv+1 or c.expected_world_version is distinct from wv or r.transition_id<>c.command_id or r.command_fingerprint<>c.command_fingerprint or r.sim_time<>c.sim_time or r.idempotency_key is distinct from c.idempotency_key or jsonb_array_length(r.event_ids)<>1 then raise exception 'POSTWAR_PREFIX_RECEIPT_OR_WORLD_GAP'using errcode='55000';end if;
   select * into strict e from world_v2.authoritative_event x where x.world_id=p_world and x.event_id=r.event_ids->>0;
   bytes:=bytes+octet_length(e.canonical_payload)+octet_length(c.canonical_payload);
-  if bytes>4194304 or e.event_sequence<>event_seq+1 or e.world_version<>r.world_version_after or e.causation_command_id<>c.command_id or e.sim_time<>c.sim_time or e.correlation_id<>c.correlation_id or e.corrects_event_id is not null or e.event_type not in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')then raise exception 'POSTWAR_PREFIX_UNKNOWN_EFFECT_OR_SEQUENCE'using errcode='55000';end if;
+  if bytes>4194304 or e.event_sequence<>event_seq+1 or e.world_version<>r.world_version_after or e.causation_command_id<>c.command_id or e.sim_time<>c.sim_time or e.correlation_id<>c.correlation_id or e.corrects_event_id is not null or e.event_type not in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')then raise exception 'POSTWAR_PREFIX_UNKNOWN_EFFECT_OR_SEQUENCE'using errcode='55000';end if;
   command:=jsonb_build_object('actorId',c.actor_id,'authSubject',c.auth_subject::text,'commandId',c.command_id,'commandType',c.command_type,'correlationId',c.correlation_id,'countryId',c.country_id,'expectedWorldVersion',c.expected_world_version::text,'idempotencyKey',c.idempotency_key,'officeId',c.office_id,'canonicalPayload',c.canonical_payload,'schemaVersion',c.schema_version,'simTime',c.sim_time::text,'submittedAtReal',to_char(c.submitted_at_real at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),'worldId',p_world,'fingerprint',c.command_fingerprint,'payloadHash',c.payload_sha256);
   command_intent:=command-'fingerprint'-'payloadHash'-'correlationId'-'submittedAtReal';
   ep:=e.canonical_payload::jsonb;
@@ -214,7 +224,7 @@ returns table(state jsonb,binding jsonb,origin_world_version bigint,origin_event
 language plpgsql security definer set search_path=pg_catalog as $$
 declare e record;m record;ep jsonb;st jsonb;key text;begin
  perform set_config('econmind.postwar_projection_world',p_world,true);
- select e0.* into e from world_v2.authoritative_event e0 join world_v2.command_submission c on c.world_id=e0.world_id and c.command_id=e0.causation_command_id where e0.world_id=p_world and c.country_id=p_country and e0.event_type in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')order by e0.event_sequence desc limit 1;
+ select e0.* into e from world_v2.authoritative_event e0 join world_v2.command_submission c on c.world_id=e0.world_id and c.command_id=e0.causation_command_id where e0.world_id=p_world and c.country_id=p_country and e0.event_type in('SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1','SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1','SOCIAL_JOB_MATCH_SETTLED_V1')order by e0.event_sequence desc limit 1;
  if not found or octet_length(e.canonical_payload)>1048576 then return;end if;
  key:=case when e.event_type='SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'then'SOCIAL_POSITION_LIFECYCLE_'else'SOCIAL_EMPLOYMENT_SERVICE_'end||p_country;
  select * into m from world_v2.current_materialization x where x.world_id=p_world and x.materialization_key=key;
