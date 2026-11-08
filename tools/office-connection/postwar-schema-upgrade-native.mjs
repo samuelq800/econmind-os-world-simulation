@@ -135,6 +135,23 @@ export async function runSchemaUpgradeNative({
       ...selected,
     ]),
   ];
+  // The real child-source phase registers Captain publication before the
+  // complete history-reader phase. Empty schema rehearsals need that same DDL
+  // prerequisite even though they never publish a World/source record.
+  const child = oldPlan.match(
+    /const childSourceNames = new Set\(\[([\s\S]*?)\]\);/u,
+  )?.[1];
+  assert(child?.includes("'postwar-captain-source-publication'"));
+  const captainIndex = names.indexOf('postwar-captain-source-publication');
+  names.splice(captainIndex, 1);
+  names.splice(
+    names.indexOf('central-bank-omo-history-read'),
+    0,
+    'postwar-captain-source-publication',
+  );
+  report.dependencyBootstrap = [
+    'old child-source Captain publication before Central Bank history',
+  ];
   assert.equal(names.length, 76);
   const oldSources = names.map((name) => {
     const p = 'database/proposals/' + name + '.sql',
