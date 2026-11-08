@@ -12,6 +12,93 @@ import {
   cbAtomicTestSha as sha,
 } from '../support/postwar-central-bank-omo-atomic-fixture.js';
 import { DurableV08LedgerLineageReader } from '../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.js';
+import type { Pool } from 'pg';
+import {
+  PostgresSqlDatabase,
+  PostgresTransactionError,
+} from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
+import { createPostwarCentralBankOmoWorldRuntime } from '../../apps/world-worker/src/persistence/postwar-central-bank-omo-world-runtime.js';
+
+/** Real PostgresSqlDatabase begin/commit/rollback/error wrapping over the
+ * existing actual embedded SQL fixture. This is not a native pg transport. */
+function postgresTransport(
+  f: Awaited<ReturnType<typeof createPostwarCentralBankWorldAtomicFixture>>,
+) {
+  let failure:
+    'NONE' | 'ROLLBACK' | 'COMMIT' | 'PERMISSION' | 'CONNECTION' | 'RESTORE' =
+    'NONE';
+  const headers: string[] = [];
+  const releases: (Error | undefined)[] = [];
+  const fault = new Error('TEST_ONLY transport failure');
+  const permission = Object.assign(new Error('TEST_ONLY forbidden header'), {
+    code: '42501',
+  });
+  const client = {
+    async query(sql: string, parameters: unknown[] = []) {
+      if (sql === 'begin') {
+        await f.db.exec(
+          'begin isolation level repeatable read;set local role cb_omo_atomic_test_worker',
+        );
+        return { rows: [], rowCount: 0 };
+      }
+      if (sql.includes('lock_central_bank_omo_startup_header')) {
+        headers.push(String(parameters[1]));
+        if (failure === 'PERMISSION') throw permission;
+        if (failure === 'CONNECTION') throw fault;
+      }
+      if (
+        sql === 'rollback to savepoint cb_omo_source_scope' &&
+        failure === 'RESTORE'
+      )
+        throw fault;
+      const result = await f.db.query(sql, parameters);
+      if (
+        (sql === 'commit' && failure === 'COMMIT') ||
+        (sql === 'rollback' && failure === 'ROLLBACK')
+      )
+        throw fault;
+      return {
+        rows: result.rows,
+        rowCount: result.affectedRows ?? result.rows.length,
+      };
+    },
+    release(error?: Error) {
+      releases.push(error);
+    },
+  };
+  const pool = { connect: async () => client } as unknown as Pool;
+  return {
+    database: new PostgresSqlDatabase(pool),
+    headers,
+    releases,
+    fault,
+    permission,
+    setFailure(value: typeof failure) {
+      failure = value;
+    },
+  };
+}
+
+function wrappedRuntime(
+  f: Awaited<ReturnType<typeof createPostwarCentralBankWorldAtomicFixture>>,
+  transport: ReturnType<typeof postgresTransport>,
+  countries: readonly string[],
+) {
+  return createPostwarCentralBankOmoWorldRuntime({
+    database: transport.database,
+    worldId: f.seed.worldId,
+    workerId: 'WORKER_TEST_ONLY_CB1',
+    workerRole: 'cb_omo_atomic_test_worker',
+    mode: 'TEST_ONLY_LOCAL',
+    countryIds: countries,
+    clock: f.clock,
+    workerPool: {
+      connect: async () => {
+        throw Error('UNUSED_POOL');
+      },
+    } as Pick<Pool, 'connect'>,
+  });
+}
 function reCountry(c: C.CanonicalCommand, country: string) {
   return C.parseCanonicalCommand(
     {
@@ -34,6 +121,128 @@ function reCountry(c: C.CanonicalCommand, country: string) {
   );
 }
 describe('genuine finite World CB runtime country selection and current Atomic cutoff', () => {
+  it('preserves C1/C2 bound and C3 missing through actual Postgres transaction wrapping without writes or false binding', async () => {
+    const f = await createPostwarCentralBankWorldAtomicFixture();
+    const transport = postgresTransport(f);
+    const runtime = wrappedRuntime(f, transport, [
+      'COUNTRY_01',
+      'COUNTRY_02',
+      'COUNTRY_03',
+    ]);
+    try {
+      const before = await f.db.query('select * from world_v2.world_head');
+      await expect(runtime.prepare(f.seed)).resolves.toBeUndefined();
+      expect(transport.headers).toEqual([
+        'COUNTRY_01',
+        'COUNTRY_02',
+        'COUNTRY_03',
+      ]);
+      await runtime.preflight(f.command, at);
+      // The successfully bound country does not re-run startup binding.
+      expect(transport.headers.filter((x) => x === 'COUNTRY_01')).toHaveLength(
+        1,
+      );
+      for (let n = 0; n < 2; n++) {
+        await expect(
+          runtime.preflight(reCountry(f.command, 'COUNTRY_03'), at),
+        ).rejects.toMatchObject({
+          missing: ['CB_OMO_INDEPENDENT_SOURCE_ADOPTION_REQUIRED'],
+        });
+      }
+      expect(transport.headers.filter((x) => x === 'COUNTRY_03')).toHaveLength(
+        3,
+      );
+      expect(
+        (await f.db.query('select * from world_v2.world_head')).rows,
+      ).toEqual(before.rows);
+      expect(
+        (
+          await f.db.query(
+            'select count(*)::int as count from world_v2.authoritative_event',
+          )
+        ).rows,
+      ).toEqual([{ count: 0 }]);
+      expect(transport.releases).toHaveLength(6);
+      expect(
+        transport.releases
+          .filter((error) => error !== undefined)
+          .every(
+            (e) =>
+              e instanceof PostgresTransactionError &&
+              e.outcome === 'ROLLED_BACK',
+          ),
+      ).toBe(true);
+    } finally {
+      await runtime.close();
+      await f.runtime.close();
+      await f.db.close();
+    }
+  });
+
+  it('does not classify permissions, connection, scope restoration or uncertain rollback/commit as source missing', async () => {
+    const f = await createPostwarCentralBankWorldAtomicFixture();
+    const transport = postgresTransport(f);
+    try {
+      for (const [failure, country, outcome] of [
+        ['ROLLBACK', 'COUNTRY_03', 'ROLLBACK_UNCONFIRMED'],
+        ['COMMIT', 'COUNTRY_01', 'COMMIT_OUTCOME_UNKNOWN'],
+        ['PERMISSION', 'COUNTRY_01', 'ROLLED_BACK'],
+        ['CONNECTION', 'COUNTRY_01', 'ROLLED_BACK'],
+        ['RESTORE', 'COUNTRY_03', 'ROLLED_BACK'],
+      ] as const) {
+        const runtime = wrappedRuntime(f, transport, [country]);
+        transport.setFailure(failure);
+        try {
+          const error = await runtime.prepare(f.seed).catch((e: unknown) => e);
+          expect(error).toBeInstanceOf(PostgresTransactionError);
+          expect(error).toMatchObject({ outcome });
+          expect(error).not.toHaveProperty('missing');
+          if (failure === 'PERMISSION')
+            expect((error as PostgresTransactionError).cause).toBe(
+              transport.permission,
+            );
+          if (failure === 'CONNECTION')
+            expect((error as PostgresTransactionError).cause).toBe(
+              transport.fault,
+            );
+          if (failure === 'RESTORE')
+            expect((error as PostgresTransactionError).cause).toBeInstanceOf(
+              AggregateError,
+            );
+          // Failed/uncertain startup never installs the opening. A new use
+          // must repeat the actual header RPC, including after COMMIT unknown.
+          transport.setFailure('PERMISSION');
+          const reads = transport.headers.length;
+          await expect(
+            runtime.preflight(reCountry(f.command, country), at),
+          ).rejects.toMatchObject({
+            outcome: 'ROLLED_BACK',
+            cause: transport.permission,
+          });
+          expect(transport.headers).toHaveLength(reads + 1);
+        } finally {
+          await runtime.close();
+        }
+      }
+      expect(
+        (
+          await f.db.query(
+            'select world_version::text as version from world_v2.world_head',
+          )
+        ).rows,
+      ).toEqual([{ version: '0' }]);
+      expect(
+        (
+          await f.db.query(
+            'select count(*)::int as count from world_v2.authoritative_event',
+          )
+        ).rows,
+      ).toEqual([{ count: 0 }]);
+    } finally {
+      await f.runtime.close();
+      await f.db.close();
+    }
+  });
   it('commits country 01 then country 02 in one global prefix, refuses missing/unbound countries and recovers FINAL after revocation without duplicates', async () => {
     const f = await createPostwarCentralBankWorldAtomicFixture();
     try {

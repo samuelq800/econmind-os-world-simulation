@@ -60,6 +60,7 @@ import {
   type CentralBankOmoCustodyBinding,
 } from './postgres-central-bank-omo-originals.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import { PostgresTransactionError } from './postgres-sql-database.js';
 import {
   prepareFinanceSocialLedgerFromOpening,
   replayPreparedFinanceSocialFxLedger,
@@ -595,42 +596,61 @@ export function createPostwarCentralBankOmoRuntime(config: {
       baseline.financial.worldId !== config.worldId
     )
       invalid('GENUINE_SAME_WORLD_OPENING_BASE_REQUIRED');
-    const rawSHA256 = await config.database.transaction((tx) =>
-      inReader(tx, async () => {
-        let h;
-        try {
-          h = await tx.query<Record<string, unknown>>(
-            'select * from world_v2.lock_central_bank_omo_startup_header($1,$2)',
-            [config.worldId, config.countryId],
-          );
-        } catch (error: unknown) {
+    let headerMissing: CentralBankOmoOriginalsMissing | undefined;
+    const rawSHA256 = await config.database
+      .transaction((tx) =>
+        inReader(tx, async () => {
+          let h;
+          try {
+            h = await tx.query<Record<string, unknown>>(
+              'select * from world_v2.lock_central_bank_omo_startup_header($1,$2)',
+              [config.worldId, config.countryId],
+            );
+          } catch (error: unknown) {
+            if (
+              error &&
+              typeof error === 'object' &&
+              'code' in error &&
+              'message' in error &&
+              error.code === '55000' &&
+              /^CB_OMO_[A-Z_]+$/u.test(String(error.message))
+            ) {
+              headerMissing = new CentralBankOmoOriginalsMissing([
+                String(error.message),
+              ]);
+              throw headerMissing;
+            }
+            throw error;
+          }
+          const r = h.rows[0];
           if (
-            error &&
-            typeof error === 'object' &&
-            'code' in error &&
-            'message' in error &&
-            error.code === '55000' &&
-            /^CB_OMO_[A-Z_]+$/u.test(String(error.message))
+            h.rows.length !== 1 ||
+            !r ||
+            r.seed_id !== baseline.seedId ||
+            r.seed_fingerprint !== baseline.seedFingerprint ||
+            r.replay_binding !== baseline.replayBinding ||
+            typeof r.canonical_seed_sha256 !== 'string' ||
+            !/^[a-f0-9]{64}$/u.test(r.canonical_seed_sha256) ||
+            (baseline.rawSHA256 !== null &&
+              r.canonical_seed_sha256 !== baseline.rawSHA256)
           )
-            throw new CentralBankOmoOriginalsMissing([String(error.message)]);
-          throw error;
-        }
-        const r = h.rows[0];
+            invalid('STORED_OPENING_HEADER_DIFFERS');
+          return r.canonical_seed_sha256;
+        }),
+      )
+      .catch((error: unknown) => {
+        // Only this header's precise missing result may survive a confirmed
+        // rollback. Restoration failures and uncertain transaction outcomes
+        // retain their original failure; neither establishes a bound source.
         if (
-          h.rows.length !== 1 ||
-          !r ||
-          r.seed_id !== baseline.seedId ||
-          r.seed_fingerprint !== baseline.seedFingerprint ||
-          r.replay_binding !== baseline.replayBinding ||
-          typeof r.canonical_seed_sha256 !== 'string' ||
-          !/^[a-f0-9]{64}$/u.test(r.canonical_seed_sha256) ||
-          (baseline.rawSHA256 !== null &&
-            r.canonical_seed_sha256 !== baseline.rawSHA256)
+          headerMissing &&
+          error instanceof PostgresTransactionError &&
+          error.outcome === 'ROLLED_BACK' &&
+          error.cause === headerMissing
         )
-          invalid('STORED_OPENING_HEADER_DIFFERS');
-        return r.canonical_seed_sha256;
-      }),
-    );
+          throw headerMissing;
+        throw error;
+      });
     if (
       prepared &&
       (prepared.seedFingerprint !== baseline.seedFingerprint ||
