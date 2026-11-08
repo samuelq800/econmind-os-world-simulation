@@ -704,26 +704,49 @@ describe('posting-aware mixed current page wire', () => {
     'wrong-head',
     'missing-postings',
     'private-extra-field',
+    'valid-paged-cb',
+    'paged-cb-missing-proof',
+    'paged-cb-wrong-frame-count',
+    'paged-cb-wrong-head',
+    'paged-cb-wrong-country',
   ])(
-    'checks Finance actual balances and complete mixed coverage (%s)',
+    'checks financial balances and complete mixed coverage (%s)',
     async (fault) => {
       const f = fixture();
-      f.config.identity.officeId = 'FINANCE';
+      const paged = fault.includes('paged-cb');
+      const office = paged ? 'CENTRAL_BANK' : 'FINANCE';
+      f.config.identity.officeId = office;
       const original = f.body('ledger-balances', 0, 1);
       original.authority.readback.worldVersion = '7';
       original.authority.readback.eventSequence = '12';
+      const pageProof = {
+        schemaVersion: 'postwar-complete-page-proof-v1',
+        hashAlgorithm: 'COMPLETE_CANONICAL_PAGE_CHAINS_SHA256_V1',
+        pageCount: '1',
+        frameCount: '7',
+      };
+      const currentCoverage: Record<string, unknown> = {
+        ...coverage(f.config.identity.countryId),
+        ...(paged
+          ? {
+              schemaVersion: 'postwar-financial-current-page-chain-coverage-v3',
+              reducerVersion: 'POSTWAR_COMPLETE_MIXED_PAGED_PREFIX_V1',
+              pageProof,
+            }
+          : {}),
+      };
       const wire = {
         ...original,
         source: {
           ...original.source,
-          officeId: 'FINANCE',
+          officeId: office,
           dataNature: 'ADMITTED_CURRENT_FINANCIAL_MIXED_POSTING_PREFIX',
           worldVersion: '7',
           eventSequence: '12',
           originWorldVersion: '0',
           originEventSequence: '0',
           observedHead: { worldVersion: '7', eventSequence: '12' },
-          currentFinancialCoverage: coverage(f.config.identity.countryId),
+          currentFinancialCoverage: currentCoverage,
         },
         rows: [
           {
@@ -731,7 +754,7 @@ describe('posting-aware mixed current page wire', () => {
             countryId: f.config.identity.countryId,
             accountId: 'TEST_GOV_GCU',
             ownerEntityId: 'TEST_GOV',
-            ownerKind: 'GOV',
+            ownerKind: paged ? 'BANK' : 'GOV',
             currency: 'GCU',
             accountClass: 'CASH',
             claimId: null,
@@ -751,11 +774,20 @@ describe('posting-aware mixed current page wire', () => {
         );
       if (fault === 'private-extra-field')
         Object.assign(wire.rows[0]!, { privateOriginalLedger: {} });
+      if (fault === 'paged-cb-missing-proof')
+        Reflect.deleteProperty(currentCoverage, 'pageProof');
+      if (fault === 'paged-cb-wrong-frame-count') pageProof.frameCount = '6';
+      if (fault === 'paged-cb-wrong-head')
+        currentCoverage.globalWorldVersion = '6';
+      if (fault === 'paged-cb-wrong-country')
+        currentCoverage.countryId = 'COUNTRY_OTHER';
       const client = createPostwarRuntimeClient(f.config, {
         fetcher: async () => Response.json(wire),
       });
       const result = await client.readPage('ledger-balances', requestId);
-      expect(result.status).toBe(fault === 'valid' ? 'PAGE' : 'UNAVAILABLE');
+      expect(result.status).toBe(
+        ['valid', 'valid-paged-cb'].includes(fault) ? 'PAGE' : 'UNAVAILABLE',
+      );
       client.disconnect();
     },
   );

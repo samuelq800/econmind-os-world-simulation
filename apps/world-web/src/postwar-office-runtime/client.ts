@@ -39,6 +39,8 @@ import {
 } from '@econmind/core/postwar-social-mixed-current-contract';
 import {
   POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE,
+  POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
+  POSTWAR_FINANCIAL_PAGED_COVERAGE_SCHEMA,
   parsePostwarCentralBankOpeningInstruments,
   parsePostwarFinancialMixedCoverage,
   parsePostwarMixedFinancialBalanceRow,
@@ -188,7 +190,8 @@ function financialCoverageMatches(
 ): boolean {
   const coverage = row(source.currentFinancialCoverage);
   if (
-    coverage?.schemaVersion === 'postwar-financial-current-prefix-coverage-v2'
+    coverage?.schemaVersion === POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA ||
+    coverage?.schemaVersion === POSTWAR_FINANCIAL_PAGED_COVERAGE_SCHEMA
   ) {
     try {
       parsePostwarFinancialMixedCoverage(coverage, {
