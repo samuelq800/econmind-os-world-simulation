@@ -453,7 +453,7 @@ export function installOfficeCommand(
       const target =
         event.target instanceof Element
           ? event.target.closest<HTMLElement>(
-              '[data-module-card="captain-8"],[data-cmd="module"][data-id="captain-8"],[data-cmd="country-module"][data-id="captain-8"]',
+              '[data-module-card="captain-8"],[data-cmd="module"][data-id="captain-8"],[data-cmd="country-module"][data-id="captain-8"],[data-cmd="country-module"][data-module="captain-8"],[data-cmd="country-room"][data-module="captain-8"]',
             )
           : null;
       if (

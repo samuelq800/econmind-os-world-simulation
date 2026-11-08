@@ -1,6 +1,7 @@
 /** OFFLINE TEST_ONLY shipped client/view protocol. Intercepted transport and DOM
  * do not establish actual SQL publication, authority, or native browser PASS. */
 import { afterEach, describe, it, expect, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   POSTWAR_CAPTAIN_CURRENT_NATURE,
   POSTWAR_CAPTAIN_OPENING_NATURE,
@@ -343,119 +344,169 @@ function openingWire(w: ReturnType<ReturnType<typeof fixture>['wire']>) {
   };
 }
 describe('Captain current runtime browser-safe wire and view', () => {
-  it('opens the source form from the exact Captain-8 catalog entry and leaves other catalog or unbound entries on their existing closed path', async () => {
-    vi.stubGlobal(
-      'MutationObserver',
-      class {
-        observe() {}
-      },
-    );
-    vi.stubGlobal('Element', HostElement);
-    class CatalogDocument extends HostDocument {
-      capture: ((event: MouseEvent) => void) | null = null;
-      addEventListener(key: string, listener: (event: MouseEvent) => void) {
-        if (key === 'click') this.capture = listener;
-      }
-    }
-    const f = commandFixture(),
-      doc = new CatalogDocument('captain'),
-      api = installOfficeCommand(
-        doc as unknown as Document,
-        { addEventListener() {} } as unknown as Window,
-        (binding, view) =>
-          createOfficeCommandController(binding, view, {
-            fetcher: f.fetcher,
-            requestId: () => requestId,
-          }),
-      );
-    const module = doc.createElement('button') as HostElement & {
-      closest(selector: string): HostElement | null;
-    };
-    module.dataset.cmd = 'country-module';
-    module.dataset.id = 'captain-8';
-    module.closest = (selector) =>
-      selector.includes('[data-cmd="country-module"][data-id="captain-8"]') &&
-      module.dataset.id === 'captain-8'
-        ? module
-        : null;
-    doc.root.append(module);
-    let prevented = 0;
-    const click = () =>
-      doc.capture?.({
-        target: module,
-        preventDefault() {
-          prevented++;
+  it.each([
+    'country-module',
+    'country-room',
+    'legacy-country-module',
+    'module-card',
+  ] as const)(
+    'opens the source form from %s actual generated/compatible Captain-8 attributes and leaves other catalog or unbound entries closed',
+    async (entry) => {
+      vi.stubGlobal(
+        'MutationObserver',
+        class {
+          observe() {}
         },
-        stopImmediatePropagation() {},
-      } as unknown as MouseEvent);
-    click();
-    expect(prevented).toBe(0);
-    api.connect(f.binding);
-    module.dataset.id = 'captain-7';
-    click();
-    expect(prevented).toBe(0);
-    module.dataset.id = 'captain-8';
-    click();
-    await expect
-      .poll(() => api.getState().status)
-      .toBe('CURRENT_AUTHORIZED_HEAD');
-    expect(prevented).toBe(1);
-    const dialog = doc.root
-      .all()
-      .find((e) => Object.hasOwn(e.dataset, 'officeCommandDialog'))!;
-    expect(dialog.open).toBe(true);
-    const form = dialog
-      .all()
-      .find((e) => Object.hasOwn(e.dataset, 'captainCapitalForm'))!;
-    expect(form.textContent).toContain('Recorded basis / section 1');
-    expect(form.textContent).toContain('未分配／危机预留');
-    const fields: Record<string, string> = {
-      fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
-      toBucket: 'FISCAL_REFORM',
-      amount: '1',
-      reasonFactRef: allocationOptions.reasons[0]!.factRef,
-    };
-    for (const el of form.all())
-      if (el.dataset.captainCapitalField)
-        (el as HostElement & { value: string }).value =
-          fields[el.dataset.captainCapitalField]!;
-    form
-      .all()
-      .find((e) => Object.hasOwn(e.dataset, 'captainCapitalStage'))!
-      .click();
-    expect(api.getState().status).toBe('REVIEW_REQUIRED');
-    expect(api.getState().intent?.request.payload).toMatchObject({
-      fromBucket: fields.fromBucket,
-      reasonFactRef: fields.reasonFactRef,
-    });
-    expect(f.requests).toHaveLength(0);
-    expect(
-      dialog.all().find((e) => e.dataset.officeCommandAction === 'confirm')
-        ?.disabled,
-    ).toBe(true);
-    dialog
-      .all()
-      .find((e) => e.dataset.officeCommandAction === 'review')!
-      .click();
-    dialog
-      .all()
-      .find((e) => e.dataset.officeCommandAction === 'confirm')!
-      .click();
-    await expect.poll(() => api.getState().status).toBe('QUEUE_ACK');
-    expect(api.getState().receipt).toBeNull();
-    expect(dialog.textContent).not.toContain('COMMITTED');
-    dialog
-      .all()
-      .find((e) => e.dataset.officeCommandAction === 'recover')!
-      .click();
-    await expect.poll(() => api.getState().receipt?.outcome).toBe('COMMITTED');
-    expect(dialog.textContent).toContain('COMMITTED');
-    expect(f.requests).toHaveLength(1);
-    f.invalidate();
-    click();
-    expect(prevented).toBe(1);
-    expect(doc.root.textContent).not.toContain('Recorded basis / section 1');
-  });
+      );
+      vi.stubGlobal('Element', HostElement);
+      class CatalogDocument extends HostDocument {
+        capture: ((event: MouseEvent) => void) | null = null;
+        addEventListener(key: string, listener: (event: MouseEvent) => void) {
+          if (key === 'click') this.capture = listener;
+        }
+      }
+      const f = commandFixture(),
+        doc = new CatalogDocument('captain'),
+        api = installOfficeCommand(
+          doc as unknown as Document,
+          { addEventListener() {} } as unknown as Window,
+          (binding, view) =>
+            createOfficeCommandController(binding, view, {
+              fetcher: f.fetcher,
+              requestId: () => requestId,
+            }),
+        );
+      const module = doc.createElement('button') as HostElement & {
+        closest(selector: string): HostElement | null;
+      };
+      // Derive the actual country's button attributes from its real renderer.
+      // country-room's data-id is an ordinal, not a module identifier.
+      const source = readFileSync(
+        new URL(
+          '../../apps/world-web/public/season1-immersive/country-game.js',
+          import.meta.url,
+        ),
+        'utf8',
+      );
+      const generated =
+        entry === 'country-module'
+          ? source.match(
+              /<button data-cmd="country-module" data-module="\$\{m\.id\}"/u,
+            )?.[0]
+          : entry === 'country-room'
+            ? source.match(
+                /<button data-cmd="country-room" data-id="\$\{i\}" data-module="\$\{module\}"/u,
+              )?.[0]
+            : entry === 'legacy-country-module'
+              ? '<button data-cmd="country-module" data-id="captain-8"'
+              : '<button data-module-card="captain-8"';
+      expect(generated).toBeDefined();
+      const markup = generated!
+        .replace('${m.id}', 'captain-8')
+        .replace('${module}', 'captain-8')
+        .replace('${i}', '0');
+      const key = (name: string) =>
+        name.replace(/-([a-z])/gu, (_, c: string) => c.toUpperCase());
+      for (const match of markup.matchAll(/data-([a-z-]+)="([^"]*)"/gu))
+        module.dataset[key(match[1]!)] = match[2]!;
+      const moduleKey =
+        entry === 'module-card'
+          ? 'moduleCard'
+          : entry === 'legacy-country-module'
+            ? 'id'
+            : 'module';
+      if (entry === 'country-room') expect(module.dataset.id).toBe('0');
+      module.closest = (selector) =>
+        selector
+          .split(',')
+          .some((s) =>
+            [...s.matchAll(/\[data-([a-z-]+)="([^"]*)"\]/gu)].every(
+              (m) => module.dataset[key(m[1]!)] === m[2],
+            ),
+          )
+          ? module
+          : null;
+      doc.root.append(module);
+      let prevented = 0;
+      const click = () =>
+        doc.capture?.({
+          target: module,
+          preventDefault() {
+            prevented++;
+          },
+          stopImmediatePropagation() {},
+        } as unknown as MouseEvent);
+      click();
+      expect(prevented).toBe(0);
+      api.connect(f.binding);
+      module.dataset[moduleKey] = 'captain-7';
+      click();
+      expect(prevented).toBe(0);
+      module.dataset[moduleKey] = 'captain-8';
+      click();
+      await expect
+        .poll(() => api.getState().status)
+        .toBe('CURRENT_AUTHORIZED_HEAD');
+      expect(prevented).toBe(1);
+      const dialog = doc.root
+        .all()
+        .find((e) => Object.hasOwn(e.dataset, 'officeCommandDialog'))!;
+      expect(dialog.open).toBe(true);
+      const form = dialog
+        .all()
+        .find((e) => Object.hasOwn(e.dataset, 'captainCapitalForm'))!;
+      expect(form.textContent).toContain('Recorded basis / section 1');
+      expect(form.textContent).toContain('未分配／危机预留');
+      const fields: Record<string, string> = {
+        fromBucket: 'UNALLOCATED_CRISIS_RESERVE',
+        toBucket: 'FISCAL_REFORM',
+        amount: '1',
+        reasonFactRef: allocationOptions.reasons[0]!.factRef,
+      };
+      for (const el of form.all())
+        if (el.dataset.captainCapitalField)
+          (el as HostElement & { value: string }).value =
+            fields[el.dataset.captainCapitalField]!;
+      form
+        .all()
+        .find((e) => Object.hasOwn(e.dataset, 'captainCapitalStage'))!
+        .click();
+      expect(api.getState().status).toBe('REVIEW_REQUIRED');
+      expect(api.getState().intent?.request.payload).toMatchObject({
+        fromBucket: fields.fromBucket,
+        reasonFactRef: fields.reasonFactRef,
+      });
+      expect(f.requests).toHaveLength(0);
+      expect(
+        dialog.all().find((e) => e.dataset.officeCommandAction === 'confirm')
+          ?.disabled,
+      ).toBe(true);
+      dialog
+        .all()
+        .find((e) => e.dataset.officeCommandAction === 'review')!
+        .click();
+      dialog
+        .all()
+        .find((e) => e.dataset.officeCommandAction === 'confirm')!
+        .click();
+      await expect.poll(() => api.getState().status).toBe('QUEUE_ACK');
+      expect(api.getState().receipt).toBeNull();
+      expect(dialog.textContent).not.toContain('COMMITTED');
+      dialog
+        .all()
+        .find((e) => e.dataset.officeCommandAction === 'recover')!
+        .click();
+      await expect
+        .poll(() => api.getState().receipt?.outcome)
+        .toBe('COMMITTED');
+      expect(dialog.textContent).toContain('COMMITTED');
+      expect(f.requests).toHaveLength(1);
+      f.invalidate();
+      click();
+      expect(prevented).toBe(1);
+      expect(doc.root.textContent).not.toContain('Recorded basis / section 1');
+    },
+  );
   it('stages one source-referenced transfer, requires review, and restores the original request after reload without resubmission', async () => {
     const f = commandFixture(),
       c = f.controller();
