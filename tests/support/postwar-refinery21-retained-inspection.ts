@@ -7,7 +7,10 @@ import { Pool } from 'pg';
 import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
 import type { PostwarPhysicalSourceContext } from '../../apps/world-worker/src/preparation/postwar-physical-service-receipt.js';
 import type { PostwarNativeReferenceMarker } from './postwar-native-reference-db.js';
-import { createPostwarRefinery21AssemblyCheck } from './postwar-refinery21-source-assembly.js';
+import {
+  createPostwarRefinery21AssemblyCheck,
+  type Refinery21InspectionActor,
+} from './postwar-refinery21-source-assembly.js';
 import { loadPostwarSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
 
 type ExistingClone = Readonly<{ database: string; installer: Pool }>;
@@ -28,6 +31,7 @@ export async function inspectPostwarRefinery21RetainedClone(
     sourceContext: PostwarPhysicalSourceContext;
     workerRole: string;
     configureTestOnlyActors?: true;
+    existingInspectionActors?: readonly Refinery21InspectionActor[];
   }>,
 ) {
   assert.equal(process.env.ECONMIND_REFINERY21_NATIVE, '1');
@@ -54,6 +58,10 @@ export async function inspectPostwarRefinery21RetainedClone(
   };
   const before = await snapshot();
   const checker = createPostwarRefinery21AssemblyCheck(input.sourceContext);
+  assert(
+    !(input.configureTestOnlyActors && input.existingInspectionActors),
+    'INSPECTION_ACTORS_MUST_HAVE_ONE_EXPLICIT_ORIGIN',
+  );
   const configured = input.configureTestOnlyActors
     ? await checker.configureTestOnlyInspectionActors({
         marker: input.marker,
@@ -72,13 +80,14 @@ export async function inspectPostwarRefinery21RetainedClone(
     application_name: 'ECONMIND_REFINERY21_BOUNDED_INSPECTION_TEST_ONLY',
   });
   try {
+    const actors = input.existingInspectionActors ?? configured?.actors;
     const inspection = await checker.inspect({
       database: new PostgresSqlDatabase(worker),
       workerRole: input.workerRole,
       pins: input.marker,
-      ...(configured ? { actors: configured.actors } : {}),
+      ...(actors ? { actors } : {}),
     });
-    if (configured)
+    if (actors)
       for (const site of inspection.sites) {
         assert.equal(
           site.actors.filter((a) => a.status === 'AUTHORIZED').length,

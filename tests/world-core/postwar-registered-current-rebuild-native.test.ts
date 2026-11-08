@@ -11,7 +11,11 @@ import {
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { preparePostwarRefinery21RetainedHostDescriptor } from '../support/postwar-refinery21-retained-inspection.js';
+import {
+  preparePostwarRefinery21RetainedHostDescriptor,
+  inspectPostwarRefinery21RetainedClone,
+} from '../support/postwar-refinery21-retained-inspection.js';
+import { loadPostwarSourceContext } from '../../apps/world-worker/src/preparation/postwar-source-context.js';
 import { createFixedOfficeBrowserApplication } from '../../tools/office-connection/fixed-office-command-browser.mjs';
 import { runRegisteredTradeCbReadbackBrowserProbe } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
 import type { RegisteredTradeCbReadbackBrowserInput } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
@@ -54,6 +58,10 @@ native(
       must(
         process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE === '1',
         'REGISTERED_NODE_NATIVE_OPT_IN_REQUIRED',
+      );
+      must(
+        process.env.ECONMIND_REFINERY21_NATIVE === '1',
+        'ACTUAL_REFINERY_SOURCE_INSPECTION_OPT_IN_REQUIRED',
       );
       const expectedCommit =
         process.env.ECONMIND_REGISTERED_FINAL_CANDIDATE_SHA;
@@ -261,6 +269,27 @@ native(
           'ONE_NODE_GENUINE_COLD_PROOF_AND_FIXED21_SOURCE_PREPARATION',
           'END',
         );
+        await phase('ACTUAL_21_SOURCE_READS_AND_420_FOREIGN_DENIALS', 'START');
+        const scopeInspection = await inspectPostwarRefinery21RetainedClone({
+          marker: f.marker,
+          clone: f.clone,
+          sourceContext: await loadPostwarSourceContext(repositoryRoot),
+          workerRole: String(descriptor.workerRole),
+          existingInspectionActors: prepared.inspectionActors,
+        });
+        must(
+          scopeInspection.inspection.sites.length === 21 &&
+            scopeInspection.inspection.sites.every(
+              (site) =>
+                site.original.status === 'PRESENT' &&
+                site.firstDay.status === 'PRESENT' &&
+                site.utility.status === 'PRESENT' &&
+                site.power.status === 'PRESENT',
+            ),
+          'ALL_21_REGISTERED_SOURCE_READS_REQUIRED',
+        );
+        report.refineryScopeInspection = scopeInspection;
+        await phase('ACTUAL_21_SOURCE_READS_AND_420_FOREIGN_DENIALS', 'END');
         await d.assertPreparationStartDenied();
         await d.recover(resume.run, { duplicateProbe: false });
         await d.recover(resume.book, { duplicateProbe: false });
