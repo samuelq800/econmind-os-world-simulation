@@ -27,6 +27,7 @@ import { buildOfficialPhysicalOpeningAdoption } from '../preparation/official-ph
 import {
   consumePreparedPostwarSocialFinancialReplayBase,
   type PreparedPostwarSocialFinancialReplayBase,
+  type PostwarSocialPreparationPins,
 } from './prepared-postwar-social-source.js';
 import {
   isPostwarSocialRuntimeConnection,
@@ -63,6 +64,23 @@ function freeze<T>(v: T): Readonly<T> {
     Object.freeze(v);
   }
   return v;
+}
+/** Immutable source identity excludes read constraints such as minimum head.
+ * This is deterministic DATA derivation, never preparation or authorization. */
+export function derivePostwarIndustryUtilityScenarioRef(
+  pins: PostwarSocialPreparationPins,
+): string {
+  return (
+    'INDUSTRY_FIRST_DAY_' +
+    sha(
+      canonicalSerialize({
+        worldId: pins.worldId,
+        seedRef: pins.seedRef,
+        contentHash: pins.contentHash,
+        admissionRef: pins.admissionRef,
+      }),
+    ).toUpperCase()
+  );
 }
 export const INDUSTRY_UTILITY_PUBLISH_QUERY =
   'select * from world_v2.publish_postwar_industry_utility_source($1,$2,$3::jsonb,$4)';
@@ -353,8 +371,7 @@ function deriveUtilityData(
   // Conservatively retain the pre-existing finite GOV public option. This is
   // not a payment/delivery claim, nor additional supply for Industry.
   const power: DayOneStorageOpening = {
-    scenarioRef:
-      'INDUSTRY_FIRST_DAY_' + sha(canonicalSerialize(b.pins)).toUpperCase(),
+    scenarioRef: derivePostwarIndustryUtilityScenarioRef(b.pins),
     worldId: b.pins.worldId,
     seedFingerprint: b.pins.contentHash,
     countryId: selected.countryId,
