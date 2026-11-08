@@ -34,7 +34,13 @@ import {
   readPostwarSocialRuntimeConnectionResources,
   type PostwarSocialRuntimeConnection,
 } from '../runtime-preparation/social-runtime-connection.js';
-import type { SqlExecutor } from './sql-database.js';
+import type { SqlExecutor, SqlDatabase } from './sql-database.js';
+import type { PostwarPhysicalSourceContext } from '../preparation/postwar-physical-service-receipt.js';
+import {
+  selectPostwarIndustryRefinerySite,
+  readPostwarIndustryRefineryCoverage,
+  type PostwarIndustryRefinerySite,
+} from './postwar-industry-refinery-sites.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 function fail(s: string): never {
   throw Error('INDUSTRY_UTILITY_SOURCE:' + s);
@@ -64,6 +70,9 @@ export const INDUSTRY_UTILITY_READ_QUERY =
   'select * from world_v2.read_postwar_industry_utility_source($1,$2,$3,$4::bigint,$5::bigint)';
 export interface PostwarIndustryUtilitySourceInput {
   readonly repositoryRoot: string;
+  /** Controlled server selection, independently matched to actual adopted originals.
+   * Omission preserves the original C2 entry point, not a first-site fallback. */
+  readonly site?: Readonly<{ countryId: string; facilityId: string }>;
   readonly socialConnection: Readonly<PostwarSocialRuntimeConnection>;
   readonly startupSeed: Readonly<OpeningSeed>;
   readonly startupBeneficialHousingRentSource?: PreparedBeneficialHousingRentSource;
@@ -71,8 +80,8 @@ export interface PostwarIndustryUtilitySourceInput {
 export interface PostwarIndustryUtilityCompactSource {
   readonly schemaVersion: 'postwar-industry-utility-original-v1';
   readonly worldId: string;
-  readonly countryId: 'COUNTRY_02';
-  readonly facilityId: 'OPEN-02-REFINED_FUEL';
+  readonly countryId: string;
+  readonly facilityId: string;
   readonly locationId: string;
   readonly operatorId: string;
   readonly seedId: string;
@@ -102,6 +111,7 @@ interface Original {
   readonly social: Readonly<PostwarSocialRuntimeConnection>;
   readonly baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>;
   readonly compact: Readonly<PostwarIndustryUtilityCompactSource>;
+  readonly sourceCountryId: string;
   readonly compactText: string;
   readonly compactSha256: string;
   readonly raw: Readonly<Record<string, string>>;
@@ -111,7 +121,17 @@ interface Original {
 const sourceOwners = new WeakMap<object, object>();
 const proposals = new WeakMap<object, Original>(),
   preparedSources = new WeakMap<object, Original>(),
-  installed = new WeakMap<object, PreparedPostwarIndustryUtilitySource>();
+  installed = new WeakMap<
+    object,
+    Map<string, PreparedPostwarIndustryUtilitySource>
+  >();
+const legacySite = Object.freeze({
+  countryId: 'COUNTRY_02',
+  facilityId: 'OPEN-02-REFINED_FUEL',
+});
+function siteKey(site: Readonly<{ countryId: string; facilityId: string }>) {
+  return canonicalSerialize([site.countryId, site.facilityId]);
+}
 /** Uses the existing validated operating view/financial original, including
  * child->parent proof. It never guesses simulation date from real wall time. */
 export function readPostwarIndustryUtilityOpeningDateFromSeed(
@@ -137,9 +157,7 @@ export function readPostwarIndustryUtilityOpeningDateFromSeed(
     fail('ACTUAL_GENESIS_VALUE_DATE_REQUIRED');
   return date + 'T00:00:00.000Z';
 }
-export async function loadPostwarIndustryUtilitySourceProposal(
-  input: PostwarIndustryUtilitySourceInput,
-): Promise<Readonly<PostwarIndustryUtilitySourceProposal>> {
+async function loadUtilityStartup(input: PostwarIndustryUtilitySourceInput) {
   const social = input.socialConnection;
   if (
     !path.isAbsolute(input.repositoryRoot) ||
@@ -220,16 +238,74 @@ export async function loadPostwarIndustryUtilitySourceProposal(
       },
       sha,
     );
-  const physical = buildOfficialPhysicalOpeningAdoption({
+  return {
+    social,
+    baseline,
+    b,
+    context,
+    adoptionBytes,
+    utilityPolicy,
+    raw,
+    openingGregorianTimestamp,
+    scenario,
+    physical: buildOfficialPhysicalOpeningAdoption({
       sourceBytes: context.sourceBytes,
       ownerDecisionBytes: context.ownerOriginalBytes,
     }),
-    powers = physical.power.filter((p) => p.countryId === 'COUNTRY_02');
+    refinerySites: readPostwarIndustryRefineryCoverage(context).sites,
+  };
+}
+/** Pure derived DATA over the real pinned originals; neither this DTO nor its
+ * pins are a prepared source, registration, currentness or execution proof. */
+function deriveUtilityData(
+  input: Readonly<{
+    sourceContext: PostwarPhysicalSourceContext;
+    site: Readonly<{ countryId: string; facilityId: string }>;
+    pins: Readonly<{
+      worldId: string;
+      seedRef: string;
+      contentHash: string;
+      admissionRef: string;
+    }>;
+    openingGregorianTimestamp: string;
+    utilityPolicyBytes: string;
+  }>,
+  physical: ReturnType<typeof buildOfficialPhysicalOpeningAdoption>,
+  selected: Readonly<PostwarIndustryRefinerySite>,
+) {
+  const context = input.sourceContext,
+    b = { pins: input.pins },
+    openingGregorianTimestamp = input.openingGregorianTimestamp,
+    utilityPolicy = input.utilityPolicyBytes;
+  if (
+    sha(utilityPolicy) !==
+    '27bbb6a7fddc97b83b74cc4f3ef13455a3238f1998d10c34016123ba19cf6872'
+  )
+    fail('EXACT_PUBLIC_OPTION_POLICY_REQUIRED');
+  const raw: Record<string, string> = {};
+  for (const key of [
+    'power',
+    'facilities',
+    'recipes',
+    'water-allocations',
+    'population-services',
+    'seasonal-water',
+    'geography',
+    'regions',
+    'countries',
+  ]) {
+    const value = context.sourceBytes.datasets['data/' + key + '.json'];
+    if (typeof value !== 'string') fail('FIXED_RAW_SOURCE_MISSING:' + key);
+    raw[key] = value;
+  }
+  const powers = physical.power.filter(
+    (p) => p.countryId === selected.countryId,
+  );
   if (powers.length !== 1) fail('ONE_ACTUAL_COUNTRY_POWER_ORIGINAL_REQUIRED');
   const p = powers[0]!,
     storage = physical.facilities.find((f) => f.id === p.storageFacilityId),
     grid = physical.facilities.find((f) => f.id === p.gridFacilityId),
-    target = physical.facilities.find((f) => f.id === 'OPEN-02-REFINED_FUEL');
+    target = physical.facilities.find((f) => f.id === selected.facilityId);
   if (
     !storage ||
     !grid ||
@@ -237,7 +313,7 @@ export async function loadPostwarIndustryUtilitySourceProposal(
     !p.openingStorage ||
     storage.status !== 'ADOPTED_BUILT' ||
     grid.status !== 'ADOPTED_BUILT' ||
-    target.operatorId !== 'ENTITY_OPERATOR_02' ||
+    target.operatorId !== selected.operatorId ||
     storage.operatorId !== target.operatorId ||
     grid.operatorId !== target.operatorId ||
     storage.titleHolderId !== target.operatorId ||
@@ -281,7 +357,7 @@ export async function loadPostwarIndustryUtilitySourceProposal(
       'INDUSTRY_FIRST_DAY_' + sha(canonicalSerialize(b.pins)).toUpperCase(),
     worldId: b.pins.worldId,
     seedFingerprint: b.pins.contentHash,
-    countryId: 'COUNTRY_02',
+    countryId: selected.countryId,
     storageId: storage.id,
     gridId: grid.id,
     operatorId: target.operatorId,
@@ -297,7 +373,7 @@ export async function loadPostwarIndustryUtilitySourceProposal(
     originalEfficiency: '0.9',
     protectedReservations: [
       {
-        reservationRef: 'RETAINED_OPENING_PUBLIC_OPTION_COUNTRY_02',
+        reservationRef: 'RETAINED_OPENING_PUBLIC_OPTION_' + selected.countryId,
         kind: 'PUBLIC_PRIORITY',
         fromSimTime: '0',
         throughSimTime: '21600000',
@@ -313,8 +389,8 @@ export async function loadPostwarIndustryUtilitySourceProposal(
   const compact: Readonly<PostwarIndustryUtilityCompactSource> = freeze({
     schemaVersion: 'postwar-industry-utility-original-v1',
     worldId: b.pins.worldId,
-    countryId: 'COUNTRY_02',
-    facilityId: 'OPEN-02-REFINED_FUEL',
+    countryId: selected.countryId,
+    facilityId: selected.facilityId,
     locationId: target.regionId,
     operatorId: target.operatorId,
     seedId: b.pins.seedRef,
@@ -332,12 +408,76 @@ export async function loadPostwarIndustryUtilitySourceProposal(
     },
     sourcePins,
   });
+  return freeze({
+    compact,
+    raw,
+    sourceCountryId: text(target.source.countryId),
+  });
+}
+export function derivePostwarIndustryUtilityCompactSourceData(
+  input: Parameters<typeof deriveUtilityData>[0],
+) {
+  return deriveUtilityData(
+    input,
+    buildOfficialPhysicalOpeningAdoption({
+      sourceBytes: input.sourceContext.sourceBytes,
+      ownerDecisionBytes: input.sourceContext.ownerOriginalBytes,
+    }),
+    selectPostwarIndustryRefinerySite(input.sourceContext, input.site),
+  );
+}
+/** All applicable real source scopes; still DATA, never SQL/actor authority. */
+export function derivePostwarIndustryUtilityCompactSourceDataSet(
+  input: Omit<Parameters<typeof deriveUtilityData>[0], 'site'>,
+) {
+  const physical = buildOfficialPhysicalOpeningAdoption({
+      sourceBytes: input.sourceContext.sourceBytes,
+      ownerDecisionBytes: input.sourceContext.ownerOriginalBytes,
+    }),
+    coverage = readPostwarIndustryRefineryCoverage(input.sourceContext);
+  return Object.freeze({
+    notApplicableCountries: coverage.notApplicableCountries,
+    sites: Object.freeze(
+      coverage.sites.map((site) =>
+        deriveUtilityData({ ...input, site }, physical, site),
+      ),
+    ),
+  });
+}
+function issueUtilityProposal(
+  startup: Awaited<ReturnType<typeof loadUtilityStartup>>,
+  site: Readonly<{ countryId: string; facilityId: string }>,
+): Readonly<PostwarIndustryUtilitySourceProposal> {
+  const {
+    social,
+    baseline,
+    b,
+    context,
+    adoptionBytes,
+    raw,
+    openingGregorianTimestamp,
+    scenario,
+  } = startup;
+  const { compact, sourceCountryId } = deriveUtilityData(
+    {
+      sourceContext: context,
+      site,
+      pins: b.pins,
+      openingGregorianTimestamp,
+      utilityPolicyBytes: startup.utilityPolicy,
+    },
+    startup.physical,
+    startup.refinerySites.find(
+      (s) => s.countryId === site.countryId && s.facilityId === site.facilityId,
+    ) ?? selectPostwarIndustryRefinerySite(context, site),
+  );
   const compactText = canonicalSerialize(compact),
     token = Object.freeze({}) as PostwarIndustryUtilitySourceProposal;
   proposals.set(token, {
     social,
     baseline,
     compact,
+    sourceCountryId,
     compactText,
     compactSha256: sha(compactText),
     raw: freeze(raw),
@@ -345,6 +485,24 @@ export async function loadPostwarIndustryUtilitySourceProposal(
     scenario,
   });
   return token;
+}
+export async function loadPostwarIndustryUtilitySourceProposal(
+  input: PostwarIndustryUtilitySourceInput,
+): Promise<Readonly<PostwarIndustryUtilitySourceProposal>> {
+  return issueUtilityProposal(
+    await loadUtilityStartup(input),
+    input.site ?? legacySite,
+  );
+}
+/** One genuine startup validation; each result is still a scoped opaque DATA
+ * proposal. SQL publication independently verifies every original and admission. */
+export async function loadPostwarIndustryUtilitySourceProposals(
+  input: Omit<PostwarIndustryUtilitySourceInput, 'site'>,
+): Promise<readonly Readonly<PostwarIndustryUtilitySourceProposal>[]> {
+  const startup = await loadUtilityStartup(input);
+  return Object.freeze(
+    startup.refinerySites.map((site) => issueUtilityProposal(startup, site)),
+  );
 }
 export async function publishPostwarIndustryUtilitySourcesFrom(
   tx: SqlExecutor,
@@ -381,9 +539,29 @@ export function consumePostwarIndustryUtilitySource(
 }
 export function readPostwarIndustryUtilitySourceForBase(
   baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>,
+  site: Readonly<{ countryId: string; facilityId: string }> = legacySite,
 ): Readonly<PreparedPostwarIndustryUtilitySource> | undefined {
   consumePreparedPostwarSocialFinancialReplayBase(baseline);
-  return installed.get(baseline.prepared);
+  return installed.get(baseline.prepared)?.get(siteKey(site));
+}
+export function readPostwarIndustryUtilitySourceForPowerFacility(
+  baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>,
+  scope: Readonly<{ countryId: string; facilityId: string }>,
+): Readonly<PreparedPostwarIndustryUtilitySource> | undefined {
+  consumePreparedPostwarSocialFinancialReplayBase(baseline);
+  const matches = [
+    ...(installed.get(baseline.prepared)?.values() ?? []),
+  ].filter((token) => {
+    const c = consumePostwarIndustryUtilitySource(token).compact;
+    return (
+      c.countryId === scope.countryId && c.power.storageId === scope.facilityId
+    );
+  });
+  if (matches.length > 1)
+    throw new PostwarIndustryUtilitySourceMissing(
+      'AMBIGUOUS_REGISTERED_POWER_SERVICE_SCOPE',
+    );
+  return matches[0];
 }
 async function assertUtilitySourcePacketFrom(
   query: string,
@@ -441,9 +619,82 @@ export function assertPostwarIndustryUtilityHistorySourceFrom(
 export async function preparePostwarIndustryUtilitySource(
   input: PostwarIndustryUtilitySourceInput,
 ): Promise<Readonly<PreparedPostwarIndustryUtilitySource>> {
-  const proposal = await loadPostwarIndustryUtilitySourceProposal(input),
-    p = proposals.get(proposal)!,
-    token = Object.freeze({}) as PreparedPostwarIndustryUtilitySource;
+  return prepareUtilityProposal(
+    await loadPostwarIndustryUtilitySourceProposal(input),
+  );
+}
+/** Fixed bounded startup DATA read, not a source token or caller authority.
+ * Absence is a successful SQL result; errors never become an empty registry. */
+export async function readPostwarIndustryUtilityRegisteredPacket(
+  input: Readonly<{
+    database: SqlDatabase;
+    workerRole: string;
+    worldId: string;
+    countryId: string;
+    facilityId: string;
+  }>,
+) {
+  if (!/^[a-z_][a-z0-9_]{0,62}$/u.test(input.workerRole))
+    fail('FIXED_WORKER_ROLE_REQUIRED');
+  return input.database.transaction(async (tx) => {
+    await tx.query('set transaction isolation level repeatable read');
+    const h = await tx.query<{ world_version: string; event_sequence: string }>(
+      'select world_version::text,event_sequence::text from world_v2.world_head where world_id=$1',
+      [input.worldId],
+    );
+    if (h.rows.length !== 1) fail('ACTUAL_WORLD_HEAD_REQUIRED');
+    const head = Object.freeze({
+      worldVersion: h.rows[0]!.world_version,
+      eventSequence: h.rows[0]!.event_sequence,
+    });
+    let failure: unknown,
+      source:
+        | Readonly<{
+            source_text: string;
+            source_sha256: string;
+            source_ref: string;
+            world_version: string;
+            event_sequence: string;
+          }>
+        | undefined;
+    try {
+      await tx.query('set local role world_v2_industry_source_reader');
+      const r = await tx.query<NonNullable<typeof source>>(
+        'select * from world_v2.read_postwar_industry_utility_history_source($1,$2,$3,$4::bigint,$5::bigint)',
+        [
+          input.worldId,
+          input.countryId,
+          input.facilityId,
+          head.worldVersion,
+          head.eventSequence,
+        ],
+      );
+      if (r.rows.length > 1) fail('EXACT_REGISTERED_UTILITY_PACKET_REQUIRED');
+      source = r.rows[0] && Object.freeze({ ...r.rows[0] });
+    } catch (e) {
+      failure = e;
+    }
+    try {
+      await tx.query('set local role "' + input.workerRole + '"');
+    } catch (restore) {
+      if (failure !== undefined)
+        throw new AggregateError(
+          [failure, restore],
+          'Utility source role restore failed',
+          { cause: restore },
+        );
+      throw restore;
+    }
+    if (failure !== undefined) throw failure;
+    return Object.freeze({ head, source });
+  });
+}
+async function prepareUtilityProposal(
+  proposal: Readonly<PostwarIndustryUtilitySourceProposal>,
+): Promise<Readonly<PreparedPostwarIndustryUtilitySource>> {
+  const p = proposals.get(proposal);
+  if (!p) fail('GENUINE_FIXED_SOURCE_PROPOSAL_REQUIRED');
+  const token = Object.freeze({}) as PreparedPostwarIndustryUtilitySource;
   preparedSources.set(token, {
     ...p,
     raw: Object.freeze({}),
@@ -451,51 +702,41 @@ export async function preparePostwarIndustryUtilitySource(
   });
   const { workerRole } = readPostwarSocialRuntimeConnectionResources(p.social);
   try {
-    await p.social.database.transaction(async (tx) => {
-      const h = await tx.query<{
-        world_version: string;
-        event_sequence: string;
-      }>(
-        'select world_version::text,event_sequence::text from world_v2.world_head where world_id=$1',
-        [p.compact.worldId],
-      );
-      if (h.rows.length !== 1) fail('ACTUAL_WORLD_HEAD_REQUIRED');
-      let failure: unknown;
-      try {
-        await tx.query('set local role world_v2_industry_source_reader');
-        await assertPostwarIndustryUtilityHistorySourceFrom(tx, {
-          preparation: token,
-          head: {
-            worldVersion: h.rows[0]!.world_version,
-            eventSequence: h.rows[0]!.event_sequence,
-          },
-        });
-      } catch (e) {
-        failure = e;
-      }
-      try {
-        await tx.query('set local role "' + workerRole + '"');
-      } catch (restore) {
-        if (failure !== undefined)
-          throw new AggregateError(
-            [failure, restore],
-            'Utility source role restore failed',
-            { cause: restore },
-          );
-        throw restore;
-      }
-      if (failure !== undefined) throw failure;
+    const packet = await readPostwarIndustryUtilityRegisteredPacket({
+      database: p.social.database,
+      workerRole,
+      worldId: p.compact.worldId,
+      countryId: p.compact.countryId,
+      facilityId: p.compact.facilityId,
     });
+    // Semantic absence is raised only after the actual read transaction and
+    // role restoration have succeeded. Adapter failures retain their outcome.
+    if (!packet.source)
+      throw new PostwarIndustryUtilitySourceMissing(
+        'REGISTERED_UTILITY_SOURCE_MISSING',
+      );
+    const source = packet.source;
+    if (
+      source.source_text !== p.compactText ||
+      source.source_sha256 !== p.compactSha256 ||
+      source.source_ref !==
+        'INDUSTRY_UTILITY_' + p.compactSha256.toUpperCase() ||
+      source.world_version !== packet.head.worldVersion ||
+      source.event_sequence !== packet.head.eventSequence ||
+      sha(source.source_text) !== source.source_sha256
+    )
+      fail('ACTUAL_CURRENT_UTILITY_SOURCE_OR_HEAD_DIFFERS');
   } catch (e) {
     preparedSources.delete(token);
     throw e;
   }
-  const old = installed.get(p.baseline.prepared);
+  const bySite =
+      installed.get(p.baseline.prepared) ??
+      new Map<string, PreparedPostwarIndustryUtilitySource>(),
+    key = siteKey(p.compact),
+    old = bySite.get(key);
   if (old) {
-    const prior = consumePostwarIndustryUtilitySource(
-      old,
-      input.socialConnection,
-    );
+    const prior = consumePostwarIndustryUtilitySource(old, p.social);
     if (prior.compactText !== p.compactText) {
       preparedSources.delete(token);
       fail('PREPARED_UTILITY_SOURCE_CHANGED');
@@ -503,8 +744,48 @@ export async function preparePostwarIndustryUtilitySource(
     preparedSources.delete(token);
     return old;
   }
-  installed.set(p.baseline.prepared, token);
+  bySite.set(key, token);
+  installed.set(p.baseline.prepared, bySite);
   return token;
+}
+/** Loads all real source scopes once, installs only the actual registered
+ * intersection. Missing rows are distinct from SQL/permission/admission errors. */
+export async function preparePostwarIndustryUtilitySources(
+  input: Omit<PostwarIndustryUtilitySourceInput, 'site'>,
+): Promise<readonly Readonly<PreparedPostwarIndustryUtilitySource>[]> {
+  const proposals = await loadPostwarIndustryUtilitySourceProposals(input),
+    values: PreparedPostwarIndustryUtilitySource[] = [],
+    created: PreparedPostwarIndustryUtilitySource[] = [];
+  try {
+    for (const proposal of proposals) {
+      const p = consumeUtilityProposal(proposal),
+        old = readPostwarIndustryUtilitySourceForBase(p.baseline, p.compact);
+      try {
+        const token = await prepareUtilityProposal(proposal);
+        values.push(token);
+        if (!old) created.push(token);
+      } catch (e) {
+        if (
+          e instanceof PostwarIndustryUtilitySourceMissing &&
+          e.reason === 'REGISTERED_UTILITY_SOURCE_MISSING'
+        )
+          continue;
+        throw e;
+      }
+    }
+    return Object.freeze(values);
+  } catch (error) {
+    for (const token of created)
+      retireUnownedPostwarIndustryUtilitySource(token);
+    throw error;
+  }
+}
+function consumeUtilityProposal(
+  proposal: Readonly<PostwarIndustryUtilitySourceProposal>,
+): Original {
+  const p = proposals.get(proposal);
+  if (!p) fail('GENUINE_FIXED_SOURCE_PROPOSAL_REQUIRED');
+  return p;
 }
 export function takePostwarIndustryUtilitySourceOwnership(
   token: Readonly<PreparedPostwarIndustryUtilitySource>,
@@ -525,8 +806,10 @@ export function retirePostwarIndustryUtilitySource(
   const p = preparedSources.get(token);
   if (!p) return;
   preparedSources.delete(token);
-  if (installed.get(p.baseline.prepared) === token)
-    installed.delete(p.baseline.prepared);
+  const bySite = installed.get(p.baseline.prepared),
+    key = siteKey(p.compact);
+  if (bySite?.get(key) === token) bySite.delete(key);
+  if (bySite?.size === 0) installed.delete(p.baseline.prepared);
 }
 export const POSTWAR_INDUSTRY_UTILITY_ADOPTION =
   DAY_ONE_STORAGE_SELF_USE_POLICY;
@@ -535,7 +818,7 @@ export const POSTWAR_INDUSTRY_UTILITY_ADOPTION =
  * are never converted to this recoverable missing-original classification. */
 export class PostwarIndustryUtilitySourceMissing extends Error {
   readonly code = 'POSTWAR_INDUSTRY_UTILITY_SOURCE_MISSING';
-  constructor(reason: string) {
+  constructor(readonly reason: string) {
     super('INDUSTRY_UTILITY_SOURCE:' + reason);
     this.name = 'PostwarIndustryUtilitySourceMissing';
   }
@@ -629,7 +912,7 @@ function utilityWaterGrantEligibility(
     countryId: c.countryId,
     locationId: c.locationId,
     operatorId: c.operatorId,
-    sourceCountryId: 'visual-territory-02',
+    sourceCountryId: p.sourceCountryId,
     sourceRegionId: c.water.sourceRegionId,
     basinRef: c.water.basinRef,
     maximumRawQuotaPerDay: {
@@ -700,69 +983,81 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
   }>
 > {
   const b = consumePreparedPostwarSocialFinancialReplayBase(input.baseline),
-    token = readPostwarIndustryUtilitySourceForBase(input.baseline),
-    runs = new Set<string>();
-  let hasUtility = false;
+    tokens = [...(installed.get(input.baseline.prepared)?.values() ?? [])],
+    runs = new Map<PreparedPostwarIndustryUtilitySource, Set<string>>();
+  if (b.pins.worldId !== input.worldId) fail('SAME_WORLD_SOURCE_REQUIRED');
+  const add = (token: PreparedPostwarIndustryUtilitySource, run: string) => {
+    const own = runs.get(token) ?? new Set<string>();
+    own.add(run);
+    runs.set(token, own);
+  };
   for (const frame of input.frames) {
     const c = frame.command;
     if (
       c.commandType === 'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1' ||
       c.commandType === 'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1'
     ) {
-      hasUtility = true;
-      const body = row(JSON.parse(c.canonicalPayload));
+      const body = row(JSON.parse(c.canonicalPayload)),
+        token = readPostwarIndustryUtilitySourceForBase(input.baseline, {
+          countryId: c.countryId,
+          facilityId: text(body.facilityId),
+        });
+      if (!token)
+        throw new PostwarIndustryUtilitySourceMissing(
+          'HISTORICAL_UTILITY_ORIGINAL_NOT_INSTALLED',
+        );
+      add(token, text(body.runId));
+    } else if (c.commandType === 'CORE_INDUSTRY_RUN_SCHEDULE_V1') {
+      const body = row(JSON.parse(c.canonicalPayload)),
+        facility = text(body.facilityId),
+        run = text(body.runId);
+      const token = readPostwarIndustryUtilitySourceForBase(input.baseline, {
+        countryId: c.countryId,
+        facilityId: facility,
+      });
+      if (token) add(token, run);
+      else if (run.startsWith('UTILITY_POWER_SERVICE_')) {
+        const matches = tokens.filter((t) => {
+          const p = consumePostwarIndustryUtilitySource(t);
+          return (
+            p.compact.countryId === c.countryId &&
+            p.compact.power.storageId === facility
+          );
+        });
+        if (matches.length !== 1)
+          throw new PostwarIndustryUtilitySourceMissing(
+            'HISTORICAL_POWER_SERVICE_ORIGINAL_NOT_INSTALLED',
+          );
+        add(matches[0]!, run.slice('UTILITY_POWER_SERVICE_'.length));
+      }
+    } else if (c.commandType === 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1') {
+      const source = row(
+        row(JSON.parse(frame.events[0]?.canonicalPayload ?? 'null')).source,
+      );
       if (
-        c.countryId === 'COUNTRY_02' &&
-        body.facilityId === 'OPEN-02-REFINED_FUEL'
-      )
-        runs.add(text(body.runId));
-    } else if (
-      c.commandType === 'CORE_INDUSTRY_RUN_SCHEDULE_V1' &&
-      c.countryId === 'COUNTRY_02'
-    ) {
-      const body = row(JSON.parse(c.canonicalPayload));
-      if (body.facilityId === 'OPEN-02-REFINED_FUEL')
-        runs.add(text(body.runId));
-      else if (
-        token &&
-        body.facilityId ===
-          consumePostwarIndustryUtilitySource(token).compact.power.storageId &&
-        typeof body.runId === 'string' &&
-        body.runId.startsWith('UTILITY_POWER_SERVICE_')
-      )
-        runs.add(body.runId.slice('UTILITY_POWER_SERVICE_'.length));
-    } else if (
-      c.commandType === 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1' &&
-      token
-    ) {
-      const body = row(JSON.parse(frame.events[0]?.canonicalPayload ?? 'null')),
-        source = row(body.source);
-      if (
-        source.countryId === 'COUNTRY_02' &&
-        source.facilityId ===
-          consumePostwarIndustryUtilitySource(token).compact.power.storageId &&
         typeof source.runId === 'string' &&
         source.runId.startsWith('UTILITY_POWER_SERVICE_')
-      )
-        runs.add(source.runId.slice('UTILITY_POWER_SERVICE_'.length));
+      ) {
+        const matches = tokens.filter((t) => {
+          const p = consumePostwarIndustryUtilitySource(t);
+          return (
+            p.compact.countryId === source.countryId &&
+            p.compact.power.storageId === source.facilityId
+          );
+        });
+        if (matches.length !== 1)
+          throw new PostwarIndustryUtilitySourceMissing(
+            'HISTORICAL_POWER_PAYMENT_ORIGINAL_NOT_INSTALLED',
+          );
+        add(matches[0]!, source.runId.slice('UTILITY_POWER_SERVICE_'.length));
+      }
     }
-  }
-  if (!token) {
-    if (hasUtility)
-      throw new PostwarIndustryUtilitySourceMissing(
-        'HISTORICAL_UTILITY_ORIGINAL_NOT_INSTALLED',
-      );
-    return Object.freeze({
-      industryPowerOriginals: [],
-      industryWaterOriginals: [],
-    });
   }
   if (!runs.size)
     return Object.freeze({
       industryPowerOriginals: [],
       industryWaterOriginals: [],
     });
-  if (b.pins.worldId !== input.worldId) fail('SAME_WORLD_SOURCE_REQUIRED');
   const expectedRole =
       input.officeId === 'SOCIAL'
         ? 'world_v2_social_source_reader'
@@ -775,10 +1070,11 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
   let failure: unknown;
   try {
     await tx.query('set local role world_v2_industry_source_reader');
-    await assertPostwarIndustryUtilityHistorySourceFrom(tx, {
-      preparation: token,
-      head: input.expectedHead,
-    });
+    for (const token of runs.keys())
+      await assertPostwarIndustryUtilityHistorySourceFrom(tx, {
+        preparation: token,
+        head: input.expectedHead,
+      });
   } catch (e) {
     failure = e;
   }
@@ -794,25 +1090,29 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
     throw restore;
   }
   if (failure !== undefined) throw failure;
-  const values = [...runs].map((run) =>
-    postwarIndustryUtilityOriginalsForRun(
-      token,
-      run,
-      input.frames.filter((frame) => {
-        if (frame.command.commandType !== 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1')
-          return false;
-        const body = row(
-            JSON.parse(frame.events[0]?.canonicalPayload ?? 'null'),
-          ),
-          source = row(body.source);
-        return (
-          source.runId === 'UTILITY_POWER_SERVICE_' + run &&
-          source.countryId ===
-            consumePostwarIndustryUtilitySource(token).compact.countryId &&
-          source.facilityId ===
-            consumePostwarIndustryUtilitySource(token).compact.power.storageId
-        );
-      }),
+  const values = [...runs].flatMap(([token, ownRuns]) =>
+    [...ownRuns].map((run) =>
+      postwarIndustryUtilityOriginalsForRun(
+        token,
+        run,
+        input.frames.filter((frame) => {
+          if (
+            frame.command.commandType !== 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1'
+          )
+            return false;
+          const body = row(
+              JSON.parse(frame.events[0]?.canonicalPayload ?? 'null'),
+            ),
+            source = row(body.source);
+          return (
+            source.runId === 'UTILITY_POWER_SERVICE_' + run &&
+            source.countryId ===
+              consumePostwarIndustryUtilitySource(token).compact.countryId &&
+            source.facilityId ===
+              consumePostwarIndustryUtilitySource(token).compact.power.storageId
+          );
+        }),
+      ),
     ),
   );
   return Object.freeze({
