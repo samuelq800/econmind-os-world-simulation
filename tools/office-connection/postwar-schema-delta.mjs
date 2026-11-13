@@ -216,37 +216,63 @@ export function createUnapprovedSchemaDeltaPlan(candidate, sources) {
  * checks exact predecessor bodies/metadata/ACL and preserves schema ACL/OIDs. */
 export const PENDING_TARGET_FORWARD_MANIFEST_PATH =
   'database/proposals/postwar-pending-programme-target-prefix.manifest.json';
+export const LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_PATH =
+  'database/proposals/postwar-industry-logistics-v2-utility-forward.manifest.json';
 export function createUnapprovedPendingTargetForwardPlan(
   candidate,
   sources,
   manifestBytes,
 ) {
-  if (
-    sha(manifestBytes) !==
-    '58a0baca366439988ea12d953ae6747abec85c43b71fa5016fdddb86446bdf9d'
-  )
-    throw Error('EXACT_PENDING_TARGET_FORWARD_MANIFEST_REQUIRED');
+  return createFixedGuardedForwardPlan(candidate, sources, manifestBytes, {
+    id: 'postwar-pending-programme-target-prefix',
+    path: PENDING_TARGET_FORWARD_MANIFEST_PATH,
+    prefix: 'PENDING_TARGET',
+    manifestSha256:
+      '58a0baca366439988ea12d953ae6747abec85c43b71fa5016fdddb86446bdf9d',
+    oidPolicy: 'PRESERVE_ALL_SEVEN_REPLACED_OIDS',
+  });
+}
+export function createUnapprovedLogisticsV2UtilityForwardPlan(
+  candidate,
+  sources,
+  manifestBytes,
+) {
+  return createFixedGuardedForwardPlan(candidate, sources, manifestBytes, {
+    id: 'postwar-industry-logistics-v2-utility-forward',
+    path: LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_PATH,
+    prefix: 'LOGISTICS_V2_UTILITY',
+    manifestSha256:
+      'f0853193166d73884e3dcbb8b4d4702d810e6fad0945c2863d462f43cf2cfafe',
+    oidPolicy: 'PRESERVE_REPLACED_FUNCTION_OID',
+  });
+}
+function createFixedGuardedForwardPlan(
+  candidate,
+  sources,
+  manifestBytes,
+  fixed,
+) {
+  if (sha(manifestBytes) !== fixed.manifestSha256)
+    throw Error(`EXACT_${fixed.prefix}_FORWARD_MANIFEST_REQUIRED`);
   const forward = JSON.parse(manifestBytes.toString('utf8'));
   const full = createUnapprovedSchemaDeltaPlan(candidate, sources);
-  const chunk = full.chunks.find(
-    (c) => c.entry.id === 'postwar-pending-programme-target-prefix',
-  );
+  const chunk = full.chunks.find((c) => c.entry.id === fixed.id);
   if (
     !chunk ||
     chunk.entry.sourceSha256 !== forward.sqlSha256 ||
     forward.installationAllowed !== false ||
     forward.productionApproval !== 'NOT_GRANTED'
   )
-    throw Error('EXACT_PENDING_TARGET_FORWARD_SOURCE_REQUIRED');
+    throw Error(`EXACT_${fixed.prefix}_FORWARD_SOURCE_REQUIRED`);
   for (const [file, hash] of Object.entries(forward.requiredPredecessorFiles))
     if (!sources.has(file) || sha(sources.get(file)) !== hash)
-      throw Error('PENDING_TARGET_PREDECESSOR_SOURCE_DIFFERS');
+      throw Error(`${fixed.prefix}_PREDECESSOR_SOURCE_DIFFERS`);
   const required = new Set();
   const entries = new Map(full.chunks.map((c) => [c.entry.id, c.entry]));
   const includeDependency = (id) => {
     if (required.has(id)) return;
     const entry = entries.get(id);
-    if (!entry) throw Error('PENDING_TARGET_INSTALLED_DEPENDENCY_REQUIRED');
+    if (!entry) throw Error(`${fixed.prefix}_INSTALLED_DEPENDENCY_REQUIRED`);
     required.add(id);
     for (const dependency of entry.dependencies) includeDependency(dependency);
   };
@@ -254,9 +280,8 @@ export function createUnapprovedPendingTargetForwardPlan(
     includeDependency(dependency);
   chunk.entry = {
     ...chunk.entry,
-    packagedSourcePath: 'source/01-postwar-pending-programme-target-prefix.sql',
-    transactionPath:
-      'transactions/01-postwar-pending-programme-target-prefix.sql',
+    packagedSourcePath: `source/01-${fixed.id}.sql`,
+    transactionPath: `transactions/01-${fixed.id}.sql`,
     preconditions: {
       ...chunk.entry.preconditions,
       existingObjectDisposition: 'EXACT_INSTALLED_PREDECESSORS_REQUIRED',
@@ -264,7 +289,7 @@ export function createUnapprovedPendingTargetForwardPlan(
       newFunctionsMustBeAbsent: forward.newFunctions,
       successors: forward.successorFunctions,
       schemaAcl: 'REQUIRE_UNCHANGED_AFTER_TEMPORARY_CREATE',
-      functionOids: 'PRESERVE_ALL_SEVEN_REPLACED_OIDS',
+      functionOids: fixed.oidPolicy,
       requiredInstalledDependencies: chunk.entry.dependencies,
       replay: 'ALREADY_APPLIED_STOP_INSPECT_NO_RETRY',
     },
@@ -272,22 +297,21 @@ export function createUnapprovedPendingTargetForwardPlan(
   return {
     chunks: [chunk],
     forwardSource: {
-      path: PENDING_TARGET_FORWARD_MANIFEST_PATH,
+      path: fixed.path,
       bytes: manifestBytes,
     },
     manifest: {
       ...full.manifest,
       schemaVersion: 'postwar-schema-forward-review-package-v1',
-      classification:
-        'UNAPPROVED_EXACT_PENDING_TARGET_FORWARD_NOT_INSTALLATION',
+      classification: `UNAPPROVED_EXACT_${fixed.prefix}_FORWARD_NOT_INSTALLATION`,
       packagedProposalCount: 1,
       packagedForwardCount: 1,
-      replacedExistingFunctionCount: 7,
-      newFunctionCount: 3,
+      replacedExistingFunctionCount: forward.replacedFunctions.length,
+      newFunctionCount: forward.newFunctions.length,
       targetApplicability: 'EXACT_INSTALLED_COMPLETE_PREREQUISITES_REQUIRED',
       isolatedRehearsal: 'AUTHORIZED_NOT_RUN',
       explicitForwardManifest: {
-        path: PENDING_TARGET_FORWARD_MANIFEST_PATH,
+        path: fixed.path,
         sha256: sha(manifestBytes),
       },
       requiredInstalledProposalIds: full.chunks
@@ -710,13 +734,20 @@ export async function preparePostwarSchemaDelta({
     )(candidate, sourceRoot);
     for (const chunk of plan.chunks)
       sources.set(chunk.entry.sourcePath, chunk.source);
-  } else if (forwardManifestPath === PENDING_TARGET_FORWARD_MANIFEST_PATH) {
-    plan = createUnapprovedPendingTargetForwardPlan(
+  } else if (
+    [
+      PENDING_TARGET_FORWARD_MANIFEST_PATH,
+      LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_PATH,
+    ].includes(forwardManifestPath)
+  ) {
+    plan = (
+      forwardManifestPath === PENDING_TARGET_FORWARD_MANIFEST_PATH
+        ? createUnapprovedPendingTargetForwardPlan
+        : createUnapprovedLogisticsV2UtilityForwardPlan
+    )(
       candidate,
       sources,
-      await regular(
-        path.join(sourceRoot, PENDING_TARGET_FORWARD_MANIFEST_PATH),
-      ),
+      await regular(path.join(sourceRoot, forwardManifestPath)),
     );
   } else if (forwardManifestPath !== undefined) {
     if (forwardManifestPath !== LOGISTICS_FORWARD_MANIFEST_PATH)
@@ -877,6 +908,7 @@ if (
           SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
           SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH,
           PENDING_TARGET_FORWARD_MANIFEST_PATH,
+          LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_PATH,
         ].includes(args[9])))
   )
     throw Error('ONLY_SOURCE_SHA_COMPANION_FRESH_OUTPUT_ARGUMENTS_ALLOWED');

@@ -8,11 +8,13 @@ import {
   createUnapprovedSchemaDeltaPlan,
   createUnapprovedSchemaForwardPlan,
   createUnapprovedPendingTargetForwardPlan,
+  createUnapprovedLogisticsV2UtilityForwardPlan,
+  LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_PATH,
   PENDING_TARGET_FORWARD_MANIFEST_PATH,
   preparePostwarSchemaDelta,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const sha = (v: Buffer) => createHash('sha256').update(v).digest('hex');
-// Explicit source inventory: companion fixed 83-proposal policy, with its
+// Explicit source inventory: companion fixed 84-proposal policy, with its
 // isolated Clock deliberately excluded. New proposals require an explicit
 // inventory update; never accept an arbitrary directory count or widen scope.
 const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
@@ -47,6 +49,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-industry-power-service-current.sql',
   'postwar-industry-utility-custody.sql',
   'postwar-industry-logistics-custody.sql',
+  'postwar-industry-logistics-v2-utility-forward.sql',
   'postwar-mixed-industry-utility-effects.sql',
   'postwar-trade-current-projection.sql',
   'postwar-industry-intake-binding.sql',
@@ -366,14 +369,14 @@ describe('unapproved postwar schema delta package boundary', () => {
         ),
       ).toThrow('DESTRUCTIVE_CREDENTIAL_OR_NONTRANSACTIONAL_SQL_DENIED');
   });
-  it('classifies the complete eighty-two non-Clock source proposal paths without running or editing SQL', async () => {
+  it('classifies the complete eighty-three non-Clock source proposal paths without running or editing SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
     const selected = names
       .filter((n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql')
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(82);
+    expect(selected).toHaveLength(83);
     expect(selected).not.toContain('isolated-world-clock.sql');
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));
@@ -655,5 +658,136 @@ describe('explicit logistics function-only forward packaging', () => {
         ),
       ).toThrow('EXPLICIT_PINNED_LOGISTICS_FORWARD_REQUIRED');
     }
+  });
+});
+
+describe('fixed logistics V2 utility forward', () => {
+  async function prepare() {
+    const f = fixture();
+    const manifest = await readFile(
+      new URL(
+        '../../' + LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_PATH,
+        import.meta.url,
+      ),
+    );
+    const declared = JSON.parse(manifest.toString('utf8'));
+    const sql = await readFile(
+      new URL('../../' + declared.sqlPath, import.meta.url),
+    );
+    for (const file of Object.keys(declared.requiredPredecessorFiles))
+      f.sources.set(
+        file,
+        await readFile(new URL('../../' + file, import.meta.url)),
+      );
+    f.sources.set(declared.sqlPath, sql);
+    f.candidate.pins.proposals.push({
+      id: 'postwar-industry-logistics-v2-utility-forward',
+      path: declared.sqlPath,
+      disposition: 'CANDIDATE_EXACT_FORWARD',
+      dependencies: ['delta-b'],
+      baselineDependencies: ['BASELINE_001'],
+      createdRelations: [],
+      createdRoles: [],
+      reusedRoles: [],
+      definedFunctions: [],
+      renamedFunctions: [],
+      sha256: sha(sql),
+    });
+    return { ...f, manifest, declared, sql };
+  }
+  it('changes only the exact BOOK policy predicate and preserves all other authoritative source checks', async () => {
+    const f = await prepare();
+    const original = f.sources
+      .get('database/proposals/postwar-mixed-industry-utility-effects.sql')!
+      .toString();
+    const oldBody = original
+      .split(
+        'create function world_v2.postwar_mixed_industry_utility_group(',
+      )[1]!
+      .split('as $$')[1]!
+      .split('$$;')[0]!;
+    const newBody = f.sql
+      .toString()
+      .split('AS $function$')[1]!
+      .split('$function$')[0]!;
+    const oldPredicate =
+      "book->'source'->>'policyVersion'is distinct from'INDUSTRY_INTERNAL_LOGISTICS_FIRST_DAY_20261101_V1'";
+    const newPredicate =
+      '(' +
+      oldPredicate +
+      "and book->'source'->>'policyVersion'is distinct from'INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_FIRST_DAY_20261108_V2')";
+    expect(oldBody.split(oldPredicate)).toHaveLength(2);
+    expect(newBody).toBe(oldBody.replace(oldPredicate, newPredicate));
+    const plan = createUnapprovedLogisticsV2UtilityForwardPlan(
+      f.candidate,
+      f.sources,
+      f.manifest,
+    );
+    expect(plan.chunks).toHaveLength(1);
+    expect(plan.chunks[0]!.transaction).toEqual(f.sql);
+    expect(plan.manifest).toMatchObject({
+      installationAllowed: false,
+      databaseOperations: 0,
+      replacedExistingFunctionCount: 1,
+      newFunctionCount: 0,
+      requiredInstalledProposalIds: ['delta-a', 'delta-b'],
+    });
+  });
+  it('rejects changed SQL, manifest and predecessor bytes without accepting caller repinning', async () => {
+    const f = await prepare();
+    expect(() =>
+      createUnapprovedLogisticsV2UtilityForwardPlan(
+        f.candidate,
+        f.sources,
+        Buffer.concat([f.manifest, Buffer.from(' ')]),
+      ),
+    ).toThrow('EXACT_LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_REQUIRED');
+    const changed = Buffer.concat([f.sql, Buffer.from('\n-- altered')]);
+    f.sources.set(f.declared.sqlPath, changed);
+    f.candidate.pins.proposals.at(-1)!.sha256 = sha(changed);
+    expect(() =>
+      createUnapprovedLogisticsV2UtilityForwardPlan(
+        f.candidate,
+        f.sources,
+        f.manifest,
+      ),
+    ).toThrow('EXACT_LOGISTICS_V2_UTILITY_FORWARD_SOURCE_REQUIRED');
+    f.sources.set(f.declared.sqlPath, f.sql);
+    f.candidate.pins.proposals.at(-1)!.sha256 = sha(f.sql);
+    f.sources.set(
+      Object.keys(f.declared.requiredPredecessorFiles)[0]!,
+      Buffer.from('-- wrong'),
+    );
+    expect(() =>
+      createUnapprovedLogisticsV2UtilityForwardPlan(
+        f.candidate,
+        f.sources,
+        f.manifest,
+      ),
+    ).toThrow('LOGISTICS_V2_UTILITY_PREDECESSOR_SOURCE_DIFFERS');
+  });
+  it('dispatches the fixed CLI selector before source path checks', () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        new URL(
+          '../../tools/office-connection/postwar-schema-delta.mjs',
+          import.meta.url,
+        ).pathname,
+        '--source-root',
+        'relative',
+        '--candidate-sha',
+        '1'.repeat(40),
+        '--companion-root',
+        'relative',
+        '--output-directory',
+        'relative',
+        '--forward-manifest',
+        LOGISTICS_V2_UTILITY_FORWARD_MANIFEST_PATH,
+      ],
+      { encoding: 'utf8' },
+    );
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('ABSOLUTE_PATHS_REQUIRED');
   });
 });
