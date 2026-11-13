@@ -2,6 +2,40 @@ import { describe, expect, it, vi } from 'vitest';
 import { runRegisteredConsumer } from '../../apps/world-api/src/runtime/registered-consumer-runner.js';
 
 describe('explicit registered FIFO runner', () => {
+  it('honours the explicit finite batch and stops immediately at an idle head', async () => {
+    const consumeOnce = vi.fn(async () => ({
+      status: 'PROCESSED' as const,
+      commandId: 'CONTROLLED_FINAL',
+    }));
+    await runRegisteredConsumer({
+      consumer: { consumeOnce },
+      signal: new AbortController().signal,
+      maxSteps: 3,
+      report: vi.fn(),
+    });
+    expect(consumeOnce).toHaveBeenCalledTimes(3);
+    const idle = vi.fn(async () => ({ status: 'IDLE' as const }));
+    await runRegisteredConsumer({
+      consumer: { consumeOnce: idle },
+      signal: new AbortController().signal,
+      maxSteps: 3,
+      report: vi.fn(),
+    });
+    expect(idle).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects an unbounded or invalid batch before consuming', async () => {
+    const consumeOnce = vi.fn(async () => ({ status: 'IDLE' as const }));
+    await expect(
+      runRegisteredConsumer({
+        consumer: { consumeOnce },
+        signal: new AbortController().signal,
+        maxSteps: Infinity,
+        report: vi.fn(),
+      }),
+    ).rejects.toThrow('REGISTERED_CONSUMER_FINITE_STEP_LIMIT_REQUIRED');
+    expect(consumeOnce).not.toHaveBeenCalled();
+  });
   it('never retries an unknown outcome or consumes a following command', async () => {
     const consumeOnce = vi.fn(async () => ({
       status: 'FAILED' as const,

@@ -1,5 +1,5 @@
-/** Dedicated registered host entry. Default is HTTP only; --consume explicitly
- * runs the existing sole FIFO. Neither mode initializes a World or moves Clock. */
+/** Dedicated registered host entry. Default is HTTP only; --consume N explicitly
+ * runs a finite FIFO batch. Neither mode initializes a World or moves Clock. */
 import { fileURLToPath } from 'node:url';
 import { startConfiguredRegisteredNodeService } from './runtime/registered-node-service.js';
 import { runRegisteredConsumer } from './runtime/registered-consumer-runner.js';
@@ -27,9 +27,12 @@ process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
 try {
   if (
-    ![3, 4].includes(process.argv.length) ||
+    ![3, 5].includes(process.argv.length) ||
     !process.argv[2]?.startsWith('/') ||
-    (process.argv.length === 4 && process.argv[3] !== '--consume')
+    (process.argv.length === 5 &&
+      (process.argv[3] !== '--consume' ||
+        !/^[1-9][0-9]{0,3}$/u.test(process.argv[4] ?? '') ||
+        Number(process.argv[4]) > 1000))
   )
     throw Error('ABSOLUTE_NODE_CONFIGURATION_PATH_REQUIRED');
   const consumeRequested = process.argv[3] === '--consume';
@@ -56,8 +59,12 @@ try {
       await runRegisteredConsumer({
         consumer: service.consumer,
         signal: consumerStop.signal,
+        maxSteps: Number(process.argv[4]),
         report: (observation) => console.log(JSON.stringify(observation)),
       });
+      console.log(
+        JSON.stringify({ event: 'REGISTERED_CONSUMER_BATCH_FINISHED' }),
+      );
     }
   }
 } catch (error) {

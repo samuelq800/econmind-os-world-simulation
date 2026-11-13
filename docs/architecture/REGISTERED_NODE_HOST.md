@@ -4,8 +4,8 @@ This is an implementation candidate, not a production deployment certificate.
 The dedicated entry is `apps/world-api/dist/registered-main.js`. It assembles
 fixed source readers, the registered execution clock, one shared consumer,
 bounded HTTP read/intake/recovery and derived publication. It does not install
-SQL, create identity or control records, initialize a World, start consumption
-or advance the Clock. Missing or revoked originals fail closed.
+SQL, create identity or control records, initialize a World or advance the
+Clock. Default startup does not consume. Missing or revoked originals fail closed.
 
 ## Build and configuration
 
@@ -64,6 +64,15 @@ do not invoke it to start a registered host. There is no public HTTP
 administrative execution endpoint. These methods retain
 the same FIFO consumer and writer lease. Process-level uniqueness supplements,
 and does not replace, database writer fencing.
+
+An operator may explicitly append `--consume N` to the registered entry for one
+finite batch of 1–1000 steps on that same consumer. It stops at an idle queue or
+the requested limit; it never starts a background polling loop. Each step still
+requires the current `MANUAL_FINITE` registration and lease. BLOCKED, FAILED,
+unknown outcomes and unavailable derived publication stop the host through its
+existing graceful shutdown. Resolve the original FINAL/derived publication
+before restarting; this option never submits a replacement command. Ordinary
+HTTP startup, source publication and Clock remain separate operations.
 
 SIGINT/SIGTERM stop HTTP acceptance, drain requests and the shared consumer, and
 close owned pools. An unknown COMMIT outcome must be resolved through the

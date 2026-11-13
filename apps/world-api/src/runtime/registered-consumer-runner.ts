@@ -1,7 +1,6 @@
 /** Explicit operator entry over the existing sole FIFO consumer. This runner
  * issues no command, lease, source, approval or Clock change. A failed/blocked
  * step or unconfirmed derived publication stops consumption for recovery. */
-import { setTimeout as delay } from 'node:timers/promises';
 import type { PostwarOfficeNodeBootstrap } from './postwar-office-node-bootstrap.js';
 
 type Step = Awaited<
@@ -19,9 +18,14 @@ export type RegisteredConsumerObservation = Readonly<{
 export async function runRegisteredConsumer(input: {
   consumer: Readonly<{ consumeOnce(): Promise<ObservedStep> }>;
   signal: AbortSignal;
+  /** Explicit finite batch, compatible with the MANUAL_FINITE registration. */
+  maxSteps?: number;
   report: (observation: RegisteredConsumerObservation) => void;
 }): Promise<void> {
-  while (!input.signal.aborted) {
+  const maxSteps = input.maxSteps ?? 1;
+  if (!Number.isSafeInteger(maxSteps) || maxSteps < 1 || maxSteps > 1000)
+    throw Error('REGISTERED_CONSUMER_FINITE_STEP_LIMIT_REQUIRED');
+  for (let i = 0; i < maxSteps && !input.signal.aborted; i++) {
     // Deliberately no retry of exceptions or FAILED/unknown commit outcomes.
     // The existing registered consumer owns all authorization and FIFO fencing.
     const step = await input.consumer.consumeOnce();
@@ -37,12 +41,6 @@ export async function runRegisteredConsumer(input: {
         recoveryRequired,
       });
     if (recoveryRequired) throw Error('REGISTERED_CONSUMER_REQUIRES_RECOVERY');
-    if (step.status === 'IDLE' && !input.signal.aborted) {
-      try {
-        await delay(250, undefined, { signal: input.signal });
-      } catch (error) {
-        if (!input.signal.aborted) throw error;
-      }
-    }
+    if (step.status === 'IDLE') return;
   }
 }
