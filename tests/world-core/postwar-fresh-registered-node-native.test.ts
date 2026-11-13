@@ -7,6 +7,8 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import { parseIndustryCommittedRunsCoverage } from '@econmind/core/postwar-industry-committed-runs-contract';
+import { restoreCompletedFreshH0 } from '../support/restore-completed-fresh-h0.js';
+import { prepareFreshIndustryH0 } from '../support/prepare-fresh-industry-h0.js';
 import { prepareFreshRegisteredNodeRehearsal } from '../support/fresh-registered-node-rehearsal.js';
 import {
   createRegisteredFinalDriver,
@@ -60,6 +62,7 @@ native('fresh actual-source registered Node and shipped browser', () => {
     await save();
     let prepared:
       | Awaited<ReturnType<typeof prepareFreshRegisteredNodeRehearsal>>
+      | Awaited<ReturnType<typeof restoreCompletedFreshH0>>
       | undefined;
     let driver: ReturnType<typeof createRegisteredFinalDriver> | undefined;
     let browser: { close(): Promise<void> } | undefined;
@@ -68,17 +71,39 @@ native('fresh actual-source registered Node and shipped browser', () => {
       | undefined;
     const failures: unknown[] = [];
     try {
-      prepared = await prepareFreshRegisteredNodeRehearsal({
-        repositoryRoot,
-        evidenceDirectory,
-        manifestFile,
-        expectedCommit,
-        ...(process.env.ECONMIND_FRESH_REFERENCE_MARKER
-          ? { referenceMarkerPath: process.env.ECONMIND_FRESH_REFERENCE_MARKER }
-          : {}),
-      });
+      prepared = process.env.ECONMIND_FRESH_COMPLETED_H0
+        ? await restoreCompletedFreshH0({
+            repositoryRoot,
+            evidenceDirectory,
+            expectedCommit,
+            completedCheckpointDirectory:
+              process.env.ECONMIND_FRESH_COMPLETED_H0,
+          })
+        : await prepareFreshRegisteredNodeRehearsal({
+            repositoryRoot,
+            evidenceDirectory,
+            manifestFile,
+            expectedCommit,
+            ...(process.env.ECONMIND_FRESH_REFERENCE_MARKER
+              ? {
+                  referenceMarkerPath:
+                    process.env.ECONMIND_FRESH_REFERENCE_MARKER,
+                }
+              : {}),
+          });
       const { fixture: f, setup: s, descriptor } = prepared;
       report.preparation = prepared.receipt;
+      const beforeIndustryPreparation = await s.counts();
+      report.industryH0 = await prepareFreshIndustryH0({
+        marker: f.marker,
+        clone: f.clone,
+        publisherRole: s.roles.publication,
+        evidencePath: path.join(
+          evidenceDirectory,
+          'industry-h0-preparation.json',
+        ),
+      });
+      assert.deepEqual(await s.counts(), beforeIndustryPreparation);
       driver = createRegisteredFinalDriver({
         repositoryRoot,
         evidenceDirectory,
