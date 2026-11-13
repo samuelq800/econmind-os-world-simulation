@@ -319,18 +319,16 @@ describe('explicit fixed office Node bootstrap ownership protocol', () => {
     const f = protocol();
     fixed.readBinding.mockReturnValue({
       publication: {
-        publishOpeningCaptainCountries: vi
-          .fn()
-          .mockResolvedValue({
-            status: 'PUBLISHED',
-            sources: [
-              {
-                countryId: 'COUNTRY_02',
-                seedFingerprint: 'sha256:' + 'b'.repeat(64),
-                admissionRef: f.config.social.admittedWorldPins.admissionRef,
-              },
-            ],
-          }),
+        publishOpeningCaptainCountries: vi.fn().mockResolvedValue({
+          status: 'PUBLISHED',
+          sources: [
+            {
+              countryId: 'COUNTRY_02',
+              seedFingerprint: 'sha256:' + 'b'.repeat(64),
+              admissionRef: f.config.social.admittedWorldPins.admissionRef,
+            },
+          ],
+        }),
       },
       financeCountryIds: ['COUNTRY_02'],
     });

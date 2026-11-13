@@ -258,7 +258,10 @@ export function createPostwarIndustryRunRuntime(config: {
         invalid('COMMAND_TIME_PRECEDES_CURRENT_HISTORY');
       const site = sites[0]!;
       if (target) {
-        if (facts.firstdayOriginal.data.schemaVersion !== 'postwar-industry-first-day-source-v1')
+        if (
+          facts.firstdayOriginal.data.schemaVersion !==
+          'postwar-industry-first-day-source-v1'
+        )
           invalid('TARGET_PRODUCTION_FACILITY_ORIGINAL_REQUIRED');
         const prepared = prepareIndustryUtilisationTargetFrame(
           { state: facts.workState, command: c, head, observedAtReal: at },

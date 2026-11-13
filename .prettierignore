@@ -50,3 +50,6 @@ docs/governance/owner-inputs/2026-10-21/OWNER_B06_C01_DEFINITION_ADOPTION.json
 data/scenario-candidates/unknown2544/approved17/execution_batches.v1.json
 # Preserve the exact GCU adoption receipt bytes pinned by the opening policy.
 docs/governance/owner-inputs/2026-10-29/GCU_OPENING_USER_ADOPTION.original.json
+# Byte-pinned forward receipt; postwar-schema-delta tests enforce this exact hash.
+# SHA-256: 58a0baca366439988ea12d953ae6747abec85c43b71fa5016fdddb86446bdf9d
+database/proposals/postwar-pending-programme-target-prefix.manifest.json

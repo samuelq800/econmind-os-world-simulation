@@ -82,6 +82,7 @@ describe('browser manual Office transport permits only the registered manual fam
       readonly INDUSTRY: readonly [
         'CORE_INDUSTRY_PRODUCTION_V1',
         'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+        'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
         'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
         'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1',
         'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
@@ -90,6 +91,7 @@ describe('browser manual Office transport permits only the registered manual fam
         'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
         'CORE_SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_V1',
         'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
+        'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1',
       ];
       readonly FINANCE: readonly [
         'CORE_FINANCE_BUDGET_APPROPRIATION_V1',
