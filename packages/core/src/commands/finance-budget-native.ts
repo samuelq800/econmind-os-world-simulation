@@ -1213,7 +1213,7 @@ function assertUtilityWorkerTimeConserved(
   }
   for (const boundaries of regions.values()) {
     boundaries.sort((a, b) =>
-      a.at < b.at ? -1 : a.at > b.at ? 1 : Number(a.add) - Number(b.add),
+      a.at < b.at ? -1 : a.at > b.at ? 1 : a.add === b.add ? 0 : a.add ? 1 : -1,
     );
     const active: Range[] = [];
     let total = 0n;

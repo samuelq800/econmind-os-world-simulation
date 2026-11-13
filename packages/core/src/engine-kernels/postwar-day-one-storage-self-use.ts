@@ -221,7 +221,7 @@ function issue(s: State): DayOneStorageSelfUseLedger {
   issued.set(token, s);
   return token;
 }
-function window(v: { fromSimTime: string; throughSimTime: string }) {
+function storageInterval(v: { fromSimTime: string; throughSimTime: string }) {
   const from = ticks(v.fromSimTime),
     through = ticks(v.throughSimTime);
   if (from >= through || through > day)
@@ -248,10 +248,13 @@ function pendingDraw(s: State) {
 function checkPower(s: State, bookings: readonly Booking[]) {
   const uses = [
     ...s.source.protectedReservations.map((r) => ({
-      ...window(r),
+      ...storageInterval(r),
       output: energy(r.outputMWh),
     })),
-    ...bookings.map((b) => ({ ...window(b.request), output: b.output })),
+    ...bookings.map((b) => ({
+      ...storageInterval(b.request),
+      output: b.output,
+    })),
   ];
   const boundaries = [
     ...new Set(uses.flatMap((u) => [u.from, u.through])),
@@ -342,7 +345,7 @@ export function createDayOneStorageSelfUseLedger(
     ref(r.reservationRef);
     ref(r.sourceRef);
     rawHash(r.sourceRawSha256);
-    window(r);
+    storageInterval(r);
     if (
       !['EXISTING_RESERVATION', 'PUBLIC_PRIORITY'].includes(r.kind) ||
       refs.has(r.reservationRef)
@@ -411,7 +414,7 @@ export function bookDayOneStorageSelfUse(input: {
     });
   }
   const at = observe(s, input.observedSimTime),
-    w = window(request);
+    w = storageInterval(request);
   for (const r of [request.bookingRef, request.runRef]) ref(r);
   if (
     request.worldId !== s.source.worldId ||

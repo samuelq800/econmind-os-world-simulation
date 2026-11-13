@@ -236,6 +236,11 @@ function electricity(n: string, d: string): ExactScenarioElectricity {
   return Object.freeze({ ...waterFraction(n, d), unit: 'MWh' as const });
 }
 const ZERO_ENERGY = electricity('0', '1');
+// Use the adopted simulation intensity directly; this is energy per volume,
+// not a real-to-simulation-time conversion or a calibrated pump efficiency.
+const WATER_ENERGY_INTENSITY = fraction(
+  INDUSTRY_FIRST_DAY_WATER_SCENARIO_POLICY.additionalElectricityPerAbstractedM3,
+);
 function addEnergy(a: ExactScenarioElectricity, b: ExactScenarioElectricity) {
   return electricity(
     (
@@ -246,7 +251,12 @@ function addEnergy(a: ExactScenarioElectricity, b: ExactScenarioElectricity) {
   );
 }
 function energyFromWater(v: WaterVolume): ExactScenarioElectricity {
-  return electricity(v.numerator, (BigInt(v.denominator) * 10n).toString());
+  return electricity(
+    (BigInt(v.numerator) * BigInt(WATER_ENERGY_INTENSITY.numerator)).toString(),
+    (
+      BigInt(v.denominator) * BigInt(WATER_ENERGY_INTENSITY.denominator)
+    ).toString(),
+  );
 }
 function parse(raw: string): unknown {
   const p = JSON.parse as (

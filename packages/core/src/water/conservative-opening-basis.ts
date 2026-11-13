@@ -231,7 +231,22 @@ export function deriveFixedConservativeOpeningWaterBasis(
     population = rows(parsed.population),
     seasonal = rows(parsed.seasonal),
     basins = rows(row(parsed.geography).basins),
-    daysInMonth = days(input.year, input.month);
+    daysInMonth = days(input.year, input.month),
+    // The validated calendar month selects a source row, not a numeric amount.
+    monthIndex = [
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+    ].indexOf(input.month);
   if (
     allocations.length !== 122 ||
     population.length !== 122 ||
@@ -271,7 +286,7 @@ export function deriveFixedConservativeOpeningWaterBasis(
       domesticAlias: text(aliases[0]!.waterDomesticM3Day),
       seasonal: Object.freeze({
         ...s,
-        selectedMonthlyRunoffM3: text(monthly[Number(input.month) - 1]),
+        selectedMonthlyRunoffM3: text(monthly[monthIndex]),
       }),
       daysInMonth,
     });

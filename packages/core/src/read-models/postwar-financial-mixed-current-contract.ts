@@ -410,10 +410,12 @@ export function parsePostwarCentralBankOpeningInstruments(
         'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY',
         'DECLARED_REQUIRES_INSTRUMENT_TERMS_AND_QUOTE',
       ].includes(String(r.status)) ||
+      typeof r.governmentSecurityHoldingCount !== 'number' ||
       !Number.isSafeInteger(r.governmentSecurityHoldingCount) ||
-      Number(r.governmentSecurityHoldingCount) < 0 ||
+      r.governmentSecurityHoldingCount < 0 ||
+      typeof r.bankLoanRecordCount !== 'number' ||
       !Number.isSafeInteger(r.bankLoanRecordCount) ||
-      Number(r.bankLoanRecordCount) < 0 ||
+      r.bankLoanRecordCount < 0 ||
       r.sourcePages.length !== 3 ||
       (r.status === 'NO_DECLARED_DOMESTIC_GOVERNMENT_SECURITY') !==
         (r.governmentSecurityHoldingCount === 0)
