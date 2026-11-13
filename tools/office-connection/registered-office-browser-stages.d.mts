@@ -106,14 +106,21 @@ export interface RegisteredOfficeBrowserSession {
       expectedStatus?: RegisteredOfficeBrowserState['status'];
     }>,
   ): Promise<RegisteredOfficeBrowserState>;
-  /** Use a fresh session after CREATE FINAL/F5 recovery (the old controller
-   * intentionally remains attempted). Child must exist in actual metadata. */
+  /** Child must exist in actual metadata. Reuse a verified FINAL session only
+   * after the explicit beginNextRequest stage succeeds. */
   submitSocialProgrammePlanFromCurrent(
     selection: RegisteredSocialProgrammePlanSelection,
     expectation?: Readonly<{
       expectedStatus?: RegisteredOfficeBrowserState['status'];
     }>,
   ): Promise<RegisteredOfficeBrowserState>;
+  /** Click the shipped explicit next-request action; it must perform a fresh
+   * authorized read, retain the prior FINAL, and send no command. */
+  beginNextRequest(
+    expectation: Readonly<{ expectedHead: RegisteredOfficeBrowserHead }>,
+  ): Promise<RegisteredOfficeBrowserState>;
+  /** Query the retained previous original without altering the current request. */
+  recoverPreviousFinal(): Promise<RegisteredOfficeBrowserState>;
   submitOnce(
     original: AuthenticatedOfficeCommandRequestDto,
     expectation?: Readonly<{

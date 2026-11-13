@@ -945,6 +945,81 @@ export async function createRegisteredOfficeBrowserStages(input) {
       submitIndustryPowerFromPlanning,
       submitSocialEmploymentServiceCreateFromCurrent,
       submitSocialProgrammePlanFromCurrent,
+      async beginNextRequest({ expectedHead }) {
+        live();
+        assert.equal(retired, false);
+        const before = await state(),
+          submitCount = count(requests, '/v1/office-command'),
+          readCount = count(requests, '/v1/postwar-office-runtime');
+        assert.equal(before.status, 'FINAL_VERIFIED');
+        assert.equal(before.canBeginNextRequest, true);
+        assert.ok(before.intent && before.receipt);
+        const button = page.locator(
+          '[data-office-command-action="next-request"]',
+        );
+        assert.equal(await button.isDisabled(), false);
+        await button.click();
+        await page.waitForFunction(() => {
+          const s = window.EconMindFixedOfficeProbe.state();
+          return s.canRead || s.status === 'DENIED' || s.status === 'MISSING';
+        });
+        const next = await state();
+        assert.deepEqual(networkFailures, []);
+        assert.equal(next.status, 'CURRENT_AUTHORIZED_HEAD');
+        assert.equal(next.canStage, true);
+        assert.equal(next.intent, null);
+        assert.equal(next.receipt, null);
+        assert.deepEqual(next.previousFinal, {
+          original: before.intent,
+          receipt: before.receipt,
+        });
+        assert.deepEqual(
+          head(next.runtimePage?.authority.readback),
+          head(expectedHead),
+        );
+        assert.ok(count(requests, '/v1/postwar-office-runtime') > readCount);
+        assert.equal(count(requests, '/v1/office-command'), submitCount);
+        original = null;
+        return record('ACTUAL_NEXT_REQUEST_AFTER_FINAL_AND_FRESH_READ', next, {
+          previousCommandId: before.receipt.commandId,
+        });
+      },
+      async recoverPreviousFinal() {
+        live();
+        assert.equal(retired, false);
+        const before = await state(),
+          submitCount = count(requests, '/v1/office-command'),
+          recoveryCount = count(requests, '/v1/command-recovery');
+        assert.ok(before.previousFinal);
+        assert.equal(before.canRecoverPreviousFinal, true);
+        await page
+          .locator('[data-office-command-action="previous-final"]')
+          .click();
+        await page.waitForFunction(() => {
+          const s = window.EconMindFixedOfficeProbe.state();
+          return s.canRead || s.status === 'DENIED' || s.status === 'MISSING';
+        });
+        const next = await state();
+        assert.deepEqual(networkFailures, []);
+        assert.equal(next.previousFinalCode, 'FINAL_VERIFIED');
+        const unchanged = (s) =>
+          Object.fromEntries(
+            Object.entries(s).filter(([key]) => key !== 'previousFinalCode'),
+          );
+        assert.deepEqual(unchanged(next), unchanged(before));
+        assert.equal(count(requests, '/v1/office-command'), submitCount);
+        assert.equal(
+          count(requests, '/v1/command-recovery'),
+          recoveryCount + 1,
+        );
+        return record(
+          'ACTUAL_PREVIOUS_FINAL_QUERY_PRESERVES_ACTIVE_REQUEST',
+          next,
+          {
+            previousCommandId: next.previousFinal.receipt.commandId,
+          },
+        );
+      },
       async submitOnce(dto, { expectedStatus = 'QUEUE_ACK' } = {}) {
         live();
         assert.equal(retired, false);

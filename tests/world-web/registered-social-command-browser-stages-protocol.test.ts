@@ -41,7 +41,8 @@ async function fixture(
   );
   cleanups.push(() => rm(dir, { recursive: true, force: true }));
   let committed = false,
-    optionsAvailable = true;
+    optionsAvailable = true,
+    nextReadFails = false;
   const programme = 'PROGRAMME_FROM_TEST_ONLY_FORM';
   const head = () => ({
     worldVersion: committed ? '4' : '3',
@@ -112,6 +113,10 @@ async function fixture(
           canRead: true,
           canConfirm: false,
           canRecover: false,
+          canBeginNextRequest: false,
+          canRecoverPreviousFinal: false,
+          previousFinal: null,
+          previousFinalCode: null,
           utilityPlanningPage: null,
           runParametersPage: null,
         };
@@ -131,6 +136,7 @@ async function fixture(
           ...ui,
           status: ui.receipt ? 'FINAL_VERIFIED' : 'CURRENT_AUTHORIZED_HEAD',
           canStage: !ui.intent,
+          canBeginNextRequest: !!ui.receipt && !!ui.intent,
           canRead: true,
           currentHead: head(),
           runtimePage: {
@@ -204,16 +210,17 @@ async function fixture(
           route = handler;
         },
         request: {
-          fetch: async (_url: string, options: Record<string, unknown>) => {
-            posts.push(JSON.parse((options.data as Buffer).toString('utf8')));
+          fetch: async (url: string, options: Record<string, unknown>) => {
+            if (new URL(url).pathname === '/v1/office-command')
+              posts.push(JSON.parse((options.data as Buffer).toString('utf8')));
             return { status: () => 202 };
           },
         },
       };
-      const emit = async (dto: unknown) => {
+      const emit = async (dto: unknown, endpoint = '/v1/office-command') => {
         await route!({
           request: () => ({
-            url: () => 'https://api.example.invalid/v1/office-command',
+            url: () => 'https://api.example.invalid' + endpoint,
             method: () => 'POST',
             allHeaders: async () => ({
               authorization: 'Bearer TEST_ONLY_UNSIGNED',
@@ -269,6 +276,35 @@ async function fixture(
           },
           allTextContents: async () => [],
           click: async () => {
+            if (selector.includes('"next-request"')) {
+              events.push('next-request');
+              await emit({}, '/v1/postwar-office-runtime');
+              if (nextReadFails) {
+                ui = { ...ui, status: 'UNAVAILABLE', runtimePage: null };
+                return;
+              }
+              const previousFinal = {
+                original: ui.intent,
+                receipt: ui.receipt,
+              };
+              ui = {
+                ...ui,
+                intent: null,
+                receipt: null,
+                previousFinal,
+                previousFinalCode: null,
+                canRecoverPreviousFinal: true,
+                canRecover: false,
+              };
+              read();
+              return;
+            }
+            if (selector.includes('"previous-final"')) {
+              events.push('previous-final');
+              await emit(ui.previousFinal, '/v1/command-recovery');
+              ui = { ...ui, previousFinalCode: 'FINAL_VERIFIED' };
+              return;
+            }
             if (selector.includes('social-next-positions')) {
               positionOffset++;
               poolOffset = 0;
@@ -473,6 +509,9 @@ async function fixture(
     noSource: () => {
       optionsAvailable = false;
     },
+    failNextRead: () => {
+      nextReadFails = true;
+    },
   };
 }
 describe('Social CREATE/child PLAN finite browser stages (protocol only)', () => {
@@ -527,7 +566,7 @@ describe('Social CREATE/child PLAN finite browser stages (protocol only)', () =>
     expect(f.posts).toHaveLength(1);
     expect(f.events).toContain('restore');
   });
-  it('requires a fresh session and selects the actual programme child/position pages for one PLAN', async () => {
+  it('requires explicit next-request preparation or a fresh session before selecting child/position pages for PLAN', async () => {
     const f = await fixture();
     await f.session.submitSocialEmploymentServiceCreateFromCurrent(f.create);
     f.commit();
@@ -544,6 +583,49 @@ describe('Social CREATE/child PLAN finite browser stages (protocol only)', () =>
       requestedMatches: '2',
       dueDayIndex: '0',
     });
+  });
+  it('restores FINAL after F5, explicitly starts the next request and queries the previous FINAL without changing the queued PLAN', async () => {
+    const f = await fixture();
+    const queued =
+      await f.session.submitSocialEmploymentServiceCreateFromCurrent(f.create);
+    await expect(
+      f.session.beginNextRequest({ expectedHead: f.create.expectedHead }),
+    ).rejects.toThrow();
+    f.commit();
+    await f.session.recoverFinal();
+    await f.session.reloadRestore(queued.intent!, { recover: false });
+    await expect(
+      f.session.beginNextRequest({ expectedHead: f.childPlan().expectedHead }),
+    ).rejects.toThrow();
+    await f.session.recoverFinal();
+    const next = await f.session.beginNextRequest({
+      expectedHead: f.childPlan().expectedHead,
+    });
+    expect(next.previousFinal?.original).toEqual(queued.intent);
+    expect(f.posts).toHaveLength(1);
+    const plan = await f.session.submitSocialProgrammePlanFromCurrent(
+      f.childPlan(),
+    );
+    const previous = await f.session.recoverPreviousFinal();
+    expect(previous.status).toBe('QUEUE_ACK');
+    expect(previous.intent).toEqual(plan.intent);
+    expect(previous.receipt).toBeNull();
+    expect(previous.previousFinalCode).toBe('FINAL_VERIFIED');
+    expect(f.posts).toHaveLength(2);
+    expect(f.events).toContain('next-request');
+    expect(f.events).toContain('previous-final');
+  });
+  it('does not report a next request success when its fresh read is unavailable', async () => {
+    const f = await fixture();
+    await f.session.submitSocialEmploymentServiceCreateFromCurrent(f.create);
+    f.commit();
+    await f.session.recoverFinal();
+    f.failNextRead();
+    await expect(
+      f.session.beginNextRequest({ expectedHead: f.childPlan().expectedHead }),
+    ).rejects.toThrow();
+    expect(f.posts).toHaveLength(1);
+    expect((await f.session.state()).intent).not.toBeNull();
   });
   it('refuses absent source and does not manufacture a licence or submit a command', async () => {
     const f = await fixture();

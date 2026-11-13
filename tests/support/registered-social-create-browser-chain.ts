@@ -172,7 +172,7 @@ export async function runRegisteredSocialCreateBrowserChain(input: {
     }
     const create = await browsers.open('social');
     let original: AuthenticatedOfficeCommandRequestDto;
-    try {
+    {
       const queued =
         await create.submitSocialEmploymentServiceCreateFromCurrent({
           ...selected,
@@ -194,9 +194,12 @@ export async function runRegisteredSocialCreateBrowserChain(input: {
         stage: 'CREATE_FINAL_AND_F5_ORIGINAL_RECOVERY',
         head: await d.readHead(),
       });
+      await create.beginNextRequest({ expectedHead: await d.readHead() });
+      stages.push({
+        stage: 'SAME_PAGE_EXPLICIT_NEXT_REQUEST_AFTER_RESTORED_FINAL',
+        head: await d.readHead(),
+      });
       await save();
-    } finally {
-      await create.close();
     }
     const afterCreate = await d.readHead(),
       childPages = await currentPages(d, 'service-pools', afterCreate),
@@ -248,7 +251,7 @@ export async function runRegisteredSocialCreateBrowserChain(input: {
       return report;
     }
     const chosen = positions[0]!,
-      plan = await browsers.open('social');
+      plan = create;
     let planOriginal: AuthenticatedOfficeCommandRequestDto;
     try {
       const queued = await plan.submitSocialProgrammePlanFromCurrent({
@@ -264,6 +267,12 @@ export async function runRegisteredSocialCreateBrowserChain(input: {
       });
       assert(queued.intent);
       planOriginal = queued.intent;
+      await plan.recoverPreviousFinal();
+      stages.push({
+        stage: 'CREATE_FINAL_READBACK_PRESERVES_QUEUED_PLAN_IN_SAME_PAGE',
+        head: await d.readHead(),
+      });
+      await save();
       await consume(planOriginal);
       await plan.recoverFinal({
         expectedHead: await d.readHead(),
