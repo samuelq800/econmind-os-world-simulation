@@ -15,6 +15,8 @@ import { prepareRegisteredFinalNativeSqlPlan } from '../../tools/office-connecti
 import { preparePostwarSocialEmploymentCreationForward } from './postwar-social-employment-creation-forward.js';
 import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
 
+import { attachRegisteredC10IndustryCheckpoint } from './registered-c10-checkpoint-attachment.js';
+
 const sha = (value: string) => createHash('sha256').update(value).digest('hex');
 export async function prepareFreshRegisteredNodeRehearsal(input: {
   repositoryRoot: string;
@@ -22,6 +24,8 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
   manifestFile: string;
   expectedCommit: string;
   referenceMarkerPath?: string;
+  /** Explicit TEST_ONLY C10 acceptance; default remains C1/C2. */
+  includeC10Industry?: true;
 }) {
   assert.equal(process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE, '1');
   const preflight = await inspectFreshRehearsalStartup(input);
@@ -64,6 +68,9 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
       fixture,
       repositoryRoot: input.repositoryRoot,
       sqlPlan,
+      ...(input.includeC10Industry === true
+        ? { allExistingRefinerySources: true as const }
+        : {}),
       recordCommitted: async (entry) => {
         ddl.push(entry);
         await writeFile(
@@ -194,8 +201,34 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
       'SOURCE_PREPARATION_CANNOT_ADVANCE_HEAD_OR_CREATE_ECONOMIC_COMMANDS',
     );
     await save();
+    const c10 =
+      input.includeC10Industry === true
+        ? await attachRegisteredC10IndustryCheckpoint({
+            marker: fixture.marker,
+            clone: fixture.clone,
+            descriptor: setup.descriptor,
+            actorPublisherRole: setup.roles.actorPublication,
+            previousHostStopped: true,
+            repairMissingOpeningBases: true,
+          })
+        : undefined;
+    const effectiveSetup = c10
+      ? {
+          ...setup,
+          descriptor: c10.descriptor,
+          signToken: c10.signToken,
+          signUnassignedToken: c10.signUnassignedToken,
+          subjects: c10.subjects,
+          actors: c10.actors,
+          c10HttpActor: c10.c10HttpActor,
+        }
+      : setup;
+    if (c10) {
+      receipt.c10 = c10.receipt;
+      await save();
+    }
     const descriptor = {
-      ...setup.descriptor,
+      ...effectiveSetup.descriptor,
       install: { ...setup.descriptor.install, centralBankOmo: false },
       beneficialRent: {
         ...setup.descriptor.beneficialRent,
@@ -209,14 +242,14 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
           classification: 'TEST_ONLY_CONFIGURATION_NOT_LIVE_AUTHORITY',
           descriptor,
           roles: setup.roles,
-          subjects: setup.subjects,
-          actors: setup.actors,
+          subjects: effectiveSetup.subjects,
+          actors: effectiveSetup.actors,
         },
         null,
         2,
       ) + '\n',
     );
-    return { fixture, setup, descriptor, receipt };
+    return { fixture, setup: effectiveSetup, descriptor, receipt };
   } catch (error) {
     const failures: unknown[] = [error];
     try {

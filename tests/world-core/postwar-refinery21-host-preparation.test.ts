@@ -54,3 +54,22 @@ it.each([
     ).toThrow();
   },
 );
+
+it('accepts only the fixed C10 subset while preserving the default full-source protocol', () => {
+  enable();
+  expect(() =>
+    Reflect.apply(requireRefinery21PreparationOptIn, undefined, [
+      { ...base, countrySubset: ['COUNTRY_10'] },
+    ]),
+  ).not.toThrow();
+  for (const countrySubset of [
+    [],
+    ['COUNTRY_02'],
+    ['COUNTRY_10', 'COUNTRY_11'],
+  ])
+    expect(() =>
+      Reflect.apply(requireRefinery21PreparationOptIn, undefined, [
+        { ...base, countrySubset },
+      ]),
+    ).toThrow('FIXED_C10_SOURCE_SUBSET_ONLY');
+});

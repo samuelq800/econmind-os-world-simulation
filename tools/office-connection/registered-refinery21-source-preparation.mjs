@@ -32,6 +32,12 @@ export function requireRefinery21PreparationOptIn(input) {
     new Set(input.countries.map((c) => c.countryId)).size,
     input.countries.length,
   );
+  if (input.countrySubset !== undefined)
+    assert.deepEqual(
+      input.countrySubset,
+      ['COUNTRY_10'],
+      'FIXED_C10_SOURCE_SUBSET_ONLY',
+    );
 }
 
 export async function prepareRegisteredRefinery21Sources(input) {
@@ -50,8 +56,12 @@ export async function prepareRegisteredRefinery21Sources(input) {
   );
   assert.equal(coverage.sites.length, 21);
   assert.equal(coverage.notApplicableCountries.length, 49);
+  const selectedSites = input.countrySubset
+    ? coverage.sites.filter((site) => site.countryId === 'COUNTRY_10')
+    : coverage.sites;
+  assert.equal(selectedSites.length, input.countrySubset ? 1 : 21);
   const configured = new Set(input.countries.map((c) => c.countryId));
-  for (const site of coverage.sites)
+  for (const site of selectedSites)
     assert(
       configured.has(site.countryId),
       'REFINERY21_ACTUAL_HOST_COUNTRY_CONFIGURATION_REQUIRED:' + site.countryId,
@@ -78,9 +88,15 @@ export async function prepareRegisteredRefinery21Sources(input) {
   const policy = await firstDay.loadPostwarIndustryFirstDayAdoptedPolicy(
     input.repositoryRoot,
   );
-  const proposals =
-    await utility.loadPostwarIndustryUtilitySourceProposals(utilityInput);
-  assert.equal(proposals.length, 21);
+  const proposals = input.countrySubset
+    ? [
+        await utility.loadPostwarIndustryUtilitySourceProposal({
+          ...utilityInput,
+          site: selectedSites[0],
+        }),
+      ]
+    : await utility.loadPostwarIndustryUtilitySourceProposals(utilityInput);
+  assert.equal(proposals.length, selectedSites.length);
   const publish = (run) =>
     input.publicationDatabase.transaction(async (tx) => {
       await tx.query('set transaction isolation level repeatable read');
@@ -172,7 +188,7 @@ export async function prepareRegisteredRefinery21Sources(input) {
     powerSources = [];
   const livePreparations = new Set();
   try {
-    for (const site of coverage.sites) {
+    for (const site of selectedSites) {
       progress('FIRST_DAY', site.countryId, 'START');
       const existing = await readCurrent((tx, head) =>
         firstDay.readPostwarIndustryFirstDaySourceFrom(tx, {
@@ -219,7 +235,7 @@ export async function prepareRegisteredRefinery21Sources(input) {
       existingBySite.set(c.countryId + '/' + c.facilityId, preparation);
     }
     for (const [index, proposal] of proposals.entries()) {
-      const site = coverage.sites[index];
+      const site = selectedSites[index];
       progress('UTILITY', site.countryId, 'START');
       const existing = existingBySite.get(
         site.countryId + '/' + site.facilityId,
@@ -246,9 +262,16 @@ export async function prepareRegisteredRefinery21Sources(input) {
         progress('UTILITY', site.countryId, 'COMMITTED');
       }
     }
-    const preparations =
+    const allPreparations =
       await utility.preparePostwarIndustryUtilitySources(utilityInput);
-    for (const preparation of preparations) livePreparations.add(preparation);
+    for (const preparation of allPreparations)
+      livePreparations.add(preparation);
+    const preparations = allPreparations.filter((p) => {
+      const c = utility.consumePostwarIndustryUtilitySource(p).compact;
+      return selectedSites.some(
+        (s) => s.countryId === c.countryId && s.facilityId === c.facilityId,
+      );
+    });
     assert.deepEqual(
       preparations
         .map((p) => {
@@ -256,7 +279,7 @@ export async function prepareRegisteredRefinery21Sources(input) {
           return c.countryId + '/' + c.facilityId;
         })
         .sort(),
-      coverage.sites
+      selectedSites
         .map((site) => site.countryId + '/' + site.facilityId)
         .sort(),
     );
@@ -326,8 +349,10 @@ export async function prepareRegisteredRefinery21Sources(input) {
     'REFINERY21_SOURCE_PUBLICATION_CHANGED_ECONOMIC_ROWS',
   );
   const report = {
-    classification:
-      'ACTUAL_ISOLATED_21_SOURCE_PUBLICATION_NOT_WORK_PAYMENT_DELIVERY_PRODUCTION',
+    classification: input.countrySubset
+      ? 'ACTUAL_ISOLATED_C10_SOURCE_PUBLICATION_NOT_WORK_PAYMENT_DELIVERY_PRODUCTION'
+      : 'ACTUAL_ISOLATED_21_SOURCE_PUBLICATION_NOT_WORK_PAYMENT_DELIVERY_PRODUCTION',
+    selectedCountries: selectedSites.map((s) => s.countryId),
     proofReuse: 'SAME_COLD_HOST_LIVE_CHILD_SEED_RENT_AND_SOCIAL_SOURCE_SLOT',
     worldId: input.configuration.admittedWorldPins.worldId,
     seedFingerprint: input.configuration.startupSeed.fingerprint,

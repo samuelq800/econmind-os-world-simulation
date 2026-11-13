@@ -269,7 +269,11 @@ async function initialize(d) {
           )
         ).loadPostwarIndustryRuntimeSourceContext(d.repositoryRoot)
       : undefined;
-  if (d.prepareRefinery21Sources === true) {
+  if (d.prepareRefinery21Sources === true && d.prepareC10Sources === true)
+    throw Error('ONE_EXPLICIT_REFINERY_PREPARATION_SCOPE_REQUIRED');
+  if (d.prepareRefinery21Sources === true && d.prepareC10Sources === true)
+    throw Error('EXCLUSIVE_REFINERY_SOURCE_SCOPE_REQUIRED');
+  if (d.prepareRefinery21Sources === true || d.prepareC10Sources === true) {
     // Validate the finite configured host scope before the expensive proof.
     const { readPostwarIndustryRefineryCoverage } =
       await import('../../apps/world-worker/dist/persistence/postwar-industry-refinery-sites.js');
@@ -277,10 +281,17 @@ async function initialize(d) {
     if (
       coverage.sites.length !== 21 ||
       coverage.notApplicableCountries.length !== 49 ||
-      coverage.sites.some(
-        (site) =>
-          !d.countries.some((country) => country.countryId === site.countryId),
-      )
+      coverage.sites
+        .filter(
+          (site) =>
+            d.prepareC10Sources !== true || site.countryId === 'COUNTRY_10',
+        )
+        .some(
+          (site) =>
+            !d.countries.some(
+              (country) => country.countryId === site.countryId,
+            ),
+        )
     )
       throw Error('REFINERY21_ACTUAL_HOST_COUNTRY_CONFIGURATION_REQUIRED');
   }
@@ -390,12 +401,15 @@ async function initialize(d) {
   };
   // Explicit isolated preparation, before any formal Node/API is constructed.
   // Reuses the loader's one live proof and the exact Worker/dist module graph.
-  if (d.prepareRefinery21Sources === true) {
+  if (d.prepareRefinery21Sources === true || d.prepareC10Sources === true) {
     const { prepareRegisteredRefinery21Sources } =
       await import('./registered-refinery21-source-preparation.mjs');
     sourceEvidence.refinery21Preparation =
       await prepareRegisteredRefinery21Sources({
         enabled: true,
+        ...(d.prepareC10Sources === true
+          ? { countrySubset: ['COUNTRY_10'] }
+          : {}),
         repositoryRoot: d.repositoryRoot,
         industryInstalled: d.install?.industry === true,
         utilitiesInstalled: d.install?.industryUtilities === true,
@@ -704,14 +718,44 @@ process.on('message', async (m) => {
         value: wire(result),
         diagnostics: databaseDiagnostics,
       });
+    } else if (m.type === 'C10_LOGISTICS_ORDERS') {
+      if (
+        !binding ||
+        !social ||
+        m.countryId !== 'COUNTRY_10' ||
+        m.facilityId !== 'OPEN-10-REFINED_FUEL' ||
+        !configuredPublicationCountries.has('COUNTRY_10')
+      )
+        throw Error('FIXED_CONFIGURED_C10_LOGISTICS_SCOPE_REQUIRED');
+      const { prepareNativeC10Orders } =
+        await import('./native-c10-order-preparation.mjs');
+      const value = wire(
+        await prepareNativeC10Orders({
+          binding,
+          social,
+          clock,
+          Shared,
+          C,
+          request: m,
+        }),
+      );
+      if (Buffer.byteLength(JSON.stringify(value)) > 262144)
+        throw Error('C10_ORDER_DRAFT_256K_BOUND');
+      send({ id: m.id, ok: true, value, diagnostics: databaseDiagnostics });
     } else if (m.type === 'INDUSTRY_SELECTORS') {
       if (
         !binding ||
         !social ||
-        m.countryId !== 'COUNTRY_02' ||
-        m.facilityId !== 'OPEN-02-REFINED_FUEL'
+        !configuredPublicationCountries.has(m.countryId) ||
+        ![
+          ['COUNTRY_02', 'OPEN-02-REFINED_FUEL'],
+          ['COUNTRY_10', 'OPEN-10-REFINED_FUEL'],
+        ].some(
+          ([countryId, facilityId]) =>
+            m.countryId === countryId && m.facilityId === facilityId,
+        )
       )
-        throw Error('FIXED_ACTUAL_C2_INDUSTRY_SCOPE_REQUIRED');
+        throw Error('FIXED_ACTUAL_C2_OR_C10_INDUSTRY_SCOPE_REQUIRED');
       const State =
         await import('../../apps/world-worker/dist/persistence/postwar-industry-run-state.js');
       const Prepared =
@@ -748,7 +792,8 @@ process.on('message', async (m) => {
           const sites = facts.siteSources.filter(
             (s) => s.countryId === m.countryId && s.facilityId === m.facilityId,
           );
-          if (sites.length !== 1) throw Error('ACTUAL_UNIQUE_C2_SITE_REQUIRED');
+          if (sites.length !== 1)
+            throw Error('ACTUAL_UNIQUE_REQUESTED_SITE_REQUIRED');
           const site = sites[0],
             positions = new Set(site.positions.map((p) => p.positionId));
           const funding = base.document.inputs.fundingAccounts.filter(

@@ -60,7 +60,21 @@ const sha = (s: string) => createHash('sha256').update(s).digest('hex');
  * decide admission. One requested output unit; exact source capacity and filled
  * workers determine the finite window. The cap is an explicit conservative
  * request limit derived from existing site payroll reservations, never a wage. */
-export function deriveRegisteredFinalIndustryRunPlan(value: unknown) {
+/** Explicit bounded test scope. Default C2 behavior remains unchanged; C10
+ * still requires its own real source, current Clock, people, wages and current funds. */
+export function deriveRegisteredFinalIndustryRunPlan(
+  value: unknown,
+  selection: 'C2_T0' | 'C10_CURRENT' = 'C2_T0',
+) {
+  registeredFinalAssert(
+    selection === 'C2_T0' || selection === 'C10_CURRENT',
+    'EXPLICIT_FIXED_INDUSTRY_TEST_SCOPE_REQUIRED',
+  );
+  const country = selection === 'C10_CURRENT' ? 'COUNTRY_10' : 'COUNTRY_02',
+    facility =
+      selection === 'C10_CURRENT'
+        ? 'OPEN-10-REFINED_FUEL'
+        : 'OPEN-02-REFINED_FUEL';
   const data = registeredFinalRecord(value),
     site = registeredFinalRecord(data.site),
     source = registeredFinalRecord(data.source),
@@ -68,10 +82,14 @@ export function deriveRegisteredFinalIndustryRunPlan(value: unknown) {
   registeredFinalAssert(
     data.classification ===
       'ACTUAL_CURRENT_INDUSTRY_PLANNING_DATA_NOT_EXECUTION_AUTHORITY' &&
-      site.countryId === 'COUNTRY_02' &&
-      site.facilityId === 'OPEN-02-REFINED_FUEL' &&
-      data.currentSimTime === '0',
-    'ACTUAL_C2_T0_PLANNING_DATA_REQUIRED',
+      site.countryId === country &&
+      site.facilityId === facility &&
+      uint(data.currentSimTime) &&
+      (selection !== 'C2_T0' || data.currentSimTime === '0') &&
+      (selection === 'C2_T0' ||
+        (uint(data.maxCommandSimTimeTicks) &&
+          BigInt(data.maxCommandSimTimeTicks) <= BigInt(data.currentSimTime))),
+    'ACTUAL_' + selection + '_PLANNING_DATA_REQUIRED',
   );
   registeredFinalAssert(
     Array.isArray(site.positions) &&
@@ -130,6 +148,12 @@ export function deriveRegisteredFinalIndustryRunPlan(value: unknown) {
     duration.lessThanOrEqualTo('28800000'),
     'ACTUAL_ONE_DAY_WORKER_AND_CAPACITY_WINDOW_REQUIRED',
   );
+  const startsAt = BigInt(String(data.currentSimTime)),
+    endsAt = startsAt + BigInt(duration.toFixed());
+  registeredFinalAssert(
+    startsAt >= 0n && endsAt <= 86400000n,
+    'ACTUAL_CURRENT_CLOCK_WITHIN_ADOPTED_FIRST_DAY_WINDOW_REQUIRED',
+  );
   let reservation = new WorldDecimal('0');
   const positions = new Set(
     site.positions.map((p: unknown) => registeredFinalRecord(p).positionId),
@@ -178,8 +202,8 @@ export function deriveRegisteredFinalIndustryRunPlan(value: unknown) {
     sourceRef: source.sourceRef,
     sourceRawSha256: source.sourceRawSha256,
     quantity: Object.freeze({ amount: '1', unit: site.outputUnit }),
-    startsAtSimTime: '0',
-    endsAtSimTime: duration.toFixed(),
+    startsAtSimTime: startsAt.toString(),
+    endsAtSimTime: endsAt.toString(),
     maximumExpense: cap.toCanonicalValue(),
     derivation: Object.freeze({
       classification: 'TEST_REQUEST_LIMITS_NOT_EXECUTION_FACTS',
