@@ -457,6 +457,31 @@ export function readIndustryFirstDayWaterExecutionState(
     scenarioState: s.scenario,
   });
 }
+/** Read-only exact command snapshot from genuine Core replay state. This is
+ * source DATA, not source currentness, an actor grant or commit authority. */
+export function readIndustryFirstDayWaterCommandSource(
+  state: IndustryFirstDayWaterExecutionState,
+  command: CanonicalCommand,
+  sha: Sha256Hex,
+): Readonly<IndustryUtilitySource> {
+  const s = lookup(state),
+    intent = parseIndustryUtilityIntent(command, sha),
+    saved = s.originals.get(
+      [intent.sourceRef, intent.facilityId, intent.runId].join('\n'),
+    ),
+    snapshot = saved?.commandSources?.find(
+      (item) => item.commandFingerprint === command.fingerprint,
+    );
+  if (
+    intent.serviceKind !== 'WATER' ||
+    command.worldId !== s.worldId ||
+    !snapshot ||
+    snapshot.source.countryId !== command.countryId ||
+    snapshot.source.sourceRawSha256 !== intent.sourceRawSha256
+  )
+    invalid('EXACT_INSTALLED_WATER_COMMAND_SNAPSHOT_REQUIRED');
+  return snapshot.source;
+}
 function scope(s: State, source: IndustryUtilitySource) {
   const data = readIndustryFirstDayWaterScenarioExecutionScope(s.scenario),
     suffix = source.countryId.slice('COUNTRY_'.length),

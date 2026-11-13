@@ -484,6 +484,7 @@ export async function readPagedFromPreparedSocialBaseOnHeldExecutor(
   tx: SqlExecutor,
   input: {
     readonly socialConnection: Readonly<PostwarSocialRuntimeConnection>;
+    readonly pendingWaterDeliveryCommand?: import('@econmind/core').CanonicalCommand;
     readonly worldId: string;
     readonly hostCountryId: string;
     readonly expectedHead?: PreparedPostwarFinanceSocialFxReplayRequest['expectedHead'];
@@ -530,6 +531,9 @@ export async function readPagedFromPreparedSocialBaseOnHeldExecutor(
         seedId: b.pins.seedRef,
         seedFingerprint: b.pins.contentHash,
         admissionRef: b.pins.admissionRef,
+        ...(input.pendingWaterDeliveryCommand === undefined
+          ? {}
+          : { pendingWaterDeliveryCommand: input.pendingWaterDeliveryCommand }),
         ...(input.expectedHead === undefined
           ? {}
           : { expectedHead: input.expectedHead }),

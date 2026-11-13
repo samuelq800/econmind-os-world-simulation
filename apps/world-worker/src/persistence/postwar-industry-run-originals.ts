@@ -23,8 +23,14 @@ import {
 } from './postwar-industry-first-day-source.js';
 import { createHash } from 'node:crypto';
 import { canonicalSerialize } from '@econmind/core';
-import { projectPostwarIndustryPowerServiceSource } from './postwar-industry-utility-service-source.js';
-import { readPostwarIndustryUtilitySourceForPowerFacility } from './postwar-industry-utility-source.js';
+import {
+  projectPostwarIndustryPowerServiceSource,
+  projectPostwarIndustryWaterServiceSource,
+} from './postwar-industry-utility-service-source.js';
+import {
+  readPostwarIndustryUtilitySourceForPowerFacility,
+  readPostwarIndustryUtilitySourceForWaterFacility,
+} from './postwar-industry-utility-source.js';
 import { INDUSTRY_FIRST_DAY_READ_QUERY } from './postwar-industry-first-day-source.js';
 import type { SqlExecutor } from './sql-database.js';
 export const INDUSTRY_RUN_HISTORY_ORIGINAL_QUERY =
@@ -58,13 +64,22 @@ export function projectPostwarIndustryRunSiteSource(
     d.admissionRef !== b.pins.admissionRef
   )
     fail('GENUINE_BASE_AND_REGISTERED_SOURCE_DIFFER');
-  if (d.serviceKind === 'POWER') {
-    const preparation = readPostwarIndustryUtilitySourceForPowerFacility(
-      baseline,
-      { countryId: text(d.countryId), facilityId: text(d.facilityId) },
-    );
+  if (d.serviceKind === 'POWER' || d.serviceKind === 'WATER') {
+    const water = d.serviceKind === 'WATER';
+    const preparation = (
+      water
+        ? readPostwarIndustryUtilitySourceForWaterFacility
+        : readPostwarIndustryUtilitySourceForPowerFacility
+    )(baseline, {
+      countryId: text(d.countryId),
+      facilityId: text(d.facilityId),
+    });
     if (!preparation) fail('REGISTERED_POWER_SOURCE_NOT_PREPARED');
-    const projected = projectPostwarIndustryPowerServiceSource({
+    const projected = (
+      water
+        ? projectPostwarIndustryWaterServiceSource
+        : projectPostwarIndustryPowerServiceSource
+    )({
       baseline,
       preparation,
     });
@@ -252,14 +267,23 @@ export function decodePostwarIndustryRunSourceRow(
     readonly baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>;
   },
 ): Readonly<PostwarIndustryFirstDaySourceData> {
-  if (!row.source_ref.startsWith('INDUSTRY_POWER_STAFF_'))
+  const water = row.source_ref.startsWith('INDUSTRY_WATER_STAFF_');
+  if (!water && !row.source_ref.startsWith('INDUSTRY_POWER_STAFF_'))
     return decodePostwarIndustryFirstDaySourceRow(row, input);
-  const preparation = readPostwarIndustryUtilitySourceForPowerFacility(
-    input.baseline,
-    { countryId: input.countryId, facilityId: input.facilityId },
-  );
+  const preparation = (
+    water
+      ? readPostwarIndustryUtilitySourceForWaterFacility
+      : readPostwarIndustryUtilitySourceForPowerFacility
+  )(input.baseline, {
+    countryId: input.countryId,
+    facilityId: input.facilityId,
+  });
   if (!preparation) fail('REGISTERED_POWER_SOURCE_NOT_PREPARED');
-  const expected = projectPostwarIndustryPowerServiceSource({
+  const expected = (
+    water
+      ? projectPostwarIndustryWaterServiceSource
+      : projectPostwarIndustryPowerServiceSource
+  )({
     baseline: input.baseline,
     preparation,
   });

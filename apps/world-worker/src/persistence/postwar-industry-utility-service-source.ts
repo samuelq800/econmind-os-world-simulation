@@ -1,6 +1,10 @@
 /** POWER service labour originals, not performed WORK, paid wages or delivery.
  * A person-day here means the existing 480 person-minutes of labour. It is not
  * an invented MWh productivity coefficient or a manufacturing recipe. */
+import {
+  POSTWAR_WATER_STAFF_POLICY,
+  postwarWaterServiceFacilityId,
+} from '../preparation/postwar-water-staff-policy.js';
 import { createHash } from 'node:crypto';
 import {
   canonicalSerialize,
@@ -348,5 +352,92 @@ export async function readPostwarIndustryPowerServiceSourceFrom(
       ...projected.firstdayOriginal,
       head: Object.freeze({ ...input.expectedHead }),
     }),
+  });
+}
+
+/** A service workplace over the same people, never a second population pool.
+ * Eligibility is not availability: RUN/WORK selects actual unoccupied ranges
+ * against the shared Core person-time bookings, and DELIVER requires paid
+ * coverage of the entire extraction interval. */
+export function derivePostwarIndustryWaterServiceSiteData(
+  input: Parameters<typeof derivePostwarIndustryPowerServiceSiteData>[0] & {
+    readonly targetFacilityId: string;
+  },
+) {
+  const power = derivePostwarIndustryPowerServiceSiteData(input),
+    facilityId = postwarWaterServiceFacilityId(input.targetFacilityId),
+    sourcePositions: unknown = JSON.parse(power.firstdayOriginal.rawText),
+    rawText = canonicalSerialize({
+      schemaVersion: 'postwar-industry-water-service-staff-v1',
+      worldId: input.scope.worldId,
+      countryId: input.scope.countryId,
+      locationId: input.scope.locationId,
+      operatorId: input.scope.operatorId,
+      facilityId,
+      targetFacilityId: input.targetFacilityId,
+      staffSourceObjectId: input.scope.storageId,
+      policyVersion: POSTWAR_WATER_STAFF_POLICY.version,
+      userAdoptionRawSha256: POSTWAR_WATER_STAFF_POLICY.userAdoptionRawSha256,
+      sourcePositions,
+    }),
+    rawSha256 = sha(rawText),
+    sourceRef = 'INDUSTRY_WATER_STAFF_' + rawSha256.toUpperCase();
+  return Object.freeze({
+    siteSource: Object.freeze({
+      ...power.siteSource,
+      facilityId,
+      sourceRef,
+      sourceRawSha256: rawSha256,
+    }),
+    firstdayOriginal: Object.freeze({
+      ...power.firstdayOriginal,
+      rawText,
+      rawSha256,
+      sourceRef,
+      data: Object.freeze({
+        ...power.firstdayOriginal.data,
+        schemaVersion: 'postwar-industry-water-service-source-v1',
+        serviceKind: 'WATER',
+        sourceSemantics:
+          'ADOPTED_EXISTING_POWER_STAFF_NOT_NEW_PEOPLE_OR_COMPLETED_WATER_SERVICE',
+        facilityId,
+        targetFacilityId: input.targetFacilityId,
+        sourceRef,
+        sourceRawSha256: rawSha256,
+        staffingPolicy: POSTWAR_WATER_STAFF_POLICY,
+        timeUnitDefinition:
+          'ONE_PERSON_DAY_IS_480_PERSON_MINUTES_NOT_WATER_VOLUME_PRODUCTIVITY',
+      }),
+    }),
+  });
+}
+export function projectPostwarIndustryWaterServiceSource(
+  input: Parameters<typeof projectPostwarIndustryPowerServiceSource>[0],
+) {
+  // Validate all private storage/OP/E03/admission pins via the existing issuer.
+  projectPostwarIndustryPowerServiceSource(input);
+  const p = consumePostwarIndustryUtilitySource(input.preparation),
+    c = p.compact,
+    d = consumePreparedPostwarSocialFinancialReplayBase(input.baseline).document
+      .inputs;
+  return derivePostwarIndustryWaterServiceSiteData({
+    scope: {
+      worldId: c.worldId,
+      seedId: c.seedId,
+      seedFingerprint: c.seedFingerprint,
+      admissionRef: c.admissionRef,
+      countryId: c.countryId,
+      locationId: c.locationId,
+      operatorId: c.operatorId,
+      storageId: c.power.storageId,
+      physicalSourceRef: c.power.sourceRef,
+      physicalSourceRawSha256: c.power.sourceRawSha256,
+      utilityCompactSha256: p.compactSha256,
+    },
+    targetFacilityId: c.facilityId,
+    sourcePositions: d.sourcePositions,
+    wagePositions: d.labour.positions,
+    populationPositionRefs: d.populationPositionRefs,
+    positionFunding: d.positionFunding,
   });
 }

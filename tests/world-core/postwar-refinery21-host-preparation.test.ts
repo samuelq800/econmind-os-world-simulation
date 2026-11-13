@@ -3,12 +3,14 @@
 import { afterEach, expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { requireRefinery21PreparationOptIn } from '../../tools/office-connection/registered-refinery21-source-preparation.mjs';
+const beforeWater = process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION;
 const beforeChild = process.env.ECONMIND_REGISTERED_FINAL_NODE_CHILD;
 const beforePrepare =
   process.env.ECONMIND_REGISTERED_REFINERY21_SOURCE_PREPARATION;
 afterEach(() => {
   for (const [key, value] of [
     ['ECONMIND_REGISTERED_FINAL_NODE_CHILD', beforeChild],
+    ['ECONMIND_REGISTERED_WATER_STAFF_PREPARATION', beforeWater],
     ['ECONMIND_REGISTERED_REFINERY21_SOURCE_PREPARATION', beforePrepare],
   ] as const) {
     if (value === undefined) delete process.env[key];
@@ -72,4 +74,18 @@ it('accepts only the fixed C10 subset while preserving the default full-source p
         { ...base, countrySubset },
       ]),
     ).toThrow('FIXED_C10_SOURCE_SUBSET_ONLY');
+});
+
+it('leaves water source publication off unless explicitly selected and rejects malformed flags', () => {
+  enable();
+  delete process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION;
+  expect(() => requireRefinery21PreparationOptIn(base)).not.toThrow();
+  process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION = '1';
+  expect(() => requireRefinery21PreparationOptIn(base)).not.toThrow();
+  for (const value of ['0', 'true', '']) {
+    process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION = value;
+    expect(() => requireRefinery21PreparationOptIn(base)).toThrow(
+      'EXPLICIT_WATER_STAFF_PREPARATION_OPT_IN_REQUIRED',
+    );
+  }
 });

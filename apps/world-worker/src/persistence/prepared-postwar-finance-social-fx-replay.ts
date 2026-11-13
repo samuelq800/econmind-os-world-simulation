@@ -75,6 +75,8 @@ export function projectPostwarOpeningFinancialEncumbrances(
 }
 export interface PreparedPostwarFinanceSocialFxReplayRequest {
   readonly executor: SqlExecutor;
+  /** Fixed current command, source DATA only; used on the final replay page. */
+  readonly pendingWaterDeliveryCommand?: import('@econmind/core').CanonicalCommand;
   readonly baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>;
   readonly worldId: string;
   readonly hostCountryId: string;
@@ -370,6 +372,14 @@ export async function readPreparedPostwarFinanceSocialFxPageOriginalsFrom(
       officeId: input.officeId,
       expectedHead: input.expectedHead,
       frames: input.frames,
+      ...(input.pendingWaterDeliveryCommand !== undefined &&
+      (input.pageBoundary === undefined ||
+        (input.pageBoundary.throughHead.worldVersion ===
+          input.expectedHead.worldVersion &&
+          input.pageBoundary.throughHead.eventSequence ===
+            input.expectedHead.eventSequence))
+        ? { pendingWaterDeliveryCommand: input.pendingWaterDeliveryCommand }
+        : {}),
     },
   );
   const industry = await readPostwarIndustryRunPageOriginalsFrom(

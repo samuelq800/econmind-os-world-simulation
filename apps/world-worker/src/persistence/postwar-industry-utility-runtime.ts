@@ -31,7 +31,10 @@ import {
   prepareIndustryUtilityExecution,
 } from '@econmind/core/industry-utility-execution';
 import { prepareIndustryFirstDayPowerExecution } from '@econmind/core/industry-first-day-power-execution';
-import { prepareIndustryFirstDayWaterExecution } from '@econmind/core/industry-first-day-water-execution';
+import {
+  prepareIndustryFirstDayWaterExecution,
+  readIndustryFirstDayWaterCommandSource,
+} from '@econmind/core/industry-first-day-water-execution';
 import {
   isPostwarSocialRuntimeConnection,
   readPostwarSocialRuntimeConnectionResources,
@@ -362,16 +365,26 @@ export function createPostwarIndustryUtilityRuntime(config: {
         countryId: c.countryId,
         facilityId: intent.facilityId,
         expectedHead: head,
+        ...(intent.serviceKind === 'WATER' && !automatic
+          ? { pendingWaterDeliveryCommand: c }
+          : {}),
       });
     try {
       const facts = consumePostwarIndustryRunStateFrom(tx, ctx);
       if (c.simTime.ticks < BigInt(facts.maxCommandSimTimeTicks))
         fail('COMMAND_TIME_PRECEDES_ACTUAL_HISTORY');
-      const utilitySource = utilitySourceForRun(
-          source,
-          intent.serviceKind === 'POWER' ? 'POWER' : 'WATER',
-          intent.runId,
-        ),
+      const utilitySource =
+          intent.serviceKind === 'WATER' && !automatic
+            ? readIndustryFirstDayWaterCommandSource(
+                facts.pagedReplay.result.industryWaterState!,
+                c,
+                sha,
+              )
+            : utilitySourceForRun(
+                source,
+                intent.serviceKind === 'POWER' ? 'POWER' : 'WATER',
+                intent.runId,
+              ),
         preparation = prepareIndustryUtilityExecution(
           { command: c, replay: facts.pagedReplay, source: utilitySource },
           sha,

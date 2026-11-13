@@ -8,6 +8,12 @@ import path from 'node:path';
 const root = fileURLToPath(new URL('../..', import.meta.url));
 
 export function requireRefinery21PreparationOptIn(input) {
+  if (process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION !== undefined)
+    assert.equal(
+      process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION,
+      '1',
+      'EXPLICIT_WATER_STAFF_PREPARATION_OPT_IN_REQUIRED',
+    );
   assert.equal(process.env.ECONMIND_REGISTERED_FINAL_NODE_CHILD, '1');
   assert.equal(
     process.env.ECONMIND_REGISTERED_REFINERY21_SOURCE_PREPARATION,
@@ -42,7 +48,7 @@ export function requireRefinery21PreparationOptIn(input) {
 
 export async function prepareRegisteredRefinery21Sources(input) {
   requireRefinery21PreparationOptIn(input);
-  const [sitesModule, firstDay, utility, power, social, powerSource] =
+  const [sitesModule, firstDay, utility, power, social, powerSource, water] =
     await Promise.all([
       import('../../apps/world-worker/dist/persistence/postwar-industry-refinery-sites.js'),
       import('../../apps/world-worker/dist/persistence/postwar-industry-first-day-source.js'),
@@ -50,6 +56,7 @@ export async function prepareRegisteredRefinery21Sources(input) {
       import('../../apps/world-worker/dist/persistence/postwar-industry-power-service-publication.js'),
       import('../../apps/world-worker/dist/runtime-preparation/social-runtime-connection.js'),
       import('../../apps/world-worker/dist/persistence/postwar-industry-utility-service-source.js'),
+      import('../../apps/world-worker/dist/persistence/postwar-industry-water-service-publication.js'),
     ]);
   const coverage = sitesModule.readPostwarIndustryRefineryCoverage(
     input.sourceContext,
@@ -103,6 +110,18 @@ export async function prepareRegisteredRefinery21Sources(input) {
       await tx.query('set local role world_v2_industry_source_publisher');
       return run(tx);
     });
+  if (process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION === '1') {
+    const installed = await publish((tx) =>
+      tx.query(
+        "select to_regprocedure('world_v2.publish_postwar_industry_water_service_source(text,text)')::text as signature",
+      ),
+    );
+    assert.equal(installed.rows.length, 1);
+    assert(
+      installed.rows[0].signature,
+      'WATER_STAFF_SOURCE_MIGRATION_NOT_INSTALLED',
+    );
+  }
   const economicSnapshot = async () => {
     const rows = {};
     for (const table of [
@@ -185,7 +204,8 @@ export async function prepareRegisteredRefinery21Sources(input) {
   const economicBefore = await economicSnapshot();
   const originals = [],
     utilitySources = [],
-    powerSources = [];
+    powerSources = [],
+    waterSources = [];
   const livePreparations = new Set();
   try {
     for (const site of selectedSites) {
@@ -337,6 +357,69 @@ export async function prepareRegisteredRefinery21Sources(input) {
         );
         progress('POWER', c.countryId, 'COMMITTED');
       }
+      if (process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION === '1') {
+        progress('WATER_STAFF', c.countryId, 'START');
+        const waterProjected =
+          powerSource.projectPostwarIndustryWaterServiceSource({
+            baseline,
+            preparation,
+          });
+        const existingWater = await readCurrent(async (tx, head) => {
+          await utility.assertPostwarIndustryUtilitySourceFrom(tx, {
+            preparation,
+            head,
+          });
+          const packets = await tx.query(
+            firstDay.INDUSTRY_FIRST_DAY_READ_QUERY,
+            [
+              c.worldId,
+              c.countryId,
+              waterProjected.siteSource.facilityId,
+              head.worldVersion,
+              head.eventSequence,
+            ],
+          );
+          if (packets.rows.length === 0) return null;
+          assert.equal(packets.rows.length, 1);
+          const packet = packets.rows[0];
+          assert.equal(
+            packet.source_text,
+            waterProjected.firstdayOriginal.rawText,
+          );
+          assert.equal(
+            packet.source_sha256,
+            waterProjected.firstdayOriginal.rawSha256,
+          );
+          assert.equal(
+            packet.source_ref,
+            waterProjected.firstdayOriginal.sourceRef,
+          );
+          assert.equal(packet.world_version, head.worldVersion);
+          assert.equal(packet.event_sequence, head.eventSequence);
+          assert.equal(
+            createHash('sha256').update(packet.source_text).digest('hex'),
+            packet.source_sha256,
+          );
+          return {
+            sourceRef: packet.source_ref,
+            sourceSha256: packet.source_sha256,
+          };
+        });
+        if (existingWater !== null) {
+          waterSources.push(existingWater);
+          progress('WATER_STAFF', c.countryId, 'REUSED_VERIFIED');
+        } else {
+          waterSources.push(
+            await publish((tx) =>
+              water.publishPostwarIndustryWaterServiceSourceFrom(tx, {
+                baseline,
+                preparation,
+              }),
+            ),
+          );
+          progress('WATER_STAFF', c.countryId, 'COMMITTED');
+        }
+      }
     }
   } finally {
     for (const preparation of livePreparations)
@@ -361,6 +444,11 @@ export async function prepareRegisteredRefinery21Sources(input) {
     originals,
     utilitySources,
     powerSources,
+    waterSources,
+    waterStaffPreparation:
+      process.env.ECONMIND_REGISTERED_WATER_STAFF_PREPARATION === '1'
+        ? 'EXPLICIT_EXISTING_STAFF_SOURCE_ONLY'
+        : 'NOT_REQUESTED',
     notApplicableCountries: coverage.notApplicableCountries,
     economicBefore,
     economicAfter,

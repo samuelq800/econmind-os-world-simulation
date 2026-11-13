@@ -103,6 +103,7 @@ export async function readPostwarIndustryRunStateFrom(
     worldId: string;
     countryId: string;
     facilityId: string;
+    readonly pendingWaterDeliveryCommand?: import('@econmind/core').CanonicalCommand;
     /** Caller holds actual H/lease before entry. Exact actual SQL H is rechecked. */
     expectedHead: Readonly<{ worldVersion: string; eventSequence: string }>;
   }>,
@@ -171,6 +172,9 @@ export async function readPostwarIndustryRunStateFrom(
       worldId: input.worldId,
       hostCountryId: input.countryId,
       expectedHead: input.expectedHead,
+      ...(input.pendingWaterDeliveryCommand === undefined
+        ? {}
+        : { pendingWaterDeliveryCommand: input.pendingWaterDeliveryCommand }),
     });
     const result = paged.view.result;
     if (!result.financialState || !result.inventoryState)

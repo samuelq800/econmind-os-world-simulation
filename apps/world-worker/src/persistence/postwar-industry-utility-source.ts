@@ -1,5 +1,11 @@
+import {
+  reconstructPostwarIndustryWaterGrantOriginals,
+  readPostwarIndustryWaterCommandOriginalFrom,
+} from './postwar-industry-water-history-originals.js';
 /** Fixed adopted water/power originals. Startup calculations are immutable
  * DATA; only an actual compact SQL registration can install a runtime source. */
+import { postwarWaterServiceFacilityId } from '../preparation/postwar-water-staff-policy.js';
+import { projectPostwarIndustryWaterServiceSource } from './postwar-industry-utility-service-source.js';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -580,6 +586,26 @@ export function readPostwarIndustryUtilitySourceForPowerFacility(
     );
   return matches[0];
 }
+export function readPostwarIndustryUtilitySourceForWaterFacility(
+  baseline: Readonly<PreparedPostwarSocialFinancialReplayBase>,
+  scope: Readonly<{ countryId: string; facilityId: string }>,
+): Readonly<PreparedPostwarIndustryUtilitySource> | undefined {
+  consumePreparedPostwarSocialFinancialReplayBase(baseline);
+  const matches = [
+    ...(installed.get(baseline.prepared)?.values() ?? []),
+  ].filter((token) => {
+    const c = consumePostwarIndustryUtilitySource(token).compact;
+    return (
+      c.countryId === scope.countryId &&
+      postwarWaterServiceFacilityId(c.facilityId) === scope.facilityId
+    );
+  });
+  if (matches.length > 1)
+    throw new PostwarIndustryUtilitySourceMissing(
+      'AMBIGUOUS_REGISTERED_WATER_SERVICE_SCOPE',
+    );
+  return matches[0];
+}
 async function assertUtilitySourcePacketFrom(
   query: string,
   tx: SqlExecutor,
@@ -949,6 +975,7 @@ export function postwarIndustryUtilityOriginalsForRun(
   preparation: Readonly<PreparedPostwarIndustryUtilitySource>,
   runId: string,
   paymentFrames: readonly import('@econmind/core/finance-budget-native').FinanceNativeBudgetCanonicalFrame[] = [],
+  historyFrames: readonly import('@econmind/core/finance-budget-native').FinanceNativeBudgetCanonicalFrame[] = [],
 ): Readonly<{
   industryPowerOriginals: readonly import('@econmind/core/industry-first-day-power-execution').IndustryFirstDayPowerOriginal[];
   industryWaterOriginals: readonly import('@econmind/core/industry-first-day-water-execution').IndustryFirstDayWaterReplayOriginal[];
@@ -956,7 +983,11 @@ export function postwarIndustryUtilityOriginalsForRun(
   const p = consumePostwarIndustryUtilitySource(preparation),
     power = utilitySourceForRun(preparation, 'POWER', runId),
     water = utilitySourceForRun(preparation, 'WATER', runId),
-    staff = power.originals.find((x) => x.kind === 'POWER_SERVICE_WORK_SITE')!;
+    staff = power.originals.find((x) => x.kind === 'POWER_SERVICE_WORK_SITE')!,
+    waterStaff = projectPostwarIndustryWaterServiceSource({
+      baseline: p.baseline,
+      preparation,
+    });
   return freeze({
     industryPowerOriginals: [
       {
@@ -970,14 +1001,22 @@ export function postwarIndustryUtilityOriginalsForRun(
       },
     ],
     industryWaterOriginals: [
-      {
-        source: water,
-        scenario: p.scenario,
-        grantEligibilityOriginal: {
-          reference: 'WATER_ELIGIBILITY_' + p.compactSha256.toUpperCase(),
-          rawText: utilityWaterGrantEligibility(preparation),
+      reconstructPostwarIndustryWaterGrantOriginals(
+        {
+          source: water,
+          scenario: p.scenario,
+          serviceFacilityId: waterStaff.siteSource.facilityId,
+          serviceRunId: 'UTILITY_WATER_SERVICE_' + runId,
+          serviceWorkSourceRef: waterStaff.firstdayOriginal.sourceRef,
+          serviceWorkSourceRawSha256: waterStaff.firstdayOriginal.rawSha256,
+          paymentFrames,
+          grantEligibilityOriginal: {
+            reference: 'WATER_ELIGIBILITY_' + p.compactSha256.toUpperCase(),
+            rawText: utilityWaterGrantEligibility(preparation),
+          },
         },
-      },
+        historyFrames,
+      ),
     ],
   });
 }
@@ -992,6 +1031,7 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
     officeId: 'SOCIAL' | 'FINANCE';
     expectedHead: { worldVersion: string; eventSequence: string };
     frames: readonly import('@econmind/core/finance-budget-native').FinanceNativeBudgetCanonicalFrame[];
+    pendingWaterDeliveryCommand?: import('@econmind/core').CanonicalCommand;
   }>,
 ): Promise<
   Readonly<{
@@ -1033,19 +1073,31 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
         facilityId: facility,
       });
       if (token) add(token, run);
-      else if (run.startsWith('UTILITY_POWER_SERVICE_')) {
+      else if (
+        run.startsWith('UTILITY_POWER_SERVICE_') ||
+        run.startsWith('UTILITY_WATER_SERVICE_')
+      ) {
+        const waterService = run.startsWith('UTILITY_WATER_SERVICE_');
         const matches = tokens.filter((t) => {
           const p = consumePostwarIndustryUtilitySource(t);
           return (
             p.compact.countryId === c.countryId &&
-            p.compact.power.storageId === facility
+            (waterService
+              ? postwarWaterServiceFacilityId(p.compact.facilityId)
+              : p.compact.power.storageId) === facility
           );
         });
         if (matches.length !== 1)
           throw new PostwarIndustryUtilitySourceMissing(
             'HISTORICAL_POWER_SERVICE_ORIGINAL_NOT_INSTALLED',
           );
-        add(matches[0]!, run.slice('UTILITY_POWER_SERVICE_'.length));
+        add(
+          matches[0]!,
+          run.slice(
+            (waterService ? 'UTILITY_WATER_SERVICE_' : 'UTILITY_POWER_SERVICE_')
+              .length,
+          ),
+        );
       }
     } else if (c.commandType === 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1') {
       const source = row(
@@ -1053,28 +1105,94 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
       );
       if (
         typeof source.runId === 'string' &&
-        source.runId.startsWith('UTILITY_POWER_SERVICE_')
+        (source.runId.startsWith('UTILITY_POWER_SERVICE_') ||
+          source.runId.startsWith('UTILITY_WATER_SERVICE_'))
       ) {
+        const waterService = source.runId.startsWith('UTILITY_WATER_SERVICE_');
         const matches = tokens.filter((t) => {
           const p = consumePostwarIndustryUtilitySource(t);
           return (
             p.compact.countryId === source.countryId &&
-            p.compact.power.storageId === source.facilityId
+            (waterService
+              ? postwarWaterServiceFacilityId(p.compact.facilityId)
+              : p.compact.power.storageId) === source.facilityId
           );
         });
         if (matches.length !== 1)
           throw new PostwarIndustryUtilitySourceMissing(
             'HISTORICAL_POWER_PAYMENT_ORIGINAL_NOT_INSTALLED',
           );
-        add(matches[0]!, source.runId.slice('UTILITY_POWER_SERVICE_'.length));
+        add(
+          matches[0]!,
+          source.runId.slice(
+            (waterService ? 'UTILITY_WATER_SERVICE_' : 'UTILITY_POWER_SERVICE_')
+              .length,
+          ),
+        );
       }
     }
+  }
+  if (input.pendingWaterDeliveryCommand !== undefined) {
+    const command = input.pendingWaterDeliveryCommand,
+      body = row(JSON.parse(command.canonicalPayload));
+    if (
+      command.worldId !== input.worldId ||
+      command.commandType !== 'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1' ||
+      command.expectedWorldVersion !== input.expectedHead.worldVersion ||
+      row(body.operation).action !== 'DELIVER'
+    )
+      fail('EXACT_CURRENT_WATER_DELIVERY_COMMAND_REQUIRED');
+    const token = readPostwarIndustryUtilitySourceForBase(input.baseline, {
+      countryId: command.countryId,
+      facilityId: text(body.facilityId),
+    });
+    if (!token)
+      throw new PostwarIndustryUtilitySourceMissing(
+        'CURRENT_WATER_ORIGINAL_NOT_INSTALLED',
+      );
+    add(token, text(body.runId));
   }
   if (!runs.size)
     return Object.freeze({
       industryPowerOriginals: [],
       industryWaterOriginals: [],
     });
+  const values = [...runs].flatMap(([token, ownRuns]) =>
+    [...ownRuns].map((run) =>
+      postwarIndustryUtilityOriginalsForRun(
+        token,
+        run,
+        input.frames.filter((frame) => {
+          if (
+            frame.command.commandType !== 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1'
+          )
+            return false;
+          const body = row(
+              JSON.parse(frame.events[0]?.canonicalPayload ?? 'null'),
+            ),
+            source = row(body.source);
+          return (
+            (source.runId === 'UTILITY_POWER_SERVICE_' + run ||
+              source.runId === 'UTILITY_WATER_SERVICE_' + run) &&
+            source.countryId ===
+              consumePostwarIndustryUtilitySource(token).compact.countryId &&
+            source.facilityId ===
+              (source.runId === 'UTILITY_WATER_SERVICE_' + run
+                ? postwarWaterServiceFacilityId(
+                    consumePostwarIndustryUtilitySource(token).compact
+                      .facilityId,
+                  )
+                : consumePostwarIndustryUtilitySource(token).compact.power
+                    .storageId)
+          );
+        }),
+        input.frames,
+      ),
+    ),
+  );
+  const waterOriginals = values.flatMap(
+    (value) => value.industryWaterOriginals,
+  );
   const expectedRole =
       input.officeId === 'SOCIAL'
         ? 'world_v2_social_source_reader'
@@ -1092,6 +1210,55 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
         preparation: token,
         head: input.expectedHead,
       });
+    const deliveries: {
+      command: import('@econmind/core').CanonicalCommand;
+      beforeHead: { worldVersion: string; eventSequence: string };
+      expectedSourceFingerprint?: string;
+    }[] = input.frames
+      .filter(
+        (frame) =>
+          frame.command.commandType === 'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1' &&
+          row(row(JSON.parse(frame.command.canonicalPayload)).operation)
+            .action === 'DELIVER',
+      )
+      .map((frame) => ({
+        command: frame.command,
+        beforeHead: {
+          worldVersion: frame.transition.worldVersionBefore,
+          eventSequence: (BigInt(frame.events[0]!.sequence) - 1n).toString(),
+        },
+        expectedSourceFingerprint: text(
+          row(JSON.parse(frame.events[0]!.canonicalPayload)).sourceFingerprint,
+        ),
+      }));
+    if (input.pendingWaterDeliveryCommand !== undefined)
+      deliveries.push({
+        command: input.pendingWaterDeliveryCommand,
+        beforeHead: input.expectedHead,
+      });
+    for (const delivery of deliveries) {
+      const body = row(JSON.parse(delivery.command.canonicalPayload)),
+        index = waterOriginals.findIndex(
+          (original) =>
+            original.source.countryId === delivery.command.countryId &&
+            original.source.facilityId === body.facilityId &&
+            original.source.runId === body.runId,
+        );
+      if (index < 0) fail('EXACT_WATER_COMMAND_ORIGINAL_REQUIRED');
+      waterOriginals[index] = await readPostwarIndustryWaterCommandOriginalFrom(
+        tx,
+        {
+          original: waterOriginals[index]!,
+          command: delivery.command,
+          beforeHead: delivery.beforeHead,
+          ...(delivery.expectedSourceFingerprint === undefined
+            ? {}
+            : {
+                expectedSourceFingerprint: delivery.expectedSourceFingerprint,
+              }),
+        },
+      );
+    }
   } catch (e) {
     failure = e;
   }
@@ -1107,38 +1274,11 @@ export async function readPostwarIndustryUtilityPageOriginalsFrom(
     throw restore;
   }
   if (failure !== undefined) throw failure;
-  const values = [...runs].flatMap(([token, ownRuns]) =>
-    [...ownRuns].map((run) =>
-      postwarIndustryUtilityOriginalsForRun(
-        token,
-        run,
-        input.frames.filter((frame) => {
-          if (
-            frame.command.commandType !== 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1'
-          )
-            return false;
-          const body = row(
-              JSON.parse(frame.events[0]?.canonicalPayload ?? 'null'),
-            ),
-            source = row(body.source);
-          return (
-            source.runId === 'UTILITY_POWER_SERVICE_' + run &&
-            source.countryId ===
-              consumePostwarIndustryUtilitySource(token).compact.countryId &&
-            source.facilityId ===
-              consumePostwarIndustryUtilitySource(token).compact.power.storageId
-          );
-        }),
-      ),
-    ),
-  );
   return Object.freeze({
     industryPowerOriginals: Object.freeze(
       values.flatMap((x) => x.industryPowerOriginals),
     ),
-    industryWaterOriginals: Object.freeze(
-      values.flatMap((x) => x.industryWaterOriginals),
-    ),
+    industryWaterOriginals: Object.freeze(waterOriginals),
   });
 }
 /** Cleanup only; ownership metadata cannot establish source readiness. */

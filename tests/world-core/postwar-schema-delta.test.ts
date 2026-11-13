@@ -14,7 +14,7 @@ import {
   preparePostwarSchemaDelta,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const sha = (v: Buffer) => createHash('sha256').update(v).digest('hex');
-// Explicit source inventory: companion fixed 84-proposal policy, with its
+// Explicit source inventory: companion fixed 85-proposal policy, with its
 // isolated Clock deliberately excluded. New proposals require an explicit
 // inventory update; never accept an arbitrary directory count or widen scope.
 const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
@@ -47,6 +47,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-industry-first-day-source.sql',
   'postwar-industry-power-service-source.sql',
   'postwar-industry-power-service-current.sql',
+  'postwar-industry-water-service-source.sql',
   'postwar-industry-utility-custody.sql',
   'postwar-industry-logistics-custody.sql',
   'postwar-industry-logistics-v2-utility-forward.sql',
@@ -369,14 +370,14 @@ describe('unapproved postwar schema delta package boundary', () => {
         ),
       ).toThrow('DESTRUCTIVE_CREDENTIAL_OR_NONTRANSACTIONAL_SQL_DENIED');
   });
-  it('classifies the complete eighty-three non-Clock source proposal paths without running or editing SQL', async () => {
+  it('classifies the complete eighty-four non-Clock source proposal paths without running or editing SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
     const selected = names
       .filter((n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql')
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(83);
+    expect(selected).toHaveLength(84);
     expect(selected).not.toContain('isolated-world-clock.sql');
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));

@@ -49,8 +49,9 @@ export function projectPostwarIndustryOperatingWageSource(input: {
     invalid('EXACT_REGISTERED_SOURCE_AND_WORK_PINS_REQUIRED');
   // Validate the fixed service projection before using its bucket. It cannot
   // be selected merely by a caller-supplied serviceKind tag.
-  const isPower = o.data.serviceKind === 'POWER';
-  if (isPower) projectPostwarIndustryRunSiteSource(o, input.baseline);
+  const isService =
+    o.data.serviceKind === 'POWER' || o.data.serviceKind === 'WATER';
+  if (isService) projectPostwarIndustryRunSiteSource(o, input.baseline);
   const document = b.document;
   const fundingAccounts = document.inputs.fundingAccounts.filter(
     (a) =>
@@ -91,8 +92,9 @@ export function projectPostwarIndustryOperatingWageSource(input: {
   const wages: IndustryOperatingWageSource['wages'][number][] = [];
   const sitePositions = document.inputs.sourcePositions.filter(
     (p) =>
-      p.sourceBucket === (isPower ? 'POWER' : 'INDUSTRY') &&
-      p.sourceObjectId === d.facilityId &&
+      p.sourceBucket === (isService ? 'POWER' : 'INDUSTRY') &&
+      p.sourceObjectId ===
+        (isService ? o.data.staffSourceObjectId : d.facilityId) &&
       p.countryId === d.countryId &&
       p.locationId === d.locationId &&
       p.employerId === d.operatorId &&

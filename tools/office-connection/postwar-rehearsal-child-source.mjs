@@ -164,12 +164,23 @@ export async function prepareRehearsalChildSource({
     // future real admission reference; no placeholder reference is issued.
     await loadAdoptedCaptainOpeningPolicy(root);
     await loadPostwarIndustryFirstDayAdoptedPolicy(root);
+    const { POSTWAR_WATER_STAFF_POLICY } = await load(
+      'apps/world-worker/dist/preparation/postwar-water-staff-policy.js',
+    );
+    if (
+      sha(await read(POSTWAR_WATER_STAFF_POLICY.userAdoptionPath)) !==
+      POSTWAR_WATER_STAFF_POLICY.userAdoptionRawSha256
+    )
+      throw Error('EXACT_ADOPTED_WATER_STAFF_ORIGINAL_REQUIRED');
     await stage('OFFICE_INPUTS_DERIVED_WITHOUT_ADMISSION', {
       financeSocialCountries: derivation.countries.length,
       fxQuotes: fx.quotes.length,
       captainAdmission: 'NOT_RUN',
       industryAdmission: 'NOT_RUN',
-      waterStaffQualification: 'NOT_ADOPTED_NOT_CREATED',
+      waterStaffQualification: 'ADOPTED_EXISTING_POWER_STAFF_NOT_PERFORMED',
+      waterStaffPolicyVersion: POSTWAR_WATER_STAFF_POLICY.version,
+      waterStaffAdoptionRawSha256:
+        POSTWAR_WATER_STAFF_POLICY.userAdoptionRawSha256,
     });
     const files = {};
     for (const name of [

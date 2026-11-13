@@ -10,6 +10,7 @@ interface OptIn {
   readonly industryInstalled: true;
   readonly utilitiesInstalled: true;
   readonly countries: readonly { readonly countryId: string }[];
+  readonly countrySubset?: readonly ['COUNTRY_10'];
 }
 export function requireRefinery21PreparationOptIn(input: OptIn): void;
 export function prepareRegisteredRefinery21Sources(
@@ -22,13 +23,15 @@ export function prepareRegisteredRefinery21Sources(
     }>,
 ): Promise<
   Readonly<{
-    classification: 'ACTUAL_ISOLATED_21_SOURCE_PUBLICATION_NOT_WORK_PAYMENT_DELIVERY_PRODUCTION';
+    classification:
+      | 'ACTUAL_ISOLATED_21_SOURCE_PUBLICATION_NOT_WORK_PAYMENT_DELIVERY_PRODUCTION'
+      | 'ACTUAL_ISOLATED_C10_SOURCE_PUBLICATION_NOT_WORK_PAYMENT_DELIVERY_PRODUCTION';
     proofReuse: 'SAME_COLD_HOST_LIVE_CHILD_SEED_RENT_AND_SOCIAL_SOURCE_SLOT';
     worldId: string;
     seedFingerprint: string;
     admissionRef: string;
     preparationActions: readonly Readonly<{
-      type: 'FIRST_DAY' | 'UTILITY' | 'POWER';
+      type: 'FIRST_DAY' | 'UTILITY' | 'POWER' | 'WATER_STAFF';
       countryId: string;
       status: 'COMMITTED' | 'REUSED_VERIFIED';
     }>[];
@@ -43,6 +46,12 @@ export function prepareRegisteredRefinery21Sources(
       sourceRef: string;
       sourceSha256: string;
     }>[];
+    waterSources: readonly Readonly<{
+      sourceRef: string;
+      sourceSha256: string;
+    }>[];
+    waterStaffPreparation:
+      'EXPLICIT_EXISTING_STAFF_SOURCE_ONLY' | 'NOT_REQUESTED';
     notApplicableCountries: readonly string[];
     economicBefore: Readonly<Record<string, unknown>>;
     economicAfter: Readonly<Record<string, unknown>>;
