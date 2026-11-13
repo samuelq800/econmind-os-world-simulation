@@ -3,7 +3,6 @@
 import {
   Money,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
-  parseSocialEmploymentServiceCreateIntent,
   type SocialEmploymentServiceCreationReadFacts,
   type SocialEmploymentServiceCreateIntent,
 } from '@econmind/core';
@@ -281,6 +280,7 @@ export function buildSocialEmploymentServiceCreateRequest(
   if (
     !p ||
     !t ||
+    !canonicalId(input.programmeId) ||
     !p.usageLicences.some((l) => l.locationId === t.locationId) ||
     !uint(d.capacity) ||
     d.capacity === '0' ||
@@ -291,7 +291,9 @@ export function buildSocialEmploymentServiceCreateRequest(
     throw Error('SOCIAL_SERVICE_EXPLICIT_LICENSED_CAPACITY_REQUIRED');
   // Current parent capacity already reflects previous creation partitions;
   // reservedSlots already includes PLAN. Neither is subtracted a second time.
-  const payload = parseSocialEmploymentServiceCreateIntent({
+  // Browser intent only. The authoritative parser uses Node-only canonical
+  // serialization and remains on the server; all selected DATA is checked above.
+  const payload: SocialEmploymentServiceCreateIntent = {
     schemaVersion: 'social-employment-service-create-v1',
     programmeId: input.programmeId,
     capacity: { amount: d.capacity, unit: 'person' },
@@ -301,7 +303,7 @@ export function buildSocialEmploymentServiceCreateRequest(
       locationId: t.locationId,
       skill: t.skill,
     },
-  });
+  };
   return {
     schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
     requestId: input.requestId,

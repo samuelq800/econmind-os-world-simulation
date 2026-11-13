@@ -696,7 +696,7 @@ export async function createRegisteredOfficeBrowserStages(input) {
       assert.equal(
         staged.status,
         'REVIEW_REQUIRED',
-        'ACTUAL_SOCIAL_FORM_DID_NOT_STAGE',
+        `ACTUAL_SOCIAL_FORM_DID_NOT_STAGE:${staged.code ?? 'NO_PUBLIC_CODE'}`,
       );
       const dto = staged.intent;
       assert.ok(dto);

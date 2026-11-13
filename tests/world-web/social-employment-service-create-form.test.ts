@@ -2,6 +2,7 @@
  * real JWT/Node/Chromium, queue execution or economic FINAL is established. */
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { parseSocialEmploymentServiceCreateIntent } from '@econmind/core';
 import { AUTHENTICATED_COMMAND_RECOVERY_SCHEMA } from '@econmind/core/authenticated-command-recovery-contract';
 import {
   buildSocialEmploymentServiceCreateRequest as build,
@@ -292,7 +293,27 @@ describe('first-day licensed service creation user intent (TEST_ONLY)', () => {
       },
     });
     expect(Object.keys(r.request.payload as object)).toHaveLength(5);
+    // Transport builder stays browser-only; the server still applies this parser.
+    expect(parseSocialEmploymentServiceCreateIntent(r.request.payload)).toEqual(
+      r.request.payload,
+    );
   });
+  it.each(['', 'lowercase', 'BAD ID'])(
+    'refuses noncanonical programme identifiers: %s',
+    (programmeId) => {
+      const f = fixture();
+      expect(() =>
+        build({
+          page: f.page(),
+          draft: f.draft,
+          programmeId,
+          requestId: f.f.request.requestId,
+          commandId: 'COMMAND_TEST_ONLY',
+          idempotencyKey: 'KEY_TEST_ONLY',
+        }),
+      ).toThrow();
+    },
+  );
   it.each(['', '0', '01', '1.5', '5'])(
     'requires explicit canonical capacity within current free parent slots: %s',
     (capacity) => {
