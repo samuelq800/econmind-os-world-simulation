@@ -1,11 +1,11 @@
 {
   "schemaVersion": "postwar-function-forward-manifest-v1",
-  "id": "postwar-social-employment-creation-dc5-v1",
+  "id": "postwar-social-employment-creation-dc5-v2",
   "classification": "UNAPPROVED_FIXED_INCREMENT_NOT_FRESH_PROPOSAL_REPLAY",
   "installationAllowed": false,
   "productionApproval": "NOT_GRANTED",
   "predecessorWorldCommit": "dc5dc7daf562c5c18b3a1f7a22fc5ac29cdcf7d4",
-  "targetSourceCommit": "37fe83971e7a4de01e24919cb8b8584fdb148ced",
+  "targetSourceCommit": "67cfcdc65f866d8e32ccddab38943d6ac064967a",
   "baselineEvidence": {
     "path": "/workspace/.cloud-setup/evidence/c10-retained-preflight-02/catalog-before.json",
     "sha256": "0c22cdb5a252b4383a3024c3d814bde2c0542ccf5b9bf1f0bdcf226de28187f8",
@@ -60,7 +60,7 @@
   ],
   "newSupplement": {
     "path": "database/proposals/postwar-social-employment-creation.sql",
-    "sha256": "c5fa45d46e1f410d1baacdd7ad8023703fd3f007f5d4cb4bab8e62d63b5c6274"
+    "sha256": "d010fa633fcb29d89e3deb669e71b5cd95f55bad74f37eafbeb7465687c1fb5e"
   },
   "functions": [
     {
@@ -445,8 +445,8 @@
   },
   "upgrade": {
     "path": "database/upgrades/postwar-social-employment-creation.sql",
-    "sha256": "b998b0fd648470a495f2f2a6fbe0632f916d99c1de44c0cee556fa63e9109a8f",
-    "bytes": 198694,
+    "sha256": "3d32a51261c891576121a1dc405977fee3a529d99149acafb6477e5c1a7b4db0",
+    "bytes": 199995,
     "existingFunctionCount": 13,
     "newFunctionCount": 3,
     "newRelationCount": 1
@@ -454,7 +454,7 @@
   "newSupplementFunctions": [
     {
       "signature": "world_v2.prepare_postwar_social_employment_creation_licences(text)",
-      "sha256": "d7ded3c88ba77ad3789008ec8f41ed9541d87829b47ad654f0e9a025b1302f07",
+      "sha256": "c22e50e3ee5452b96ade0f94e6210785820ee6674a121928b008eb916a335b8b",
       "roles": [
         "world_v2_postwar_projection_owner",
         "world_v2_postwar_projection_publisher"
@@ -496,5 +496,10 @@
     "EXACT_BASELINE_CATALOG_AND_INDEPENDENT_SCHEMA_ANCESTRY_RECEIPTS_RETAINED",
     "UNKNOWN_COMMIT_RESULT_STOP_INSPECT_NO_BLIND_RETRY",
     "NEW_SOURCE_INITIALIZER_SEPARATE_CONTROLLED_ROLE_AFTER_SCHEMA_RECEIPT"
-  ]
+  ],
+  "supersedes": {
+    "id": "postwar-social-employment-creation-dc5-v1",
+    "commit": "16f1bedd09df119fda4aba846227f86a69bfd3f3",
+    "installedV1Disposition": "REFUSED_USE_EXACT_ORDINAL_FORWARD"
+  }
 }

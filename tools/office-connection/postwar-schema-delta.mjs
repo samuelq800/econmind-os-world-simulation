@@ -218,6 +218,8 @@ export const LOGISTICS_FORWARD_MANIFEST_PATH =
   'database/upgrades/postwar-industry-logistics-multicountry-scope.manifest.json';
 export const SOCIAL_CREATION_FORWARD_MANIFEST_PATH =
   'database/upgrades/postwar-social-employment-creation.manifest.json';
+export const SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH =
+  'database/upgrades/postwar-social-employment-creation-ordinal.manifest.json';
 export function createUnapprovedSchemaForwardPlan(
   candidate,
   forward,
@@ -375,18 +377,38 @@ export async function createUnapprovedSocialCreationForwardPlan(
   candidate,
   sourceRoot,
 ) {
+  return createSocialForwardPlan(candidate, sourceRoot, false);
+}
+export async function createUnapprovedSocialCreationOrdinalForwardPlan(
+  candidate,
+  sourceRoot,
+) {
+  return createSocialForwardPlan(candidate, sourceRoot, true);
+}
+async function createSocialForwardPlan(candidate, sourceRoot, ordinal) {
   if (!path.isAbsolute(sourceRoot)) throw Error('ABSOLUTE_PATHS_REQUIRED');
+  const manifestPath = ordinal
+    ? SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH
+    : SOCIAL_CREATION_FORWARD_MANIFEST_PATH;
+  const functionCount = ordinal ? 1 : 13;
+  const newFunctionCount = ordinal ? 0 : 3;
+  const newRelationCount = ordinal ? 0 : 1;
+  const id = ordinal
+    ? 'postwar-social-employment-creation-ordinal'
+    : 'postwar-social-employment-creation';
   const loaderPath =
     'tests/support/postwar-social-employment-creation-forward.ts';
   const loaderBytes = await regular(path.join(sourceRoot, loaderPath));
-  const { preparePostwarSocialEmploymentCreationForward } = await import(
-    pathToFileURL(path.join(sourceRoot, loaderPath)).href
-  );
-  const prepared =
-    await preparePostwarSocialEmploymentCreationForward(sourceRoot);
-  const manifestBytes = await regular(
-    path.join(sourceRoot, SOCIAL_CREATION_FORWARD_MANIFEST_PATH),
-  );
+  const {
+    preparePostwarSocialEmploymentCreationForward,
+    preparePostwarSocialEmploymentCreationOrdinalForward,
+  } = await import(pathToFileURL(path.join(sourceRoot, loaderPath)).href);
+  const prepared = await (
+    ordinal
+      ? preparePostwarSocialEmploymentCreationOrdinalForward
+      : preparePostwarSocialEmploymentCreationForward
+  )(sourceRoot);
+  const manifestBytes = await regular(path.join(sourceRoot, manifestPath));
   const forward = JSON.parse(manifestBytes.toString('utf8'));
   const { pins, manifest } = candidate;
   const newSignatures = [
@@ -398,7 +420,10 @@ export async function createUnapprovedSocialCreationForwardPlan(
     !/^[a-f0-9]{40}$/u.test(pins.sourceCommit ?? '') ||
     pins.installationAllowed !== false ||
     manifest.production_publisher !== 'main-site-release-chain' ||
-    forward.id !== 'postwar-social-employment-creation-dc5-v1' ||
+    forward.id !==
+      (ordinal
+        ? 'postwar-social-employment-creation-ordinal-v1'
+        : 'postwar-social-employment-creation-dc5-v2') ||
     forward.schemaVersion !== 'postwar-function-forward-manifest-v1' ||
     forward.classification !==
       'UNAPPROVED_FIXED_INCREMENT_NOT_FRESH_PROPOSAL_REPLAY' ||
@@ -406,12 +431,12 @@ export async function createUnapprovedSocialCreationForwardPlan(
     forward.productionApproval !== 'NOT_GRANTED' ||
     sha(manifestBytes) !== prepared.manifestSha256 ||
     forward.upgrade.sha256 !== prepared.sha256 ||
-    forward.upgrade.existingFunctionCount !== 13 ||
-    forward.upgrade.newFunctionCount !== 3 ||
-    forward.upgrade.newRelationCount !== 1 ||
-    prepared.functions.length !== 13 ||
+    forward.upgrade.existingFunctionCount !== functionCount ||
+    forward.upgrade.newFunctionCount !== newFunctionCount ||
+    forward.upgrade.newRelationCount !== newRelationCount ||
+    prepared.functions.length !== functionCount ||
     JSON.stringify(forward.newSupplementFunctions.map((f) => f.signature)) !==
-      JSON.stringify(newSignatures) ||
+      JSON.stringify(ordinal ? [] : newSignatures) ||
     [
       ...forward.sourcePins.map((p) => ({ path: p.path, sha256: p.newSha256 })),
       forward.newSupplement,
@@ -432,13 +457,13 @@ export async function createUnapprovedSocialCreationForwardPlan(
   )
     throw Error('SOCIAL_CREATION_EXACT_TRANSACTION_REQUIRED');
   const entry = {
-    id: 'postwar-social-employment-creation',
+    id,
     disposition: forward.classification,
     sourcePath: prepared.forwardPath,
     sourceSha256: prepared.sha256,
     sourceBytes: bytes.length,
-    packagedSourcePath: 'source/01-postwar-social-employment-creation.sql',
-    transactionPath: 'transactions/01-postwar-social-employment-creation.sql',
+    packagedSourcePath: `source/01-${id}.sql`,
+    transactionPath: `transactions/01-${id}.sql`,
     transactionSha256: sha(transaction.bytes),
     transactionBytes: transaction.bytes.length,
     transactionEnvelope: transaction.sourceEnvelope,
@@ -448,9 +473,12 @@ export async function createUnapprovedSocialCreationForwardPlan(
       functions: forward.functions,
       newSupplement: forward.newSupplement,
       newFunctions: forward.newSupplementFunctions,
-      newRelation: 'postwar_social_employment_creation_licence',
-      metadataPolicy:
-        'EXACT_PREDECESSOR_OR_SUCCESSOR_AND_COMPLETE_SUPPLEMENT_STRUCTURE',
+      newRelation: ordinal
+        ? null
+        : 'postwar_social_employment_creation_licence',
+      metadataPolicy: ordinal
+        ? 'EXACT_V1_INITIALIZER_PREDECESSOR_ONLY_AND_COMPLETE_SUPPLEMENT_STRUCTURE'
+        : 'EXACT_PREDECESSOR_OR_SUCCESSOR_AND_COMPLETE_SUPPLEMENT_STRUCTURE',
       operator: forward.operatorPreconditions,
       observed: false,
     },
@@ -463,7 +491,7 @@ export async function createUnapprovedSocialCreationForwardPlan(
   return {
     chunks: [{ entry, source: bytes, transaction: transaction.bytes }],
     forwardSource: {
-      path: SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
+      path: manifestPath,
       bytes: manifestBytes,
     },
     forwardLoader: { path: loaderPath, sha256: sha(loaderBytes) },
@@ -482,7 +510,7 @@ export async function createUnapprovedSocialCreationForwardPlan(
         sourceCommit: m.artifact_source_commit,
       })),
       explicitForwardManifest: {
-        path: SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
+        path: manifestPath,
         sha256: prepared.manifestSha256,
         predecessorCommit: prepared.predecessorWorldCommit,
         targetSourceCommit: prepared.targetSourceCommit,
@@ -490,12 +518,13 @@ export async function createUnapprovedSocialCreationForwardPlan(
       fixedReadOnlyLoader: { path: loaderPath, sha256: sha(loaderBytes) },
       packagedProposalCount: 0,
       packagedForwardCount: 1,
-      replacedExistingFunctionCount: 13,
-      addedFunctionCount: 3,
-      addedRelationCount: 1,
+      replacedExistingFunctionCount: functionCount,
+      addedFunctionCount: newFunctionCount,
+      addedRelationCount: newRelationCount,
       steps: [entry],
-      installationPath:
-        'EXACT_DC5_SCHEMA_INCREMENT_WITH_LICENCE_SUPPLEMENT_ONLY',
+      installationPath: ordinal
+        ? 'EXACT_V1_INITIALIZER_BODY_REPAIR_ONLY'
+        : 'EXACT_DC5_SCHEMA_INCREMENT_WITH_LICENCE_SUPPLEMENT_ONLY',
       mutuallyExclusiveWith: 'FRESH_SCHEMA_DELTA_FROM_SAME_CANDIDATE',
       freshProposalSqlIncluded: false,
       installationAllowed: false,
@@ -510,8 +539,9 @@ export async function createUnapprovedSocialCreationForwardPlan(
       historicalUpgradeManifestsModified: false,
       sourceInitializer: prepared.sourceInitializer,
       operatorPrecondition: prepared.operatorPrecondition,
-      targetApplicability:
-        'EXACT_SEALED_PREDECESSOR_CATALOG_OR_EXACT_SUCCESSOR_ONLY_NO_HOT_UPGRADE',
+      targetApplicability: ordinal
+        ? 'EXACT_V1_CATALOG_ONLY_REPEAT_REJECTED_NO_HOT_UPGRADE'
+        : 'EXACT_SEALED_PREDECESSOR_CATALOG_OR_EXACT_SUCCESSOR_ONLY_NO_HOT_UPGRADE',
       independentChangesNotCovered: forward.notCovered,
     },
   };
@@ -574,11 +604,17 @@ export async function preparePostwarSchemaDelta({
     ),
   );
   let plan;
-  if (forwardManifestPath === SOCIAL_CREATION_FORWARD_MANIFEST_PATH) {
-    plan = await createUnapprovedSocialCreationForwardPlan(
-      candidate,
-      sourceRoot,
-    );
+  if (
+    [
+      SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
+      SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH,
+    ].includes(forwardManifestPath)
+  ) {
+    plan = await (
+      forwardManifestPath === SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH
+        ? createUnapprovedSocialCreationOrdinalForwardPlan
+        : createUnapprovedSocialCreationForwardPlan
+    )(candidate, sourceRoot);
     for (const chunk of plan.chunks)
       sources.set(chunk.entry.sourcePath, chunk.source);
   } else if (forwardManifestPath !== undefined) {
@@ -662,7 +698,9 @@ export async function preparePostwarSchemaDelta({
   await writeFile(
     path.join(outputDirectory, 'RECOVERY.md'),
     (plan.forwardLoader
-      ? '# Explicit Social schema increment review\n\nThis fixed alternative adds one licence supplement table and three functions, and replaces thirteen exact existing bodies. It is mutually exclusive with fresh proposal installation and does not include other logistics/opening-repair receipts. Stop and drain all consumers and source-publication transactions first; no hot upgrade. Source licence initialization is a separate controlled publisher transaction after a confirmed schema receipt and is NOT performed by this package. Unknown COMMIT requires STOP and actual catalog/receipt inspection, not automatic retry.\n\n'
+      ? plan.manifest.replacedExistingFunctionCount === 1
+        ? '# Explicit Social ordinal initializer repair\n\nThis packages one exact V1 initializer body replacement. It adds no relation/function, repeats are refused, and all other predecessor catalog metadata must match. Stop and drain consumers and publication transactions. After confirmed DDL receipt only, run the controlled licence initializer separately; unknown COMMIT requires catalog/receipt inspection without blind retry.\n\n'
+        : '# Explicit Social schema increment review\n\nThis fixed alternative adds one licence supplement table and three functions, and replaces thirteen exact existing bodies. It is mutually exclusive with fresh proposal installation and does not include other logistics/opening-repair receipts. Stop and drain all consumers and source-publication transactions first; no hot upgrade. Source licence initialization is a separate controlled publisher transaction after a confirmed schema receipt and is NOT performed by this package. Unknown COMMIT requires STOP and actual catalog/receipt inspection, not automatic retry.\n\n'
       : plan.forwardSource
         ? '# Explicit function-only forward\n\nThis mode packages only the selected later upgrade for an existing exact schema. It is mutually exclusive with the fresh schema-delta path from this same candidate; never execute fresh proposals followed by this forward as one chain. Inspect its exact predecessor/successor body hashes and preserved owner/ACL before applying. Do not install the fresh proposals or rerun/relabel the historical five-upgrade/two-fresh manifest. No database version is inferred.\n\n'
         : '') +
@@ -736,6 +774,7 @@ if (
         ![
           LOGISTICS_FORWARD_MANIFEST_PATH,
           SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
+          SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH,
         ].includes(args[9])))
   )
     throw Error('ONLY_SOURCE_SHA_COMPANION_FRESH_OUTPUT_ARGUMENTS_ALLOWED');

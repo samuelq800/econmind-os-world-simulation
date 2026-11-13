@@ -1,4 +1,4 @@
-/** Read-only fixed review-artifact loader. No DB, caller SQL/path, source
+/** Read-only fixed review-artifact loaders. No DB, caller SQL/path, source
  * publication, credential, World, Clock, running-host upgrade or approval. */
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -8,19 +8,55 @@ const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 export async function preparePostwarSocialEmploymentCreationForward(
   repositoryRoot: string,
 ) {
+  return prepareFixed(repositoryRoot, {
+    manifestPath:
+      'database/upgrades/postwar-social-employment-creation.manifest.json',
+    manifestSha256:
+      'fec489c6828cc7b91e99584e468e83b97ac63a4eea89cc64504a84964238a4da',
+    forwardPath: 'database/upgrades/postwar-social-employment-creation.sql',
+    sha256: '3d32a51261c891576121a1dc405977fee3a529d99149acafb6477e5c1a7b4db0',
+    predecessorWorldCommit: 'dc5dc7daf562c5c18b3a1f7a22fc5ac29cdcf7d4',
+    targetSourceCommit: '67cfcdc65f866d8e32ccddab38943d6ac064967a',
+    functionCount: 13,
+    schemaVersion: 'postwar-social-employment-creation-forward-v2',
+  });
+}
+export async function preparePostwarSocialEmploymentCreationOrdinalForward(
+  repositoryRoot: string,
+) {
+  return prepareFixed(repositoryRoot, {
+    manifestPath:
+      'database/upgrades/postwar-social-employment-creation-ordinal.manifest.json',
+    manifestSha256:
+      '8e38cf586741eae985def7f92ae64186e28ab4e335a5a53e4aad53448b0abb22',
+    forwardPath:
+      'database/upgrades/postwar-social-employment-creation-ordinal-upgrade.sql',
+    sha256: 'e51c8b48c4e9b1ffa01808e18bd26a1a6eab444e5e3a19b2b5258bca4dfd6b95',
+    predecessorWorldCommit: '16f1bedd09df119fda4aba846227f86a69bfd3f3',
+    targetSourceCommit: '67cfcdc65f866d8e32ccddab38943d6ac064967a',
+    functionCount: 1,
+    schemaVersion: 'postwar-social-employment-creation-ordinal-forward-v1',
+  });
+}
+async function prepareFixed(
+  repositoryRoot: string,
+  expected: {
+    manifestPath: string;
+    manifestSha256: string;
+    forwardPath: string;
+    sha256: string;
+    predecessorWorldCommit: string;
+    targetSourceCommit: string;
+    functionCount: number;
+    schemaVersion: string;
+  },
+) {
   assert(path.isAbsolute(repositoryRoot));
-  const manifestPath =
-    'database/upgrades/postwar-social-employment-creation.manifest.json';
-  const forwardPath =
-    'database/upgrades/postwar-social-employment-creation.sql';
+  const { manifestPath, manifestSha256, forwardPath, sha256 } = expected;
   const [raw, sql] = await Promise.all([
     readFile(path.join(repositoryRoot, manifestPath), 'utf8'),
     readFile(path.join(repositoryRoot, forwardPath), 'utf8'),
   ]);
-  const manifestSha256 =
-    'aa0c2ee8b42798deb7776c8e3644023039df18f1c4110852febd4cdcfa4e35b0';
-  const sha256 =
-    'b998b0fd648470a495f2f2a6fbe0632f916d99c1de44c0cee556fa63e9109a8f';
   assert.equal(sha(raw), manifestSha256);
   assert.equal(sha(sql), sha256);
   assert(Buffer.byteLength(sql) <= 262144 && Buffer.byteLength(raw) <= 32768);
@@ -40,18 +76,15 @@ export async function preparePostwarSocialEmploymentCreationForward(
   };
   assert.equal(
     manifest.predecessorWorldCommit,
-    'dc5dc7daf562c5c18b3a1f7a22fc5ac29cdcf7d4',
+    expected.predecessorWorldCommit,
   );
-  assert.equal(
-    manifest.targetSourceCommit,
-    '37fe83971e7a4de01e24919cb8b8584fdb148ced',
-  );
+  assert.equal(manifest.targetSourceCommit, expected.targetSourceCommit);
   assert.equal(manifest.installationAllowed, false);
   assert.equal(manifest.productionApproval, 'NOT_GRANTED');
   assert.equal(manifest.upgrade.path, forwardPath);
   assert.equal(manifest.upgrade.sha256, sha256);
   assert.equal(manifest.upgrade.bytes, Buffer.byteLength(sql));
-  assert.equal(manifest.functions.length, 13);
+  assert.equal(manifest.functions.length, expected.functionCount);
   for (const source of [
     ...manifest.sourcePins.map((p) => ({ path: p.path, sha256: p.newSha256 })),
     manifest.newSupplement,
@@ -62,7 +95,7 @@ export async function preparePostwarSocialEmploymentCreationForward(
     );
   }
   return Object.freeze({
-    schemaVersion: 'postwar-social-employment-creation-forward-v1',
+    schemaVersion: expected.schemaVersion,
     classification: 'FIXED_REVIEW_ARTIFACT_NOT_APPROVAL_OR_SOURCE_AUTHORITY',
     sourceEnvelope: 'SOURCE_BEGIN_COMMIT',
     predecessorWorldCommit: manifest.predecessorWorldCommit,

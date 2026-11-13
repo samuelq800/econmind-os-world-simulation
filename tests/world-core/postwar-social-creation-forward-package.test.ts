@@ -7,17 +7,16 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   createUnapprovedSocialCreationForwardPlan,
+  createUnapprovedSocialCreationOrdinalForwardPlan,
+  SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH,
   SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
   LOGISTICS_FORWARD_MANIFEST_PATH,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const root = path.resolve(import.meta.dirname, '../..');
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
-async function fixture() {
+async function fixture(manifestPath = SOCIAL_CREATION_FORWARD_MANIFEST_PATH) {
   const forward = JSON.parse(
-    await readFile(
-      path.join(root, SOCIAL_CREATION_FORWARD_MANIFEST_PATH),
-      'utf8',
-    ),
+    await readFile(path.join(root, manifestPath), 'utf8'),
   );
   // TEST_ONLY package metadata, not an admitted World/DB/currentness proof.
   return {
@@ -55,9 +54,7 @@ describe('fixed Social13 source-review package entry', () => {
     );
     expect(p.chunks).toHaveLength(1);
     expect(p.chunks[0]!.source).toEqual(p.chunks[0]!.transaction);
-    expect(sha(p.chunks[0]!.source.toString())).toBe(
-      'b998b0fd648470a495f2f2a6fbe0632f916d99c1de44c0cee556fa63e9109a8f',
-    );
+    expect(sha(p.chunks[0]!.source.toString())).toBe(f.forward.upgrade.sha256);
     expect(p.chunks[0]!.entry.preconditions.functions).toHaveLength(13);
     expect(p.chunks[0]!.entry.preconditions.newFunctions).toHaveLength(3);
     expect(p.manifest).toMatchObject({
@@ -82,6 +79,30 @@ describe('fixed Social13 source-review package entry', () => {
       automaticRollback: false,
       uncertainCommit: 'STOP_INSPECT_CATALOG_AND_RECEIPTS_NO_BLIND_RETRY',
     });
+  });
+  it('packages the exact one-initializer repair without new tables or source publication', async () => {
+    const f = await fixture(SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH);
+    const p = await createUnapprovedSocialCreationOrdinalForwardPlan(
+      f.candidate,
+      root,
+    );
+    expect(p.chunks).toHaveLength(1);
+    expect(sha(p.chunks[0]!.source.toString())).toBe(f.forward.upgrade.sha256);
+    expect(p.manifest).toMatchObject({
+      replacedExistingFunctionCount: 1,
+      addedRelationCount: 0,
+      addedFunctionCount: 0,
+      installationAllowed: false,
+      databaseOperations: 0,
+    });
+    expect(p.manifest.sourceInitializer.performed).toBe(false);
+    expect(p.manifest.targetApplicability).toContain('REPEAT_REJECTED');
+    f.candidate.pins.proposals[0]!.sha256 = '0'.repeat(64);
+    await expect(
+      createUnapprovedSocialCreationOrdinalForwardPlan(f.candidate, root),
+    ).rejects.toThrow(
+      'EXACT_SOCIAL_CREATION_FORWARD_AND_CANDIDATE_PINS_REQUIRED',
+    );
   });
   it('rejects candidate source-pin disagreement and approval instead of silently packaging another schema', async () => {
     const f = await fixture();
@@ -151,6 +172,7 @@ describe('fixed Social13 source-review package entry', () => {
     for (const suffix of [
       [],
       ['--forward-manifest', SOCIAL_CREATION_FORWARD_MANIFEST_PATH],
+      ['--forward-manifest', SOCIAL_CREATION_ORDINAL_FORWARD_MANIFEST_PATH],
       ['--forward-manifest', LOGISTICS_FORWARD_MANIFEST_PATH],
     ]) {
       const r = spawnSync(process.execPath, [script, ...args, ...suffix], {
