@@ -136,9 +136,37 @@ export async function createPostwarBeneficialRentChildNativeFixture(
   );
   return result;
 }
+/** Reuse only an actual owned, sealed admission baseline. This creates a new
+ * independent clone, never retries or overwrites a partially installed clone.
+ * The fixed child bytes and full genuine Core proof below remain mandatory. */
+export async function createPostwarBeneficialRentChildFromSealedReference(
+  input: PostwarBeneficialRentChildRehearsalInput,
+  referenceMarkerPath: string,
+) {
+  must(
+    process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE === '1',
+    'REGISTERED_FINAL_NATIVE_EXPLICIT_OPT_IN_REQUIRED',
+  );
+  must(
+    input.retainOwnedCheckpointOnCleanup === true,
+    'SEALED_REFERENCE_REUSE_MUST_RETAIN_OWNED_CHECKPOINTS',
+  );
+  const result = await runChildRehearsal(
+    input,
+    'REGISTERED_FIXTURE',
+    referenceMarkerPath,
+  );
+  must(
+    'fixtureKind' in result &&
+      result.fixtureKind === 'ACTUAL_REGISTERED_CHILD_H0_FIXTURE',
+    'ACTUAL_INITIALIZED_H0_FIXTURE_REQUIRED',
+  );
+  return result;
+}
 async function runChildRehearsal(
   input: PostwarBeneficialRentChildRehearsalInput,
   scope: 'SOURCE_PUBLICATION_ONLY' | 'COLD_RUNTIME' | 'REGISTERED_FIXTURE',
+  referenceMarkerPath?: string,
 ) {
   must(
     input.retainOwnedCheckpointOnCleanup === undefined ||
@@ -261,15 +289,58 @@ async function runChildRehearsal(
         canonicalSerialize(data.receipts) === canonicalSerialize(receipts),
       'EXACT_EXISTING_GENUINE_CHILD_SOURCE_REQUIRED',
     );
-    await stage(
-      'NEW_CLUSTER_ACTUAL_BOOTSTRAP_AND_CONTROLLED_TEST_ONLY_ADMISSION',
-    );
-    marker = await createPostwarNativeReferenceDatabase({
-      repositoryRoot: input.repositoryRoot,
-      evidenceDirectory: input.evidenceDirectory,
-      seedFile: path.join(input.artifactDirectory, 'candidate-seed.json'),
-      beneficialRentSource: token,
-    });
+    if (referenceMarkerPath) {
+      await stage('REUSE_ACTUAL_OWNED_SEALED_ADMISSION_NO_REINITIALIZATION');
+      const retained =
+        await loadPostwarNativeReferenceMarker(referenceMarkerPath);
+      must(
+        retained.baselineSealed &&
+          retained.worldId === seed.worldId &&
+          retained.seedId === seed.seedId &&
+          retained.seedFingerprint === CHILD &&
+          retained.seedFileSha256 === SEED_RAW_SHA,
+        'SAME_FIXED_CHILD_SEALED_ADMISSION_REQUIRED',
+      );
+      marker = {
+        ...retained,
+        markerPath: path.join(input.evidenceDirectory, 'reference-db.json'),
+      };
+      await writeFile(
+        marker.markerPath,
+        JSON.stringify(marker, null, 2) + '\n',
+        { flag: 'wx' },
+      );
+      await writeFile(
+        path.join(input.evidenceDirectory, 'reference-reuse.json'),
+        JSON.stringify(
+          {
+            classification:
+              'NEW_CLONE_OF_EXISTING_OWNED_ADMISSION_NOT_RESTORED_PARTIAL_WORLD',
+            parentMarkerPath: referenceMarkerPath,
+            admittedDatabase: retained.database,
+            ownershipNonce: retained.ownershipNonce,
+            admissionRef: retained.admissionRef,
+            seedFingerprint: retained.seedFingerprint,
+            fullCoreProofReissued: true,
+            bootstrapPerformed: false,
+            admissionPublished: false,
+          },
+          null,
+          2,
+        ) + '\n',
+        { flag: 'wx' },
+      );
+    } else {
+      await stage(
+        'NEW_CLUSTER_ACTUAL_BOOTSTRAP_AND_CONTROLLED_TEST_ONLY_ADMISSION',
+      );
+      marker = await createPostwarNativeReferenceDatabase({
+        repositoryRoot: input.repositoryRoot,
+        evidenceDirectory: input.evidenceDirectory,
+        seedFile: path.join(input.artifactDirectory, 'candidate-seed.json'),
+        beneficialRentSource: token,
+      });
+    }
     must(
       marker.seedFingerprint === CHILD && marker.baselineSealed,
       'ACTUAL_CHILD_ADMISSION_REQUIRED',

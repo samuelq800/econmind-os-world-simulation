@@ -132,7 +132,10 @@ export const REGISTERED_FINAL_NATIVE_SQL_EXCLUSIONS = Object.freeze([
 export async function prepareRegisteredFinalNativeSqlPlan({
   repositoryRoot,
   expectedCommit,
+  completeOpeningInventory = false,
 }) {
+  if (typeof completeOpeningInventory !== 'boolean')
+    throw Error('EXPLICIT_COMPLETE_OPENING_INVENTORY_SELECTION_REQUIRED');
   if (!/^[a-f0-9]{40}$/u.test(expectedCommit))
     throw Error('EXACT_FROZEN_CANDIDATE_REQUIRED');
   const root = path.resolve(repositoryRoot);
@@ -179,7 +182,15 @@ export async function prepareRegisteredFinalNativeSqlPlan({
   if (untracked !== '')
     throw Error('UNTRACKED_PRODUCT_OR_SQL_OUTSIDE_FROZEN_COMMIT');
   const entries = [];
-  for (const name of REGISTERED_FINAL_NATIVE_SQL_ORDER) {
+  // The historical plan stays immutable for retained checkpoints. A fresh
+  // current host selects the existing bounded repair after all its dependencies.
+  const selectedNames = completeOpeningInventory
+    ? [
+        ...REGISTERED_FINAL_NATIVE_SQL_ORDER,
+        'postwar-complete-opening-inventory-read-repair',
+      ]
+    : REGISTERED_FINAL_NATIVE_SQL_ORDER;
+  for (const name of selectedNames) {
     const relativePath = 'database/proposals/' + name + '.sql';
     const bytes = await readFile(path.join(root, relativePath), 'utf8');
     entries.push(

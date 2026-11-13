@@ -47,8 +47,17 @@ import {
 import type { createPostwarBeneficialRentChildNativeFixture } from './postwar-beneficial-rent-child-native-fixture.js';
 import { installRegisteredFinalChildH0From } from './registered-final-child-h0-readback.js';
 
-type Fixture = Awaited<
-  ReturnType<typeof createPostwarBeneficialRentChildNativeFixture>
+type Fixture = Pick<
+  Awaited<ReturnType<typeof createPostwarBeneficialRentChildNativeFixture>>,
+  | 'fixtureKind'
+  | 'marker'
+  | 'clone'
+  | 'workerRole'
+  | 'intakeRole'
+  | 'seed'
+  | 'preparation'
+  | 'financeSocialDerivation'
+  | 'installedSql'
 >;
 type Plan = Awaited<ReturnType<typeof prepareRegisteredFinalNativeSqlPlan>>;
 const sha = (v: string) => createHash('sha256').update(v).digest('hex');
@@ -204,6 +213,17 @@ export async function createRegisteredFinalNodeSetup(input: {
     COUNTRY_01: 'ACTOR_TEST_ONLY_REGISTERED_C01_' + uid,
     COUNTRY_02: 'ACTOR_TEST_ONLY_REGISTERED_C02_' + uid,
   });
+  // Public TEST_ONLY identifiers only, no signing private key. An interrupted
+  // setup must retain its actual intended role/actor names for catalogue checks.
+  await writeFile(
+    path.join(path.dirname(m.markerPath), 'registered-setup-identifiers.json'),
+    JSON.stringify(
+      { status: 'PLANNED_NOT_COMMITTED', roles, workerId, subjects, actors },
+      null,
+      2,
+    ) + '\n',
+    { flag: 'wx' },
+  );
   const admin = new PostgresSqlDatabase(f.clone.installer),
     pools: Pool[] = [];
   const open = (user: string) => {
@@ -698,6 +718,29 @@ export async function createRegisteredFinalNodeSetup(input: {
             'select world_v2.lock_postwar_source_revocation_fences($1)',
             [m.worldId],
           );
+          if (
+            input.sqlPlan.entries.some(
+              (entry: { name: string }) =>
+                entry.name === 'postwar-complete-opening-inventory-read-repair',
+            )
+          ) {
+            // The current opening includes multiple genuine inventory sources.
+            // Append the exact complete read copy before issuing its provenance;
+            // the SQL publisher independently checks all admitted source bytes.
+            const complete = await tx.query(
+              'select * from world_v2.publish_postwar_complete_opening_inventory($1,$2,$3,$4,$5,$6)',
+              [
+                m.worldId,
+                countryId,
+                m.seedFingerprint,
+                f.financeSocialDerivation.canonicalSeedSha256,
+                m.sourceBundleSha256,
+                m.admissionRef,
+              ],
+            );
+            if (complete.rows.length !== 2)
+              throw Error('COMPLETE_INDUSTRY_AND_TRADE_INVENTORY_REQUIRED');
+          }
           return publishPostwarPhysicalInventoryProvenanceFrom(tx, {
             worldId: m.worldId,
             countryId,

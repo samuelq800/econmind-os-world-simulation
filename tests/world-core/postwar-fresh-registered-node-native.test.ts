@@ -72,6 +72,9 @@ native('fresh actual-source registered Node and shipped browser', () => {
         evidenceDirectory,
         manifestFile,
         expectedCommit,
+        ...(process.env.ECONMIND_FRESH_REFERENCE_MARKER
+          ? { referenceMarkerPath: process.env.ECONMIND_FRESH_REFERENCE_MARKER }
+          : {}),
       });
       const { fixture: f, setup: s, descriptor } = prepared;
       report.preparation = prepared.receipt;

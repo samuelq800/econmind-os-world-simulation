@@ -6,7 +6,10 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { Pool } from 'pg';
 import { inspectFreshRehearsalStartup } from '../../tools/office-connection/fresh-rehearsal-startup-preflight.mjs';
-import { createPostwarBeneficialRentChildNativeFixture } from './postwar-beneficial-rent-child-native-fixture.js';
+import {
+  createPostwarBeneficialRentChildNativeFixture,
+  createPostwarBeneficialRentChildFromSealedReference,
+} from './postwar-beneficial-rent-child-native-fixture.js';
 import { createRegisteredFinalNodeSetup } from './registered-final-node-setup.js';
 import { prepareRegisteredFinalNativeSqlPlan } from '../../tools/office-connection/registered-final-native-sql.mjs';
 import { preparePostwarSocialEmploymentCreationForward } from './postwar-social-employment-creation-forward.js';
@@ -18,6 +21,7 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
   evidenceDirectory: string;
   manifestFile: string;
   expectedCommit: string;
+  referenceMarkerPath?: string;
 }) {
   assert.equal(process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE, '1');
   const preflight = await inspectFreshRehearsalStartup(input);
@@ -26,7 +30,10 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
     'PRECHECK_ONLY_FULL_VALIDATION_NOT_RUN',
     'NEW_SOURCE_NEEDS_INDEPENDENT_VERSIONED_BINDING_NO_PIN_BYPASS',
   );
-  const sqlPlan = await prepareRegisteredFinalNativeSqlPlan(input);
+  const sqlPlan = await prepareRegisteredFinalNativeSqlPlan({
+    ...input,
+    completeOpeningInventory: true,
+  });
   const manifest = JSON.parse(await readFile(input.manifestFile, 'utf8')) as {
     parentFile: string;
     parentRawSha256: string;
@@ -37,19 +44,40 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
     manifest.parentRawSha256,
     'ee2f777126e9050ce7139e2d9d9e24d2ec7305de95b8380d3e4c35fc4edb314f',
   );
-  const fixture = await createPostwarBeneficialRentChildNativeFixture({
+  const fixtureInput = {
     repositoryRoot: input.repositoryRoot,
     evidenceDirectory: path.join(input.evidenceDirectory, 'pg'),
     artifactDirectory: path.dirname(input.manifestFile),
-    retainOwnedCheckpointOnCleanup: true,
-  });
+    retainOwnedCheckpointOnCleanup: true as const,
+  };
+  const fixture = input.referenceMarkerPath
+    ? await createPostwarBeneficialRentChildFromSealedReference(
+        fixtureInput,
+        input.referenceMarkerPath,
+      )
+    : await createPostwarBeneficialRentChildNativeFixture(fixtureInput);
   let setup:
     Awaited<ReturnType<typeof createRegisteredFinalNodeSetup>> | undefined;
   try {
+    const ddl: unknown[] = [];
     setup = await createRegisteredFinalNodeSetup({
       fixture,
       repositoryRoot: input.repositoryRoot,
       sqlPlan,
+      recordCommitted: async (entry) => {
+        ddl.push(entry);
+        await writeFile(
+          path.join(input.evidenceDirectory, 'setup-ddl.json'),
+          JSON.stringify(
+            {
+              candidate: input.expectedCommit,
+              entries: ddl,
+            },
+            null,
+            2,
+          ) + '\n',
+        );
+      },
     });
     const receipt: Record<string, unknown> = {
       classification: 'NEW_ISOLATED_ACTUAL_H0_NOT_RESTORED_H3',
@@ -174,6 +202,20 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
         parentSeedPath: manifest.parentFile,
       },
     };
+    await writeFile(
+      path.join(input.evidenceDirectory, 'registered-node-descriptor.json'),
+      JSON.stringify(
+        {
+          classification: 'TEST_ONLY_CONFIGURATION_NOT_LIVE_AUTHORITY',
+          descriptor,
+          roles: setup.roles,
+          subjects: setup.subjects,
+          actors: setup.actors,
+        },
+        null,
+        2,
+      ) + '\n',
+    );
     return { fixture, setup, descriptor, receipt };
   } catch (error) {
     const failures: unknown[] = [error];
