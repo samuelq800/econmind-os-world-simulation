@@ -1,5 +1,15 @@
+import { selectPostwarIndustryWaterPlanningInputs } from './postwar-industry-water-planning.js';
+import { readPostwarIndustryWaterPlanningEvidenceFrom } from './postwar-industry-water-history-originals.js';
+import {
+  readRegisteredWorldExecutionFrom,
+  registeredWorldExecutionClockScope,
+} from '../time/registered-world-execution-state.js';
+import type { DurableConsumptionClock } from '../preparation/durable-command-consumption.js';
 import type { IndustryUtilityPlanningRow } from '@econmind/core/postwar-industry-utility-planning-contract';
-import { readIndustryFirstDayPowerState } from '@econmind/core/industry-first-day-power-execution';
+import {
+  readIndustryFirstDayPowerState,
+  readIndustryFirstDayPowerReplayDelivery,
+} from '@econmind/core/industry-first-day-power-execution';
 import {
   readIndustryFirstDayWorkState,
   readIndustryCompletedWork,
@@ -34,6 +44,8 @@ import { prepareIndustryFirstDayPowerExecution } from '@econmind/core/industry-f
 import {
   prepareIndustryFirstDayWaterExecution,
   readIndustryFirstDayWaterCommandSource,
+  readIndustryFirstDayWaterExecutionState,
+  readIndustryFirstDayWaterReplayDelivery,
 } from '@econmind/core/industry-first-day-water-execution';
 import {
   isPostwarSocialRuntimeConnection,
@@ -56,6 +68,7 @@ import {
   takePostwarIndustryUtilitySourceOwnership,
   PostwarIndustryUtilitySourceMissing,
   utilitySourceForRun,
+  postwarIndustryUtilityOriginalsForRun,
   type PreparedPostwarIndustryUtilitySource,
 } from './postwar-industry-utility-source.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
@@ -179,6 +192,7 @@ export function isPostwarIndustryWaterGrantCommand(
 export function createPostwarIndustryUtilityRuntime(config: {
   readonly database: SqlDatabase;
   readonly socialConnection: Readonly<PostwarSocialRuntimeConnection>;
+  readonly planningClock?: Readonly<DurableConsumptionClock>;
   readonly publication?: Readonly<{
     database: SqlDatabase;
     clock: Readonly<PostwarIndustryWorkPublicationClock>;
@@ -909,6 +923,202 @@ export function createPostwarIndustryUtilityRuntime(config: {
             }
           }
         }
+        const clockScope = registeredWorldExecutionClockScope(
+          config.planningClock,
+        );
+        if (clockScope && clockScope.worldId !== world)
+          fail('EXACT_REGISTERED_PLANNING_CLOCK_WORLD_REQUIRED');
+        const observedAtSimTime =
+          clockScope && config.planningClock
+            ? (await readRegisteredWorldExecutionFrom(tx, config.planningClock))
+                .simTime
+            : null;
+        const waterState = facts.pagedReplay.result.industryWaterState,
+          water = waterState
+            ? readIndustryFirstDayWaterExecutionState(waterState, sha)
+            : undefined,
+          waterDeliveries =
+            waterState && water
+              ? water.committedDeliveryEventFingerprints.map((fp) =>
+                  readIndustryFirstDayWaterReplayDelivery(waterState, fp, sha),
+                )
+              : [],
+          works = facts.completedWorks
+            .map(readIndustryCompletedWork)
+            .map((work) => ({
+              ...work.data,
+              workEventFingerprint: work.frame.events[0]!.fingerprint,
+            })),
+          payments = (water?.paymentFrames ?? []).map((frame) => {
+            const payload = JSON.parse(
+                frame.events[0]!.canonicalPayload,
+              ) as Record<string, unknown>,
+              origin = payload.source as Record<string, unknown>;
+            return {
+              workEventFingerprint: text(payload.workEventFingerprint),
+              paymentEventFingerprint: frame.events[0]!.fingerprint,
+              countryId: text(origin.countryId),
+              facilityId: text(origin.facilityId),
+              operatorId: text(origin.operatorId),
+              runId: text(origin.runId),
+              paidAtSimTime: frame.command.simTime.toCanonicalValue(),
+              worldVersionAfter: frame.transition.worldVersionAfter,
+            };
+          }),
+          powerDeliveries =
+            state && power
+              ? power.committedDeliveryEventFingerprints.map((fp) => {
+                  const delivery = readIndustryFirstDayPowerReplayDelivery(
+                    state,
+                    fp,
+                    sha,
+                  );
+                  return {
+                    ...delivery,
+                    eventFingerprint: fp,
+                    committedAtSimTime:
+                      delivery.frame.command.simTime.toCanonicalValue(),
+                    worldVersionAfter:
+                      delivery.frame.transition.worldVersionAfter,
+                    usedMWh: water?.powerUses.find(
+                      (use) => use.eventFingerprint === fp,
+                    )?.amount ?? { numerator: '0', denominator: '1' },
+                  };
+                })
+              : [],
+          waterEvidenceBindings: string[] = [];
+        for (const run of readIndustryFirstDayWorkState(
+          facts.workState,
+        ).runs.filter(
+          (run) =>
+            run.source.countryId === input.countryId &&
+            run.source.facilityId === p.compact.facilityId,
+        )) {
+          const original = postwarIndustryUtilityOriginalsForRun(
+              source,
+              run.terms.runId,
+            ).industryWaterOriginals[0]!,
+            src = original.source,
+            choice = selectPostwarIndustryWaterPlanningInputs({
+              scope: {
+                ...src,
+                startsAtSimTime: run.terms.startsAtSimTime,
+                endsAtSimTime: run.terms.endsAtSimTime,
+                serviceFacilityId: original.serviceFacilityId!,
+                serviceRunId: original.serviceRunId!,
+              },
+              observedAtSimTime,
+              headWorldVersion: facts.head.worldVersion,
+              registeredRights: water?.registeredRights ?? [],
+              fromTicks:
+                water?.scenarioState.regionCursors.find(
+                  (cursor) =>
+                    cursor.sourceRegionId === p.compact.water.sourceRegionId,
+                )?.throughTicks ?? null,
+              alreadyDelivered: waterDeliveries.some(
+                (delivery) =>
+                  delivery.source.countryId === src.countryId &&
+                  delivery.source.facilityId === src.facilityId &&
+                  delivery.source.runId === src.runId,
+              ),
+              works,
+              payments,
+              paidWork: facts.wageState?.paidWork ?? [],
+              usedPaidEvents: water?.usedPaidEventFingerprints ?? [],
+              power: powerDeliveries,
+            }),
+            common = {
+              schemaVersion:
+                'postwar-industry-utility-planning-row-v1' as const,
+              planningRef:
+                'WATER_PLAN_' +
+                sha(
+                  canonicalSerialize([
+                    world,
+                    facts.head,
+                    run.frame.command.fingerprint,
+                    observedAtSimTime,
+                    choice,
+                  ]),
+                ).toUpperCase(),
+              countryId: src.countryId,
+              facilityId: src.facilityId,
+              locationId: src.locationId,
+              operatorId: src.operatorId,
+              runId: src.runId,
+              sourceRef: src.sourceRef,
+              sourceRawSha256: src.sourceRawSha256,
+              runStartsAtSimTime: run.terms.startsAtSimTime,
+              runEndsAtSimTime: run.terms.endsAtSimTime,
+              measurement: 'PLANNING_DATA_NOT_AUTHORITY' as const,
+              serviceKind: 'WATER' as const,
+            };
+          if (choice.status === 'BLOCKED') {
+            rows.push(
+              Object.freeze({
+                ...common,
+                action: 'BLOCKED' as const,
+                parameters: Object.freeze({
+                  reasonCode: choice.reasonCode,
+                  observedAtSimTime,
+                }),
+              }),
+            );
+            continue;
+          }
+          // Only the same held SQL transaction may supply the complete current
+          // protected set. Empty claims are never substituted for a read error.
+          let evidence:
+              | Awaited<
+                  ReturnType<
+                    typeof readPostwarIndustryWaterPlanningEvidenceFrom
+                  >
+                >
+              | undefined,
+            readFailure: unknown;
+          try {
+            await tx.query('set local role world_v2_industry_source_reader');
+            evidence = await readPostwarIndustryWaterPlanningEvidenceFrom(tx, {
+              original,
+              beforeHead: input.expectedHead,
+              untilTicks: observedAtSimTime!,
+              workEventFingerprint: choice.workEventFingerprint,
+              powerEventFingerprints: choice.powerEventFingerprints,
+            });
+          } catch (error) {
+            readFailure = error;
+          }
+          try {
+            await tx.query('set local role "' + workerRole + '"');
+          } catch (restore) {
+            if (readFailure !== undefined)
+              throw new AggregateError(
+                [readFailure, restore],
+                'Water planning source role restore failed',
+                { cause: restore },
+              );
+            throw restore;
+          }
+          if (readFailure !== undefined) throw readFailure;
+          if (!evidence || evidence.fromTicks !== choice.fromTicks)
+            fail('CURRENT_WATER_CORE_AND_SQL_INTERVAL_DIFFER');
+          waterEvidenceBindings.push(hash(evidence));
+          rows.push(
+            Object.freeze({
+              ...common,
+              action: 'DELIVER' as const,
+              parameters: Object.freeze({
+                operation: Object.freeze({
+                  action: 'DELIVER',
+                  workEventFingerprint: choice.workEventFingerprint,
+                  paymentEventFingerprint: choice.paymentEventFingerprint,
+                  powerEventFingerprints: choice.powerEventFingerprints,
+                  additionalProtectedClaims: evidence.claims,
+                }),
+              }),
+            }),
+          );
+        }
         return Object.freeze({
           head: facts.head,
           rows: Object.freeze(rows),
@@ -917,6 +1127,9 @@ export function createPostwarIndustryUtilityRuntime(config: {
           sourceOriginalsFingerprint: hash([
             p.compactSha256,
             power?.originalsFingerprint ?? null,
+            water?.sourceOriginalsFingerprint ?? null,
+            observedAtSimTime,
+            waterEvidenceBindings,
           ]),
         });
       });

@@ -3,6 +3,7 @@
 import {
   parseIndustryUtilityPlanningRow,
   type IndustryUtilityPlanningRow,
+  type IndustryWaterPlanningBlockReason,
 } from '@econmind/core/postwar-industry-utility-planning-contract';
 import {
   AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
@@ -31,6 +32,8 @@ export function buildIndustryUtilityRequest(
     d = input.draft;
   if (row.countryId !== input.countryId || row.planningRef !== d.planningRef)
     throw Error('INDUSTRY_UTILITY_CURRENT_SELECTION_REQUIRED');
+  if (row.action === 'BLOCKED')
+    throw Error('INDUSTRY_UTILITY_BLOCKED_NOT_A_COMMAND');
   let operation: Readonly<Record<string, unknown>>;
   if (row.action === 'BOOK') {
     if (
@@ -97,6 +100,19 @@ export function buildIndustryUtilityRequest(
     },
   };
 }
+const waterBlockLabels: Readonly<
+  Record<IndustryWaterPlanningBlockReason, string>
+> = {
+  REGISTERED_CLOCK_REQUIRED: '尚无受控模拟时钟读数，不能判定取水时段。',
+  WATER_RIGHT_REQUIRED: '缺少当前运行所需的有效取水权。',
+  WATER_INTERVAL_NOT_ELAPSED: '实际取水时段尚未结束，不能登记交付。',
+  WATER_RUN_EXPIRED: '当前运行窗口已过期，不能继续使用该运行登记取水。',
+  WATER_SERVICE_WORK_REQUIRED: '尚无完整的实际水务值守工时。',
+  WATER_SERVICE_PAYMENT_REQUIRED: '水务实际劳动尚未完成付款核验。',
+  WATER_SERVICE_COVERAGE_REQUIRED: '值守人员、岗位或全时段覆盖尚未满足。',
+  POWER_DELIVERY_REQUIRED: '缺少本次取水所需的已交付电力。',
+  WATER_ALREADY_DELIVERED: '本次水务服务已经交付，不能重复登记。',
+};
 export function renderIndustryUtilityForm(
   document: Document,
   rows: readonly IndustryUtilityPlanningRow[],
@@ -157,6 +173,10 @@ export function renderIndustryUtilityForm(
     labels.set(key, caption);
     panel.append(caption);
   }
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.industryUtilityAction = 'stage';
+  button.textContent = '审阅服务调度';
   const describe = () => {
     const row = sourceRows.find((r) => r.planningRef === selected.value);
     for (const [key, field] of fields) {
@@ -164,8 +184,15 @@ export function renderIndustryUtilityForm(
       field.disabled = row?.action !== 'BOOK';
       labels.get(key)!.hidden = row?.action !== 'BOOK';
     }
+    button.disabled = !row || row.action === 'BLOCKED';
+    if (button.disabled) button.remove();
+    else if (!panel.contains(button)) panel.append(button);
     if (!row) {
       summary.textContent = '';
+      return;
+    }
+    if (row.action === 'BLOCKED') {
+      summary.textContent = `水务暂不可提交：${waterBlockLabels[row.parameters.reasonCode]} 当前模拟时间：${row.parameters.observedAtSimTime ?? '未取得'}；运行窗口 ${row.runStartsAtSimTime}–${row.runEndsAtSimTime}。未生成工时、付款或交付。`;
       return;
     }
     const route =
@@ -181,15 +208,12 @@ export function renderIndustryUtilityForm(
     summary.textContent = `${row.sourceRef} · RUN窗口 ${row.runStartsAtSimTime}–${row.runEndsAtSimTime} · ${route}${detail}。仅调度数据，实际来源、权限与资源由服务器重新核验。`;
   };
   selected.addEventListener('change', describe);
-  describe();
   const result = document.createElement('p');
   result.setAttribute('role', 'status');
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.dataset.industryUtilityAction = 'stage';
-  button.textContent = '审阅服务调度';
   button.addEventListener('click', () => {
-    if (!document.body.contains(panel)) return;
+    const row = sourceRows.find((r) => r.planningRef === selected.value);
+    if (!document.body.contains(panel) || !row || row.action === 'BLOCKED')
+      return;
     const ok = stage({
       planningRef: selected.value,
       quantity: fields.get('quantity')!.value,
@@ -201,5 +225,6 @@ export function renderIndustryUtilityForm(
       : '调度数据已过期，或数量与时段无效，请刷新后重试。';
   });
   panel.append(button, result);
+  describe();
   return panel;
 }

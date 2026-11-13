@@ -454,6 +454,20 @@ export function readIndustryFirstDayWaterExecutionState(
     sourceOriginalsFingerprint: hash([...s.originalPins], sha),
     registeredRights: [...s.grants.values()].map((g) => g.right),
     committedDeliveryEventFingerprints: [...s.entries.keys()],
+    paymentFrames: [
+      ...new Map(
+        [...s.originals.values()].flatMap((o) =>
+          (o.paymentFrames ?? []).map(
+            (frame) => [frame.command.fingerprint, frame] as const,
+          ),
+        ),
+      ).values(),
+    ],
+    usedPaidEventFingerprints: [...s.usedPaidInputs],
+    powerUses: [...s.powerUses].map(([eventFingerprint, amount]) => ({
+      eventFingerprint,
+      amount,
+    })),
     scenarioState: s.scenario,
   });
 }

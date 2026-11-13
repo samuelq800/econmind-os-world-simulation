@@ -609,6 +609,7 @@ function constructFinanceSocialRuntimeConnection(
         ? createPostwarIndustryUtilityRuntime({
             database,
             socialConnection: social,
+            planningClock: input.clock,
             ...(input.industry.publicationDatabase
               ? {
                   publication: {

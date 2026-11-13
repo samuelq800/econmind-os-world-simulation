@@ -7,6 +7,10 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import { parseIndustryCommittedRunsCoverage } from '@econmind/core/postwar-industry-committed-runs-contract';
+import {
+  parseIndustryUtilityPlanningRow,
+  parseIndustryUtilityPlanningCoverage,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
 import { runRegisteredProgrammeTargetBrowserChain } from '../support/registered-programme-target-browser-chain.js';
 import { runFreshC10Prefix } from '../support/run-fresh-c10-prefix.js';
 import {
@@ -302,6 +306,43 @@ native('resumed committed-source registered Node and shipped browser', () => {
         assert.equal(
           row(report.retainedC10Planning).status,
           'ACTUAL_PLANNING_ROWS',
+        );
+        assert.deepEqual(await s.counts(), beforeResume);
+        const utilities = await d.post(
+          '/v1/postwar-office-runtime',
+          {
+            schemaVersion: 'postwar-office-runtime-read-v1',
+            requestId: randomUUID(),
+            operation: 'READ_CURRENT_OFFICE_OPENING',
+            officeId: 'INDUSTRY',
+            dataset: 'industry-utility-planning',
+            page: { offset: 0, limit: 25 },
+          },
+          'COUNTRY_10',
+        );
+        report.retainedWaterPlanning = utilities;
+        await save();
+        assert.equal(utilities.status, 200, 'ACTUAL_C10_UTILITY_PLANNING_READ');
+        assert.equal(utilities.body.ok, true);
+        const coverage = parseIndustryUtilityPlanningCoverage(
+          row(utilities.body.source).currentIndustryUtilityPlanningCoverage,
+        );
+        assert.equal(coverage.countryId, 'COUNTRY_10');
+        assert.equal(coverage.globalWorldVersion, beforeResume.worldVersion);
+        assert.equal(coverage.globalEventSequence, beforeResume.eventSequence);
+        assert(Array.isArray(utilities.body.rows));
+        const water = utilities.body.rows
+          .map(parseIndustryUtilityPlanningRow)
+          .filter(
+            (item) => item.serviceKind === 'WATER' && item.runId === runId,
+          );
+        assert.equal(water.length, 1, 'EXACT_EXISTING_RUN_WATER_PLANNING_ROW');
+        const waterRow = water[0]!;
+        assert(waterRow.action === 'BLOCKED');
+        assert.equal(
+          waterRow.parameters.observedAtSimTime,
+          '0',
+          'PLANNING_READ_OBSERVES_EXISTING_CLOCK_WITHOUT_ADVANCING',
         );
         assert.deepEqual(await s.counts(), beforeResume);
       }

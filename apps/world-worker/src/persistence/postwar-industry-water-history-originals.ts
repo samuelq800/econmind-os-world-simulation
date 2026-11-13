@@ -136,52 +136,49 @@ export const POSTWAR_WATER_COMMAND_EVIDENCE_QUERY =
 /** RPC rows are immutable source DATA, not authority. The caller holds the
  * exact-head source transaction; Core replays each grant, wage and power effect
  * independently. In particular, missing rows/null are never an empty claim set. */
-export async function readPostwarIndustryWaterCommandOriginalFrom(
+/** Fixed held-transaction evidence read shared by planning and command replay.
+ * It does not construct a command or acquire an additional connection. */
+export async function readPostwarIndustryWaterPlanningEvidenceFrom(
   tx: import('./sql-database.js').SqlExecutor,
   input: Readonly<{
     original: Readonly<IndustryFirstDayWaterReplayOriginal>;
-    command: import('@econmind/core').CanonicalCommand;
     beforeHead: { worldVersion: string; eventSequence: string };
-    expectedSourceFingerprint?: string;
+    untilTicks: string;
+    workEventFingerprint: string;
+    powerEventFingerprints: readonly string[];
   }>,
-): Promise<Readonly<IndustryFirstDayWaterReplayOriginal>> {
-  const { original, command, beforeHead } = input,
-    intent = parseIndustryUtilityIntent(command, sha),
-    operation = intent.operation;
+) {
+  const {
+    original,
+    beforeHead,
+    untilTicks,
+    workEventFingerprint,
+    powerEventFingerprints,
+  } = input;
   if (
-    intent.serviceKind !== 'WATER' ||
-    operation.action !== 'DELIVER' ||
-    command.worldId !== original.source.worldId ||
-    command.countryId !== original.source.countryId ||
-    intent.facilityId !== original.source.facilityId ||
-    intent.runId !== original.source.runId ||
-    intent.sourceRef !== original.source.sourceRef ||
-    intent.sourceRawSha256 !== original.source.sourceRawSha256 ||
-    command.expectedWorldVersion !== beforeHead.worldVersion ||
-    !/^(0|[1-9][0-9]*)$/u.test(beforeHead.eventSequence) ||
-    !/^sha256:[a-f0-9]{64}$/u.test(String(operation.workEventFingerprint)) ||
-    !Array.isArray(operation.powerEventFingerprints) ||
-    !operation.powerEventFingerprints.length ||
-    operation.powerEventFingerprints.length > 64 ||
-    !operation.powerEventFingerprints.every(
-      (v) => typeof v === 'string' && /^sha256:[a-f0-9]{64}$/u.test(v),
+    ![beforeHead.worldVersion, beforeHead.eventSequence, untilTicks].every(
+      (v) => /^(0|[1-9][0-9]*)$/u.test(v),
     ) ||
-    new Set(operation.powerEventFingerprints).size !==
-      operation.powerEventFingerprints.length
+    BigInt(untilTicks) > 86400000n ||
+    !/^sha256:[a-f0-9]{64}$/u.test(workEventFingerprint) ||
+    !powerEventFingerprints.length ||
+    powerEventFingerprints.length > 64 ||
+    powerEventFingerprints.some((v) => !/^sha256:[a-f0-9]{64}$/u.test(v)) ||
+    new Set(powerEventFingerprints).size !== powerEventFingerprints.length
   )
-    fail('EXACT_DELIVERY_COMMAND_AND_BEFORE_HEAD_REQUIRED');
+    fail('EXACT_BOUNDED_WATER_PLANNING_EVIDENCE_SCOPE_REQUIRED');
   const result = await tx.query<Record<string, unknown>>(
     POSTWAR_WATER_COMMAND_EVIDENCE_QUERY,
     [
-      command.worldId,
-      command.countryId,
-      intent.facilityId,
-      intent.runId,
+      original.source.worldId,
+      original.source.countryId,
+      original.source.facilityId,
+      original.source.runId,
       beforeHead.worldVersion,
       beforeHead.eventSequence,
-      command.simTime.toCanonicalValue(),
-      operation.workEventFingerprint,
-      canonicalSerialize(operation.powerEventFingerprints),
+      untilTicks,
+      workEventFingerprint,
+      canonicalSerialize(powerEventFingerprints),
     ],
   );
   if (result.rows.length !== 1)
@@ -223,13 +220,13 @@ export async function readPostwarIndustryWaterCommandOriginalFrom(
   if (
     typeof row.from_ticks !== 'string' ||
     !/^(0|[1-9][0-9]*)$/u.test(row.from_ticks) ||
-    BigInt(row.from_ticks) >= command.simTime.ticks ||
-    command.simTime.ticks > 86400000n
+    BigInt(row.from_ticks) >= BigInt(untilTicks) ||
+    BigInt(untilTicks) > 86400000n
   )
     fail('EXACT_CURRENT_WATER_INTERVAL_REQUIRED');
   if (
     !Array.isArray(row.power_pins) ||
-    row.power_pins.length !== operation.powerEventFingerprints.length
+    row.power_pins.length !== powerEventFingerprints.length
   )
     fail('COMPLETE_CURRENT_POWER_ORIGINS_REQUIRED');
   const powers = row.power_pins.map((p) => pin(p, 'POWER_DELIVERY'));
@@ -293,6 +290,56 @@ export async function readPostwarIndustryWaterCommandOriginalFrom(
   const claims = [...byRef.values()].sort((a, b) =>
     a.claimRef < b.claimRef ? -1 : a.claimRef > b.claimRef ? 1 : 0,
   );
+  return Object.freeze({
+    grant,
+    powers: Object.freeze(powers),
+    claims: Object.freeze(claims),
+    fromTicks: row.from_ticks,
+  });
+}
+
+export async function readPostwarIndustryWaterCommandOriginalFrom(
+  tx: import('./sql-database.js').SqlExecutor,
+  input: Readonly<{
+    original: Readonly<IndustryFirstDayWaterReplayOriginal>;
+    command: import('@econmind/core').CanonicalCommand;
+    beforeHead: { worldVersion: string; eventSequence: string };
+    expectedSourceFingerprint?: string;
+  }>,
+): Promise<Readonly<IndustryFirstDayWaterReplayOriginal>> {
+  const { original, command, beforeHead } = input,
+    intent = parseIndustryUtilityIntent(command, sha),
+    operation = intent.operation;
+  if (
+    intent.serviceKind !== 'WATER' ||
+    operation.action !== 'DELIVER' ||
+    command.worldId !== original.source.worldId ||
+    command.countryId !== original.source.countryId ||
+    intent.facilityId !== original.source.facilityId ||
+    intent.runId !== original.source.runId ||
+    intent.sourceRef !== original.source.sourceRef ||
+    intent.sourceRawSha256 !== original.source.sourceRawSha256 ||
+    command.expectedWorldVersion !== beforeHead.worldVersion ||
+    !/^(0|[1-9][0-9]*)$/u.test(beforeHead.eventSequence) ||
+    !/^sha256:[a-f0-9]{64}$/u.test(String(operation.workEventFingerprint)) ||
+    !Array.isArray(operation.powerEventFingerprints) ||
+    !operation.powerEventFingerprints.length ||
+    operation.powerEventFingerprints.length > 64 ||
+    !operation.powerEventFingerprints.every(
+      (v) => typeof v === 'string' && /^sha256:[a-f0-9]{64}$/u.test(v),
+    ) ||
+    new Set(operation.powerEventFingerprints).size !==
+      operation.powerEventFingerprints.length
+  )
+    fail('EXACT_DELIVERY_COMMAND_AND_BEFORE_HEAD_REQUIRED');
+  const { grant, powers, claims, fromTicks } =
+    await readPostwarIndustryWaterPlanningEvidenceFrom(tx, {
+      original,
+      beforeHead,
+      untilTicks: command.simTime.toCanonicalValue(),
+      workEventFingerprint: operation.workEventFingerprint as string,
+      powerEventFingerprints: operation.powerEventFingerprints as string[],
+    });
   if (!same(operation.additionalProtectedClaims, claims))
     fail('COMMAND_MUST_MATCH_ACTUAL_CURRENT_PROTECTED_CLAIMS');
   const protectedSha = sha(
@@ -300,7 +347,7 @@ export async function readPostwarIndustryWaterCommandOriginalFrom(
       worldId: original.source.worldId,
       seedFingerprint: original.source.seedFingerprint,
       head: beforeHead,
-      fromTicks: row.from_ticks,
+      fromTicks,
       untilTicks: command.simTime.toCanonicalValue(),
       claims,
     }),

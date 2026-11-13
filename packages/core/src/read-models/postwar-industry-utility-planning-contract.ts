@@ -12,6 +12,20 @@ export const INDUSTRY_UTILITY_PLANNING_ROW_SCHEMA =
   'postwar-industry-utility-planning-row-v1' as const;
 export const INDUSTRY_UTILITY_PLANNING_MEASUREMENT =
   'PLANNING_DATA_NOT_AUTHORITY' as const;
+/** Read-only reasons. BLOCKED is never a utility command or a service receipt. */
+export const INDUSTRY_WATER_PLANNING_BLOCK_REASONS = [
+  'REGISTERED_CLOCK_REQUIRED',
+  'WATER_RIGHT_REQUIRED',
+  'WATER_INTERVAL_NOT_ELAPSED',
+  'WATER_RUN_EXPIRED',
+  'WATER_SERVICE_WORK_REQUIRED',
+  'WATER_SERVICE_PAYMENT_REQUIRED',
+  'WATER_SERVICE_COVERAGE_REQUIRED',
+  'POWER_DELIVERY_REQUIRED',
+  'WATER_ALREADY_DELIVERED',
+] as const;
+export type IndustryWaterPlanningBlockReason =
+  (typeof INDUSTRY_WATER_PLANNING_BLOCK_REASONS)[number];
 export interface IndustryUtilityCapacityFact {
   readonly name: string;
   readonly value: string;
@@ -59,6 +73,14 @@ export type IndustryUtilityPlanningRow = Common &
         serviceKind: 'POWER';
         action: 'DELIVER';
         parameters: Readonly<{ operation: Readonly<Record<string, unknown>> }>;
+      }>
+    | Readonly<{
+        serviceKind: 'WATER';
+        action: 'BLOCKED';
+        parameters: Readonly<{
+          reasonCode: IndustryWaterPlanningBlockReason;
+          observedAtSimTime: string | null;
+        }>;
       }>
     | Readonly<{
         serviceKind: 'WATER';
@@ -167,7 +189,16 @@ export function parseIndustryUtilityPlanningRow(
     BigInt(String(r.runEndsAtSimTime)) > 86400000n
   )
     fail();
-  if (r.serviceKind === 'POWER' && r.action === 'BOOK') {
+  if (r.serviceKind === 'WATER' && r.action === 'BLOCKED') {
+    if (
+      !exact(p, ['reasonCode', 'observedAtSimTime']) ||
+      !INDUSTRY_WATER_PLANNING_BLOCK_REASONS.some(
+        (reason) => reason === p.reasonCode,
+      ) ||
+      (p.observedAtSimTime !== null && !integer(p.observedAtSimTime))
+    )
+      fail();
+  } else if (r.serviceKind === 'POWER' && r.action === 'BOOK') {
     if (
       !exact(p, ['purpose', 'quantityUnit', 'capacityFacts']) ||
       !['INDUSTRY_SELF_USE', 'PROCESS_WATER_PUMPING_SELF_USE'].includes(

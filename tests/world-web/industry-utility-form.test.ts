@@ -8,7 +8,11 @@ import {
   planningRow,
   planningRequestId,
 } from '../support/industry-utility-planning-fixture.js';
-import { HostDocument } from './trusted-host-dom.js';
+import {
+  INDUSTRY_WATER_PLANNING_BLOCK_REASONS,
+  parseIndustryUtilityPlanningRow,
+} from '../../packages/core/src/read-models/postwar-industry-utility-planning-contract.js';
+import { HostDocument, HostElement } from './trusted-host-dom.js';
 const draft = {
   planningRef: planningRow().planningRef,
   quantity: '2',
@@ -30,6 +34,88 @@ const build = (
     idempotencyKey: 'KEY_NEW_TEST_ONLY',
   });
 describe('Industry utility real-reference form transport', () => {
+  it.each(INDUSTRY_WATER_PLANNING_BLOCK_REASONS)(
+    'shows a Chinese reason for %s and cannot build or stage a command',
+    (reasonCode) => {
+      const row = parseIndustryUtilityPlanningRow({
+        ...planningRow('WATER', 'DELIVER'),
+        action: 'BLOCKED',
+        parameters: { reasonCode, observedAtSimTime: null },
+      });
+      expect(() =>
+        build(row, {
+          planningRef: row.planningRef,
+          quantity: '',
+          startsAtSimTime: '',
+          endsAtSimTime: '',
+        }),
+      ).toThrow('BLOCKED_NOT_A_COMMAND');
+      const doc = new HostDocument('industry');
+      let staged = 0;
+      const panel = renderIndustryUtilityForm(
+        doc as unknown as Document,
+        [row],
+        true,
+        'PAGE',
+        () => {
+          staged++;
+          return true;
+        },
+      ) as unknown as HostElement;
+      doc.root.append(panel);
+      expect(panel.textContent).toContain('水务暂不可提交');
+      expect(panel.textContent).toContain('未生成工时、付款或交付');
+      expect(panel.textContent).toContain('当前模拟时间：未取得');
+      expect(
+        panel.querySelector('[data-industry-utility-action="stage"]'),
+      ).toBeNull();
+      expect(staged).toBe(0);
+    },
+  );
+  it('keeps a genuinely ready WATER DELIVER selectable next to a blocked source', () => {
+    const ready = planningRow('WATER', 'DELIVER');
+    const blocked = parseIndustryUtilityPlanningRow({
+      ...ready,
+      planningRef: 'BLOCKED_TEST_ONLY',
+      action: 'BLOCKED',
+      parameters: {
+        reasonCode: 'WATER_SERVICE_WORK_REQUIRED',
+        observedAtSimTime: '50',
+      },
+    });
+    const doc = new HostDocument('industry');
+    let staged = '';
+    const panel = renderIndustryUtilityForm(
+      doc as unknown as Document,
+      [blocked, ready],
+      true,
+      'PAGE',
+      (d) => {
+        staged = d.planningRef;
+        return true;
+      },
+    ) as unknown as HostElement;
+    doc.root.append(panel);
+    const select = panel.querySelector(
+      '[data-industry-utility-field="planningRef"]',
+    )! as HostElement & { value: string };
+    select.value = ready.planningRef;
+    select.listeners.get('change')?.();
+    const button = panel.querySelector(
+      '[data-industry-utility-action="stage"]',
+    )!;
+    expect(button.disabled).toBe(false);
+    button.click();
+    expect(staged).toBe(ready.planningRef);
+    expect(
+      build(ready, {
+        planningRef: ready.planningRef,
+        quantity: '',
+        startsAtSimTime: '',
+        endsAtSimTime: '',
+      }).request.commandType,
+    ).toBe('INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1');
+  });
   it('copies actual selected RUN/source/purpose while leaving quantity/window to the user', () => {
     expect(build()).toMatchObject({
       request: {
@@ -83,7 +169,8 @@ describe('Industry utility real-reference form transport', () => {
           startsAtSimTime: '',
           endsAtSimTime: '',
         });
-      if (row.action === 'BOOK') throw Error('REF_ONLY_ROW_REQUIRED');
+      if (row.action === 'BOOK' || row.action === 'BLOCKED')
+        throw Error('REF_ONLY_ROW_REQUIRED');
       expect((r.request.payload as { operation: unknown }).operation).toEqual(
         row.parameters.operation,
       );

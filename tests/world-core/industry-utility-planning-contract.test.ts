@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   parseIndustryUtilityPlanningRow,
+  INDUSTRY_WATER_PLANNING_BLOCK_REASONS,
   parseIndustryUtilityPlanningCoverage,
 } from '../../packages/core/src/read-models/postwar-industry-utility-planning-contract.js';
 import {
@@ -9,6 +10,49 @@ import {
   planningFp,
 } from '../support/industry-utility-planning-fixture.js';
 describe('public source-bound Industry utility planning DATA', () => {
+  it.each(INDUSTRY_WATER_PLANNING_BLOCK_REASONS)(
+    'keeps %s as read-only blocking data, without an operation',
+    (reasonCode) => {
+      const row = parseIndustryUtilityPlanningRow({
+        ...planningRow('WATER', 'DELIVER'),
+        action: 'BLOCKED',
+        parameters: {
+          reasonCode,
+          observedAtSimTime:
+            reasonCode === 'REGISTERED_CLOCK_REQUIRED' ? null : '0',
+        },
+      });
+      expect(row.action).toBe('BLOCKED');
+      expect(row.parameters).not.toHaveProperty('operation');
+      expect(Object.isFrozen(row.parameters)).toBe(true);
+    },
+  );
+  it.each([
+    { reasonCode: 'UNREVIEWED_REASON', observedAtSimTime: '0' },
+    { reasonCode: 'WATER_RIGHT_REQUIRED', observedAtSimTime: -1 },
+    { reasonCode: 'WATER_RIGHT_REQUIRED', observedAtSimTime: '-1' },
+    {
+      reasonCode: 'WATER_RIGHT_REQUIRED',
+      observedAtSimTime: '9223372036854775808',
+    },
+    { reasonCode: 'WATER_RIGHT_REQUIRED' },
+    {
+      reasonCode: 'WATER_RIGHT_REQUIRED',
+      observedAtSimTime: '0',
+      operation: { action: 'DELIVER' },
+    },
+  ])(
+    'refuses malformed or command-bearing blocked parameters %j',
+    (parameters) => {
+      expect(() =>
+        parseIndustryUtilityPlanningRow({
+          ...planningRow('WATER', 'DELIVER'),
+          action: 'BLOCKED',
+          parameters,
+        }),
+      ).toThrow();
+    },
+  );
   it.each([
     ['POWER', 'BOOK'],
     ['POWER', 'DELIVER'],

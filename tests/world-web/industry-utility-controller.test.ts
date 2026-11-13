@@ -1,6 +1,7 @@
 /** Actual shipped clients/controller over explicit synthetic responses.
  * No backend/source/queue/native service execution is claimed. */
 import { describe, expect, it } from 'vitest';
+import { parseIndustryUtilityPlanningRow } from '../../packages/core/src/read-models/postwar-industry-utility-planning-contract.js';
 import { createOfficeCommandController } from '../../apps/world-web/src/office-command/controller.js';
 import {
   industryUtilityPlanningWireFixture,
@@ -20,6 +21,40 @@ const draft = (ref: string) => ({
   endsAtSimTime: '30',
 });
 describe('Industry source-bound service selection and original recovery', () => {
+  it('keeps an authorized blocked WATER row visible but cannot stage or submit it', async () => {
+    const f = industryUtilityPlanningWireFixture();
+    const blocked = parseIndustryUtilityPlanningRow({
+      ...planningRow('WATER', 'DELIVER', f.binding.read.identity.countryId),
+      action: 'BLOCKED',
+      parameters: {
+        reasonCode: 'WATER_SERVICE_WORK_REQUIRED',
+        observedAtSimTime: '0',
+      },
+    });
+    f.setRows([blocked]);
+    const c = controller(f);
+    try {
+      await c.refresh();
+      expect(c.getState().utilityPlanningPage?.status).toBe('PAGE');
+      expect(c.getState().utilityPlanningPage?.rows[0]).toEqual(blocked);
+      expect(
+        c.stageIndustryUtility({
+          planningRef: blocked.planningRef,
+          quantity: '',
+          startsAtSimTime: '',
+          endsAtSimTime: '',
+        }),
+      ).toBe(false);
+      expect(c.getState().intent).toBeNull();
+      expect(c.review()).toBe(false);
+      await c.confirm();
+      expect(
+        f.calls.filter((call) => call.path === '/v1/office-command'),
+      ).toHaveLength(0);
+    } finally {
+      c.disconnect();
+    }
+  });
   it('loads actual source/RUN refs, submits only once, then restores the old original after F5 for query only', async () => {
     const f = industryUtilityPlanningWireFixture(),
       first = controller(f);
