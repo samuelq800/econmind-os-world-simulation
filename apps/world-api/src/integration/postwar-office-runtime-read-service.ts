@@ -1,4 +1,11 @@
 import {
+  INDUSTRY_COMMITTED_RUNS_DATASET,
+  INDUSTRY_COMMITTED_RUNS_NATURE,
+  parseIndustryCommittedRunRow,
+  parseIndustryCommittedRunsCoverage,
+  type IndustryCommittedRunsCoverage,
+} from '@econmind/core/postwar-industry-committed-runs-contract';
+import {
   isPostwarSocialServiceCreationPlanningReader,
   type PostwarSocialServiceCreationPlanningReader,
   type PostwarSocialServiceCreationPlanningResult,
@@ -103,7 +110,8 @@ type PageSourceNature =
   | PostwarIndustryLabourCurrentSource['dataNature']
   | PostwarTradeCurrentSource['dataNature']
   | 'ADMITTED_IMMUTABLE_OPENING_FACTS'
-  | typeof INDUSTRY_UTILITY_PLANNING_NATURE;
+  | typeof INDUSTRY_UTILITY_PLANNING_NATURE
+  | typeof INDUSTRY_COMMITTED_RUNS_NATURE;
 type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
   readonly source: Omit<
     OriginalSuccessPage['source'],
@@ -120,6 +128,7 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
       | PostwarSocialMixedCurrentSource['currentStateBinding'];
     readonly dataNature: PageSourceNature;
     readonly currentIndustryUtilityPlanningCoverage?: IndustryUtilityPlanningCoverage;
+    readonly currentIndustryCommittedRunsCoverage?: IndustryCommittedRunsCoverage;
     readonly currentFinancialCoverage?: FinancialReadSource['currentFinancialCoverage'];
     readonly centralBankOpeningInstruments?: PostwarFinancialMixedCurrentSource['centralBankOpeningInstruments'];
     readonly currentCaptainCoverage?: PostwarCaptainCurrentSource['currentCaptainCoverage'];
@@ -134,13 +143,16 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
     }>;
   } & (
       | Readonly<{
-          dataNature: typeof INDUSTRY_UTILITY_PLANNING_NATURE;
+          dataNature:
+            | typeof INDUSTRY_UTILITY_PLANNING_NATURE
+            | typeof INDUSTRY_COMMITTED_RUNS_NATURE;
           canonicalSeedSha256?: never;
         }>
       | Readonly<{
           dataNature: Exclude<
             PageSourceNature,
-            typeof INDUSTRY_UTILITY_PLANNING_NATURE
+            | typeof INDUSTRY_UTILITY_PLANNING_NATURE
+            | typeof INDUSTRY_COMMITTED_RUNS_NATURE
           >;
           canonicalSeedSha256: string;
         }>
@@ -151,6 +163,7 @@ const OFFICE_RUNTIME_DATASETS = Object.freeze({
   ...POSTWAR_FINANCIAL_CURRENT_DATASETS,
   INDUSTRY: [
     INDUSTRY_UTILITY_PLANNING_DATASET,
+    INDUSTRY_COMMITTED_RUNS_DATASET,
     INDUSTRY_RUN_PARAMETERS_DATASET,
     POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
     ...POSTWAR_PROJECTION_DATASETS.INDUSTRY,
@@ -644,8 +657,11 @@ export function createPostwarOfficeRuntimeReadService(
         const claims = await claimsFor(input.authorization, signal);
         if (
           request.office === 'INDUSTRY' &&
-          request.dataset === INDUSTRY_UTILITY_PLANNING_DATASET
+          (request.dataset === INDUSTRY_UTILITY_PLANNING_DATASET ||
+            request.dataset === INDUSTRY_COMMITTED_RUNS_DATASET)
         ) {
+          const committedRuns =
+            request.dataset === INDUSTRY_COMMITTED_RUNS_DATASET;
           // Release each bounded read connection before using the independent
           // worker source transaction. Nesting a second checkout deadlocks a
           // valid single-connection pool; an RR snapshot is not fresh authority.
@@ -700,7 +716,12 @@ export function createPostwarOfficeRuntimeReadService(
                 )
               )
                 return fail(503, 'INDUSTRY_UTILITY_PLANNING_NOT_INSTALLED');
-              const planning = await industryUtilityPlanningReader.readPage({
+              const readPlanning = committedRuns
+                ? industryUtilityPlanningReader.readCommittedRunsPage
+                : industryUtilityPlanningReader.readPage;
+              if (!readPlanning)
+                return fail(503, 'INDUSTRY_COMMITTED_RUNS_NOT_INSTALLED');
+              const planning = await readPlanning({
                 countryId: before.scope.countryId,
                 expectedHead: {
                   worldVersion: before.source.worldVersion,
@@ -768,18 +789,40 @@ export function createPostwarOfficeRuntimeReadService(
                     ps.countryId !== fresh.scope.countryId
                   )
                     return fail(403, 'CURRENT_SCOPE_NOT_AUTHORIZED');
-                  const coverage = parseIndustryUtilityPlanningCoverage(
-                    ps.currentIndustryUtilityPlanningCoverage,
-                  );
-                  const rows = planning.rows.map(
-                    parseIndustryUtilityPlanningRow,
-                  );
+                  const coverage = committedRuns
+                    ? parseIndustryCommittedRunsCoverage(
+                        'currentIndustryCommittedRunsCoverage' in ps
+                          ? ps.currentIndustryCommittedRunsCoverage
+                          : undefined,
+                      )
+                    : parseIndustryUtilityPlanningCoverage(
+                        'currentIndustryUtilityPlanningCoverage' in ps
+                          ? ps.currentIndustryUtilityPlanningCoverage
+                          : undefined,
+                      );
+                  const rows = committedRuns
+                    ? planning.rows.map(parseIndustryCommittedRunRow)
+                    : planning.rows.map(parseIndustryUtilityPlanningRow);
                   if (
                     coverage.countryId !== fresh.scope.countryId ||
                     coverage.globalWorldVersion !== h.worldVersion ||
                     coverage.globalEventSequence !== h.eventSequence ||
                     rows.some((r) => r.countryId !== fresh.scope.countryId) ||
-                    new Set(rows.map((r) => r.planningRef)).size !== rows.length
+                    new Set(
+                      rows.map((r) =>
+                        'runId' in r && committedRuns
+                          ? r.runId
+                          : 'planningRef' in r
+                            ? r.planningRef
+                            : '',
+                      ),
+                    ).size !== rows.length ||
+                    (committedRuns &&
+                      rows.some(
+                        (r) =>
+                          !('facilityId' in coverage) ||
+                          r.facilityId !== coverage.facilityId,
+                      ))
                   )
                     return fail(503, 'READ_BINDING_UNAVAILABLE');
                   const result = pageBody(
@@ -790,7 +833,9 @@ export function createPostwarOfficeRuntimeReadService(
                         ...h,
                         ...ps,
                         sourceRevision: coverage.reducerVersion,
-                        dataNature: INDUSTRY_UTILITY_PLANNING_NATURE,
+                        dataNature: committedRuns
+                          ? INDUSTRY_COMMITTED_RUNS_NATURE
+                          : INDUSTRY_UTILITY_PLANNING_NATURE,
                       },
                       page: planning.page,
                       rows,

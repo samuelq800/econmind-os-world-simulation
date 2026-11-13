@@ -1,4 +1,10 @@
 import {
+  INDUSTRY_COMMITTED_RUNS_DATASET,
+  INDUSTRY_COMMITTED_RUNS_NATURE,
+  parseIndustryCommittedRunRow,
+  parseIndustryCommittedRunsCoverage,
+} from '@econmind/core/postwar-industry-committed-runs-contract';
+import {
   POSTWAR_TRADE_CURRENT_DATASETS,
   POSTWAR_TRADE_CURRENT_NATURE,
   parsePostwarTradeCurrentCoverage,
@@ -80,6 +86,7 @@ export const officeDatasets: Readonly<Record<string, readonly string[]>> =
     ],
     INDUSTRY: [
       INDUSTRY_UTILITY_PLANNING_DATASET,
+      INDUSTRY_COMMITTED_RUNS_DATASET,
       INDUSTRY_RUN_PARAMETERS_DATASET,
       POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
       'opening-inventory-entries',
@@ -602,6 +609,49 @@ export function createPostwarRuntimeClient(
           )
             throw Error('INDUSTRY_RUN_PARAMETER_SCOPE_MISMATCH');
         }
+        const currentCommittedRuns =
+          dataset === INDUSTRY_COMMITTED_RUNS_DATASET &&
+          c.identity.officeId === 'INDUSTRY' &&
+          source.dataNature === INDUSTRY_COMMITTED_RUNS_NATURE;
+        if (
+          dataset === INDUSTRY_COMMITTED_RUNS_DATASET &&
+          !currentCommittedRuns
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentCommittedRuns) {
+          const coverage = parseIndustryCommittedRunsCoverage(
+              source.currentIndustryCommittedRunsCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            runs = rows.map(parseIndustryCommittedRunRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            pointer?.rowOrigin !== 'fixed-industry-committed-runs-runtime' ||
+            pointer.rowBinding !==
+              'runId+commandFingerprint+eventFingerprint' ||
+            runs.some(
+              (r) =>
+                r.countryId !== c.identity.countryId ||
+                r.facilityId !== coverage.facilityId ||
+                BigInt(r.committedWorldVersion) >
+                  BigInt(coverage.globalWorldVersion),
+            ) ||
+            new Set(runs.map((r) => r.runId)).size !== runs.length ||
+            (previous &&
+              runs.some((r) =>
+                previous.rows.some((p) => row(p)?.runId === r.runId),
+              )) ||
+            source.currentFinancialCoverage !== undefined ||
+            source.currentIndustryUtilityPlanningCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentIndustryCommittedRunsCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const currentUtilityPlanning =
           dataset === INDUSTRY_UTILITY_PLANNING_DATASET &&
           c.identity.officeId === 'INDUSTRY' &&
@@ -713,6 +763,7 @@ export function createPostwarRuntimeClient(
           !currentTrade &&
           !currentIndustry &&
           !currentUtilityPlanning &&
+          !currentCommittedRuns &&
           !financialCurrent &&
           !historicalFacts
         )

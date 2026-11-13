@@ -1,3 +1,4 @@
+import { parseIndustryCommittedRunRow } from '@econmind/core/postwar-industry-committed-runs-contract';
 import {
   INDUSTRY_UTILITY_PLANNING_DATASET,
   parseIndustryUtilityPlanningRow,
@@ -376,6 +377,60 @@ export function installOfficeCommand(
             active(owner, lifetime, dialog!) && owner.stageIndustryRun(draft),
         ),
       );
+    }
+    if (currentView()?.role === 'industry') {
+      const runs = state.committedRunsPage;
+      const section = document.createElement('section');
+      section.dataset.industryCommittedRuns = '';
+      section.append(
+        node('h3', '已提交的本国设施排产'),
+        node(
+          'p',
+          '仅显示完整历史已提交的排产与已记录工时；不表示产出、已支付或剩余容量。未提交请求不列入。',
+        ),
+      );
+      if (!runs)
+        section.append(
+          node(
+            'p',
+            '已提交排产暂不可读取：' +
+              (state.committedRunsCode ?? 'UNAVAILABLE') +
+              '。数量未知，不按 0 处理。',
+          ),
+        );
+      else if (runs.status === 'EMPTY')
+        section.append(
+          node(
+            'p',
+            runs.page.total === 0
+              ? '当前受权设施无已提交排产。'
+              : '当前分页范围无记录；不是全体排产为零。',
+          ),
+        );
+      else
+        for (const value of runs.rows) {
+          const run = parseIndustryCommittedRunRow(value);
+          section.append(
+            node(
+              'p',
+              `${run.facilityId} · ${run.runId} · ${run.quantity} ${run.outputUnit} · ${run.startsAtSimTime}–${run.endsAtSimTime} · 已记录工时 ${run.performedPersonMilliseconds} 人毫秒 · ${run.commandId}`,
+            ),
+          );
+        }
+      if (runs)
+        section.append(
+          node(
+            'p',
+            `授权记录 ${runs.page.returned ? runs.page.offset + 1 : runs.page.offset}–${runs.page.offset + runs.page.returned} / ${runs.page.total}；世界版本 ${runs.authority.readback.worldVersion}。`,
+          ),
+        );
+      if (runs && runs.page.nextOffset !== null)
+        section.append(
+          button('下一排产页', 'next-committed-runs', state.canRead, () =>
+            owner.nextIndustryCommittedRunsPage(),
+          ),
+        );
+      dialog.append(section);
     }
     if (currentView()?.role === 'industry') {
       const planning =

@@ -1,3 +1,7 @@
+import {
+  createPostwarIndustryCommittedRunsReader,
+  type PostwarIndustryCommittedRunsPage,
+} from './postwar-industry-committed-runs-read.js';
 /** Fixed server-only planning DATA reader. One held transaction and genuine
  * replay context for all services; never a caller-supplied source or executor. */
 import { createHash } from 'node:crypto';
@@ -55,6 +59,15 @@ export type PostwarIndustryUtilityPlanningPage =
       rows: readonly IndustryUtilityPlanningRow[];
     }>;
 export interface PostwarIndustryUtilityPlanningReader {
+  readCommittedRunsPage?(
+    input: Readonly<{
+      countryId: string;
+      expectedHead: Head;
+      offset?: number;
+      limit?: number;
+      expectedVersion?: string;
+    }>,
+  ): Promise<PostwarIndustryCommittedRunsPage>;
   readPage(
     input: Readonly<{
       countryId: string;
@@ -94,7 +107,9 @@ export function createPostwarIndustryUtilityPlanningReader(
   }>,
 ): Readonly<PostwarIndustryUtilityPlanningReader> {
   const initial = readPostwarFinanceSocialRuntimeBinding(config.binding);
+  const committedRuns = createPostwarIndustryCommittedRunsReader(config);
   const reader: Readonly<PostwarIndustryUtilityPlanningReader> = Object.freeze({
+    readCommittedRunsPage: committedRuns.readPage,
     async readPage(
       input: Parameters<PostwarIndustryUtilityPlanningReader['readPage']>[0],
     ): Promise<PostwarIndustryUtilityPlanningPage> {

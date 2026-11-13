@@ -143,6 +143,10 @@
     "./postwar-industry-utility-planning-contract": {
       "types": "./dist/read-models/postwar-industry-utility-planning-contract.d.ts",
       "default": "./dist/read-models/postwar-industry-utility-planning-contract.js"
+    },
+    "./postwar-industry-committed-runs-contract": {
+      "types": "./dist/read-models/postwar-industry-committed-runs-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-committed-runs-contract.js"
     }
   },
   "scripts": {

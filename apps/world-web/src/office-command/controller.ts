@@ -1,3 +1,4 @@
+import { INDUSTRY_COMMITTED_RUNS_DATASET } from '@econmind/core/postwar-industry-committed-runs-contract';
 import {
   INDUSTRY_UTILITY_PLANNING_DATASET,
   parseIndustryUtilityPlanningRow,
@@ -133,6 +134,10 @@ export function createOfficeCommandController(
       b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
         : null,
+    industryCommittedRunsReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
     industryRunReader =
       b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
@@ -157,6 +162,8 @@ export function createOfficeCommandController(
     code: string | null = b ? null : 'OFFICE_BINDING_MISSING_OR_UNSUPPORTED';
   let runtimePage: RuntimePage | null = null;
   let runParametersPage: RuntimePage | null = null;
+  let committedRunsPage: RuntimePage | null = null;
+  let committedRunsCode: string | null = null;
   let utilityPlanningPage: RuntimePage | null = null;
   let utilityPlanningCode: string | null = null;
   let socialPoolsPage: RuntimePage | null = null;
@@ -197,6 +204,8 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    committedRunsPage = null;
+    committedRunsCode = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
     socialPoolsPage = null;
@@ -213,6 +222,7 @@ export function createOfficeCommandController(
     reader?.disconnect();
     runtimeReader?.disconnect();
     industryRunReader?.disconnect();
+    industryCommittedRunsReader?.disconnect();
     industryUtilityReader?.disconnect();
     socialPoolsReader?.disconnect();
     recoverer?.disconnect();
@@ -262,6 +272,8 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    committedRunsPage = null;
+    committedRunsCode = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
     socialPoolsPage = null;
@@ -282,6 +294,38 @@ export function createOfficeCommandController(
         busy = false;
         notify();
       }
+    }
+  }
+  async function readCommittedRuns(previous?: RuntimePage) {
+    if (!industryCommittedRunsReader || !currentHead()) return;
+    const next = await industryCommittedRunsReader.readPage(
+      INDUSTRY_COMMITTED_RUNS_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    committedRunsPage = null;
+    committedRunsCode = next.status;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      committedRunsPage = next;
+      committedRunsCode = null;
     }
   }
   async function readUtilityPlanning(previous?: RuntimePage) {
@@ -369,6 +413,8 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    committedRunsPage = null;
+    committedRunsCode = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
     socialPoolsPage = null;
@@ -473,6 +519,8 @@ export function createOfficeCommandController(
         }
       }
       await readUtilityPlanning();
+      if (!checkLiveness() || !runtimePage) return;
+      await readCommittedRuns();
       if (!checkLiveness() || !runtimePage) return;
       try {
         lastAuthorizedReadAtClient = new Date().toISOString();
@@ -666,6 +714,10 @@ export function createOfficeCommandController(
           ? (JSON.parse(JSON.stringify(utilityPlanningPage)) as RuntimePage)
           : null,
         utilityPlanningCode,
+        committedRunsPage: committedRunsPage
+          ? (JSON.parse(JSON.stringify(committedRunsPage)) as RuntimePage)
+          : null,
+        committedRunsCode,
         socialPoolsPage: socialPoolsPage
           ? (JSON.parse(JSON.stringify(socialPoolsPage)) as RuntimePage)
           : null,
@@ -993,6 +1045,11 @@ export function createOfficeCommandController(
         return false;
       }
     },
+    nextIndustryCommittedRunsPage: () =>
+      operation(async () => {
+        if (committedRunsPage && committedRunsPage.page.nextOffset !== null)
+          await readCommittedRuns(committedRunsPage);
+      }),
     nextIndustryUtilityPlanningPage: () =>
       operation(async () => {
         if (
