@@ -7,6 +7,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import { parseIndustryCommittedRunsCoverage } from '@econmind/core/postwar-industry-committed-runs-contract';
+import { runFreshC10Prefix } from '../support/run-fresh-c10-prefix.js';
 import { restoreCompletedFreshH0 } from '../support/restore-completed-fresh-h0.js';
 import { prepareFreshIndustryH0 } from '../support/prepare-fresh-industry-h0.js';
 import { prepareFreshRegisteredNodeRehearsal } from '../support/fresh-registered-node-rehearsal.js';
@@ -112,10 +113,21 @@ native('fresh actual-source registered Node and shipped browser', () => {
         allowedOrigin: 'https://pages-test.example',
         signToken: (countryId) => {
           assert(
-            countryId === 'COUNTRY_01' || countryId === 'COUNTRY_02',
+            countryId === 'COUNTRY_01' ||
+              countryId === 'COUNTRY_02' ||
+              (countryId === 'COUNTRY_10' &&
+                process.env.ECONMIND_FRESH_C10_PREFIX === '1' &&
+                descriptor.countries.some(
+                  (country) => String(country.countryId) === 'COUNTRY_10',
+                )),
             'EXACT_REGISTERED_TEST_COUNTRY_REQUIRED',
           );
-          return s.signToken(countryId);
+          // The restored signer accepts its actual saved C10 subject; the
+          // legacy setup remains restricted by the descriptor/opt-in gate above.
+          const signConfigured = s.signToken as (
+            country: 'COUNTRY_01' | 'COUNTRY_02' | 'COUNTRY_10',
+          ) => string;
+          return signConfigured(countryId);
         },
       });
       const d = driver;
@@ -249,15 +261,30 @@ native('fresh actual-source registered Node and shipped browser', () => {
         ),
       });
       await save();
+      if (process.env.ECONMIND_FRESH_C10_PREFIX === '1') {
+        assert(
+          descriptor.countries.some(
+            (country) => String(country.countryId) === 'COUNTRY_10',
+          ),
+          'ACTUAL_C10_DESCRIPTOR_REQUIRED',
+        );
+        report.c10 = await runFreshC10Prefix({
+          driver: d,
+          worldId: f.marker.worldId,
+          evidencePath: path.join(evidenceDirectory, 'c10-prefix.json'),
+        });
+        await save();
+      }
+      const recoveryHead = await d.readHead();
       const before = await s.counts();
       await d.stop();
       report.secondColdStart = await d.launch(descriptor);
       expect(await s.counts()).toEqual(before);
-      expect(await d.readHead()).toEqual(head);
+      expect(await d.readHead()).toEqual(recoveryHead);
       report.coldRecovery = await runRegisteredTradeCbReadbackBrowserProbe({
         ...common,
         apiBaseURL: d.origin(),
-        expectedHead: head,
+        expectedHead: recoveryHead,
         failureEvidencePath: path.join(
           evidenceDirectory,
           'cold-browser-readback-failure.json',

@@ -271,8 +271,6 @@ async function initialize(d) {
       : undefined;
   if (d.prepareRefinery21Sources === true && d.prepareC10Sources === true)
     throw Error('ONE_EXPLICIT_REFINERY_PREPARATION_SCOPE_REQUIRED');
-  if (d.prepareRefinery21Sources === true && d.prepareC10Sources === true)
-    throw Error('EXCLUSIVE_REFINERY_SOURCE_SCOPE_REQUIRED');
   if (d.prepareRefinery21Sources === true || d.prepareC10Sources === true) {
     // Validate the finite configured host scope before the expensive proof.
     const { readPostwarIndustryRefineryCoverage } =
