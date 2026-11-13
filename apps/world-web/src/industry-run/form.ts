@@ -8,7 +8,8 @@ import {
   AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
   type AuthenticatedOfficeCommandRequestDto,
 } from '@econmind/core/authenticated-office-command-contract';
-/** Exact catalog subset. Other Industry-13 actions are not RUN scheduling. */
+/** Exact catalog subset: RUN scheduling and separate finite first-day target
+ * intent. Neither mapping proves actual output; critical priorities are unwired. */
 export const INDUSTRY_RUN_CATALOG_BINDING = Object.freeze({
   moduleId: 'industry-13',
   normativeUnit: 'INDUSTRY-U0282',
@@ -21,9 +22,13 @@ export const INDUSTRY_RUN_CATALOG_BINDING = Object.freeze({
     'industry-u0283-0': 'facilityId',
     'industry-u0283-1': 'grossRunQuantityCalculationOnly',
   }),
+  targetCommandType: 'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
+  targetFields: Object.freeze({
+    'industry-u0283-0': 'facilityId',
+    'industry-u0283-1': 'targetPercent',
+  }),
+  targetScope: 'ADMITTED_FACILITY_FIRST_DAY_WINDOW_INTENT_NOT_RUN_OR_OUTPUT',
   unsupportedFields: Object.freeze([
-    'industry-u0283-0',
-    'industry-u0283-1',
     'industry-u0284-0',
     'industry-u0284-1',
   ] as const),

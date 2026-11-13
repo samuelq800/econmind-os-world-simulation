@@ -3,8 +3,10 @@
  * starts no backend, registers no source and never initializes a world. Terms
  * are pending requests only; zero target is intent, never production. */
 import assert from 'node:assert/strict';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { dirname, resolve } from 'node:path';
+import { parseIndustryRunParameterRow } from '@econmind/core/postwar-industry-run-parameters-contract';
 import type { AuthenticatedOfficeCommandRequestDto } from '@econmind/core/authenticated-office-command-contract';
 import {
   createRegisteredOfficeBrowserStages,
@@ -54,10 +56,69 @@ const current = (
   return page;
 };
 
+/** Immutable H0 rule facts may accompany a current authorized head. They
+ * are not a current stock/capacity-remaining projection. Keep both bindings. */
+function openingRunParameters(
+  page: RegisteredOfficeBrowserState['runParametersPage'],
+  head: Awaited<ReturnType<Driver['readHead']>>,
+  binding: RegisteredOfficeBrowserStageInput,
+) {
+  assert(page, 'ACTUAL_ADOPTED_RUN_PARAMETERS_REQUIRED');
+  assert.equal(page.dataset, 'industry-run-parameters');
+  assert.equal(page.authority.readback.worldVersion, head.worldVersion);
+  assert.equal(page.authority.readback.eventSequence, head.eventSequence);
+  assert.equal(page.authority.identity.countryId, binding.countryId);
+  assert.equal(page.authority.identity.officeId, 'INDUSTRY');
+  assert.equal(page.authority.identity.authSubjectId, binding.authSubject);
+  for (const key of [
+    'worldId',
+    'seedRef',
+    'contentHash',
+    'admissionRef',
+  ] as const) {
+    assert.equal(
+      page.source[key],
+      binding.readConfiguration.admittedWorldPins[key],
+    );
+    assert.equal(
+      page.authority.readback[key],
+      binding.readConfiguration.admittedWorldPins[key],
+    );
+  }
+  assert.equal(page.source.countryId, binding.countryId);
+  assert.equal(page.source.officeId, 'INDUSTRY');
+  assert.equal(page.source.dataNature, 'ADMITTED_IMMUTABLE_OPENING_FACTS');
+  for (const key of [
+    'worldVersion',
+    'eventSequence',
+    'originWorldVersion',
+    'originEventSequence',
+  ])
+    assert.equal(page.source[key], '0');
+  const observed = row(page.source.observedHead);
+  assert.equal(observed.worldVersion, head.worldVersion);
+  assert.equal(observed.eventSequence, head.eventSequence);
+  const pointer = row(page.source.sourcePointer);
+  assert.equal(
+    pointer.rowOrigin,
+    'world_v2.postwar_industry_first_day_source.source_text',
+  );
+  assert.equal(pointer.rowBinding, 'sourceRef+sourceRawSha256');
+  for (const key of ['sourceVersion', 'bindingVersion'])
+    assert.match(text(page.source[key]), /^sha256:[a-f0-9]{64}$/u);
+  const rows = page.rows.map(parseIndustryRunParameterRow);
+  assert(rows.every((r) => r.countryId === binding.countryId));
+  assert.equal(new Set(rows.map((r) => r.facilityId)).size, rows.length);
+  return { page, rows };
+}
+
 export async function runRegisteredProgrammeTargetBrowserChain(input: {
   driver: Driver;
   browserInput: RegisteredOfficeBrowserStageInput;
   evidencePath: string;
+  /** Recover one saved pending programme before the first target submission.
+   * A saved target original is deliberately refused, never replaced. */
+  resumeEvidencePath?: string;
 }) {
   const d = input.driver;
   assert.equal(input.browserInput.countryId, 'COUNTRY_02');
@@ -65,6 +126,41 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
     input.browserInput.browser && input.browserInput.application,
     'BORROWED_ACTUAL_BROWSER_AND_APPLICATION_REQUIRED',
   );
+  let resumedProgramme: AuthenticatedOfficeCommandRequestDto | undefined;
+  let resumeEvidenceSha256: string | undefined;
+  if (input.resumeEvidencePath) {
+    assert.notEqual(
+      resolve(input.resumeEvidencePath),
+      resolve(input.evidencePath),
+    );
+    const bytes = await readFile(input.resumeEvidencePath);
+    assert(bytes.length <= 1048576, 'BOUNDED_SAVED_EVIDENCE_REQUIRED');
+    resumeEvidenceSha256 = createHash('sha256').update(bytes).digest('hex');
+    const previous = row(JSON.parse(bytes.toString('utf8')));
+    assert.equal(
+      previous.classification,
+      'TEST_ONLY_ACTUAL_REGISTERED_DOM_PROGRAMME_AND_TARGET',
+    );
+    assert.equal(
+      previous.scope,
+      'ISOLATED_WORLD_ONLY_PENDING_TERMS_AND_TARGET_INTENT',
+    );
+    assert(
+      Array.isArray(previous.originals) && previous.originals.length === 1,
+      'EXACTLY_ONE_PROGRAMME_AND_NO_TARGET_ORIGINAL_REQUIRED',
+    );
+    const original = row(previous.originals[0]),
+      request = row(original.request);
+    assert.equal(request.commandType, 'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1');
+    assert.equal(request.officeId, 'SOCIAL');
+    assert.equal(request.countryId, input.browserInput.countryId);
+    assert.equal(
+      request.worldId,
+      input.browserInput.readConfiguration.admittedWorldPins.worldId,
+    );
+    resumedProgramme =
+      original as unknown as AuthenticatedOfficeCommandRequestDto;
+  }
   const originals: AuthenticatedOfficeCommandRequestDto[] = [];
   const stages: Record<string, unknown>[] = [];
   const report: Record<string, unknown> = {
@@ -76,6 +172,8 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
     status: 'IN_PROGRESS',
     originals,
     stages,
+    resumeEvidencePath: input.resumeEvidencePath ?? null,
+    resumeEvidenceSha256: resumeEvidenceSha256 ?? null,
   };
   await mkdir(dirname(input.evidencePath), { recursive: true });
   const save = () =>
@@ -88,6 +186,16 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
   const browsers = await createRegisteredOfficeBrowserStages(
     input.browserInput,
   );
+  function retainOriginal(original: AuthenticatedOfficeCommandRequestDto) {
+    for (const list of [originals, d.originals]) {
+      const prior = list.find(
+        (o) => o.request.commandId === original.request.commandId,
+      );
+      if (prior)
+        assert.deepEqual(prior, original, 'SAVED_ORIGINAL_IDENTITY_CONFLICT');
+      else list.push(original);
+    }
+  }
   async function submitStaged(
     session: RegisteredOfficeBrowserSession,
     expectedType: string,
@@ -113,8 +221,7 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
     const reviewed = await session.state();
     assert.equal(reviewed.status, 'REVIEWED');
     assert.deepEqual(reviewed.intent, original);
-    originals.push(original);
-    d.originals.push(original);
+    retainOriginal(original);
     stages.push({ stage: 'ORIGINAL_SAVED_BEFORE_CONFIRM', original });
     await save();
     const sent: unknown[] = [];
@@ -189,27 +296,56 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
       assert(
         Array.isArray(context.locationIds) && context.locationIds.length > 0,
       );
-      const locationId = text(context.locationIds[0]),
+      const locationId = resumedProgramme
+          ? text(row(resumedProgramme.request.payload).locationId)
+          : text(context.locationIds[0]),
         currency = text(context.localCurrency);
+      assert(context.locationIds.includes(locationId));
+      const validateProgramme = (dto: AuthenticatedOfficeCommandRequestDto) => {
+        const terms = row(dto.request.payload);
+        assert.equal(terms.kind, 'RELOCATION_SUPPORT');
+        assert.equal(terms.locationId, locationId);
+        assert.equal(terms.participants, '1');
+        assert.deepEqual(terms.benefit, { amount: '0', currency });
+      };
       const page = pageOf(social);
-      const selector = '[data-social-programme-kind="RELOCATION_SUPPORT"]';
-      await page
-        .locator(selector + ' [name="locationId"]')
-        .selectOption(locationId);
-      await page.locator(selector + ' [name="participants"]').fill('1');
-      await page.locator(selector + ' [name="benefit"]').fill('0');
-      await page.locator(selector + ' button[type="submit"]').click();
-      const { original, restored } = await submitStaged(
-        social,
-        'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1',
-        (dto) => {
-          const terms = row(dto.request.payload);
-          assert.equal(terms.kind, 'RELOCATION_SUPPORT');
-          assert.equal(terms.locationId, locationId);
-          assert.equal(terms.participants, '1');
-          assert.deepEqual(terms.benefit, { amount: '0', currency });
-        },
-      );
+      let original: AuthenticatedOfficeCommandRequestDto;
+      let restored: RegisteredOfficeBrowserState;
+      if (resumedProgramme) {
+        original = resumedProgramme;
+        validateProgramme(original);
+        retainOriginal(original);
+        stages.push({
+          stage: 'SAVED_PROGRAMME_ORIGINAL_RETAINED_FOR_RECOVERY',
+          original,
+        });
+        await save();
+        await d.recover(original, { duplicateProbe: false });
+        await social.reloadRestore(original, { recover: false });
+        restored = await social.recoverFinal({
+          expectedHead: await d.readHead(),
+          requireCurrent: true,
+        });
+        assert.equal(restored.receipt?.commandId, original.request.commandId);
+        stages.push({
+          stage: 'EXISTING_PROGRAMME_FINAL_RECOVERED_NO_RESUBMISSION',
+          commandId: original.request.commandId,
+        });
+        await save();
+      } else {
+        const selector = '[data-social-programme-kind="RELOCATION_SUPPORT"]';
+        await page
+          .locator(selector + ' [name="locationId"]')
+          .selectOption(locationId);
+        await page.locator(selector + ' [name="participants"]').fill('1');
+        await page.locator(selector + ' [name="benefit"]').fill('0');
+        await page.locator(selector + ' button[type="submit"]').click();
+        ({ original, restored } = await submitStaged(
+          social,
+          'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1',
+          validateProgramme,
+        ));
+      }
       let visible = restored;
       let found: Record<string, unknown> | undefined;
       for (let pages = 0; pages < 64; pages++) {
@@ -248,7 +384,17 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
     const industry = await browsers.open('industry');
     try {
       const state = await industry.read({ expectedHead: await d.readHead() });
-      const parameters = current(state.runParametersPage, await d.readHead());
+      const parameters = openingRunParameters(
+        state.runParametersPage,
+        await d.readHead(),
+        input.browserInput,
+      );
+      stages.push({
+        stage: 'IMMUTABLE_ADOPTED_PARAMETERS_AT_CURRENT_AUTHORIZED_HEAD',
+        source: parameters.page.source,
+        authority: parameters.page.authority,
+      });
+      await save();
       const before = current(state.targetPage, await d.readHead());
       assert.equal(
         before.page.nextOffset,
@@ -300,6 +446,9 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
           assert.equal(terms.targetPercent, '0');
           assert.equal(terms.startsAtSimTime, starts);
           assert.equal(terms.endsAtSimTime, ends);
+          assert.equal(terms.sourceRef, facility.sourceRef);
+          assert.equal(terms.sourceRawSha256, facility.sourceRawSha256);
+          assert.equal(terms.policyVersion, facility.policyVersion);
         },
       );
       const targets = current(restored.targetPage, await d.readHead());

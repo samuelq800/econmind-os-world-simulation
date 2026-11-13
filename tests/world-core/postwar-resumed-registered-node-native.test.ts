@@ -73,7 +73,17 @@ native('resumed committed-source registered Node and shipped browser', () => {
       | undefined;
     const failures: unknown[] = [];
     try {
-      prepared = await reopenPreparedRegisteredCheckpoint({
+      const checkpoint = JSON.parse(
+        await readFile(
+          path.join(checkpointDirectory, 'pg/retained-checkpoint.json'),
+          'utf8',
+        ),
+      );
+      const restore =
+        checkpoint.resourceState === 'PREPARED_OWNED_CLONE'
+          ? reopenPreparedRegisteredCheckpoint
+          : restoreCommittedRegisteredCheckpoint;
+      prepared = await restore({
         repositoryRoot,
         evidenceDirectory,
         expectedCommit,
@@ -93,7 +103,7 @@ native('resumed committed-source registered Node and shipped browser', () => {
           'utf8',
         ),
       );
-      assert.equal(forward.database, f.clone.database);
+      assert.equal(forward.database, prepared.receipt.parentDatabase);
       assert.equal(
         forward.status,
         'GUARDED_FORWARD_AND_RUNTIME_INTERNAL_DENIALS_PASSED',
@@ -111,7 +121,7 @@ native('resumed committed-source registered Node and shipped browser', () => {
           )
           .digest('hex'),
       );
-      assert.equal(renewal.database, f.clone.database);
+      assert.equal(renewal.database, prepared.receipt.parentDatabase);
       assert.equal(renewal.after.registrationRef, descriptor.registrationRef);
       assert.equal(renewal.after.simTime, '0');
       report.guardedForward = forward;
@@ -126,27 +136,54 @@ native('resumed committed-source registered Node and shipped browser', () => {
         );
       await save();
       const beforeResume = await s.counts();
-      const saved = JSON.parse(
-        await readFile(
-          path.join(checkpointDirectory, 'driver-progress.json'),
-          'utf8',
-        ),
-      );
+      const originalDirectories = required(
+        'ECONMIND_RESUME_ORIGINAL_DIRECTORIES',
+      ).split(':');
+      const originals = new Map<
+        string,
+        {
+          original: Parameters<
+            ReturnType<typeof createRegisteredFinalDriver>['recover']
+          >[0];
+          stored: unknown;
+        }
+      >();
+      for (const directory of originalDirectories) {
+        assert(directory.startsWith('/workspace/.cloud-setup/evidence/'));
+        const saved = JSON.parse(
+          await readFile(path.join(directory, 'driver-progress.json'), 'utf8'),
+        );
+        for (const original of saved.originals) {
+          const stored = saved.stored.find(
+            (r: { commandId: string }) =>
+              r.commandId === original.request.commandId,
+          );
+          assert(stored, 'SAVED_COMMITTED_RECEIPT_REQUIRED');
+          const prior = originals.get(original.request.commandId);
+          if (prior)
+            assert.deepEqual(
+              prior,
+              { original, stored },
+              'ORIGINAL_CHECKPOINT_CONFLICT',
+            );
+          else originals.set(original.request.commandId, { original, stored });
+        }
+      }
       assert.equal(
-        saved.originals.length,
-        1,
-        'ONE_EXISTING_CREATE_ORIGINAL_REQUIRED',
+        String(originals.size),
+        beforeResume.commands,
+        'COMPLETE_CHECKPOINT_ORIGINAL_SET_REQUIRED',
       );
-      const original = saved.originals[0];
-      assert.equal(
-        original.request.commandType,
-        'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
-      );
-      assert.equal(beforeResume.worldVersion, '1');
-      assert.equal(beforeResume.commands, '1');
-      assert.equal(beforeResume.events, '1');
+      assert.equal(beforeResume.commands, beforeResume.receipts);
       assert.equal(beforeResume.batches, '0');
       assert.equal(beforeResume.inventory, '0');
+      const employmentCreations = [...originals.values()].filter(
+        ({ original }) =>
+          original.request.commandType ===
+          'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
+      );
+      assert.equal(employmentCreations.length, 1);
+      const original = employmentCreations[0]!.original;
       driver = createRegisteredFinalDriver({
         repositoryRoot,
         evidenceDirectory,
@@ -187,15 +224,20 @@ native('resumed committed-source registered Node and shipped browser', () => {
           acl.every((v) => row(v).denied === true),
       );
       report.onlineRawSourceDenials = acl;
-      const storedBefore = await d.inspect(original.request.commandId);
-      assert.deepEqual(
-        storedBefore,
-        saved.stored[0],
-        'ORIGINAL_FINAL_MUST_MATCH_SAVED_RECEIPT',
-      );
-      report.originalRecovery = await d.recover(original, {
-        duplicateProbe: false,
-      });
+      report.originalRecovery = [];
+      for (const saved of originals.values()) {
+        const stored = await d.inspect(saved.original.request.commandId);
+        assert.deepEqual(
+          stored,
+          saved.stored,
+          'ORIGINAL_FINAL_MUST_MATCH_SAVED_RECEIPT',
+        );
+        d.originals.push(saved.original);
+        d.stored.push(stored);
+        (report.originalRecovery as unknown[]).push(
+          await d.recover(saved.original, { duplicateProbe: false }),
+        );
+      }
       assert.deepEqual(await s.counts(), beforeResume);
       report.openingReads = [];
       for (const [officeId, dataset] of [
@@ -270,7 +312,7 @@ native('resumed committed-source registered Node and shipped browser', () => {
         'NO_VACANCY_MUST_NOT_BE_REPLACED_WITH_SYNTHETIC_POSITION',
       );
       const poolPages = await currentPages(d, 'service-pools', currentHead);
-      const programmeId = original.request.payload.programmeId;
+      const programmeId = row(original.request.payload).programmeId;
       const pools = poolPages.flatMap((page) => {
         assert(Array.isArray(page.body.rows));
         return page.body.rows.map(row);
@@ -371,6 +413,12 @@ native('resumed committed-source registered Node and shipped browser', () => {
           evidenceDirectory,
           'programme-target-browser.json',
         ),
+        ...(process.env.ECONMIND_RESUME_PROGRAMME_EVIDENCE
+          ? {
+              resumeEvidencePath:
+                process.env.ECONMIND_RESUME_PROGRAMME_EVIDENCE,
+            }
+          : {}),
       });
       await save();
       if (process.env.ECONMIND_FRESH_C10_PREFIX === '1') {

@@ -71,9 +71,17 @@ describe('source-bound Industry RUN form', () => {
       expect(module.fields.find((f) => f.key === id)?.source).toBe(
         'INDUSTRY-U0282',
       );
+    expect(INDUSTRY_RUN_CATALOG_BINDING.targetFields).toEqual({
+      'industry-u0283-0': 'facilityId',
+      'industry-u0283-1': 'targetPercent',
+    });
+    for (const id of Object.keys(INDUSTRY_RUN_CATALOG_BINDING.targetFields))
+      expect(module.fields.find((f) => f.key === id)?.source).toBe(
+        'INDUSTRY-U0283',
+      );
     expect(INDUSTRY_RUN_CATALOG_BINDING.unsupportedFields).toEqual(
       module.fields
-        .filter((f) => f.source !== 'INDUSTRY-U0282')
+        .filter((f) => f.source === 'INDUSTRY-U0284')
         .map((f) => f.key),
     );
   });
