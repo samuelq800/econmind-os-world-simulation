@@ -45,6 +45,13 @@ export async function createSocialEmploymentCreationNativeDatabase() {
   let started = false;
   let client: Client | undefined;
   let closed = false;
+  const activeConnectionErrors: string[] = [];
+  const assertHealthy = () =>
+    assert.equal(
+      activeConnectionErrors.length,
+      0,
+      'UNEXPECTED_NATIVE_CONNECTION_ERROR:' + activeConnectionErrors.join(';'),
+    );
   const close = async () => {
     if (closed) return;
     closed = true;
@@ -65,7 +72,10 @@ export async function createSocialEmploymentCreationNativeDatabase() {
       assert.equal(stopped.State.Running, false);
     }
     report.resourceState = 'RETAINED_STOPPED_TEST_ONLY';
+    report.activeConnectionErrors = activeConnectionErrors;
+    if (activeConnectionErrors.length) report.status = 'FAILED_CONNECTION';
     await save();
+    assertHealthy();
   };
   try {
     const inspected = JSON.parse(await docker(['image', 'inspect', image]))[0];
@@ -116,6 +126,15 @@ export async function createSocialEmploymentCreationNativeDatabase() {
     started = true;
     const deadline = Date.now() + 45_000;
     while (Date.now() < deadline) {
+      // The init server uses this same socket. Never connect until PID 1 is
+      // the final postmaster; its predecessor is deliberately shut down.
+      const command = (
+        await docker(['exec', name, 'cat', '/proc/1/comm'])
+      ).trim();
+      if (command !== 'postgres') {
+        await new Promise((done) => setTimeout(done, 100));
+        continue;
+      }
       const probe = new Client({
         host: socket,
         port: 5432,
@@ -124,24 +143,28 @@ export async function createSocialEmploymentCreationNativeDatabase() {
         ssl: false,
         connectionTimeoutMillis: 1000,
       });
+      let accepted = false;
+      const probeErrors: string[] = [];
+      probe.on('error', (error: Error) => {
+        if (accepted) activeConnectionErrors.push(error.message);
+        else probeErrors.push(error.message);
+      });
       try {
         await probe.connect();
         const version = await probe.query(
           "select current_setting('server_version_num') version",
         );
         assert.equal(version.rows[0].version, '160015');
-        // Only use the final post-init postmaster, never the bootstrap server.
-        const command = (
-          await docker(['exec', name, 'cat', '/proc/1/comm'])
-        ).trim();
-        if (command !== 'postgres') {
-          await probe.end();
-        } else {
-          client = probe;
-          break;
-        }
-      } catch {
-        await probe.end().catch(() => {});
+        assert.equal(probeErrors.length, 0, 'PROBE_CONNECTION_EVENT_ERROR');
+        accepted = true;
+        client = probe;
+        report.finalPostmasterBeforeFirstConnection = true;
+        break;
+      } catch (error) {
+        report.lastReadinessError =
+          error instanceof Error ? error.message : String(error);
+        report.lastReadinessConnectionEvents = probeErrors;
+        await probe.end();
       }
       await new Promise((done) => setTimeout(done, 100));
     }
@@ -154,11 +177,15 @@ export async function createSocialEmploymentCreationNativeDatabase() {
     await save();
     const db: SocialEmploymentCreationTestDatabase = {
       async query<T>(sql: string, params: unknown[] = []) {
+        assertHealthy();
         const result = await client!.query(sql, params);
+        assertHealthy();
         return { rows: result.rows as T[] };
       },
       async exec(sql: string) {
+        assertHealthy();
         await client!.query(sql);
+        assertHealthy();
       },
       close,
     };
