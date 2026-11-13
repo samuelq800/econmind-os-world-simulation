@@ -23,6 +23,30 @@ describe('Industry RUN parameter DATA contract', () => {
     expect(parseIndustryRunParameterRow(row)).toEqual(row);
     expect(Object.isFrozen(parseIndustryRunParameterRow(row))).toBe(true);
   });
+  it('accepts exact v2 capacity while retaining the exact v1 contract', () => {
+    const v2 = {
+      ...row,
+      schemaVersion: 'postwar-industry-run-parameter-row-v2',
+      capacityPerSimDay: '123.45',
+    };
+    expect(parseIndustryRunParameterRow(v2)).toEqual(v2);
+    expect(() =>
+      parseIndustryRunParameterRow({ ...row, capacityPerSimDay: '123.45' }),
+    ).toThrow();
+    for (const capacityPerSimDay of [
+      undefined,
+      '0',
+      '-1',
+      'NaN',
+      '01',
+      '1.0',
+      '1e2',
+      100,
+    ])
+      expect(() =>
+        parseIndustryRunParameterRow({ ...v2, capacityPerSimDay }),
+      ).toThrow();
+  });
   it.each([
     { ready: true },
     { balance: '100' },

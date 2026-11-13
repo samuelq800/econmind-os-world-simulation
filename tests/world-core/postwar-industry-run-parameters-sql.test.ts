@@ -19,6 +19,11 @@ const reader = createPostwarIndustryRunParametersReader({
 });
 describe('RUN original parameter low-role page', () => {
   it('reads actual published policy/source/unit and original currency without money/ready/economic values', async () => {
+    const original = await f.db.query<{ capacity: string }>(
+      "select source_text::jsonb->'sourceFacility'->>'capacity' capacity from world_v2.postwar_industry_first_day_source where world_id=$1 and facility_id='OPEN-02-REFINED_FUEL'",
+      [f.f.world],
+    );
+    expect(original.rows).toHaveLength(1);
     await f.begin();
     const r = await reader.readPageFrom(f.tx, { worldId: f.f.world });
     expect(r.status).toBe('PAGE');
@@ -32,6 +37,8 @@ describe('RUN original parameter low-role page', () => {
       expenseCurrency: f.currency,
       windowStartsAtSimTime: '0',
       windowEndsAtSimTime: '86400000',
+      schemaVersion: 'postwar-industry-run-parameter-row-v2',
+      capacityPerSimDay: original.rows[0]!.capacity,
     });
     expect(r.source).toMatchObject({
       worldVersion: '0',

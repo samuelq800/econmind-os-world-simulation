@@ -17,6 +17,10 @@ export const INDUSTRY_RUN_CATALOG_BINDING = Object.freeze({
     'industry-u0282-0': 'facilityId',
     'industry-u0282-1': 'quantity',
   }),
+  assistedFields: Object.freeze({
+    'industry-u0283-0': 'facilityId',
+    'industry-u0283-1': 'grossRunQuantityCalculationOnly',
+  }),
   unsupportedFields: Object.freeze([
     'industry-u0283-0',
     'industry-u0283-1',
@@ -36,6 +40,75 @@ export interface IndustryRunDraft {
   readonly startsAtSimTime: string;
   readonly endsAtSimTime: string;
   readonly maximumExpense: string;
+}
+function decimalRatio(value: string) {
+  if (value.length > 128 || !/^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/u.test(value))
+    throw Error('INDUSTRY_RUN_EXACT_DECIMAL_REQUIRED');
+  const [whole, fraction = ''] = value.split('.');
+  return {
+    numerator: BigInt(whole! + fraction),
+    denominator: 10n ** BigInt(fraction.length),
+  };
+}
+/** Gross plan arithmetic only. It neither reads existing reservations nor
+ * establishes feasible output, remaining capacity or a persistent target. */
+export function calculateIndustryRunGrossQuantity(
+  row: IndustryRunParameterRow,
+  input: Readonly<{
+    utilisationPercent: string;
+    startsAtSimTime: string;
+    endsAtSimTime: string;
+  }>,
+): string {
+  const source = parseIndustryRunParameterRow(row);
+  if (source.capacityPerSimDay === undefined)
+    throw Error('INDUSTRY_RUN_SOURCE_CAPACITY_UNAVAILABLE');
+  const capacity = decimalRatio(source.capacityPerSimDay),
+    percent = decimalRatio(input.utilisationPercent);
+  if (
+    percent.numerator > 100n * percent.denominator ||
+    ![input.startsAtSimTime, input.endsAtSimTime].every(
+      (v) => v.length <= 128 && /^(0|[1-9][0-9]*)$/u.test(v),
+    ) ||
+    BigInt(input.startsAtSimTime) < BigInt(source.windowStartsAtSimTime) ||
+    BigInt(input.endsAtSimTime) > BigInt(source.windowEndsAtSimTime) ||
+    BigInt(input.endsAtSimTime) <= BigInt(input.startsAtSimTime)
+  )
+    throw Error('INDUSTRY_RUN_EXPLICIT_PERCENT_AND_WINDOW_REQUIRED');
+  let numerator =
+      capacity.numerator *
+      (BigInt(input.endsAtSimTime) - BigInt(input.startsAtSimTime)) *
+      percent.numerator,
+    denominator = capacity.denominator * 86400000n * percent.denominator * 100n;
+  let a = numerator,
+    b = denominator;
+  while (b !== 0n) [a, b] = [b, a % b];
+  numerator /= a;
+  denominator /= a;
+  let twos = 0,
+    fives = 0;
+  while (denominator % 2n === 0n) {
+    denominator /= 2n;
+    twos++;
+  }
+  while (denominator % 5n === 0n) {
+    denominator /= 5n;
+    fives++;
+  }
+  const places = Math.max(twos, fives);
+  if (denominator !== 1n || places > 128)
+    throw Error('INDUSTRY_RUN_EXACT_FINITE_QUANTITY_REQUIRED_NO_ROUNDING');
+  numerator *= 2n ** BigInt(places - twos) * 5n ** BigInt(places - fives);
+  const digits = numerator.toString().padStart(places + 1, '0');
+  const result =
+    places === 0
+      ? digits
+      : (digits.slice(0, -places) + '.' + digits.slice(-places)).replace(
+          /\.?0+$/u,
+          '',
+        );
+  if (result.length > 128) throw Error('INDUSTRY_RUN_QUANTITY_TOO_LARGE');
+  return result;
 }
 export function buildIndustryRunRequest(
   input: Readonly<{
@@ -67,6 +140,17 @@ export function buildIndustryRunRequest(
     BigInt(d.endsAtSimTime) <= BigInt(d.startsAtSimTime)
   )
     throw Error('INDUSTRY_RUN_EXPLICIT_PLAN_AND_BOUND_SOURCE_REQUIRED');
+  if (p.capacityPerSimDay !== undefined) {
+    const quantity = decimalRatio(d.quantity),
+      capacity = decimalRatio(p.capacityPerSimDay);
+    if (
+      quantity.numerator * capacity.denominator * 86400000n >
+      capacity.numerator *
+        quantity.denominator *
+        (BigInt(d.endsAtSimTime) - BigInt(d.startsAtSimTime))
+    )
+      throw Error('INDUSTRY_RUN_EXCEEDS_GROSS_WINDOW_CAPACITY');
+  }
   return {
     schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
     requestId: input.requestId,
@@ -111,7 +195,7 @@ export function renderIndustryRunForm(
   const scope = document.createElement('p');
   scope.dataset.industryRunCatalogScope = '';
   scope.textContent =
-    '生产目标仅连接本次设施与目标产量。起止时间、最高费用须明确填写；载入或排队不表示已生产。利用率目标、设施与资源优先级尚未接通。';
+    '本次设施排产可手填数量，或按原件容量、明确百分比与窗口计算理论计划量。这不是剩余容量或可行产出，未扣除已安排量；不保存持续利用率目标。起止时间、最高费用须明确填写，载入或排队不表示已生产。设施与资源优先级尚未接通。';
   panel.append(scope);
   if (!enabled || rows.length === 0) {
     const msg = document.createElement('p');
@@ -124,6 +208,7 @@ export function renderIndustryRunForm(
     facility = document.createElement('select');
   facility.dataset.industryRunField = 'facilityId';
   facility.dataset.catalogFieldId = 'industry-u0282-0';
+  facility.dataset.catalogAssistedFieldId = 'industry-u0283-0';
   facility.setAttribute('aria-label', '生产设施');
   for (const row of sources) {
     const option = document.createElement('option');
@@ -160,19 +245,61 @@ export function renderIndustryRunForm(
   const describe = () => {
     const row = sources.find((p) => p.facilityId === facility.value);
     summary.textContent = row
-      ? `${row.outputUnit} · ${row.expenseCurrency} · 窗口 ${row.windowStartsAtSimTime}–${row.windowEndsAtSimTime} 模拟毫秒 · ${row.policyVersion}。计划尚未执行。`
+      ? `${row.outputUnit} · ${row.expenseCurrency} · 窗口 ${row.windowStartsAtSimTime}–${row.windowEndsAtSimTime} 模拟毫秒 · ${row.policyVersion}。原件日容量：${row.capacityPerSimDay ?? '未提供（可手填本次数量）'}。计划尚未执行。`
       : '';
+    calculate.disabled = row?.capacityPerSimDay === undefined;
   };
-  facility.addEventListener('change', describe);
-  describe();
   const result = document.createElement('p');
   result.setAttribute('role', 'status');
+  const utilisationLabel = document.createElement('label'),
+    utilisation = document.createElement('input'),
+    calculate = document.createElement('button');
+  utilisationLabel.textContent = '本次窗口利用率（0–100%，仅辅助计划量）';
+  utilisation.type = 'text';
+  utilisation.value = '';
+  utilisation.autocomplete = 'off';
+  utilisation.maxLength = 128;
+  utilisation.dataset.industryRunField = 'utilisationPercent';
+  utilisation.dataset.catalogAssistedFieldId = 'industry-u0283-1';
+  utilisation.setAttribute('aria-label', '本次窗口利用率（百分比）');
+  utilisationLabel.append(utilisation);
+  calculate.type = 'button';
+  calculate.dataset.industryRunAction = 'calculate-gross-quantity';
+  calculate.textContent = '计算本次理论计划量';
+  calculate.addEventListener('click', () => {
+    if (!document.body.contains(panel)) return;
+    try {
+      const row = sources.find((p) => p.facilityId === facility.value);
+      if (!row) throw Error('SOURCE_REQUIRED');
+      const quantity = calculateIndustryRunGrossQuantity(row, {
+        utilisationPercent: utilisation.value,
+        startsAtSimTime: fields.get('startsAtSimTime')!.value,
+        endsAtSimTime: fields.get('endsAtSimTime')!.value,
+      });
+      fields.get('quantity')!.value = quantity;
+      result.textContent =
+        quantity === '0'
+          ? '0%：本次不安排运行，不产生提交或产出。'
+          : `理论计划量 ${quantity} ${row.outputUnit}，未扣已安排量；请审阅时间、实际投入与费用后提交。`;
+    } catch {
+      fields.get('quantity')!.value = '';
+      result.textContent =
+        '需真实原件容量、0–100%和有效窗口；不能精确表示的数量不自动舍入，请调整窗口或手填计划量。';
+    }
+  });
+  facility.addEventListener('change', describe);
+  describe();
+  panel.append(utilisationLabel, calculate);
   const button = document.createElement('button');
   button.type = 'button';
   button.dataset.industryRunAction = 'stage';
   button.textContent = '审阅排产计划';
   button.addEventListener('click', () => {
     if (!document.body.contains(panel)) return;
+    if (fields.get('quantity')!.value === '0') {
+      result.textContent = '本次不安排运行，不产生提交或产出。';
+      return;
+    }
     const ok = stage({
       facilityId: facility.value,
       quantity: fields.get('quantity')!.value,

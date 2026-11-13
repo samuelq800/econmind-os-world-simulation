@@ -357,9 +357,9 @@ describe('Industry typed RUN plan lifecycle', () => {
         const form = dialog
           .all()
           .find((e) => Object.hasOwn(e.dataset, 'industryRunForm'))!;
-        expect(form.textContent).toContain(
-          '利用率目标、设施与资源优先级尚未接通',
-        );
+        expect(form.textContent).toContain('不保存持续利用率目标');
+        expect(form.textContent).toContain('未扣除已安排量');
+        expect(form.textContent).toContain('设施与资源优先级尚未接通');
         if (mode === 'MISSING') {
           expect(ui.getState().runParametersPage).toBeNull();
           expect(form.textContent).toContain('排产参数当前不可用');

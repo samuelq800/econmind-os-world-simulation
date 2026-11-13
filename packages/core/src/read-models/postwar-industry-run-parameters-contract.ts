@@ -4,8 +4,9 @@ export const INDUSTRY_RUN_PARAMETERS_DATASET =
   'industry-run-parameters' as const;
 export const INDUSTRY_RUN_PARAMETER_ROW_SCHEMA =
   'postwar-industry-run-parameter-row-v1' as const;
-export interface IndustryRunParameterRow {
-  readonly schemaVersion: typeof INDUSTRY_RUN_PARAMETER_ROW_SCHEMA;
+export const INDUSTRY_RUN_PARAMETER_CAPACITY_ROW_SCHEMA =
+  'postwar-industry-run-parameter-row-v2' as const;
+interface IndustryRunParameterBase {
   readonly countryId: string;
   readonly facilityId: string;
   readonly locationId: string;
@@ -22,6 +23,17 @@ export interface IndustryRunParameterRow {
   readonly maximumMinutesPerWorkerFirstSimDay: string;
   readonly measurement: 'ADOPTED_PARAMETERS_NOT_RUN_WORK_PAYMENT_OR_OUTPUT_AUTHORITY';
 }
+export type IndustryRunParameterRow = IndustryRunParameterBase &
+  (
+    | {
+        readonly schemaVersion: typeof INDUSTRY_RUN_PARAMETER_ROW_SCHEMA;
+        readonly capacityPerSimDay?: never;
+      }
+    | {
+        readonly schemaVersion: typeof INDUSTRY_RUN_PARAMETER_CAPACITY_ROW_SCHEMA;
+        readonly capacityPerSimDay: string;
+      }
+  );
 const keys = [
   'schemaVersion',
   'countryId',
@@ -46,15 +58,23 @@ export function parseIndustryRunParameterRow(
   if (!input || typeof input !== 'object' || Array.isArray(input))
     throw Error('INDUSTRY_RUN_PARAMETERS:OBJECT_REQUIRED');
   const r = input as Record<string, unknown>;
+  const withCapacity =
+    r.schemaVersion === INDUSTRY_RUN_PARAMETER_CAPACITY_ROW_SCHEMA;
+  const expectedKeys = withCapacity ? [...keys, 'capacityPerSimDay'] : keys;
   const text = (k: string) =>
     typeof r[k] === 'string' &&
     String(r[k]).length > 0 &&
     String(r[k]).length <= 256 &&
     String(r[k]).trim() === r[k];
   if (
-    Object.keys(r).length !== keys.length ||
-    !keys.every((k) => Object.hasOwn(r, k)) ||
-    r.schemaVersion !== INDUSTRY_RUN_PARAMETER_ROW_SCHEMA ||
+    Object.keys(r).length !== expectedKeys.length ||
+    !expectedKeys.every((k) => Object.hasOwn(r, k)) ||
+    (!withCapacity && r.schemaVersion !== INDUSTRY_RUN_PARAMETER_ROW_SCHEMA) ||
+    (withCapacity &&
+      (typeof r.capacityPerSimDay !== 'string' ||
+        r.capacityPerSimDay.length > 128 ||
+        !/^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/u.test(r.capacityPerSimDay) ||
+        r.capacityPerSimDay === '0')) ||
     r.measurement !==
       'ADOPTED_PARAMETERS_NOT_RUN_WORK_PAYMENT_OR_OUTPUT_AUTHORITY' ||
     ![
