@@ -13,10 +13,32 @@ import {
   readFinanceNativeBudgetMixedPrefix,
   type FinanceNativeBudgetCanonicalFrame,
 } from '../../packages/core/src/commands/finance-budget-native.js';
-/** One owned in-memory TEST_ONLY DB. Fixed fresh/predecessor modes only;
- * no external connection, caller SQL, source callback or runtime authority. */
+export interface SocialEmploymentCreationTestDatabase {
+  query<T = Record<string, unknown>>(
+    sql: string,
+    params?: unknown[],
+  ): Promise<{ rows: T[] }>;
+  exec(sql: string): Promise<unknown>;
+  close(): Promise<void>;
+}
+/** One owned TEST_ONLY DB, in-memory by default. A disposable native harness
+ * may provide the same minimal adapter; this fixture accepts no DSN, caller
+ * SQL, source callback or runtime authority. Fixed original cases only. */
 export async function createSocialEmploymentCreationSqlFixture(
   mode: 'CREATE_FRESH' | 'DC5_PREDECESSOR' = 'CREATE_FRESH',
+  dutySourceCase:
+    | 'VALID_ABSOLUTE'
+    | 'BEFORE_START'
+    | 'AFTER_END'
+    | 'MISSING_REF'
+    | 'DUPLICATE_REF'
+    | 'WRONG_COHORT'
+    | 'WRONG_REGION'
+    | 'WRONG_COUNT'
+    | 'OVERLAPPING_DUTIES'
+    | 'WRONG_MINUTES' = 'VALID_ABSOLUTE',
+  createDatabase: () => Promise<SocialEmploymentCreationTestDatabase> = async () =>
+    new PGlite(),
 ) {
   const read = (p: string) =>
     readFile(new URL('../../' + p, import.meta.url), 'utf8');
@@ -194,7 +216,10 @@ export async function createSocialEmploymentCreationSqlFixture(
           duty,
           cohortId: 'COHORT_' + countryId,
           positionId: 'SERVICE_' + countryId,
-          startOrdinal: String(i),
+          // TEST_ONLY LF coordinates: the service position occupies [100,
+          // 100 + employedCount); these two distinct full-day duties lie
+          // inside it, while their end ordinals exceed its employed headcount.
+          startOrdinal: String(200 + i),
           workerCount: '1',
           minutesPerWorker: '480',
           totalMinutes: '480',
@@ -234,7 +259,7 @@ export async function createSocialEmploymentCreationSqlFixture(
     };
   });
 
-  const db = new PGlite();
+  const db = await createDatabase();
   for (const id of [
     '0001_world_v2_namespace',
     '0002_world_v2_command_event_ledger',
@@ -277,6 +302,66 @@ export async function createSocialEmploymentCreationSqlFixture(
     ),
   );
   const countries = fixtures.map((f) => f.country);
+  const populationPositionRefs = fixtures.flatMap((f) => [
+    {
+      positionId: f.wage.positionId,
+      cohortId: 'COHORT_' + f.country.countryId,
+      regionId: f.wage.locationId,
+      startOrdinal: '0',
+      count: f.country.state.labour.positions.find(
+        (p) => p.positionId === f.wage.positionId,
+      )!.employedCount,
+      sourcePoolId: 'TEST_ONLY_LF_' + f.wage.locationId,
+      sourceStartOrdinal: '0',
+    },
+    {
+      positionId: f.servicePosition.positionId,
+      cohortId: 'COHORT_' + f.country.countryId,
+      regionId: f.servicePosition.locationId,
+      startOrdinal: '100',
+      count: f.country.state.labour.positions.find(
+        (p) => p.positionId === f.servicePosition.positionId,
+      )!.employedCount,
+      sourcePoolId: 'TEST_ONLY_LF_' + f.servicePosition.locationId,
+      sourceStartOrdinal: '100',
+    },
+  ]);
+  // Fixed malformed TEST_ONLY originals are built and admitted before any
+  // immutable SQL publication. No production seed or stored history is edited.
+  const duty = countries[0]!.dutyAssignments[0]!;
+  const serviceRef = populationPositionRefs[1]!;
+  switch (dutySourceCase) {
+    case 'BEFORE_START':
+      duty.startOrdinal = '99';
+      break;
+    case 'AFTER_END':
+      duty.startOrdinal = String(100 + Number(serviceRef.count));
+      break;
+    case 'MISSING_REF':
+      populationPositionRefs.splice(1, 1);
+      break;
+    case 'DUPLICATE_REF':
+      populationPositionRefs.push({ ...serviceRef });
+      break;
+    case 'WRONG_COHORT':
+      serviceRef.cohortId = 'WRONG_TEST_ONLY_COHORT';
+      break;
+    case 'WRONG_REGION':
+      serviceRef.regionId = 'WRONG_TEST_ONLY_REGION';
+      break;
+    case 'WRONG_COUNT':
+      serviceRef.count = String(Number(serviceRef.count) + 1);
+      break;
+    case 'OVERLAPPING_DUTIES':
+      countries[0]!.dutyAssignments[1]!.startOrdinal = duty.startOrdinal;
+      break;
+    case 'WRONG_MINUTES':
+      duty.minutesPerWorker = '481';
+      duty.totalMinutes = '481';
+      break;
+    case 'VALID_ABSOLUTE':
+      break;
+  }
   const seed = C.createOpeningSeed(
     {
       schemaVersion: C.OPENING_SEED_SCHEMA_VERSION,
@@ -353,10 +438,7 @@ export async function createSocialEmploymentCreationSqlFixture(
                       ]),
                     },
                     fundingAccounts: fixtures.map((f) => f.funding),
-                    populationPositionRefs: fixtures.map((f) => ({
-                      positionId: f.wage.positionId,
-                      cohortId: 'COHORT_' + f.country.countryId,
-                    })),
+                    populationPositionRefs,
                   },
                   policy: {
                     version: 'POSTWAR_SOCIAL_EMPLOYMENT_20261028_V1',

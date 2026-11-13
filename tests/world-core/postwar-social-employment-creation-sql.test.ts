@@ -31,6 +31,17 @@ describe('actual SQL licence supplement over TEST_ONLY genuine Core opening data
     const before = await db.query(
       'select country_id,scope_document,scope_sha256 from world_v2.postwar_social_prefix_scope order by country_id',
     );
+    // Regression: these absolute LF duty ends exceed the position headcount,
+    // but belong to its real non-zero population range.
+    for (const f of fixtures) {
+      const position = f.country.state.labour.positions.find(
+        (p) => p.positionId === f.servicePosition.positionId,
+      )!;
+      expect(
+        BigInt(f.country.dutyAssignments[0]!.startOrdinal) +
+          BigInt(f.country.dutyAssignments[0]!.workerCount),
+      ).toBeGreaterThan(BigInt(position.employedCount));
+    }
     expect(
       (await prepareLicences()).rows[0]!
         .prepare_postwar_social_employment_creation_licences,
@@ -149,3 +160,52 @@ it('keeps all supplementary authority confined to the exact existing inaccessibl
     roles.rows.every((r) => !r.rolcanlogin && !r.rolsuper && !r.rolbypassrls),
   ).toBe(true);
 });
+
+// Each case has its own explicitly TEST_ONLY original and independent DB;
+// failed publication must leave no licence rows or economic postings.
+it.each([
+  'BEFORE_START',
+  'AFTER_END',
+  'MISSING_REF',
+  'DUPLICATE_REF',
+  'WRONG_COHORT',
+  'WRONG_REGION',
+  'WRONG_COUNT',
+  'OVERLAPPING_DUTIES',
+  'WRONG_MINUTES',
+] as const)(
+  'rejects invalid actual duty source: %s',
+  async (sourceCase) => {
+    const invalid = await createSocialEmploymentCreationSqlFixture(
+      'CREATE_FRESH',
+      sourceCase,
+    );
+    try {
+      await expect(invalid.prepareLicences()).rejects.toThrow(
+        'SOCIAL_CREATION_ACTUAL_DUTY_TIME_REQUIRED',
+      );
+      await invalid.admin();
+      expect(
+        (
+          await invalid.db.query(
+            'select * from world_v2.postwar_social_employment_creation_licence',
+          )
+        ).rows,
+      ).toHaveLength(0);
+      expect(
+        (
+          await invalid.db.query(
+            'select * from world_v2.financial_posting_batch',
+          )
+        ).rows,
+      ).toHaveLength(0);
+      expect(
+        (await invalid.db.query('select * from world_v2.inventory_posting'))
+          .rows,
+      ).toHaveLength(0);
+    } finally {
+      await invalid.db.close();
+    }
+  },
+  60000,
+);

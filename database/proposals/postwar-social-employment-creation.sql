@@ -74,7 +74,23 @@ begin
    if jsonb_array_length(duties)<>jsonb_array_length(licence->'dutyAssignmentIds')or exists(select 1 from jsonb_array_elements(duties)x where x->>'countryId'is distinct from scope.country_id or x->>'locationId'is distinct from licence->>'locationId'or x->>'employerId'is distinct from licence->>'licensorEntityId'or x->>'employerRole'is distinct from 'OP'or x->>'occupation'is distinct from 'GENERAL'or x->>'duty'not in('EMPLOYMENT_INTAKE','EMPLOYMENT_VERIFICATION')or x->>'minutesPerWorker'is distinct from '480'or x->>'workerCount'!~'^[1-9][0-9]*$'or(x->>'totalMinutes')::numeric<>(x->>'workerCount')::numeric*480
      or x->>'startOrdinal'!~'^(0|[1-9][0-9]*)$'
      or not exists(select 1 from jsonb_array_elements(doc->'inputs'->'labour'->'positions')p where p->>'positionId'=x->>'positionId'and p->>'countryId'=scope.country_id and p->>'locationId'=licence->>'locationId'and p->>'employerId'=licence->>'licensorEntityId'and p->>'employerRole'='OP'and p->>'owner'='PRIVATE_SECTOR'and p->>'classificationId'='PROFESSIONAL_AND_BUSINESS_SERVICES'and p->>'occupation'='GENERAL'and p->>'skill'in('MEDIUM','HIGH'))
-     or not exists(select 1 from jsonb_array_elements(country->'state'->'labour'->'positions')p where p->>'positionId'=x->>'positionId'and p->>'countryId'=scope.country_id and(p->>'employedCount')::numeric>=(x->>'startOrdinal')::numeric+(x->>'workerCount')::numeric))
+     -- Duty ordinals are absolute LF/cohort coordinates, not a count from
+     -- zero. Bind the unique original position range before checking bounds.
+     or (select count(*)from jsonb_array_elements(doc->'inputs'->'populationPositionRefs')r where r->>'positionId'=x->>'positionId')<>1
+     or not exists(select 1 from jsonb_array_elements(country->'state'->'labour'->'positions')p
+       join jsonb_array_elements(doc->'inputs'->'populationPositionRefs')r on r->>'positionId'=p->>'positionId'
+       where p->>'positionId'=x->>'positionId'and p->>'countryId'=scope.country_id
+       and r->>'regionId'=x->>'locationId'and r->>'cohortId'=x->>'cohortId'
+       and r->>'startOrdinal'~'^(0|[1-9][0-9]*)$'and r->>'count'~'^[1-9][0-9]*$'
+       and(r->>'count')::numeric=(p->>'employedCount')::numeric
+       and(x->>'startOrdinal')::numeric>=(r->>'startOrdinal')::numeric
+       and(x->>'startOrdinal')::numeric+(x->>'workerCount')::numeric<=(r->>'startOrdinal')::numeric+(r->>'count')::numeric)
+     -- A full-day licensed worker cannot also occupy another duty slice,
+     -- including the provider's unlicensed primary recovery service.
+     or exists(select 1 from jsonb_array_elements(country->'dutyAssignments')other
+       where other->>'assignmentId'<>x->>'assignmentId'and other->>'locationId'=x->>'locationId'and other->>'cohortId'=x->>'cohortId'
+       and(other->>'startOrdinal')::numeric<(x->>'startOrdinal')::numeric+(x->>'workerCount')::numeric
+       and(x->>'startOrdinal')::numeric<(other->>'startOrdinal')::numeric+(other->>'workerCount')::numeric))
     or(licence->>'maximumWorkerMinutes')::numeric is distinct from(select sum((x->>'totalMinutes')::numeric)from jsonb_array_elements(duties)x)then raise exception 'SOCIAL_CREATION_ACTUAL_DUTY_TIME_REQUIRED'using errcode='23514';end if;
    body:=world_v2.canonical_json(licence);
    select * into old from world_v2.postwar_social_employment_creation_licence where world_id=p_world and country_id=scope.country_id and licence_ref=licence->>'licenseId';
