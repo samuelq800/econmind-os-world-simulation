@@ -1,20 +1,22 @@
 /** Resume a sealed positive checkpoint; preserve original FINAL and never
- * rerun CREATE or source initialization. Only finite C10 originals are new. */
+ * rerun CREATE or source initialization. Only explicit pending programme/zero target and finite C10 originals are new. */
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { randomUUID, createHash } from 'node:crypto';
+import { mkdir, writeFile, readFile, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import { parseIndustryCommittedRunsCoverage } from '@econmind/core/postwar-industry-committed-runs-contract';
+import { runRegisteredProgrammeTargetBrowserChain } from '../support/registered-programme-target-browser-chain.js';
 import { runFreshC10Prefix } from '../support/run-fresh-c10-prefix.js';
-import { restoreCommittedRegisteredCheckpoint } from '../support/restore-completed-fresh-h0.js';
+import {
+  restoreCommittedRegisteredCheckpoint,
+  reopenPreparedRegisteredCheckpoint,
+} from '../support/restore-completed-fresh-h0.js';
 import {
   createRegisteredFinalDriver,
   registeredFinalRecord as row,
 } from '../support/postwar-registered-final-driver.js';
-import { prepareResumedPendingPrefix } from '../support/prepare-resumed-pending-prefix.js';
-import { renewResumedNativeExecution } from '../support/renew-resumed-native-execution.js';
 import { currentPages } from '../support/registered-social-create-browser-chain.js';
 import { createFixedOfficeBrowserApplication } from '../../tools/office-connection/fixed-office-command-browser.mjs';
 import { runRegisteredTradeCbReadbackBrowserProbe } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
@@ -22,7 +24,7 @@ import { wireColdError } from '../../tools/office-connection/native-mixed-cold-e
 
 const flag = process.env.ECONMIND_RESUMED_REGISTERED_NODE_NATIVE;
 if (flag !== undefined && flag !== '1')
-  throw Error('FRESH_NATIVE_FLAG_MUST_BE_1');
+  throw Error('RESUMED_NATIVE_FLAG_MUST_BE_1');
 const native = flag === '1' ? describe : describe.skip;
 const repositoryRoot = path.resolve(import.meta.dirname, '../..');
 const required = (name: string): string => {
@@ -71,7 +73,7 @@ native('resumed committed-source registered Node and shipped browser', () => {
       | undefined;
     const failures: unknown[] = [];
     try {
-      prepared = await restoreCommittedRegisteredCheckpoint({
+      prepared = await reopenPreparedRegisteredCheckpoint({
         repositoryRoot,
         evidenceDirectory,
         expectedCommit,
@@ -79,19 +81,49 @@ native('resumed committed-source registered Node and shipped browser', () => {
       });
       const { fixture: f, setup: s, descriptor } = prepared;
       report.preparation = prepared.receipt;
-      report.guardedForward = await prepareResumedPendingPrefix({
-        prepared,
-        repositoryRoot,
-        evidencePath: path.join(
-          evidenceDirectory,
-          'pending-prefix-forward.json',
+      const forward = JSON.parse(
+        await readFile(
+          path.join(checkpointDirectory, 'pending-prefix-forward.json'),
+          'utf8',
         ),
-      });
-      await save();
-      report.finiteRenewal = await renewResumedNativeExecution(
-        prepared,
-        path.join(evidenceDirectory, 'finite-execution-renewal.json'),
       );
+      const renewal = JSON.parse(
+        await readFile(
+          path.join(checkpointDirectory, 'finite-execution-renewal.json'),
+          'utf8',
+        ),
+      );
+      assert.equal(forward.database, f.clone.database);
+      assert.equal(
+        forward.status,
+        'GUARDED_FORWARD_AND_RUNTIME_INTERNAL_DENIALS_PASSED',
+      );
+      assert.equal(
+        forward.sqlSha256,
+        createHash('sha256')
+          .update(
+            await readFile(
+              path.join(
+                repositoryRoot,
+                'database/proposals/postwar-pending-programme-target-prefix.sql',
+              ),
+            ),
+          )
+          .digest('hex'),
+      );
+      assert.equal(renewal.database, f.clone.database);
+      assert.equal(renewal.after.registrationRef, descriptor.registrationRef);
+      assert.equal(renewal.after.simTime, '0');
+      report.guardedForward = forward;
+      report.finiteRenewal = renewal;
+      for (const file of [
+        'pending-prefix-forward.json',
+        'finite-execution-renewal.json',
+      ])
+        await copyFile(
+          path.join(checkpointDirectory, file),
+          path.join(evidenceDirectory, file),
+        );
       await save();
       const beforeResume = await s.counts();
       const saved = JSON.parse(
@@ -325,6 +357,19 @@ native('resumed committed-source registered Node and shipped browser', () => {
         failureEvidencePath: path.join(
           evidenceDirectory,
           'browser-readback-failure.json',
+        ),
+      });
+      await save();
+      report.programmeTarget = await runRegisteredProgrammeTargetBrowserChain({
+        driver: d,
+        browserInput: {
+          ...common,
+          actualOrigin: d.origin(),
+          evidenceDir: path.join(evidenceDirectory, 'programme-target-browser'),
+        },
+        evidencePath: path.join(
+          evidenceDirectory,
+          'programme-target-browser.json',
         ),
       });
       await save();
