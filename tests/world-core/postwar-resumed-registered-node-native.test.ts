@@ -103,7 +103,10 @@ native('resumed committed-source registered Node and shipped browser', () => {
           'utf8',
         ),
       );
-      assert.equal(forward.database, prepared.receipt.parentDatabase);
+      assert.match(
+        forward.database,
+        /^postwar_clone_committed_resume_[a-f0-9]+$/u,
+      );
       assert.equal(
         forward.status,
         'GUARDED_FORWARD_AND_RUNTIME_INTERNAL_DENIALS_PASSED',
@@ -121,7 +124,7 @@ native('resumed committed-source registered Node and shipped browser', () => {
           )
           .digest('hex'),
       );
-      assert.equal(renewal.database, prepared.receipt.parentDatabase);
+      assert.equal(renewal.database, forward.database);
       assert.equal(renewal.after.registrationRef, descriptor.registrationRef);
       assert.equal(renewal.after.simTime, '0');
       report.guardedForward = forward;
@@ -432,6 +435,9 @@ native('resumed committed-source registered Node and shipped browser', () => {
           driver: d,
           worldId: f.marker.worldId,
           evidencePath: path.join(evidenceDirectory, 'c10-prefix.json'),
+          ...(process.env.ECONMIND_RESUME_C10_EVIDENCE
+            ? { resumeEvidencePath: process.env.ECONMIND_RESUME_C10_EVIDENCE }
+            : {}),
         });
         await save();
       }

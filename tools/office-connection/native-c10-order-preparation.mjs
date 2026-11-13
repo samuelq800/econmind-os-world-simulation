@@ -370,6 +370,8 @@ export async function prepareNativeC10Orders({
     request.countryId === country && request.facilityId === facility,
     'FIXED_C10_REQUIRED',
   );
+  const { readRegisteredWorldExecutionFrom } =
+    await import('../../apps/world-worker/dist/time/registered-world-execution-state.js');
   const State =
     await import('../../apps/world-worker/dist/persistence/postwar-industry-run-state.js');
   const Sources =
@@ -387,6 +389,11 @@ export async function prepareNativeC10Orders({
     resources.readPostwarSocialRuntimeConnectionResources(social).workerRole;
   assert(/^[a-z][a-z0-9_]{0,62}$/.test(role));
   return social.database.transaction(async (tx) => {
+    // Use the existing transaction/connection and retain the registration SHARE
+    // lock. clock.simTime() would open another transaction on this max=1 pool.
+    const execution = await readRegisteredWorldExecutionFrom(tx, clock);
+    assert.equal(execution.worldId, ports.worldId);
+    assert.equal(execution.workerId, ports.workerId);
     const held = await tx.query(
       'select h.world_version::text as "worldVersion",h.event_sequence::text as "eventSequence" from world_v2.world_head h join world_v2.world_writer_lease l using(world_id) where h.world_id=$1 and l.holder_id=$2 and l.lease_expires_at_real>clock_timestamp() for share',
       [ports.worldId, ports.workerId],
@@ -443,9 +450,7 @@ export async function prepareNativeC10Orders({
             s.source.countryId === country && s.source.facilityId === facility,
         );
       assert(states.length <= 1, 'C10_UNIQUE_CURRENT_LOGISTICS_STATE');
-      const currentSimTime = (
-        await clock.simTime(ports.worldId)
-      ).toCanonicalValue();
+      const currentSimTime = execution.simTime;
       if (BigInt(currentSimTime) < BigInt(facts.maxCommandSimTimeTicks))
         return {
           head,

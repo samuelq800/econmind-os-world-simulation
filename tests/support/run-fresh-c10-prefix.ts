@@ -2,7 +2,7 @@
  * no Clock advance, completed labour, invented payment or delivery is allowed. */
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, readFile } from 'node:fs/promises';
 import { WorldDecimal, canonicalDecimal } from '@econmind/core';
 import { parseIndustryUtilityPlanningRow } from '@econmind/core/postwar-industry-utility-planning-contract';
 import type { createRegisteredFinalDriver } from './postwar-registered-final-driver.js';
@@ -16,11 +16,39 @@ export async function runFreshC10Prefix(input: {
   driver: ReturnType<typeof createRegisteredFinalDriver>;
   worldId: string;
   evidencePath: string;
+  resumeEvidencePath?: string;
 }) {
   assert.equal(process.env.ECONMIND_FRESH_C10_PREFIX, '1');
-  const d = input.driver,
-    uid = randomUUID().replaceAll('-', '').toUpperCase(),
-    runId = 'RUN_TEST_C10_' + uid;
+  const d = input.driver;
+  const prior = input.resumeEvidencePath
+    ? JSON.parse(await readFile(input.resumeEvidencePath, 'utf8'))
+    : undefined;
+  if (prior) {
+    assert.equal(
+      prior.stages.length,
+      1,
+      'ONLY_COMMITTED_RUN_WITH_NO_BOOK_MAY_RESUME_HERE',
+    );
+    assert.equal(prior.stages[0].stage, 'RUN');
+    assert.equal(
+      prior.stages[0].original.request.commandType,
+      'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+    );
+    assert.equal(prior.stages[0].original.request.countryId, 'COUNTRY_10');
+    assert.equal(prior.stages[0].original.request.payload.runId, prior.runId);
+    assert(
+      !d.originals.some(
+        (o) =>
+          o.request.commandType === 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+      ),
+      'EXISTING_LOGISTICS_ORIGINAL_REQUIRES_EXACT_STAGE_RECOVERY',
+    );
+  }
+  const runId =
+    prior?.runId ??
+    'RUN_TEST_C10_' + randomUUID().replaceAll('-', '').toUpperCase();
+  assert.match(runId, /^RUN_TEST_C10_[A-F0-9]{32}$/u);
+  const uid = runId.slice('RUN_TEST_C10_'.length);
   const identity = (label: string) => ({
     commandId: 'CMD_C10_' + label + '_' + uid,
     idempotencyKey: 'IDEM_C10_' + label + '_' + uid,
@@ -37,16 +65,34 @@ export async function runFreshC10Prefix(input: {
   await save();
   try {
     const beforeClock = await d.rpc('CLOCK');
-    const run = await prepareRegisteredC10Run({
-      driver: d,
-      runId,
-      identity: identity('RUN'),
-    });
-    (report.stages as unknown[]).push({
-      stage: 'RUN',
-      original: run,
-      result: await executeRegisteredC10Stage({ driver: d, original: run }),
-    });
+    if (prior) {
+      const run = prior.stages[0].original;
+      const stored = await d.inspect(run.request.commandId);
+      assert.deepEqual(
+        stored,
+        prior.stages[0].result,
+        'SAVED_C10_RUN_FINAL_REQUIRED',
+      );
+      await d.recover(run, { duplicateProbe: false });
+      (report.stages as unknown[]).push({
+        stage: 'RUN',
+        original: run,
+        result: stored,
+        recoveredWithoutResubmit: true,
+      });
+      report.resumeEvidencePath = input.resumeEvidencePath;
+    } else {
+      const run = await prepareRegisteredC10Run({
+        driver: d,
+        runId,
+        identity: identity('RUN'),
+      });
+      (report.stages as unknown[]).push({
+        stage: 'RUN',
+        original: run,
+        result: await executeRegisteredC10Stage({ driver: d, original: run }),
+      });
+    }
     await save();
     const planning = (await d.rpc('C10_LOGISTICS_ORDERS', {
       countryId: 'COUNTRY_10',

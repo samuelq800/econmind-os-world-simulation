@@ -116,8 +116,8 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
   driver: Driver;
   browserInput: RegisteredOfficeBrowserStageInput;
   evidencePath: string;
-  /** Recover one saved pending programme before the first target submission.
-   * A saved target original is deliberately refused, never replaced. */
+  /** Recover saved programme and optional target originals. Only an absent
+   * target original permits its first submission; unknown outcomes stop. */
   resumeEvidencePath?: string;
 }) {
   const d = input.driver;
@@ -127,6 +127,7 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
     'BORROWED_ACTUAL_BROWSER_AND_APPLICATION_REQUIRED',
   );
   let resumedProgramme: AuthenticatedOfficeCommandRequestDto | undefined;
+  let resumedTarget: AuthenticatedOfficeCommandRequestDto | undefined;
   let resumeEvidenceSha256: string | undefined;
   if (input.resumeEvidencePath) {
     assert.notEqual(
@@ -146,8 +147,9 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
       'ISOLATED_WORLD_ONLY_PENDING_TERMS_AND_TARGET_INTENT',
     );
     assert(
-      Array.isArray(previous.originals) && previous.originals.length === 1,
-      'EXACTLY_ONE_PROGRAMME_AND_NO_TARGET_ORIGINAL_REQUIRED',
+      Array.isArray(previous.originals) &&
+        [1, 2].includes(previous.originals.length),
+      'EXACT_PROGRAMME_AND_OPTIONAL_TARGET_ORIGINALS_REQUIRED',
     );
     const original = row(previous.originals[0]),
       request = row(original.request);
@@ -160,6 +162,20 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
     );
     resumedProgramme =
       original as unknown as AuthenticatedOfficeCommandRequestDto;
+    if (previous.originals.length === 2) {
+      const target = row(previous.originals[1]),
+        targetRequest = row(target.request);
+      assert.equal(
+        targetRequest.commandType,
+        'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
+      );
+      assert.equal(targetRequest.officeId, 'INDUSTRY');
+      assert.equal(targetRequest.countryId, request.countryId);
+      assert.equal(targetRequest.worldId, request.worldId);
+      assert.notEqual(targetRequest.commandId, request.commandId);
+      assert.notEqual(targetRequest.idempotencyKey, request.idempotencyKey);
+      resumedTarget = target as unknown as AuthenticatedOfficeCommandRequestDto;
+    }
   }
   const originals: AuthenticatedOfficeCommandRequestDto[] = [];
   const stages: Record<string, unknown>[] = [];
@@ -284,6 +300,11 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
       page.off('request', capture);
     }
   }
+  // Preserve both retained originals even if the first recovery fails; a later
+  // continuation must never mistake an omitted target for permission to submit.
+  if (resumedProgramme) retainOriginal(resumedProgramme);
+  if (resumedTarget) retainOriginal(resumedTarget);
+  await save();
   try {
     const social = await browsers.open('social');
     try {
@@ -401,21 +422,33 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
         null,
         'COMPLETE_TARGET_PAGE_REQUIRED',
       );
+      const savedTargetTerms = resumedTarget
+        ? row(resumedTarget.request.payload)
+        : null;
       const facility = parameters.rows.find(
-        (r) => r.capacityPerSimDay !== undefined,
+        (r) =>
+          r.capacityPerSimDay !== undefined &&
+          (!savedTargetTerms || r.facilityId === savedTargetTerms.facilityId),
       );
       assert(facility, 'ACTUAL_SOURCE_CAPACITY_FACILITY_REQUIRED');
       const facilityId = text(facility.facilityId);
-      assert(
-        !before.rows.some((r) => r.facilityId === facilityId),
-        'TEST_REQUIRES_UNSET_TARGET_NOT_OVERWRITE',
-      );
-      const starts = text(facility.windowStartsAtSimTime),
-        ends = text(facility.windowEndsAtSimTime);
+      if (!resumedTarget)
+        assert(
+          !before.rows.some((r) => r.facilityId === facilityId),
+          'TEST_REQUIRES_UNSET_TARGET_NOT_OVERWRITE',
+        );
+      const starts = text(
+          savedTargetTerms?.startsAtSimTime ?? facility.windowStartsAtSimTime,
+        ),
+        ends = text(
+          savedTargetTerms?.endsAtSimTime ?? facility.windowEndsAtSimTime,
+        );
       assert(
         BigInt(starts) >= 0n &&
           BigInt(ends) > BigInt(starts) &&
-          BigInt(ends) <= 86400000n,
+          BigInt(ends) <= 86400000n &&
+          BigInt(starts) >= BigInt(facility.windowStartsAtSimTime) &&
+          BigInt(ends) <= BigInt(facility.windowEndsAtSimTime),
       );
       const runsBefore = current(state.committedRunsPage, await d.readHead());
       assert.equal(
@@ -424,33 +457,59 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
         'COMPLETE_RUN_PAGE_REQUIRED',
       );
       const page = pageOf(industry);
-      await page
-        .locator('[data-industry-run-field="facilityId"]')
-        .selectOption(facilityId);
-      await page
-        .locator('[data-industry-run-field="startsAtSimTime"]')
-        .fill(starts);
-      await page
-        .locator('[data-industry-run-field="endsAtSimTime"]')
-        .fill(ends);
-      await page
-        .locator('[data-industry-run-field="utilisationPercent"]')
-        .fill('0');
-      await page.locator('[data-industry-run-action="stage-target"]').click();
-      const { original, restored } = await submitStaged(
-        industry,
-        'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
-        (dto) => {
-          const terms = row(dto.request.payload);
-          assert.equal(terms.facilityId, facilityId);
-          assert.equal(terms.targetPercent, '0');
-          assert.equal(terms.startsAtSimTime, starts);
-          assert.equal(terms.endsAtSimTime, ends);
-          assert.equal(terms.sourceRef, facility.sourceRef);
-          assert.equal(terms.sourceRawSha256, facility.sourceRawSha256);
-          assert.equal(terms.policyVersion, facility.policyVersion);
-        },
-      );
+      const validateTarget = (dto: AuthenticatedOfficeCommandRequestDto) => {
+        const terms = row(dto.request.payload);
+        assert.equal(terms.facilityId, facilityId);
+        assert.equal(terms.targetPercent, '0');
+        assert.equal(terms.startsAtSimTime, starts);
+        assert.equal(terms.endsAtSimTime, ends);
+        assert.equal(terms.sourceRef, facility.sourceRef);
+        assert.equal(terms.sourceRawSha256, facility.sourceRawSha256);
+        assert.equal(terms.policyVersion, facility.policyVersion);
+      };
+      let original: AuthenticatedOfficeCommandRequestDto;
+      let restored: RegisteredOfficeBrowserState;
+      if (resumedTarget) {
+        original = resumedTarget;
+        validateTarget(original);
+        const headBeforeRecovery = await d.readHead();
+        await d.recover(original, { duplicateProbe: false });
+        await industry.reloadRestore(original, { recover: false });
+        restored = await industry.recoverFinal({
+          expectedHead: headBeforeRecovery,
+          requireCurrent: true,
+        });
+        assert.equal(restored.receipt?.commandId, original.request.commandId);
+        assert.deepEqual(
+          await d.readHead(),
+          headBeforeRecovery,
+          'TARGET_RECOVERY_MUST_NOT_ADVANCE_HEAD',
+        );
+        stages.push({
+          stage: 'EXISTING_TARGET_FINAL_RECOVERED_NO_RESUBMISSION',
+          commandId: original.request.commandId,
+        });
+        await save();
+      } else {
+        await page
+          .locator('[data-industry-run-field="facilityId"]')
+          .selectOption(facilityId);
+        await page
+          .locator('[data-industry-run-field="startsAtSimTime"]')
+          .fill(starts);
+        await page
+          .locator('[data-industry-run-field="endsAtSimTime"]')
+          .fill(ends);
+        await page
+          .locator('[data-industry-run-field="utilisationPercent"]')
+          .fill('0');
+        await page.locator('[data-industry-run-action="stage-target"]').click();
+        ({ original, restored } = await submitStaged(
+          industry,
+          'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
+          validateTarget,
+        ));
+      }
       const targets = current(restored.targetPage, await d.readHead());
       const target = targets.rows.find(
         (r) => r.commandId === original.request.commandId,
@@ -458,6 +517,10 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
       assert(target, 'EXPLICIT_ZERO_TARGET_MUST_BE_VISIBLE_AFTER_F5');
       assert.equal(target.targetPercent, '0');
       assert.equal(target.facilityId, facilityId);
+      assert.equal(target.startsAtSimTime, starts);
+      assert.equal(target.endsAtSimTime, ends);
+      assert.equal(target.sourceRef, facility.sourceRef);
+      assert.equal(target.sourceRawSha256, facility.sourceRawSha256);
       assert.deepEqual(
         current(restored.committedRunsPage, await d.readHead()).rows,
         runsBefore.rows,
@@ -469,7 +532,12 @@ export async function runRegisteredProgrammeTargetBrowserChain(input: {
           .textContent()) ?? '',
         /0%/u,
       );
-      stages.push({ stage: 'TARGET_UNSET_TO_EXPLICIT_ZERO_F5_NO_RUN', target });
+      stages.push({
+        stage: resumedTarget
+          ? 'TARGET_EXISTING_ZERO_F5_CURRENT_RUNS_UNCHANGED'
+          : 'TARGET_UNSET_TO_EXPLICIT_ZERO_F5_NO_RUN',
+        target,
+      });
       await save();
     } finally {
       await industry.close();
