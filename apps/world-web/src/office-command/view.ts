@@ -405,18 +405,40 @@ export function installOfficeCommand(
         state.runParametersPage?.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
           ? state.runParametersPage.rows.map(parseIndustryRunParameterRow)
           : [];
+      if (state.runParametersPage?.status !== 'EMPTY')
+        dialog.append(
+          renderIndustryRunForm(
+            document,
+            rows,
+            state.canStage,
+            (draft) =>
+              active(owner, lifetime, dialog!) && owner.stageIndustryRun(draft),
+            (draft) =>
+              active(owner, lifetime, dialog!) &&
+              owner.stageIndustryUtilisationTarget(draft),
+          ),
+        );
+    }
+    if (currentView()?.role === 'industry') {
+      const parameters = state.runParametersPage;
       dialog.append(
-        renderIndustryRunForm(
-          document,
-          rows,
-          state.canStage,
-          (draft) =>
-            active(owner, lifetime, dialog!) && owner.stageIndustryRun(draft),
-          (draft) =>
-            active(owner, lifetime, dialog!) &&
-            owner.stageIndustryUtilisationTarget(draft),
+        node(
+          'p',
+          parameters
+            ? parameters.page.total === 0
+              ? '当前授权来源没有可用设施排产参数。'
+              : `设施来源 ${parameters.page.returned ? parameters.page.offset + 1 : parameters.page.offset}–${parameters.page.offset + parameters.page.returned} / ${parameters.page.total}；世界版本 ${parameters.authority.readback.worldVersion}。`
+            : '设施来源读取不可用：' +
+                (state.runParametersCode ?? '尚未读取') +
+                '。数量未知，不按 0 处理。',
         ),
       );
+      if (parameters && parameters.page.nextOffset !== null)
+        dialog.append(
+          button('下一设施来源页', 'next-run-parameters', state.canRead, () =>
+            owner.nextIndustryRunParametersPage(),
+          ),
+        );
     }
     if (currentView()?.role === 'industry') {
       const targets = document.createElement('section');
@@ -433,7 +455,14 @@ export function installOfficeCommand(
           node('p', '目标读取不可用：' + (state.targetCode ?? '尚未读取')),
         );
       else if (state.targetPage.status === 'EMPTY')
-        targets.append(node('p', '当前设施尚未设置目标。'));
+        targets.append(
+          node(
+            'p',
+            state.targetPage.page.total === 0
+              ? '当前设施尚未设置目标。'
+              : '当前分页范围无目标；不是全部目标为空。',
+          ),
+        );
       else
         for (const raw of state.targetPage.rows) {
           const value = parseIndustryUtilisationTargetRow(raw);
@@ -444,6 +473,15 @@ export function installOfficeCommand(
             ),
           );
         }
+      if (state.targetPage) {
+        const page = state.targetPage;
+        targets.append(
+          node(
+            'p',
+            `目标记录 ${page.page.returned ? page.page.offset + 1 : page.page.offset}–${page.page.offset + page.page.returned} / ${page.page.total}；世界版本 ${page.authority.readback.worldVersion}。`,
+          ),
+        );
+      }
       dialog.append(targets);
       const runs = state.committedRunsPage;
       const section = document.createElement('section');

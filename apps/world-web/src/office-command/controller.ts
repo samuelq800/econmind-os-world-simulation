@@ -178,6 +178,7 @@ export function createOfficeCommandController(
     code: string | null = b ? null : 'OFFICE_BINDING_MISSING_OR_UNSUPPORTED';
   let runtimePage: RuntimePage | null = null;
   let runParametersPage: RuntimePage | null = null;
+  let runParametersCode: string | null = null;
   let targetPage: RuntimePage | null = null;
   let targetCode: string | null = null;
   let committedRunsPage: RuntimePage | null = null;
@@ -224,6 +225,7 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    runParametersCode = null;
     committedRunsPage = null;
     committedRunsCode = null;
     targetPage = null;
@@ -298,6 +300,7 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    runParametersCode = null;
     committedRunsPage = null;
     committedRunsCode = null;
     targetPage = null;
@@ -324,6 +327,50 @@ export function createOfficeCommandController(
         busy = false;
         notify();
       }
+    }
+  }
+  async function readRunParameters(previous?: RuntimePage) {
+    if (!industryRunReader || !currentHead()) return;
+    if (
+      !attempted &&
+      (intent?.request.commandType === 'CORE_INDUSTRY_RUN_SCHEDULE_V1' ||
+        intent?.request.commandType ===
+          'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1')
+    ) {
+      intent = null;
+      status = 'CURRENT_AUTHORIZED_HEAD';
+      code = null;
+    }
+    runParametersPage = null;
+    runParametersCode = 'READING';
+    notify();
+    const next = await industryRunReader.readPage(
+      INDUSTRY_RUN_PARAMETERS_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    runParametersCode = 'code' in next ? next.code : next.status;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      runParametersPage = next;
+      runParametersCode = null;
     }
   }
   async function readCommittedRuns(previous?: RuntimePage) {
@@ -517,6 +564,7 @@ export function createOfficeCommandController(
     model = null;
     runtimePage = null;
     runParametersPage = null;
+    runParametersCode = null;
     committedRunsPage = null;
     committedRunsCode = null;
     targetPage = null;
@@ -604,29 +652,8 @@ export function createOfficeCommandController(
       await readSocialPools();
       if (checkLiveness() && runtimePage) await readSocialProgrammes();
       if (!checkLiveness() || !runtimePage) return;
-      if (industryRunReader) {
-        const parameters = await industryRunReader.readPage(
-          INDUSTRY_RUN_PARAMETERS_DATASET,
-          requestId(),
-        );
-        if (!checkLiveness()) return;
-        if (parameters.status === 'DENIED') {
-          disconnect('DENIED');
-          return;
-        }
-        if (parameters.status === 'PAGE' || parameters.status === 'EMPTY') {
-          if (
-            parameters.authority.readback.worldVersion !==
-              result.authority.readback.worldVersion ||
-            parameters.authority.readback.eventSequence !==
-              result.authority.readback.eventSequence
-          ) {
-            fail('STALE');
-            return;
-          }
-          runParametersPage = parameters;
-        }
-      }
+      await readRunParameters();
+      if (!checkLiveness() || !runtimePage) return;
       await readUtilityPlanning();
       if (!checkLiveness() || !runtimePage) return;
       await readCommittedRuns();
@@ -820,6 +847,7 @@ export function createOfficeCommandController(
         runParametersPage: runParametersPage
           ? (JSON.parse(JSON.stringify(runParametersPage)) as RuntimePage)
           : null,
+        runParametersCode,
         utilityPlanningPage: utilityPlanningPage
           ? (JSON.parse(JSON.stringify(utilityPlanningPage)) as RuntimePage)
           : null,
@@ -1238,6 +1266,11 @@ export function createOfficeCommandController(
         return false;
       }
     },
+    nextIndustryRunParametersPage: () =>
+      operation(async () => {
+        if (runParametersPage && runParametersPage.page.nextOffset !== null)
+          await readRunParameters(runParametersPage);
+      }),
     nextIndustryCommittedRunsPage: () =>
       operation(async () => {
         if (committedRunsPage && committedRunsPage.page.nextOffset !== null)

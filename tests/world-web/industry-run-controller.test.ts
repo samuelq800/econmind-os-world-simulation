@@ -13,7 +13,18 @@ import {
 const fp = 'sha256:' + 'a'.repeat(64),
   raw = 'b'.repeat(64),
   requestId = '11111111-1111-4111-8111-111111111111';
-function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
+function setup(
+  mode:
+    | 'OK'
+    | 'MISSING'
+    | 'EMPTY'
+    | 'FOREIGN'
+    | 'PAGED'
+    | 'DUPLICATE'
+    | 'DRIFT'
+    | 'DENIED_NEXT'
+    | 'HEAD_NEXT' = 'OK',
+) {
   const base = officeProjectionFixture('industry'),
     identity = {
       ...base.config.identity,
@@ -57,6 +68,14 @@ function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
     calls.push({ path, body });
     if (path === POSTWAR_RUNTIME_PATH) {
       const parameter = body.dataset === 'industry-run-parameters';
+      const offset = Number((body.page as { offset?: number })?.offset ?? 0);
+      const paged =
+        ['PAGED', 'DUPLICATE', 'DRIFT', 'DENIED_NEXT', 'HEAD_NEXT'].includes(
+          mode,
+        ) && parameter;
+      const currentHead = mode === 'HEAD_NEXT' && offset > 0 ? '8' : head;
+      if (mode === 'DENIED_NEXT' && parameter && offset > 0)
+        return new Response(null, { status: 403 });
       if (mode === 'MISSING' && parameter)
         return Response.json(
           {
@@ -80,7 +99,7 @@ function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
         schemaVersion: POSTWAR_RUNTIME_SCHEMA,
         requestId: body.requestId,
         ok: true,
-        status: 'AVAILABLE',
+        status: mode === 'EMPTY' && parameter ? 'EMPTY' : 'AVAILABLE',
         dataset: body.dataset,
         authority: {
           source: 'SERVER_VERIFIED_READ_BINDING',
@@ -91,8 +110,8 @@ function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
           seed,
           readback: {
             ...seed,
-            worldVersion: head,
-            eventSequence: head,
+            worldVersion: currentHead,
+            eventSequence: currentHead,
             readbackRef: 'READBACK_TEST_ONLY',
           },
         },
@@ -106,14 +125,20 @@ function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
           dataNature: parameter
             ? 'ADMITTED_IMMUTABLE_OPENING_FACTS'
             : 'ADMITTED_CURRENT_INDUSTRY_EMPLOYMENT_HEADCOUNT',
-          sourceVersion: fp,
+          sourceVersion:
+            mode === 'DRIFT' && parameter && offset > 0
+              ? 'sha256:' + 'e'.repeat(64)
+              : fp,
           bindingVersion: fp,
           sourceRevision: 'PARAMETERS_TEST_ONLY',
           worldVersion: parameter ? '0' : head,
           eventSequence: parameter ? '0' : head,
           originWorldVersion: '0',
           originEventSequence: '0',
-          observedHead: { worldVersion: head, eventSequence: head },
+          observedHead: {
+            worldVersion: currentHead,
+            eventSequence: currentHead,
+          },
           pageHash: raw,
           returnedRowsHash: raw,
           hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
@@ -155,7 +180,16 @@ function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
               },
         },
         rows: parameter
-          ? [row]
+          ? mode === 'EMPTY'
+            ? []
+            : paged
+              ? Array.from({ length: offset === 0 ? 25 : 1 }, (_, i) => ({
+                  ...row,
+                  facilityId:
+                    'FACILITY_PAGE_' +
+                    (mode === 'DUPLICATE' && offset > 0 ? 0 : offset + i),
+                }))
+              : [row]
           : [
               {
                 schemaVersion: 'postwar-industry-labour-current-row-v1',
@@ -174,7 +208,24 @@ function setup(mode: 'OK' | 'MISSING' | 'FOREIGN' = 'OK') {
                 paidCost: null,
               },
             ],
-        page: { offset: 0, limit: 25, returned: 1, total: 1, nextOffset: null },
+        page:
+          mode === 'EMPTY' && parameter
+            ? { offset: 0, limit: 25, returned: 0, total: 0, nextOffset: null }
+            : paged
+              ? {
+                  offset,
+                  limit: 25,
+                  returned: offset === 0 ? 25 : 1,
+                  total: 26,
+                  nextOffset: offset === 0 ? 25 : null,
+                }
+              : {
+                  offset: 0,
+                  limit: 25,
+                  returned: 1,
+                  total: 1,
+                  nextOffset: null,
+                },
       });
     }
     if (path === '/v1/office-command') {
@@ -255,10 +306,101 @@ const draft = {
   maximumExpense: '3',
 };
 describe('Industry typed RUN plan lifecycle', () => {
+  it('reads the next bounded facility page explicitly, clears an unstaged old-page plan and never posts a command', async () => {
+    const f = setup('PAGED');
+    try {
+      await f.controller.refresh();
+      expect(f.controller.getState().runParametersPage?.rows).toHaveLength(25);
+      expect(
+        f.controller.stageIndustryRun({
+          ...draft,
+          facilityId: 'FACILITY_PAGE_0',
+        }),
+      ).toBe(true);
+      await f.controller.nextIndustryRunParametersPage();
+      expect(f.controller.getState().intent).toBeNull();
+      expect(
+        f.controller
+          .getState()
+          .runParametersPage?.rows.map((r) => r.facilityId),
+      ).toEqual(['FACILITY_PAGE_25']);
+      expect(
+        f.controller.stageIndustryRun({
+          ...draft,
+          facilityId: 'FACILITY_PAGE_0',
+        }),
+      ).toBe(false);
+      expect(
+        f.controller.stageIndustryRun({
+          ...draft,
+          facilityId: 'FACILITY_PAGE_25',
+        }),
+      ).toBe(true);
+      const reads = f.calls.filter(
+        (c) => c.body.dataset === 'industry-run-parameters',
+      );
+      expect(
+        reads.map((c) => (c.body.page as { offset: number }).offset),
+      ).toEqual([0, 25]);
+      await f.controller.nextIndustryRunParametersPage();
+      expect(
+        f.calls.filter((c) => c.body.dataset === 'industry-run-parameters'),
+      ).toHaveLength(2);
+      expect(
+        f.calls.every((c) => c.path === '/v1/postwar-office-runtime'),
+      ).toBe(true);
+    } finally {
+      f.controller.disconnect();
+    }
+  });
+  it('keeps an actually empty authorized parameter list distinct from a fetch failure', async () => {
+    const f = setup('EMPTY');
+    try {
+      await f.controller.refresh();
+      expect(f.controller.getState().runParametersPage?.status).toBe('EMPTY');
+      expect(f.controller.getState().runParametersCode).toBeNull();
+      expect(f.controller.stageIndustryRun(draft)).toBe(false);
+      expect(
+        f.calls.every((c) => c.path === '/v1/postwar-office-runtime'),
+      ).toBe(true);
+    } finally {
+      f.controller.disconnect();
+    }
+  });
+  it.each(['DUPLICATE', 'DRIFT', 'DENIED_NEXT', 'HEAD_NEXT'] as const)(
+    'refuses %s on continuation without showing the prior facility page as current',
+    async (mode) => {
+      const f = setup(mode);
+      try {
+        await f.controller.refresh();
+        expect(f.controller.getState().runParametersPage?.rows).toHaveLength(
+          25,
+        );
+        await f.controller.nextIndustryRunParametersPage();
+        expect(f.controller.getState().runParametersPage).toBeNull();
+        expect(
+          f.controller.stageIndustryRun({
+            ...draft,
+            facilityId: 'FACILITY_PAGE_0',
+          }),
+        ).toBe(false);
+        if (mode === 'DENIED_NEXT')
+          expect(f.controller.getState().status).toBe('DENIED');
+        if (mode === 'HEAD_NEXT')
+          expect(f.controller.getState().status).toBe('UNAVAILABLE');
+        expect(
+          f.calls.every((c) => c.path === '/v1/postwar-office-runtime'),
+        ).toBe(true);
+      } finally {
+        f.controller.disconnect();
+      }
+    },
+  );
   it.each([
     { entry: 'country-module', mode: 'OK' },
     { entry: 'country-room', mode: 'OK' },
     { entry: 'country-module', mode: 'MISSING' },
+    { entry: 'country-module', mode: 'PAGED' },
   ] as const)(
     'opens source-bound RUN from actual $entry attributes ($mode), blocks legacy continuation and stages only explicit user terms',
     async ({ entry, mode }) => {
@@ -357,11 +499,15 @@ describe('Industry typed RUN plan lifecycle', () => {
         const form = dialog
           .all()
           .find((e) => Object.hasOwn(e.dataset, 'industryRunForm'))!;
-        expect(form.textContent).toContain('不保存持续利用率目标');
+        expect(form.textContent).toContain('可另行提交明确窗口的利用率目标');
         expect(form.textContent).toContain('未扣除已安排量');
         expect(form.textContent).toContain('设施与资源优先级尚未接通');
         if (mode === 'MISSING') {
           expect(ui.getState().runParametersPage).toBeNull();
+          expect(ui.getState().runParametersCode).toBe(
+            'INDUSTRY_RUN_PARAMETERS_UNAVAILABLE',
+          );
+          expect(dialog.textContent).toContain('数量未知，不按 0 处理');
           expect(form.textContent).toContain('排产参数当前不可用');
           expect(
             form.all().some((e) => e.dataset.industryRunAction === 'stage'),
@@ -375,6 +521,30 @@ describe('Industry typed RUN plan lifecycle', () => {
           'industry-run-parameters',
         );
         expect(form.textContent).toContain('tonne · XBB');
+        if (mode === 'PAGED') {
+          expect(dialog.textContent).toContain('1–25 / 26');
+          dialog
+            .all()
+            .find(
+              (e) => e.dataset.officeCommandAction === 'next-run-parameters',
+            )!
+            .click();
+          await expect
+            .poll(() => ui.getState().runParametersPage?.page.offset)
+            .toBe(25);
+          expect(dialog.textContent).toContain('26–26 / 26');
+          expect(
+            dialog
+              .all()
+              .some(
+                (e) => e.dataset.officeCommandAction === 'next-run-parameters',
+              ),
+          ).toBe(false);
+          expect(
+            f.calls.every((c) => c.path === '/v1/postwar-office-runtime'),
+          ).toBe(true);
+          return;
+        }
         const values: Record<string, string> = {
           facilityId: f.row.facilityId,
           quantity: '2',

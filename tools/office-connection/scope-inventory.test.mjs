@@ -1,13 +1,20 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+  readFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { after, test } from 'node:test';
 import {
   buildScopeInventory,
   classifySourceHit,
   collectRecordedTests,
   indexSources,
+  reviewedFieldConnections,
 } from './scope-inventory.mjs';
 
 const temp = mkdtempSync(resolve(tmpdir(), 'office-scope-inventory-'));
@@ -27,10 +34,47 @@ test('retains every required module/input/readout and never counts supplemental 
     assert.equal(row.acceptance, 'UNKNOWN_NOT_EXECUTED_AS_A_CATALOG_ITEM');
     assert.match(row.page.staticRenderer.sha256, /^[0-9a-f]{64}$/u);
     for (const link of ['command', 'api', 'sql']) {
-      assert.match(row.links[link].status, /^UNKNOWN_/u);
-      assert.equal(row.links[link].reference, null);
+      if (row.reviewedConnection) {
+        assert.equal(row.kind, 'INPUT_FIELD');
+        assert.equal(
+          row.links[link].status,
+          'IMPLEMENTED_UNVERIFIED_LIMITED_CONTRACT',
+        );
+        assert.match(row.links[link].reference.sha256, /^[0-9a-f]{64}$/u);
+        assert.equal(
+          row.reviewedConnection.runtimeAcceptance,
+          'NOT_EXECUTED_BY_INVENTORY',
+        );
+      } else {
+        assert.match(row.links[link].status, /^UNKNOWN_/u);
+        assert.equal(row.links[link].reference, null);
+      }
     }
   }
+  assert.equal(inventory.reviewedCatalogFieldConnections.inputFieldCount, 8);
+  assert.equal(
+    inventory.itemRows.filter((r) => r.reviewedConnection).length,
+    8,
+  );
+  assert.equal(
+    inventory.reviewedCatalogFieldConnections.moduleActionsCompleted,
+    0,
+  );
+  assert.deepEqual(
+    inventory.reviewedCatalogFieldConnections.fields
+      .map((r) => r.fieldKey)
+      .sort(),
+    [
+      'industry-u0283-0',
+      'industry-u0283-1',
+      'social-u0933-0',
+      'social-u0933-1',
+      'social-u0933-2',
+      'social-u0934-0',
+      'social-u0934-1',
+      'social-u0934-2',
+    ],
+  );
   assert.equal(inventory.supplementalMainFields.catalogPolicyInputs, 0);
   assert.equal(inventory.supplementalMainFields.catalogReadouts, 0);
   assert.equal(inventory.supplementalMainFields.readonlySlots, 10);
@@ -123,5 +167,45 @@ test('classifies normal tests and explicit rehearsal apart from potential produc
       'sourceAdmitted: false',
     ),
     'EXPLICIT_UNAVAILABLE_OR_REFUSAL_REQUIRES_CONTEXT',
+  );
+});
+
+test('reviewed field mappings fail on DTO or SQL-anchor drift instead of blessing another contract', () => {
+  const target = resolve(temp, 'reviewed-connection-drift');
+  const reviewed = reviewedFieldConnections();
+  const refs = reviewed.flatMap((r) => [
+    r.mapping,
+    ...Object.values(r.references),
+  ]);
+  for (const { path } of refs) {
+    mkdirSync(dirname(resolve(target, path)), { recursive: true });
+    writeFileSync(resolve(target, path), readFileSync(resolve(path)));
+  }
+  assert.equal(reviewedFieldConnections(target).length, 8);
+  const mapping = 'apps/world-web/src/industry-run/form.ts';
+  const original = readFileSync(resolve(target, mapping), 'utf8');
+  writeFileSync(
+    resolve(target, mapping),
+    original.replace(
+      "'industry-u0283-1': 'targetPercent'",
+      "'industry-u0283-1': 'quantity'",
+    ),
+  );
+  assert.throws(
+    () => reviewedFieldConnections(target),
+    /REVIEWED_FIELD_MAPPING_REVIEW_REQUIRED/u,
+  );
+  writeFileSync(resolve(target, mapping), original);
+  const sql = 'database/proposals/postwar-pending-programme-target-prefix.sql';
+  writeFileSync(
+    resolve(target, sql),
+    readFileSync(resolve(target, sql), 'utf8').replace(
+      'create function world_v2.postwar_social_programme_effect_scoped',
+      'create function world_v2.REMOVED_TEST_ONLY',
+    ),
+  );
+  assert.throws(
+    () => reviewedFieldConnections(target),
+    /REVIEWED_FIELD_CONNECTION_DRIFT/u,
   );
 });

@@ -194,8 +194,7 @@ const runtimeNames = {
   SOCIAL: /social|housing-rent/u,
 };
 
-function readMainMapping(root) {
-  const path = 'apps/world-web/src/main-office-fields/mapping.ts';
+function readStaticMapping(root, path, variable) {
   const source = ts.createSourceFile(
     path,
     readFileSync(resolve(root, path), 'utf8'),
@@ -232,15 +231,155 @@ function readMainMapping(root) {
   const visit = (node) => {
     if (
       ts.isVariableDeclaration(node) &&
-      node.name.getText(source) === 'MAIN_OFFICE_FIELD_MAPPING'
+      node.name.getText(source) === variable
     )
       mapping = literal(node.initializer);
     ts.forEachChild(node, visit);
   };
   visit(source);
-  if (!mapping || mapping.fields.length !== mapping.coverage.newReadonlySlots)
+  if (!mapping) throw Error('STATIC_FIELD_MAPPING_MISSING:' + variable);
+  return mapping;
+}
+function readMainMapping(root) {
+  const mapping = readStaticMapping(
+    root,
+    'apps/world-web/src/main-office-fields/mapping.ts',
+    'MAIN_OFFICE_FIELD_MAPPING',
+  );
+  if (mapping.fields.length !== mapping.coverage.newReadonlySlots)
     throw Error('MAIN_FIELD_MAPPING_SLOT_COUNT_DRIFT');
   return mapping;
+}
+
+/** Explicitly reviewed partial DTO translations. This is not inferred from
+ * lexical references, and cannot claim installation or runtime acceptance. */
+export function reviewedFieldConnections(root = repositoryRoot) {
+  const anchor = (path, needle) => {
+    const line = readFileSync(resolve(root, path), 'utf8')
+      .split('\n')
+      .findIndex((s) => s.includes(needle));
+    if (line < 0)
+      throw Error('REVIEWED_FIELD_CONNECTION_DRIFT:' + path + ':' + needle);
+    return reference(root, path, line + 1);
+  };
+  const groups = [
+    {
+      path: 'apps/world-web/src/office-command/view.ts',
+      variable: 'SOCIAL_PROGRAMME_TERMS_CATALOG_BINDING',
+      fieldsProperty: 'fields',
+      expected: {
+        'social-u0933-0': 'RELOCATION_SUPPORT.locationId',
+        'social-u0933-1': 'RELOCATION_SUPPORT.participants',
+        'social-u0933-2': 'RELOCATION_SUPPORT.benefit',
+        'social-u0934-0': 'RETURN_TO_WORK.eligible',
+        'social-u0934-1': 'RETURN_TO_WORK.capacity',
+        'social-u0934-2': 'RETURN_TO_WORK.duration',
+      },
+      scope:
+        'PENDING_REVIEW_TERMS_ONLY_NOT_APPROVAL_FUNDING_OR_POPULATION_CHANGE',
+      commandType: 'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1',
+      dataset: 'social-labour-programmes',
+      refs: {
+        dto: [
+          'apps/world-web/src/social-employment/programme-form.ts',
+          'export function buildSocialProgrammeRequest',
+        ],
+        source: [
+          'apps/world-web/src/social-employment/programme-form.ts',
+          'currentSocialProgrammeContext',
+        ],
+        command: [
+          'packages/core/src/commands/social-employment-service.ts',
+          'SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND',
+        ],
+        api: [
+          'apps/world-api/src/runtime/postwar-social-connection.ts',
+          'manualFamilies.has(selector.commandType)',
+        ],
+        executor: [
+          'apps/world-worker/src/persistence/postwar-social-employment-service-creation-runtime.ts',
+          'SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE',
+        ],
+        sql: [
+          'database/proposals/postwar-pending-programme-target-prefix.sql',
+          'create function world_v2.postwar_social_programme_effect_scoped',
+        ],
+        readback: [
+          'apps/world-api/src/integration/postwar-office-runtime-read-service.ts',
+          'fixed-social-programme-runtime',
+        ],
+      },
+    },
+    {
+      path: 'apps/world-web/src/industry-run/form.ts',
+      variable: 'INDUSTRY_RUN_CATALOG_BINDING',
+      fieldsProperty: 'targetFields',
+      expected: {
+        'industry-u0283-0': 'facilityId',
+        'industry-u0283-1': 'targetPercent',
+      },
+      scope: 'ADMITTED_FACILITY_FIRST_DAY_WINDOW_INTENT_NOT_RUN_OR_OUTPUT',
+      commandType: 'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
+      dataset: 'industry-utilisation-targets',
+      refs: {
+        dto: [
+          'apps/world-web/src/industry-run/form.ts',
+          'export function buildIndustryUtilisationTargetRequest',
+        ],
+        source: [
+          'apps/world-worker/src/persistence/postwar-industry-run-parameters-read.ts',
+          'read_postwar_industry_run_parameters_page',
+        ],
+        command: [
+          'packages/core/src/industry/industry-first-day-work.ts',
+          'INDUSTRY_UTILISATION_TARGET_COMMAND',
+        ],
+        api: [
+          'apps/world-api/src/runtime/postwar-industry-connection.ts',
+          'r.request.commandType !== INDUSTRY_UTILISATION_TARGET_COMMAND',
+        ],
+        executor: [
+          'apps/world-worker/src/persistence/postwar-industry-run-runtime.ts',
+          'const target = c.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND',
+        ],
+        sql: [
+          'database/proposals/postwar-pending-programme-target-prefix.sql',
+          'create or replace function world_v2.postwar_mixed_industry_work_group',
+        ],
+        readback: [
+          'apps/world-worker/src/persistence/postwar-industry-utilisation-targets-read.ts',
+          'fixed-industry-utilisation-targets-runtime',
+        ],
+      },
+    },
+  ];
+  return groups.flatMap((group) => {
+    const mapping = readStaticMapping(root, group.path, group.variable),
+      fields = mapping[group.fieldsProperty];
+    if (
+      JSON.stringify(fields) !== JSON.stringify(group.expected) ||
+      (mapping.scope ?? mapping.targetScope) !== group.scope
+    )
+      throw Error('REVIEWED_FIELD_MAPPING_REVIEW_REQUIRED:' + group.variable);
+    const references = Object.fromEntries(
+      Object.entries(group.refs).map(([k, [path, needle]]) => [
+        k,
+        anchor(path, needle),
+      ]),
+    );
+    return Object.entries(fields).map(([fieldKey, payloadField]) => ({
+      moduleId: mapping.moduleId,
+      fieldKey,
+      payloadField,
+      scope: group.scope,
+      commandType: group.commandType,
+      dataset: group.dataset,
+      codeStatus: 'IMPLEMENTED_UNVERIFIED_LIMITED_CONTRACT',
+      mapping: anchor(group.path, group.variable),
+      references,
+      runtimeAcceptance: 'NOT_EXECUTED_BY_INVENTORY',
+    }));
+  });
 }
 
 export function buildScopeInventory({
@@ -251,6 +390,7 @@ export function buildScopeInventory({
   const inventory = loadInventory(root);
   const { requirements, modules, counts } = inventory;
   const mainMapping = readMainMapping(root);
+  const reviewedConnections = reviewedFieldConnections(root);
   const tokens = [
     ...new Set(
       modules.flatMap((module) => [
@@ -323,8 +463,15 @@ export function buildScopeInventory({
       const itemTests = sourceReferences.filter(({ path }) =>
         tests.some((test) => test.path === path),
       );
+      const reviewed =
+        row.kind === 'INPUT_FIELD'
+          ? reviewedConnections.find(
+              (r) => r.moduleId === module.id && r.fieldKey === row.fieldKey,
+            )
+          : undefined;
       itemRows.push({
         ...base,
+        ...(reviewed ? { reviewedConnection: reviewed } : {}),
         ...row,
         page: {
           staticRenderer: pageRef,
@@ -347,16 +494,21 @@ export function buildScopeInventory({
         sourceReferences,
         links: {
           command: {
-            status: 'UNKNOWN_NO_REVIEWED_ITEM_TO_DTO_TRANSLATION',
-            reference: null,
+            status:
+              reviewed?.codeStatus ??
+              'UNKNOWN_NO_REVIEWED_ITEM_TO_DTO_TRANSLATION',
+            reference: reviewed?.references.command ?? null,
           },
           api: {
-            status: 'UNKNOWN_NO_ITEM_ROUTE_BINDING_PROVEN',
-            reference: null,
+            status:
+              reviewed?.codeStatus ?? 'UNKNOWN_NO_ITEM_ROUTE_BINDING_PROVEN',
+            reference: reviewed?.references.api ?? null,
           },
           sql: {
-            status: 'UNKNOWN_NO_ITEM_ROW_OR_MUTATION_BINDING_PROVEN',
-            reference: null,
+            status:
+              reviewed?.codeStatus ??
+              'UNKNOWN_NO_ITEM_ROW_OR_MUTATION_BINDING_PROVEN',
+            reference: reviewed?.references.sql ?? null,
           },
           tests: itemTests.map((test) => ({
             ...test,
@@ -407,6 +559,18 @@ export function buildScopeInventory({
         [module.id, field.source],
       );
   }
+  if (
+    reviewedConnections.some(
+      (r) =>
+        !itemRows.some(
+          (item) =>
+            item.kind === 'INPUT_FIELD' &&
+            item.moduleId === r.moduleId &&
+            item.fieldKey === r.fieldKey,
+        ),
+    )
+  )
+    throw Error('REVIEWED_FIELD_NOT_IN_ORIGINAL_CATALOG');
   const manifest = {
     schemaVersion: 'office-connection-scope-inventory-v1',
     classification:
@@ -463,6 +627,15 @@ export function buildScopeInventory({
       })),
       significance:
         'SUPPLEMENTAL_MAIN_FIELDS_NOT_A_REDUCTION_OF_CATALOG_DENOMINATORS',
+    },
+    reviewedCatalogFieldConnections: {
+      status: 'STATIC_REVIEWED_LIMITED_CONTRACTS_NOT_RUNTIME_ACCEPTANCE',
+      fields: reviewedConnections,
+      inputFieldCount: reviewedConnections.length,
+      moduleActionsCompleted: 0,
+      catalogReadoutsCompleted: 0,
+      nativeEvidence:
+        'HISTORICAL_VERSION_SPECIFIC_SEPARATELY_RECORDED_NOT_INHERITED',
     },
     legacyInventory: {
       reference: reference(root, 'config/office-connection/requirements.json'),

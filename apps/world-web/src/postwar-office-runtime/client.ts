@@ -623,6 +623,10 @@ export function createPostwarRuntimeClient(
             parameters.some((p) => p.countryId !== c.identity.countryId) ||
             new Set(parameters.map((p) => p.facilityId)).size !==
               parameters.length ||
+            (previous &&
+              parameters.some((p) =>
+                previous.rows.some((old) => old.facilityId === p.facilityId),
+              )) ||
             source.currentFinancialCoverage !== undefined
           )
             throw Error('INDUSTRY_RUN_PARAMETER_SCOPE_MISMATCH');
