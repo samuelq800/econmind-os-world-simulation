@@ -21,6 +21,9 @@ import {
 } from '@econmind/core';
 import {
   parseIndustryRunScheduleIntent,
+  parseIndustryUtilisationTargetIntent,
+  prepareIndustryUtilisationTargetFrame,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
   prepareIndustryRunScheduleFrame,
   INDUSTRY_RUN_SCHEDULE_COMMAND,
   readIndustryFirstDayWorkState,
@@ -157,9 +160,12 @@ export function createPostwarIndustryRunRuntime(config: {
   }
   async function derive(tx: SqlExecutor, c: CanonicalCommand, at: string) {
     if (!live()) invalid('LIVE_SOURCE_REQUIRED');
-    const terms = parseIndustryRunScheduleIntent(c, sha);
+    const target = c.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND;
+    const terms = target
+      ? parseIndustryUtilisationTargetIntent(c, sha)
+      : parseIndustryRunScheduleIntent(c, sha);
     if (
-      c.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND ||
+      (!target && c.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND) ||
       c.worldId !== world ||
       c.officeId !== 'INDUSTRY' ||
       c.authSubject === null ||
@@ -180,6 +186,18 @@ export function createPostwarIndustryRunRuntime(config: {
     let failure: unknown;
     try {
       await tx.query('set local role world_v2_industry_source_reader');
+      if (target) {
+        const installed = await tx.query<{ version: string }>(
+          'select world_v2.postwar_utilisation_target_contract_version() as version',
+        );
+        if (
+          installed.rows.length !== 1 ||
+          installed.rows[0]?.version !==
+            'postwar-industry-utilisation-target-v1'
+        )
+          invalid('TARGET_COMPLETE_PREFIX_CONTRACT_NOT_INSTALLED');
+      }
+
       rows = (
         await tx.query<Record<string, unknown>>(INDUSTRY_RUN_SCOPE_QUERY, [
           world,
@@ -239,6 +257,47 @@ export function createPostwarIndustryRunRuntime(config: {
       if (c.simTime.ticks < BigInt(facts.maxCommandSimTimeTicks))
         invalid('COMMAND_TIME_PRECEDES_CURRENT_HISTORY');
       const site = sites[0]!;
+      if (target) {
+        if (facts.firstdayOriginal.data.schemaVersion !== 'postwar-industry-first-day-source-v1')
+          invalid('TARGET_PRODUCTION_FACILITY_ORIGINAL_REQUIRED');
+        const prepared = prepareIndustryUtilisationTargetFrame(
+          { state: facts.workState, command: c, head, observedAtReal: at },
+          sha,
+        );
+        return {
+          frame: prepared.frame,
+          head,
+          binding: Object.freeze({
+            schemaVersion:
+              'postwar-industry-utilisation-target-current-binding-v1',
+            commandFingerprint: c.fingerprint,
+            observedAtReal: at,
+            head,
+            seedPins: facts.seedPins,
+            sourceRef: facts.firstdayOriginal.sourceRef,
+            sourceRawSha256: facts.firstdayOriginal.rawSha256,
+            pageChainFingerprint: facts.pageChainFingerprint,
+            siteFingerprint: hash(site),
+            previousTargetsFingerprint: hash(
+              readIndustryFirstDayWorkState(
+                facts.workState,
+              ).utilisationTargets.map((target) => ({
+                terms: target.terms,
+                commandFingerprint: target.frame.command.fingerprint,
+                eventFingerprint: target.frame.events[0]!.fingerprint,
+              })),
+            ),
+            authorizationTeamId: text(r.team_id),
+            authorizationVersion: text(r.authorization_version),
+          }),
+          commitAssertion: createWorldWriterCommitAssertion(
+            lease,
+            head.worldVersion,
+          ),
+        };
+      }
+      // Only RUN reserves the scheduling cap. A target is never a reservation.
+      if (!('maximumExpense' in terms)) invalid('EXACT_RUN_EXPENSE_REQUIRED');
       const accounts = base.document.inputs.fundingAccounts.filter(
         (a) =>
           a.countryId === c.countryId &&

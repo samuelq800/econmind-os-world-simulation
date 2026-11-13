@@ -12,7 +12,10 @@ import { INDUSTRY_OPERATING_WAGE_COMMAND } from '@econmind/core/industry-operati
 import { isPostwarIndustryOperatingWageRuntime } from '../persistence/postwar-industry-operating-wage-runtime.js';
 import { INDUSTRY_FIRST_DAY_WORK_COMMAND } from '@econmind/core/industry-first-day-work';
 import { isPostwarIndustryWorkRuntime } from '../persistence/postwar-industry-work-runtime.js';
-import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
 import { isPostwarIndustryRunRuntime } from '../persistence/postwar-industry-run-runtime.js';
 import { BENEFICIAL_HOUSING_RENT_COMMAND } from '@econmind/core';
 import {
@@ -37,6 +40,7 @@ import {
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   canonicalSerialize,
   parseWorldWriterLease,
@@ -196,6 +200,7 @@ const FINANCE_SOCIAL_COMMAND_FAMILIES: ReadonlySet<string> = new Set([
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
 ]);
@@ -708,7 +713,8 @@ function createDurableCommandConsumer(
         industryLogisticsRuntime.worldId === world;
       const industryRunInstalled =
         financeSocialBinding !== null &&
-        command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND &&
+        (command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+          command.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND) &&
         isPostwarIndustryRunRuntime(officeReaders.industryRun) &&
         officeReaders.industryRun.database === input.database &&
         officeReaders.industryRun.worldId === world;

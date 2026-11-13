@@ -2,7 +2,10 @@ import { isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort } fr
 import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
 import { isPreparedPostwarIndustryUtilityRuntime } from '../persistence/postwar-industry-utility-runtime.js';
 import { isPreparedPostwarIndustryLogisticsRuntime } from '../persistence/postwar-industry-logistics-runtime.js';
-import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
 import { isPostwarIndustryRunRuntime } from '../persistence/postwar-industry-run-runtime.js';
 import { isPreparedPostwarIndustryRuntime } from '../persistence/postwar-industry-runtime.js';
 import {
@@ -27,6 +30,7 @@ import {
   DOMAIN_ERROR_CODES,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   type CanonicalCommand,
   type Sha256Hex,
@@ -464,7 +468,10 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
         : isPreparedPostwarIndustryUtilityRuntime(candidate))
     );
   }
-  if (commandType === INDUSTRY_RUN_SCHEDULE_COMMAND) {
+  if (
+    commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+    commandType === INDUSTRY_UTILISATION_TARGET_COMMAND
+  ) {
     if (!construction?.financeSocialBinding) return false;
     const fixed = readFinanceSocialSourceBinding(
       construction.financeSocialBinding,
@@ -543,7 +550,10 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
         construction.readers.financeBudget?.commitGuard,
       )
     );
-  if (commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND)
+  if (
+    commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+    commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+  )
     return (
       !!construction &&
       (!construction.productionBinding ||

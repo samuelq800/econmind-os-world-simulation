@@ -1,3 +1,9 @@
+import { INDUSTRY_UTILISATION_TARGETS_DATASET } from '@econmind/core/postwar-industry-utilisation-targets-contract';
+import { SOCIAL_PROGRAMMES_DATASET } from '@econmind/core/social-labour-programme-public-contract';
+import {
+  buildSocialProgrammeRequest,
+  type SocialProgrammeDraft,
+} from '../social-employment/programme-form.js';
 import { INDUSTRY_COMMITTED_RUNS_DATASET } from '@econmind/core/postwar-industry-committed-runs-contract';
 import {
   INDUSTRY_UTILITY_PLANNING_DATASET,
@@ -25,6 +31,8 @@ import {
 } from '@econmind/core/postwar-industry-run-parameters-contract';
 import {
   buildIndustryRunRequest,
+  buildIndustryUtilisationTargetRequest,
+  type IndustryUtilisationTargetDraft,
   type IndustryRunDraft,
 } from '../industry-run/form.js';
 import {
@@ -138,11 +146,19 @@ export function createOfficeCommandController(
       b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
         : null,
+    industryUtilisationTargetsReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
     industryRunReader =
       b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
         : null,
     socialPoolsReader =
+      b?.read.identity.officeId === 'SOCIAL' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    socialProgrammesReader =
       b?.read.identity.officeId === 'SOCIAL' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
         : null,
@@ -162,12 +178,16 @@ export function createOfficeCommandController(
     code: string | null = b ? null : 'OFFICE_BINDING_MISSING_OR_UNSUPPORTED';
   let runtimePage: RuntimePage | null = null;
   let runParametersPage: RuntimePage | null = null;
+  let targetPage: RuntimePage | null = null;
+  let targetCode: string | null = null;
   let committedRunsPage: RuntimePage | null = null;
   let committedRunsCode: string | null = null;
   let utilityPlanningPage: RuntimePage | null = null;
   let utilityPlanningCode: string | null = null;
   let socialPoolsPage: RuntimePage | null = null;
   let socialPoolsCode: string | null = null;
+  let socialProgrammesPage: RuntimePage | null = null;
+  let socialProgrammesCode: string | null = null;
   let model: OfficeProjectionModel | null = null,
     intent: AuthenticatedOfficeCommandRequestDto | null = null,
     acknowledgement: ManualOfficeQueueAcknowledgementDto | null = null,
@@ -206,10 +226,14 @@ export function createOfficeCommandController(
     runParametersPage = null;
     committedRunsPage = null;
     committedRunsCode = null;
+    targetPage = null;
+    targetCode = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
     socialPoolsPage = null;
     socialPoolsCode = null;
+    socialProgrammesPage = null;
+    socialProgrammesCode = null;
     intent = null;
     acknowledgement = null;
     lookup = null;
@@ -223,8 +247,10 @@ export function createOfficeCommandController(
     runtimeReader?.disconnect();
     industryRunReader?.disconnect();
     industryCommittedRunsReader?.disconnect();
+    industryUtilisationTargetsReader?.disconnect();
     industryUtilityReader?.disconnect();
     socialPoolsReader?.disconnect();
+    socialProgrammesReader?.disconnect();
     recoverer?.disconnect();
     writer?.disconnect();
     const cleanup = stop;
@@ -274,10 +300,14 @@ export function createOfficeCommandController(
     runParametersPage = null;
     committedRunsPage = null;
     committedRunsCode = null;
+    targetPage = null;
+    targetCode = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
     socialPoolsPage = null;
     socialPoolsCode = null;
+    socialProgrammesPage = null;
+    socialProgrammesCode = null;
     status = 'UNAVAILABLE';
     code = publicCode;
   }
@@ -326,6 +356,38 @@ export function createOfficeCommandController(
       }
       committedRunsPage = next;
       committedRunsCode = null;
+    }
+  }
+  async function readTargets(previous?: RuntimePage) {
+    if (!industryUtilisationTargetsReader || !currentHead()) return;
+    const next = await industryUtilisationTargetsReader.readPage(
+      INDUSTRY_UTILISATION_TARGETS_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    targetPage = null;
+    targetCode = next.status;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      targetPage = next;
+      targetCode = null;
     }
   }
   async function readUtilityPlanning(previous?: RuntimePage) {
@@ -408,6 +470,48 @@ export function createOfficeCommandController(
       socialPoolsCode = null;
     }
   }
+  async function readSocialProgrammes(previous?: RuntimePage) {
+    if (!socialProgrammesReader || !currentHead()) return;
+    if (
+      !attempted &&
+      intent?.request.commandType === 'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1'
+    ) {
+      intent = null;
+      status = 'CURRENT_AUTHORIZED_HEAD';
+      code = null;
+    }
+    socialProgrammesPage = null;
+    socialProgrammesCode = 'READING';
+    notify();
+    const next = await socialProgrammesReader.readPage(
+      SOCIAL_PROGRAMMES_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    socialProgrammesCode = next.status;
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const h = currentHead();
+      if (
+        !h ||
+        next.authority.readback.worldVersion !== h.worldVersion ||
+        next.authority.readback.eventSequence !== h.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      socialProgrammesPage = next;
+      socialProgrammesCode = null;
+    }
+  }
   async function read(tradeOpeningH0 = false, previous?: RuntimePage) {
     if (!b || !reader) return;
     model = null;
@@ -415,10 +519,14 @@ export function createOfficeCommandController(
     runParametersPage = null;
     committedRunsPage = null;
     committedRunsCode = null;
+    targetPage = null;
+    targetCode = null;
     utilityPlanningPage = null;
     utilityPlanningCode = null;
     socialPoolsPage = null;
     socialPoolsCode = null;
+    socialProgrammesPage = null;
+    socialProgrammesCode = null;
     clearUnsubmittedSocialEmploymentIntent();
     status = 'READING';
     notify();
@@ -494,6 +602,7 @@ export function createOfficeCommandController(
       floor = result.authority.readback.worldVersion;
       runtimePage = result;
       await readSocialPools();
+      if (checkLiveness() && runtimePage) await readSocialProgrammes();
       if (!checkLiveness() || !runtimePage) return;
       if (industryRunReader) {
         const parameters = await industryRunReader.readPage(
@@ -521,6 +630,7 @@ export function createOfficeCommandController(
       await readUtilityPlanning();
       if (!checkLiveness() || !runtimePage) return;
       await readCommittedRuns();
+      await readTargets();
       if (!checkLiveness() || !runtimePage) return;
       try {
         lastAuthorizedReadAtClient = new Date().toISOString();
@@ -718,10 +828,18 @@ export function createOfficeCommandController(
           ? (JSON.parse(JSON.stringify(committedRunsPage)) as RuntimePage)
           : null,
         committedRunsCode,
+        targetPage: targetPage
+          ? (JSON.parse(JSON.stringify(targetPage)) as RuntimePage)
+          : null,
+        targetCode,
         socialPoolsPage: socialPoolsPage
           ? (JSON.parse(JSON.stringify(socialPoolsPage)) as RuntimePage)
           : null,
         socialPoolsCode,
+        socialProgrammesPage: socialProgrammesPage
+          ? (JSON.parse(JSON.stringify(socialProgrammesPage)) as RuntimePage)
+          : null,
+        socialProgrammesCode,
         tradeDataset:
           b?.read.identity.officeId === 'TRADE' && runtimeReader
             ? tradeDataset
@@ -914,6 +1032,51 @@ export function createOfficeCommandController(
       const previous = socialPoolsPage;
       return operation(() => readSocialPools(previous));
     },
+    nextSocialProgrammesPage() {
+      if (
+        !socialProgrammesPage ||
+        socialProgrammesPage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = socialProgrammesPage;
+      return operation(() => readSocialProgrammes(previous));
+    },
+    stageSocialProgramme(draft: SocialProgrammeDraft) {
+      const h = currentHead();
+      if (
+        !b ||
+        busy ||
+        attempted ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        !socialProgrammesPage ||
+        !h ||
+        socialProgrammesPage.authority.readback.worldVersion !==
+          h.worldVersion ||
+        socialProgrammesPage.authority.readback.eventSequence !==
+          h.eventSequence
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildSocialProgrammeRequest({
+            page: socialProgrammesPage,
+            draft,
+            programmeId: 'SOCIAL_PROGRAMME_' + id,
+            requestId: requestId(),
+            commandId: 'SOCIAL_PROGRAMME_CREATE_' + id,
+            idempotencyKey: 'SOCIAL_PROGRAMME_CREATE_KEY_' + id,
+          }),
+        );
+      } catch {
+        intent = null;
+        status = 'UNAVAILABLE';
+        code = 'SOCIAL_PROGRAMME_CURRENT_TERMS_REQUIRED';
+        notify();
+        return false;
+      }
+    },
     stageSocialEmploymentServiceCreate(
       draft: SocialEmploymentServiceCreateDraft,
     ) {
@@ -1039,6 +1202,36 @@ export function createOfficeCommandController(
             commandId: 'INDUSTRY_RUN_' + id,
             idempotencyKey: 'INDUSTRY_RUN_KEY_' + id,
             runId: 'INDUSTRY_PLAN_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
+    },
+    stageIndustryUtilisationTarget(draft: IndustryUtilisationTargetDraft) {
+      if (
+        !b ||
+        !checkLiveness() ||
+        runParametersPage?.dataset !== INDUSTRY_RUN_PARAMETERS_DATASET ||
+        !currentHead()
+      )
+        return false;
+      try {
+        const source = runParametersPage.rows
+          .map(parseIndustryRunParameterRow)
+          .find((row) => row.facilityId === draft.facilityId);
+        if (!source) return false;
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildIndustryUtilisationTargetRequest({
+            row: source,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: currentHead()!.worldVersion,
+            requestId: requestId(),
+            commandId: 'INDUSTRY_TARGET_' + id,
+            idempotencyKey: 'INDUSTRY_TARGET_KEY_' + id,
           }),
         );
       } catch {

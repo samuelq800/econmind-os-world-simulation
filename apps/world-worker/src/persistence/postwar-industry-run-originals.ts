@@ -11,6 +11,7 @@ import {
 import {
   type IndustryFirstDayWorkSiteSource,
   INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
   INDUSTRY_FIRST_DAY_WORK_COMMAND,
 } from '@econmind/core/industry-first-day-work';
 import type { FinanceNativeBudgetCanonicalFrame } from '@econmind/core/finance-budget-native';
@@ -184,6 +185,7 @@ export async function readPostwarIndustryRunPageOriginalsFrom(
   for (const frame of input.frames) {
     if (
       frame.command.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND &&
+      frame.command.commandType !== INDUSTRY_UTILISATION_TARGET_COMMAND &&
       frame.command.commandType !== INDUSTRY_FIRST_DAY_WORK_COMMAND
     )
       continue;
@@ -210,7 +212,8 @@ export async function readPostwarIndustryRunPageOriginalsFrom(
       JSON.parse(frame.events[0]?.canonicalPayload ?? 'null'),
     );
     const facility =
-      frame.command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND
+      frame.command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+      frame.command.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND
         ? text(object(event.terms).facilityId)
         : text(event.facilityId);
     const original = decodePostwarIndustryRunSourceRow(r.rows[0], {

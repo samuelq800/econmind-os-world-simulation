@@ -1,5 +1,8 @@
 import { isManualIndustryUtilityCommandFamily } from '@econmind/core/authenticated-office-command-contract';
-import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
 import { INDUSTRY_PRODUCTION_COMMAND } from '@econmind/core/industry-production-command';
 /** Explicit server-only HTTP borrower of one genuinely issued Industry
  * runtime. No consumer, source, pool, credential or policy is created here. */
@@ -212,6 +215,7 @@ export function createPostwarIndustryConnection(
         if (
           (r.request.commandType !== INDUSTRY_PRODUCTION_COMMAND &&
             r.request.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND &&
+            r.request.commandType !== INDUSTRY_UTILISATION_TARGET_COMMAND &&
             !isManualIndustryUtilityCommandFamily(r.request.commandType)) ||
           r.request.officeId !== 'INDUSTRY'
         )
@@ -219,7 +223,8 @@ export function createPostwarIndustryConnection(
         if (r.request.worldId !== ports!.worldId)
           return fail(403, 'WORLD_BINDING_MISMATCH');
         if (
-          r.request.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND &&
+          (r.request.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+            r.request.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND) &&
           !ports!.industryRun
         )
           return fail(503, 'INDUSTRY_RUN_RUNTIME_NOT_INSTALLED');
@@ -252,6 +257,7 @@ export function createPostwarIndustryConnection(
         if (
           (o.commandType !== INDUSTRY_PRODUCTION_COMMAND &&
             o.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND &&
+            o.commandType !== INDUSTRY_UTILISATION_TARGET_COMMAND &&
             !isManualIndustryUtilityCommandFamily(o.commandType)) ||
           o.officeId !== 'INDUSTRY'
         )
@@ -259,7 +265,8 @@ export function createPostwarIndustryConnection(
         if (o.worldId !== ports!.worldId)
           return fail(403, 'WORLD_BINDING_MISMATCH');
         if (
-          o.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND &&
+          (o.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+            o.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND) &&
           !ports!.industryRun
         )
           return fail(503, 'INDUSTRY_RUN_RUNTIME_NOT_INSTALLED');

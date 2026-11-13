@@ -18,7 +18,10 @@ import {
 } from '../persistence/postwar-industry-logistics-runtime.js';
 import type { PostwarIndustryOperatingWageRuntime } from '../persistence/postwar-industry-operating-wage-runtime.js';
 import type { PostwarIndustryWorkRuntime } from '../persistence/postwar-industry-work-runtime.js';
-import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
 import {
   isPostwarIndustryRunRuntime,
   type PostwarIndustryRunRuntime,
@@ -55,6 +58,7 @@ import {
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DOMAIN_ERROR_CODES,
   DomainError,
@@ -171,6 +175,7 @@ export function manualOfficeCapability(command: CanonicalCommand) {
     case INDUSTRY_UTILITY_COMMANDS.POWER:
     case INDUSTRY_UTILITY_COMMANDS.WATER:
     case INDUSTRY_UTILITY_COMMANDS.LOGISTICS:
+    case INDUSTRY_UTILISATION_TARGET_COMMAND:
     case INDUSTRY_RUN_SCHEDULE_COMMAND:
     case INDUSTRY_PRODUCTION_COMMAND:
       return command.officeId === 'INDUSTRY'
@@ -190,6 +195,7 @@ export function manualOfficeCapability(command: CanonicalCommand) {
       return command.officeId === 'SOCIAL'
         ? SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY
         : null;
+    case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
     case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND:
     case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
       return command.officeId === 'SOCIAL' ? ('SOCIAL_LABOUR' as const) : null;
@@ -344,6 +350,7 @@ export function createManualOfficeCommandComposition(input: {
           runtime.assertSourceBeforeClaim(command, at),
       };
     }
+    case INDUSTRY_UTILISATION_TARGET_COMMAND:
     case INDUSTRY_RUN_SCHEDULE_COMMAND: {
       validateManualOfficeCommandIntent(command);
       const runtime = input.readers.industryRun;
@@ -437,6 +444,7 @@ export function createManualOfficeCommandComposition(input: {
           runtime.preflightCanonical(command, observedAtReal),
       };
     }
+    case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
     case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND: {
       validateManualOfficeCommandIntent(command);
       const runtime = input.readers.socialServiceCreation;

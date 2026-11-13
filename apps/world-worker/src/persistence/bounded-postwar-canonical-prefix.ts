@@ -52,6 +52,10 @@ const integer = (v: unknown): string => {
 const timestamp = (v: unknown) =>
   v instanceof Date ? v.toISOString() : text(v);
 const socialTypes = new Map([
+  [
+    'INDUSTRY_UTILISATION_TARGET_SET_V1',
+    'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
+  ],
   ['INDUSTRY_FIRST_DAY_RUN_SCHEDULED_V1', 'CORE_INDUSTRY_RUN_SCHEDULE_V1'],
   ['INDUSTRY_FIRST_DAY_WORK_COMPLETED_V1', 'CORE_INDUSTRY_FIRST_DAY_WORK_V1'],
   ['INDUSTRY_OPERATING_WAGE_PAID_V1', 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1'],

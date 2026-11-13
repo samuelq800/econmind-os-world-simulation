@@ -243,6 +243,8 @@ export interface SocialEmploymentServiceState {
   readonly appliedOperations: readonly SocialEmploymentOperationBinding[];
   /** Absent in old history: do not normalize absence into [] or change hashes. */
   readonly creations?: readonly SocialEmploymentServiceCreationRecord[];
+  /** Absent in old history; proposed terms do not confer execution rights. */
+  readonly programmes?: readonly SocialLabourProgrammeRecord[];
 }
 export interface SocialEmploymentServiceCreateIntent {
   readonly schemaVersion: 'social-employment-service-create-v1';
@@ -540,6 +542,7 @@ function validateServiceStateFromPopulation(
     'plans',
     'appliedOperations',
     ...(Object.hasOwn(r, 'creations') ? ['creations'] : []),
+    ...(Object.hasOwn(r, 'programmes') ? ['programmes'] : []),
   ]);
   if (r.schemaVersion !== 'social-employment-service-state-v1')
     invalid('Unsupported social service state');
@@ -828,6 +831,15 @@ function validateServiceStateFromPopulation(
     plans,
     appliedOperations,
     ...(creations ? { creations } : {}),
+    ...(Object.hasOwn(r, 'programmes')
+      ? {
+          programmes: validateProgrammeRecords(
+            r.programmes,
+            text(r.worldId),
+            digest,
+          ),
+        }
+      : {}),
   });
 }
 
@@ -1631,6 +1643,12 @@ export function createSocialEmploymentServiceReplayReducers(
       sha256Hex: digest,
     });
   return Object.freeze({
+    [SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT]: ({ state, event }) =>
+      reduceSocialLabourProgrammeCreatedEvent({
+        state: state as SocialEmploymentServiceState,
+        event,
+        sha256Hex: digest,
+      }),
     [SOCIAL_SERVICE_PLAN_EVENT]: reducer,
     [SOCIAL_JOB_MATCH_EVENT]: reducer,
     [SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT]: ({ state, event }) =>
@@ -1640,4 +1658,404 @@ export function createSocialEmploymentServiceReplayReducers(
         sha256Hex: digest,
       }),
   });
+}
+
+/** U0933/U0934 terms registration only. These records confer no eligibility,
+ * approval, funding, capacity, movement, labour participation or payment. */
+export const SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND =
+  'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1';
+export const SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT =
+  'SOCIAL_LABOUR_PROGRAMME_CREATED_V1';
+export type SocialLabourProgrammeCreateIntent = Readonly<
+  {
+    schemaVersion: 'social-labour-programme-create-v1';
+    programmeId: string;
+  } & (
+    | {
+        kind: 'RELOCATION_SUPPORT';
+        locationId: string;
+        participants: string;
+        benefit: Readonly<{ amount: string; currency: string }>;
+      }
+    | {
+        kind: 'RETURN_TO_WORK';
+        eligible: string;
+        capacity: string;
+        duration: Readonly<{ amount: string; unit: 'SIM_DAY' }>;
+      }
+  )
+>;
+export interface SocialLabourProgrammeRecord {
+  readonly canonicalCommand: string;
+  readonly commandFingerprint: CanonicalSha256;
+  readonly sourceRef: string;
+  readonly sourceFingerprint: CanonicalSha256;
+  readonly status: 'PENDING_REVIEW';
+}
+export interface SocialLabourProgrammeReadFacts extends SocialEmploymentPopulationReadFacts {
+  readonly worldId: string;
+  readonly countryId: string;
+  readonly head: Readonly<{ worldVersion: string; eventSequence: string }>;
+  readonly localCurrency: string;
+  readonly sourceRef: string;
+  readonly sourceFingerprint: CanonicalSha256;
+  readonly sourceRevocations: readonly string[];
+}
+export function parseSocialLabourProgrammeCreateIntent(
+  value: unknown,
+): SocialLabourProgrammeCreateIntent {
+  const r = inert(value);
+  if (r.schemaVersion !== 'social-labour-programme-create-v1')
+    invalid('Programme schema required');
+  const programmeId = idempotencyKey(text(r.programmeId));
+  if (r.kind === 'RELOCATION_SUPPORT') {
+    keys(r, [
+      'schemaVersion',
+      'programmeId',
+      'kind',
+      'locationId',
+      'participants',
+      'benefit',
+    ]);
+    const b = inert(r.benefit);
+    keys(b, ['amount', 'currency']);
+    const amount = text(b.amount),
+      currency = text(b.currency);
+    if (
+      Money.from(amount, currency).toCanonicalValue().amount !== amount ||
+      Money.from(amount, currency).amount.isNegative()
+    )
+      invalid('Canonical nonnegative local benefit required');
+    return freeze({
+      schemaVersion: r.schemaVersion,
+      programmeId,
+      kind: r.kind,
+      locationId: idempotencyKey(text(r.locationId)),
+      participants: integer(r.participants, true),
+      benefit: { amount, currency },
+    });
+  }
+  if (r.kind === 'RETURN_TO_WORK') {
+    keys(r, [
+      'schemaVersion',
+      'programmeId',
+      'kind',
+      'eligible',
+      'capacity',
+      'duration',
+    ]);
+    const d = inert(r.duration);
+    keys(d, ['amount', 'unit']);
+    const eligible = text(r.eligible);
+    if (
+      !eligible.trim() ||
+      eligible !== eligible.trim() ||
+      eligible.length > 2048 ||
+      d.unit !== 'SIM_DAY'
+    )
+      invalid('Explicit eligibility proposal and simulated duration required');
+    return freeze({
+      schemaVersion: r.schemaVersion,
+      programmeId,
+      kind: r.kind,
+      eligible,
+      capacity: integer(r.capacity, true),
+      duration: { amount: integer(d.amount, true), unit: 'SIM_DAY' },
+    });
+  }
+  return invalid('Supported programme kind required');
+}
+function programmeCommand(command: CanonicalCommand, digest: Sha256Hex) {
+  validateCanonicalCommand(command, digest);
+  if (
+    command.commandType !== SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+    command.officeId !== 'SOCIAL' ||
+    command.countryId === null ||
+    command.expectedWorldVersion === null ||
+    command.idempotencyKey === null
+  )
+    invalid('Exact manual Social programme command required');
+  return parseSocialLabourProgrammeCreateIntent(
+    JSON.parse(command.canonicalPayload),
+  );
+}
+function validateProgrammeRecords(
+  value: unknown,
+  world: string,
+  digest: Sha256Hex,
+): readonly SocialLabourProgrammeRecord[] {
+  const ids = new Set<string>(),
+    commands = new Set<string>();
+  return freeze(
+    array(value)
+      .map((value) => {
+        const r = inert(value);
+        keys(r, [
+          'canonicalCommand',
+          'commandFingerprint',
+          'sourceRef',
+          'sourceFingerprint',
+          'status',
+        ]);
+        const canonicalCommand = text(r.canonicalCommand),
+          command = parseCanonicalCommand(JSON.parse(canonicalCommand), digest),
+          intent = programmeCommand(command, digest);
+        const identity = canonicalSerialize([
+          command.countryId,
+          intent.programmeId,
+        ]);
+        if (
+          command.worldId !== world ||
+          canonicalCommand !== canonicalSerialize(wire(command)) ||
+          command.fingerprint !== sha(r.commandFingerprint) ||
+          r.status !== 'PENDING_REVIEW' ||
+          ids.has(identity) ||
+          commands.has(command.commandId)
+        )
+          invalid('Exact unique pending programme record required');
+        ids.add(identity);
+        commands.add(command.commandId);
+        return {
+          canonicalCommand,
+          commandFingerprint: command.fingerprint,
+          sourceRef: idempotencyKey(text(r.sourceRef)),
+          sourceFingerprint: sha(r.sourceFingerprint),
+          status: 'PENDING_REVIEW' as const,
+        };
+      })
+      .sort((a, b) =>
+        a.canonicalCommand < b.canonicalCommand
+          ? -1
+          : a.canonicalCommand > b.canonicalCommand
+            ? 1
+            : 0,
+      ),
+  );
+}
+/** Bounded DATA projection, not a reader authorization boundary. */
+export function readSocialLabourProgrammes(input: {
+  state: SocialEmploymentServiceState;
+  countryId: string;
+  offset: number;
+  limit: number;
+  sha256Hex: Sha256Hex;
+}) {
+  countryId(input.countryId);
+  if (
+    !Number.isSafeInteger(input.offset) ||
+    input.offset < 0 ||
+    !Number.isSafeInteger(input.limit) ||
+    input.limit < 1 ||
+    input.limit > 100
+  )
+    invalid('Bounded programme page required');
+  const rows = validateProgrammeRecords(
+    input.state.programmes ?? [],
+    input.state.worldId,
+    input.sha256Hex,
+  )
+    .map((r) => ({
+      record: r,
+      command: parseCanonicalCommand(
+        JSON.parse(r.canonicalCommand),
+        input.sha256Hex,
+      ),
+    }))
+    .filter((r) => r.command.countryId === input.countryId)
+    .map(({ record, command }) => ({
+      programmeId: programmeCommand(command, input.sha256Hex).programmeId,
+      terms: programmeCommand(command, input.sha256Hex),
+      status: record.status,
+      commandId: command.commandId,
+      commandFingerprint: command.fingerprint,
+      sourceRef: record.sourceRef,
+      sourceFingerprint: record.sourceFingerprint,
+      classification:
+        'TERMS_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE' as const,
+    }));
+  return freeze({
+    rows: rows.slice(input.offset, input.offset + input.limit),
+    total: rows.length,
+    nextOffset:
+      input.offset + input.limit < rows.length
+        ? input.offset + input.limit
+        : null,
+  });
+}
+export function prepareSocialLabourProgrammeCreation(input: {
+  command: CanonicalCommand;
+  state: SocialEmploymentServiceState;
+  readFacts: SocialLabourProgrammeReadFacts;
+  sha256Hex: Sha256Hex;
+}) {
+  const { command, sha256Hex: digest } = input,
+    intent = programmeCommand(command, digest),
+    f = inert(input.readFacts);
+  keys(f, [
+    'worldId',
+    'countryId',
+    'boundary',
+    'simTime',
+    'populationAvailability',
+    'head',
+    'localCurrency',
+    'sourceRef',
+    'sourceFingerprint',
+    'sourceRevocations',
+  ]);
+  const population = populationFacts({
+    boundary: f.boundary,
+    simTime: f.simTime,
+    populationAvailability: f.populationAvailability,
+  });
+  const state = validateServiceStateFromPopulation(
+    input.state,
+    population,
+    digest,
+  );
+  if (
+    state.worldId !== command.worldId ||
+    f.worldId !== command.worldId ||
+    f.countryId !== command.countryId
+  )
+    invalid('Programme actual source scope mismatch');
+  const sourceRef = idempotencyKey(text(f.sourceRef)),
+    sourceFingerprint = sha(f.sourceFingerprint);
+  if (array(f.sourceRevocations).length !== 0)
+    invalid('Programme source revoked');
+  const head = inert(f.head);
+  keys(head, ['worldVersion', 'eventSequence']);
+  integer(head.eventSequence);
+  const duplicate = state.programmes?.find(
+    (r) =>
+      parseCanonicalCommand(JSON.parse(r.canonicalCommand), digest)
+        .commandId === command.commandId,
+  );
+  if (duplicate) {
+    if (
+      duplicate.commandFingerprint !== command.fingerprint ||
+      duplicate.canonicalCommand !== canonicalSerialize(wire(command))
+    )
+      invalid('Programme idempotency conflict');
+    return freeze({
+      source: 'EXACT_DUPLICATE' as const,
+      state,
+      result: {
+        programmeId: intent.programmeId,
+        status: 'PENDING_REVIEW' as const,
+        classification:
+          'TERMS_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE' as const,
+      },
+      eventPayload: null,
+    });
+  }
+  if (
+    integer(head.worldVersion) !== command.expectedWorldVersion ||
+    population.simTime !== command.simTime.toCanonicalValue()
+  )
+    invalid('Programme exact head and simulated time required');
+  if (
+    intent.kind === 'RELOCATION_SUPPORT' &&
+    (intent.benefit.currency !== text(f.localCurrency) ||
+      !population.populationAvailability.some(
+        (p) =>
+          p.countryId === command.countryId &&
+          p.locationId === intent.locationId,
+      ))
+  )
+    invalid(
+      'Programme actual domestic destination and local currency required',
+    );
+  if (
+    population.populationAvailability.some(
+      (p) => p.countryId !== command.countryId,
+    )
+  )
+    invalid('Programme cross-country source rejected');
+  const record: SocialLabourProgrammeRecord = freeze({
+    canonicalCommand: canonicalSerialize(wire(command)),
+    commandFingerprint: command.fingerprint,
+    sourceRef,
+    sourceFingerprint,
+    status: 'PENDING_REVIEW',
+  });
+  const next = validateServiceStateFromPopulation(
+    { ...state, programmes: [...(state.programmes ?? []), record] },
+    population,
+    digest,
+  );
+  const result = {
+    programmeId: intent.programmeId,
+    status: 'PENDING_REVIEW' as const,
+    classification:
+      'TERMS_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE' as const,
+  };
+  return freeze({
+    source: 'APPLIED' as const,
+    state: next,
+    result,
+    eventPayload: {
+      schemaVersion: 'social-labour-programme-created-v1',
+      command: wire(command),
+      readFacts: f,
+      beforeStateHash: hash(state, digest),
+      afterStateHash: hash(next, digest),
+      result,
+    },
+  });
+}
+export function reduceSocialLabourProgrammeCreatedEvent(input: {
+  state: SocialEmploymentServiceState;
+  event: ReplayReducerEvent;
+  sha256Hex: Sha256Hex;
+}): SocialEmploymentServiceState {
+  const r = inert(input.event.payload);
+  keys(r, [
+    'schemaVersion',
+    'command',
+    'readFacts',
+    'beforeStateHash',
+    'afterStateHash',
+    'result',
+  ]);
+  const command = parseCanonicalCommand(r.command, input.sha256Hex);
+  programmeCommand(command, input.sha256Hex);
+  const f = r.readFacts as unknown as SocialLabourProgrammeReadFacts;
+  if (
+    r.schemaVersion !== 'social-labour-programme-created-v1' ||
+    input.event.eventType !== SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT ||
+    input.event.causationCommandId !== command.commandId ||
+    input.event.transitionId !== command.commandId ||
+    input.event.worldId !== command.worldId ||
+    input.event.worldVersionBefore !== command.expectedWorldVersion ||
+    input.event.worldVersionAfter !==
+      (BigInt(command.expectedWorldVersion!) + 1n).toString() ||
+    input.event.simTime.ticks !== command.simTime.ticks ||
+    input.event.correctsEventId !== null ||
+    input.event.sequence !== (BigInt(f.head.eventSequence) + 1n).toString()
+  )
+    invalid('Programme replay causation mismatch');
+  const state = validateServiceStateFromPopulation(
+    input.state,
+    populationFacts({
+      boundary: f.boundary,
+      simTime: f.simTime,
+      populationAvailability: f.populationAvailability,
+    }),
+    input.sha256Hex,
+  );
+  if (hash(state, input.sha256Hex) !== sha(r.beforeStateHash))
+    invalid('Programme replay predecessor mismatch');
+  const operation = prepareSocialLabourProgrammeCreation({
+    command,
+    state,
+    readFacts: f,
+    sha256Hex: input.sha256Hex,
+  });
+  if (
+    operation.source !== 'APPLIED' ||
+    canonicalSerialize(operation.eventPayload) !== canonicalSerialize(r)
+  )
+    invalid('Programme replay differs from actual calculation');
+  return operation.state;
 }

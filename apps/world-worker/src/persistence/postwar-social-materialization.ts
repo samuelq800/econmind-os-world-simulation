@@ -46,6 +46,7 @@ export async function observePostwarSocialMaterialization(input: {
       ? ['SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1']
       : [
           'SOCIAL_EMPLOYMENT_SERVICE_CREATED_V1',
+          'SOCIAL_LABOUR_PROGRAMME_CREATED_V1',
           'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1',
           'SOCIAL_JOB_MATCH_SETTLED_V1',
         ],

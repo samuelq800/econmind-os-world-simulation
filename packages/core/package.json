@@ -147,6 +147,14 @@
     "./postwar-industry-committed-runs-contract": {
       "types": "./dist/read-models/postwar-industry-committed-runs-contract.d.ts",
       "default": "./dist/read-models/postwar-industry-committed-runs-contract.js"
+    },
+    "./postwar-industry-utilisation-targets-contract": {
+      "types": "./dist/read-models/postwar-industry-utilisation-targets-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-utilisation-targets-contract.js"
+    },
+    "./social-labour-programme-public-contract": {
+      "types": "./dist/commands/social-labour-programme-public-contract.d.ts",
+      "default": "./dist/commands/social-labour-programme-public-contract.js"
     }
   },
   "scripts": {

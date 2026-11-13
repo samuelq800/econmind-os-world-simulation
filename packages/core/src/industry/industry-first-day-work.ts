@@ -30,6 +30,26 @@ import {
   INDUSTRY_FIRST_DAY_POLICY_RAW_SHA256,
   INDUSTRY_FIRST_DAY_USER_ADOPTION_RAW_SHA256,
 } from '../inventory/production-operating-basis.js';
+export const INDUSTRY_UTILISATION_TARGET_COMMAND =
+  'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1' as const;
+export const INDUSTRY_UTILISATION_TARGET_EVENT =
+  'INDUSTRY_UTILISATION_TARGET_SET_V1' as const;
+/** Desired utilisation only. No run, reservation, labour, payment or output. */
+export interface IndustryUtilisationTargetTerms {
+  readonly schemaVersion: 'postwar-industry-utilisation-target-v1';
+  readonly facilityId: string;
+  readonly targetPercent: string;
+  readonly startsAtSimTime: string;
+  readonly endsAtSimTime: string;
+  readonly policyVersion: typeof INDUSTRY_FIRST_DAY_POLICY_VERSION;
+  readonly sourceRef: string;
+  readonly sourceRawSha256: string;
+}
+interface UtilisationTarget {
+  readonly terms: Readonly<IndustryUtilisationTargetTerms>;
+  readonly frame: FinanceNativeBudgetCanonicalFrame;
+  readonly source: Readonly<IndustryFirstDayWorkSiteSource>;
+}
 export const INDUSTRY_RUN_SCHEDULE_COMMAND =
   'CORE_INDUSTRY_RUN_SCHEDULE_V1' as const;
 export const INDUSTRY_RUN_SCHEDULED_EVENT =
@@ -138,6 +158,7 @@ interface State {
   readonly worldId: string;
   readonly sources: readonly IndustryFirstDayWorkSiteSource[];
   readonly runs: ReadonlyMap<string, Run>;
+  readonly utilisationTargets: ReadonlyMap<string, UtilisationTarget>;
   readonly bookings: readonly IndustryFirstDayWorkAllocation[];
   readonly seen: ReadonlyMap<
     string,
@@ -265,6 +286,7 @@ export function createIndustryFirstDayWorkState(
       })),
     ),
     runs: new Map(),
+    utilisationTargets: new Map(),
     bookings: [],
     seen: new Map(),
   });
@@ -299,6 +321,50 @@ function frame(f: FinanceNativeBudgetCanonicalFrame, sha: Sha256Hex) {
     f.inventoryPostings.length
   )
     invalid('EXACT_ZERO_POSTING_COMMITTED_STAGE_REQUIRED');
+}
+export function parseIndustryUtilisationTargetIntent(
+  command: FinanceNativeBudgetCanonicalFrame['command'],
+  sha: Sha256Hex,
+): Readonly<IndustryUtilisationTargetTerms> {
+  const c = validateCanonicalCommand(command, sha);
+  if (
+    c.commandType !== INDUSTRY_UTILISATION_TARGET_COMMAND ||
+    c.officeId !== 'INDUSTRY' ||
+    c.authSubject === null ||
+    c.idempotencyKey === null ||
+    c.expectedWorldVersion === null
+  )
+    invalid('MANUAL_UTILISATION_TARGET_SCOPE_REQUIRED');
+  const p = record(JSON.parse(c.canonicalPayload));
+  exact(p, [
+    'schemaVersion',
+    'facilityId',
+    'targetPercent',
+    'startsAtSimTime',
+    'endsAtSimTime',
+    'policyVersion',
+    'sourceRef',
+    'sourceRawSha256',
+  ]);
+  for (const key of ['facilityId', 'sourceRef'])
+    if (!/^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u.test(text(p[key])))
+      invalid('CANONICAL_TARGET_REFERENCE_REQUIRED');
+  const percentage = new WorldDecimal(text(p.targetPercent));
+  const starts = whole(p.startsAtSimTime),
+    ends = whole(p.endsAtSimTime);
+  if (
+    p.schemaVersion !== 'postwar-industry-utilisation-target-v1' ||
+    p.policyVersion !== INDUSTRY_FIRST_DAY_POLICY_VERSION ||
+    !/^[a-f0-9]{64}$/u.test(text(p.sourceRawSha256)) ||
+    percentage.toFixed() !== p.targetPercent ||
+    percentage.lessThan('0') ||
+    percentage.greaterThan('100') ||
+    starts < c.simTime.ticks ||
+    ends <= starts ||
+    ends > 86400000n
+  )
+    invalid('FINITE_FIRST_DAY_TARGET_PERCENT_AND_WINDOW_REQUIRED');
+  return freeze(p) as unknown as Readonly<IndustryUtilisationTargetTerms>;
 }
 export function parseIndustryRunScheduleIntent(
   command: FinanceNativeBudgetCanonicalFrame['command'],
@@ -374,9 +440,34 @@ export function replayIndustryFirstDayRunFrame(
     return Object.freeze({ state: input.state, work: previous.work });
   }
   const runs = new Map(prior.runs),
+    utilisationTargets = new Map(prior.utilisationTargets),
     bookings = [...prior.bookings];
   let work: IndustryCompletedWork | null = null;
-  if (c.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND) {
+  if (c.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND) {
+    const terms = parseIndustryUtilisationTargetIntent(c, sha);
+    const s = prior.sources.find(
+      (v) => v.countryId === c.countryId && v.facilityId === terms.facilityId,
+    );
+    if (
+      !s ||
+      terms.policyVersion !== s.policyVersion ||
+      terms.sourceRef !== s.sourceRef ||
+      terms.sourceRawSha256 !== s.sourceRawSha256
+    )
+      invalid('EXACT_TARGET_SITE_SOURCE_REQUIRED');
+    if (
+      f.events[0]!.eventType !== INDUSTRY_UTILISATION_TARGET_EVENT ||
+      !equal(JSON.parse(f.events[0]!.canonicalPayload), targetPayload(terms, s))
+    )
+      invalid('EXACT_TARGET_SOURCE_EVENT_REQUIRED');
+    // The latest explicit target for a facility is the current intention.
+    // Earlier commands remain in canonical history; committed runs are untouched.
+    utilisationTargets.set(c.countryId + '\0' + terms.facilityId, {
+      terms,
+      frame: f,
+      source: s,
+    });
+  } else if (c.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND) {
     if (
       c.officeId !== 'INDUSTRY' ||
       c.authSubject === null ||
@@ -624,7 +715,13 @@ export function replayIndustryFirstDayRunFrame(
   const state = Object.freeze({}) as IndustryFirstDayWorkState,
     seen = new Map(prior.seen);
   seen.set(c.commandId, { fingerprint: c.fingerprint, state, work });
-  states.set(state, { ...prior, runs, bookings: freeze(bookings), seen });
+  states.set(state, {
+    ...prior,
+    runs,
+    utilisationTargets,
+    bookings: freeze(bookings),
+    seen,
+  });
   return Object.freeze({ state, work });
 }
 
@@ -646,6 +743,17 @@ export function readIndustryFirstDayWorkState(
           frame: r.frame,
           source: r.source,
           performedPersonMilliseconds: r.performed.toString(),
+        }),
+      ),
+    ),
+    utilisationTargets: Object.freeze(
+      [...s.utilisationTargets.values()].map((value) =>
+        Object.freeze({
+          terms: value.terms,
+          frame: value.frame,
+          source: value.source,
+          effect:
+            'TARGET_INTENT_ONLY_NO_RESERVED_CAPACITY_OR_PRODUCTION' as const,
         }),
       ),
     ),
@@ -715,6 +823,57 @@ function stageFrame(
     }),
     financialPostingBatches: Object.freeze([]),
     inventoryPostings: Object.freeze([]),
+  });
+}
+function targetPayload(
+  terms: Readonly<IndustryUtilisationTargetTerms>,
+  source: Readonly<IndustryFirstDayWorkSiteSource>,
+) {
+  return {
+    schemaVersion: 'postwar-industry-utilisation-target-set-v1',
+    terms,
+    source: {
+      worldId: source.worldId,
+      countryId: source.countryId,
+      facilityId: source.facilityId,
+      operatorId: source.operatorId,
+      seedId: source.seedId,
+      seedFingerprint: source.seedFingerprint,
+      admissionRef: source.admissionRef,
+      sourceRef: source.sourceRef,
+      sourceRawSha256: source.sourceRawSha256,
+    },
+  };
+}
+export function prepareIndustryUtilisationTargetFrame(
+  input: Readonly<{
+    state: IndustryFirstDayWorkState;
+    command: FinanceNativeBudgetCanonicalFrame['command'];
+    head: { worldVersion: string; eventSequence: string };
+    observedAtReal: string;
+  }>,
+  sha: Sha256Hex,
+) {
+  const prior = states.get(input.state);
+  if (!prior) invalid('ISSUED_WORK_STATE_REQUIRED');
+  const terms = parseIndustryUtilisationTargetIntent(input.command, sha);
+  const source = prior.sources.find(
+    (s) =>
+      s.countryId === input.command.countryId &&
+      s.facilityId === terms.facilityId,
+  );
+  if (!source) invalid('ACTUAL_TARGET_SITE_SOURCE_REQUIRED');
+  const frame = stageFrame(
+    {
+      ...input,
+      eventType: INDUSTRY_UTILISATION_TARGET_EVENT,
+      payload: targetPayload(terms, source),
+    },
+    sha,
+  );
+  return Object.freeze({
+    frame,
+    ...replayIndustryFirstDayRunFrame({ state: input.state, frame }, sha),
   });
 }
 export function prepareIndustryRunScheduleFrame(

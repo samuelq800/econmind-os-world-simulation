@@ -31,7 +31,10 @@ import {
   type IndustryWorkSourceCommitProtectionPort,
   type IndustryWorkSourceCommitRequest,
 } from './postwar-industry-work-runtime.js';
-import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
 import {
   INDUSTRY_RUN_SOURCE_PURPOSE,
   isPostwarIndustryRunSourceCommitProtectionPort,
@@ -50,6 +53,7 @@ import {
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
   SimTime,
   bindAuthoritativeTransition,
@@ -1664,7 +1668,11 @@ export class AtomicTransitionRepository {
     candidate: PrivateAtomicTransitionCandidate,
     head: { readonly worldVersion: string; readonly eventSequence: string },
   ): Promise<void> {
-    if (candidate.command.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND) return;
+    if (
+      candidate.command.commandType !== INDUSTRY_RUN_SCHEDULE_COMMAND &&
+      candidate.command.commandType !== INDUSTRY_UTILISATION_TARGET_COMMAND
+    )
+      return;
     const captured = candidate.deferredOfficeOperatingSourceReadBinding,
       port = this.#industryRunSourceCommitProtectionPort;
     if (
@@ -2355,7 +2363,9 @@ export class AtomicTransitionRepository {
     head: { readonly worldVersion: string; readonly eventSequence: string },
   ): Promise<void> {
     if (
-      candidate.command.commandType !== SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
+      candidate.command.commandType !==
+        SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND &&
+      candidate.command.commandType !== SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
     )
       return;
     const captured = candidate.deferredOfficeOperatingSourceReadBinding;
@@ -2376,7 +2386,11 @@ export class AtomicTransitionRepository {
     const request: Readonly<SocialServiceCreationSourceCommitRequest> =
       Object.freeze({
         phase: 'BEFORE_EVENTS',
-        purpose: 'SOCIAL_EMPLOYMENT_SERVICE_CREATE_SOURCE_EVALUATION_V1',
+        purpose:
+          candidate.command.commandType ===
+          SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+            ? 'SOCIAL_LABOUR_PROGRAMME_CREATE_SOURCE_EVALUATION_V1'
+            : 'SOCIAL_EMPLOYMENT_SERVICE_CREATE_SOURCE_EVALUATION_V1',
         command: candidate.command,
         transition: candidate.transition,
         currentHead: Object.freeze({

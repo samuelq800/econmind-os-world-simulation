@@ -1,4 +1,15 @@
 import {
+  INDUSTRY_UTILISATION_TARGETS_DATASET,
+  INDUSTRY_UTILISATION_TARGETS_NATURE,
+  parseIndustryUtilisationTargetRow,
+  parseIndustryUtilisationTargetsCoverage,
+} from '@econmind/core/postwar-industry-utilisation-targets-contract';
+import {
+  SOCIAL_PROGRAMMES_DATASET,
+  SOCIAL_PROGRAMMES_NATURE,
+  parseSocialProgrammeRowDto,
+} from '@econmind/core/social-labour-programme-public-contract';
+import {
   INDUSTRY_COMMITTED_RUNS_DATASET,
   INDUSTRY_COMMITTED_RUNS_NATURE,
   parseIndustryCommittedRunRow,
@@ -69,7 +80,13 @@ export const POSTWAR_RUNTIME_SCHEMA = 'postwar-office-runtime-read-v1';
 export const POSTWAR_RUNTIME_PATH = '/v1/postwar-office-runtime';
 export const officeDatasets: Readonly<Record<string, readonly string[]>> =
   Object.freeze({
-    SOCIAL: ['positions', 'service-pools', 'offers', 'minimum-wage'],
+    SOCIAL: [
+      'positions',
+      'service-pools',
+      'offers',
+      'minimum-wage',
+      SOCIAL_PROGRAMMES_DATASET,
+    ],
     FINANCE: [
       'currency-fx',
       'opening-financial-legs',
@@ -87,6 +104,7 @@ export const officeDatasets: Readonly<Record<string, readonly string[]>> =
     INDUSTRY: [
       INDUSTRY_UTILITY_PLANNING_DATASET,
       INDUSTRY_COMMITTED_RUNS_DATASET,
+      INDUSTRY_UTILISATION_TARGETS_DATASET,
       INDUSTRY_RUN_PARAMETERS_DATASET,
       POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
       'opening-inventory-entries',
@@ -609,6 +627,42 @@ export function createPostwarRuntimeClient(
           )
             throw Error('INDUSTRY_RUN_PARAMETER_SCOPE_MISMATCH');
         }
+        const currentSocialProgrammes =
+          dataset === SOCIAL_PROGRAMMES_DATASET &&
+          c.identity.officeId === 'SOCIAL' &&
+          source.dataNature === SOCIAL_PROGRAMMES_NATURE;
+        if (dataset === SOCIAL_PROGRAMMES_DATASET && !currentSocialProgrammes)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentSocialProgrammes) {
+          const programmes = rows.map(parseSocialProgrammeRowDto),
+            pointer = row(source.sourcePointer),
+            context = row(source.currentSocialProgrammeContext);
+          if (
+            source.sourceRevision !== 'SOCIAL_PROGRAMME_TERMS_READ_V1' ||
+            pointer?.rowOrigin !== 'fixed-social-programme-runtime' ||
+            pointer.rowBinding !==
+              'programmeId+commandFingerprint+sourceRef+sourceFingerprint' ||
+            programmes.some((p) => p.countryId !== c.identity.countryId) ||
+            new Set(programmes.map((p) => p.programmeId)).size !==
+              programmes.length ||
+            (previous &&
+              programmes.some((p) =>
+                previous.rows.some((old) => old.programmeId === p.programmeId),
+              )) ||
+            !context ||
+            Object.keys(context).sort().join('|') !==
+              'localCurrency|locationIds' ||
+            !canonicalId(context.localCurrency) ||
+            !Array.isArray(context.locationIds) ||
+            context.locationIds.length > 1000 ||
+            context.locationIds.some((x) => !canonicalId(x)) ||
+            new Set(context.locationIds).size !== context.locationIds.length ||
+            source.currentStateBinding !== undefined ||
+            source.currentPrefixCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentSocialProgrammeContext !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const currentCommittedRuns =
           dataset === INDUSTRY_COMMITTED_RUNS_DATASET &&
           c.identity.officeId === 'INDUSTRY' &&
@@ -651,6 +705,52 @@ export function createPostwarRuntimeClient(
           )
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
         } else if (source.currentIndustryCommittedRunsCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        const currentUtilisationTargets =
+          dataset === INDUSTRY_UTILISATION_TARGETS_DATASET &&
+          c.identity.officeId === 'INDUSTRY' &&
+          source.dataNature === INDUSTRY_UTILISATION_TARGETS_NATURE;
+        if (
+          dataset === INDUSTRY_UTILISATION_TARGETS_DATASET &&
+          !currentUtilisationTargets
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentUtilisationTargets) {
+          const coverage = parseIndustryUtilisationTargetsCoverage(
+              source.currentIndustryUtilisationTargetsCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            runs = rows.map(parseIndustryUtilisationTargetRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            pointer?.rowOrigin !==
+              'fixed-industry-utilisation-targets-runtime' ||
+            pointer.rowBinding !==
+              'facilityId+commandFingerprint+eventFingerprint' ||
+            runs.some(
+              (r) =>
+                r.countryId !== c.identity.countryId ||
+                r.facilityId !== coverage.facilityId ||
+                BigInt(r.committedWorldVersion) >
+                  BigInt(coverage.globalWorldVersion),
+            ) ||
+            new Set(runs.map((r) => r.facilityId)).size !== runs.length ||
+            (previous &&
+              runs.some((r) =>
+                previous.rows.some((p) => row(p)?.facilityId === r.facilityId),
+              )) ||
+            source.currentFinancialCoverage !== undefined ||
+            source.currentIndustryUtilityPlanningCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (
+          source.currentIndustryUtilisationTargetsCoverage !== undefined
+        )
           throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const currentUtilityPlanning =
           dataset === INDUSTRY_UTILITY_PLANNING_DATASET &&
@@ -764,6 +864,8 @@ export function createPostwarRuntimeClient(
           !currentIndustry &&
           !currentUtilityPlanning &&
           !currentCommittedRuns &&
+          !currentUtilisationTargets &&
+          !currentSocialProgrammes &&
           !financialCurrent &&
           !historicalFacts
         )

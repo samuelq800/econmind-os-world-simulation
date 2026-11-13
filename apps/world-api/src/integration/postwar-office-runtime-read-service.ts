@@ -1,4 +1,16 @@
 import {
+  INDUSTRY_UTILISATION_TARGETS_DATASET,
+  INDUSTRY_UTILISATION_TARGETS_NATURE,
+  parseIndustryUtilisationTargetRow,
+  parseIndustryUtilisationTargetsCoverage,
+  type IndustryUtilisationTargetsCoverage,
+} from '@econmind/core/postwar-industry-utilisation-targets-contract';
+import {
+  SOCIAL_PROGRAMMES_DATASET,
+  SOCIAL_PROGRAMMES_NATURE,
+  parseSocialProgrammeRowDto,
+} from '@econmind/core/social-labour-programme-public-contract';
+import {
   INDUSTRY_COMMITTED_RUNS_DATASET,
   INDUSTRY_COMMITTED_RUNS_NATURE,
   parseIndustryCommittedRunRow,
@@ -111,7 +123,9 @@ type PageSourceNature =
   | PostwarTradeCurrentSource['dataNature']
   | 'ADMITTED_IMMUTABLE_OPENING_FACTS'
   | typeof INDUSTRY_UTILITY_PLANNING_NATURE
-  | typeof INDUSTRY_COMMITTED_RUNS_NATURE;
+  | typeof INDUSTRY_COMMITTED_RUNS_NATURE
+  | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
+  | typeof SOCIAL_PROGRAMMES_NATURE;
 type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
   readonly source: Omit<
     OriginalSuccessPage['source'],
@@ -129,6 +143,11 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
     readonly dataNature: PageSourceNature;
     readonly currentIndustryUtilityPlanningCoverage?: IndustryUtilityPlanningCoverage;
     readonly currentIndustryCommittedRunsCoverage?: IndustryCommittedRunsCoverage;
+    readonly currentIndustryUtilisationTargetsCoverage?: IndustryUtilisationTargetsCoverage;
+    readonly currentSocialProgrammeContext?: Readonly<{
+      localCurrency: string;
+      locationIds: readonly string[];
+    }>;
     readonly currentFinancialCoverage?: FinancialReadSource['currentFinancialCoverage'];
     readonly centralBankOpeningInstruments?: PostwarFinancialMixedCurrentSource['centralBankOpeningInstruments'];
     readonly currentCaptainCoverage?: PostwarCaptainCurrentSource['currentCaptainCoverage'];
@@ -145,7 +164,9 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
       | Readonly<{
           dataNature:
             | typeof INDUSTRY_UTILITY_PLANNING_NATURE
-            | typeof INDUSTRY_COMMITTED_RUNS_NATURE;
+            | typeof INDUSTRY_COMMITTED_RUNS_NATURE
+            | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
+            | typeof SOCIAL_PROGRAMMES_NATURE;
           canonicalSeedSha256?: never;
         }>
       | Readonly<{
@@ -153,6 +174,8 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
             PageSourceNature,
             | typeof INDUSTRY_UTILITY_PLANNING_NATURE
             | typeof INDUSTRY_COMMITTED_RUNS_NATURE
+            | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
+            | typeof SOCIAL_PROGRAMMES_NATURE
           >;
           canonicalSeedSha256: string;
         }>
@@ -161,9 +184,11 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
 const OFFICE_RUNTIME_DATASETS = Object.freeze({
   ...POSTWAR_PROJECTION_DATASETS,
   ...POSTWAR_FINANCIAL_CURRENT_DATASETS,
+  SOCIAL: [SOCIAL_PROGRAMMES_DATASET, ...POSTWAR_PROJECTION_DATASETS.SOCIAL],
   INDUSTRY: [
     INDUSTRY_UTILITY_PLANNING_DATASET,
     INDUSTRY_COMMITTED_RUNS_DATASET,
+    INDUSTRY_UTILISATION_TARGETS_DATASET,
     INDUSTRY_RUN_PARAMETERS_DATASET,
     POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
     ...POSTWAR_PROJECTION_DATASETS.INDUSTRY,
@@ -219,6 +244,10 @@ export type PostwarOfficeRuntimeServiceResponse = Readonly<{
             sourcePointer: SuccessPage['source']['sourcePointer'];
             currentIndustryUtilityPlanningCoverage?: IndustryUtilityPlanningCoverage;
             currentEmploymentServiceCreationOptions?: PostwarSocialServiceCreationPlanningResult;
+            currentSocialProgrammeContext?: Readonly<{
+              localCurrency: string;
+              locationIds: readonly string[];
+            }>;
             currentStateBinding?: SuccessPage['source']['currentStateBinding'];
             currentPrefixCoverage?: SuccessPage['source']['currentPrefixCoverage'];
             currentFinancialCoverage?: SuccessPage['source']['currentFinancialCoverage'];
@@ -418,6 +447,12 @@ function pageBody(
                   'LEGACY_OPERATING_ADOPTION_CONTEXT_NOT_DIRECT_ROW_SOURCE',
               }
             : page.source.sourcePointer,
+        ...(page.source.currentSocialProgrammeContext === undefined
+          ? {}
+          : {
+              currentSocialProgrammeContext:
+                page.source.currentSocialProgrammeContext,
+            }),
         ...(page.source.currentStateBinding === undefined
           ? {}
           : { currentStateBinding: page.source.currentStateBinding }),
@@ -457,6 +492,12 @@ function pageBody(
           : {
               currentIndustryCommittedRunsCoverage:
                 page.source.currentIndustryCommittedRunsCoverage,
+            }),
+        ...(page.source.currentIndustryUtilisationTargetsCoverage === undefined
+          ? {}
+          : {
+              currentIndustryUtilisationTargetsCoverage:
+                page.source.currentIndustryUtilisationTargetsCoverage,
             }),
         ...(page.source.currentCaptainAllocationOptions === undefined
           ? {}
@@ -662,10 +703,178 @@ export function createPostwarOfficeRuntimeReadService(
         if (signal.aborted) return fail(499, 'CANCELLED');
         const claims = await claimsFor(input.authorization, signal);
         if (
+          request.office === 'SOCIAL' &&
+          request.dataset === SOCIAL_PROGRAMMES_DATASET
+        ) {
+          const programmeReader = socialServiceCreationPlanningReader;
+          const selectSocial = (identity: ValidatedJwtClaims) =>
+            snapshots.withReadOnlyExecutor(
+              {
+                verifiedSubject: identity.authSubject,
+                worldId: c.admittedWorldPins.worldId,
+                signal,
+              },
+              async (read) => {
+                const headers = await store.readCurrentSeatHeadersFrom(read, {
+                  worldId: c.admittedWorldPins.worldId,
+                });
+                if (headers.some((h) => !validHeader(h, identity)))
+                  throw Error('READ_BINDING_UNAVAILABLE');
+                const selected = headers.filter(
+                  (h) => h.scope.officeId === 'SOCIAL',
+                );
+                return selected.length === 1 ? selected[0]! : null;
+              },
+            );
+          const result = await trackRequestCompletion(
+            (async (): Promise<PostwarOfficeRuntimeServiceResponse> => {
+              const before = await selectSocial(claims);
+              if (!before) return fail(403, 'CURRENT_SOCIAL_SEAT_REQUIRED');
+              if (!programmeReader?.readProgrammes)
+                return fail(503, 'SOCIAL_PROGRAMMES_NOT_INSTALLED');
+              const read = await programmeReader.readProgrammes({
+                countryId: before.scope.countryId,
+                expectedHead: {
+                  worldVersion: before.source.worldVersion,
+                  eventSequence: before.source.eventSequence,
+                },
+                offset: request.offset,
+                // Eligibility text can contain 2048 characters; bounded
+                // slices remain usable within the existing 48 KiB row budget.
+                limit: Math.min(request.limit, 3),
+              });
+              if (signal.aborted) return fail(499, 'CANCELLED');
+              if (read.status !== 'AVAILABLE')
+                return fail(read.status === 'STALE' ? 409 : 503, read.code);
+              const rows = read.data.rows.map((r) =>
+                parseSocialProgrammeRowDto({
+                  countryId: before.scope.countryId,
+                  ...r,
+                }),
+              );
+              const { total, nextOffset, creationContext } = read.data;
+              if (
+                rows.length > request.limit ||
+                !Number.isSafeInteger(total) ||
+                total < request.offset + rows.length ||
+                total > 100000 ||
+                (nextOffset !== null &&
+                  nextOffset !== request.offset + rows.length) ||
+                (nextOffset === null) !==
+                  (request.offset + rows.length === total) ||
+                new Set(rows.map((r) => r.programmeId)).size !== rows.length ||
+                !creationContext ||
+                creationContext.locationIds.length > 1000
+              )
+                return fail(503, 'SOCIAL_PROGRAMME_PAGE_INVALID');
+              // Each checkout ends before the next: works with a one-connection
+              // read pool and rechecks JWT/seat/head after the Worker snapshot.
+              const freshClaims = await claimsFor(input.authorization, signal);
+              const response = await snapshots.withReadOnlyExecutor(
+                {
+                  verifiedSubject: freshClaims.authSubject,
+                  worldId: c.admittedWorldPins.worldId,
+                  signal,
+                },
+                async (executor) => {
+                  const headers = await store.readCurrentSeatHeadersFrom(
+                    executor,
+                    { worldId: c.admittedWorldPins.worldId },
+                  );
+                  if (headers.some((h) => !validHeader(h, freshClaims)))
+                    return fail(503, 'READ_BINDING_UNAVAILABLE');
+                  const selected = headers.filter(
+                    (h) => h.scope.officeId === 'SOCIAL',
+                  );
+                  if (selected.length !== 1)
+                    return fail(403, 'CURRENT_SOCIAL_SEAT_REQUIRED');
+                  const fresh = selected[0]!;
+                  if (canonicalSerialize(before) !== canonicalSerialize(fresh))
+                    return fail(409, 'STALE_SOURCE_SCOPE');
+                  if (
+                    !isPostwarSocialServiceCreationPlanningReader(
+                      programmeReader,
+                      c.admittedWorldPins.worldId,
+                    )
+                  )
+                    return fail(503, 'SOCIAL_PROGRAMMES_NOT_INSTALLED');
+                  const sourceVersion =
+                    'sha256:' +
+                    createHash('sha256')
+                      .update(
+                        canonicalSerialize({
+                          worldId: fresh.scope.worldId,
+                          countryId: fresh.scope.countryId,
+                          source: fresh.source,
+                          dataset: SOCIAL_PROGRAMMES_DATASET,
+                        }),
+                      )
+                      .digest('hex');
+                  if (
+                    request.expectedVersion &&
+                    request.expectedVersion !== sourceVersion
+                  )
+                    return fail(409, 'STALE_SOURCE_SCOPE');
+                  const encoded = canonicalSerialize(rows);
+                  if (Buffer.byteLength(encoded) > 48000)
+                    return fail(503, 'RESPONSE_LIMIT_EXCEEDED');
+                  const hashed = await executor.query<{ hash: string }>(
+                    "select encode(sha256(convert_to($1::jsonb::text,'UTF8')),'hex') hash",
+                    [encoded],
+                  );
+                  if (
+                    hashed.rows.length !== 1 ||
+                    !/^[a-f0-9]{64}$/u.test(hashed.rows[0]!.hash)
+                  )
+                    return fail(503, 'READ_BINDING_UNAVAILABLE');
+                  const result = pageBody(
+                    {
+                      status: rows.length ? 'PAGE' : 'EMPTY',
+                      scope: fresh.scope,
+                      source: {
+                        ...fresh.source,
+                        dataNature: SOCIAL_PROGRAMMES_NATURE,
+                        sourceVersion,
+                        sourceRevision: 'SOCIAL_PROGRAMME_TERMS_READ_V1',
+                        pageHash: hashed.rows[0]!.hash,
+                        returnedRowsHash: hashed.rows[0]!.hash,
+                        hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
+                        sourcePointer: {
+                          rowOrigin: 'fixed-social-programme-runtime',
+                          rowBinding:
+                            'programmeId+commandFingerprint+sourceRef+sourceFingerprint',
+                        },
+                        currentSocialProgrammeContext: creationContext,
+                      },
+                      page: {
+                        offset: request.offset,
+                        limit: request.limit,
+                        returned: rows.length,
+                        total,
+                        nextOffset,
+                      },
+                      rows,
+                    },
+                    request,
+                  );
+                  if (Buffer.byteLength(JSON.stringify(result.body)) > 65536)
+                    return fail(503, 'RESPONSE_LIMIT_EXCEEDED');
+                  return result;
+                },
+              );
+              return response ?? fail(503, 'READ_BINDING_UNAVAILABLE');
+            })(),
+          );
+          return signal.aborted ? fail(499, 'CANCELLED') : result;
+        }
+        if (
           request.office === 'INDUSTRY' &&
           (request.dataset === INDUSTRY_UTILITY_PLANNING_DATASET ||
-            request.dataset === INDUSTRY_COMMITTED_RUNS_DATASET)
+            request.dataset === INDUSTRY_COMMITTED_RUNS_DATASET ||
+            request.dataset === INDUSTRY_UTILISATION_TARGETS_DATASET)
         ) {
+          const utilisationTargets =
+            request.dataset === INDUSTRY_UTILISATION_TARGETS_DATASET;
           const committedRuns =
             request.dataset === INDUSTRY_COMMITTED_RUNS_DATASET;
           // Release each bounded read connection before using the independent
@@ -722,9 +931,11 @@ export function createPostwarOfficeRuntimeReadService(
                 )
               )
                 return fail(503, 'INDUSTRY_UTILITY_PLANNING_NOT_INSTALLED');
-              const readPlanning = committedRuns
-                ? industryUtilityPlanningReader.readCommittedRunsPage
-                : industryUtilityPlanningReader.readPage;
+              const readPlanning = utilisationTargets
+                ? industryUtilityPlanningReader.readUtilisationTargetsPage
+                : committedRuns
+                  ? industryUtilityPlanningReader.readCommittedRunsPage
+                  : industryUtilityPlanningReader.readPage;
               if (!readPlanning)
                 return fail(503, 'INDUSTRY_COMMITTED_RUNS_NOT_INSTALLED');
               const planning = await readPlanning({
@@ -795,20 +1006,28 @@ export function createPostwarOfficeRuntimeReadService(
                     ps.countryId !== fresh.scope.countryId
                   )
                     return fail(403, 'CURRENT_SCOPE_NOT_AUTHORIZED');
-                  const coverage = committedRuns
-                    ? parseIndustryCommittedRunsCoverage(
-                        'currentIndustryCommittedRunsCoverage' in ps
-                          ? ps.currentIndustryCommittedRunsCoverage
+                  const coverage = utilisationTargets
+                    ? parseIndustryUtilisationTargetsCoverage(
+                        'currentIndustryUtilisationTargetsCoverage' in ps
+                          ? ps.currentIndustryUtilisationTargetsCoverage
                           : undefined,
                       )
-                    : parseIndustryUtilityPlanningCoverage(
-                        'currentIndustryUtilityPlanningCoverage' in ps
-                          ? ps.currentIndustryUtilityPlanningCoverage
-                          : undefined,
-                      );
-                  const rows = committedRuns
-                    ? planning.rows.map(parseIndustryCommittedRunRow)
-                    : planning.rows.map(parseIndustryUtilityPlanningRow);
+                    : committedRuns
+                      ? parseIndustryCommittedRunsCoverage(
+                          'currentIndustryCommittedRunsCoverage' in ps
+                            ? ps.currentIndustryCommittedRunsCoverage
+                            : undefined,
+                        )
+                      : parseIndustryUtilityPlanningCoverage(
+                          'currentIndustryUtilityPlanningCoverage' in ps
+                            ? ps.currentIndustryUtilityPlanningCoverage
+                            : undefined,
+                        );
+                  const rows = utilisationTargets
+                    ? planning.rows.map(parseIndustryUtilisationTargetRow)
+                    : committedRuns
+                      ? planning.rows.map(parseIndustryCommittedRunRow)
+                      : planning.rows.map(parseIndustryUtilityPlanningRow);
                   if (
                     coverage.countryId !== fresh.scope.countryId ||
                     coverage.globalWorldVersion !== h.worldVersion ||
@@ -816,14 +1035,16 @@ export function createPostwarOfficeRuntimeReadService(
                     rows.some((r) => r.countryId !== fresh.scope.countryId) ||
                     new Set(
                       rows.map((r) =>
-                        'runId' in r && committedRuns
-                          ? r.runId
-                          : 'planningRef' in r
-                            ? r.planningRef
-                            : '',
+                        utilisationTargets
+                          ? r.facilityId
+                          : 'runId' in r && committedRuns
+                            ? r.runId
+                            : 'planningRef' in r
+                              ? r.planningRef
+                              : '',
                       ),
                     ).size !== rows.length ||
-                    (committedRuns &&
+                    ((committedRuns || utilisationTargets) &&
                       rows.some(
                         (r) =>
                           !('facilityId' in coverage) ||
@@ -839,9 +1060,11 @@ export function createPostwarOfficeRuntimeReadService(
                         ...h,
                         ...ps,
                         sourceRevision: coverage.reducerVersion,
-                        dataNature: committedRuns
-                          ? INDUSTRY_COMMITTED_RUNS_NATURE
-                          : INDUSTRY_UTILITY_PLANNING_NATURE,
+                        dataNature: utilisationTargets
+                          ? INDUSTRY_UTILISATION_TARGETS_NATURE
+                          : committedRuns
+                            ? INDUSTRY_COMMITTED_RUNS_NATURE
+                            : INDUSTRY_UTILITY_PLANNING_NATURE,
                       },
                       page: planning.page,
                       rows,

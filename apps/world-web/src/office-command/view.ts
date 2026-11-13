@@ -1,3 +1,5 @@
+import { parseIndustryUtilisationTargetRow } from '@econmind/core/postwar-industry-utilisation-targets-contract';
+import { renderSocialProgrammeForm } from '../social-employment/programme-form.js';
 import { parseIndustryCommittedRunRow } from '@econmind/core/postwar-industry-committed-runs-contract';
 import {
   INDUSTRY_UTILITY_PLANNING_DATASET,
@@ -51,6 +53,21 @@ export const SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING = Object.freeze({
     'social-u0934-1',
     'social-u0934-2',
   ]),
+} as const);
+
+/** Separate U0933/U0934 terms lifecycle; none of these fields are a licensed
+ * referral pool creation or an eligibility/payment instruction. */
+export const SOCIAL_PROGRAMME_TERMS_CATALOG_BINDING = Object.freeze({
+  moduleId: 'social-10',
+  fields: Object.freeze({
+    'social-u0933-0': 'RELOCATION_SUPPORT.locationId',
+    'social-u0933-1': 'RELOCATION_SUPPORT.participants',
+    'social-u0933-2': 'RELOCATION_SUPPORT.benefit',
+    'social-u0934-0': 'RETURN_TO_WORK.eligible',
+    'social-u0934-1': 'RETURN_TO_WORK.capacity',
+    'social-u0934-2': 'RETURN_TO_WORK.duration',
+  }),
+  scope: 'PENDING_REVIEW_TERMS_ONLY_NOT_APPROVAL_FUNDING_OR_POPULATION_CHANGE',
 } as const);
 
 /** Additive manual-intent drawer; no default economic payload or fixture data. */
@@ -297,6 +314,26 @@ export function installOfficeCommand(
     }
     if (currentView()?.role === 'social') {
       dialog.append(
+        renderSocialProgrammeForm(document, {
+          page: state.socialProgrammesPage,
+          enabled: state.canStage,
+          code: state.socialProgrammesCode,
+          stage: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialProgramme(draft),
+        }),
+      );
+      if (
+        state.socialProgrammesPage?.page.nextOffset !== null &&
+        state.socialProgrammesPage
+      )
+        dialog.append(
+          button('下一项目页', 'social-next-programmes', state.canRead, () =>
+            owner.nextSocialProgrammesPage(),
+          ),
+        );
+
+      dialog.append(
         renderSocialEmploymentServiceCreateForm(document, {
           page: state.socialPoolsPage,
           enabled: state.canStage,
@@ -375,10 +412,39 @@ export function installOfficeCommand(
           state.canStage,
           (draft) =>
             active(owner, lifetime, dialog!) && owner.stageIndustryRun(draft),
+          (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageIndustryUtilisationTarget(draft),
         ),
       );
     }
     if (currentView()?.role === 'industry') {
+      const targets = document.createElement('section');
+      targets.dataset.industryUtilisationTargets = '';
+      targets.append(
+        node('h3', '已保存的设施利用率目标'),
+        node(
+          'p',
+          '仅为明确窗口的目标意图，不代表实际产出、资源预留或已确认可行性，不改动已有排产。',
+        ),
+      );
+      if (!state.targetPage)
+        targets.append(
+          node('p', '目标读取不可用：' + (state.targetCode ?? '尚未读取')),
+        );
+      else if (state.targetPage.status === 'EMPTY')
+        targets.append(node('p', '当前设施尚未设置目标。'));
+      else
+        for (const raw of state.targetPage.rows) {
+          const value = parseIndustryUtilisationTargetRow(raw);
+          targets.append(
+            node(
+              'p',
+              `${value.facilityId}：${value.targetPercent}% · ${value.startsAtSimTime}–${value.endsAtSimTime} 模拟毫秒 · 提交 ${value.commandId}`,
+            ),
+          );
+        }
+      dialog.append(targets);
       const runs = state.committedRunsPage;
       const section = document.createElement('section');
       section.dataset.industryCommittedRuns = '';

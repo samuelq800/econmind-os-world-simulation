@@ -5,6 +5,7 @@ import { expect, it } from 'vitest';
 import {
   COMMAND_SCHEMA_VERSION,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   parseCanonicalCommand,
 } from '@econmind/core';
 import {
@@ -148,4 +149,43 @@ it('rejects structural copies of private source ports and public reader bindings
   expect(() =>
     createPostwarSocialServiceCreationPlanningReader({ binding: {} as never }),
   ).toThrow('GENUINE_FINANCE_SOCIAL_RUNTIME_CONNECTION_REQUIRED');
+});
+
+it('rejects an unissued programme commit authorization before any database work', async () => {
+  const f = fixture();
+  const command = parseCanonicalCommand(
+    {
+      schemaVersion: COMMAND_SCHEMA_VERSION,
+      worldId,
+      countryId: 'COUNTRY_01',
+      officeId: 'SOCIAL',
+      actorId: 'ACTOR_TEST_ONLY',
+      authSubject: '11111111-1111-4111-8111-111111111111',
+      commandId: 'PROGRAMME_COMMAND_TEST_ONLY',
+      commandType: SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+      correlationId: 'TRACE_TEST_ONLY',
+      expectedWorldVersion: '0',
+      idempotencyKey: 'PROGRAMME_COMMAND_TEST_ONLY',
+      simTime: '0',
+      submittedAtReal: '2026-11-13T00:00:00.000Z',
+      payload: {
+        schemaVersion: 'social-labour-programme-create-v1',
+        programmeId: 'PROGRAMME_TEST_ONLY',
+        kind: 'RETURN_TO_WORK',
+        eligible: 'Explicit proposed condition',
+        capacity: '1',
+        duration: { amount: '2', unit: 'SIM_DAY' },
+      },
+    },
+    sha,
+  );
+  await expect(
+    f.runtime.candidateFactory.prepare({
+      command,
+      commitAuthorization: null,
+      observedAtReal: '2026-11-13T00:00:00.000Z',
+    }),
+  ).rejects.toThrow('GENUINE_CURRENT_SOCIAL_PROOF_REQUIRED');
+  expect(f.borrows()).toBe(0);
+  expect(f.statements).toEqual([]);
 });

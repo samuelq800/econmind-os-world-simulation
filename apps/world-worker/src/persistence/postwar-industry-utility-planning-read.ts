@@ -1,4 +1,8 @@
 import {
+  createPostwarIndustryUtilisationTargetsReader,
+  type PostwarIndustryUtilisationTargetsReader,
+} from './postwar-industry-utilisation-targets-read.js';
+import {
   createPostwarIndustryCommittedRunsReader,
   type PostwarIndustryCommittedRunsPage,
 } from './postwar-industry-committed-runs-read.js';
@@ -77,6 +81,7 @@ export interface PostwarIndustryUtilityPlanningReader {
       expectedVersion?: string;
     }>,
   ): Promise<PostwarIndustryUtilityPlanningPage>;
+  readUtilisationTargetsPage?: PostwarIndustryUtilisationTargetsReader['readPage'];
 }
 const readers = new WeakMap<
   object,
@@ -110,6 +115,8 @@ export function createPostwarIndustryUtilityPlanningReader(
   const committedRuns = createPostwarIndustryCommittedRunsReader(config);
   const reader: Readonly<PostwarIndustryUtilityPlanningReader> = Object.freeze({
     readCommittedRunsPage: committedRuns.readPage,
+    readUtilisationTargetsPage:
+      createPostwarIndustryUtilisationTargetsReader(config).readPage,
     async readPage(
       input: Parameters<PostwarIndustryUtilityPlanningReader['readPage']>[0],
     ): Promise<PostwarIndustryUtilityPlanningPage> {

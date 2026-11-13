@@ -19,6 +19,7 @@ import {
 } from './central-bank-open-market-operation.js';
 import {
   INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
   INDUSTRY_FIRST_DAY_WORK_COMMAND,
   createIndustryFirstDayWorkState,
   extendIndustryFirstDayWorkSources,
@@ -167,6 +168,10 @@ import {
 } from './social-employment-position-lifecycle.js';
 import {
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT,
+  reduceSocialLabourProgrammeCreatedEvent,
+  type SocialLabourProgrammeReadFacts,
   SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
   reduceSocialEmploymentServiceCreatedEvent,
   type SocialEmploymentServiceCreationReadFacts,
@@ -1694,7 +1699,8 @@ function foldFinanceNativeBudgetMixedPrefix(
     if (
       financialReplay ||
       captainEnabled ||
-      command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
+      command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+      command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
     ) {
       const canonicalReceipt = createFinalCommandReceipt({
         command,
@@ -1885,6 +1891,7 @@ function foldFinanceNativeBudgetMixedPrefix(
         eventSequence: frame.events.at(-1)!.sequence,
       });
     } else if (
+      command.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND ||
       command.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
       command.commandType === INDUSTRY_FIRST_DAY_WORK_COMMAND
     ) {
@@ -2250,13 +2257,15 @@ function foldFinanceNativeBudgetMixedPrefix(
       const type =
         command.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND
           ? SOCIAL_POSITION_OFFER_CREATED_EVENT
-          : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
-            ? SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT
-            : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
-              ? SOCIAL_SERVICE_PLAN_EVENT
-              : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
-                ? SOCIAL_JOB_MATCH_EVENT
-                : null;
+          : command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+            ? SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT
+            : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
+              ? SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT
+              : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
+                ? SOCIAL_SERVICE_PLAN_EVENT
+                : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
+                  ? SOCIAL_JOB_MATCH_EVENT
+                  : null;
       const event = frame.events[0];
       if (
         type === null ||
@@ -2320,6 +2329,31 @@ function foldFinanceNativeBudgetMixedPrefix(
             eventSequence: event.sequence,
           },
         });
+      } else if (type === SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT) {
+        const original = socialCreationOriginals.get(country.countryId),
+          facts = payload.readFacts as SocialLabourProgrammeReadFacts;
+        if (
+          !original ||
+          !facts ||
+          original.worldId !== facts.worldId ||
+          original.countryId !== facts.countryId ||
+          original.localCurrency !== facts.localCurrency ||
+          original.sourceRef !== facts.sourceRef ||
+          original.sourceFingerprint !== facts.sourceFingerprint ||
+          !same(
+            original.populationAvailability,
+            facts.populationAvailability,
+          ) ||
+          facts.head?.worldVersion !== budget.worldVersion ||
+          facts.head?.eventSequence !== budget.eventSequence
+        )
+          invalid('SOCIAL_PROGRAMME_ACTUAL_SOURCE_AND_HEAD_REQUIRED');
+        const employment = reduceSocialLabourProgrammeCreatedEvent({
+          state: beforeEmployment,
+          event: replayEvent,
+          sha256Hex: sha,
+        });
+        country.lifecycle = freeze({ ...country.lifecycle, employment });
       } else if (type === SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT) {
         const original = socialCreationOriginals.get(country.countryId),
           facts = payload.readFacts as SocialEmploymentServiceCreationReadFacts;

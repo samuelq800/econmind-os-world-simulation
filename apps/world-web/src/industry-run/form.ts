@@ -41,6 +41,61 @@ export interface IndustryRunDraft {
   readonly endsAtSimTime: string;
   readonly maximumExpense: string;
 }
+export interface IndustryUtilisationTargetDraft {
+  readonly facilityId: string;
+  readonly targetPercent: string;
+  readonly startsAtSimTime: string;
+  readonly endsAtSimTime: string;
+}
+export function buildIndustryUtilisationTargetRequest(
+  input: Readonly<{
+    row: IndustryRunParameterRow;
+    draft: IndustryUtilisationTargetDraft;
+    worldId: string;
+    countryId: string;
+    worldVersion: string;
+    requestId: string;
+    commandId: string;
+    idempotencyKey: string;
+  }>,
+): AuthenticatedOfficeCommandRequestDto {
+  const row = parseIndustryRunParameterRow(input.row),
+    d = input.draft;
+  const percent = decimalRatio(d.targetPercent);
+  if (
+    row.countryId !== input.countryId ||
+    row.facilityId !== d.facilityId ||
+    row.capacityPerSimDay === undefined ||
+    percent.numerator > 100n * percent.denominator ||
+    ![d.startsAtSimTime, d.endsAtSimTime].every(
+      (v) => v.length <= 128 && /^(0|[1-9][0-9]*)$/u.test(v),
+    ) ||
+    BigInt(d.startsAtSimTime) < BigInt(row.windowStartsAtSimTime) ||
+    BigInt(d.endsAtSimTime) > BigInt(row.windowEndsAtSimTime) ||
+    BigInt(d.endsAtSimTime) <= BigInt(d.startsAtSimTime)
+  )
+    throw Error('INDUSTRY_TARGET_EXPLICIT_BOUND_SOURCE_REQUIRED');
+  return {
+    schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
+    requestId: input.requestId,
+    request: {
+      worldId: input.worldId,
+      countryId: input.countryId,
+      officeId: 'INDUSTRY',
+      commandType: 'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
+      commandId: input.commandId,
+      idempotencyKey: input.idempotencyKey,
+      expectedWorldVersion: input.worldVersion,
+      payload: {
+        schemaVersion: 'postwar-industry-utilisation-target-v1',
+        ...d,
+        policyVersion: row.policyVersion,
+        sourceRef: row.sourceRef,
+        sourceRawSha256: row.sourceRawSha256,
+      },
+    },
+  };
+}
 function decimalRatio(value: string) {
   if (value.length > 128 || !/^(0|[1-9][0-9]*)(\.[0-9]*[1-9])?$/u.test(value))
     throw Error('INDUSTRY_RUN_EXACT_DECIMAL_REQUIRED');
@@ -185,6 +240,7 @@ export function renderIndustryRunForm(
   rows: readonly IndustryRunParameterRow[],
   enabled: boolean,
   stage: (draft: IndustryRunDraft) => boolean,
+  stageTarget?: (draft: IndustryUtilisationTargetDraft) => boolean,
 ) {
   const panel = document.createElement('section');
   panel.dataset.industryRunForm = '';
@@ -195,7 +251,11 @@ export function renderIndustryRunForm(
   const scope = document.createElement('p');
   scope.dataset.industryRunCatalogScope = '';
   scope.textContent =
-    '本次设施排产可手填数量，或按原件容量、明确百分比与窗口计算理论计划量。这不是剩余容量或可行产出，未扣除已安排量；不保存持续利用率目标。起止时间、最高费用须明确填写，载入或排队不表示已生产。设施与资源优先级尚未接通。';
+    '本次设施排产可手填数量，或按原件容量、明确百分比与窗口计算理论计划量。这不是剩余容量或可行产出，未扣除已安排量；' +
+    (stageTarget
+      ? '可另行提交明确窗口的利用率目标；目标不占用容量或改变既有排产。'
+      : '不保存持续利用率目标。') +
+    '起止时间、最高费用须明确填写，载入或排队不表示已生产。设施与资源优先级尚未接通。';
   panel.append(scope);
   if (!enabled || rows.length === 0) {
     const msg = document.createElement('p');
@@ -311,6 +371,26 @@ export function renderIndustryRunForm(
       ? '计划已载入，请审阅后确认提交。'
       : '请填写有效的产量、时间与最高费用，或刷新已过期的参数。';
   });
+  if (stageTarget) {
+    const target = document.createElement('button');
+    target.type = 'button';
+    target.dataset.industryRunAction = 'stage-target';
+    target.dataset.catalogFieldIds = 'industry-u0283-0 industry-u0283-1';
+    target.textContent = '审阅利用率目标';
+    target.addEventListener('click', () => {
+      if (!document.body.contains(panel)) return;
+      const ok = stageTarget({
+        facilityId: facility.value,
+        targetPercent: utilisation.value,
+        startsAtSimTime: fields.get('startsAtSimTime')!.value,
+        endsAtSimTime: fields.get('endsAtSimTime')!.value,
+      });
+      result.textContent = ok
+        ? '目标已载入，确认后持久保存；0%是明确目标，不产生排产、费用或产出。'
+        : '请填写0–100%和有效窗口，并刷新授权设施数据。';
+    });
+    panel.append(target);
+  }
   panel.append(button, result);
   return panel;
 }

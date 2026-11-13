@@ -1,6 +1,8 @@
 import { parseIndustryUtilityManualIntent } from '@econmind/core/industry-utility-execution';
 import {
   INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+  parseIndustryUtilisationTargetIntent,
   parseIndustryRunScheduleIntent,
 } from '@econmind/core/industry-first-day-work';
 import {
@@ -15,6 +17,8 @@ import {
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  parseSocialLabourProgrammeCreateIntent,
   parseSocialPositionOfferCreateIntent,
   parseSocialEmploymentServiceCreateIntent,
   DomainError,
@@ -96,6 +100,7 @@ export function decodeStoredManualOfficeCommand(
   if (
     isManualIndustryUtilityCommandFamily(original.commandType) ||
     original.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+    original.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND ||
     original.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
     original.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
   )
@@ -121,6 +126,9 @@ export function validateManualOfficeCommandIntent(
     case MANUAL_INDUSTRY_UTILITY_COMMANDS.WATER:
     case MANUAL_INDUSTRY_UTILITY_COMMANDS.LOGISTICS:
       parseIndustryUtilityManualIntent(command, sha);
+      return;
+    case INDUSTRY_UTILISATION_TARGET_COMMAND:
+      parseIndustryUtilisationTargetIntent(command, sha);
       return;
     case INDUSTRY_RUN_SCHEDULE_COMMAND:
       if (command.idempotencyKey === null) invalid();
@@ -153,6 +161,17 @@ export function validateManualOfficeCommandIntent(
         parseSocialEmploymentServiceCommand(command, sha).kind !== 'PLAN'
       )
         invalid();
+      return;
+    case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialLabourProgrammeCreateIntent(
+        JSON.parse(command.canonicalPayload),
+      );
       return;
     case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND:
       if (

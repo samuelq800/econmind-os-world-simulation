@@ -1,7 +1,10 @@
 /** Syntax only: a parsed manual request grants neither capacity/licence
  * authority nor source admission, queuing, money or an executable candidate. */
 import { describe, expect, it } from 'vitest';
-import { SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND } from '@econmind/core';
+import {
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+} from '@econmind/core';
 import { parseManualOfficeCommandRequest } from '../../apps/world-worker/src/intake/postgres-office-command-intake.js';
 import { buildManualOfficeCommandIntent } from '../../apps/world-worker/src/intake/manual-office-command-intent.js';
 const payload = {
@@ -58,4 +61,26 @@ describe('licensed service creation strict transport registration only', () => {
         build({ ...request, payload: { ...payload, ...added } }),
       ).toThrow('unknown');
   });
+});
+
+it('registers explicit pending programme terms under Social without accepting approval fields', () => {
+  const programme = {
+    ...request,
+    commandType: SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+    payload: {
+      schemaVersion: 'social-labour-programme-create-v1',
+      programmeId: 'PROGRAMME_PENDING_TEST_ONLY',
+      kind: 'RETURN_TO_WORK',
+      eligible: 'Proposed eligibility; verification pending',
+      capacity: '3',
+      duration: { amount: '2', unit: 'SIM_DAY' },
+    },
+  };
+  expect(JSON.parse(build(programme).canonicalPayload)).toEqual(
+    programme.payload,
+  );
+  expect(() => build({ ...programme, officeId: 'FINANCE' })).toThrow();
+  expect(() =>
+    build({ ...programme, payload: { ...programme.payload, approved: true } }),
+  ).toThrow();
 });

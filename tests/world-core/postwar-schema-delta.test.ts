@@ -7,10 +7,12 @@ import {
   classifyDeltaTransaction,
   createUnapprovedSchemaDeltaPlan,
   createUnapprovedSchemaForwardPlan,
+  createUnapprovedPendingTargetForwardPlan,
+  PENDING_TARGET_FORWARD_MANIFEST_PATH,
   preparePostwarSchemaDelta,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const sha = (v: Buffer) => createHash('sha256').update(v).digest('hex');
-// Explicit source inventory: companion fixed 82-proposal policy, with its
+// Explicit source inventory: companion fixed 83-proposal policy, with its
 // isolated Clock deliberately excluded. New proposals require an explicit
 // inventory update; never accept an arbitrary directory count or widen scope.
 const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
@@ -89,6 +91,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-social-match-prefix-pages.sql',
   'postwar-social-paged-match-publisher.sql',
   'postwar-paged-current-projection.sql',
+  'postwar-pending-programme-target-prefix.sql',
   'postwar-industry-run-custody.sql',
   'postwar-industry-run-history.sql',
   'postwar-industry-work-custody.sql',
@@ -363,14 +366,14 @@ describe('unapproved postwar schema delta package boundary', () => {
         ),
       ).toThrow('DESTRUCTIVE_CREDENTIAL_OR_NONTRANSACTIONAL_SQL_DENIED');
   });
-  it('classifies the complete eighty-one non-Clock source proposal paths without running or editing SQL', async () => {
+  it('classifies the complete eighty-two non-Clock source proposal paths without running or editing SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
     const selected = names
       .filter((n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql')
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(81);
+    expect(selected).toHaveLength(82);
     expect(selected).not.toContain('isolated-world-clock.sql');
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));
@@ -401,6 +404,128 @@ describe('unapproved postwar schema delta package boundary', () => {
         outputDirectory: '/tmp/unused-schema-delta',
       }),
     ).rejects.toThrow('ABSOLUTE_PATHS_REQUIRED');
+  });
+});
+
+describe('fixed pending-programme and target forward packaging', () => {
+  it('accepts the fixed forward CLI selector before checking source paths', () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        new URL(
+          '../../tools/office-connection/postwar-schema-delta.mjs',
+          import.meta.url,
+        ).pathname,
+        '--source-root',
+        'relative-source',
+        '--candidate-sha',
+        '1'.repeat(40),
+        '--companion-root',
+        'relative-companion',
+        '--output-directory',
+        'relative-output',
+        '--forward-manifest',
+        PENDING_TARGET_FORWARD_MANIFEST_PATH,
+      ],
+      { encoding: 'utf8' },
+    );
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('ABSOLUTE_PATHS_REQUIRED');
+    expect(result.stderr).not.toContain(
+      'ONLY_SOURCE_SHA_COMPANION_FRESH_OUTPUT_ARGUMENTS_ALLOWED',
+    );
+  });
+  async function forwardFixture() {
+    const f = fixture();
+    const manifest = await readFile(
+      new URL('../../' + PENDING_TARGET_FORWARD_MANIFEST_PATH, import.meta.url),
+    );
+    const declared = JSON.parse(manifest.toString('utf8'));
+    const sql = await readFile(
+      new URL('../../' + declared.sqlPath, import.meta.url),
+    );
+    for (const file of Object.keys(declared.requiredPredecessorFiles))
+      f.sources.set(
+        file,
+        await readFile(new URL('../../' + file, import.meta.url)),
+      );
+    f.sources.set(declared.sqlPath, sql);
+    f.candidate.pins.proposals.push({
+      id: 'postwar-pending-programme-target-prefix',
+      path: declared.sqlPath,
+      disposition: 'CANDIDATE_FIXED_GUARDED_FORWARD',
+      dependencies: ['delta-b'],
+      baselineDependencies: ['BASELINE_001'],
+      createdRelations: [],
+      createdRoles: [],
+      reusedRoles: [],
+      definedFunctions: [],
+      renamedFunctions: [],
+      sha256: sha(sql),
+    });
+    return { ...f, manifest, declared, sql };
+  }
+  it('packages only the guarded increment while retaining exact installed preconditions and stopping ambiguous replay', async () => {
+    const f = await forwardFixture();
+    const result = createUnapprovedPendingTargetForwardPlan(
+      f.candidate,
+      f.sources,
+      f.manifest,
+    );
+    expect(result.chunks).toHaveLength(1);
+    expect(result.chunks[0]!.transaction).toEqual(f.sql);
+    expect(result.chunks[0]!.entry.transactionPath).toBe(
+      'transactions/01-postwar-pending-programme-target-prefix.sql',
+    );
+    expect(result.manifest).toMatchObject({
+      installationAllowed: false,
+      productionApproval: 'NOT_GRANTED',
+      databaseOperations: 0,
+      networkRequests: 0,
+      isolatedClockSqlIncluded: false,
+      packagedProposalCount: 1,
+      replacedExistingFunctionCount: 7,
+      newFunctionCount: 3,
+      requiredInstalledProposalIds: ['delta-a', 'delta-b'],
+    });
+    expect(result.chunks[0]!.entry.preconditions).toMatchObject({
+      functions: f.declared.replacedFunctions,
+      newFunctionsMustBeAbsent: f.declared.newFunctions,
+      successors: f.declared.successorFunctions,
+      replay: 'ALREADY_APPLIED_STOP_INSPECT_NO_RETRY',
+      schemaAcl: 'REQUIRE_UNCHANGED_AFTER_TEMPORARY_CREATE',
+    });
+  });
+  it('rejects altered manifest, SQL even if repinned by a caller, and changed prerequisite source bytes', async () => {
+    const f = await forwardFixture();
+    expect(() =>
+      createUnapprovedPendingTargetForwardPlan(
+        f.candidate,
+        f.sources,
+        Buffer.concat([f.manifest, Buffer.from('\n')]),
+      ),
+    ).toThrow('EXACT_PENDING_TARGET_FORWARD_MANIFEST_REQUIRED');
+    const changed = Buffer.concat([f.sql, Buffer.from('\n-- changed')]);
+    f.sources.set(f.declared.sqlPath, changed);
+    f.candidate.pins.proposals.at(-1)!.sha256 = sha(changed);
+    expect(() =>
+      createUnapprovedPendingTargetForwardPlan(
+        f.candidate,
+        f.sources,
+        f.manifest,
+      ),
+    ).toThrow('EXACT_PENDING_TARGET_FORWARD_SOURCE_REQUIRED');
+    f.sources.set(f.declared.sqlPath, f.sql);
+    f.candidate.pins.proposals.at(-1)!.sha256 = sha(f.sql);
+    const prerequisite = Object.keys(f.declared.requiredPredecessorFiles)[0]!;
+    f.sources.set(prerequisite, Buffer.from('-- wrong predecessor'));
+    expect(() =>
+      createUnapprovedPendingTargetForwardPlan(
+        f.candidate,
+        f.sources,
+        f.manifest,
+      ),
+    ).toThrow('PENDING_TARGET_PREDECESSOR_SOURCE_DIFFERS');
   });
 });
 

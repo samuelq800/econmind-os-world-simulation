@@ -1040,3 +1040,124 @@ describe('whole Finance/Social known-family prefix replay, TEST_ONLY Core semant
     ).toThrow('UNSUPPORTED_MIXED');
   });
 });
+
+it('keeps pending programme terms across the same real Core PLAN/MATCH prefix without budget effects', () => {
+  const c1 = socialOriginal(),
+    source = {
+      worldId: world,
+      countryId: country,
+      governmentEntityId: 'GOV_COUNTRY_01',
+      localCurrency: 'GBP',
+      sourceRef: 'SOURCE_TEST_ONLY',
+      sourceFingerprint: `sha256:${'1'.repeat(64)}` as C.CanonicalSha256,
+      populationAvailability: c1.facts.populationAvailability,
+      usageLicences: [],
+    };
+  const command = C.parseCanonicalCommand(
+    {
+      schemaVersion: C.COMMAND_SCHEMA_VERSION,
+      worldId: world,
+      countryId: country,
+      officeId: 'SOCIAL',
+      actorId: 'ACTOR_TEST_ONLY',
+      authSubject: subject,
+      commandId: 'COMMAND_PROGRAMME_TEST_ONLY',
+      idempotencyKey: 'KEY_PROGRAMME_TEST_ONLY',
+      commandType: C.SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+      expectedWorldVersion: '0',
+      simTime: '0',
+      submittedAtReal: at,
+      correlationId: 'CORRELATION_TEST_ONLY',
+      payload: {
+        schemaVersion: 'social-labour-programme-create-v1',
+        programmeId: 'PROGRAMME_TEST_ONLY',
+        kind: 'RELOCATION_SUPPORT',
+        locationId: c1.scope.locationId,
+        participants: '4',
+        benefit: { amount: '5', currency: 'GBP' },
+      },
+    },
+    sha,
+  );
+  const prepared = C.prepareSocialLabourProgrammeCreation({
+    command,
+    state: c1.state,
+    readFacts: {
+      worldId: world,
+      countryId: country,
+      boundary: c1.facts.boundary,
+      simTime: '0',
+      populationAvailability: source.populationAvailability,
+      head: { worldVersion: '0', eventSequence: '0' },
+      localCurrency: source.localCurrency,
+      sourceRef: source.sourceRef,
+      sourceFingerprint: source.sourceFingerprint,
+      sourceRevocations: [],
+    },
+    sha256Hex: sha,
+  });
+  const event = C.parseAuthoritativeEvent(
+    {
+      schemaVersion: C.EVENT_SCHEMA_VERSION,
+      eventId: 'EVENT_PROGRAMME_TEST_ONLY',
+      eventType: C.SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT,
+      worldId: world,
+      causationCommandId: command.commandId,
+      correlationId: command.correlationId,
+      worldVersion: '1',
+      sequence: '1',
+      simTime: '0',
+      recordedAtReal: at,
+      correctsEventId: null,
+      payload: prepared.eventPayload,
+    },
+    sha,
+  );
+  const transition = C.createAuthoritativeTransition({
+    command,
+    worldVersionBefore: '0',
+    worldVersionAfter: '1',
+    events: [event],
+  });
+  const first = {
+    command,
+    transition,
+    events: [event],
+    receipt: C.createFinalCommandReceipt({
+      command,
+      transition,
+      outcome: 'COMMITTED',
+      reasonCode: null,
+      simTime: command.simTime,
+      recordedAtReal: at,
+    }),
+    inventoryPostings: [],
+    financialPostingBatches: [],
+  };
+  const next = { ...c1, state: prepared.state },
+    plan = socialFrame(next, '1', '2'),
+    match = socialFrame(next, '2', '3', plan);
+  const frames = [first, plan, match],
+    input = {
+      worldId: world,
+      frames,
+      socialCountries: [c1],
+      socialCreationOriginals: [source],
+    };
+  const proof = prepareFinanceNativeBudgetMixedPrefix(input, sha),
+    result = readFinanceNativeBudgetMixedPrefix(proof, world, frames, sha);
+  expect(result.budgetEncumbrances).toEqual([]);
+  expect(result.budgetState.worldVersion).toBe('3');
+  expect(result.socialCountries[0]!.lifecycle.employment.programmes).toEqual(
+    prepared.state.programmes,
+  );
+  expect(() =>
+    prepareFinanceNativeBudgetMixedPrefix(
+      {
+        ...input,
+        socialCreationOriginals: [{ ...source, localCurrency: 'USD' }],
+      },
+      sha,
+    ),
+  ).toThrow('SOCIAL_PROGRAMME_ACTUAL_SOURCE');
+});

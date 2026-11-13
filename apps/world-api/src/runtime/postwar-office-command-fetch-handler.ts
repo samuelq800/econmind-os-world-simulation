@@ -1,5 +1,8 @@
 import { isManualIndustryUtilityCommandFamily } from '@econmind/core/authenticated-office-command-contract';
-import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
 import type { PostwarIndustryConnection } from './postwar-industry-connection.js';
 import { INDUSTRY_PRODUCTION_COMMAND } from '@econmind/core/industry-production-command';
 import type { PostwarCentralBankConnection } from './postwar-central-bank-connection.js';
@@ -15,6 +18,7 @@ import {
   AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
 } from '@econmind/core';
 import {
@@ -184,6 +188,7 @@ export function createPostwarOfficeCommandFetchHandler(
             selector.officeId === 'INDUSTRY' &&
             (selector.commandType === INDUSTRY_PRODUCTION_COMMAND ||
               selector.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+              selector.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND ||
               isManualIndustryUtilityCommandFamily(selector.commandType))
               ? industry
               : selector.officeId === 'CENTRAL_BANK' &&
@@ -207,6 +212,7 @@ export function createPostwarOfficeCommandFetchHandler(
                             [
                               SOCIAL_POSITION_OFFER_CREATE_COMMAND,
                               SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+                              SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
                               SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
                             ].some((f) => f === selector.commandType)
                           ? social

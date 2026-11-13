@@ -4,6 +4,10 @@
 import { createHash } from 'node:crypto';
 import {
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT,
+  prepareSocialLabourProgrammeCreation,
+  readSocialLabourProgrammes,
   SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
   canonicalSerialize,
   canonicalHashInput,
@@ -53,6 +57,18 @@ import type {
   AtomicTransitionCandidateFactory,
   AtomicTransitionDraft,
 } from './atomic-transition-repository.js';
+export const SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE =
+  'SOCIAL_LABOUR_PROGRAMME_CREATE_SOURCE_EVALUATION_V1' as const;
+function sourcePurpose(command: CanonicalCommand) {
+  return command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+    ? SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE
+    : SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE;
+}
+function createdEventType(command: CanonicalCommand) {
+  return command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+    ? SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT
+    : SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT;
+}
 export const SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE =
   'SOCIAL_EMPLOYMENT_SERVICE_CREATE_SOURCE_EVALUATION_V1' as const;
 const digest = (s: string) => createHash('sha256').update(s).digest('hex'),
@@ -71,7 +87,9 @@ function freeze<T>(value: T): T {
 }
 export interface SocialServiceCreationSourceReadBinding {
   readonly schemaVersion: 'social-service-create-source-read-binding-v1';
-  readonly purpose: typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE;
+  readonly purpose:
+    | typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE
+    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE;
   readonly commandFingerprint: string;
   readonly readHead: DecisionResultHead;
   readonly seedFingerprint: string;
@@ -92,7 +110,9 @@ export interface SocialServiceCreationSourceReadBinding {
 }
 export interface SocialServiceCreationSourceCommitRequest {
   readonly phase: 'BEFORE_EVENTS';
-  readonly purpose: typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE;
+  readonly purpose:
+    | typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE
+    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE;
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
   readonly currentHead: DecisionResultHead;
@@ -102,7 +122,9 @@ export interface SocialServiceCreationSourceCommitRequest {
 }
 export interface SocialServiceCreationSourceCommitAudit {
   readonly status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY';
-  readonly purpose: typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE;
+  readonly purpose:
+    | typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE
+    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE;
   readonly commandFingerprint: string;
   readonly currentHead: DecisionResultHead;
   readonly readBindingFingerprint: string;
@@ -120,6 +142,15 @@ export function isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPo
 ): value is SocialServiceCreationSourceCommitProtectionPort {
   return !!value && typeof value === 'object' && issuedSourcePorts.has(value);
 }
+export type PostwarSocialLabourProgrammeReadData = ReturnType<
+  typeof readSocialLabourProgrammes
+> &
+  Readonly<{
+    creationContext: Readonly<{
+      localCurrency: string;
+      locationIds: readonly string[];
+    }>;
+  }>;
 export interface PostwarSocialEmploymentServiceCreationRuntime {
   readonly candidateFactory: Readonly<AtomicTransitionCandidateFactory>;
   readonly sourceCommitProtectionPort: Readonly<SocialServiceCreationSourceCommitProtectionPort>;
@@ -128,6 +159,18 @@ export interface PostwarSocialEmploymentServiceCreationRuntime {
     readonly observedAtReal: string;
   }): Promise<void>;
   authorizeIntake(command: CanonicalCommand): Promise<AuthorizedOfficeContext>;
+  readProgrammesFrom(
+    tx: SqlExecutor,
+    selection: {
+      readonly countryId: string;
+      readonly offset: number;
+      readonly limit: number;
+      readonly expectedHead: {
+        readonly worldVersion: string;
+        readonly eventSequence: string;
+      };
+    },
+  ): Promise<PostwarSocialLabourProgrammeReadData>;
   readPlanningFrom(
     tx: SqlExecutor,
     selection: {
@@ -158,7 +201,8 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
     const c = validateCanonicalCommand(value, digest);
     if (
       c.worldId !== configuration.worldId ||
-      c.commandType !== SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+      (c.commandType !== SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND &&
+        c.commandType !== SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND) ||
       c.officeId !== 'SOCIAL' ||
       c.countryId === null ||
       c.expectedWorldVersion === null ||
@@ -249,7 +293,21 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
       originalCountry,
     };
   };
+  const assertProgrammeContractFrom = async (tx: SqlExecutor) => {
+    await roles.withSourceReaderFrom(tx, async () => {
+      const result = await tx.query<{ version: string }>(
+        'select world_v2.postwar_social_programme_contract_version() as version',
+      );
+      if (
+        result.rows.length !== 1 ||
+        result.rows[0]?.version !== 'postwar-social-labour-programme-v1'
+      )
+        invalid('PROGRAMME_INSTALLED_COMPLETE_PREFIX_REQUIRED');
+    });
+  };
   const deriveFrom = async (tx: SqlExecutor, command: CanonicalCommand) => {
+    if (command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND)
+      await assertProgrammeContractFrom(tx);
     const {
       ticks,
       source,
@@ -278,46 +336,85 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
     )
       invalid('COMMAND_PRECEDES_CURRENT_PREFIX');
 
-    const facts = projectPostwarSocialServiceCreationFacts({
-      command,
-      document,
-      source: source.source,
-      head: {
-        worldVersion: lineage.headWorldVersion,
-        eventSequence: lineage.headEventSequence,
-      },
-    });
-    const body = originalCountry.physicalDayBodies.filter(
-      (b) =>
-        b.locationId === facts.usageLicence.locationId && b.dayIndex === '0',
-    );
-    if (body.length !== 1) invalid('ACTUAL_UNIQUE_PHYSICAL_DAY_REQUIRED');
-    const physical = (state: typeof country.lifecycle.employment) =>
-      assertSocialPhysicalCapacityState({
-        state,
-        readFacts: {
-          ...originalCountry.validationReadFacts.facts,
+    const { facts, operation, before } = (() => {
+      if (command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND) {
+        const f = originalCountry.validationReadFacts.facts;
+        const facts = {
+          worldId: command.worldId,
+          countryId: country.countryId,
+          boundary: f.boundary,
           simTime: command.simTime.toCanonicalValue(),
-        },
-        sourceEnvelope: {
-          ...body[0]!,
-          headWorldVersion: lineage.headWorldVersion,
-          headEventSequence: lineage.headEventSequence,
-        },
-        sha256Hex: digest,
-      });
-    const before = physical(country.lifecycle.employment),
-      operation = prepareSocialEmploymentServiceCreation({
+          populationAvailability: f.populationAvailability,
+          head: {
+            worldVersion: lineage.headWorldVersion,
+            eventSequence: lineage.headEventSequence,
+          },
+          localCurrency: originalCountry.minimumWage.currency,
+          sourceRef: source.source.sourceId,
+          sourceFingerprint: source.source.payloadHash,
+          sourceRevocations: [],
+        };
+        const operation = prepareSocialLabourProgrammeCreation({
+          command,
+          state: country.lifecycle.employment,
+          readFacts: facts,
+          sha256Hex: digest,
+        });
+        const unchanged = (state: typeof country.lifecycle.employment) => {
+          const { programmes, ...existing } = state;
+          void programmes;
+          return existing;
+        };
+        const before = unchanged(country.lifecycle.employment);
+        if (
+          operation.source !== 'APPLIED' ||
+          !same(before, unchanged(operation.state))
+        )
+          invalid('PROGRAMME_TERMS_ONLY_NO_EXISTING_STATE_CHANGE_REQUIRED');
+        return { facts, operation, before };
+      }
+      const facts = projectPostwarSocialServiceCreationFacts({
         command,
-        state: country.lifecycle.employment,
-        readFacts: facts,
-        sha256Hex: digest,
+        document,
+        source: source.source,
+        head: {
+          worldVersion: lineage.headWorldVersion,
+          eventSequence: lineage.headEventSequence,
+        },
       });
-    if (operation.source !== 'APPLIED')
-      invalid('FINAL_RECOVERY_MUST_NOT_BECOME_FRESH_CANDIDATE');
-    const after = physical(operation.state);
-    if (!same(before, after))
-      invalid('CAPACITY_OR_PHYSICAL_COMMITMENTS_NOT_CONSERVED');
+      const body = originalCountry.physicalDayBodies.filter(
+        (b) =>
+          b.locationId === facts.usageLicence.locationId && b.dayIndex === '0',
+      );
+      if (body.length !== 1) invalid('ACTUAL_UNIQUE_PHYSICAL_DAY_REQUIRED');
+      const physical = (state: typeof country.lifecycle.employment) =>
+        assertSocialPhysicalCapacityState({
+          state,
+          readFacts: {
+            ...originalCountry.validationReadFacts.facts,
+            simTime: command.simTime.toCanonicalValue(),
+          },
+          sourceEnvelope: {
+            ...body[0]!,
+            headWorldVersion: lineage.headWorldVersion,
+            headEventSequence: lineage.headEventSequence,
+          },
+          sha256Hex: digest,
+        });
+      const before = physical(country.lifecycle.employment),
+        operation = prepareSocialEmploymentServiceCreation({
+          command,
+          state: country.lifecycle.employment,
+          readFacts: facts,
+          sha256Hex: digest,
+        });
+      if (operation.source !== 'APPLIED')
+        invalid('FINAL_RECOVERY_MUST_NOT_BECOME_FRESH_CANDIDATE');
+      const after = physical(operation.state);
+      if (!same(before, after))
+        invalid('CAPACITY_OR_PHYSICAL_COMMITMENTS_NOT_CONSERVED');
+      return { facts, operation, before };
+    })();
     const social = await authorizePostwarSocialOperatingCommandFrom(
       tx,
       command,
@@ -326,7 +423,7 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
     );
     const binding: SocialServiceCreationSourceReadBinding = freeze({
       schemaVersion: 'social-service-create-source-read-binding-v1',
-      purpose: SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE,
+      purpose: sourcePurpose(command),
       commandFingerprint: command.fingerprint,
       readHead: {
         worldId: lineage.worldId,
@@ -361,7 +458,7 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
         const command = capturedCommand(request.command);
         if (
           request.phase !== 'BEFORE_EVENTS' ||
-          request.purpose !== SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE ||
+          request.purpose !== sourcePurpose(command) ||
           !isCommitAuthorizationProof(request.commitAuthorization) ||
           request.commitAuthorization.commandFingerprint !==
             command.fingerprint ||
@@ -390,7 +487,7 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
           !same(request.readBinding, fresh.binding) ||
           request.transition.events.length !== 1 ||
           request.transition.events[0]!.eventType !==
-            SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT ||
+            createdEventType(command) ||
           request.transition.events[0]!.canonicalPayload !==
             canonicalSerialize(fresh.operation.eventPayload)
         )
@@ -399,7 +496,7 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
           );
         return freeze({
           status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
-          purpose: SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE,
+          purpose: sourcePurpose(command),
           commandFingerprint: command.fingerprint,
           currentHead: request.currentHead,
           readBindingFingerprint: hash(fresh.binding),
@@ -472,7 +569,7 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
           {
             schemaVersion: 'event-v1',
             eventId: `SOCIAL_SERVICE_CREATE_EVENT_${command.commandId}`,
-            eventType: SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
+            eventType: createdEventType(command),
             worldId: command.worldId,
             causationCommandId: command.commandId,
             correlationId: command.correlationId,
@@ -538,6 +635,49 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
   return Object.freeze({
     candidateFactory,
     sourceCommitProtectionPort,
+    async readProgrammesFrom(
+      tx: SqlExecutor,
+      selection: Parameters<
+        PostwarSocialEmploymentServiceCreationRuntime['readProgrammesFrom']
+      >[1],
+    ) {
+      if (
+        !Number.isSafeInteger(selection.offset) ||
+        selection.offset < 0 ||
+        !Number.isSafeInteger(selection.limit) ||
+        selection.limit < 1 ||
+        selection.limit > 100
+      )
+        invalid('BOUNDED_PROGRAMME_PAGE_REQUIRED');
+      await assertProgrammeContractFrom(tx);
+      const current = await readCurrentFrom(tx, selection.countryId);
+      if (
+        !same(selection.expectedHead, {
+          worldVersion: current.lineage.headWorldVersion,
+          eventSequence: current.lineage.headEventSequence,
+        })
+      )
+        invalid('PROGRAMME_CURRENT_HEAD_DIFFERS');
+      return {
+        ...readSocialLabourProgrammes({
+          state: current.country.lifecycle.employment,
+          countryId: selection.countryId,
+          offset: selection.offset,
+          limit: selection.limit,
+          sha256Hex: digest,
+        }),
+        creationContext: {
+          localCurrency: current.originalCountry.minimumWage.currency,
+          locationIds: [
+            ...new Set(
+              current.originalCountry.validationReadFacts.facts.populationAvailability
+                .filter((p) => p.countryId === selection.countryId)
+                .map((p) => p.locationId),
+            ),
+          ].sort(),
+        },
+      };
+    },
     async readPlanningFrom(
       tx: SqlExecutor,
       selection: {
@@ -595,10 +735,13 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
         invalid('CURRENT_PRECLAIM_OBSERVATION_REQUIRED');
       await configuration.database.transaction((tx) => deriveFrom(tx, command));
     },
-    authorizeIntake(command: CanonicalCommand) {
+    async authorizeIntake(input: CanonicalCommand) {
+      const command = capturedCommand(input);
+      if (command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND)
+        await configuration.database.transaction(assertProgrammeContractFrom);
       return authorizePostwarSocialOperatingCommandFrom(
         configuration.database,
-        capturedCommand(command),
+        command,
         'SOCIAL',
       );
     },

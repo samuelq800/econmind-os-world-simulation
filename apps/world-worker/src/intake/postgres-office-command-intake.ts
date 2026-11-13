@@ -1,4 +1,7 @@
-import { INDUSTRY_RUN_SCHEDULE_COMMAND } from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
 import {
   buildManualOfficeCommandIntent,
   decodeStoredManualOfficeCommand,
@@ -18,6 +21,7 @@ import {
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DomainError,
   DOMAIN_ERROR_CODES,
@@ -124,11 +128,13 @@ export function parseManualOfficeCommandRequest(
     (row.officeId === 'INDUSTRY' &&
       (row.commandType === 'CORE_INDUSTRY_PRODUCTION_V1' ||
         row.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+        row.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND ||
         isManualIndustryUtilityCommandFamily(row.commandType))) ||
     (row.officeId === 'TRADE' &&
       row.commandType === 'CORE_GOODS_TRANSFER_V1') ||
     (row.officeId === 'SOCIAL' &&
-      (row.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+      (row.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+        row.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
         row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
         row.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)) ||
     (row.officeId === 'FINANCE' &&
@@ -155,6 +161,7 @@ export function manualOfficeCommandCapability(request: {
     office === 'INDUSTRY' &&
     (family === 'CORE_INDUSTRY_PRODUCTION_V1' ||
       family === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+      family === INDUSTRY_UTILISATION_TARGET_COMMAND ||
       isManualIndustryUtilityCommandFamily(family))
   )
     return 'INDUSTRY_PRODUCTION' as const;
@@ -166,7 +173,8 @@ export function manualOfficeCommandCapability(request: {
     return CENTRAL_BANK_OMO_CAPABILITY;
   if (
     office === 'SOCIAL' &&
-    (family === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+    (family === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+      family === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
       family === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
       family === SOCIAL_POSITION_OFFER_CREATE_COMMAND)
   )
