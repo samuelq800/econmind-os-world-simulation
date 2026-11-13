@@ -485,6 +485,20 @@ export function installOfficeCommand(
           `Durable FINAL · ${state.receipt.outcome} · ${state.receipt.reasonCode ?? 'No rejection reason'} · ${state.receipt.commandId}`,
         ),
       );
+    if (state.previousFinal)
+      dialog.append(
+        node(
+          'p',
+          `Previous FINAL · ${state.previousFinal.receipt.outcome} · ${state.previousFinal.receipt.commandId} · ${state.previousFinalCode ?? 'Retained in this session'}`,
+        ),
+        node('pre', JSON.stringify(state.previousFinal.original, null, 2)),
+        button(
+          'Read previous FINAL — no replay',
+          'previous-final',
+          state.canRecoverPreviousFinal,
+          () => owner.recoverPreviousFinal(),
+        ),
+      );
     if (state.model) {
       dialog.append(
         node('p', `Authorized readback · v${state.model.head.worldVersion}`),
@@ -507,6 +521,12 @@ export function installOfficeCommand(
       );
     for (const [label, key, enabled, action] of [
       ['Manual refresh', 'refresh', state.canRead, () => owner.refresh()],
+      [
+        'Read current state → prepare next request',
+        'next-request',
+        state.canBeginNextRequest,
+        () => owner.beginNextRequest(),
+      ],
       ['Review exact intent', 'review', state.canReview, () => owner.review()],
       [
         'Confirm once → queue',

@@ -174,6 +174,15 @@ export function createOfficeCommandController(
   let submitCode: string | null = null;
   // Local presentation metadata only; never source freshness or authority.
   let lastAuthorizedReadAtClient: string | null = null;
+  // One prior request for explicit read-only recovery in this live session.
+  // Neither this record nor its recovery can replace the active request.
+  let previousFinal: {
+    original: AuthenticatedOfficeCommandRequestDto;
+    receipt: BrowserFinalReceipt;
+  } | null = null;
+  let previousFinalCode: string | null = null;
+  const usedCommandIds = new Set<string>(),
+    usedIdempotencyKeys = new Set<string>();
   const currentHead = () =>
     runtimePage?.authority.readback ?? model?.head ?? null;
   const notify = () => {
@@ -196,6 +205,10 @@ export function createOfficeCommandController(
     acknowledgement = null;
     lookup = null;
     receipt = null;
+    previousFinal = null;
+    previousFinalCode = null;
+    usedCommandIds.clear();
+    usedIdempotencyKeys.clear();
     lastAuthorizedReadAtClient = null;
     reader?.disconnect();
     runtimeReader?.disconnect();
@@ -579,6 +592,8 @@ export function createOfficeCommandController(
     acknowledgement = null;
     lookup = null;
     attempted = true;
+    usedCommandIds.add(original.request.commandId);
+    usedIdempotencyKeys.add(original.request.idempotencyKey);
     outcomeUnknown = true;
     submitStatus = 'UNKNOWN';
     submitCode = 'ORIGINAL_REQUEST_RESTORED_FOR_RECOVERY_ONLY';
@@ -590,6 +605,17 @@ export function createOfficeCommandController(
   function stageIntent(value: unknown) {
     if (!b || busy || attempted || !checkLiveness()) return false;
     const next = parseOfficeIntent(value, b.read);
+    if (
+      next &&
+      (usedCommandIds.has(next.request.commandId) ||
+        usedIdempotencyKeys.has(next.request.idempotencyKey))
+    ) {
+      intent = null;
+      status = 'UNAVAILABLE';
+      code = 'ORIGINAL_REQUEST_RECOVERY_ONLY';
+      notify();
+      return false;
+    }
     if (
       !next ||
       !currentHead() ||
@@ -626,6 +652,10 @@ export function createOfficeCommandController(
           : null,
         receipt,
         acknowledgement,
+        previousFinal: previousFinal
+          ? (JSON.parse(JSON.stringify(previousFinal)) as typeof previousFinal)
+          : null,
+        previousFinalCode,
         runtimePage: runtimePage
           ? (JSON.parse(JSON.stringify(runtimePage)) as RuntimePage)
           : null,
@@ -663,6 +693,14 @@ export function createOfficeCommandController(
             ) as AuthenticatedOfficeCommandRequestDto)
           : null,
         canRead: !retired && !busy,
+        canBeginNextRequest:
+          !retired &&
+          !busy &&
+          status === 'FINAL_VERIFIED' &&
+          !!receipt &&
+          !!intent &&
+          !!currentHead(),
+        canRecoverPreviousFinal: !retired && !busy && !!previousFinal,
         canStage: !retired && !busy && !attempted && !!currentHead(),
         canRestoreOriginal: !retired && !busy && !attempted && !receipt,
         canReview:
@@ -698,6 +736,66 @@ export function createOfficeCommandController(
     refresh: () =>
       operation(async () => {
         await read();
+      }),
+    beginNextRequest: () =>
+      operation(async () => {
+        if (status !== 'FINAL_VERIFIED' || !receipt || !intent) return;
+        await read();
+        // A durable receipt alone cannot authorize another command. A failed
+        // read keeps the original request locked and available for recovery.
+        if (
+          !checkLiveness() ||
+          status !== 'FINAL_VERIFIED' ||
+          !currentHead() ||
+          !receipt ||
+          !intent
+        )
+          return;
+        previousFinal = { original: intent, receipt };
+        previousFinalCode = null;
+        intent = null;
+        receipt = null;
+        acknowledgement = null;
+        lookup = null;
+        attempted = false;
+        outcomeUnknown = false;
+        submitStatus = null;
+        submitCode = null;
+        code = null;
+        status = runtimeReader ? 'CURRENT_AUTHORIZED_HEAD' : 'CURRENT';
+      }),
+    recoverPreviousFinal: () =>
+      operation(async () => {
+        if (!previousFinal || !recoverer) return;
+        const previous = previousFinal;
+        previousFinalCode = 'READING';
+        notify();
+        try {
+          const result = await recoverer.recover(
+            previous.original,
+            requestId(),
+            previous.receipt.commandFingerprint,
+          );
+          if (!checkLiveness()) return;
+          if (result.status === 'DENIED') {
+            disconnect('DENIED');
+            return;
+          }
+          previousFinalCode =
+            result.status === 'FINAL'
+              ? Object.entries(previous.receipt).every(
+                  ([key, value]) =>
+                    JSON.stringify(value) ===
+                    JSON.stringify(
+                      result.receipt[key as keyof typeof result.receipt],
+                    ),
+                )
+                ? 'FINAL_VERIFIED'
+                : 'PREVIOUS_FINAL_MISMATCH'
+              : (('code' in result ? result.code : undefined) ?? result.status);
+        } catch {
+          if (checkLiveness()) previousFinalCode = 'UNAVAILABLE';
+        }
       }),
     selectTradeDataset(dataset: PostwarTradeCurrentDataset) {
       if (
@@ -964,6 +1062,8 @@ export function createOfficeCommandController(
         )
           return;
         attempted = true;
+        usedCommandIds.add(intent.request.commandId);
+        usedIdempotencyKeys.add(intent.request.idempotencyKey);
         status = 'SUBMITTING';
         code = null;
         notify();
