@@ -1,9 +1,64 @@
 import {
+  isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort,
+  type createPostwarSocialEmploymentServiceCreationRuntime,
+  type SocialServiceCreationSourceCommitProtectionPort,
+} from '../persistence/postwar-social-employment-service-creation-runtime.js';
+import { INDUSTRY_UTILITY_COMMANDS } from '@econmind/core/industry-utility-execution';
+import {
+  isPostwarIndustryUtilityRuntime,
+  PostwarIndustryUtilitySourceMissing,
+  type PostwarIndustryUtilityRuntime,
+  type IndustryUtilitySourceCommitProtectionPort,
+} from '../persistence/postwar-industry-utility-runtime.js';
+import {
+  isPostwarIndustryLogisticsRuntime,
+  PostwarIndustryLogisticsSourceMissing,
+  type PostwarIndustryLogisticsRuntime,
+  type IndustryLogisticsSourceCommitProtectionPort,
+} from '../persistence/postwar-industry-logistics-runtime.js';
+import type { PostwarIndustryOperatingWageRuntime } from '../persistence/postwar-industry-operating-wage-runtime.js';
+import type { PostwarIndustryWorkRuntime } from '../persistence/postwar-industry-work-runtime.js';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
+import {
+  isPostwarIndustryRunRuntime,
+  type PostwarIndustryRunRuntime,
+  type IndustryRunSourceCommitProtectionPort,
+} from '../persistence/postwar-industry-run-runtime.js';
+import {
+  INDUSTRY_PRODUCTION_COMMAND,
+  INDUSTRY_PRODUCTION_CAPABILITY,
+} from '@econmind/core/industry-production-command';
+import {
+  isPreparedPostwarIndustryRuntime,
+  PostwarIndustryRuntimeMissing,
+  type PostwarIndustryRuntime,
+} from '../persistence/postwar-industry-runtime.js';
+import type { IndustryProductionCutoffGuard } from '../persistence/industry-production-source-cutoff.js';
+import type { PostwarBeneficialHousingRentRuntime } from '../persistence/postwar-beneficial-housing-rent-runtime.js';
+import { MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY } from '../persistence/manual-office-authorization-sql.js';
+import { CentralBankOmoOriginalsMissing } from '../persistence/postgres-central-bank-omo-originals.js';
+import {
+  isPostwarNarrowTradeReservationRuntime,
+  type PostwarNarrowTradeReservationRuntime,
+} from './postwar-narrow-trade-reservation-candidate.js';
+import { type PostwarNarrowTradeAutomaticRuntime } from './postwar-narrow-trade-shipment-delivery-candidates.js';
+import {
+  isPostwarNarrowTradeCurrentSource,
+  PostwarNarrowTradeCurrentSourceMissing,
+  type PostwarNarrowTradeCurrentSource,
+} from '../persistence/postwar-narrow-trade-current-source.js';
+import {
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_CAPABILITY,
   CENTRAL_BANK_OMO_COMMAND,
   CENTRAL_BANK_OMO_CAPABILITY,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DOMAIN_ERROR_CODES,
   DomainError,
@@ -44,12 +99,69 @@ import type { AtomicTransitionCandidateFactory } from '../persistence/atomic-tra
 import type { SqlDatabase } from '../persistence/sql-database.js';
 import { createSocialEmploymentCommitSourceGuard } from '../persistence/social-employment-runtime-snapshot-reader.js';
 import type { SourceCommitProtectionPort } from '../projections/governing-source-commit-boundary-contract.js';
-import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import {
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
+} from '@econmind/core/authenticated-office-command-contract';
+import {
+  isPostwarDayOneFxRuntime,
+  type createPostwarDayOneFxRuntime,
+  type DayOneFxSourceCommitProtectionPort,
+} from '../persistence/postwar-day-one-fx-runtime.js';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
+import {
+  isFinanceBudgetNativeCommitGuard,
+  type createPostgresFinanceBudgetNativeRuntime,
+  type FinanceBudgetNativeCommitGuard,
+} from '../persistence/postgres-finance-budget-custody.js';
+import {
+  isPostwarSocialPositionSourceCommitProtectionPort,
+  type createPostwarSocialPositionRuntime,
+  type SocialPositionSourceCommitProtectionPort,
+} from '../persistence/postwar-social-position-runtime.js';
+import {
+  isPostwarCaptainSourceCommitProtectionPort,
+  type createPostwarCaptainRuntime,
+  type CaptainSourceCommitProtectionPort,
+} from '../persistence/postwar-captain-runtime.js';
+import type { createPostwarSocialMatchRuntime } from '../persistence/postwar-social-match-runtime.js';
+import {
+  isPostwarCentralBankOmoRuntime,
+  type PostwarCentralBankOmoRuntime,
+  type CentralBankOmoSourceCommitProtectionPort,
+} from '../persistence/postwar-central-bank-omo-runtime.js';
 
 /** Server constructor dependencies only. No request snapshot, prebuilt draft,
  * caller candidateFactory, readiness registry or automatic publisher port. */
 export interface ManualOfficeRuntimeReaders {
+  readonly industryOperatingWage?: Readonly<PostwarIndustryOperatingWageRuntime> | null;
+  readonly industryWork?: Readonly<PostwarIndustryWorkRuntime> | null;
+  readonly industryUtility?: Readonly<PostwarIndustryUtilityRuntime> | null;
+  readonly industryLogistics?: Readonly<PostwarIndustryLogisticsRuntime> | null;
+  readonly industryRun?: Readonly<PostwarIndustryRunRuntime> | null;
+  readonly industry?: Readonly<PostwarIndustryRuntime> | null;
+  readonly beneficialHousingRent?: Readonly<PostwarBeneficialHousingRentRuntime> | null;
+  readonly tradeReservation?: Readonly<PostwarNarrowTradeReservationRuntime> | null;
+  readonly tradeAutomatic?: Readonly<PostwarNarrowTradeAutomaticRuntime> | null;
+  readonly tradeSource?: Readonly<PostwarNarrowTradeCurrentSource> | null;
+  readonly centralBankNative?: PostwarCentralBankOmoRuntime | null;
+  readonly treasuryFx?: ReturnType<typeof createPostwarDayOneFxRuntime> | null;
+  /** Automatic source is a separate fixed publisher path, never a browser intent. */
+  readonly socialMatch?: ReturnType<
+    typeof createPostwarSocialMatchRuntime
+  > | null;
+  readonly captainNative?: ReturnType<
+    typeof createPostwarCaptainRuntime
+  > | null;
+  readonly socialServiceCreation?: ReturnType<
+    typeof createPostwarSocialEmploymentServiceCreationRuntime
+  >;
+  readonly socialPosition?: ReturnType<
+    typeof createPostwarSocialPositionRuntime
+  > | null;
+  readonly financeBudget?: ReturnType<
+    typeof createPostgresFinanceBudgetNativeRuntime
+  > | null;
   readonly captain?: CaptainPoliticalCapitalRuntimeReader | null;
   readonly centralBank?: CentralBankOmoReader | null;
   readonly social?: Pick<
@@ -60,6 +172,17 @@ export interface ManualOfficeRuntimeReaders {
 
 export function manualOfficeCapability(command: CanonicalCommand) {
   switch (command.commandType) {
+    case INDUSTRY_UTILITY_COMMANDS.POWER:
+    case INDUSTRY_UTILITY_COMMANDS.WATER:
+    case INDUSTRY_UTILITY_COMMANDS.LOGISTICS:
+    case INDUSTRY_UTILISATION_TARGET_COMMAND:
+    case INDUSTRY_RUN_SCHEDULE_COMMAND:
+    case INDUSTRY_PRODUCTION_COMMAND:
+      return command.officeId === 'INDUSTRY'
+        ? INDUSTRY_PRODUCTION_CAPABILITY
+        : null;
+    case 'CORE_GOODS_TRANSFER_V1':
+      return command.officeId === 'TRADE' ? ('TRADE_CONTRACTS' as const) : null;
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND:
       return command.officeId === 'CAPTAIN'
         ? CAPTAIN_POLITICAL_CAPITAL_CAPABILITY
@@ -71,6 +194,14 @@ export function manualOfficeCapability(command: CanonicalCommand) {
     case SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND:
       return command.officeId === 'SOCIAL'
         ? SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY
+        : null;
+    case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
+    case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND:
+    case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
+      return command.officeId === 'SOCIAL' ? ('SOCIAL_LABOUR' as const) : null;
+    case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND:
+      return command.officeId === 'FINANCE'
+        ? ('FINANCE_TREASURY' as const)
         : null;
     case FINANCE_BUDGET_APPROPRIATION_COMMAND:
       return command.officeId === 'FINANCE'
@@ -103,22 +234,13 @@ export async function authorizeManualOfficeCommand(input: {
     const r = await input.database.query<{
       team_id: string;
       authorization_version: string;
-    }>(
-      `select a.team_id, a.authorization_version from world_v2.current_commit_authorization a
-       where a.world_id=$1 and a.auth_subject=$2::uuid and a.country_id=$3
-         and a.office_id=$4 and a.capability=$5 and a.active
-         and not exists(select 1 from world_v2.current_commit_authorization other
-           where other.world_id=a.world_id and other.auth_subject=a.auth_subject and other.active
-             and (other.country_id is distinct from a.country_id or other.team_id is distinct from a.team_id
-               or other.authorization_version is distinct from a.authorization_version))`,
-      [
-        command.worldId,
-        command.authSubject,
-        command.countryId,
-        command.officeId,
-        capability,
-      ],
-    );
+    }>(MANUAL_OFFICE_CURRENT_MEMBERSHIP_QUERY, [
+      command.worldId,
+      command.authSubject,
+      command.countryId,
+      command.officeId,
+      capability,
+    ]);
     if (r.rows.length !== 1 || !r.rows[0]) return null;
     return {
       authSubject: command.authSubject,
@@ -173,7 +295,19 @@ export function createManualOfficeCommandComposition(input: {
   readonly readers: ManualOfficeRuntimeReaders;
 }): {
   readonly factory: AtomicTransitionCandidateFactory;
+  readonly industryUtilitySourceCommitProtectionPort?: IndustryUtilitySourceCommitProtectionPort;
+  readonly industryLogisticsSourceCommitProtectionPort?: IndustryLogisticsSourceCommitProtectionPort;
+  readonly industryRunSourceCommitProtectionPort?: IndustryRunSourceCommitProtectionPort;
+  readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
   readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
+  readonly dayOneFxSourceCommitProtectionPort?: DayOneFxSourceCommitProtectionPort;
+  readonly financeBudgetSourceCommitProtectionPort?: FinanceBudgetNativeCommitGuard;
+  readonly socialServiceCreationSourceCommitProtectionPort?: SocialServiceCreationSourceCommitProtectionPort;
+  readonly socialPositionSourceCommitProtectionPort?: SocialPositionSourceCommitProtectionPort;
+  readonly captainSourceCommitProtectionPort?: CaptainSourceCommitProtectionPort;
+  readonly centralBankOmoSourceCommitProtectionPort?: CentralBankOmoSourceCommitProtectionPort;
+  readonly narrowTransferApprovalGuard?: PostwarNarrowTradeReservationRuntime['narrowTransferApprovalGuard'];
+  readonly postwarNarrowTradeSourceCommitProtectionPort?: PostwarNarrowTradeCurrentSource['sourceCommitProtectionPort'];
   assertSourceBeforeClaim(observedAtReal: string): Promise<void>;
 } | null {
   const command = input.command,
@@ -181,12 +315,201 @@ export function createManualOfficeCommandComposition(input: {
   const cap = manualOfficeCapability(command);
   if (cap === null) invalid('Manual factory requires a supported family');
   switch (command.commandType) {
-    case FINANCE_BUDGET_APPROPRIATION_COMMAND:
+    case INDUSTRY_UTILITY_COMMANDS.POWER:
+    case INDUSTRY_UTILITY_COMMANDS.WATER: {
       validateManualOfficeCommandIntent(command);
-      // Deliberately no budget reader/factory/guard port or positive source.
-      return null;
+      const runtime = input.readers.industryUtility;
+      if (
+        !isPostwarIndustryUtilityRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryUtilitySourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (at) =>
+          runtime.assertSourceBeforeClaim(command, at),
+      };
+    }
+    case INDUSTRY_UTILITY_COMMANDS.LOGISTICS: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.industryLogistics;
+      if (
+        !isPostwarIndustryLogisticsRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryLogisticsSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (at) =>
+          runtime.assertSourceBeforeClaim(command, at),
+      };
+    }
+    case INDUSTRY_UTILISATION_TARGET_COMMAND:
+    case INDUSTRY_RUN_SCHEDULE_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.industryRun;
+      if (
+        !isPostwarIndustryRunRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryRunSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (at) =>
+          runtime.assertSourceBeforeClaim(command, at),
+      };
+    }
+    case INDUSTRY_PRODUCTION_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.industry;
+      if (
+        !isPreparedPostwarIndustryRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.database !== input.database
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        industryProductionCutoffGuard: runtime.cutoffGuard,
+        async assertSourceBeforeClaim() {
+          const actual = await runtime.inspect(command);
+          if (
+            actual.preparedRun !== 'EXACT_GENUINE_CORE_DATA' ||
+            actual.missing.length
+          )
+            throw new PostwarIndustryRuntimeMissing(
+              actual.missing.length
+                ? actual.missing
+                : ['GENUINE_PREPARED_RUN_MISSING'],
+            );
+        },
+      };
+    }
+    case 'CORE_GOODS_TRANSFER_V1': {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.tradeReservation,
+        source = input.readers.tradeSource;
+      if (
+        !isPostwarNarrowTradeReservationRuntime(runtime) ||
+        runtime.worldId !== command.worldId ||
+        runtime.workerId !== input.workerId ||
+        runtime.database !== input.database ||
+        !isPostwarNarrowTradeCurrentSource(source, command.worldId)
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        narrowTransferApprovalGuard: runtime.narrowTransferApprovalGuard,
+        postwarNarrowTradeSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        async assertSourceBeforeClaim(observedAtReal) {
+          await input.database.transaction(async (tx) => {
+            await tx.query('set transaction isolation level repeatable read');
+            const authorization = await authorizeManualOfficeCommand({
+              database: input.database,
+              command,
+            });
+            const result = await source.inspectFrom(tx, {
+              command,
+              authorization,
+              observedAtReal,
+            });
+            if (result.kind === 'MISSING')
+              throw new PostwarNarrowTradeCurrentSourceMissing(result);
+            await runtime.narrowTransferApprovalGuard.assertCurrent(tx, {
+              command,
+              observedAtReal,
+            });
+          });
+        },
+      };
+    }
+    case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.treasuryFx;
+      if (!isPostwarDayOneFxRuntime(runtime)) return null;
+      return {
+        factory: runtime.candidateFactory,
+        dayOneFxSourceCommitProtectionPort: runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.preflightCanonical(command, observedAtReal),
+      };
+    }
+    case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
+    case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.socialServiceCreation;
+      if (
+        !runtime ||
+        !isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPort(
+          runtime.sourceCommitProtectionPort,
+        )
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        socialServiceCreationSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.assertSourceBeforeClaim({ command, observedAtReal }),
+      };
+    }
+    case SOCIAL_POSITION_OFFER_CREATE_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.socialPosition;
+      if (
+        !runtime ||
+        !isPostwarSocialPositionSourceCommitProtectionPort(
+          runtime.sourceCommitProtectionPort,
+        )
+      )
+        return null;
+      return {
+        factory: runtime.candidateFactory,
+        socialPositionSourceCommitProtectionPort:
+          runtime.sourceCommitProtectionPort,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.assertSourceBeforeClaim({ command, observedAtReal }),
+      };
+    }
+    case FINANCE_BUDGET_APPROPRIATION_COMMAND: {
+      validateManualOfficeCommandIntent(command);
+      const runtime = input.readers.financeBudget;
+      if (!runtime || !isFinanceBudgetNativeCommitGuard(runtime.commitGuard))
+        return null;
+      return {
+        factory: runtime.factory,
+        financeBudgetSourceCommitProtectionPort: runtime.commitGuard,
+        assertSourceBeforeClaim: (observedAtReal) =>
+          runtime.assertSourceBeforeClaim({ command, observedAtReal }),
+      };
+    }
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND: {
       parseCaptainPoliticalCapitalAllocation(command, digest);
+      if (input.readers.captainNative) {
+        const runtime = input.readers.captainNative;
+        if (
+          !isPostwarCaptainSourceCommitProtectionPort(
+            runtime.sourceCommitProtectionPort,
+          )
+        )
+          return null;
+        return {
+          factory: runtime.factory,
+          captainSourceCommitProtectionPort: runtime.sourceCommitProtectionPort,
+          assertSourceBeforeClaim: (observedAtReal) =>
+            runtime.assertSourceBeforeClaim({ command, observedAtReal }),
+        };
+      }
       if (!input.readers.captain) return null;
       const source = createCaptainPoliticalCapitalRuntimeSource({
         reader: input.readers.captain,
@@ -216,6 +539,21 @@ export function createManualOfficeCommandComposition(input: {
     }
     case CENTRAL_BANK_OMO_COMMAND: {
       const intent = parseCentralBankOmoIntent(command, digest);
+      if (
+        input.readers.centralBankNative !== undefined &&
+        input.readers.centralBankNative !== null
+      ) {
+        const runtime = input.readers.centralBankNative;
+        if (!isPostwarCentralBankOmoRuntime(runtime)) return null;
+        return {
+          factory: runtime.factory,
+          centralBankOmoSourceCommitProtectionPort:
+            runtime.sourceCommitProtectionPort,
+          async assertSourceBeforeClaim(observedAtReal) {
+            await runtime.preflight(command, observedAtReal);
+          },
+        };
+      }
       const reader = input.readers.centralBank;
       if (!reader) return null;
       const factory: AtomicTransitionCandidateFactory = {
@@ -356,7 +694,12 @@ export function createManualOfficeCommandComposition(input: {
 
 export function isManualOfficeSourceMissing(error: unknown): boolean {
   return (
+    error instanceof PostwarIndustryRuntimeMissing ||
+    error instanceof PostwarIndustryUtilitySourceMissing ||
+    error instanceof PostwarIndustryLogisticsSourceMissing ||
     error instanceof CaptainPoliticalCapitalSourceMissing ||
+    error instanceof PostwarNarrowTradeCurrentSourceMissing ||
+    error instanceof CentralBankOmoOriginalsMissing ||
     error instanceof SocialOperatingStateMissingError
   );
 }

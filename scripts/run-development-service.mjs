@@ -5,6 +5,7 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 import { assertSafeEnvironment } from './environment-policy.mjs';
+import { readProcessParentPid } from './process-parent-pid.mjs';
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(
@@ -100,13 +101,9 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
     }
     if (process.platform === 'win32') return true;
     try {
-      const { stdout } = await execFileAsync('ps', [
-        '-p',
-        String(originalParentPid),
-        '-o',
-        'ppid=',
-      ]);
-      return Number(stdout.trim()) === originalPnpmOwnerPid;
+      return (
+        (await readProcessParentPid(originalParentPid)) === originalPnpmOwnerPid
+      );
     } catch {
       return false;
     }

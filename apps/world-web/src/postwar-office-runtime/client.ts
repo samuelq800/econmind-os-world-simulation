@@ -1,0 +1,1048 @@
+import {
+  INDUSTRY_UTILISATION_TARGETS_DATASET,
+  INDUSTRY_UTILISATION_TARGETS_NATURE,
+  parseIndustryUtilisationTargetRow,
+  parseIndustryUtilisationTargetsCoverage,
+} from '@econmind/core/postwar-industry-utilisation-targets-contract';
+import {
+  SOCIAL_PROGRAMMES_DATASET,
+  SOCIAL_PROGRAMMES_NATURE,
+  parseSocialProgrammeRowDto,
+} from '@econmind/core/social-labour-programme-public-contract';
+import {
+  INDUSTRY_COMMITTED_RUNS_DATASET,
+  INDUSTRY_COMMITTED_RUNS_NATURE,
+  parseIndustryCommittedRunRow,
+  parseIndustryCommittedRunsCoverage,
+} from '@econmind/core/postwar-industry-committed-runs-contract';
+import {
+  POSTWAR_TRADE_CURRENT_DATASETS,
+  POSTWAR_TRADE_CURRENT_NATURE,
+  parsePostwarTradeCurrentCoverage,
+  parsePostwarTradeInventoryRow,
+  parsePostwarTradeTransferRow,
+} from '@econmind/core/postwar-trade-current-contract';
+import {
+  INDUSTRY_UTILITY_PLANNING_DATASET,
+  INDUSTRY_UTILITY_PLANNING_NATURE,
+  parseIndustryUtilityPlanningRow,
+  parseIndustryUtilityPlanningCoverage,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
+import {
+  INDUSTRY_RUN_PARAMETERS_DATASET,
+  parseIndustryRunParameterRow,
+} from '@econmind/core/postwar-industry-run-parameters-contract';
+import {
+  POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
+  POSTWAR_INDUSTRY_LABOUR_OPENING_NATURE,
+  POSTWAR_INDUSTRY_LABOUR_CURRENT_NATURE,
+  parsePostwarIndustryLabourCurrentCoverage,
+  parsePostwarIndustryLabourCurrentRow,
+} from '@econmind/core/postwar-industry-labour-current-contract';
+import {
+  parsePostwarCaptainAllocationOptions,
+  POSTWAR_CAPTAIN_CURRENT_NATURE,
+  POSTWAR_CAPTAIN_OPENING_NATURE,
+  POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA,
+  POSTWAR_CAPTAIN_CURRENT_DATASET,
+  POSTWAR_CAPTAIN_CURRENT_BUCKETS,
+  parsePostwarCaptainCurrentCoverage,
+  parsePostwarCaptainPoliticalCapitalRow,
+} from '@econmind/core/postwar-captain-current-contract';
+import {
+  POSTWAR_SOCIAL_MIXED_CURRENT_NATURE,
+  parsePostwarSocialMixedCoverage,
+  parsePostwarSocialMixedStateBinding,
+} from '@econmind/core/postwar-social-mixed-current-contract';
+import {
+  POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE,
+  POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
+  POSTWAR_FINANCIAL_PAGED_COVERAGE_SCHEMA,
+  parsePostwarCentralBankOpeningInstruments,
+  parsePostwarFinancialMixedCoverage,
+  parsePostwarMixedFinancialBalanceRow,
+  parsePostwarMixedTreasuryCapacityRow,
+} from '@econmind/core/postwar-financial-mixed-current-contract';
+import { sameAuthorizedIdentity } from '../prototype/authorized-read-adapter.js';
+import {
+  hash,
+  canonicalId,
+  parseAuthority,
+  row,
+  uuid,
+  validConfig,
+  version,
+  type ProductionReadConfig,
+  type ServerReadAuthority,
+} from '../production-read/contract.js';
+
+export const POSTWAR_RUNTIME_SCHEMA = 'postwar-office-runtime-read-v1';
+export const POSTWAR_RUNTIME_PATH = '/v1/postwar-office-runtime';
+export const officeDatasets: Readonly<Record<string, readonly string[]>> =
+  Object.freeze({
+    SOCIAL: [
+      'positions',
+      'service-pools',
+      'offers',
+      'minimum-wage',
+      SOCIAL_PROGRAMMES_DATASET,
+    ],
+    FINANCE: [
+      'currency-fx',
+      'opening-financial-legs',
+      'ledger-balances',
+      'treasury-capacity',
+    ],
+    CENTRAL_BANK: [
+      'currency-fx',
+      'cb-categories',
+      'cb-holdings',
+      'bank-loans',
+      'opening-financial-legs',
+      'ledger-balances',
+    ],
+    INDUSTRY: [
+      INDUSTRY_UTILITY_PLANNING_DATASET,
+      INDUSTRY_COMMITTED_RUNS_DATASET,
+      INDUSTRY_UTILISATION_TARGETS_DATASET,
+      INDUSTRY_RUN_PARAMETERS_DATASET,
+      POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET,
+      'opening-inventory-entries',
+      'regional-source-capacity',
+    ],
+    TRADE: ['opening-inventory-entries', ...POSTWAR_TRADE_CURRENT_DATASETS],
+    CAPTAIN: [
+      POSTWAR_CAPTAIN_CURRENT_DATASET,
+      'regional-source-capacity',
+      'public-service-summary',
+    ],
+  });
+export interface RuntimePage {
+  readonly status: 'PAGE' | 'EMPTY';
+  readonly dataset: string;
+  readonly authority: ServerReadAuthority;
+  readonly source: Readonly<Record<string, unknown>> & {
+    readonly sourceVersion: string;
+    readonly bindingVersion: string;
+  };
+  readonly page: {
+    readonly offset: number;
+    readonly limit: number;
+    readonly returned: number;
+    readonly total: number;
+    readonly nextOffset: number | null;
+  };
+  readonly rows: readonly Readonly<Record<string, unknown>>[];
+}
+export type RuntimeResult =
+  | RuntimePage
+  | {
+      readonly status: 'NOT_CONNECTED' | 'STALE' | 'DENIED' | 'UNAVAILABLE';
+      readonly code: string;
+    };
+
+/** A coverage document describes the server-verified complete prefix. It does
+ * not promote the originating materialization to a different World version. */
+function coversCurrentPrefix(
+  source: Record<string, unknown>,
+  binding: Record<string, unknown>,
+  country: string,
+): boolean {
+  if (source.currentPrefixCoverage === undefined)
+    return (
+      binding.sourceStateWorldVersion === source.worldVersion &&
+      binding.sourceEventSequence === source.eventSequence
+    );
+  const coverage = row(source.currentPrefixCoverage);
+  const fields = [
+    'schemaVersion',
+    'coverageRef',
+    'countryId',
+    'globalWorldVersion',
+    'globalEventSequence',
+    'originWorldVersion',
+    'originEventSequence',
+    'prefixFingerprint',
+    'knownEffectsFingerprint',
+    'coveredThroughEventId',
+    'coveredThroughEventFingerprint',
+    'reducerVersion',
+  ];
+  return (
+    !!coverage &&
+    Object.keys(coverage).length === fields.length &&
+    fields.every((key) => Object.hasOwn(coverage, key)) &&
+    coverage.schemaVersion === 'postwar-social-current-prefix-coverage-v2' &&
+    coverage.reducerVersion === 'POSTWAR_SOCIAL_COMPLETE_PREFIX_SCOPE_V2' &&
+    coverage.countryId === country &&
+    canonicalId(coverage.coverageRef) &&
+    canonicalId(coverage.coveredThroughEventId) &&
+    [
+      'prefixFingerprint',
+      'knownEffectsFingerprint',
+      'coveredThroughEventFingerprint',
+    ].every((key) => hash(coverage[key])) &&
+    coverage.globalWorldVersion === source.worldVersion &&
+    coverage.globalEventSequence === source.eventSequence &&
+    coverage.originWorldVersion === binding.sourceStateWorldVersion &&
+    coverage.originEventSequence === binding.sourceEventSequence &&
+    version(coverage.originWorldVersion) &&
+    version(coverage.originEventSequence) &&
+    version(coverage.globalWorldVersion) &&
+    version(coverage.globalEventSequence) &&
+    coverage.originWorldVersion !== '0' &&
+    coverage.originEventSequence !== '0' &&
+    BigInt(coverage.originWorldVersion) <=
+      BigInt(coverage.globalWorldVersion) &&
+    BigInt(coverage.originEventSequence) <= BigInt(coverage.globalEventSequence)
+  );
+}
+function observedHeadMatches(
+  source: Record<string, unknown>,
+  authority: ServerReadAuthority,
+): boolean {
+  const observed = row(source.observedHead);
+  return (
+    !!observed &&
+    Object.keys(observed).length === 2 &&
+    observed.worldVersion === authority.readback.worldVersion &&
+    observed.eventSequence === authority.readback.eventSequence
+  );
+}
+function financialCoverageMatches(
+  source: Record<string, unknown>,
+  authority: ServerReadAuthority,
+): boolean {
+  const coverage = row(source.currentFinancialCoverage);
+  if (
+    coverage?.schemaVersion === POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA ||
+    coverage?.schemaVersion === POSTWAR_FINANCIAL_PAGED_COVERAGE_SCHEMA
+  ) {
+    try {
+      parsePostwarFinancialMixedCoverage(coverage, {
+        countryId: authority.identity.countryId,
+        worldVersion: authority.readback.worldVersion,
+        eventSequence: authority.readback.eventSequence,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  const fields = [
+    'schemaVersion',
+    'reducerVersion',
+    'coverageRef',
+    'prefixFingerprint',
+    'knownEffectsFingerprint',
+    'globalWorldVersion',
+    'globalEventSequence',
+    'coveredThroughEventId',
+    'coveredThroughEventFingerprint',
+    'noFinancialPostings',
+    'noInventoryPostings',
+  ];
+  return (
+    !!coverage &&
+    Object.keys(coverage).length === fields.length &&
+    fields.every((key) => Object.hasOwn(coverage, key)) &&
+    coverage.schemaVersion === 'postwar-financial-current-prefix-coverage-v1' &&
+    coverage.reducerVersion ===
+      'POSTWAR_FINANCIAL_COMPLETE_NO_POSTING_PREFIX_V1' &&
+    canonicalId(coverage.coverageRef) &&
+    canonicalId(coverage.coveredThroughEventId) &&
+    [
+      'prefixFingerprint',
+      'knownEffectsFingerprint',
+      'coveredThroughEventFingerprint',
+    ].every((key) => hash(coverage[key])) &&
+    coverage.globalWorldVersion === authority.readback.worldVersion &&
+    coverage.globalEventSequence === authority.readback.eventSequence &&
+    coverage.noFinancialPostings === true &&
+    coverage.noInventoryPostings === true
+  );
+}
+export function createPostwarRuntimeClient(
+  supplied: ProductionReadConfig | null,
+  options: { fetcher?: typeof fetch; timeoutMs?: number } = {},
+) {
+  const c =
+    validConfig(supplied) &&
+    supplied.identity.projectionVersion === POSTWAR_RUNTIME_SCHEMA &&
+    supplied.endpoints.projectionPath === POSTWAR_RUNTIME_PATH
+      ? {
+          ...supplied,
+          identity: Object.freeze({ ...supplied.identity }),
+          world: Object.freeze({ ...supplied.world }),
+          endpoints: Object.freeze({ ...supplied.endpoints }),
+          session: Object.freeze({ ...supplied.session }),
+        }
+      : null;
+  let epoch = 0,
+    retired = !c,
+    active: AbortController | null = null,
+    unsubscribe: (() => void) | undefined;
+  const current = () => {
+    try {
+      return (
+        !!c &&
+        !retired &&
+        c.session.isCurrent() &&
+        sameAuthorizedIdentity(c.currentIdentity(), c.identity)
+      );
+    } catch {
+      return false;
+    }
+  };
+  function disconnect() {
+    retired = true;
+    epoch++;
+    active?.abort();
+    active = null;
+    const stop = unsubscribe;
+    unsubscribe = undefined;
+    stop?.();
+  }
+  if (c) {
+    try {
+      unsubscribe = c.session.onInvalidate(disconnect);
+      if (typeof unsubscribe !== 'function' || !current()) disconnect();
+    } catch {
+      disconnect();
+    }
+  }
+  return Object.freeze({
+    disconnect,
+    async readPage(
+      dataset: string,
+      requestId: string,
+      previous?: RuntimePage,
+    ): Promise<RuntimeResult> {
+      const fail = (
+        status: 'NOT_CONNECTED' | 'STALE' | 'DENIED' | 'UNAVAILABLE',
+        code: string,
+      ): RuntimeResult => ({ status, code });
+      if (!c || retired)
+        return fail('NOT_CONNECTED', 'TRUSTED_READ_BINDING_MISSING');
+      if (!current()) {
+        disconnect();
+        return fail('STALE', 'SESSION_CHANGED');
+      }
+      if (
+        !uuid(requestId) ||
+        !officeDatasets[c.identity.officeId]?.includes(dataset)
+      )
+        return fail('DENIED', 'INVALID_DATASET');
+      if (
+        previous &&
+        (previous.dataset !== dataset ||
+          !parseAuthority(previous.authority, c) ||
+          previous.page.nextOffset === null)
+      )
+        return fail('STALE', 'INVALID_CONTINUATION');
+      const started = ++epoch;
+      active?.abort();
+      const abort = new AbortController();
+      active = abort;
+      const timer = setTimeout(
+        () => abort.abort(),
+        Math.min(10000, Math.max(1, options.timeoutMs ?? 10000)),
+      );
+      const wait = <T>(work: Promise<T>) =>
+        new Promise<T>((resolve, reject) => {
+          const cancel = () => reject(Error('CANCELLED'));
+          if (abort.signal.aborted) {
+            cancel();
+            return;
+          }
+          abort.signal.addEventListener('abort', cancel, { once: true });
+          work
+            .then(resolve, reject)
+            .finally(() => abort.signal.removeEventListener('abort', cancel));
+        });
+      try {
+        const token = await wait(c.getAccessToken());
+        if (started !== epoch || !current())
+          return fail('STALE', 'SESSION_CHANGED');
+        if (!token) {
+          disconnect();
+          return fail('DENIED', 'AUTH_REQUIRED');
+        }
+        const response = await wait(
+          (options.fetcher ?? fetch)(
+            c.endpoints.origin + POSTWAR_RUNTIME_PATH,
+            {
+              method: 'POST',
+              credentials: 'omit',
+              cache: 'no-store',
+              redirect: 'error',
+              headers: {
+                authorization: `Bearer ${token}`,
+                'content-type': 'application/json',
+              },
+              signal: abort.signal,
+              body: JSON.stringify({
+                schemaVersion: POSTWAR_RUNTIME_SCHEMA,
+                requestId,
+                operation: 'READ_CURRENT_OFFICE_OPENING',
+                officeId: c.identity.officeId,
+                dataset,
+                page: {
+                  offset: previous?.page.nextOffset ?? 0,
+                  limit: 25,
+                  ...(previous
+                    ? {
+                        sourceVersion: previous.source.sourceVersion,
+                        bindingVersion: previous.source.bindingVersion,
+                      }
+                    : {}),
+                },
+              }),
+            },
+          ),
+        );
+        if (response.status === 401 || response.status === 403) {
+          disconnect();
+          return fail('DENIED', 'AUTHORIZATION_DENIED');
+        }
+        if (
+          response.redirected ||
+          (response.url !== '' &&
+            response.url !== c.endpoints.origin + POSTWAR_RUNTIME_PATH) ||
+          !response.headers
+            .get('content-type')
+            ?.match(/^application\/json(?:;|$)/iu) ||
+          Number(response.headers.get('content-length') ?? 0) > 65536 ||
+          !response.body
+        )
+          throw Error('INVALID_RESPONSE');
+        const reader = response.body.getReader();
+        const cancelReader = () => {
+          void reader.cancel().catch(() => undefined);
+        };
+        abort.signal.addEventListener('abort', cancelReader, { once: true });
+        let text = '',
+          bytes = 0;
+        const decoder = new TextDecoder('utf-8', { fatal: true });
+        try {
+          while (true) {
+            const next = await wait(reader.read());
+            if (next.done) break;
+            bytes += next.value.byteLength;
+            if (bytes > 65536) throw Error('RESPONSE_TOO_LARGE');
+            text += decoder.decode(next.value, { stream: true });
+          }
+          text += decoder.decode();
+        } finally {
+          abort.signal.removeEventListener('abort', cancelReader);
+          void reader.cancel().catch(() => undefined);
+          try {
+            reader.releaseLock();
+          } catch {
+            /* Cancellation owns pending stream reads. */
+          }
+        }
+        if (started !== epoch || !current())
+          return fail('STALE', 'SESSION_CHANGED');
+        const body = row(JSON.parse(text));
+        if (
+          !body ||
+          body.schemaVersion !== POSTWAR_RUNTIME_SCHEMA ||
+          body.requestId !== requestId
+        )
+          throw Error('INVALID_RESPONSE');
+        if (body.ok !== true) {
+          const code = row(body.error)?.code;
+          if (typeof code !== 'string' || code.length > 128)
+            throw Error('INVALID_RESPONSE');
+          return fail(response.status === 409 ? 'STALE' : 'UNAVAILABLE', code);
+        }
+        const authority = parseAuthority(body.authority, c),
+          source = row(body.source),
+          page = row(body.page),
+          rows = body.rows;
+        if (
+          !response.ok ||
+          !authority ||
+          !source ||
+          !page ||
+          !Array.isArray(rows) ||
+          rows.some((v) => !row(v)) ||
+          body.dataset !== dataset ||
+          !['AVAILABLE', 'EMPTY'].includes(String(body.status))
+        )
+          throw Error('INVALID_RESPONSE');
+        const historical =
+          source.dataNature === 'ADMITTED_IMMUTABLE_OPENING_FACTS';
+        for (const [key, value] of Object.entries({
+          worldId: c.identity.worldId,
+          countryId: c.identity.countryId,
+          officeId: c.identity.officeId,
+          authSubjectId: c.identity.authSubjectId,
+          authorizationRevision: c.identity.authorizationRevision,
+          scopeKey: c.identity.scopeKey,
+          modelVersion: c.identity.modelVersion,
+          seedRef: c.world.seedRef,
+          contentHash: c.world.contentHash,
+          admissionRef: c.world.admissionRef,
+          worldVersion: historical ? '0' : authority.readback.worldVersion,
+          eventSequence: historical ? '0' : authority.readback.eventSequence,
+        }))
+          if (source[key] !== value) throw Error('SOURCE_SCOPE_MISMATCH');
+        const opening =
+          source.worldVersion === '0' &&
+          source.eventSequence === '0' &&
+          source.dataNature ===
+            'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY';
+        const currentSocial =
+          source.worldVersion !== '0' &&
+          source.eventSequence !== '0' &&
+          c.identity.officeId === 'SOCIAL' &&
+          ['positions', 'service-pools'].includes(dataset) &&
+          (source.dataNature ===
+            'ADMITTED_CURRENT_SOCIAL_DERIVED_FROM_COMMITTED_EVENT_MATERIALIZATION' ||
+            source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE);
+        if (source.centralBankOpeningInstruments !== undefined) {
+          if (
+            c.identity.officeId !== 'CENTRAL_BANK' ||
+            dataset !== 'ledger-balances'
+          )
+            throw Error('CB_OPENING_INSTRUMENT_SCOPE_MISMATCH');
+          const opening = parsePostwarCentralBankOpeningInstruments(
+            source.centralBankOpeningInstruments,
+          );
+          if (
+            opening.countryId !== c.identity.countryId ||
+            opening.seedFingerprint !== source.contentHash ||
+            opening.admissionRef !== source.admissionRef ||
+            opening.canonicalSeedSha256 !== source.canonicalSeedSha256 ||
+            opening.sourceBundleSha256 !== source.sourceBundleSha256
+          )
+            throw Error('CB_OPENING_INSTRUMENT_SOURCE_MISMATCH');
+        }
+        const currentTrade =
+          c.identity.officeId === 'TRADE' &&
+          POSTWAR_TRADE_CURRENT_DATASETS.some((x) => x === dataset) &&
+          source.dataNature === POSTWAR_TRADE_CURRENT_NATURE;
+        if (
+          POSTWAR_TRADE_CURRENT_DATASETS.some((x) => x === dataset) &&
+          !currentTrade
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentTrade) {
+          const coverage = parsePostwarTradeCurrentCoverage(
+            source.currentTradeCoverage,
+          );
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== coverage.globalWorldVersion ||
+            source.originEventSequence !== coverage.globalEventSequence
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          if (dataset === 'inventory-current') {
+            if (
+              rows
+                .map(parsePostwarTradeInventoryRow)
+                .some((x) => x.countryId !== c.identity.countryId)
+            )
+              throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          } else if (
+            rows
+              .map(parsePostwarTradeTransferRow)
+              .some(
+                (x) =>
+                  x.sellerCountryId !== c.identity.countryId &&
+                  x.buyerCountryId !== c.identity.countryId,
+              )
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentTradeCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        const currentCaptain =
+          c.identity.officeId === 'CAPTAIN' &&
+          dataset === POSTWAR_CAPTAIN_CURRENT_DATASET &&
+          ((source.dataNature === POSTWAR_CAPTAIN_CURRENT_NATURE &&
+            source.worldVersion !== '0' &&
+            source.eventSequence !== '0') ||
+            (source.dataNature === POSTWAR_CAPTAIN_OPENING_NATURE &&
+              source.worldVersion === '0' &&
+              source.eventSequence === '0'));
+        if (dataset === POSTWAR_CAPTAIN_CURRENT_DATASET && !currentCaptain)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentCaptain) {
+          const coverage = parsePostwarCaptainCurrentCoverage(
+            source.currentCaptainCoverage,
+          );
+          if (
+            (source.dataNature === POSTWAR_CAPTAIN_OPENING_NATURE) !==
+              (coverage.schemaVersion ===
+                POSTWAR_CAPTAIN_OPENING_COVERAGE_SCHEMA) ||
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            coverage.originWorldVersion !== source.originWorldVersion ||
+            coverage.originEventSequence !== source.originEventSequence ||
+            page.total !== POSTWAR_CAPTAIN_CURRENT_BUCKETS.length
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          if (source.currentCaptainAllocationOptions !== undefined) {
+            const options = parsePostwarCaptainAllocationOptions(
+              source.currentCaptainAllocationOptions,
+            );
+            if (
+              options.countryId !== c.identity.countryId ||
+              options.originalPacketSha256 !== coverage.originalPacketSha256
+            )
+              throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          }
+          const capitals = rows.map(parsePostwarCaptainPoliticalCapitalRow);
+          if (
+            capitals.some((v) => v.countryId !== c.identity.countryId) ||
+            new Set(capitals.map((v) => v.bucket)).size !== capitals.length ||
+            new Set(capitals.map((v) => v.capitalRef)).size > 1
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentCaptainCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (dataset === INDUSTRY_RUN_PARAMETERS_DATASET) {
+          const pointer = row(source.sourcePointer),
+            parameters = rows.map(parseIndustryRunParameterRow);
+          if (
+            c.identity.officeId !== 'INDUSTRY' ||
+            !historical ||
+            !observedHeadMatches(source, authority) ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            pointer?.rowOrigin !==
+              'world_v2.postwar_industry_first_day_source.source_text' ||
+            pointer.rowBinding !== 'sourceRef+sourceRawSha256' ||
+            parameters.some((p) => p.countryId !== c.identity.countryId) ||
+            new Set(parameters.map((p) => p.facilityId)).size !==
+              parameters.length ||
+            (previous &&
+              parameters.some((p) =>
+                previous.rows.some((old) => old.facilityId === p.facilityId),
+              )) ||
+            source.currentFinancialCoverage !== undefined
+          )
+            throw Error('INDUSTRY_RUN_PARAMETER_SCOPE_MISMATCH');
+        }
+        const currentSocialProgrammes =
+          dataset === SOCIAL_PROGRAMMES_DATASET &&
+          c.identity.officeId === 'SOCIAL' &&
+          source.dataNature === SOCIAL_PROGRAMMES_NATURE;
+        if (dataset === SOCIAL_PROGRAMMES_DATASET && !currentSocialProgrammes)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentSocialProgrammes) {
+          const programmes = rows.map(parseSocialProgrammeRowDto),
+            pointer = row(source.sourcePointer),
+            context = row(source.currentSocialProgrammeContext);
+          if (
+            source.sourceRevision !== 'SOCIAL_PROGRAMME_TERMS_READ_V1' ||
+            pointer?.rowOrigin !== 'fixed-social-programme-runtime' ||
+            pointer.rowBinding !==
+              'programmeId+commandFingerprint+sourceRef+sourceFingerprint' ||
+            programmes.some((p) => p.countryId !== c.identity.countryId) ||
+            new Set(programmes.map((p) => p.programmeId)).size !==
+              programmes.length ||
+            (previous &&
+              programmes.some((p) =>
+                previous.rows.some((old) => old.programmeId === p.programmeId),
+              )) ||
+            !context ||
+            Object.keys(context).sort().join('|') !==
+              'localCurrency|locationIds' ||
+            !canonicalId(context.localCurrency) ||
+            !Array.isArray(context.locationIds) ||
+            context.locationIds.length > 1000 ||
+            context.locationIds.some((x) => !canonicalId(x)) ||
+            new Set(context.locationIds).size !== context.locationIds.length ||
+            source.currentStateBinding !== undefined ||
+            source.currentPrefixCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentSocialProgrammeContext !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        const currentCommittedRuns =
+          dataset === INDUSTRY_COMMITTED_RUNS_DATASET &&
+          c.identity.officeId === 'INDUSTRY' &&
+          source.dataNature === INDUSTRY_COMMITTED_RUNS_NATURE;
+        if (
+          dataset === INDUSTRY_COMMITTED_RUNS_DATASET &&
+          !currentCommittedRuns
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentCommittedRuns) {
+          const coverage = parseIndustryCommittedRunsCoverage(
+              source.currentIndustryCommittedRunsCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            runs = rows.map(parseIndustryCommittedRunRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            pointer?.rowOrigin !== 'fixed-industry-committed-runs-runtime' ||
+            pointer.rowBinding !==
+              'runId+commandFingerprint+eventFingerprint' ||
+            runs.some(
+              (r) =>
+                r.countryId !== c.identity.countryId ||
+                r.facilityId !== coverage.facilityId ||
+                BigInt(r.committedWorldVersion) >
+                  BigInt(coverage.globalWorldVersion),
+            ) ||
+            new Set(runs.map((r) => r.runId)).size !== runs.length ||
+            (previous &&
+              runs.some((r) =>
+                previous.rows.some((p) => row(p)?.runId === r.runId),
+              )) ||
+            source.currentFinancialCoverage !== undefined ||
+            source.currentIndustryUtilityPlanningCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentIndustryCommittedRunsCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        const currentUtilisationTargets =
+          dataset === INDUSTRY_UTILISATION_TARGETS_DATASET &&
+          c.identity.officeId === 'INDUSTRY' &&
+          source.dataNature === INDUSTRY_UTILISATION_TARGETS_NATURE;
+        if (
+          dataset === INDUSTRY_UTILISATION_TARGETS_DATASET &&
+          !currentUtilisationTargets
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentUtilisationTargets) {
+          const coverage = parseIndustryUtilisationTargetsCoverage(
+              source.currentIndustryUtilisationTargetsCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            runs = rows.map(parseIndustryUtilisationTargetRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            pointer?.rowOrigin !==
+              'fixed-industry-utilisation-targets-runtime' ||
+            pointer.rowBinding !==
+              'facilityId+commandFingerprint+eventFingerprint' ||
+            runs.some(
+              (r) =>
+                r.countryId !== c.identity.countryId ||
+                r.facilityId !== coverage.facilityId ||
+                BigInt(r.committedWorldVersion) >
+                  BigInt(coverage.globalWorldVersion),
+            ) ||
+            new Set(runs.map((r) => r.facilityId)).size !== runs.length ||
+            (previous &&
+              runs.some((r) =>
+                previous.rows.some((p) => row(p)?.facilityId === r.facilityId),
+              )) ||
+            source.currentFinancialCoverage !== undefined ||
+            source.currentIndustryUtilityPlanningCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (
+          source.currentIndustryUtilisationTargetsCoverage !== undefined
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        const currentUtilityPlanning =
+          dataset === INDUSTRY_UTILITY_PLANNING_DATASET &&
+          c.identity.officeId === 'INDUSTRY' &&
+          source.dataNature === INDUSTRY_UTILITY_PLANNING_NATURE;
+        if (
+          dataset === INDUSTRY_UTILITY_PLANNING_DATASET &&
+          !currentUtilityPlanning
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentUtilityPlanning) {
+          const coverage = parseIndustryUtilityPlanningCoverage(
+              source.currentIndustryUtilityPlanningCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            planning = rows.map(parseIndustryUtilityPlanningRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            !version(source.originWorldVersion) ||
+            !version(source.originEventSequence) ||
+            BigInt(source.originWorldVersion) >
+              BigInt(authority.readback.worldVersion) ||
+            BigInt(source.originEventSequence) >
+              BigInt(authority.readback.eventSequence) ||
+            pointer?.rowOrigin !== 'fixed-industry-utility-planning-runtime' ||
+            pointer.rowBinding !== 'planningRef+sourceRef+sourceRawSha256' ||
+            planning.some((p) => p.countryId !== c.identity.countryId) ||
+            new Set(planning.map((p) => p.planningRef)).size !==
+              planning.length ||
+            source.currentFinancialCoverage !== undefined ||
+            source.currentIndustryLabourCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentIndustryUtilityPlanningCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        const currentIndustry =
+          c.identity.officeId === 'INDUSTRY' &&
+          dataset === POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET &&
+          [
+            POSTWAR_INDUSTRY_LABOUR_OPENING_NATURE,
+            POSTWAR_INDUSTRY_LABOUR_CURRENT_NATURE,
+          ].some((nature) => nature === source.dataNature);
+        if (
+          dataset === POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET &&
+          !currentIndustry
+        )
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (currentIndustry) {
+          const coverage = parsePostwarIndustryLabourCurrentCoverage(
+              source.currentIndustryLabourCoverage,
+            ),
+            pointer = row(source.sourcePointer),
+            selection = row(pointer?.selection),
+            labour = rows.map(parsePostwarIndustryLabourCurrentRow);
+          if (
+            !observedHeadMatches(source, authority) ||
+            coverage.countryId !== c.identity.countryId ||
+            coverage.globalWorldVersion !== authority.readback.worldVersion ||
+            coverage.globalEventSequence !== authority.readback.eventSequence ||
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            source.dataNature !==
+              (coverage.globalWorldVersion === '0'
+                ? POSTWAR_INDUSTRY_LABOUR_OPENING_NATURE
+                : POSTWAR_INDUSTRY_LABOUR_CURRENT_NATURE) ||
+            !pointer ||
+            pointer.path !==
+              '/carrier/socialEmployment/inputs/sourcePositions' ||
+            !canonicalId(pointer.sourceId) ||
+            !hash(pointer.sourcePayloadHash) ||
+            typeof pointer.canonicalSeedSha256 !== 'string' ||
+            !/^[a-f0-9]{64}$/u.test(pointer.canonicalSeedSha256) ||
+            selection?.countryId !== c.identity.countryId ||
+            selection.sourceBucket !== 'INDUSTRY' ||
+            selection.employerRole !== 'OP' ||
+            labour.some(
+              (r) =>
+                r.countryId !== c.identity.countryId ||
+                (coverage.globalWorldVersion === '0' &&
+                  r.currentEmployedCount !== r.openingFilledCount),
+            ) ||
+            new Set(labour.map((r) => r.positionId)).size !== labour.length ||
+            source.currentFinancialCoverage !== undefined
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (source.currentIndustryLabourCoverage !== undefined)
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        const financialOffice = ['FINANCE', 'CENTRAL_BANK'].includes(
+          c.identity.officeId,
+        );
+        const financialCurrent =
+          (source.dataNature ===
+            'ADMITTED_CURRENT_FINANCIAL_NO_POSTING_PREFIX' ||
+            source.dataNature === POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE) &&
+          financialOffice &&
+          ['ledger-balances', 'treasury-capacity'].includes(dataset) &&
+          (source.dataNature === POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE ||
+            (source.worldVersion !== '0' && source.eventSequence !== '0'));
+        const historicalFacts =
+          historical &&
+          c.identity.officeId !== 'SOCIAL' &&
+          !['ledger-balances', 'treasury-capacity'].includes(dataset);
+        if (
+          !opening &&
+          !currentSocial &&
+          !currentCaptain &&
+          !currentTrade &&
+          !currentIndustry &&
+          !currentUtilityPlanning &&
+          !currentCommittedRuns &&
+          !currentUtilisationTargets &&
+          !currentSocialProgrammes &&
+          !financialCurrent &&
+          !historicalFacts
+        )
+          throw Error('UNPROVEN_CURRENT_DATA_KIND');
+        if (source.dataNature === POSTWAR_FINANCIAL_MIXED_CURRENT_NATURE) {
+          const office = c.identity.officeId;
+          if (office !== 'FINANCE' && office !== 'CENTRAL_BANK')
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          if (dataset === 'ledger-balances')
+            for (const value of rows)
+              parsePostwarMixedFinancialBalanceRow(value, {
+                countryId: c.identity.countryId,
+                officeId: office,
+              });
+          if (dataset === 'treasury-capacity') {
+            if (office !== 'FINANCE' || page.total !== 1)
+              throw Error('CURRENT_STATE_BINDING_MISMATCH');
+            for (const value of rows)
+              parsePostwarMixedTreasuryCapacityRow(value, c.identity.countryId);
+          }
+        }
+        if (financialCurrent || historicalFacts) {
+          if (
+            source.originWorldVersion !== '0' ||
+            source.originEventSequence !== '0' ||
+            !observedHeadMatches(source, authority) ||
+            (financialCurrent &&
+              !financialCoverageMatches(source, authority)) ||
+            (source.currentFinancialCoverage !== undefined &&
+              (!financialOffice ||
+                !financialCoverageMatches(source, authority)))
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        }
+        if (
+          currentSocial &&
+          source.dataNature === POSTWAR_SOCIAL_MIXED_CURRENT_NATURE
+        ) {
+          try {
+            if (!observedHeadMatches(source, authority))
+              throw Error('HEAD_MISMATCH');
+            const coverage = parsePostwarSocialMixedCoverage(
+              source.currentPrefixCoverage,
+              {
+                countryId: c.identity.countryId,
+                worldVersion: authority.readback.worldVersion,
+                eventSequence: authority.readback.eventSequence,
+              },
+            );
+            if (
+              source.originWorldVersion !== coverage.originWorldVersion ||
+              source.originEventSequence !== coverage.originEventSequence
+            )
+              throw Error('ORIGIN_MISMATCH');
+            const binding = parsePostwarSocialMixedStateBinding(
+              source.currentStateBinding,
+              coverage,
+            );
+            if (
+              binding &&
+              ![
+                `SOCIAL_POSITION_LIFECYCLE_${c.identity.countryId}`,
+                `SOCIAL_EMPLOYMENT_SERVICE_${c.identity.countryId}`,
+              ].includes(binding.materializationKey)
+            )
+              throw Error('MATERIALIZATION_SCOPE_MISMATCH');
+            for (const value of rows)
+              if (row(value)?.countryId !== c.identity.countryId)
+                throw Error('ROW_COUNTRY_MISMATCH');
+          } catch {
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+          }
+        } else if (currentSocial) {
+          const binding = row(source.currentStateBinding);
+          const fields = [
+            'sourceCommandId',
+            'commandFingerprint',
+            'sourceEventId',
+            'eventFingerprint',
+            'materializationKey',
+            'materializationHash',
+            'canonicalMaterializationSha256',
+            'sourceStateWorldVersion',
+            'sourceEventSequence',
+          ];
+          if (
+            !binding ||
+            Object.keys(binding).length !== fields.length ||
+            !fields.every((key) => Object.hasOwn(binding, key)) ||
+            !canonicalId(binding.sourceCommandId) ||
+            !canonicalId(binding.sourceEventId) ||
+            ![
+              'commandFingerprint',
+              'eventFingerprint',
+              'materializationHash',
+            ].every((key) => hash(binding[key])) ||
+            typeof binding.canonicalMaterializationSha256 !== 'string' ||
+            !/^[a-f0-9]{64}$/u.test(binding.canonicalMaterializationSha256) ||
+            !coversCurrentPrefix(source, binding, c.identity.countryId) ||
+            ![
+              `SOCIAL_POSITION_LIFECYCLE_${c.identity.countryId}`,
+              `SOCIAL_EMPLOYMENT_SERVICE_${c.identity.countryId}`,
+            ].includes(String(binding.materializationKey))
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        } else if (
+          source.currentStateBinding !== undefined ||
+          source.currentPrefixCoverage !== undefined
+        ) {
+          throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        }
+        if (
+          !hash(source.sourceVersion) ||
+          !hash(source.bindingVersion) ||
+          !['pageHash', 'returnedRowsHash'].every(
+            (key) =>
+              typeof source[key] === 'string' &&
+              /^[a-f0-9]{64}$/u.test(source[key]),
+          ) ||
+          source.hashAlgorithm !== 'POSTGRES_JSONB_TEXT_UTF8_SHA256' ||
+          !row(source.sourcePointer) ||
+          (previous &&
+            (previous.source.sourceVersion !== source.sourceVersion ||
+              previous.source.bindingVersion !== source.bindingVersion))
+        )
+          throw Error('STALE_SOURCE_SCOPE');
+        const offset = previous?.page.nextOffset ?? 0;
+        if (
+          ![page.offset, page.limit, page.returned, page.total].every(
+            Number.isSafeInteger,
+          ) ||
+          page.offset !== offset ||
+          page.limit !== 25 ||
+          page.returned !== rows.length ||
+          rows.length > 25 ||
+          Number(page.total) < offset + rows.length ||
+          (rows.length === 0 && Number(page.total) !== 0) ||
+          (body.status === 'EMPTY') !== (rows.length === 0) ||
+          (page.nextOffset !== null &&
+            (page.nextOffset !== offset + rows.length ||
+              rows.length === 0 ||
+              Number(page.nextOffset) >= Number(page.total))) ||
+          (page.nextOffset === null &&
+            offset + rows.length !== Number(page.total))
+        )
+          throw Error('INVALID_PAGINATION');
+        return {
+          status: body.status === 'EMPTY' ? 'EMPTY' : 'PAGE',
+          dataset,
+          authority,
+          source: source as RuntimePage['source'],
+          page: page as unknown as RuntimePage['page'],
+          rows: rows as RuntimePage['rows'],
+        };
+      } catch (error) {
+        return fail(
+          started !== epoch || !current() ? 'STALE' : 'UNAVAILABLE',
+          abort.signal.aborted
+            ? 'CANCELLED_OR_TIMEOUT'
+            : error instanceof Error &&
+                [
+                  'STALE_SOURCE_SCOPE',
+                  'SOURCE_SCOPE_MISMATCH',
+                  'CURRENT_STATE_BINDING_MISMATCH',
+                ].includes(error.message)
+              ? error.message
+              : 'FETCH_FAILED',
+        );
+      } finally {
+        clearTimeout(timer);
+        abort.abort();
+        if (active === abort) active = null;
+      }
+    },
+  });
+}

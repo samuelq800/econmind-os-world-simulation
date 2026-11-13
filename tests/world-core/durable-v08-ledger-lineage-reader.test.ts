@@ -400,4 +400,141 @@ describe('V10.6 durable V08 ledger lineage reader', () => {
       'Durable Event hashes differ',
     );
   });
+
+  it('returns the actual checked seed and complete replay with one immutable seed read in stable READ ONLY mode', async () => {
+    const values = fixture();
+    const backing = database({ values });
+    const statements: string[] = [];
+    const executor: SqlExecutor = {
+      async query<Row extends object>(
+        statement: string,
+        parameters: readonly unknown[] = [],
+      ) {
+        statements.push(statement);
+        if (statement.includes("current_setting('transaction_read_only')"))
+          return {
+            rows: [
+              { read_only: 'on', isolation: 'repeatable read' },
+            ] as unknown as Row[],
+            rowCount: 1,
+          };
+        return backing.query<Row>(statement, parameters);
+      },
+    };
+    const reader = new DurableV08LedgerLineageReader({
+      database: backing,
+      sha256Hex,
+    });
+    const snapshot = await reader.readOnlySnapshotWithSeedFrom(executor, WORLD);
+    expect(snapshot.seed).toEqual(values.opening);
+    expect(snapshot.ledgers.seedFingerprint).toBe(snapshot.seed.fingerprint);
+    expect(snapshot.headWorldVersion).toBe('1');
+    expect(snapshot.headEventSequence).toBe('1');
+    expect(
+      statements.filter((sql) => sql.includes('from world_v2.opening_seed')),
+    ).toHaveLength(1);
+    expect(statements.some((sql) => /for\s+share/iu.test(sql))).toBe(false);
+    const previous = await reader.rebuildReadOnlyFrom(executor, WORLD);
+    expect(previous).not.toHaveProperty('seed');
+    expect(previous.ledgers).toEqual(snapshot.ledgers);
+  });
+});
+
+describe('immutable historical command read boundary', () => {
+  function history() {
+    const { command } = fixture();
+    const row = {
+      command_actor_id: command.actorId,
+      command_auth_subject: command.authSubject,
+      command_canonical_payload: command.canonicalPayload,
+      command_country_id: command.countryId,
+      command_expected_world_version: command.expectedWorldVersion,
+      command_fingerprint: command.fingerprint,
+      command_id: command.commandId,
+      command_idempotency_key: command.idempotencyKey,
+      command_office_id: command.officeId,
+      command_payload_sha256: command.payloadHash,
+      command_schema_version: command.schemaVersion,
+      command_sim_time: command.simTime.toCanonicalValue(),
+      command_submitted_at_real: command.submittedAtReal,
+      command_type: command.commandType,
+      command_world_id: command.worldId,
+      correlation_id: command.correlationId,
+    };
+    return { command, row };
+  }
+  it('reads the same actual canonical/hash data without an S lock; writer read retains it', async () => {
+    const { command, row } = history(),
+      statements: string[] = [];
+    const executor: SqlExecutor = {
+      query: async <Row extends object>(sql: string, parameters) => {
+        statements.push(sql);
+        expect(parameters).toEqual([WORLD, command.commandId]);
+        return { rows: [row] as Row[], rowCount: 1 };
+      },
+    };
+    const db: SqlDatabase = {
+      ...executor,
+      transaction: async (consume) => consume(executor),
+    };
+    const reader = new DurableV08LedgerLineageReader({
+      database: db,
+      sha256Hex,
+    });
+    expect(
+      canonicalSerialize(
+        await reader.readCommandReadOnlyFrom(
+          executor,
+          WORLD,
+          command.commandId,
+        ),
+      ),
+    ).toBe(canonicalSerialize(command));
+    expect(statements[0]).not.toMatch(/for\s+(?:share|update)/iu);
+    expect(
+      canonicalSerialize(
+        await reader.readCommandFrom(executor, WORLD, command.commandId),
+      ),
+    ).toBe(canonicalSerialize(command));
+    expect(statements[1]).toMatch(/for share/iu);
+  });
+  it('retains missing/duplicate/corrupt durable evidence refusal and backend errors', async () => {
+    const { command, row } = history(),
+      failure = Error('backend unavailable');
+    for (const mode of ['MISSING', 'DUPLICATE', 'HASH', 'PAYLOAD', 'BACKEND']) {
+      const executor: SqlExecutor = {
+        query: async <Row extends object>() => {
+          if (mode === 'BACKEND') throw failure;
+          const value =
+            mode === 'HASH'
+              ? { ...row, command_fingerprint: 'sha256:' + '0'.repeat(64) }
+              : mode === 'PAYLOAD'
+                ? { ...row, command_canonical_payload: '{}' }
+                : row;
+          const rows =
+            mode === 'MISSING'
+              ? []
+              : mode === 'DUPLICATE'
+                ? [value, value]
+                : [value];
+          return { rows: rows as Row[], rowCount: rows.length };
+        },
+      };
+      const db: SqlDatabase = {
+        ...executor,
+        transaction: async (consume) => consume(executor),
+      };
+      const reader = new DurableV08LedgerLineageReader({
+        database: db,
+        sha256Hex,
+      });
+      const result = reader.readCommandReadOnlyFrom(
+        executor,
+        WORLD,
+        command.commandId,
+      );
+      if (mode === 'BACKEND') await expect(result).rejects.toBe(failure);
+      else await expect(result).rejects.toThrow();
+    }
+  });
 });

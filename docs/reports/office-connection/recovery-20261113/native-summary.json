@@ -1,0 +1,72 @@
+{
+  "candidate": "82031e567c0258cf1ff29a749dbf24bf166c21a9",
+  "classification": "TEST_ONLY_NEW_SMALL_SOURCE_NATIVE_NOT_H3_RESTORE",
+  "result": {
+    "numPassedTests": 4,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "runnerExit": 0,
+  "beforeAfterUnchanged": true,
+  "inputDigest": "ab82e476ffc8e50e6185e7a6ef4e7c5c53b98d720f7eb1d10634922069c2ee65",
+  "worktreeStatus": "",
+  "resources": [
+    {
+      "container": "econmind-social-ordinal-2cf48c47",
+      "volume": "econmind-social-ordinal-2cf48c47-data",
+      "receipt": "/workspace/recovery-evidence-20261113/final-native-fixed/2cf48c47/native-db.json",
+      "status": "PASS",
+      "finalPostmasterBeforeFirstConnection": true,
+      "activeConnectionErrors": [],
+      "finalState": {
+        "running": false,
+        "exitCode": 0,
+        "oomKilled": false
+      },
+      "fatalOrPanicLogLines": []
+    },
+    {
+      "container": "econmind-social-ordinal-3a3d2ebe",
+      "volume": "econmind-social-ordinal-3a3d2ebe-data",
+      "receipt": "/workspace/recovery-evidence-20261113/final-native-fixed/3a3d2ebe/native-db.json",
+      "status": "PASS",
+      "finalPostmasterBeforeFirstConnection": true,
+      "activeConnectionErrors": [],
+      "finalState": {
+        "running": false,
+        "exitCode": 0,
+        "oomKilled": false
+      },
+      "fatalOrPanicLogLines": []
+    },
+    {
+      "container": "econmind-social-ordinal-c3b58d18",
+      "volume": "econmind-social-ordinal-c3b58d18-data",
+      "receipt": "/workspace/recovery-evidence-20261113/final-native-fixed/c3b58d18/native-db.json",
+      "status": "PASS",
+      "finalPostmasterBeforeFirstConnection": true,
+      "activeConnectionErrors": [],
+      "finalState": {
+        "running": false,
+        "exitCode": 0,
+        "oomKilled": false
+      },
+      "fatalOrPanicLogLines": []
+    },
+    {
+      "container": "econmind-social-ordinal-f84a974d",
+      "volume": "econmind-social-ordinal-f84a974d-data",
+      "receipt": "/workspace/recovery-evidence-20261113/final-native-fixed/f84a974d/native-db.json",
+      "status": "PASS",
+      "finalPostmasterBeforeFirstConnection": true,
+      "activeConnectionErrors": [],
+      "finalState": {
+        "running": false,
+        "exitCode": 0,
+        "oomKilled": false
+      },
+      "fatalOrPanicLogLines": []
+    }
+  ]
+}

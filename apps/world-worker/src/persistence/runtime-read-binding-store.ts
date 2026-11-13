@@ -16,6 +16,10 @@ import {
 } from '@econmind/core';
 import { WorldOpeningSeedStore } from './opening-seed-store.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import {
+  readValidatedReadOnlyOpeningSnapshotFrom,
+  type ValidatedReadOnlyOpeningSnapshotScope,
+} from './validated-read-only-opening-snapshot.js';
 
 const sha = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex');
 const ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
@@ -309,10 +313,41 @@ export class RuntimeReadBindingStore {
     readonly verifiedSubject: string;
     readonly worldId: string;
   }): Promise<Readonly<ImmutableOpeningAdmissionReference> | null> {
+    return this.#readImmutableAdmissionBoundFrom(input);
+  }
+  /** Shares only a genuine active same-backend/same-transaction readonly
+   * replay. Role/subject and the actual admission row are freshly read here. */
+  async readImmutableAdmissionWithSnapshotFrom(input: {
+    readonly executor: SqlExecutor;
+    readonly verifiedSubject: string;
+    readonly worldId: string;
+    readonly snapshot: ValidatedReadOnlyOpeningSnapshotScope;
+  }): Promise<Readonly<ImmutableOpeningAdmissionReference> | null> {
+    if (input.snapshot === undefined)
+      throw new RuntimeReadBindingStoreError(
+        'RUNTIME_READ_BINDING_UNAVAILABLE',
+      );
+    return this.#readImmutableAdmissionBoundFrom(input, input.snapshot);
+  }
+  async #readImmutableAdmissionBoundFrom(
+    input: {
+      readonly executor: SqlExecutor;
+      readonly verifiedSubject: string;
+      readonly worldId: string;
+    },
+    snapshot?: ValidatedReadOnlyOpeningSnapshotScope,
+  ): Promise<Readonly<ImmutableOpeningAdmissionReference> | null> {
     try {
       const subject = authSubject(input.verifiedSubject),
         world = worldId(input.worldId);
       await this.#assertSession(input.executor, this.#readerRole, subject);
+      const scoped =
+        snapshot === undefined
+          ? null
+          : await readValidatedReadOnlyOpeningSnapshotFrom(
+              input.executor,
+              snapshot,
+            );
       const result = await input.executor.query<Row>(
         `select admission_ref, world_id, seed_id, seed_fingerprint, model_version, replay_binding,
         to_char(admitted_at_real at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as admitted_at_real
@@ -321,7 +356,10 @@ export class RuntimeReadBindingStore {
       );
       if (result.rows.length !== 1) return null;
       const r = result.rows[0]!,
-        seed = await this.#opening.loadFrom(input.executor, world);
+        seed =
+          scoped === null
+            ? await this.#opening.loadFrom(input.executor, world)
+            : scoped.seed;
       const replay = canonicalSerialize(seed.replayBinding),
         fingerprint = text(r.seed_fingerprint);
       if (

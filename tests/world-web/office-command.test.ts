@@ -95,8 +95,8 @@ describe('three manual Office families / shipped clients / OFFLINE TEST_ONLY', (
       });
     },
   );
-  it.each(['INDUSTRY', 'FINANCE', 'TRADE'])(
-    'keeps %s explicitly unsupported',
+  it.each(['FINANCE', 'TRADE'])(
+    'rejects %s identity when it mismatches the selected Industry Office view',
     async (officeId) => {
       const f = officeCommandFixture('industry');
       const read = {

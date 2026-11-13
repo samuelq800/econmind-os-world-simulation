@@ -1,3 +1,44 @@
+import { INDUSTRY_UTILISATION_TARGETS_DATASET } from '@econmind/core/postwar-industry-utilisation-targets-contract';
+import { SOCIAL_PROGRAMMES_DATASET } from '@econmind/core/social-labour-programme-public-contract';
+import {
+  buildSocialProgrammeRequest,
+  type SocialProgrammeDraft,
+} from '../social-employment/programme-form.js';
+import { INDUSTRY_COMMITTED_RUNS_DATASET } from '@econmind/core/postwar-industry-committed-runs-contract';
+import {
+  INDUSTRY_UTILITY_PLANNING_DATASET,
+  parseIndustryUtilityPlanningRow,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
+import {
+  buildIndustryUtilityRequest,
+  type IndustryUtilityDraft,
+} from '../industry-utility/form.js';
+import {
+  buildSocialEmploymentPlanRequest,
+  type SocialEmploymentPlanDraft,
+} from '../social-employment/plan-form.js';
+import {
+  buildSocialEmploymentServiceCreateRequest,
+  type SocialEmploymentServiceCreateDraft,
+} from '../social-employment/create-form.js';
+import {
+  buildCaptainCapitalRequest,
+  type CaptainCapitalDraft,
+} from '../captain-capital/form.js';
+import {
+  INDUSTRY_RUN_PARAMETERS_DATASET,
+  parseIndustryRunParameterRow,
+} from '@econmind/core/postwar-industry-run-parameters-contract';
+import {
+  buildIndustryRunRequest,
+  buildIndustryUtilisationTargetRequest,
+  type IndustryUtilisationTargetDraft,
+  type IndustryRunDraft,
+} from '../industry-run/form.js';
+import {
+  POSTWAR_TRADE_CURRENT_DATASETS,
+  type PostwarTradeCurrentDataset,
+} from '@econmind/core/postwar-trade-current-contract';
 import type {
   AuthenticatedOfficeCommandRequestDto,
   ManualOfficeQueueAcknowledgementDto,
@@ -10,6 +51,7 @@ import {
 import {
   canonicalId,
   hash,
+  row,
   validConfig,
   type ProductionReadConfig,
 } from '../production-read/contract.js';
@@ -21,6 +63,12 @@ import {
   type OfficeProjectionView,
 } from '../office-projection/model.js';
 import { createOfficeCommandClient } from './client.js';
+import { createOfficeRecoveryClient } from './recovery-client.js';
+import {
+  createPostwarRuntimeClient,
+  POSTWAR_RUNTIME_SCHEMA,
+  type RuntimePage,
+} from '../postwar-office-runtime/client.js';
 import {
   officeFamilies,
   parseOfficeIntent,
@@ -53,6 +101,7 @@ type Status =
   | 'READY_TO_READ'
   | 'READING'
   | 'CURRENT'
+  | 'CURRENT_AUTHORIZED_HEAD'
   | 'REVIEW_REQUIRED'
   | 'REVIEWED'
   | 'SUBMITTING'
@@ -85,6 +134,37 @@ export function createOfficeCommandController(
       }
     : null;
   const reader = b ? createProductionReadClient(b.read, options) : null,
+    runtimeReader =
+      b?.read.identity.projectionVersion === POSTWAR_RUNTIME_SCHEMA
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    industryUtilityReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    industryCommittedRunsReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    industryUtilisationTargetsReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    industryRunReader =
+      b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    socialPoolsReader =
+      b?.read.identity.officeId === 'SOCIAL' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    socialProgrammesReader =
+      b?.read.identity.officeId === 'SOCIAL' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
+    recoverer = b
+      ? createOfficeRecoveryClient(b.endpoint, b.read, options)
+      : null,
     writer = b ? createOfficeCommandClient(b.endpoint, b.read, options) : null;
   const requestId = options.requestId ?? (() => crypto.randomUUID()),
     listeners = new Set<() => void>();
@@ -96,16 +176,43 @@ export function createOfficeCommandController(
     stop: (() => void) | null = null;
   let status: Status = b ? 'READY_TO_READ' : 'MISSING',
     code: string | null = b ? null : 'OFFICE_BINDING_MISSING_OR_UNSUPPORTED';
+  let runtimePage: RuntimePage | null = null;
+  let runParametersPage: RuntimePage | null = null;
+  let runParametersCode: string | null = null;
+  let targetPage: RuntimePage | null = null;
+  let targetCode: string | null = null;
+  let committedRunsPage: RuntimePage | null = null;
+  let committedRunsCode: string | null = null;
+  let utilityPlanningPage: RuntimePage | null = null;
+  let utilityPlanningCode: string | null = null;
+  let socialPoolsPage: RuntimePage | null = null;
+  let socialPoolsCode: string | null = null;
+  let socialProgrammesPage: RuntimePage | null = null;
+  let socialProgrammesCode: string | null = null;
   let model: OfficeProjectionModel | null = null,
     intent: AuthenticatedOfficeCommandRequestDto | null = null,
     acknowledgement: ManualOfficeQueueAcknowledgementDto | null = null,
     lookup: FinalLookupIdentity | null = null,
     receipt: BrowserFinalReceipt | null = null;
   let floor = b?.read.world.minimumWorldVersion ?? '0';
+  // Local read selection only. It cannot change the server's dataset, source
+  // custody, current head or command authority.
+  let tradeDataset: PostwarTradeCurrentDataset = 'inventory-current';
   let submitStatus: Status | null = null;
   let submitCode: string | null = null;
   // Local presentation metadata only; never source freshness or authority.
   let lastAuthorizedReadAtClient: string | null = null;
+  // One prior request for explicit read-only recovery in this live session.
+  // Neither this record nor its recovery can replace the active request.
+  let previousFinal: {
+    original: AuthenticatedOfficeCommandRequestDto;
+    receipt: BrowserFinalReceipt;
+  } | null = null;
+  let previousFinalCode: string | null = null;
+  const usedCommandIds = new Set<string>(),
+    usedIdempotencyKeys = new Set<string>();
+  const currentHead = () =>
+    runtimePage?.authority.readback ?? model?.head ?? null;
   const notify = () => {
     for (const fn of [...listeners]) fn();
   };
@@ -116,12 +223,37 @@ export function createOfficeCommandController(
     status = reason === 'DENIED' ? 'DENIED' : 'MISSING';
     code = reason;
     model = null;
+    runtimePage = null;
+    runParametersPage = null;
+    runParametersCode = null;
+    committedRunsPage = null;
+    committedRunsCode = null;
+    targetPage = null;
+    targetCode = null;
+    utilityPlanningPage = null;
+    utilityPlanningCode = null;
+    socialPoolsPage = null;
+    socialPoolsCode = null;
+    socialProgrammesPage = null;
+    socialProgrammesCode = null;
     intent = null;
     acknowledgement = null;
     lookup = null;
     receipt = null;
+    previousFinal = null;
+    previousFinalCode = null;
+    usedCommandIds.clear();
+    usedIdempotencyKeys.clear();
     lastAuthorizedReadAtClient = null;
     reader?.disconnect();
+    runtimeReader?.disconnect();
+    industryRunReader?.disconnect();
+    industryCommittedRunsReader?.disconnect();
+    industryUtilisationTargetsReader?.disconnect();
+    industryUtilityReader?.disconnect();
+    socialPoolsReader?.disconnect();
+    socialProgrammesReader?.disconnect();
+    recoverer?.disconnect();
     writer?.disconnect();
     const cleanup = stop;
     stop = null;
@@ -160,14 +292,27 @@ export function createOfficeCommandController(
     }
     checkLiveness();
   }
-  function fail(reason: string) {
+  function fail(reason: string, publicCode = reason) {
     if (reason === 'DENIED') {
       disconnect('DENIED');
       return;
     }
     model = null;
+    runtimePage = null;
+    runParametersPage = null;
+    runParametersCode = null;
+    committedRunsPage = null;
+    committedRunsCode = null;
+    targetPage = null;
+    targetCode = null;
+    utilityPlanningPage = null;
+    utilityPlanningCode = null;
+    socialPoolsPage = null;
+    socialPoolsCode = null;
+    socialProgrammesPage = null;
+    socialProgrammesCode = null;
     status = 'UNAVAILABLE';
-    code = reason;
+    code = publicCode;
   }
   async function operation(fn: () => Promise<void>) {
     if (busy || !checkLiveness()) return;
@@ -184,11 +329,347 @@ export function createOfficeCommandController(
       }
     }
   }
-  async function read() {
+  async function readRunParameters(previous?: RuntimePage) {
+    if (!industryRunReader || !currentHead()) return;
+    if (
+      !attempted &&
+      (intent?.request.commandType === 'CORE_INDUSTRY_RUN_SCHEDULE_V1' ||
+        intent?.request.commandType ===
+          'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1')
+    ) {
+      intent = null;
+      status = 'CURRENT_AUTHORIZED_HEAD';
+      code = null;
+    }
+    runParametersPage = null;
+    runParametersCode = 'READING';
+    notify();
+    const next = await industryRunReader.readPage(
+      INDUSTRY_RUN_PARAMETERS_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    runParametersCode = 'code' in next ? next.code : next.status;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      runParametersPage = next;
+      runParametersCode = null;
+    }
+  }
+  async function readCommittedRuns(previous?: RuntimePage) {
+    if (!industryCommittedRunsReader || !currentHead()) return;
+    const next = await industryCommittedRunsReader.readPage(
+      INDUSTRY_COMMITTED_RUNS_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    committedRunsPage = null;
+    committedRunsCode = next.status;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      committedRunsPage = next;
+      committedRunsCode = null;
+    }
+  }
+  async function readTargets(previous?: RuntimePage) {
+    if (!industryUtilisationTargetsReader || !currentHead()) return;
+    const next = await industryUtilisationTargetsReader.readPage(
+      INDUSTRY_UTILISATION_TARGETS_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    targetPage = null;
+    targetCode = next.status;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      targetPage = next;
+      targetCode = null;
+    }
+  }
+  async function readUtilityPlanning(previous?: RuntimePage) {
+    if (!industryUtilityReader || !currentHead()) return;
+    const next = await industryUtilityReader.readPage(
+      INDUSTRY_UTILITY_PLANNING_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    utilityPlanningPage = null;
+    utilityPlanningCode = next.status;
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const head = currentHead();
+      if (
+        !head ||
+        next.authority.readback.worldVersion !== head.worldVersion ||
+        next.authority.readback.eventSequence !== head.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      utilityPlanningPage = next;
+      utilityPlanningCode = null;
+    }
+  }
+  function clearUnsubmittedSocialEmploymentIntent() {
+    if (
+      !attempted &&
+      (intent?.request.commandType ===
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1' ||
+        intent?.request.commandType ===
+          'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1')
+    ) {
+      intent = null;
+      status = 'CURRENT_AUTHORIZED_HEAD';
+      code = null;
+    }
+  }
+  async function readSocialPools(previous?: RuntimePage) {
+    if (!socialPoolsReader || !currentHead()) return;
+    clearUnsubmittedSocialEmploymentIntent();
+    socialPoolsPage = null;
+    socialPoolsCode = 'READING';
+    notify();
+    const next = await socialPoolsReader.readPage(
+      'service-pools',
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    socialPoolsCode = next.status;
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const h = currentHead();
+      if (
+        !h ||
+        next.authority.readback.worldVersion !== h.worldVersion ||
+        next.authority.readback.eventSequence !== h.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      socialPoolsPage = next;
+      socialPoolsCode = null;
+    }
+  }
+  async function readSocialProgrammes(previous?: RuntimePage) {
+    if (!socialProgrammesReader || !currentHead()) return;
+    if (
+      !attempted &&
+      intent?.request.commandType === 'CORE_SOCIAL_LABOUR_PROGRAMME_CREATE_V1'
+    ) {
+      intent = null;
+      status = 'CURRENT_AUTHORIZED_HEAD';
+      code = null;
+    }
+    socialProgrammesPage = null;
+    socialProgrammesCode = 'READING';
+    notify();
+    const next = await socialProgrammesReader.readPage(
+      SOCIAL_PROGRAMMES_DATASET,
+      requestId(),
+      previous,
+    );
+    if (!checkLiveness()) return;
+    if (next.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (next.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    socialProgrammesCode = next.status;
+    if (next.status === 'PAGE' || next.status === 'EMPTY') {
+      const h = currentHead();
+      if (
+        !h ||
+        next.authority.readback.worldVersion !== h.worldVersion ||
+        next.authority.readback.eventSequence !== h.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      socialProgrammesPage = next;
+      socialProgrammesCode = null;
+    }
+  }
+  async function read(tradeOpeningH0 = false, previous?: RuntimePage) {
     if (!b || !reader) return;
     model = null;
+    runtimePage = null;
+    runParametersPage = null;
+    runParametersCode = null;
+    committedRunsPage = null;
+    committedRunsCode = null;
+    targetPage = null;
+    targetCode = null;
+    utilityPlanningPage = null;
+    utilityPlanningCode = null;
+    socialPoolsPage = null;
+    socialPoolsCode = null;
+    socialProgrammesPage = null;
+    socialProgrammesCode = null;
+    clearUnsubmittedSocialEmploymentIntent();
     status = 'READING';
     notify();
+    if (runtimeReader) {
+      const dataset =
+        b.read.identity.officeId === 'INDUSTRY'
+          ? 'industry-labour-current'
+          : b.read.identity.officeId === 'CENTRAL_BANK'
+            ? 'ledger-balances'
+            : b.read.identity.officeId === 'TRADE'
+              ? tradeOpeningH0
+                ? 'opening-inventory-entries'
+                : tradeDataset
+              : b.read.identity.officeId === 'SOCIAL'
+                ? 'positions'
+                : b.read.identity.officeId === 'CAPTAIN'
+                  ? 'political-capital-current'
+                  : 'ledger-balances';
+      const result = await runtimeReader.readPage(
+        dataset,
+        requestId(),
+        previous,
+      );
+      if (!checkLiveness()) return;
+      if (result.status !== 'PAGE' && result.status !== 'EMPTY') {
+        fail(result.status, 'code' in result ? result.code : result.status);
+        return;
+      }
+      if (
+        previous &&
+        (previous.authority.readback.worldVersion !==
+          result.authority.readback.worldVersion ||
+          previous.authority.readback.eventSequence !==
+            result.authority.readback.eventSequence)
+      ) {
+        fail('STALE');
+        return;
+      }
+      if (BigInt(result.authority.readback.worldVersion) < BigInt(floor)) {
+        fail('STALE');
+        return;
+      }
+      const observedOpeningHead = tradeOpeningH0
+        ? row(result.source.observedHead)
+        : null;
+      if (
+        tradeOpeningH0 &&
+        (floor !== '0' ||
+          result.dataset !== 'opening-inventory-entries' ||
+          result.authority.readback.worldVersion !== '0' ||
+          result.authority.readback.eventSequence !== '0' ||
+          result.source.worldVersion !== '0' ||
+          result.source.eventSequence !== '0' ||
+          (result.source.originWorldVersion !== undefined &&
+            result.source.originWorldVersion !== '0') ||
+          (result.source.originEventSequence !== undefined &&
+            result.source.originEventSequence !== '0') ||
+          (result.source.observedHead !== undefined &&
+            (!observedOpeningHead ||
+              observedOpeningHead.worldVersion !== '0' ||
+              observedOpeningHead.eventSequence !== '0')) ||
+          ![
+            'ADMITTED_IMMUTABLE_OPENING_FACTS',
+            'ADMITTED_H0_DERIVED_PROJECTION_NOT_POST_H0_REPLAY',
+          ].includes(String(result.source.dataNature)))
+      ) {
+        // A verified positive head is still a real lower bound, even though
+        // these historical rows cannot be used as the current Trade readout.
+        floor = result.authority.readback.worldVersion;
+        fail('TRADE_OPENING_REQUIRES_EXACT_H0');
+        return;
+      }
+      floor = result.authority.readback.worldVersion;
+      runtimePage = result;
+      await readSocialPools();
+      if (checkLiveness() && runtimePage) await readSocialProgrammes();
+      if (!checkLiveness() || !runtimePage) return;
+      await readRunParameters();
+      if (!checkLiveness() || !runtimePage) return;
+      await readUtilityPlanning();
+      if (!checkLiveness() || !runtimePage) return;
+      await readCommittedRuns();
+      await readTargets();
+      if (!checkLiveness() || !runtimePage) return;
+      try {
+        lastAuthorizedReadAtClient = new Date().toISOString();
+      } catch {
+        lastAuthorizedReadAtClient = null;
+      }
+      code = receipt ? null : submitCode;
+      status = receipt
+        ? 'FINAL_VERIFIED'
+        : (submitStatus ?? 'CURRENT_AUTHORIZED_HEAD');
+      return;
+    }
     const r = await reader.readProjection(requestId());
     if (!checkLiveness()) return;
     if (r.status !== 'PROJECTION') {
@@ -214,6 +695,129 @@ export function createOfficeCommandController(
     code = receipt ? null : submitCode;
     status = receipt ? 'FINAL_VERIFIED' : (submitStatus ?? 'CURRENT');
   }
+  async function recoverOriginal() {
+    if (
+      !b ||
+      !recoverer ||
+      !intent ||
+      !attempted ||
+      receipt ||
+      (!outcomeUnknown && !lookup)
+    )
+      return;
+    status = 'LOOKING_UP_FINAL';
+    code = null;
+    notify();
+    const result = await recoverer.recover(
+      intent,
+      requestId(),
+      lookup?.commandFingerprint,
+    );
+    if (!checkLiveness()) return;
+    if (result.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (result.status === 'PENDING') {
+      lookup = {
+        commandId: result.state.commandId,
+        idempotencyKey: result.state.idempotencyKey,
+        commandFingerprint: result.state.commandFingerprint,
+      };
+      outcomeUnknown = false;
+      status = 'QUEUE_ACK';
+      code = 'RECOVERY_PENDING';
+      submitStatus = status;
+      submitCode = code;
+      return;
+    }
+    if (result.status === 'FINAL') {
+      receipt = Object.freeze({
+        ...result.receipt,
+        eventIds: Object.freeze([...result.receipt.eventIds]),
+      });
+      lookup = {
+        commandId: result.receipt.commandId,
+        idempotencyKey: result.receipt.idempotencyKey,
+        commandFingerprint: result.receipt.commandFingerprint,
+      };
+      outcomeUnknown = false;
+      if (
+        result.receipt.worldVersionAfter !== null &&
+        BigInt(result.receipt.worldVersionAfter) > BigInt(floor)
+      )
+        floor = result.receipt.worldVersionAfter;
+      await read();
+      return;
+    }
+    status = outcomeUnknown ? 'UNKNOWN' : 'QUEUE_ACK';
+    code =
+      ('code' in result ? result.code : undefined) ?? 'RECOVERY_UNAVAILABLE';
+    submitStatus = status;
+    submitCode = code;
+  }
+  function restoreOriginalForRecovery(value: unknown) {
+    // An explicit original is query identity only. Unlike staging a new intent,
+    // its expected head may precede the current authorized projection.
+    if (!b || busy || attempted || receipt || !checkLiveness()) return false;
+    const original = parseOfficeIntent(value, b.read);
+    if (
+      !original ||
+      (currentHead() &&
+        BigInt(original.request.expectedWorldVersion) >
+          BigInt(currentHead()!.worldVersion))
+    ) {
+      intent = null;
+      status = 'UNAVAILABLE';
+      code = 'ORIGINAL_RECOVERY_SCOPE_OR_HEAD_MISMATCH';
+      notify();
+      return false;
+    }
+    intent = original;
+    acknowledgement = null;
+    lookup = null;
+    attempted = true;
+    usedCommandIds.add(original.request.commandId);
+    usedIdempotencyKeys.add(original.request.idempotencyKey);
+    outcomeUnknown = true;
+    submitStatus = 'UNKNOWN';
+    submitCode = 'ORIGINAL_REQUEST_RESTORED_FOR_RECOVERY_ONLY';
+    status = submitStatus;
+    code = submitCode;
+    notify();
+    return true;
+  }
+  function stageIntent(value: unknown) {
+    if (!b || busy || attempted || !checkLiveness()) return false;
+    const next = parseOfficeIntent(value, b.read);
+    if (
+      next &&
+      (usedCommandIds.has(next.request.commandId) ||
+        usedIdempotencyKeys.has(next.request.idempotencyKey))
+    ) {
+      intent = null;
+      status = 'UNAVAILABLE';
+      code = 'ORIGINAL_REQUEST_RECOVERY_ONLY';
+      notify();
+      return false;
+    }
+    if (
+      !next ||
+      !currentHead() ||
+      next.request.expectedWorldVersion !== currentHead()!.worldVersion
+    ) {
+      intent = null;
+      status = 'UNAVAILABLE';
+      code = 'INTENT_OR_CURRENT_VERSION_MISMATCH';
+      notify();
+      return false;
+    }
+    intent = next;
+    status = 'REVIEW_REQUIRED';
+    code = null;
+    notify();
+    return true;
+  }
   return Object.freeze({
     disconnect,
     checkLiveness,
@@ -233,6 +837,53 @@ export function createOfficeCommandController(
           : null,
         receipt,
         acknowledgement,
+        previousFinal: previousFinal
+          ? (JSON.parse(JSON.stringify(previousFinal)) as typeof previousFinal)
+          : null,
+        previousFinalCode,
+        runtimePage: runtimePage
+          ? (JSON.parse(JSON.stringify(runtimePage)) as RuntimePage)
+          : null,
+        runParametersPage: runParametersPage
+          ? (JSON.parse(JSON.stringify(runParametersPage)) as RuntimePage)
+          : null,
+        runParametersCode,
+        utilityPlanningPage: utilityPlanningPage
+          ? (JSON.parse(JSON.stringify(utilityPlanningPage)) as RuntimePage)
+          : null,
+        utilityPlanningCode,
+        committedRunsPage: committedRunsPage
+          ? (JSON.parse(JSON.stringify(committedRunsPage)) as RuntimePage)
+          : null,
+        committedRunsCode,
+        targetPage: targetPage
+          ? (JSON.parse(JSON.stringify(targetPage)) as RuntimePage)
+          : null,
+        targetCode,
+        socialPoolsPage: socialPoolsPage
+          ? (JSON.parse(JSON.stringify(socialPoolsPage)) as RuntimePage)
+          : null,
+        socialPoolsCode,
+        socialProgrammesPage: socialProgrammesPage
+          ? (JSON.parse(JSON.stringify(socialProgrammesPage)) as RuntimePage)
+          : null,
+        socialProgrammesCode,
+        tradeDataset:
+          b?.read.identity.officeId === 'TRADE' && runtimeReader
+            ? tradeDataset
+            : null,
+        canReadTradeOpeningH0:
+          !retired &&
+          !busy &&
+          !!runtimeReader &&
+          b?.read.identity.officeId === 'TRADE' &&
+          floor === '0',
+        currentHead: currentHead()
+          ? {
+              worldVersion: currentHead()!.worldVersion,
+              eventSequence: currentHead()!.eventSequence,
+            }
+          : null,
         lastAuthorizedReadAtClient,
         intent: intent
           ? (JSON.parse(
@@ -240,12 +891,32 @@ export function createOfficeCommandController(
             ) as AuthenticatedOfficeCommandRequestDto)
           : null,
         canRead: !retired && !busy,
-        canStage: !retired && !busy && !attempted && !!model,
-        canReview: !retired && !busy && !attempted && !!intent && !!model,
+        canBeginNextRequest:
+          !retired &&
+          !busy &&
+          status === 'FINAL_VERIFIED' &&
+          !!receipt &&
+          !!intent &&
+          !!currentHead(),
+        canRecoverPreviousFinal: !retired && !busy && !!previousFinal,
+        canStage: !retired && !busy && !attempted && !!currentHead(),
+        canRestoreOriginal: !retired && !busy && !attempted && !receipt,
+        canReview:
+          !retired && !busy && !attempted && !!intent && !!currentHead(),
         canConfirm:
-          !retired && !busy && !attempted && status === 'REVIEWED' && !!model,
+          !retired &&
+          !busy &&
+          !attempted &&
+          status === 'REVIEWED' &&
+          !!currentHead(),
         canLookupFinal: !retired && !busy && !!lookup,
-        canRecover: !retired && !busy && outcomeUnknown && !lookup,
+        canRecover:
+          !retired &&
+          !busy &&
+          attempted &&
+          !!intent &&
+          !receipt &&
+          (outcomeUnknown || !!lookup),
         completion:
           status === 'FINAL_VERIFIED' &&
           receipt?.outcome === 'COMMITTED' &&
@@ -264,25 +935,389 @@ export function createOfficeCommandController(
       operation(async () => {
         await read();
       }),
-    stage(value: unknown) {
-      if (!b || busy || attempted || !checkLiveness()) return false;
-      const next = parseOfficeIntent(value, b.read);
+    beginNextRequest: () =>
+      operation(async () => {
+        if (status !== 'FINAL_VERIFIED' || !receipt || !intent) return;
+        await read();
+        // A durable receipt alone cannot authorize another command. A failed
+        // read keeps the original request locked and available for recovery.
+        if (
+          !checkLiveness() ||
+          status !== 'FINAL_VERIFIED' ||
+          !currentHead() ||
+          !receipt ||
+          !intent
+        )
+          return;
+        previousFinal = { original: intent, receipt };
+        previousFinalCode = null;
+        intent = null;
+        receipt = null;
+        acknowledgement = null;
+        lookup = null;
+        attempted = false;
+        outcomeUnknown = false;
+        submitStatus = null;
+        submitCode = null;
+        code = null;
+        status = runtimeReader ? 'CURRENT_AUTHORIZED_HEAD' : 'CURRENT';
+      }),
+    recoverPreviousFinal: () =>
+      operation(async () => {
+        if (!previousFinal || !recoverer) return;
+        const previous = previousFinal;
+        previousFinalCode = 'READING';
+        notify();
+        try {
+          const result = await recoverer.recover(
+            previous.original,
+            requestId(),
+            previous.receipt.commandFingerprint,
+          );
+          if (!checkLiveness()) return;
+          if (result.status === 'DENIED') {
+            disconnect('DENIED');
+            return;
+          }
+          previousFinalCode =
+            result.status === 'FINAL'
+              ? Object.entries(previous.receipt).every(
+                  ([key, value]) =>
+                    JSON.stringify(value) ===
+                    JSON.stringify(
+                      result.receipt[key as keyof typeof result.receipt],
+                    ),
+                )
+                ? 'FINAL_VERIFIED'
+                : 'PREVIOUS_FINAL_MISMATCH'
+              : (('code' in result ? result.code : undefined) ?? result.status);
+        } catch {
+          if (checkLiveness()) previousFinalCode = 'UNAVAILABLE';
+        }
+      }),
+    selectTradeDataset(dataset: PostwarTradeCurrentDataset) {
       if (
-        !next ||
-        !model ||
-        next.request.expectedWorldVersion !== model.head.worldVersion
-      ) {
+        !b ||
+        b.read.identity.officeId !== 'TRADE' ||
+        !runtimeReader ||
+        !POSTWAR_TRADE_CURRENT_DATASETS.includes(dataset)
+      )
+        return Promise.resolve();
+      return operation(async () => {
+        tradeDataset = dataset;
+        await read();
+      });
+    },
+    readTradeOpeningH0() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'TRADE' ||
+        !runtimeReader ||
+        floor !== '0'
+      )
+        return Promise.resolve();
+      return operation(() => read(true));
+    },
+    nextTradePage() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'TRADE' ||
+        !runtimeReader ||
+        !runtimePage ||
+        runtimePage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = runtimePage,
+        opening = previous.dataset === 'opening-inventory-entries';
+      if (
+        (!opening && previous.dataset !== tradeDataset) ||
+        (opening && floor !== '0')
+      )
+        return Promise.resolve();
+      return operation(() => read(opening, previous));
+    },
+    stage: stageIntent,
+    restoreOriginalForRecovery,
+    nextSocialPositionsPage() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        runtimePage?.dataset !== 'positions' ||
+        runtimePage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = runtimePage;
+      return operation(() => read(false, previous));
+    },
+    nextSocialPoolsPage() {
+      if (
+        !b ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        !socialPoolsPage ||
+        socialPoolsPage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = socialPoolsPage;
+      return operation(() => readSocialPools(previous));
+    },
+    nextSocialProgrammesPage() {
+      if (
+        !socialProgrammesPage ||
+        socialProgrammesPage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = socialProgrammesPage;
+      return operation(() => readSocialProgrammes(previous));
+    },
+    stageSocialProgramme(draft: SocialProgrammeDraft) {
+      const h = currentHead();
+      if (
+        !b ||
+        busy ||
+        attempted ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        !socialProgrammesPage ||
+        !h ||
+        socialProgrammesPage.authority.readback.worldVersion !==
+          h.worldVersion ||
+        socialProgrammesPage.authority.readback.eventSequence !==
+          h.eventSequence
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildSocialProgrammeRequest({
+            page: socialProgrammesPage,
+            draft,
+            programmeId: 'SOCIAL_PROGRAMME_' + id,
+            requestId: requestId(),
+            commandId: 'SOCIAL_PROGRAMME_CREATE_' + id,
+            idempotencyKey: 'SOCIAL_PROGRAMME_CREATE_KEY_' + id,
+          }),
+        );
+      } catch {
         intent = null;
         status = 'UNAVAILABLE';
-        code = 'INTENT_OR_CURRENT_VERSION_MISMATCH';
+        code = 'SOCIAL_PROGRAMME_CURRENT_TERMS_REQUIRED';
         notify();
         return false;
       }
-      intent = next;
-      status = 'REVIEW_REQUIRED';
-      code = null;
-      notify();
-      return true;
+    },
+    stageSocialEmploymentServiceCreate(
+      draft: SocialEmploymentServiceCreateDraft,
+    ) {
+      const h = currentHead();
+      if (
+        !b ||
+        busy ||
+        attempted ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        !socialPoolsPage ||
+        !h ||
+        socialPoolsPage.authority.readback.worldVersion !== h.worldVersion ||
+        socialPoolsPage.authority.readback.eventSequence !== h.eventSequence
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildSocialEmploymentServiceCreateRequest({
+            page: socialPoolsPage,
+            draft,
+            programmeId: 'EMPLOYMENT_PROGRAMME_' + id,
+            requestId: requestId(),
+            commandId: 'SOCIAL_SERVICE_CREATE_' + id,
+            idempotencyKey: 'SOCIAL_SERVICE_CREATE_KEY_' + id,
+          }),
+        );
+      } catch {
+        intent = null;
+        status = 'UNAVAILABLE';
+        code = 'SOCIAL_SERVICE_CREATE_CURRENT_SOURCE_REQUIRED';
+        notify();
+        return false;
+      }
+    },
+    stageSocialEmploymentPlan(draft: SocialEmploymentPlanDraft) {
+      if (
+        !b ||
+        busy ||
+        attempted ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'SOCIAL' ||
+        runtimePage?.dataset !== 'positions' ||
+        !socialPoolsPage
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildSocialEmploymentPlanRequest({
+            positions: runtimePage,
+            pools: socialPoolsPage,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            draft,
+            requestId: requestId(),
+            commandId: 'SOCIAL_PLAN_' + id,
+            idempotencyKey: 'SOCIAL_PLAN_KEY_' + id,
+          }),
+        );
+      } catch {
+        intent = null;
+        status = 'UNAVAILABLE';
+        code = 'SOCIAL_PLAN_CURRENT_SELECTION_INVALID';
+        notify();
+        return false;
+      }
+    },
+    stageCaptainCapital(draft: CaptainCapitalDraft) {
+      const head = currentHead();
+      if (
+        !b ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'CAPTAIN' ||
+        runtimePage?.dataset !== 'political-capital-current' ||
+        !head
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildCaptainCapitalRequest({
+            rows: runtimePage.rows,
+            options: runtimePage.source.currentCaptainAllocationOptions,
+            coverage: runtimePage.source.currentCaptainCoverage,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: head.worldVersion,
+            eventSequence: head.eventSequence,
+            requestId: requestId(),
+            commandId: 'CAPTAIN_ALLOCATION_' + id,
+            idempotencyKey: 'CAPTAIN_ALLOCATION_KEY_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
+    },
+    stageIndustryRun(draft: IndustryRunDraft) {
+      if (
+        !b ||
+        !checkLiveness() ||
+        runParametersPage?.dataset !== INDUSTRY_RUN_PARAMETERS_DATASET ||
+        !currentHead()
+      )
+        return false;
+      try {
+        const source = runParametersPage.rows
+          .map(parseIndustryRunParameterRow)
+          .find((row) => row.facilityId === draft.facilityId);
+        if (!source) return false;
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildIndustryRunRequest({
+            row: source,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: currentHead()!.worldVersion,
+            requestId: requestId(),
+            commandId: 'INDUSTRY_RUN_' + id,
+            idempotencyKey: 'INDUSTRY_RUN_KEY_' + id,
+            runId: 'INDUSTRY_PLAN_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
+    },
+    stageIndustryUtilisationTarget(draft: IndustryUtilisationTargetDraft) {
+      if (
+        !b ||
+        !checkLiveness() ||
+        runParametersPage?.dataset !== INDUSTRY_RUN_PARAMETERS_DATASET ||
+        !currentHead()
+      )
+        return false;
+      try {
+        const source = runParametersPage.rows
+          .map(parseIndustryRunParameterRow)
+          .find((row) => row.facilityId === draft.facilityId);
+        if (!source) return false;
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildIndustryUtilisationTargetRequest({
+            row: source,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: currentHead()!.worldVersion,
+            requestId: requestId(),
+            commandId: 'INDUSTRY_TARGET_' + id,
+            idempotencyKey: 'INDUSTRY_TARGET_KEY_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
+    },
+    nextIndustryRunParametersPage: () =>
+      operation(async () => {
+        if (runParametersPage && runParametersPage.page.nextOffset !== null)
+          await readRunParameters(runParametersPage);
+      }),
+    nextIndustryCommittedRunsPage: () =>
+      operation(async () => {
+        if (committedRunsPage && committedRunsPage.page.nextOffset !== null)
+          await readCommittedRuns(committedRunsPage);
+      }),
+    nextIndustryUtilityPlanningPage: () =>
+      operation(async () => {
+        if (
+          !attempted &&
+          utilityPlanningPage?.page.nextOffset !== null &&
+          utilityPlanningPage
+        )
+          await readUtilityPlanning(utilityPlanningPage);
+      }),
+    stageIndustryUtility(draft: IndustryUtilityDraft) {
+      if (
+        !b ||
+        !checkLiveness() ||
+        !currentHead() ||
+        utilityPlanningPage?.dataset !== INDUSTRY_UTILITY_PLANNING_DATASET ||
+        utilityPlanningPage.authority.readback.worldVersion !==
+          currentHead()!.worldVersion ||
+        utilityPlanningPage.authority.readback.eventSequence !==
+          currentHead()!.eventSequence
+      )
+        return false;
+      try {
+        const row = utilityPlanningPage.rows
+          .map(parseIndustryUtilityPlanningRow)
+          .find((r) => r.planningRef === draft.planningRef);
+        if (!row) return false;
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildIndustryUtilityRequest({
+            row,
+            draft,
+            worldId: b.read.identity.worldId,
+            countryId: b.read.identity.countryId,
+            worldVersion: currentHead()!.worldVersion,
+            requestId: requestId(),
+            commandId: 'INDUSTRY_UTILITY_' + id,
+            idempotencyKey: 'INDUSTRY_UTILITY_KEY_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
     },
     review() {
       if (
@@ -290,8 +1325,8 @@ export function createOfficeCommandController(
         busy ||
         attempted ||
         !intent ||
-        !model ||
-        intent.request.expectedWorldVersion !== model.head.worldVersion
+        !currentHead() ||
+        intent.request.expectedWorldVersion !== currentHead()!.worldVersion
       )
         return false;
       status = 'REVIEWED';
@@ -303,13 +1338,15 @@ export function createOfficeCommandController(
         if (
           !writer ||
           !intent ||
-          !model ||
+          !currentHead() ||
           attempted ||
           status !== 'REVIEWED' ||
-          intent.request.expectedWorldVersion !== model.head.worldVersion
+          intent.request.expectedWorldVersion !== currentHead()!.worldVersion
         )
           return;
         attempted = true;
+        usedCommandIds.add(intent.request.commandId);
+        usedIdempotencyKeys.add(intent.request.idempotencyKey);
         status = 'SUBMITTING';
         code = null;
         notify();
@@ -358,8 +1395,13 @@ export function createOfficeCommandController(
       notify();
       return true;
     },
+    recoverOriginal: () => operation(recoverOriginal),
     lookupAndRefresh: () =>
       operation(async () => {
+        if (runtimeReader) {
+          await recoverOriginal();
+          return;
+        }
         if (!reader || !lookup) return;
         model = null;
         receipt = null;

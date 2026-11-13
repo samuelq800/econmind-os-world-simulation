@@ -81,7 +81,8 @@ jobs:
   official-pnpm-check:
     name: Isolated official pnpm check
     runs-on: macos-latest
-    timeout-minutes: 25
+    # The growing serial suite exceeded 25m; retain every check and test limit.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
         with:

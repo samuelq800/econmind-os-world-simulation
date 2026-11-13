@@ -1,0 +1,505 @@
+{
+  "schemaVersion": "postwar-function-forward-manifest-v1",
+  "id": "postwar-social-employment-creation-dc5-v2",
+  "classification": "UNAPPROVED_FIXED_INCREMENT_NOT_FRESH_PROPOSAL_REPLAY",
+  "installationAllowed": false,
+  "productionApproval": "NOT_GRANTED",
+  "predecessorWorldCommit": "dc5dc7daf562c5c18b3a1f7a22fc5ac29cdcf7d4",
+  "targetSourceCommit": "67cfcdc65f866d8e32ccddab38943d6ac064967a",
+  "baselineEvidence": {
+    "path": "/workspace/.cloud-setup/evidence/c10-retained-preflight-02/catalog-before.json",
+    "sha256": "0c22cdb5a252b4383a3024c3d814bde2c0542ccf5b9bf1f0bdcf226de28187f8",
+    "role": "ACTUAL_SEALED_PREDECESSOR_FUNCTION_METADATA_NOT_CALLER_ASSERTION"
+  },
+  "sourcePins": [
+    {
+      "path": "database/proposals/finance-budget-mixed-source.sql",
+      "oldSha256": "f28cdd81df241d9358af5e5506e3c7afeffbe5d11d4a874920ecb2a9906c1043",
+      "newSha256": "71518240416db8afa9afd2b4a2ffb40cfaacc78c371596ee212d0ccd2513e510"
+    },
+    {
+      "path": "database/proposals/postwar-financial-current-derived-read.sql",
+      "oldSha256": "1cacce9a249d5a6b6006e399d73497f54f5866f718ee8656ad07df4aa3411a3b",
+      "newSha256": "522f5142f938dd14855e7c0eae1e258ba294a2e6d705a21cd8072a0d8999612d"
+    },
+    {
+      "path": "database/proposals/postwar-mixed-current-projection-read.sql",
+      "oldSha256": "c449dd71dfbcc1f2bb8bda1d3cb66a106c889c39ff251707a6153b66d59116cd",
+      "newSha256": "7a220342c1552cb024b2587c2f1369f269339007aa47bbe7d3578d8bf4a25c4f"
+    },
+    {
+      "path": "database/proposals/postwar-mixed-industry-current-effects.sql",
+      "oldSha256": "e3c03d6f2a8732675ab827f229803c4e19a26610016e3db7d2b19ae1f5160737",
+      "newSha256": "939c2414aed35ee9fa958b9b50c3e0876c90ab273c48639ec85916e6d50a319a"
+    },
+    {
+      "path": "database/proposals/postwar-paged-current-projection.sql",
+      "oldSha256": "dd7534670f54e86eab75f9d71cd98280e8fc735c03d8d9ed9d02abc156d18664",
+      "newSha256": "c030be9088e33fc744f5a9de0f680d8605b0fca9491d133edd074ac2936a15e7"
+    },
+    {
+      "path": "database/proposals/postwar-social-current-derived-read.sql",
+      "oldSha256": "148d00b2a67acb367f876e70d3afa04749c1b13c715e406de03b6f410e6d95ba",
+      "newSha256": "7c891a115d5855262e8215ab6a524d77dcafa7518dbc89d007fb700c7fffdc13"
+    },
+    {
+      "path": "database/proposals/postwar-social-current-prefix-read.sql",
+      "oldSha256": "54c1c962f68d57f0a77768f10bc886e90a4384e5439b02ab9b400dc8b19a10e3",
+      "newSha256": "bb34d9eafa6cb30f52d4f1e8bbbd52878848790cbaa9718e720bad7534407d6b"
+    },
+    {
+      "path": "database/proposals/postwar-social-mixed-match-publisher.sql",
+      "oldSha256": "3978ddaa91ce5057f19bf6da0d8fac614b2fcd55fdcee2ebd508accbfaf0c940",
+      "newSha256": "a54f050b3cdc252630323f198d69fb511c01c17fbf2e89a2bda60bdeae710473"
+    },
+    {
+      "path": "database/proposals/postwar-social-paged-match-publisher.sql",
+      "oldSha256": "c12649a9c7fa2ce283ce2c8c92131e1b3a8d01f5e3954472f45a8dc199c99583",
+      "newSha256": "462808c5c49c4c6cdf44851626e8c9f282ab5f96f0a7fa2920ebb019f56b055a"
+    }
+  ],
+  "newSupplement": {
+    "path": "database/proposals/postwar-social-employment-creation.sql",
+    "sha256": "d010fa633fcb29d89e3deb669e71b5cd95f55bad74f37eafbeb7465687c1fb5e"
+  },
+  "functions": [
+    {
+      "signature": "world_v2.finance_budget_mixed_social_effect_scoped(text,text,text,jsonb,jsonb,bigint)",
+      "sourcePath": "database/proposals/finance-budget-mixed-source.sql",
+      "oldBodySha256": "1e47ce6c54fab149e23868794f39f6ea1d0bf8dadcff0a542f6848500fcd1f6f",
+      "newBodySha256": "00a3826defd9c60544fa017be0fa2a3ffd0233f50aa466e0a8a95c8fcc519eb3",
+      "owner": "world_v2_finance_budget_source_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_type",
+        "p_command",
+        "p_event",
+        "p_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "boolean",
+      "acl": [
+        {
+          "grantee": "world_v2_finance_budget_source_owner",
+          "grantor": "world_v2_finance_budget_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.assert_finance_budget_mixed_social_scope(text,text,text,text,text,text)",
+      "sourcePath": "database/proposals/finance-budget-mixed-source.sql",
+      "oldBodySha256": "823846f64e61c5018d2d9f31cabe12341b94fb204f3216ee7b4bae552f40e290",
+      "newBodySha256": "4af6995f2f06cc478c781e1699d4ee2075ee6586f3769104d6b83adcdc421cbf",
+      "owner": "world_v2_finance_budget_source_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "p_finance_country",
+        "p_country",
+        "p_seed_fingerprint",
+        "p_admission_ref",
+        "p_canonical_sha256"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "void",
+      "acl": [
+        {
+          "grantee": "world_v2_finance_budget_source_owner",
+          "grantor": "world_v2_finance_budget_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_financial_complete_prefix(text)",
+      "sourcePath": "database/proposals/postwar-financial-current-derived-read.sql",
+      "oldBodySha256": "fef16f0047419576da633e6e6478959f85d3ad1d4344b9fe18271d40f8b3a52a",
+      "newBodySha256": "4af960565cfb9926798948da821d2d3c6bcd5d27c20647f5442ec355fd97e80c",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "prefix_fingerprint",
+        "effects_fingerprint",
+        "last_event_id",
+        "last_event_fingerprint",
+        "budget_envelopes"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(prefix_fingerprint text, effects_fingerprint text, last_event_id text, last_event_fingerprint text, budget_envelopes jsonb)",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_mixed_current_prefix(text)",
+      "sourcePath": "database/proposals/postwar-mixed-current-projection-read.sql",
+      "oldBodySha256": "85e3e197b647b852b1071d592be9eebe0baa5e08c7c753b7bbf5034afff97ef0",
+      "newBodySha256": "dce007f3d7dd6991eb3f961ec023fb0f5a4eecf476605c2095815a249ec85e8e",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "prefix_fingerprint",
+        "effects_fingerprint",
+        "last_event_id",
+        "last_event_fingerprint",
+        "budget_envelopes",
+        "financial_posting_count",
+        "financial_batch_count",
+        "financial_postings_fingerprint"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(prefix_fingerprint text, effects_fingerprint text, last_event_id text, last_event_fingerprint text, budget_envelopes jsonb, financial_posting_count text, financial_batch_count text, financial_postings_fingerprint text)",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.publish_postwar_mixed_social_current(text,text,text)",
+      "sourcePath": "database/proposals/postwar-mixed-current-projection-read.sql",
+      "oldBodySha256": "50c68c94274df51f6f56e0f63dd2c99686dc9e76507411a21808d7a82e53ec93",
+      "newBodySha256": "9d2ce401346aee2deb7f0658087a4af5e1c1c99c5302e4b66f0471a0cf66d779",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": ["p_world", "p_country", "p_assertion"],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "SETOF world_v2.postwar_mixed_current_document",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantee": "world_v2_postwar_projection_publisher",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_apply_current_frame_page(text,text,jsonb)",
+      "sourcePath": "database/proposals/postwar-mixed-industry-current-effects.sql",
+      "oldBodySha256": "2c51196a70737cd86a40ce5301dd3795af1e4e1365a0eda7d5738218e3606a03",
+      "newBodySha256": "d9579f8680f939dd0e99a69e5e683b5cb33e8a2c3f8169fcc48d41641644d4b4",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": ["p_world", "p_frames_text", "p_state"],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "jsonb",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.publish_postwar_paged_social_current(text,text,text)",
+      "sourcePath": "database/proposals/postwar-paged-current-projection.sql",
+      "oldBodySha256": "1ad3fec6981e6be40005a45fa7f68e72481c01f8fd7db699f5661ff8c36a91a3",
+      "newBodySha256": "80d44571bc4db8b38675da359890073126b668bf1837e92fec2b8b05601b2563",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": ["p_world", "p_country", "p_assertion"],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "SETOF world_v2.postwar_paged_current_document",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantee": "world_v2_postwar_projection_publisher",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_current_social_witness(text,text)",
+      "sourcePath": "database/proposals/postwar-social-current-derived-read.sql",
+      "oldBodySha256": "53f820fdcc355b470e6b019da521077160f9c15f6afa6e1ba083178a64ec2ff3",
+      "newBodySha256": "48c1d2b665c11f4139907a48776d8e60a51310c22c55e21615cbba41fb669843",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "world_version",
+        "event_sequence",
+        "state",
+        "binding"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(world_version bigint, event_sequence bigint, state jsonb, binding jsonb)",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_social_prefix_effect_scoped(text,text,text,jsonb,jsonb,bigint)",
+      "sourcePath": "database/proposals/postwar-social-current-prefix-read.sql",
+      "oldBodySha256": "2752d990cecbd558de8104c842c4bca14058cd7153e135e733eec9789a7cbb30",
+      "newBodySha256": "7670a954c6cad3b642e9b3bab456e85571b1d452ded0d4029121eca1b19cc0af",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_type",
+        "p_command",
+        "p_event",
+        "p_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "boolean",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_social_complete_prefix(text)",
+      "sourcePath": "database/proposals/postwar-social-current-prefix-read.sql",
+      "oldBodySha256": "6e36086df009880c423805829d326f7824c713ec6ec9335f89b30064fa90dcf4",
+      "newBodySha256": "def4a0441271b20636e78fca7395d3bb9c689099b4b6f3a14053103395d97f0e",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "prefix_fingerprint",
+        "effects_fingerprint",
+        "last_event_id",
+        "last_event_fingerprint"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(prefix_fingerprint text, effects_fingerprint text, last_event_id text, last_event_fingerprint text)",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_social_origin_at_prefix(text,text)",
+      "sourcePath": "database/proposals/postwar-social-current-prefix-read.sql",
+      "oldBodySha256": "9265626d1e11f4e5a3e22a1e48f2db08bf878dd1541064489f830265305ff150",
+      "newBodySha256": "95bd455f6a07730d62e4a4a7ffcbb39205366fba88e60225a0f10b5cb6c14533",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "state",
+        "binding",
+        "origin_world_version",
+        "origin_event_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(state jsonb, binding jsonb, origin_world_version bigint, origin_event_sequence bigint)",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.publish_social_operating_mixed_match_due(text,text,text,text)",
+      "sourcePath": "database/proposals/postwar-social-mixed-match-publisher.sql",
+      "oldBodySha256": "2f97ac32fa04e4ee8aed77910a78efcf13b85cbf2bcf08b8bb4180ca65e2f1d5",
+      "newBodySha256": "67f51457a7f71331d43bd099c0b51d82190eefeaf1bf0726eb0f99075a29b89f",
+      "owner": "world_v2_social_source_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": ["p_world", "p_country", "p_plan", "p_witness"],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "world_v2.command_submission",
+      "acl": [
+        {
+          "grantee": "world_v2_social_source_owner",
+          "grantor": "world_v2_social_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantee": "world_v2_social_source_publisher",
+          "grantor": "world_v2_social_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.publish_social_operating_paged_match_due(text,text,text,text)",
+      "sourcePath": "database/proposals/postwar-social-paged-match-publisher.sql",
+      "oldBodySha256": "622e5512e32ca0addc63c89693e680035e59ce374e0a7bf6511ac17d5340ad2d",
+      "newBodySha256": "6f0f2882c7519e3cfe3149a57d47c58f19dc26de17f1e2302967ce3d830d1e5f",
+      "owner": "world_v2_social_source_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": ["p_world", "p_country", "p_plan", "p_witness"],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "world_v2.command_submission",
+      "acl": [
+        {
+          "grantee": "world_v2_social_source_owner",
+          "grantor": "world_v2_social_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantee": "world_v2_social_source_publisher",
+          "grantor": "world_v2_social_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    }
+  ],
+  "notCovered": [
+    "Native opening-repair extra function and its independent receipt",
+    "Two logistics scope forwards (independent lineage)",
+    "Official source registration or economic command execution",
+    "Production approval"
+  ],
+  "transaction": "ONE_TRANSACTION_UNKNOWN_OUTCOME_STOP_NO_BLIND_RETRY",
+  "predecessorFunctionFixture": {
+    "path": "tests/fixtures/sql/postwar-social-employment-creation.dc5-functions.sql",
+    "sha256": "8a2f410f6d43479fee8f649e380e3b1c6563d25422f2bbff405482a69900216a"
+  },
+  "upgrade": {
+    "path": "database/upgrades/postwar-social-employment-creation.sql",
+    "sha256": "3d32a51261c891576121a1dc405977fee3a529d99149acafb6477e5c1a7b4db0",
+    "bytes": 199995,
+    "existingFunctionCount": 13,
+    "newFunctionCount": 3,
+    "newRelationCount": 1
+  },
+  "newSupplementFunctions": [
+    {
+      "signature": "world_v2.prepare_postwar_social_employment_creation_licences(text)",
+      "sha256": "c22e50e3ee5452b96ade0f94e6210785820ee6674a121928b008eb916a335b8b",
+      "roles": [
+        "world_v2_postwar_projection_owner",
+        "world_v2_postwar_projection_publisher"
+      ],
+      "argumentNames": ["p_world"],
+      "result": "integer"
+    },
+    {
+      "signature": "world_v2.postwar_social_employment_creation_effect_scoped(text,text,jsonb,jsonb,bigint)",
+      "sha256": "9d727aeea72e24461ad50e2477e5aa7fcb899661c7825a7f535cbfb9e4c2ec67",
+      "roles": [
+        "world_v2_finance_budget_source_owner",
+        "world_v2_postwar_projection_owner",
+        "world_v2_social_source_owner"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_command",
+        "p_event",
+        "p_sequence"
+      ],
+      "result": "boolean"
+    },
+    {
+      "signature": "world_v2.postwar_social_created_pool(text,text,text,bigint)",
+      "sha256": "3e0f721aa0c75bf85071412320ee60b0cec3b96cdd1b18d800c0a0e692d9e6bd",
+      "roles": [
+        "world_v2_finance_budget_source_owner",
+        "world_v2_postwar_projection_owner"
+      ],
+      "argumentNames": ["p_world", "p_country", "p_pool", "p_sequence"],
+      "result": "jsonb"
+    }
+  ],
+  "operatorPreconditions": [
+    "ISOLATED_OR_SEPARATELY_APPROVED_TARGET_ONLY",
+    "ALL_CONSUMERS_AND_SOURCE_PUBLICATION_TRANSACTIONS_STOPPED_AND_DRAINED",
+    "EXACT_BASELINE_CATALOG_AND_INDEPENDENT_SCHEMA_ANCESTRY_RECEIPTS_RETAINED",
+    "UNKNOWN_COMMIT_RESULT_STOP_INSPECT_NO_BLIND_RETRY",
+    "NEW_SOURCE_INITIALIZER_SEPARATE_CONTROLLED_ROLE_AFTER_SCHEMA_RECEIPT"
+  ],
+  "supersedes": {
+    "id": "postwar-social-employment-creation-dc5-v1",
+    "commit": "16f1bedd09df119fda4aba846227f86a69bfd3f3",
+    "installedV1Disposition": "REFUSED_USE_EXACT_ORDINAL_FORWARD"
+  }
+}

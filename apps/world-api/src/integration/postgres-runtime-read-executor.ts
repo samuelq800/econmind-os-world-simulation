@@ -10,8 +10,74 @@ import {
 import { createPostgresServerReadBindingSnapshotReader } from './postgres-server-read-binding.js';
 import { createPersistedReadBindingConsumer } from './postgres-full-read-provider.js';
 import { WorldReadFailure } from './transport.js';
+import { TRADE_CONTRACT_RUNTIME_READ_QUERY } from '../read-models/trade-contract-runtime-reader.js';
 
-/** Only the two existing authenticated handler queries; same managed read pool
+function validTradeParameters(
+  values: readonly string[],
+  subject: string,
+): boolean {
+  if (
+    !Array.isArray(values) ||
+    values.length !== 12 ||
+    values.some((value) => typeof value !== 'string')
+  )
+    return false;
+  const id = (value: string) =>
+    value.length <= 256 && /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(value);
+  const version = (value: string) =>
+    value.length <= 19 &&
+    /^(?:0|[1-9]\d*)$/u.test(value) &&
+    BigInt(value) <= 9223372036854775807n;
+  const [
+    world,
+    authSubject,
+    country,
+    team,
+    revision,
+    classification,
+    scope,
+    limit,
+    head,
+    eventSequence,
+    after,
+    command,
+  ] = values as [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+  ];
+  return (
+    authSubject === subject &&
+    [world, country, team, scope].every(id) &&
+    revision.length > 0 &&
+    revision.length <= 256 &&
+    revision.trim() === revision &&
+    classification === 'OFFICE_PRIVATE' &&
+    scope ===
+      `OFFICE_${Buffer.from(country).toString('hex').toUpperCase()}_5452414445` &&
+    /^[1-9]\d{0,2}$/u.test(limit) &&
+    Number(limit) >= 2 &&
+    Number(limit) <= 101 &&
+    ((head === '' && eventSequence === '' && after === '' && command === '') ||
+      (version(head) &&
+        version(eventSequence) &&
+        version(after) &&
+        BigInt(after) > 0n &&
+        BigInt(after) <= BigInt(head) &&
+        id(command)))
+  );
+}
+
+/** Only the existing two queries plus exact own-Trade evidence SQL; same managed read pool
  * and role as the full provider, subject-bound READ ONLY snapshots. No raw SQL
  * from HTTP, writes, SET ROLE, credentials or automatic connection startup. */
 export function createPostgresRuntimeReadExecutor(input: {
@@ -57,6 +123,20 @@ export function createPostgresRuntimeReadExecutor(input: {
             },
             signal,
           };
+        } else if (
+          request.text === TRADE_CONTRACT_RUNTIME_READ_QUERY &&
+          validTradeParameters(request.values, subject)
+        ) {
+          binding = {
+            verifiedSubject: subject,
+            worldId: request.values[0]!,
+            projectionSelector: {
+              classification: 'OFFICE_PRIVATE',
+              scopeKey: request.values[6]!,
+            },
+            finalSelector: null,
+            signal,
+          };
         } else throw new Error('QUERY_DENIED');
       } catch {
         throw new WorldReadFailure(
@@ -68,6 +148,17 @@ export function createPostgresRuntimeReadExecutor(input: {
       const result = await snapshot.read(binding, async (facts, executor) => {
         const verified = await consume(binding, facts, executor);
         if (!verified) return null;
+        if (
+          request.text === TRADE_CONTRACT_RUNTIME_READ_QUERY &&
+          (verified.identity.officeId !== 'TRADE' ||
+            verified.identity.worldId !== request.values[0] ||
+            verified.identity.authSubjectId !== request.values[1] ||
+            verified.identity.countryId !== request.values[2] ||
+            verified.identity.authorizationRevision !== request.values[4] ||
+            verified.identity.classification !== 'OFFICE_PRIVATE' ||
+            verified.identity.scopeKey !== request.values[6])
+        )
+          return null;
         const result = await executor.query(request.text, request.values);
         return Object.freeze({
           rows: result.rows,

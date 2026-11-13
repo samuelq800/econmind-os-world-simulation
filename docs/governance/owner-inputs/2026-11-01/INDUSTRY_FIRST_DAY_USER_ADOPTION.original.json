@@ -1,0 +1,9 @@
+{
+  "recordedAtUTC": "2026-11-01T08:19:23Z",
+  "authority": "EXPLICIT_USER_ANSWER_IN_THIS_TASK",
+  "questionItemId": "[\"request_user_input_async\",\"call_5b8ea3f23884462681544099c89843ff\",0]",
+  "question": "Industry 的首日生产还需要确认五项开局规则。是否采用这一组有限方案：①工业岗位首日每人最多 480 分钟，不重复占用其他岗位时间；②已有 conditionFraction=1 的设施首日视为可运行，但不伪造已完成维护；③按已有国内物流估算提供有容量、时限和实际成本的场景服务，不视为已勘测道路；④现有炼厂配方作为基础技术，不授予高效技术升级；⑤Industry 席位获得本国既有 OP 汇总设施的有限调度委托，仍受真实资金和产权限制？这仅补规则，实际工时、付款、资源消耗仍须执行并校验。",
+  "answer": "采用这五项有限首日规则",
+  "scope": "Adoption of the five bounded Industry first-day scenario rules; implementation must preserve existing country/resource differences and validate actual time, funds, rights and resource consumption. Not evidence of completed work, maintenance, payment, delivery or production. No production reset, deployment, new credentials, permissions, World or Clock activation.",
+  "implementationStatus": "IN_PROGRESS"
+}

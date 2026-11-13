@@ -1,4 +1,10 @@
 import {
+  assertProductionOperatingBasis,
+  type ProductionOperatingBasisFields,
+} from './production-operating-basis.js';
+export * from './production-operating-basis.js';
+import { isSettledOriginalProductionDeposit } from '../finance/production-deposit-funding.js';
+import {
   canonicalSha256,
   type CanonicalCommand,
   type Sha256Hex,
@@ -39,6 +45,7 @@ import {
 } from './inventory-ledger.js';
 import {
   type FinancialPostingBatch,
+  type FinancialPostingLeg,
   type FinancialLedgerState,
 } from '../finance/financial-ledger.js';
 import { isAuthoritativeFinancialLedgerState } from '../opening/ledger-authority.js';
@@ -67,14 +74,12 @@ export interface ProductionRecipe {
 }
 
 /** These source bindings are not authorization grants. The Worker still owns admission. */
-export interface ProductionOperatingEvidence {
+export interface ProductionOperatingEvidence extends ProductionOperatingBasisFields {
   readonly worldId: InventoryAccount['worldId'];
   readonly worldVersion: string;
   readonly facilityRef: string;
   readonly operatorId: InventoryAccount['titleHolderId'];
   readonly operatorClassification: 'OP';
-  readonly maintenanceAppliedRef: string;
-  readonly technologyRightRef: string;
   readonly operatingPermissionRef: string;
   readonly costSourceRef: string;
   readonly fundingBatchId: FinancialPostingBatchId;
@@ -168,13 +173,23 @@ export function productionConsumptionEventPayload(
   )
     invalid('Production needs the same operational OP facility and recipe');
   legalEntityId(op.operatorId);
-  for (const key of [
-    'maintenanceAppliedRef',
-    'technologyRightRef',
-    'operatingPermissionRef',
-    'costSourceRef',
-  ] as const)
+  for (const key of ['operatingPermissionRef', 'costSourceRef'] as const)
     ref(op[key], key);
+  assertProductionOperatingBasis({
+    operating: op,
+    scope: {
+      worldId: op.worldId,
+      countryId: evidence.output.countryId,
+      facilityRef: op.facilityRef,
+      operatorId: op.operatorId,
+    },
+    snapshotAt: evidence.input.trace.snapshotAt,
+    operatingDuration: evidence.input.capacity.payload.operatingDuration,
+    recipeFactRef: evidence.recipe.factRef,
+    recipeSourceRef: evidence.recipe.sourceRef,
+    recipeCanonicalPayload: evidence.recipe.canonicalPayload,
+    productivity: evidence.input.capacity.payload.productivity,
+  });
   if (
     !result.actualOutput ||
     !Quantity.from(
@@ -367,6 +382,40 @@ export function isValidatedProductionPosting(
   return instances.has(posting);
 }
 
+/** Same deterministic selector is shared by Core replay and Worker cutoff.
+ * Arbitrary ASSET is never a payment instrument. */
+export function selectSettledProductionFundingPayment(
+  posting: InventoryProductionPosting,
+  batch: FinancialPostingBatch,
+  financial: FinancialLedgerState,
+): FinancialPostingLeg {
+  const op = posting.evidence.operating.payload;
+  const cost = Money.from(op.settledCost.amount, op.settledCost.currency);
+  const expense = batch.legs.find((l) => l.legId === op.costLegId);
+  if (!expense) invalid('Production settled expense leg required');
+  const cash = batch.legs.filter(
+    (l) =>
+      l.direction === 'CREDIT' &&
+      l.account.ownerId === op.operatorId &&
+      l.account.countryId === posting.evidence.output.countryId &&
+      (l.account.accountClass === 'CASH' ||
+        l.account.accountClass === 'DEPOSIT' ||
+        (l.account.accountClass === 'ASSET' &&
+          isSettledOriginalProductionDeposit({
+            payment: l,
+            expense,
+            batch,
+            financial,
+          }))) &&
+      l.amount.currency === cost.currency,
+  );
+  if (cash.length !== 1 || !cash[0]!.amount.amount.equals(cost.amount))
+    invalid(
+      'Production needs an exact settled cash/deposit payment, not a free payable',
+    );
+  return cash[0]!;
+}
+
 /** Replay must resolve real settled financial lineage, not merely accept a source reference. */
 export function assertProductionFunding(
   posting: InventoryProductionPosting,
@@ -409,21 +458,9 @@ export function assertProductionFunding(
     !expense.amount.amount.equals(cost.amount)
   )
     invalid('Production cost does not match the settled expense leg');
-  const cash = batch.legs.filter(
-    (l) =>
-      l.direction === 'CREDIT' &&
-      l.account.ownerId === op.operatorId &&
-      l.account.countryId === posting.evidence.output.countryId &&
-      (l.account.accountClass === 'CASH' ||
-        l.account.accountClass === 'DEPOSIT') &&
-      l.amount.currency === cost.currency,
-  );
-  if (cash.length !== 1 || !cash[0]!.amount.amount.equals(cost.amount))
-    invalid(
-      'Production needs an exact settled cash/deposit payment, not a free payable',
-    );
+  const cash = selectSettledProductionFundingPayment(posting, batch, financial);
   const balance = financial.positions.find(
-    (p) => p.account.accountId === cash[0]!.account.accountId,
+    (p) => p.account.accountId === cash.account.accountId,
   );
   if (balance?.netDebitBalance.amount.isNegative())
     invalid(

@@ -14,7 +14,7 @@ import {
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   OfficialOpeningBundleLoader,
   OFFICIAL_OPENING_BUNDLE_LIMITS,
@@ -114,9 +114,11 @@ async function wrongCarrier(
 beforeAll(async () => {
   loaded = await new OfficialOpeningBundleLoader({ repositoryRoot }).load();
 }, 30_000);
-afterAll(async () => {
+afterEach(async () => {
+  // Release each test's real copies before the next case; the source bundle
+  // stays immutable and disk usage does not grow with the number of cases.
   // Each exact path was created by this test's own mkdtemp.
-  for (const root of ownedTemps)
+  for (const root of ownedTemps.splice(0))
     await rm(root, { recursive: true, force: true });
 });
 

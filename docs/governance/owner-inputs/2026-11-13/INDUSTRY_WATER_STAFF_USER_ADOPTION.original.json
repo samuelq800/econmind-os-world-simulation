@@ -1,0 +1,19 @@
+{
+  "authority": "EXPLICIT_USER_CONFIRMATION_OF_PREVIOUSLY_DISCLOSED_SCHEME",
+  "questionMessageId": "Sentinel_f0bfe5f3e2f08191bf624a1f6365a2b8",
+  "questionDateUTC": "2026-11-08",
+  "question": "水务原始数据缺少人员资格和工时规则，需要你确认一个首日模拟方案：从本国同一 OP 的现有电力岗位中，选取当前未被占用的人员；每个实际取水点在抽取期间至少有 1 人全程值守。沿用该人员的真实岗位技能和工资，工时计入每人 480 分钟上限，不能与电力、制造或物流重复占用；实际付款后才记服务完成。不新增人员或每立方米工时系数，水量、配额和已确定的泵耗系数不变。是否采用这个方案？如果暂不采用，缺少合格水务服务的产出会保持关闭，其他施工继续。",
+  "answers": [
+    {
+      "dateUTC": "2026-11-13",
+      "messageId": "Sentinel_c59c5970eed48191a3ab6f8da647a382",
+      "text": "前面所有未确认的全部确认"
+    },
+    {
+      "dateUTC": "2026-11-13",
+      "messageId": "Sentinel_68b79ed080c88191b7f03ea29c1f7887",
+      "text": "继续执行完成所有这些"
+    }
+  ],
+  "scope": "Only the disclosed new-scenario first-day water staffing scheme. Existing same-country same-OP POWER workers, actual skill and wage, at least one person throughout each extraction interval, shared 480-minute limit, no overlap with power/manufacturing/logistics, actual wage payment before service completion. No invented people or volume-based labour coefficient. No change to water quotas or pump-energy assumption. This record is adoption, not work, payment, delivery, physical qualification certification or production activation."
+}

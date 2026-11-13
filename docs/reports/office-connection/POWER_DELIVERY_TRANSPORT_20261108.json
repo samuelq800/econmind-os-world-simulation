@@ -1,0 +1,126 @@
+{
+  "classification": "IMPLEMENTATION_AND_SCOPED_MANUAL_SCHEMA_BROWSER_PROTOCOL_JWT_SQL_NOT_NATIVE_POWER_SERVICE_DELIVERY",
+  "branch": "codex/power-service-integration-20261108",
+  "baseHead": "c2eac7b6310cf6a0e56f39a7db99c90e37dd1a55",
+  "reportedAt": "2026-11-08T15:36:21.982019+00:00",
+  "sourceManifest": [
+    {
+      "path": "packages/core/src/commands/authenticated-office-command-contract.ts",
+      "sha256": "c020240968ec0991fbf0ec7f875cd1c095ce45eace4ed2a0c91f6018ca309926",
+      "bytes": 7430
+    },
+    {
+      "path": "packages/core/src/read-models/postwar-industry-utility-planning-contract.ts",
+      "sha256": "5d147b607bf2c25859ae10fb701adc228d1e9a60dea38d55367cb5d5a8d2b34b",
+      "bytes": 9486
+    },
+    {
+      "path": "apps/world-web/src/industry-utility/form.ts",
+      "sha256": "fa9730e71eed44ef8e67d6e5bc9b014060b0bc96dd2954e0743928dd6266e7d3",
+      "bytes": 8010
+    },
+    {
+      "path": "tests/support/industry-utility-manual-intent-fixture.ts",
+      "sha256": "1ef56513b051fec5e076b5a7c61b84027db5f5ce3c72056ac328af26b2dc8284",
+      "bytes": 2951
+    },
+    {
+      "path": "tests/support/industry-utility-planning-fixture.ts",
+      "sha256": "8e3f267213fc456d172956dd90bb7099a8aa8a9a76cce1f5ef464c0cd50a9f8e",
+      "bytes": 12225
+    },
+    {
+      "path": "tests/world-core/industry-utility-manual-intent.test.ts",
+      "sha256": "c1d190fa155a55bcb038958197546c905066914a62243901b243820bad9c150e",
+      "bytes": 7989
+    },
+    {
+      "path": "tests/world-web/office-command-family-boundary.test.ts",
+      "sha256": "5956ad84c3ba5a9ee2b54517397c0606161699b7710893a2abdda91eb513c3ee",
+      "bytes": 9047
+    },
+    {
+      "path": "tests/world-api/postwar-industry-utility-transport.test.ts",
+      "sha256": "23ce29e137a20ebeaaa8bc5fca133a7cf629756e75c1a216996a25bacc70bdd5",
+      "bytes": 7273
+    },
+    {
+      "path": "tests/world-api/authenticated-office-command.test.ts",
+      "sha256": "1eae1513c1311ae2edf768f53930122aa81b637d87b229350baec526908f7446",
+      "bytes": 19308
+    },
+    {
+      "path": "tests/world-core/industry-utility-planning-contract.test.ts",
+      "sha256": "7ee7b50f42ac54e7a22a9f65bdcdcf3aab027a6642ed7d8f209c0418fcc4ad95",
+      "bytes": 2793
+    },
+    {
+      "path": "tests/world-web/industry-power-delivery-transport.test.ts",
+      "sha256": "2179c2e15f44738b8e167f263a1c33508d9a58089dc8bf87756842cb5ceb7d4f",
+      "bytes": 6891
+    }
+  ],
+  "builtArtifactManifest": [
+    {
+      "path": "packages/core/dist/commands/authenticated-office-command-contract.js",
+      "sha256": "6f16ac02617c267fc9aa53660a57081bd220407661020e113017054a6d53ad71"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-office-command-contract.d.ts",
+      "sha256": "45ab6c0239385ef4a60a8d8f49bd4d6c667a4b00c6618a1692d2045677713a53"
+    },
+    {
+      "path": "packages/core/dist/read-models/postwar-industry-utility-planning-contract.js",
+      "sha256": "6d7b5dd11b26d2eb540cf785f1bb02dbd5dd596806842133b2a1b363a32b99cf"
+    },
+    {
+      "path": "packages/core/dist/read-models/postwar-industry-utility-planning-contract.d.ts",
+      "sha256": "a94a29aed0412c66d1d43e42f5b4595c35259c3f56abb31fab47c3035a27a884"
+    }
+  ],
+  "tests": [
+    {
+      "file": "power-delivery-browser-attempt1-20261108.json",
+      "success": true,
+      "numPassedTests": 85,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    {
+      "file": "power-delivery-manual-intent-attempt1-20261108.json",
+      "success": true,
+      "numPassedTests": 27,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    {
+      "file": "power-delivery-api-attempt1-20261108.json",
+      "success": true,
+      "numPassedTests": 61,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    }
+  ],
+  "uniqueAssertions": 173,
+  "aggregation": "Three distinct test-file selections: browser/public DTO 85, Core/Worker manual intent 27, API protocol plus actual JWT/PGlite unavailable-source authorization 61. Not one 173-test run.",
+  "checks": {
+    "scopedTypesExit": 0,
+    "scopedLintExit": 0,
+    "formatExit": 0,
+    "diffCheckExit": 0
+  },
+  "behavior": [
+    "POWER DELIVER manual payload is exactly action,bookingRef,workEventFingerprint,paymentEventFingerprint; lexical references validated.",
+    "Existing INDUSTRY_PRODUCTION/current seat/world head/canonical intent/recovery pipeline retained; no new family, capability, automatic issuer or role grant.",
+    "Public planning DTO accepts the exact source-provided POWER delivery row; browser copies protected refs and refuses editable quantity/time/paid amount.",
+    "Original recovery after reload keeps old expectedHead, does not resubmit and remains usable with current planning unavailable.",
+    "WATER GRANT_RIGHT remains fixed-automatic-only and rejected by manual HTTP."
+  ],
+  "buildScope": "Independent tree only: Social owner reported Core emit04 and Worker emit01 actual exit0; tests use this tree dist/source. No main c2eac native acceptance inherited.",
+  "notRun": [
+    "Actual registered POWER service WORK/WAGE/DELIVER native acceptance",
+    "Genuine positive live planning HTTP/Chromium service delivery",
+    "Production, deployment, Clock, provider network, or main-tree rebuilds"
+  ],
+  "evidenceDirectory": "/workspace/.cloud-setup/evidence/power-delivery-transport-20261108"
+}

@@ -1,24 +1,46 @@
+import { parseIndustryUtilityManualIntent } from '@econmind/core/industry-utility-execution';
+import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+  parseIndustryUtilisationTargetIntent,
+  parseIndustryRunScheduleIntent,
+} from '@econmind/core/industry-first-day-work';
+import {
+  INDUSTRY_PRODUCTION_COMMAND,
+  parseIndustryProductionIntent,
+} from '@econmind/core/industry-production-command';
 import { createHash } from 'node:crypto';
 import {
   COMMAND_SCHEMA_VERSION,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   CENTRAL_BANK_OMO_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  parseSocialLabourProgrammeCreateIntent,
+  parseSocialPositionOfferCreateIntent,
+  parseSocialEmploymentServiceCreateIntent,
   DomainError,
   DOMAIN_ERROR_CODES,
   actorId,
   parseCanonicalCommand,
   parseCaptainPoliticalCapitalAllocation,
   parseCentralBankOmoIntent,
+  parseNarrowTreasuryGcuTransferTerms,
   parseSocialEmploymentServiceCommand,
   parseBudgetSourcePayload,
   validateCanonicalCommand,
   type CanonicalCommand,
 } from '@econmind/core';
 import {
+  MANUAL_INDUSTRY_UTILITY_COMMANDS,
+  isManualIndustryUtilityCommandFamily,
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
   type ManualOfficeCommandRequestDto,
 } from '@econmind/core/authenticated-office-command-contract';
+import { parsePostwarDayOneTreasuryFxPayload } from '@econmind/core/postwar-day-one-treasury-fx';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 export interface StoredManualOfficeCommand {
   worldId: string;
@@ -75,7 +97,13 @@ export function decodeStoredManualOfficeCommand(
     original.canonicalPayload !== canonicalPayload
   )
     conflict();
-  if (original.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+  if (
+    isManualIndustryUtilityCommandFamily(original.commandType) ||
+    original.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+    original.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND ||
+    original.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
+    original.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+  )
     validateManualOfficeCommandIntent(original);
   return original;
 }
@@ -94,6 +122,31 @@ export function validateManualOfficeCommandIntent(
 ): void {
   validateCanonicalCommand(command, sha);
   switch (command.commandType) {
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.POWER:
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.WATER:
+    case MANUAL_INDUSTRY_UTILITY_COMMANDS.LOGISTICS:
+      parseIndustryUtilityManualIntent(command, sha);
+      return;
+    case INDUSTRY_UTILISATION_TARGET_COMMAND:
+      parseIndustryUtilisationTargetIntent(command, sha);
+      return;
+    case INDUSTRY_RUN_SCHEDULE_COMMAND:
+      if (command.idempotencyKey === null) invalid();
+      parseIndustryRunScheduleIntent(command, sha);
+      return;
+    case INDUSTRY_PRODUCTION_COMMAND:
+      if (command.idempotencyKey === null) invalid();
+      parseIndustryProductionIntent(command, sha);
+      return;
+    case 'CORE_GOODS_TRANSFER_V1':
+      if (
+        command.officeId !== 'TRADE' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseNarrowTreasuryGcuTransferTerms(command);
+      return;
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND:
       if (command.officeId !== 'CAPTAIN') invalid();
       parseCaptainPoliticalCapitalAllocation(command, sha);
@@ -109,6 +162,55 @@ export function validateManualOfficeCommandIntent(
       )
         invalid();
       return;
+    case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialLabourProgrammeCreateIntent(
+        JSON.parse(command.canonicalPayload),
+      );
+      return;
+    case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialEmploymentServiceCreateIntent(
+        JSON.parse(command.canonicalPayload),
+      );
+      return;
+    case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialPositionOfferCreateIntent(
+        JSON.parse(command.canonicalPayload),
+      );
+      return;
+    case POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND: {
+      if (
+        command.officeId !== 'FINANCE' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      try {
+        parsePostwarDayOneTreasuryFxPayload(
+          JSON.parse(command.canonicalPayload),
+        );
+      } catch {
+        invalid();
+      }
+      return;
+    }
     case FINANCE_BUDGET_APPROPRIATION_COMMAND: {
       if (
         command.officeId !== 'FINANCE' ||

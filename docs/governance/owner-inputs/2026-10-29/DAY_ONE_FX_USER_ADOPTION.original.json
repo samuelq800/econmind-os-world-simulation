@@ -1,0 +1,16 @@
+{
+  "recordedAtUTC": "2026-10-29T03:04:23.551948+00:00",
+  "authority": "EXPLICIT_USER_ANSWER_IN_THIS_TASK",
+  "questionItemId": "[\"request_user_input_async\",\"call_a4b8644a521e40c0819a615ca5a40d26\",0]",
+  "answer": "采用上述首日换汇规则",
+  "policy": {
+    "rateBasis": "existing country-specific LC/GCU baseline with original units",
+    "initialSpread": "0",
+    "validity": "one simulation day, using existing Core time units",
+    "settlement": "actual available balances only, no overdraft, no central-bank reserves",
+    "adoptAfter": "conservation and authorization validation"
+  },
+  "scope": "Versioned first-day bank FX quoting and settlement; no production reset, new persistent credentials or World/Clock activation",
+  "implementationStatus": "IN_PROGRESS",
+  "worktree": "/workspace/.cloud-setup/worktrees/postwar-day-one-fx"
+}

@@ -74,7 +74,7 @@ jobs:
 
   official-and-native-postgres:
     runs-on: macos-15
-    timeout-minutes: 35
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v5
         with:

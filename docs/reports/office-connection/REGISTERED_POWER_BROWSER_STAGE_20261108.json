@@ -1,0 +1,57 @@
+{
+  "classification": "BROWSER_STAGE_IMPLEMENTATION_AND_MOCK_CONTROL_PROTOCOL_NOT_ACTUAL_NODE_CHROMIUM_OR_ECONOMIC_ACCEPTANCE",
+  "headAtReport": "e99ad25aef6795351626e07698c64be87d725cbe",
+  "branch": "codex/power-service-integration-20261108",
+  "reportedAt": "2026-11-08T16:01:51.939664+00:00",
+  "sourceManifest": [
+    {
+      "path": "tools/office-connection/registered-office-browser-stages.mjs",
+      "sha256": "87caa1e9d9ed79edd16ef1d1dfccfaa2ecd37b188fe9ef9e735e6f3560ef52be",
+      "bytes": 25765
+    },
+    {
+      "path": "tools/office-connection/registered-office-browser-stages.d.mts",
+      "sha256": "19854a6e074097500b47008bcda77876877a35ab6ceef4aeea18532b266f0cc6",
+      "bytes": 4606
+    },
+    {
+      "path": "tests/world-web/registered-office-browser-stages-protocol.test.ts",
+      "sha256": "e9fb66ec18d4b236e398301ac466e48b9c39b604cd46249e25462ebf88f7761e",
+      "bytes": 17990
+    }
+  ],
+  "newMethod": "RegisteredOfficeBrowserSession.submitIndustryPowerFromPlanning(selection, expectation?)",
+  "selection": {
+    "common": ["planningRef", "sourceVersion", "expectedHead", "action"],
+    "BOOK": ["quantity", "startsAtSimTime", "endsAtSimTime"],
+    "DELIVER": []
+  },
+  "behavior": [
+    "Uses existing actual Node/JWT passthrough, real current planning rows and shipped form/review/confirm DOM selectors; no DTO builder/default source or response synthesis added.",
+    "Matches actual read head/sourceVersion and exactly one selected POWER row; BOOK values are explicit caller inputs, DELIVER protected references are immutable actual row values.",
+    "Captures and compares actual command POST to reviewed original and asserts exactly one explicit submit. ACK/unknown cannot count as final.",
+    "Returns actual state.intent for existing reloadRestore(original) and separate recoverFinal after caller-controlled actual consumer work. No consumer/clock/backend started here.",
+    "Existing generic submitOnce/reloadRestore and child-origin rebinding remain compatible. Denied cleanup now checks utilityPlanningPage too.",
+    "No new methods on production view/controller/client and no edit to frozen native runner."
+  ],
+  "finalProtocolRun": {
+    "success": true,
+    "numPassedTests": 5,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "checks": {
+    "nodeSyntaxExit": 0,
+    "scopedTypesExit": 0,
+    "scopedLintExit": 0,
+    "formatExit": 0,
+    "diffCheckExit": 0
+  },
+  "limitations": [
+    "Five protocol cases use explicit TEST_ONLY browser/backend control doubles; no real Chromium or Node backend is validated.",
+    "Actual POWER BOOK/DELIVER service receipts and live UI execution remain NOT_RUN in this task.",
+    "Temporary mock evidence is cleaned and is not a native pass artifact.",
+    "Core exports were refreshed by root in this isolated branch; no independent package build/native World/production/Clock/credentials were created."
+  ],
+  "evidenceDirectory": "/workspace/.cloud-setup/evidence/registered-power-browser-stage-20261108"
+}

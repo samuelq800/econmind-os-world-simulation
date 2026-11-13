@@ -1,0 +1,1059 @@
+{
+  "classification": "OFFLINE_ACTUAL_SOURCE_JOIN_NOT_RUNTIME_AUTHORITY_OR_WORK_AVAILABILITY",
+  "repositoryHead": "e1f5986bfc3d8b8819fb4944868c799d6dc685e6",
+  "markerPath": "/workspace/.cloud-setup/evidence/fn13c/pg/reference-db.json",
+  "markerSha256": "3bdd3b7f27cdbecdd0a5a9628ad135ab9140d54cd5d32576692cd08799b31593",
+  "seedFile": "/workspace/rehearsal-20261113/child-source-20261029-canonical/candidate-seed.json",
+  "seedFileSha256": "835f9ec096746e3bc8f8cd1a7235fc7a2af0daee06d4ceeedff1fdff99d0262f",
+  "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+  "seedId": "SEED_POSTWAR_GCU_OPENING_20261029_V1",
+  "seedFingerprint": "sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a",
+  "operatingSourcePayloadSha256": "966231ddda26cb2344e7045d34c48379bf5bc78757f135d8d1e914b4a01e2d8d",
+  "selectedSourceChecksumsSha256": "88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315",
+  "staffingPolicy": {
+    "version": "INDUSTRY_WATER_STAFF_20261113_V1",
+    "userAdoptionPath": "docs/governance/owner-inputs/2026-11-13/INDUSTRY_WATER_STAFF_USER_ADOPTION.original.json",
+    "userAdoptionRawSha256": "fa2ee807b63d903722bc896a439d12a4dfa1502294a0f626cfd37bf0efe5f406",
+    "workerSource": "EXISTING_SAME_COUNTRY_SAME_OP_POWER_POSITION",
+    "minimumConcurrentPersonsPerExtractionPoint": "1",
+    "maximumSharedMinutesPerPersonFirstDay": "480",
+    "actualPaidServiceRequired": true,
+    "overlappingPowerManufacturingLogisticsWorkAllowed": false,
+    "newPeopleAllowed": false,
+    "volumeBasedLabourCoefficient": null
+  },
+  "counts": {
+    "countryDenominator": 70,
+    "refineryCountries": 21,
+    "sourceEligible": 21,
+    "rejected": 0,
+    "noRefineryCountries": 49
+  },
+  "rows": [
+    {
+      "countryId": "COUNTRY_02",
+      "targetFacilityId": "OPEN-02-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-02-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_FC6ED9BC69BDFDEECC91665CB90047F644D1F58BE6CBD14C75DCEFD6378D9097",
+      "rawSha256": "fc6ed9bc69bdfdeecc91665cb90047f644d1f58be6cbd14c75dcefd6378d9097",
+      "rawFile": "COUNTRY_02.water-staff.json",
+      "rawBytes": 2239,
+      "personCount": "15400",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_7C82472DA98C8A1185D5791B01D2754762D77E685689A3010C4B9676A14C178E",
+          "poolId": "POSTWAR_LF_REGION_02_E1_HIGH",
+          "sourceStartOrdinal": "4548766",
+          "startOrdinal": "50462456",
+          "count": "1232",
+          "regionId": "REGION_02_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_02_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_8BD1F89DC6B54095658D0A80DB2637F15057A52E2BBC96022BB2FDBF02E4B05E",
+          "poolId": "POSTWAR_LF_REGION_02_E1_LOW",
+          "sourceStartOrdinal": "27199448",
+          "startOrdinal": "27199448",
+          "count": "8778",
+          "regionId": "REGION_02_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_02_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_9D0FD1244F0E867A4E0E04ADCB87FD62F07653F02848F07FACE5ACD62047AE8D",
+          "poolId": "POSTWAR_LF_REGION_02_E1_MEDIUM",
+          "sourceStartOrdinal": "11850127",
+          "startOrdinal": "43840986",
+          "count": "5390",
+          "regionId": "REGION_02_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_02_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_10",
+      "targetFacilityId": "OPEN-10-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-10-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_B1135ADABC1B12569CCD0C845A311A85D596F1E643E898F8BECEE7191B0EF6C8",
+      "rawSha256": "b1135adabc1b12569ccd0c845a311a85d596f1e643e898f8becee7191b0ef6c8",
+      "rawFile": "COUNTRY_10.water-staff.json",
+      "rawBytes": 2246,
+      "personCount": "29575",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_0FF6C2E9A79C1077F64CA7AD76E5062E3C1D0E599F8608B10D190323E17744FF",
+          "poolId": "POSTWAR_LF_REGION_10_E1_LOW",
+          "sourceStartOrdinal": "21696949",
+          "startOrdinal": "21696949",
+          "count": "16858",
+          "regionId": "REGION_10_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_10_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_37ABA49B0B8CB1A3532DF69AFB1F31127418081C01E5FE91152DE7AE6F1EA001",
+          "poolId": "POSTWAR_LF_REGION_10_E1_HIGH",
+          "sourceStartOrdinal": "3620639",
+          "startOrdinal": "40250672",
+          "count": "2366",
+          "regionId": "REGION_10_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_10_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_D1BC1D6F69F253B971A78531826A2081264579B1F324298CB289AC7AA074E630",
+          "poolId": "POSTWAR_LF_REGION_10_E1_MEDIUM",
+          "sourceStartOrdinal": "9570189",
+          "startOrdinal": "35080759",
+          "count": "10351",
+          "regionId": "REGION_10_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_10_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_18",
+      "targetFacilityId": "OPEN-18-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-18-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_052A3DEE445B3921DCF7616EC7CBBAF078559C3966B9F3D5901611E7E473F16A",
+      "rawSha256": "052a3dee445b3921dcf7616ec7cbbaf078559c3966b9f3d5901611e7e473f16a",
+      "rawFile": "COUNTRY_18.water-staff.json",
+      "rawBytes": 2239,
+      "personCount": "13378",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_1ED28AF4B0601C321729EB3C6430F01836A855FDFD28B43C32CD9E964F9EA50C",
+          "poolId": "POSTWAR_LF_REGION_18_E1_MEDIUM",
+          "sourceStartOrdinal": "10939667",
+          "startOrdinal": "37614548",
+          "count": "4682",
+          "regionId": "REGION_18_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_18_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_58694D872BAC5E62B33106A3B27B91A000EBB3853975E873ABC439B83D576523",
+          "poolId": "POSTWAR_LF_REGION_18_E1_HIGH",
+          "sourceStartOrdinal": "4533189",
+          "startOrdinal": "44232275",
+          "count": "1070",
+          "regionId": "REGION_18_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_18_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_B6322E05275210BD6D6C0B7E61EF8E7BA4CE63F1723F8E4B3A1237D14135DBE0",
+          "poolId": "POSTWAR_LF_REGION_18_E1_LOW",
+          "sourceStartOrdinal": "22516947",
+          "startOrdinal": "22516947",
+          "count": "7626",
+          "regionId": "REGION_18_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_18_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_20",
+      "targetFacilityId": "OPEN-20-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-20-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_E9C02808376E8C2C9228E5E38A26C6B9C32816063EAE0764DB25E42054B0CD8A",
+      "rawSha256": "e9c02808376e8c2c9228e5e38a26c6b9c32816063eae0764db25e42054b0cd8a",
+      "rawFile": "COUNTRY_20.water-staff.json",
+      "rawBytes": 2242,
+      "personCount": "20706",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_5B9E9D6DF4C98E8C8CE90CEB3001055B11E0A21014783BF2E24FF589F28CA59B",
+          "poolId": "POSTWAR_LF_REGION_20_E1_LOW",
+          "sourceStartOrdinal": "18963343",
+          "startOrdinal": "18963343",
+          "count": "11803",
+          "regionId": "REGION_20_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_20_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_E49FF5E18C30F3944536F967F3676E5E34ABB329FFD2259700418D172DFC35AE",
+          "poolId": "POSTWAR_LF_REGION_20_E1_HIGH",
+          "sourceStartOrdinal": "3198572",
+          "startOrdinal": "35763178",
+          "count": "1656",
+          "regionId": "REGION_20_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_20_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_EA07B274C14E552A4EDD1D0125849D69BA00F25F99F6B4B985B123141B72F019",
+          "poolId": "POSTWAR_LF_REGION_20_E1_MEDIUM",
+          "sourceStartOrdinal": "8308760",
+          "startOrdinal": "31082287",
+          "count": "7247",
+          "regionId": "REGION_20_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_20_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_25",
+      "targetFacilityId": "OPEN-25-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-25-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_45E33F6B1830AD5A55D4EB2CAE251B6BA4EFE33B53EDC3EE533784947A3CCFCD",
+      "rawSha256": "45e33f6b1830ad5a55d4eb2cae251b6ba4efe33b53edc3ee533784947a3ccfcd",
+      "rawFile": "COUNTRY_25.water-staff.json",
+      "rawBytes": 2239,
+      "personCount": "13847",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_08628024E52F06453B7F3131FF05ED52FD3D57C438F67974628E1236E629110C",
+          "poolId": "POSTWAR_LF_REGION_25_E1_MEDIUM",
+          "sourceStartOrdinal": "11401807",
+          "startOrdinal": "39319815",
+          "count": "4846",
+          "regionId": "REGION_25_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_25_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_1452A1C46821D1927D4C0CBC9CAAB55B67FB476684462FEDC44F7D303524CB5B",
+          "poolId": "POSTWAR_LF_REGION_25_E1_HIGH",
+          "sourceStartOrdinal": "4706395",
+          "startOrdinal": "46173804",
+          "count": "1108",
+          "regionId": "REGION_25_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_25_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_181D82380ED6FEDE8233CB3B058A42C07EEB94E28B9B7B2444BB65222E853606",
+          "poolId": "POSTWAR_LF_REGION_25_E1_LOW",
+          "sourceStartOrdinal": "23398286",
+          "startOrdinal": "23398286",
+          "count": "7893",
+          "regionId": "REGION_25_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_25_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_26",
+      "targetFacilityId": "OPEN-26-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-26-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_53A314B8F92D0942B59581EC9B9F81B6C20BED8A0CAB2D287487283807038BFA",
+      "rawSha256": "53a314b8f92d0942b59581ec9b9f81b6c20bed8a0cab2d287487283807038bfa",
+      "rawFile": "COUNTRY_26.water-staff.json",
+      "rawBytes": 2238,
+      "personCount": "17538",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_035EFDD0A290D6034DCD01657B2EE4BF26538F1566A5B0A0BAC052F196EA05E4",
+          "poolId": "POSTWAR_LF_REGION_26_E2_HIGH",
+          "sourceStartOrdinal": "2565560",
+          "startOrdinal": "28073492",
+          "count": "1403",
+          "regionId": "REGION_26_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_26_E2_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_4AA57E52A0F8A04D6AFECDED623CD4233F9B9DBA676CE274DF485B8CCA84B4A1",
+          "poolId": "POSTWAR_LF_REGION_26_E2_MEDIUM",
+          "sourceStartOrdinal": "6558639",
+          "startOrdinal": "24257496",
+          "count": "6138",
+          "regionId": "REGION_26_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_26_E2_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_9BB7806D6B263DE917662D01BCDEFB800E45FF13FA98764785F67267860F02DC",
+          "poolId": "POSTWAR_LF_REGION_26_E2_LOW",
+          "sourceStartOrdinal": "15225632",
+          "startOrdinal": "15225632",
+          "count": "9997",
+          "regionId": "REGION_26_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_26_E2_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_28",
+      "targetFacilityId": "OPEN-28-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-28-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_50CC5ECE2A638F654EA8BA796A91E6DCE3473CAFDB32AE342CD27A20FD3070A7",
+      "rawSha256": "50cc5ece2a638f654ea8ba796a91e6dce3473cafdb32ae342cd27a20fd3070a7",
+      "rawFile": "COUNTRY_28.water-staff.json",
+      "rawBytes": 2243,
+      "personCount": "25192",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_0890AAEF615589E83D2D93866AE4A8E7D43B2DA215919920506DD10BDEE032C3",
+          "poolId": "POSTWAR_LF_REGION_28_E2_MEDIUM",
+          "sourceStartOrdinal": "11745784",
+          "startOrdinal": "37179495",
+          "count": "8817",
+          "regionId": "REGION_28_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_28_E2_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_60E9202BFC4D28464B90F62CDCA99660AA9C0C5462DEA80BF5611E0D771229C2",
+          "poolId": "POSTWAR_LF_REGION_28_E2_LOW",
+          "sourceStartOrdinal": "21587799",
+          "startOrdinal": "21587799",
+          "count": "14360",
+          "regionId": "REGION_28_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_28_E2_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_8F82EF125262BE506D384EEFC02B41FE20D9EA2BE806B142E7FD5D2AFDC11D16",
+          "poolId": "POSTWAR_LF_REGION_28_E2_HIGH",
+          "sourceStartOrdinal": "5084639",
+          "startOrdinal": "44309461",
+          "count": "2015",
+          "regionId": "REGION_28_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_28_E2_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_31",
+      "targetFacilityId": "OPEN-31-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-31-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_9A2F11D8F04DBF097F40027412449A46BEACCFFE9343314FD33E5312C908AAC5",
+      "rawSha256": "9a2f11d8f04dbf097f40027412449a46beaccffe9343314fd33e5312c908aac5",
+      "rawFile": "COUNTRY_31.water-staff.json",
+      "rawBytes": 2243,
+      "personCount": "22828",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_19AF9F8BEE21E4E6AE9DF08D3182B1BEEA85C1B1821DF80D92110B6F57BD1D54",
+          "poolId": "POSTWAR_LF_REGION_31_E2_MEDIUM",
+          "sourceStartOrdinal": "10221454",
+          "startOrdinal": "33342402",
+          "count": "7990",
+          "regionId": "REGION_31_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_31_E2_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_3AEB07B07B1E6CC67C8B506BC46DFFC1311E345F361EF35D165718910750DC56",
+          "poolId": "POSTWAR_LF_REGION_31_E2_HIGH",
+          "sourceStartOrdinal": "4362274",
+          "startOrdinal": "39596567",
+          "count": "1826",
+          "regionId": "REGION_31_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_31_E2_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_565B445C119401490030A648A577A1F8C410D5E11B7FBDF8DD8765B2F23BA82F",
+          "poolId": "POSTWAR_LF_REGION_31_E2_LOW",
+          "sourceStartOrdinal": "19517726",
+          "startOrdinal": "19517726",
+          "count": "13012",
+          "regionId": "REGION_31_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_31_E2_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_37",
+      "targetFacilityId": "OPEN-37-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-37-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_43119567150CE3131C11444CE8A366E3F9438CB11562701A1BBBC966D86A3AD5",
+      "rawSha256": "43119567150ce3131c11444ce8a366e3f9438cb11562701a1bbbc966d86a3ad5",
+      "rawFile": "COUNTRY_37.water-staff.json",
+      "rawBytes": 2234,
+      "personCount": "11123",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_34060A205D5475CC30159EF8F222C88B8C51A2829A44846C3AA3C8F5F1A3ECFD",
+          "poolId": "POSTWAR_LF_REGION_37_E1_LOW",
+          "sourceStartOrdinal": "18578639",
+          "startOrdinal": "18578639",
+          "count": "6340",
+          "regionId": "REGION_37_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_37_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_6068DD7D3F78DF92B3E2A4328D7DBFD97CF7232275D3CBBC61B28D068EE7104C",
+          "poolId": "POSTWAR_LF_REGION_37_E1_MEDIUM",
+          "sourceStartOrdinal": "8215093",
+          "startOrdinal": "30376826",
+          "count": "3893",
+          "regionId": "REGION_37_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_37_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_A72D7803130887350B3EEE0F51671B4969279155F268D3A4BC2466654837785C",
+          "poolId": "POSTWAR_LF_REGION_37_E1_HIGH",
+          "sourceStartOrdinal": "3200487",
+          "startOrdinal": "35051487",
+          "count": "890",
+          "regionId": "REGION_37_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_37_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_38",
+      "targetFacilityId": "OPEN-38-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-38-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_0F41C4F070FA557962A63DAB160B66BC88918C11A46E84B575C10D5522F012D8",
+      "rawSha256": "0f41c4f070fa557962a63dab160b66bc88918c11a46e84b575c10d5522f012d8",
+      "rawFile": "COUNTRY_38.water-staff.json",
+      "rawBytes": 2247,
+      "personCount": "32619",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_1A795DE67BF3075F8FBC2F1EE5F5E5959015696337224827DAEF86B8A79F23FF",
+          "poolId": "POSTWAR_LF_REGION_38_E1_HIGH",
+          "sourceStartOrdinal": "6304113",
+          "startOrdinal": "59996715",
+          "count": "2610",
+          "regionId": "REGION_38_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_38_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_3D0C0F60152813E331DA05D145B2074631623C35770A4EC7A79278AD134867C5",
+          "poolId": "POSTWAR_LF_REGION_38_E1_MEDIUM",
+          "sourceStartOrdinal": "14923954",
+          "startOrdinal": "50644117",
+          "count": "11417",
+          "regionId": "REGION_38_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_38_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_E6D3D0A189382300590EE44E9DC52F18BE0E1BB920D32D024B33B1327661AA7A",
+          "poolId": "POSTWAR_LF_REGION_38_E1_LOW",
+          "sourceStartOrdinal": "29752117",
+          "startOrdinal": "29752117",
+          "count": "18592",
+          "regionId": "REGION_38_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_38_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_48",
+      "targetFacilityId": "OPEN-48-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-48-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_1CC0A6BDD5B1A35423073EEAD7DEE0AB0EAF062CD3EF61C4FE1DE63706E119B5",
+      "rawSha256": "1cc0a6bdd5b1a35423073eead7dee0ab0eaf062cd3ef61c4fe1de63706e119b5",
+      "rawFile": "COUNTRY_48.water-staff.json",
+      "rawBytes": 2239,
+      "personCount": "16823",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_16AFD0F3FB8E51F84EB3F5F27442245764B5D181FF3DFF9670E7DCBD1D714AF5",
+          "poolId": "POSTWAR_LF_REGION_48_E1_MEDIUM",
+          "sourceStartOrdinal": "11993861",
+          "startOrdinal": "41265110",
+          "count": "5888",
+          "regionId": "REGION_48_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_48_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_D4E7716A11361550684ACF29AABFA2352B6EE3E24AFA42D9BBC60E153CB1D810",
+          "poolId": "POSTWAR_LF_REGION_48_E1_HIGH",
+          "sourceStartOrdinal": "4972682",
+          "startOrdinal": "48492906",
+          "count": "1346",
+          "regionId": "REGION_48_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_48_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_E89442B4BCEF9D469495845662D9D94F89BC2DA1A69D4A363D76282C585B97EA",
+          "poolId": "POSTWAR_LF_REGION_48_E1_LOW",
+          "sourceStartOrdinal": "24782748",
+          "startOrdinal": "24782748",
+          "count": "9589",
+          "regionId": "REGION_48_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_48_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_50",
+      "targetFacilityId": "OPEN-50-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-50-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_C1EAFC6B4EC11A240C8AF71B3697DA815D03597C87E8B71A4D31EA152EF4C4DB",
+      "rawSha256": "c1eafc6b4ec11a240c8af71b3697da815d03597c87e8b71a4d31ea152ef4c4db",
+      "rawFile": "COUNTRY_50.water-staff.json",
+      "rawBytes": 2243,
+      "personCount": "28234",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_9969F2DA635848BB8C8801BE026DD79A13CB5436D0BD20E649DCEBFDEC72E367",
+          "poolId": "POSTWAR_LF_REGION_50_E1_HIGH",
+          "sourceStartOrdinal": "4479295",
+          "startOrdinal": "39925927",
+          "count": "2259",
+          "regionId": "REGION_50_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_50_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_9B0A156F0A38132295C620F20F69D7CC767FB01B8ED67C66A3C9BADB5263C8F6",
+          "poolId": "POSTWAR_LF_REGION_50_E1_MEDIUM",
+          "sourceStartOrdinal": "10472948",
+          "startOrdinal": "33565291",
+          "count": "9882",
+          "regionId": "REGION_50_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_50_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_D0D3F801AFACE98F1B61856774D5E50D37A885ED6160A9BDE8DDF08703452789",
+          "poolId": "POSTWAR_LF_REGION_50_E1_LOW",
+          "sourceStartOrdinal": "19283241",
+          "startOrdinal": "19283241",
+          "count": "16093",
+          "regionId": "REGION_50_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_50_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_52",
+      "targetFacilityId": "OPEN-52-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-52-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_6066079AB232A457EA97708F04EC7D7F21B903D34B856C62C0A6D753FD51BA81",
+      "rawSha256": "6066079ab232a457ea97708f04ec7d7f21b903d34b856c62c0a6d753fd51ba81",
+      "rawFile": "COUNTRY_52.water-staff.json",
+      "rawBytes": 2243,
+      "personCount": "22369",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_8C5AD7947CE611712A9DB9464D06FF74EC99F8666E4C4B8628935D760C8B8ADB",
+          "poolId": "POSTWAR_LF_REGION_52_E1_MEDIUM",
+          "sourceStartOrdinal": "20180035",
+          "startOrdinal": "55855822",
+          "count": "7829",
+          "regionId": "REGION_52_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_52_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_90143AE990441726A2AF2567DE2BB7E62534C12CC12A0998F77E4599410572F3",
+          "poolId": "POSTWAR_LF_REGION_52_E1_HIGH",
+          "sourceStartOrdinal": "9391262",
+          "startOrdinal": "68873587",
+          "count": "1790",
+          "regionId": "REGION_52_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_52_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_F69E7F747E0C69C5A8E897467B10604F399A47EFADC7976B99803F5691E14DE3",
+          "poolId": "POSTWAR_LF_REGION_52_E1_LOW",
+          "sourceStartOrdinal": "29581950",
+          "startOrdinal": "29581950",
+          "count": "12750",
+          "regionId": "REGION_52_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_52_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_53",
+      "targetFacilityId": "OPEN-53-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-53-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_25928006F93251B36DC2C7E43ECF1387DD9A12EF1CACAA905D170244A623FA77",
+      "rawSha256": "25928006f93251b36dc2c7e43ecf1387dd9a12ef1cacaa905d170244a623fa77",
+      "rawFile": "COUNTRY_53.water-staff.json",
+      "rawBytes": 2247,
+      "personCount": "35352",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_16E80ADCCFA7B0680AF8C16602093AD913934BB79242E762DDCAB0656D5C2D79",
+          "poolId": "POSTWAR_LF_REGION_53_E2_HIGH",
+          "sourceStartOrdinal": "6033049",
+          "startOrdinal": "55523035",
+          "count": "2828",
+          "regionId": "REGION_53_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_53_E2_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_76AA00C7E8893605DFAE79BB752E4DCB5008BA1A982711F35DF2B26CC5857E79",
+          "poolId": "POSTWAR_LF_REGION_53_E2_MEDIUM",
+          "sourceStartOrdinal": "14182747",
+          "startOrdinal": "46775131",
+          "count": "12373",
+          "regionId": "REGION_53_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_53_E2_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_B040333FF7E11C2F6DE61FEFC30DD44BEF90F9DF19379241EBBC59DE0C0C8CE8",
+          "poolId": "POSTWAR_LF_REGION_53_E2_LOW",
+          "sourceStartOrdinal": "27479347",
+          "startOrdinal": "27479347",
+          "count": "20151",
+          "regionId": "REGION_53_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_53_E2_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_55",
+      "targetFacilityId": "OPEN-55-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-55-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_DA693314310521AE72B6E1F71760C2F591889317D5FDA1FA7640F6875F2ECF26",
+      "rawSha256": "da693314310521ae72b6e1f71760c2f591889317d5fda1fa7640f6875f2ecf26",
+      "rawFile": "COUNTRY_55.water-staff.json",
+      "rawBytes": 2243,
+      "personCount": "20055",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_140E57B05448974EB9461A4ECDAE4CB6F6F0237F75328746EFB06A31AA31A2D8",
+          "poolId": "POSTWAR_LF_REGION_55_E1_MEDIUM",
+          "sourceStartOrdinal": "19687517",
+          "startOrdinal": "54615476",
+          "count": "7019",
+          "regionId": "REGION_55_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_55_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_4111BEF2E755393004F49CC656B3FC89171F55F975D66A22673BCEB578C7ABEA",
+          "poolId": "POSTWAR_LF_REGION_55_E1_HIGH",
+          "sourceStartOrdinal": "9060397",
+          "startOrdinal": "66949512",
+          "count": "1604",
+          "regionId": "REGION_55_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_55_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_F8703706AC746819A9E61EBCEE1D637ABEA4A775B335BD24C92C84203FB2E62F",
+          "poolId": "POSTWAR_LF_REGION_55_E1_LOW",
+          "sourceStartOrdinal": "29586185",
+          "startOrdinal": "29586185",
+          "count": "11432",
+          "regionId": "REGION_55_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_55_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_60",
+      "targetFacilityId": "OPEN-60-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-60-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_8E70F67AB03E15028B71632C96DDC7A2698156192973815C6E971595B5CDBC5A",
+      "rawSha256": "8e70f67ab03e15028b71632c96ddc7a2698156192973815c6e971595b5cdbc5a",
+      "rawFile": "COUNTRY_60.water-staff.json",
+      "rawBytes": 2247,
+      "personCount": "31966",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_2EF4C5DED48E2DCF39A714698EE3A701509876E707AC64DF793AEDE73C31983D",
+          "poolId": "POSTWAR_LF_REGION_60_E2_LOW",
+          "sourceStartOrdinal": "28835990",
+          "startOrdinal": "28835990",
+          "count": "18221",
+          "regionId": "REGION_60_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_60_E2_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_38092C63224998D6772BE04C3C332308EEF6D0837462F94C534399E42CAEE4A8",
+          "poolId": "POSTWAR_LF_REGION_60_E2_HIGH",
+          "sourceStartOrdinal": "6123192",
+          "startOrdinal": "58682488",
+          "count": "2557",
+          "regionId": "REGION_60_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_60_E2_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_A746E7FD2BAB7C17A4313F2236235E7517020F2C3E63D18EC614EF13896EFD8C",
+          "poolId": "POSTWAR_LF_REGION_60_E2_MEDIUM",
+          "sourceStartOrdinal": "14775225",
+          "startOrdinal": "49829131",
+          "count": "11188",
+          "regionId": "REGION_60_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_60_E2_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_62",
+      "targetFacilityId": "OPEN-62-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-62-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_6398D4B1BC2AB66FA0A94599CF7F8329B87AB81693C9A9FE25CA0DA1131B5915",
+      "rawSha256": "6398d4b1bc2ab66fa0a94599cf7f8329b87ab81693c9a9fe25ca0da1131b5915",
+      "rawFile": "COUNTRY_62.water-staff.json",
+      "rawBytes": 2243,
+      "personCount": "21011",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_37CD7B5F34016BC42589C1D47C9AA9DC5B2DD318335D9B3851BE027064F229AB",
+          "poolId": "POSTWAR_LF_REGION_62_E1_HIGH",
+          "sourceStartOrdinal": "4226461",
+          "startOrdinal": "40901178",
+          "count": "1681",
+          "regionId": "REGION_62_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_62_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_9C121ACF56058B27575BD73808248B98C349A33B84E69C1A782A6DE1384E9F07",
+          "poolId": "POSTWAR_LF_REGION_62_E1_LOW",
+          "sourceStartOrdinal": "20430114",
+          "startOrdinal": "20430114",
+          "count": "11976",
+          "regionId": "REGION_62_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_62_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_DE707CFFB0570E78C29C76DDA8849CBE13839369C4B02C3E3D9E8424414B0751",
+          "poolId": "POSTWAR_LF_REGION_62_E1_MEDIUM",
+          "sourceStartOrdinal": "10353035",
+          "startOrdinal": "34898353",
+          "count": "7354",
+          "regionId": "REGION_62_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_62_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_63",
+      "targetFacilityId": "OPEN-63-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-63-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_4F83A54F56030EAAFA25298241AF9985C9C23A542366C3061C651A0C3EE042FE",
+      "rawSha256": "4f83a54f56030eaafa25298241af9985c9c23a542366c3061c651a0c3ee042fe",
+      "rawFile": "COUNTRY_63.water-staff.json",
+      "rawBytes": 2247,
+      "personCount": "31622",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_74F649E8689536442F4F8955693B9B87E6CC83EF409736F76A15BCA3827B5BCB",
+          "poolId": "POSTWAR_LF_REGION_63_E1_MEDIUM",
+          "sourceStartOrdinal": "13613139",
+          "startOrdinal": "44553594",
+          "count": "11068",
+          "regionId": "REGION_63_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_63_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_77C8729C6D82C31E42B73F1D69E831C56A9ECF1EB611C765679455DFB3C68147",
+          "poolId": "POSTWAR_LF_REGION_63_E1_LOW",
+          "sourceStartOrdinal": "26224095",
+          "startOrdinal": "26224095",
+          "count": "18024",
+          "regionId": "REGION_63_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_63_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_B728AC1E524C0BA360ECE50CC8EEB47A7482D2EEF1F66DAB376CFAF8039DE4ED",
+          "poolId": "POSTWAR_LF_REGION_63_E1_HIGH",
+          "sourceStartOrdinal": "5744291",
+          "startOrdinal": "52677942",
+          "count": "2530",
+          "regionId": "REGION_63_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_63_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_66",
+      "targetFacilityId": "OPEN-66-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-66-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_BC6CE7FF2E2FF2E5AF2F2F977543EC830B909176E232A59D254D2F11B33089AE",
+      "rawSha256": "bc6ce7ff2e2ff2e5af2f2f977543ec830b909176e232a59d254d2f11b33089ae",
+      "rawFile": "COUNTRY_66.water-staff.json",
+      "rawBytes": 2247,
+      "personCount": "36404",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_54BBF6A83F5D22FE71C717DC296B31D51B042E0655C61B942766C005E0D254B9",
+          "poolId": "POSTWAR_LF_REGION_66_E2_LOW",
+          "sourceStartOrdinal": "29444391",
+          "startOrdinal": "29444391",
+          "count": "20751",
+          "regionId": "REGION_66_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_66_E2_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_92A836992E28C1611DD4E655938775B1E040CBFBCD428A7F507AF8F19E56A578",
+          "poolId": "POSTWAR_LF_REGION_66_E2_HIGH",
+          "sourceStartOrdinal": "8803315",
+          "startOrdinal": "69603418",
+          "count": "2912",
+          "regionId": "REGION_66_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_66_E2_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_CA506B85AA2CE5D90C11D6071FF5B5305FDCE367893B82014C41A435AD67F744",
+          "poolId": "POSTWAR_LF_REGION_66_E2_MEDIUM",
+          "sourceStartOrdinal": "19034848",
+          "startOrdinal": "56604756",
+          "count": "12741",
+          "regionId": "REGION_66_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_66_E2_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_67",
+      "targetFacilityId": "OPEN-67-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-67-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_18632726EEAA02744BDF15B1A8EE9050D6AC849A848542134536D96BF7E12291",
+      "rawSha256": "18632726eeaa02744bdf15b1a8ee9050d6ac849a848542134536d96bf7e12291",
+      "rawFile": "COUNTRY_67.water-staff.json",
+      "rawBytes": 2243,
+      "personCount": "27274",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_0A27010369BB8AE60CD44E5318A87EA3705B82C4DACD59ABF542600871F33095",
+          "poolId": "POSTWAR_LF_REGION_67_E2_LOW",
+          "sourceStartOrdinal": "22149684",
+          "startOrdinal": "22149684",
+          "count": "15546",
+          "regionId": "REGION_67_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_67_E2_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_7C2B3E3D007460335D496B1CC57D390F0F2756C17E7D2CD474C1FC0425740220",
+          "poolId": "POSTWAR_LF_REGION_67_E2_HIGH",
+          "sourceStartOrdinal": "7473523",
+          "startOrdinal": "55395784",
+          "count": "2182",
+          "regionId": "REGION_67_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_67_E2_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_D2DB8C56EB5CEA27E57E06BFEBA3556A9FBDCB94A48172B073015798EE191FEA",
+          "poolId": "POSTWAR_LF_REGION_67_E2_MEDIUM",
+          "sourceStartOrdinal": "15901352",
+          "startOrdinal": "44574766",
+          "count": "9546",
+          "regionId": "REGION_67_E2",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_67_E2_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    },
+    {
+      "countryId": "COUNTRY_70",
+      "targetFacilityId": "OPEN-70-REFINED_FUEL",
+      "serviceFacilityId": "UTILITY_WATER_OPEN-70-REFINED_FUEL",
+      "sourceEligibility": "EXISTING_SAME_OP_POWER_PERSONNEL_JOIN_PASSED",
+      "currentAvailability": "NOT_READ_REQUIRES_CURRENT_SHARED_BOOKINGS",
+      "sourceRef": "INDUSTRY_WATER_STAFF_D82245BF797AA6CFC2A3766FCBE6B6E1543B69D7F5189FD43677F62014D3D63D",
+      "rawSha256": "d82245bf797aa6cfc2a3766fcbe6b6e1543b69d7f5189fd43677f62014d3d63d",
+      "rawFile": "COUNTRY_70.water-staff.json",
+      "rawBytes": 2234,
+      "personCount": "10311",
+      "positionRanges": [
+        {
+          "positionId": "POSTWAR_SOURCE_293C9AB7C82BDD5EFFB19CE8E968BB913A81A9DDC0D30795CE109DEEE179F284",
+          "poolId": "POSTWAR_LF_REGION_70_E1_MEDIUM",
+          "sourceStartOrdinal": "7472169",
+          "startOrdinal": "28035269",
+          "count": "3609",
+          "regionId": "REGION_70_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_70_E1_MEDIUM_EMPLOYED",
+          "skill": "MEDIUM"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_ACD69B9A84ECD9010985582F823421296AAC0B9A1C0873524C69223332317360",
+          "poolId": "POSTWAR_LF_REGION_70_E1_LOW",
+          "sourceStartOrdinal": "17415830",
+          "startOrdinal": "17415830",
+          "count": "5877",
+          "regionId": "REGION_70_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_70_E1_LOW_EMPLOYED",
+          "skill": "LOW"
+        },
+        {
+          "positionId": "POSTWAR_SOURCE_FC5418164B3302C4D0A84284F8900AA24E866CC1C2F9C4A31E7387DD54B5CF53",
+          "poolId": "POSTWAR_LF_REGION_70_E1_HIGH",
+          "sourceStartOrdinal": "2898386",
+          "startOrdinal": "32329270",
+          "count": "825",
+          "regionId": "REGION_70_E1",
+          "cohortRef": "POSTWAR_PEOPLE_REGION_70_E1_HIGH_EMPLOYED",
+          "skill": "HIGH"
+        }
+      ],
+      "registeredSource": "NOT_READ",
+      "production": "NOT_EXECUTED"
+    }
+  ],
+  "notApplicableCountries": [
+    "COUNTRY_01",
+    "COUNTRY_03",
+    "COUNTRY_04",
+    "COUNTRY_05",
+    "COUNTRY_06",
+    "COUNTRY_07",
+    "COUNTRY_08",
+    "COUNTRY_09",
+    "COUNTRY_11",
+    "COUNTRY_12",
+    "COUNTRY_13",
+    "COUNTRY_14",
+    "COUNTRY_15",
+    "COUNTRY_16",
+    "COUNTRY_17",
+    "COUNTRY_19",
+    "COUNTRY_21",
+    "COUNTRY_22",
+    "COUNTRY_23",
+    "COUNTRY_24",
+    "COUNTRY_27",
+    "COUNTRY_29",
+    "COUNTRY_30",
+    "COUNTRY_32",
+    "COUNTRY_33",
+    "COUNTRY_34",
+    "COUNTRY_35",
+    "COUNTRY_36",
+    "COUNTRY_39",
+    "COUNTRY_40",
+    "COUNTRY_41",
+    "COUNTRY_42",
+    "COUNTRY_43",
+    "COUNTRY_44",
+    "COUNTRY_45",
+    "COUNTRY_46",
+    "COUNTRY_47",
+    "COUNTRY_49",
+    "COUNTRY_51",
+    "COUNTRY_54",
+    "COUNTRY_56",
+    "COUNTRY_57",
+    "COUNTRY_58",
+    "COUNTRY_59",
+    "COUNTRY_61",
+    "COUNTRY_64",
+    "COUNTRY_65",
+    "COUNTRY_68",
+    "COUNTRY_69"
+  ],
+  "databaseOperations": 0,
+  "publications": 0,
+  "commands": 0,
+  "currentWorkerAvailability": "NOT_READ",
+  "payments": "NOT_EXECUTED",
+  "serviceDelivery": "NOT_EXECUTED",
+  "evidenceDirectory": "/workspace/rehearsal-20261113/water-staff-source-coverage",
+  "checkedWorkingTree": "WATER staffing implementation uncommitted atop e1f5986bfc3d8b8819fb4944868c799d6dc685e6"
+}

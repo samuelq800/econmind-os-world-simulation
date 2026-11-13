@@ -1,3 +1,4 @@
+import { manualUtilityPayload } from '../support/industry-utility-manual-intent-fixture.js';
 import { describe, expect, it } from 'vitest';
 import { COMMAND_SCHEMA_VERSION, parseCanonicalCommand } from '@econmind/core';
 import { createAuthenticatedOfficeCommandService } from '../../apps/world-api/src/integration/authenticated-office-command-service.js';
@@ -100,7 +101,9 @@ describe('actual JWT/current SQL manual Office intake: unavailable source is zer
     ['INDUSTRY', 'CORE_INDUSTRY_FAKE_V1'],
     ['SOCIAL', 'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1'],
     ['CAPTAIN', 'CORE_CENTRAL_BANK_OMO_V1'],
-    ['TRADE', 'CORE_GOODS_TRANSFER_V1'],
+    ['TRADE', 'CORE_GOODS_SHIPMENT_V1'],
+    ['TRADE', 'CORE_GOODS_DELIVERY_V1'],
+    ['INDUSTRY', 'CORE_INDUSTRY_FIRST_DAY_WORK_V1'],
   ])(
     'refuses unsupported Office/SystemDue pairing %s/%s',
     async (officeId, commandType) => {
@@ -110,6 +113,166 @@ describe('actual JWT/current SQL manual Office intake: unavailable source is zer
           .code,
       ).toBe('PROTOCOL_ERROR');
       expect(f.queries).toHaveLength(0);
+      await f.noEffects();
+    },
+  );
+  it.each([
+    ['TRADE', 'CORE_GOODS_TRANSFER_V1', 'TRADE_CONTRACTS', ''],
+    ['INDUSTRY', 'CORE_INDUSTRY_RUN_SCHEDULE_V1', 'INDUSTRY_PRODUCTION', ''],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'BOOK',
+    ],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'DELIVER',
+    ],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'DELIVER',
+    ],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'BOOK',
+    ],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'SHIP',
+    ],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'PAY_INPUTS',
+    ],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'DELIVER',
+    ],
+    [
+      'INDUSTRY',
+      'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+      'INDUSTRY_PRODUCTION',
+      'SERVICE_WORK',
+    ],
+  ] as const)(
+    'registered %s/%s requires its actual current capability and remains zero-write when source/runtime is absent',
+    async (officeId, commandType, capability, action) => {
+      const f = await fixture();
+      const request = {
+        ...f.request,
+        officeId,
+        commandType,
+        payload:
+          commandType === 'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1'
+            ? manualUtilityPayload('POWER', action)
+            : commandType === 'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1'
+              ? manualUtilityPayload('WATER')
+              : commandType === 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1'
+                ? manualUtilityPayload('LOGISTICS', action)
+                : officeId === 'TRADE'
+                  ? {
+                      schemaVersion: 'core-goods-transfer-v1',
+                      commodityId: 'GRAIN',
+                      sellerCountryId: COUNTRY,
+                      buyerCountryId: 'COUNTRY_BUYER_TEST_ONLY',
+                      quantity: { amount: '1', unit: 'tonne' },
+                      price: { amount: '1', currency: 'GCU', perUnit: 'tonne' },
+                      assetSource: {
+                        batchId: 'BATCH_TEST_ONLY',
+                        physicalLocationId: 'LOCATION_TEST_ONLY',
+                        titleHolderId: 'ENTITY_TEST_ONLY_OWNER',
+                        riskBearerId: 'ENTITY_TEST_ONLY_OWNER',
+                        economicRecognitionId: null,
+                      },
+                      paymentSource: 'BUYER_TREASURY_GCU',
+                      policyVersion: 'V10_TREASURY_GCU_V1',
+                      threshold: {
+                        policyVersion: 'V10_TREASURY_GCU_THRESHOLD_V1',
+                        maxSettlement: { amount: '6', currency: 'GCU' },
+                      },
+                      expiresAtReal: '2026-10-08T00:10:00.000Z',
+                    }
+                  : {
+                      schemaVersion: 'postwar-industry-run-schedule-v1',
+                      runId: 'RUN_TEST_ONLY',
+                      facilityId: 'FACILITY_TEST_ONLY',
+                      quantity: { amount: '1', unit: 'tonne' },
+                      startsAtSimTime: '10000',
+                      endsAtSimTime: '20000',
+                      maximumExpense: { amount: '1', currency: 'XAA' },
+                      policyVersion: 'INDUSTRY_FIRST_DAY_20261101_V1',
+                      sourceRef: 'SOURCE_TEST_ONLY',
+                      sourceRawSha256: 'a'.repeat(64),
+                    },
+      };
+      expect(parseManualOfficeCommandRequest(request)).toEqual(request);
+      expect((await f.call(request)).body.error!.code).toBe(
+        'CURRENT_SEAT_OR_ADMISSION_REQUIRED',
+      );
+      expect(f.server.clockCalls).toBe(0);
+      // Only TEST_ONLY fixture metadata is installed. This is neither a domain
+      // original, OP mandate, Trade three-signature proof nor an execution grant.
+      const scope = `OFFICE_${Buffer.from(COUNTRY).toString('hex').toUpperCase()}_${Buffer.from(officeId).toString('hex').toUpperCase()}`;
+      for (const cap of ['READ', capability])
+        await f.admin(
+          "insert into world_v2.current_commit_authorization values($1,$2,$3,$4,$5,'TEAM_TEST_ONLY','REV_1',true,now())",
+          [WORLD, SUBJECT, COUNTRY, officeId, cap],
+        );
+      await f.admin(
+        "insert into world_v2.runtime_read_seat(seat_ref,world_id,auth_subject,country_id,office_id,team_id,authorization_revision)values($1,$2,$3,$4,$5,'TEAM_TEST_ONLY','REV_1')",
+        ['SEAT_TEST_ONLY_' + officeId, WORLD, SUBJECT, COUNTRY, officeId],
+      );
+      await f.admin(
+        "insert into world_v2.projection_entitlement values($1,$2,'OFFICE_PRIVATE',$3,'REV_1',true,now(),null)",
+        [WORLD, SUBJECT, scope],
+      );
+      await f.admin(
+        "insert into world_v2.read_projection values($1,'OFFICE_PRIVATE',$2,'world-projection-read-v1',0,0,'{}',now())",
+        [WORLD, scope],
+      );
+      const rejected = await f.call(request);
+      expect(rejected).toMatchObject({
+        httpStatus: 503,
+        body: {
+          ok: false,
+          error: { code: 'SOURCE_RUNTIME_UNAVAILABLE' },
+          state: {
+            commandType,
+            submitted: false,
+            queued: false,
+            missing: ['ADMITTED_DOMAIN_SOURCE', 'SOLE_DURABLE_CONSUMER'],
+          },
+        },
+      });
+      const malformed = await f.call({
+        ...request,
+        payload: { ...request.payload, approved: true },
+      });
+      expect(malformed.httpStatus).toBe(400);
+      expect(malformed.body.error!.code).not.toBe('SOURCE_RUNTIME_UNAVAILABLE');
+      expect(malformed.body.state).toBeUndefined();
+      const clocks = f.server.clockCalls;
+      await f.admin(
+        'update world_v2.current_commit_authorization set active=false where world_id=$1 and office_id=$2 and capability=$3',
+        [WORLD, officeId, capability],
+      );
+      expect((await f.call(request)).body.error!.code).toBe(
+        'AUTHORIZATION_DENIED',
+      );
+      expect(f.server.clockCalls).toBe(clocks);
       await f.noEffects();
     },
   );

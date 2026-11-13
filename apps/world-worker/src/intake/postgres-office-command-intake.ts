@@ -1,4 +1,8 @@
 import {
+  INDUSTRY_RUN_SCHEDULE_COMMAND,
+  INDUSTRY_UTILISATION_TARGET_COMMAND,
+} from '@econmind/core/industry-first-day-work';
+import {
   buildManualOfficeCommandIntent,
   decodeStoredManualOfficeCommand,
   type StoredManualOfficeCommand,
@@ -15,6 +19,9 @@ import {
   CENTRAL_BANK_OMO_COMMAND,
   CENTRAL_BANK_OMO_CAPABILITY,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DomainError,
   DOMAIN_ERROR_CODES,
@@ -30,7 +37,10 @@ import {
 } from '@econmind/core';
 import type { FinancialIntakeBindingDto } from '@econmind/core/authenticated-financial-intake-contract';
 import {
+  isManualIndustryUtilityCommandFamily,
+  isManualIndustryUtilityPayload,
   FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND,
   type ManualOfficeSourceRejectionDto,
   type ManualOfficeQueueAcknowledgementDto,
   type ManualOfficeCommandRequestDto,
@@ -38,6 +48,7 @@ import {
 
 import {
   boundManualOfficeIntakeRuntime,
+  manualOfficeIntakeRuntimeSupportsFamily,
   preflightManualOfficeIntakeRuntime,
   type ManualOfficeIntakeRuntime,
 } from './manual-office-intake-runtime.js';
@@ -114,29 +125,69 @@ export function parseManualOfficeCommandRequest(
       row.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND) ||
     (row.officeId === 'CENTRAL_BANK' &&
       row.commandType === CENTRAL_BANK_OMO_COMMAND) ||
+    (row.officeId === 'INDUSTRY' &&
+      (row.commandType === 'CORE_INDUSTRY_PRODUCTION_V1' ||
+        row.commandType === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+        row.commandType === INDUSTRY_UTILISATION_TARGET_COMMAND ||
+        isManualIndustryUtilityCommandFamily(row.commandType))) ||
+    (row.officeId === 'TRADE' &&
+      row.commandType === 'CORE_GOODS_TRANSFER_V1') ||
     (row.officeId === 'SOCIAL' &&
-      row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND) ||
+      (row.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+        row.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+        row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
+        row.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)) ||
     (row.officeId === 'FINANCE' &&
-      row.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+      (row.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND ||
+        row.commandType === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND))
   ))
+    invalid();
+  if (
+    isManualIndustryUtilityCommandFamily(row.commandType) &&
+    !isManualIndustryUtilityPayload(row.commandType, row.payload)
+  )
     invalid();
   return Object.freeze(row) as unknown as ManualOfficeCommandRequestDto;
 }
 
-const capability = (office: ManualOfficeCommandRequestDto['officeId']) => {
-  switch (office) {
-    case 'CAPTAIN':
-      return CAPTAIN_POLITICAL_CAPITAL_CAPABILITY;
-    case 'CENTRAL_BANK':
-      return CENTRAL_BANK_OMO_CAPABILITY;
-    case 'SOCIAL':
-      return SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY;
-    case 'FINANCE':
-      return 'FINANCE_BUDGET' as const;
-    default:
-      return invalid();
-  }
-};
+/** Fixed family/capability mapping shared with authenticated recovery. Office
+ * scope alone never grants Treasury or private-entity disposition authority. */
+export function manualOfficeCommandCapability(request: {
+  readonly officeId: string | null;
+  readonly commandType: string;
+}) {
+  const { officeId: office, commandType: family } = request;
+  if (
+    office === 'INDUSTRY' &&
+    (family === 'CORE_INDUSTRY_PRODUCTION_V1' ||
+      family === INDUSTRY_RUN_SCHEDULE_COMMAND ||
+      family === INDUSTRY_UTILISATION_TARGET_COMMAND ||
+      isManualIndustryUtilityCommandFamily(family))
+  )
+    return 'INDUSTRY_PRODUCTION' as const;
+  if (office === 'TRADE' && family === 'CORE_GOODS_TRANSFER_V1')
+    return 'TRADE_CONTRACTS' as const;
+  if (office === 'CAPTAIN' && family === CAPTAIN_POLITICAL_CAPITAL_COMMAND)
+    return CAPTAIN_POLITICAL_CAPITAL_CAPABILITY;
+  if (office === 'CENTRAL_BANK' && family === CENTRAL_BANK_OMO_COMMAND)
+    return CENTRAL_BANK_OMO_CAPABILITY;
+  if (
+    office === 'SOCIAL' &&
+    (family === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+      family === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
+      family === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
+      family === SOCIAL_POSITION_OFFER_CREATE_COMMAND)
+  )
+    return SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY;
+  if (office === 'FINANCE' && family === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+    return 'FINANCE_BUDGET' as const;
+  if (
+    office === 'FINANCE' &&
+    family === POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND
+  )
+    return 'FINANCE_TREASURY' as const;
+  return invalid();
+}
 
 export const OFFICE_COMMAND_CURRENT_BINDING_QUERY = `
 select seat.seat_ref, authz.team_id, authz.authorization_version,
@@ -225,10 +276,10 @@ export class PostgresOfficeCommandIntake {
     const request = parseManualOfficeCommandRequest(input.request);
     const b = input.binding;
     const runtime = this.config.runtime;
-    // No budget source/guard/consumer is installed. A runtime for another
-    // family cannot enable budget registration, including an existing-ID retry.
+    // A runtime for another family cannot enable budget registration,
+    // including an existing-ID retry. Source currentness is checked separately.
     const positive =
-      request.commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+      manualOfficeIntakeRuntimeSupportsFamily(runtime, request.commandType) &&
       boundManualOfficeIntakeRuntime(runtime, {
         pool: this.config.pool,
         clock: this.config.clock,
@@ -331,7 +382,7 @@ export class PostgresOfficeCommandIntake {
           request.officeId,
           b.seatRef,
           b.identity.authorizationRevision,
-          capability(request.officeId),
+          manualOfficeCommandCapability(request),
           scope,
         ],
       );
@@ -370,7 +421,7 @@ export class PostgresOfficeCommandIntake {
         worldId: worldId(request.worldId),
         requestedCountryId: countryId(request.countryId),
         requestedOfficeId: officeId(request.officeId),
-        capability: capability(request.officeId),
+        capability: manualOfficeCommandCapability(request),
       });
       const storedRows = await query<StoredCommand>(
         `select world_id as "worldId", command_id as "commandId", idempotency_key as "idempotencyKey",
@@ -448,7 +499,7 @@ export class PostgresOfficeCommandIntake {
           request.officeId,
           b.seatRef,
           b.identity.authorizationRevision,
-          capability(request.officeId),
+          manualOfficeCommandCapability(request),
           scope,
         ],
       );

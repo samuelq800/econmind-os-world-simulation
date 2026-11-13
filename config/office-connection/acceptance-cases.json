@@ -1,0 +1,241 @@
+{
+  "schemaVersion": "office-connection-acceptance-v1",
+  "policy": "Test mechanism evidence only; never grants admission, operational authority or VERIFIED status.",
+  "cases": [
+    {
+      "id": "scoped-cache",
+      "areas": [
+        "world",
+        "country",
+        "office",
+        "subject",
+        "revocation",
+        "version",
+        "duplicate",
+        "out-of-order",
+        "cache"
+      ],
+      "availability": "READY",
+      "backend": "NONE",
+      "sourceClassification": "TEST_ONLY",
+      "testFile": "tests/world-web/scoped-reconnect-cache.test.ts",
+      "scopeReferences": [
+        "apps/world-web/src/reconnect/scoped-cache.ts",
+        "tests/world-web/scoped-reconnect-cache.test.ts"
+      ],
+      "limit": "In-memory derived cache; no live channel, org scope, persistent browser cache or API pagination."
+    },
+    {
+      "id": "authenticated-intake",
+      "areas": [
+        "world",
+        "country",
+        "office",
+        "subject",
+        "revocation",
+        "version",
+        "retry",
+        "permission"
+      ],
+      "availability": "READY",
+      "backend": "PGLITE",
+      "sourceClassification": "TEST_ONLY",
+      "testFile": "tests/world-api/authenticated-office-command.test.ts",
+      "scopeReferences": [
+        "tests/support/g-manual-office-api-test-only-fixture.ts"
+      ],
+      "limit": "Actual JWT/SQL mechanism with disposable admission-veto fixture; unavailable source must reject without writes."
+    },
+    {
+      "id": "durable-manual-dispatch",
+      "areas": [
+        "transaction",
+        "receipt",
+        "event",
+        "revocation",
+        "version",
+        "permission"
+      ],
+      "availability": "READY",
+      "backend": "PGLITE",
+      "sourceClassification": "TEST_ONLY",
+      "testFile": "tests/world-core/manual-office-durable-dispatch.test.ts",
+      "scopeReferences": [
+        "tests/support/g-dispatch-captain-test-only-fixture.ts",
+        "tests/support/g-dispatch-cb-test-only-fixture.ts"
+      ],
+      "limit": "Captain/Central Bank TEST_ONLY success paths and Social source refusal; no six-Office production success claim."
+    },
+    {
+      "id": "revoked-receipt",
+      "areas": ["transaction", "receipt", "event", "revocation", "retry"],
+      "availability": "READY",
+      "backend": "PGLITE",
+      "sourceClassification": "TEST_ONLY",
+      "testFile": "tests/world-core/d-revoked-receipt-head-lock-embedded.test.ts",
+      "scopeReferences": ["tests/support/d-revoked-receipt-fixture.ts"],
+      "limit": "Serial SQL head-lock and atomic zero-effect receipt checks; does not prove native concurrent locking."
+    },
+    {
+      "id": "recovery-lineage",
+      "areas": [
+        "recovery",
+        "receipt",
+        "event",
+        "outbox",
+        "retry",
+        "transaction"
+      ],
+      "availability": "READY",
+      "backend": "PGLITE",
+      "sourceClassification": "TEST_ONLY",
+      "testFile": "tests/world-core/v09-world-recovery-preparation.test.ts",
+      "scopeReferences": [
+        "tests/world-core/v09-world-recovery-preparation.test.ts"
+      ],
+      "limit": "Embedded lineage/materialization recovery; no process restart or native reconnect proof."
+    },
+    {
+      "id": "native-read-isolation",
+      "areas": [
+        "world",
+        "country",
+        "office",
+        "subject",
+        "revocation",
+        "permission",
+        "receipt",
+        "version"
+      ],
+      "availability": "READY",
+      "backend": "NATIVE_POSTGRES",
+      "sourceClassification": "TEST_ONLY",
+      "testFile": "tests/world-api/postgres-full-read-provider.test.ts",
+      "scopeReferences": [
+        "tests/world-api/postgres-full-read-provider.test.ts"
+      ],
+      "nativePrerequisites": [
+        "WORLD_V2_G_NATIVE_PROVIDER_TEST=1",
+        "Owned disposable native cluster; native_acceptance owner only"
+      ],
+      "limit": "Synthetic admitted binding fixture; existing real admission veto remains intact."
+    },
+    {
+      "id": "native-social-atomic",
+      "areas": [
+        "transaction",
+        "duplicate",
+        "retry",
+        "revocation",
+        "event",
+        "receipt",
+        "permission"
+      ],
+      "availability": "READY",
+      "backend": "NATIVE_POSTGRES",
+      "sourceClassification": "SIMULATED_SOURCE",
+      "testFile": "tests/world-core/d-social-office-atomic-postgres.test.ts",
+      "scopeReferences": ["tests/support/social-office-atomic-fixture.ts"],
+      "nativePrerequisites": [
+        "D_SOCIAL_ATOMIC_NATIVE_MARKER references owned disposable cluster marker",
+        "Native test owner installs original full23 chain"
+      ],
+      "limit": "Real native transactions on simulated Social source; does not admit official labour Social source."
+    },
+    {
+      "id": "native-restart-retry",
+      "areas": [
+        "restart",
+        "recovery",
+        "retry",
+        "duplicate",
+        "transaction",
+        "event",
+        "receipt"
+      ],
+      "availability": "READY",
+      "backend": "NATIVE_POSTGRES",
+      "sourceClassification": "TEST_ONLY",
+      "testFile": "tests/world-core/v09-atomic-recovery-postgres.test.ts",
+      "scopeReferences": [
+        "tests/world-core/v09-atomic-recovery-postgres.test.ts",
+        "tests/support/v09-atomic-database.ts"
+      ],
+      "nativePrerequisites": [
+        "V09_TEST_DATABASE_URL for separately owned disposable database",
+        "Native test environment preflight"
+      ],
+      "limit": "Contains gated restart/retry slices: every assertion must run, not only the outer suite."
+    },
+    {
+      "id": "migration-rehearsal",
+      "areas": ["migration", "recovery"],
+      "availability": "PLAN_ONLY",
+      "backend": "PGLITE",
+      "sourceClassification": "TEST_ONLY",
+      "command": ["node", "scripts/rehearse-migrations.mjs"],
+      "scopeReferences": [
+        "scripts/rehearse-migrations.mjs",
+        "database/migrations/manifest.json"
+      ],
+      "limit": "Clean/existing-schema forward apply plus exact ledger provenance and Storage delta; not down-migration rollback."
+    },
+    {
+      "id": "organization-isolation",
+      "areas": ["org", "permission"],
+      "availability": "GAP",
+      "backend": "NONE",
+      "sourceClassification": "UNAVAILABLE",
+      "scopeReferences": [
+        "packages/core/src/authorization/projections.ts",
+        "packages/core/src/authorization/offices.ts"
+      ],
+      "limit": "Existing authorization scope is subject/World/country/Office; no organization tenant dimension or acceptance route was found."
+    },
+    {
+      "id": "pagination-version",
+      "areas": ["pagination", "version"],
+      "availability": "GAP",
+      "backend": "NONE",
+      "sourceClassification": "UNAVAILABLE",
+      "scopeReferences": [
+        "apps/world-api/src/integration/postgres-read-adapter.ts"
+      ],
+      "limit": "World version/cache monotonicity exists; no generic paginated Office API/cursor consistency contract was found."
+    },
+    {
+      "id": "migration-rollback",
+      "areas": ["migration", "rollback"],
+      "availability": "GAP",
+      "backend": "NONE",
+      "sourceClassification": "UNAVAILABLE",
+      "scopeReferences": [
+        "scripts/rehearse-migrations.mjs",
+        "database/migrations/manifest.json"
+      ],
+      "limit": "Forward rehearsal is implemented; no reversible down-chain restoration runner is claimed. Transaction rollback is a separate covered area."
+    },
+    {
+      "id": "office-export",
+      "areas": ["export", "permission"],
+      "availability": "NOT_PRESENT",
+      "backend": "NONE",
+      "sourceClassification": "UNAVAILABLE",
+      "scopeReferences": [
+        "apps/world-api/src/integration/authenticated-office-command-service.ts"
+      ],
+      "limit": "No Office export action/route identified in audited API. No export action is invented or counted as passed."
+    },
+    {
+      "id": "office-background-job",
+      "areas": ["background", "permission"],
+      "availability": "NOT_PRESENT",
+      "backend": "NONE",
+      "sourceClassification": "UNAVAILABLE",
+      "scopeReferences": [
+        "apps/world-worker/src/preparation/durable-command-consumption.ts"
+      ],
+      "limit": "Durable command/outbox processing is covered separately; no independent user-facing Office background-job API was identified."
+    }
+  ]
+}
