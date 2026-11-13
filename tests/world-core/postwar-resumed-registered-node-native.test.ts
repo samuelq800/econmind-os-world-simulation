@@ -1,0 +1,400 @@
+/** Resume a sealed positive checkpoint; preserve original FINAL and never
+ * rerun CREATE or source initialization. Only finite C10 originals are new. */
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { describe, it, expect } from 'vitest';
+import { parseIndustryCommittedRunsCoverage } from '@econmind/core/postwar-industry-committed-runs-contract';
+import { runFreshC10Prefix } from '../support/run-fresh-c10-prefix.js';
+import { restoreCommittedRegisteredCheckpoint } from '../support/restore-completed-fresh-h0.js';
+import {
+  createRegisteredFinalDriver,
+  registeredFinalRecord as row,
+} from '../support/postwar-registered-final-driver.js';
+import { prepareResumedPendingPrefix } from '../support/prepare-resumed-pending-prefix.js';
+import { renewResumedNativeExecution } from '../support/renew-resumed-native-execution.js';
+import { currentPages } from '../support/registered-social-create-browser-chain.js';
+import { createFixedOfficeBrowserApplication } from '../../tools/office-connection/fixed-office-command-browser.mjs';
+import { runRegisteredTradeCbReadbackBrowserProbe } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
+import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
+
+const flag = process.env.ECONMIND_RESUMED_REGISTERED_NODE_NATIVE;
+if (flag !== undefined && flag !== '1')
+  throw Error('FRESH_NATIVE_FLAG_MUST_BE_1');
+const native = flag === '1' ? describe : describe.skip;
+const repositoryRoot = path.resolve(import.meta.dirname, '../..');
+const required = (name: string): string => {
+  const value = process.env[name];
+  assert(value, 'EXPLICIT_RESUMED_INPUT_REQUIRED:' + name);
+  return value;
+};
+
+native('resumed committed-source registered Node and shipped browser', () => {
+  it('recovers the original FINAL without resubmit, reads actual pages and cold-recovers the same DB', async () => {
+    const expectedCommit = required('ECONMIND_REGISTERED_FINAL_CANDIDATE_SHA');
+    const evidenceDirectory = required(
+      'ECONMIND_REGISTERED_FINAL_EVIDENCE_DIR',
+    );
+    const checkpointDirectory = required('ECONMIND_RESUME_CHECKPOINT');
+    assert.match(expectedCommit, /^[a-f0-9]{40}$/u);
+    assert(evidenceDirectory.startsWith('/workspace/.cloud-setup/evidence/'));
+    await mkdir(evidenceDirectory, { recursive: true });
+    const report: Record<string, unknown> = {
+      classification:
+        'SEALED_POSITIVE_CHECKPOINT_CLONE_NOT_REINITIALIZATION_OR_PRODUCTION',
+      candidate: expectedCommit,
+      status: 'RUNNING',
+      social: 'NOT_RUN',
+      browserReadback: 'NOT_RUN',
+      coldRecovery: 'NOT_RUN',
+      c10: 'NOT_RUN',
+      refinery21: 'NOT_RUN',
+      omoWrite: 'NOT_CONFIGURED_NO_INDEPENDENT_ORIGINAL',
+      clockService: 'NOT_STARTED',
+      automaticConsumer: 'NOT_STARTED',
+    };
+    const save = () =>
+      writeFile(
+        path.join(evidenceDirectory, 'resumed-native.json'),
+        JSON.stringify(report, null, 2) + '\n',
+      );
+    await save();
+    let prepared:
+      | Awaited<ReturnType<typeof restoreCommittedRegisteredCheckpoint>>
+      | undefined;
+    let driver: ReturnType<typeof createRegisteredFinalDriver> | undefined;
+    let browser: { close(): Promise<void> } | undefined;
+    let application:
+      | Awaited<ReturnType<typeof createFixedOfficeBrowserApplication>>
+      | undefined;
+    const failures: unknown[] = [];
+    try {
+      prepared = await restoreCommittedRegisteredCheckpoint({
+        repositoryRoot,
+        evidenceDirectory,
+        expectedCommit,
+        completedCheckpointDirectory: checkpointDirectory,
+      });
+      const { fixture: f, setup: s, descriptor } = prepared;
+      report.preparation = prepared.receipt;
+      report.guardedForward = await prepareResumedPendingPrefix({
+        prepared,
+        repositoryRoot,
+        evidencePath: path.join(
+          evidenceDirectory,
+          'pending-prefix-forward.json',
+        ),
+      });
+      await save();
+      report.finiteRenewal = await renewResumedNativeExecution(
+        prepared,
+        path.join(evidenceDirectory, 'finite-execution-renewal.json'),
+      );
+      await save();
+      const beforeResume = await s.counts();
+      const saved = JSON.parse(
+        await readFile(
+          path.join(checkpointDirectory, 'driver-progress.json'),
+          'utf8',
+        ),
+      );
+      assert.equal(
+        saved.originals.length,
+        1,
+        'ONE_EXISTING_CREATE_ORIGINAL_REQUIRED',
+      );
+      const original = saved.originals[0];
+      assert.equal(
+        original.request.commandType,
+        'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1',
+      );
+      assert.equal(beforeResume.worldVersion, '1');
+      assert.equal(beforeResume.commands, '1');
+      assert.equal(beforeResume.events, '1');
+      assert.equal(beforeResume.batches, '0');
+      assert.equal(beforeResume.inventory, '0');
+      driver = createRegisteredFinalDriver({
+        repositoryRoot,
+        evidenceDirectory,
+        worldId: f.marker.worldId,
+        installer: f.clone.installer,
+        allowedOrigin: 'https://pages-test.example',
+        signToken: (countryId) => {
+          assert(
+            countryId === 'COUNTRY_01' ||
+              countryId === 'COUNTRY_02' ||
+              (countryId === 'COUNTRY_10' &&
+                process.env.ECONMIND_FRESH_C10_PREFIX === '1' &&
+                descriptor.countries.some(
+                  (country) => String(country.countryId) === 'COUNTRY_10',
+                )),
+            'EXACT_REGISTERED_TEST_COUNTRY_REQUIRED',
+          );
+          // The restored signer accepts its actual saved C10 subject; the
+          // legacy setup remains restricted by the descriptor/opt-in gate above.
+          const signConfigured = s.signToken as (
+            country: 'COUNTRY_01' | 'COUNTRY_02' | 'COUNTRY_10',
+          ) => string;
+          return signConfigured(countryId);
+        },
+      });
+      const d = driver;
+      report.driver = d.report;
+      report.firstColdStart = await d.launch(descriptor);
+      expect(await d.readHead()).toEqual({
+        worldVersion: beforeResume.worldVersion,
+        eventSequence: beforeResume.eventSequence,
+      });
+      expect(await d.rpc('CLOCK')).toBe('0');
+      const acl = await d.rpc('ACL');
+      assert(
+        Array.isArray(acl) &&
+          acl.length === 2 &&
+          acl.every((v) => row(v).denied === true),
+      );
+      report.onlineRawSourceDenials = acl;
+      const storedBefore = await d.inspect(original.request.commandId);
+      assert.deepEqual(
+        storedBefore,
+        saved.stored[0],
+        'ORIGINAL_FINAL_MUST_MATCH_SAVED_RECEIPT',
+      );
+      report.originalRecovery = await d.recover(original, {
+        duplicateProbe: false,
+      });
+      assert.deepEqual(await s.counts(), beforeResume);
+      report.openingReads = [];
+      for (const [officeId, dataset] of [
+        ['CENTRAL_BANK', 'cb-holdings'],
+        ['TRADE', 'opening-inventory-entries'],
+        ['SOCIAL', 'service-pools'],
+        ['INDUSTRY', 'industry-labour-current'],
+      ]) {
+        const read = await d.post(
+          '/v1/postwar-office-runtime',
+          {
+            schemaVersion: 'postwar-office-runtime-read-v1',
+            requestId: randomUUID(),
+            operation: 'READ_CURRENT_OFFICE_OPENING',
+            officeId,
+            dataset,
+            page: { offset: 0, limit: 25 },
+          },
+          'COUNTRY_02',
+        );
+        assert.equal(
+          read.status,
+          200,
+          officeId + '_ACTUAL_COMMITTED_CHECKPOINT_READ',
+        );
+        assert.equal(read.body.ok, true);
+        (report.openingReads as unknown[]).push({
+          officeId,
+          dataset,
+          status: read.status,
+          source: read.body.source,
+          page: read.body.page,
+        });
+      }
+      await save();
+      const playwrightModule =
+        process.env.OFFICE_BROWSER_PLAYWRIGHT_MODULE ??
+        '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs';
+      const { chromium } = await import(pathToFileURL(playwrightModule).href);
+      browser = await chromium.launch({
+        headless: true,
+        executablePath:
+          process.env.OFFICE_BROWSER_EXECUTABLE ?? '/usr/bin/chromium',
+        args: ['--no-sandbox', '--disable-dev-shm-usage'],
+      });
+      application = await createFixedOfficeBrowserApplication();
+      const readConfiguration = descriptor.configuration;
+      const common = {
+        applicationOrigin: 'https://pages-test.example',
+        browser,
+        application,
+        authSubject: s.subjects.COUNTRY_02,
+        countryId: 'COUNTRY_02',
+        countryDisplayId: '02',
+        readConfiguration,
+        getAccessToken: () => 'Bearer ' + s.signToken('COUNTRY_02'),
+      };
+      const currentHead = await d.readHead();
+      const positionPages = await currentPages(d, 'positions', currentHead);
+      const positions = positionPages.flatMap((page) => {
+        assert(Array.isArray(page.body.rows));
+        return page.body.rows.map(row);
+      });
+      const vacancies = positions.filter(
+        (p) =>
+          BigInt(String(p.requiredCount)) > BigInt(String(p.employedCount)),
+      );
+      assert.equal(positions.length, 60, 'ACTUAL_C2_POSITION_COUNT');
+      assert.equal(
+        vacancies.length,
+        0,
+        'NO_VACANCY_MUST_NOT_BE_REPLACED_WITH_SYNTHETIC_POSITION',
+      );
+      const poolPages = await currentPages(d, 'service-pools', currentHead);
+      const programmeId = original.request.payload.programmeId;
+      const pools = poolPages.flatMap((page) => {
+        assert(Array.isArray(page.body.rows));
+        return page.body.rows.map(row);
+      });
+      const creations = poolPages.flatMap((page) => {
+        const options = row(
+          row(page.body.source).currentEmploymentServiceCreationOptions,
+        );
+        if (options.status !== 'AVAILABLE') return [];
+        const data = row(options.data);
+        assert(Array.isArray(data.creations));
+        return data.creations
+          .map(row)
+          .filter((c) => c.programmeId === programmeId);
+      });
+      assert.equal(
+        creations.length,
+        1,
+        'COMMITTED_PROGRAMME_METADATA_MUST_READ_BACK',
+      );
+      assert(
+        pools.some((p) => p.poolId === creations[0]!.childPoolId),
+        'COMMITTED_PROGRAMME_POOL_MUST_READ_BACK',
+      );
+      report.social = {
+        status: 'EXISTING_CREATE_FINAL_RECOVERED_PLAN_MATCH_NOT_RUN',
+        programmeId,
+        actualPositions: positions.length,
+        actualVacancies: vacancies.length,
+        reason: 'NO_ACTUAL_VACANT_POSITION',
+      };
+      await writeFile(
+        path.join(evidenceDirectory, 'social-current-pages.json'),
+        JSON.stringify(
+          { head: currentHead, positionPages, poolPages },
+          null,
+          2,
+        ) + '\n',
+      );
+      await save();
+      const head = await d.readHead();
+      const beforeRunsRead = await s.counts();
+      const runs = await d.post(
+        '/v1/postwar-office-runtime',
+        {
+          schemaVersion: 'postwar-office-runtime-read-v1',
+          requestId: randomUUID(),
+          operation: 'READ_CURRENT_OFFICE_OPENING',
+          officeId: 'INDUSTRY',
+          dataset: 'industry-committed-runs',
+          page: { offset: 0, limit: 25 },
+        },
+        'COUNTRY_02',
+      );
+      assert.equal(runs.status, 200, 'ACTUAL_RESTRICTED_COMMITTED_RUNS_READ');
+      assert.equal(runs.body.ok, true);
+      const runSource = row(runs.body.source);
+      assert.equal(
+        runSource.dataNature,
+        'ADMITTED_CURRENT_INDUSTRY_COMMITTED_RUNS',
+      );
+      const runCoverage = parseIndustryCommittedRunsCoverage(
+        runSource.currentIndustryCommittedRunsCoverage,
+      );
+      assert.equal(runCoverage.countryId, 'COUNTRY_02');
+      assert.equal(runCoverage.globalWorldVersion, head.worldVersion);
+      assert.equal(runCoverage.globalEventSequence, head.eventSequence);
+      assert.deepEqual(
+        runs.body.rows,
+        [],
+        'NO_RUN_COMMAND_WAS_SUBMITTED_IN_THIS_SCOPED_CHAIN',
+      );
+      assert.deepEqual(await s.counts(), beforeRunsRead);
+      report.industryCommittedRuns = {
+        classification: 'ACTUAL_AUTHORIZED_EMPTY_COMMITTED_SCHEDULE_NOT_OUTPUT',
+        status: runs.status,
+        body: runs.body,
+      };
+      await save();
+      report.browserReadback = await runRegisteredTradeCbReadbackBrowserProbe({
+        ...common,
+        apiBaseURL: d.origin(),
+        expectedHead: head,
+        failureEvidencePath: path.join(
+          evidenceDirectory,
+          'browser-readback-failure.json',
+        ),
+      });
+      await save();
+      if (process.env.ECONMIND_FRESH_C10_PREFIX === '1') {
+        assert(
+          descriptor.countries.some(
+            (country) => String(country.countryId) === 'COUNTRY_10',
+          ),
+          'ACTUAL_C10_DESCRIPTOR_REQUIRED',
+        );
+        report.c10 = await runFreshC10Prefix({
+          driver: d,
+          worldId: f.marker.worldId,
+          evidencePath: path.join(evidenceDirectory, 'c10-prefix.json'),
+        });
+        await save();
+      }
+      const recoveryHead = await d.readHead();
+      const before = await s.counts();
+      await d.stop();
+      report.secondColdStart = await d.launch(descriptor);
+      expect(await s.counts()).toEqual(before);
+      expect(await d.readHead()).toEqual(recoveryHead);
+      report.coldRecovery = await runRegisteredTradeCbReadbackBrowserProbe({
+        ...common,
+        apiBaseURL: d.origin(),
+        expectedHead: recoveryHead,
+        failureEvidencePath: path.join(
+          evidenceDirectory,
+          'cold-browser-readback-failure.json',
+        ),
+      });
+      report.newOriginalRecoveries = [];
+      for (const committedOriginal of d.originals)
+        (report.newOriginalRecoveries as unknown[]).push(
+          await d.recover(committedOriginal, { duplicateProbe: false }),
+        );
+      report.finalRecovery = await d.recover(original, {
+        duplicateProbe: false,
+      });
+      assert.deepEqual(await s.counts(), before);
+      report.status =
+        'PASSED_SCOPED_H1_RECOVERY_READS_AND_COLD_BROWSER_NOT_ALL_OFFICES';
+    } catch (error) {
+      failures.push(error);
+      report.status = 'FAILED';
+      report.error = wireColdError(error);
+    } finally {
+      for (const close of [
+        () => browser?.close(),
+        () => application?.close(),
+        () => driver?.stop(),
+        () => prepared?.setup.close(),
+        () => prepared?.fixture.cleanup(),
+      ]) {
+        try {
+          await close();
+        } catch (error) {
+          failures.push(error);
+        }
+      }
+      report.cleanupErrors = failures
+        .slice(report.error ? 1 : 0)
+        .map(wireColdError);
+      await save();
+    }
+    if (failures.length)
+      throw new AggregateError(
+        failures,
+        'RESUMED_REGISTERED_NATIVE_FAILED_OR_UNDRAINED',
+      );
+  }, 3600000);
+});

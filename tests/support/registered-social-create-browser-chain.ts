@@ -71,7 +71,7 @@ export function selectRegisteredSocialCreation(pages: readonly Page[]) {
   }
   return null;
 }
-async function currentPages(
+export async function currentPages(
   d: Driver,
   dataset: 'positions' | 'service-pools',
   head: Head,

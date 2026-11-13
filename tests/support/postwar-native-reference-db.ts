@@ -193,6 +193,33 @@ export async function clonePostwarNativeReference(
   } finally {
     await admin.end();
   }
+  return openReferenceClonePools(marker, database);
+}
+/** Reattach only an already owned, connectable isolated clone; never create or unseal. */
+export async function openPostwarNativeReferenceClone(
+  marker: PostwarNativeReferenceMarker,
+  database: string,
+) {
+  await owned(marker);
+  if (!/^postwar_clone_committed_resume_[a-f0-9]+$/u.test(database))
+    throw Error('REFERENCE_COMMITTED_RESUME_CLONE_REQUIRED');
+  const admin = pool(marker, 'postgres');
+  try {
+    const result = await admin.query(
+      'select datallowconn from pg_database where datname=$1',
+      [database],
+    );
+    if (result.rows.length !== 1 || result.rows[0].datallowconn !== true)
+      throw Error('REFERENCE_EXISTING_CONNECTABLE_CLONE_REQUIRED');
+  } finally {
+    await admin.end();
+  }
+  return openReferenceClonePools(marker, database);
+}
+function openReferenceClonePools(
+  marker: PostwarNativeReferenceMarker,
+  database: string,
+) {
   const reader = pool(marker, database, roles.readerRole),
     boundedReader = pool(marker, database, roles.boundedReaderRole),
     installer = pool(marker, database);

@@ -11,17 +11,29 @@ import type { createRegisteredFinalNodeSetup } from './registered-final-node-set
 import {
   loadPostwarNativeReferenceMarker,
   clonePostwarNativeReference,
+  openPostwarNativeReferenceClone,
   sealPostwarReferenceClone,
 } from './postwar-native-reference-db.js';
 import { createRegisteredUtilityFixtureTokenSigner } from './registered-c10-http-actor.js';
 const run = promisify(execFile);
 type Setup = Awaited<ReturnType<typeof createRegisteredFinalNodeSetup>>;
-export async function restoreCompletedFreshH0(input: {
+type RestoreInput = {
   repositoryRoot: string;
   evidenceDirectory: string;
   completedCheckpointDirectory: string;
   expectedCommit: string;
-}) {
+};
+export const restoreCompletedFreshH0 = (input: RestoreInput) =>
+  restoreRegisteredCheckpoint(input, 'EMPTY_H0');
+/** Positive, sealed checkpoint recovery: never reruns opening preparation or commands. */
+export const restoreCommittedRegisteredCheckpoint = (input: RestoreInput) =>
+  restoreRegisteredCheckpoint(input, 'COMMITTED_CHECKPOINT');
+export const reopenPreparedRegisteredCheckpoint = (input: RestoreInput) =>
+  restoreRegisteredCheckpoint(input, 'PREPARED_COMMITTED_CLONE');
+async function restoreRegisteredCheckpoint(
+  input: RestoreInput,
+  mode: 'EMPTY_H0' | 'COMMITTED_CHECKPOINT' | 'PREPARED_COMMITTED_CLONE',
+) {
   assert.equal(process.env.ECONMIND_REGISTERED_FINAL_NODE_NATIVE, '1');
   assert.equal(
     (
@@ -45,12 +57,29 @@ export async function restoreCompletedFreshH0(input: {
     ownershipNonce: string;
     templateDatabase: string;
     head: { world_version: string; event_sequence: string };
+    economicCounts: Record<string, string>;
+    h0RestoreEligible: boolean;
+    resourceState: string;
   };
   assert.equal(checkpoint.ownershipNonce, marker.ownershipNonce);
-  assert.deepEqual(checkpoint.head, {
-    world_version: '0',
-    event_sequence: '0',
-  });
+  if (mode === 'EMPTY_H0') {
+    assert.deepEqual(checkpoint.head, {
+      world_version: '0',
+      event_sequence: '0',
+    });
+  } else {
+    assert.equal(checkpoint.h0RestoreEligible, false);
+    assert(BigInt(checkpoint.head.world_version) > 0n);
+    assert(BigInt(checkpoint.head.event_sequence) > 0n);
+    assert.equal(
+      checkpoint.economicCounts.worldVersion,
+      checkpoint.head.world_version,
+    );
+    assert.equal(
+      checkpoint.economicCounts.eventSequence,
+      checkpoint.head.event_sequence,
+    );
+  }
   const saved = JSON.parse(
     await readFile(
       path.join(directory, 'registered-node-descriptor.json'),
@@ -96,11 +125,19 @@ export async function restoreCompletedFreshH0(input: {
       'INSTALLED_SQL_CHANGED_REQUIRES_SEPARATE_REVIEWED_UPGRADE',
     );
   }
-  const clone = await clonePostwarNativeReference(
-    marker,
-    'completed_fresh_h0',
-    checkpoint.templateDatabase,
-  );
+  if (mode === 'PREPARED_COMMITTED_CLONE')
+    assert.equal(checkpoint.resourceState, 'PREPARED_OWNED_CLONE');
+  const clone =
+    mode === 'PREPARED_COMMITTED_CLONE'
+      ? await openPostwarNativeReferenceClone(
+          marker,
+          checkpoint.templateDatabase,
+        )
+      : await clonePostwarNativeReference(
+          marker,
+          mode === 'EMPTY_H0' ? 'completed_fresh_h0' : 'committed_resume',
+          checkpoint.templateDatabase,
+        );
   const counts = async () => {
     const result = await clone.installer.query<Record<string, string>>(
       'select h.world_version::text as "worldVersion",h.event_sequence::text as "eventSequence",(select count(*)::text from world_v2.command_submission where world_id=$1)commands,(select count(*)::text from world_v2.command_receipt where world_id=$1)receipts,(select count(*)::text from world_v2.authoritative_event where world_id=$1)events,(select count(*)::text from world_v2.financial_posting_batch where world_id=$1)batches,(select count(*)::text from world_v2.inventory_posting where world_id=$1)inventory,(select count(*)::text from world_v2.command_queue where world_id=$1)queues from world_v2.world_head h where h.world_id=$1',
@@ -141,10 +178,18 @@ export async function restoreCompletedFreshH0(input: {
     );
   };
   try {
-    assert(
-      Object.values(await counts()).every((v) => v === '0'),
-      'ACTUAL_UNTOUCHED_H0_REQUIRED',
-    );
+    if (mode === 'EMPTY_H0') {
+      assert(
+        Object.values(await counts()).every((v) => v === '0'),
+        'ACTUAL_UNTOUCHED_H0_REQUIRED',
+      );
+    } else {
+      assert.deepEqual(
+        await counts(),
+        checkpoint.economicCounts,
+        'SEALED_CHECKPOINT_COUNTS_MUST_MATCH',
+      );
+    }
     const roles = await clone.installer.query<{
       rolname: string;
       rolsuper: boolean;
@@ -174,7 +219,13 @@ export async function restoreCompletedFreshH0(input: {
       'select auth_subject::text,actor_id from world_v2.world_actor_binding where world_id=$1',
       [marker.worldId],
     );
-    for (const country of ['COUNTRY_01', 'COUNTRY_02'] as const)
+    for (const country of Object.keys(
+      saved.subjects,
+    ) as (keyof typeof saved.subjects)[]) {
+      assert(
+        original.countries.some((c) => String(c.countryId) === country),
+        'SAVED_SUBJECT_REQUIRES_ACTUAL_REGISTERED_COUNTRY',
+      );
       assert.equal(
         bindings.rows.filter(
           (b) =>
@@ -183,6 +234,7 @@ export async function restoreCompletedFreshH0(input: {
         ).length,
         1,
       );
+    }
     const keys = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
     const kid = 'TEST_ONLY_FRESH_REOPEN_' + randomUUID();
     const jwk = {
@@ -196,6 +248,7 @@ export async function restoreCompletedFreshH0(input: {
       ...original,
       database: clone.database,
       jwks: { keys: [jwk] },
+      ...(mode !== 'EMPTY_H0' ? { prepareC10Sources: false } : {}),
     };
     const signToken = createRegisteredUtilityFixtureTokenSigner({
       subjects: saved.subjects,
@@ -205,6 +258,7 @@ export async function restoreCompletedFreshH0(input: {
     });
     const receipt = {
       classification: 'REUSED_COMPLETED_ADMISSION_AND_SETUP_NOT_NEW_WORLD',
+      recoveryMode: mode,
       candidate: input.expectedCommit,
       parentDirectory: directory,
       parentDatabase: checkpoint.templateDatabase,
@@ -212,6 +266,10 @@ export async function restoreCompletedFreshH0(input: {
       noRolesOrSourcesCreated: true,
       noPrivateKeyPersisted: true,
       before: await counts(),
+      sourcePreparation:
+        mode !== 'EMPTY_H0'
+          ? 'REUSED_SEALED_SOURCES_NO_PUBLICATION'
+          : 'UNCHANGED_H0_DESCRIPTOR',
     };
     await copyFile(
       path.join(directory, 'pg/reference-db.json'),
