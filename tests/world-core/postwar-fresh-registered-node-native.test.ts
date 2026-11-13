@@ -6,6 +6,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, it, expect } from 'vitest';
+import { parseIndustryCommittedRunsCoverage } from '@econmind/core/postwar-industry-committed-runs-contract';
 import { prepareFreshRegisteredNodeRehearsal } from '../support/fresh-registered-node-rehearsal.js';
 import {
   createRegisteredFinalDriver,
@@ -84,7 +85,13 @@ native('fresh actual-source registered Node and shipped browser', () => {
         worldId: f.marker.worldId,
         installer: f.clone.installer,
         allowedOrigin: 'https://pages-test.example',
-        signToken: s.signToken,
+        signToken: (countryId) => {
+          assert(
+            countryId === 'COUNTRY_01' || countryId === 'COUNTRY_02',
+            'EXACT_REGISTERED_TEST_COUNTRY_REQUIRED',
+          );
+          return s.signToken(countryId);
+        },
       });
       const d = driver;
       report.driver = d.report;
@@ -169,6 +176,44 @@ native('fresh actual-source registered Node and shipped browser', () => {
       });
       await save();
       const head = await d.readHead();
+      const beforeRunsRead = await s.counts();
+      const runs = await d.post(
+        '/v1/postwar-office-runtime',
+        {
+          schemaVersion: 'postwar-office-runtime-read-v1',
+          requestId: randomUUID(),
+          operation: 'READ_CURRENT_OFFICE_OPENING',
+          officeId: 'INDUSTRY',
+          dataset: 'industry-committed-runs',
+          page: { offset: 0, limit: 25 },
+        },
+        'COUNTRY_02',
+      );
+      assert.equal(runs.status, 200, 'ACTUAL_RESTRICTED_COMMITTED_RUNS_READ');
+      assert.equal(runs.body.ok, true);
+      const runSource = row(runs.body.source);
+      assert.equal(
+        runSource.dataNature,
+        'ADMITTED_CURRENT_INDUSTRY_COMMITTED_RUNS',
+      );
+      const runCoverage = parseIndustryCommittedRunsCoverage(
+        runSource.currentIndustryCommittedRunsCoverage,
+      );
+      assert.equal(runCoverage.countryId, 'COUNTRY_02');
+      assert.equal(runCoverage.globalWorldVersion, head.worldVersion);
+      assert.equal(runCoverage.globalEventSequence, head.eventSequence);
+      assert.deepEqual(
+        runs.body.rows,
+        [],
+        'NO_RUN_COMMAND_WAS_SUBMITTED_IN_THIS_SCOPED_CHAIN',
+      );
+      assert.deepEqual(await s.counts(), beforeRunsRead);
+      report.industryCommittedRuns = {
+        classification: 'ACTUAL_AUTHORIZED_EMPTY_COMMITTED_SCHEDULE_NOT_OUTPUT',
+        status: runs.status,
+        body: runs.body,
+      };
+      await save();
       report.browserReadback = await runRegisteredTradeCbReadbackBrowserProbe({
         ...common,
         apiBaseURL: d.origin(),
