@@ -647,38 +647,36 @@ process.on('message', async (m) => {
         !social
       )
         throw Error('FIXED_ACTUAL_H0_LABOUR_COUNTRY_REQUIRED');
-      const { createPostwarMixedCurrentProjectionSource } =
-        await import('../../apps/world-worker/dist/persistence/postwar-mixed-current-projection-publication.js');
-      const { createPostwarIndustryLabourCurrentPublisher } =
-        await import('../../apps/world-worker/dist/persistence/postwar-industry-labour-current-publication.js');
-      const resources =
-        Social.readPostwarSocialRuntimeConnectionResources(social);
-      const source = createPostwarMixedCurrentProjectionSource({
-        socialConnection: social,
-        worldId: binding.worldId,
-        workerRole: resources.workerRole,
-        publicationDatabase,
-        historyMode: 'PAGED_COMPLETE_V1',
+      // H0 has no positive event prefix. The existing fixed SQL derives the
+      // opening headcount from the admitted roster and independently rejects
+      // any event, committed receipt, posting, nonzero head or caller assertion.
+      const result = await publicationDatabase.transaction(async (tx) => {
+        const published = await tx.query(
+          'select * from world_v2.publish_postwar_industry_labour_current($1,$2,$3)',
+          [binding.worldId, m.countryId, null],
+        );
+        if (
+          published.rows.length !== 1 ||
+          published.rows[0].country_id !== m.countryId ||
+          String(published.rows[0].world_version) !== '0' ||
+          String(published.rows[0].event_sequence) !== '0'
+        )
+          throw Error('ACTUAL_EMPTY_H0_LABOUR_PUBLICATION_REQUIRED');
+        return {
+          head: {
+            worldId: binding.worldId,
+            worldVersion: '0',
+            eventSequence: '0',
+          },
+          documents: published.rows,
+        };
       });
-      try {
-        const publisher = createPostwarIndustryLabourCurrentPublisher({
-          source,
-          socialConnection: social,
-          publicationDatabase,
-        });
-        const result = await publisher.publishCountry(m.countryId, {
-          worldVersion: '0',
-          eventSequence: '0',
-        });
-        send({
-          id: m.id,
-          ok: true,
-          value: wire(result),
-          diagnostics: databaseDiagnostics,
-        });
-      } finally {
-        await source.close();
-      }
+      send({
+        id: m.id,
+        ok: true,
+        value: wire(result),
+        diagnostics: databaseDiagnostics,
+      });
     } else if (m.type === 'PUBLISH_MATCH') {
       if (
         !['COUNTRY_01', 'COUNTRY_02'].includes(m.countryId) ||
