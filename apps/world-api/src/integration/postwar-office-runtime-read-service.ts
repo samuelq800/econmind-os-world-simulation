@@ -452,6 +452,12 @@ function pageBody(
               currentIndustryUtilityPlanningCoverage:
                 page.source.currentIndustryUtilityPlanningCoverage,
             }),
+        ...(page.source.currentIndustryCommittedRunsCoverage === undefined
+          ? {}
+          : {
+              currentIndustryCommittedRunsCoverage:
+                page.source.currentIndustryCommittedRunsCoverage,
+            }),
         ...(page.source.currentCaptainAllocationOptions === undefined
           ? {}
           : {
