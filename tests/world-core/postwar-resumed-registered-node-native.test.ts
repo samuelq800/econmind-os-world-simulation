@@ -26,6 +26,10 @@ import { wireColdError } from '../../tools/office-connection/native-mixed-cold-e
 const flag = process.env.ECONMIND_RESUMED_REGISTERED_NODE_NATIVE;
 if (flag !== undefined && flag !== '1')
   throw Error('RESUMED_NATIVE_FLAG_MUST_BE_1');
+const recoveryFlag = process.env.ECONMIND_RESUME_RECOVERY_ONLY;
+if (recoveryFlag !== undefined && recoveryFlag !== '1')
+  throw Error('RECOVERY_ONLY_FLAG_MUST_BE_1');
+const recoveryOnly = recoveryFlag === '1';
 const native = flag === '1' ? describe : describe.skip;
 const repositoryRoot = path.resolve(import.meta.dirname, '../..');
 const required = (name: string): string => {
@@ -48,6 +52,7 @@ native('resumed committed-source registered Node and shipped browser', () => {
       classification:
         'SEALED_POSITIVE_CHECKPOINT_CLONE_NOT_REINITIALIZATION_OR_PRODUCTION',
       candidate: expectedCommit,
+      recoveryOnly,
       status: 'RUNNING',
       social: 'NOT_RUN',
       browserReadback: 'NOT_RUN',
@@ -300,7 +305,10 @@ native('resumed committed-source registered Node and shipped browser', () => {
         );
         assert.deepEqual(await s.counts(), beforeResume);
       }
-      if (process.env.ECONMIND_RESUME_STALE_PROJECTION === '1') {
+      if (
+        !recoveryOnly &&
+        process.env.ECONMIND_RESUME_STALE_PROJECTION === '1'
+      ) {
         const before = await s.counts();
         const publication = row(
           await d.rpc('RETRY_PUBLICATION', {
@@ -494,41 +502,57 @@ native('resumed committed-source registered Node and shipped browser', () => {
         ),
       });
       await save();
-      report.programmeTarget = await runRegisteredProgrammeTargetBrowserChain({
-        driver: d,
-        browserInput: {
-          ...common,
-          actualOrigin: d.origin(),
-          evidenceDir: path.join(evidenceDirectory, 'programme-target-browser'),
-        },
-        evidencePath: path.join(
-          evidenceDirectory,
-          'programme-target-browser.json',
-        ),
-        ...(process.env.ECONMIND_RESUME_PROGRAMME_EVIDENCE
-          ? {
-              resumeEvidencePath:
-                process.env.ECONMIND_RESUME_PROGRAMME_EVIDENCE,
-            }
-          : {}),
-      });
-      await save();
-      if (process.env.ECONMIND_FRESH_C10_PREFIX === '1') {
-        assert(
-          descriptor.countries.some(
-            (country) => String(country.countryId) === 'COUNTRY_10',
-          ),
-          'ACTUAL_C10_DESCRIPTOR_REQUIRED',
+      if (recoveryOnly) {
+        report.programmeTarget = 'RECOVERY_ONLY_NO_NEW_PROGRAMME_OR_TARGET';
+        report.c10 = 'RECOVERY_ONLY_NO_NEW_C10_OPERATION';
+        assert.deepEqual(
+          await s.counts(),
+          beforeResume,
+          'RECOVERY_ONLY_AUTHORITATIVE_COUNTS_UNCHANGED',
         );
-        report.c10 = await runFreshC10Prefix({
-          driver: d,
-          worldId: f.marker.worldId,
-          evidencePath: path.join(evidenceDirectory, 'c10-prefix.json'),
-          ...(process.env.ECONMIND_RESUME_C10_EVIDENCE
-            ? { resumeEvidencePath: process.env.ECONMIND_RESUME_C10_EVIDENCE }
-            : {}),
-        });
         await save();
+      } else {
+        report.programmeTarget = await runRegisteredProgrammeTargetBrowserChain(
+          {
+            driver: d,
+            browserInput: {
+              ...common,
+              actualOrigin: d.origin(),
+              evidenceDir: path.join(
+                evidenceDirectory,
+                'programme-target-browser',
+              ),
+            },
+            evidencePath: path.join(
+              evidenceDirectory,
+              'programme-target-browser.json',
+            ),
+            ...(process.env.ECONMIND_RESUME_PROGRAMME_EVIDENCE
+              ? {
+                  resumeEvidencePath:
+                    process.env.ECONMIND_RESUME_PROGRAMME_EVIDENCE,
+                }
+              : {}),
+          },
+        );
+        await save();
+        if (process.env.ECONMIND_FRESH_C10_PREFIX === '1') {
+          assert(
+            descriptor.countries.some(
+              (country) => String(country.countryId) === 'COUNTRY_10',
+            ),
+            'ACTUAL_C10_DESCRIPTOR_REQUIRED',
+          );
+          report.c10 = await runFreshC10Prefix({
+            driver: d,
+            worldId: f.marker.worldId,
+            evidencePath: path.join(evidenceDirectory, 'c10-prefix.json'),
+            ...(process.env.ECONMIND_RESUME_C10_EVIDENCE
+              ? { resumeEvidencePath: process.env.ECONMIND_RESUME_C10_EVIDENCE }
+              : {}),
+          });
+          await save();
+        }
       }
       const recoveryHead = await d.readHead();
       const before = await s.counts();
