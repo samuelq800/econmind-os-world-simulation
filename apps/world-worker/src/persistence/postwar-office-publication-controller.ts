@@ -118,7 +118,8 @@ export function createPostwarOfficePublicationController(input: {
   readonly industryLabour?: true;
   readonly tradeCurrent?: true;
   /** Fixed registered host scope, installed by the genuine shared composition.
-   * Absence leaves this new explicit method disabled on legacy controllers. */
+   * Each global-head commit refreshes this scope. Absence retains legacy
+   * command-country/Trade-party publication and disables explicit rebuild. */
   readonly currentCountryIds?: readonly string[];
 }): PostwarOfficePublicationController {
   const world = worldId(input.worldId);
@@ -295,6 +296,27 @@ export function createPostwarOfficePublicationController(input: {
             return { command: cmd, tradeCountries };
           },
         );
+        // A commit advances the one global head even when its economic effect
+        // belongs to another country. Refresh the already registered scope;
+        // otherwise an unaffected country's valid derived pages become stale.
+        if (currentCountries) {
+          const configured = readPostwarSocialRuntimeConnectionResources(
+            input.socialConnection,
+          );
+          if (
+            currentCountries.length === 0 ||
+            currentCountries.length > 70 ||
+            new Set(currentCountries).size !== currentCountries.length ||
+            configured.workerRole !== input.workerRole ||
+            !currentCountries.includes(command.countryId) ||
+            [...currentCountries, ...tradeCountries].some(
+              (country) =>
+                !/^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(country) ||
+                !configured.countryIds.includes(country),
+            )
+          )
+            throw Error('EXACT_REGISTERED_POST_COMMIT_COUNTRY_SCOPE_REQUIRED');
+        }
         const result = await publisher.publishOfficeCurrentCountry(
           command.countryId,
           {
@@ -311,23 +333,37 @@ export function createPostwarOfficePublicationController(input: {
           canonicalSerialize(industry.head) !== canonicalSerialize(result.head)
         )
           throw Error('INDUSTRY_EXPECTED_PUBLICATION_HEAD_MISMATCH');
-        let counterpartDocuments = 0;
-        for (const country of tradeCountries.filter(
-          (x) => x !== command.countryId,
-        )) {
+        let additionalDocuments = 0;
+        const otherCountries = [
+          ...new Set([...(currentCountries ?? []), ...tradeCountries]),
+        ].filter((country) => country !== command.countryId);
+        for (const country of otherCountries) {
           const other = await publisher.publishOfficeCurrentCountry(country, {
             requireCaptain: false,
-            includeTrade: true,
+            ...(input.tradeCurrent ? { includeTrade: true } : {}),
+            expectedHead: result.head,
           });
           if (
             canonicalSerialize(other.head) !== canonicalSerialize(result.head)
           )
-            throw Error('TRADE_CURRENT_PARTIES_SAME_OBSERVED_HEAD_REQUIRED');
-          counterpartDocuments +=
+            throw Error('CURRENT_COUNTRIES_SAME_OBSERVED_HEAD_REQUIRED');
+          // Legacy Trade-only counterpart behavior remains unchanged. Formal
+          // registered publication keeps Industry labour at that same head too.
+          const otherIndustry = currentCountries
+            ? await industryPublisher?.publishCountry(country, result.head)
+            : undefined;
+          if (
+            otherIndustry &&
+            canonicalSerialize(otherIndustry.head) !==
+              canonicalSerialize(result.head)
+          )
+            throw Error('INDUSTRY_EXPECTED_PUBLICATION_HEAD_MISMATCH');
+          additionalDocuments +=
             other.captain.length +
             other.financial.length +
             other.social.length +
-            other.trade.length;
+            other.trade.length +
+            (otherIndustry?.documents.length ?? 0);
         }
         return Object.freeze({
           status: 'PUBLISHED',
@@ -339,7 +375,7 @@ export function createPostwarOfficePublicationController(input: {
             result.financial.length +
             result.social.length +
             result.trade.length +
-            counterpartDocuments +
+            additionalDocuments +
             (industry?.documents.length ?? 0),
           ...(industry ? { industryLabour: 'PUBLISHED' as const } : {}),
           captain: result.captain.length

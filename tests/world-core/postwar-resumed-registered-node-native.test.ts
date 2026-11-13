@@ -17,6 +17,7 @@ import {
   createRegisteredFinalDriver,
   registeredFinalRecord as row,
 } from '../support/postwar-registered-final-driver.js';
+import { renewResumedNativeExecution } from '../support/renew-resumed-native-execution.js';
 import { currentPages } from '../support/registered-social-create-browser-chain.js';
 import { createFixedOfficeBrowserApplication } from '../../tools/office-connection/fixed-office-command-browser.mjs';
 import { runRegisteredTradeCbReadbackBrowserProbe } from '../../tools/office-connection/registered-trade-cb-readback-browser-probe.mjs';
@@ -124,7 +125,10 @@ native('resumed committed-source registered Node and shipped browser', () => {
           )
           .digest('hex'),
       );
-      assert.equal(renewal.database, forward.database);
+      assert.match(
+        renewal.database,
+        /^postwar_clone_committed_resume_[a-f0-9]+$/u,
+      );
       assert.equal(renewal.after.registrationRef, descriptor.registrationRef);
       assert.equal(renewal.after.simTime, '0');
       report.guardedForward = forward;
@@ -138,6 +142,20 @@ native('resumed committed-source registered Node and shipped browser', () => {
           path.join(evidenceDirectory, file),
         );
       await save();
+      if (process.env.ECONMIND_RESUME_RENEW_EXECUTION === '1') {
+        await copyFile(
+          path.join(evidenceDirectory, 'finite-execution-renewal.json'),
+          path.join(
+            evidenceDirectory,
+            'previous-finite-execution-renewal.json',
+          ),
+        );
+        report.resumedFiniteRenewal = await renewResumedNativeExecution(
+          prepared,
+          path.join(evidenceDirectory, 'finite-execution-renewal.json'),
+        );
+        await save();
+      }
       const beforeResume = await s.counts();
       const originalDirectories = required(
         'ECONMIND_RESUME_ORIGINAL_DIRECTORIES',
@@ -242,6 +260,33 @@ native('resumed committed-source registered Node and shipped browser', () => {
         );
       }
       assert.deepEqual(await s.counts(), beforeResume);
+      if (process.env.ECONMIND_RESUME_STALE_PROJECTION === '1') {
+        const before = await s.counts();
+        const publication = row(
+          await d.rpc('RETRY_PUBLICATION', {
+            commandId: original.request.commandId,
+          }),
+        );
+        report.retainedProjectionRepair = {
+          classification:
+            'OLD_STALE_DERIVED_REBUILD_FROM_EXISTING_FINAL_NOT_ECONOMIC_RESUBMISSION',
+          commandId: original.request.commandId,
+          result: publication,
+        };
+        await save();
+        assert.equal(
+          publication.status,
+          'PUBLISHED',
+          'EXISTING_FINAL_DERIVED_RETRY_REQUIRED',
+        );
+        assert.equal(row(publication.head).worldVersion, before.worldVersion);
+        assert.equal(row(publication.head).eventSequence, before.eventSequence);
+        assert.deepEqual(
+          await s.counts(),
+          before,
+          'DERIVED_RETRY_CANNOT_CHANGE_ECONOMIC_HISTORY',
+        );
+      }
       report.openingReads = [];
       for (const [officeId, dataset] of [
         ['CENTRAL_BANK', 'cb-holdings'],
@@ -260,6 +305,10 @@ native('resumed committed-source registered Node and shipped browser', () => {
             page: { offset: 0, limit: 25 },
           },
           'COUNTRY_02',
+        );
+        await writeFile(
+          path.join(evidenceDirectory, 'opening-' + officeId + '.json'),
+          JSON.stringify(read, null, 2) + '\n',
         );
         assert.equal(
           read.status,

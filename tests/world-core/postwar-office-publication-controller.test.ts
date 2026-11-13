@@ -60,7 +60,7 @@ vi.mock(
   () => ({
     readPostwarSocialRuntimeConnectionResources: () => ({
       workerRole: 'test_worker',
-      countryIds: ['COUNTRY_02', 'COUNTRY_10'],
+      countryIds: ['COUNTRY_01', 'COUNTRY_02', 'COUNTRY_10'],
     }),
   }),
 );
@@ -164,6 +164,129 @@ beforeEach(() => {
   fixture.close.mockResolvedValue(undefined);
 });
 describe('fixed post-commit derived publication', () => {
+  it('refreshes the registered C1/C2/C10 scope after a C10 RUN advances the global head, deduplicating the primary country', async () => {
+    fixture.readCommand.mockResolvedValue({
+      ...command,
+      countryId: 'COUNTRY_10',
+      officeId: 'INDUSTRY',
+      commandType: 'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+    });
+    const c = controller(true, true, [
+      'COUNTRY_01',
+      'COUNTRY_02',
+      'COUNTRY_10',
+    ]);
+    const result = await c.afterCommitted(step);
+    expect(result).toMatchObject({
+      status: 'PROCESSED',
+      receipt,
+      derivedPublication: {
+        status: 'PUBLISHED',
+        countryId: 'COUNTRY_10',
+        documentCount: 42,
+      },
+    });
+    expect(fixture.publish.mock.calls.map((call) => call[0])).toEqual([
+      'COUNTRY_10',
+      'COUNTRY_01',
+      'COUNTRY_02',
+    ]);
+    expect(fixture.industryPublish.mock.calls.map((call) => call[0])).toEqual([
+      'COUNTRY_10',
+      'COUNTRY_01',
+      'COUNTRY_02',
+    ]);
+    for (const country of ['COUNTRY_01', 'COUNTRY_02'])
+      expect(fixture.publish).toHaveBeenCalledWith(country, {
+        requireCaptain: false,
+        includeTrade: true,
+        expectedHead: { worldId: world, worldVersion: '3', eventSequence: '4' },
+      });
+    await c.close();
+  });
+  it.each([
+    { scope: [] },
+    { scope: ['COUNTRY_02', 'COUNTRY_02'] },
+    { scope: ['COUNTRY_02', 'COUNTRY_03'] },
+    { scope: ['COUNTRY_10'] },
+  ])(
+    'refuses an invalid registered scope or out-of-scope committed country before any derived writes: %j',
+    async ({ scope }) => {
+      const c = controller(true, false, scope);
+      const result = await c.afterCommitted(step);
+      expect(result).toMatchObject({
+        status: 'PROCESSED',
+        receipt,
+        derivedPublication: { status: 'UNAVAILABLE' },
+      });
+      expect(fixture.publish).not.toHaveBeenCalled();
+      expect(fixture.industryPublish).not.toHaveBeenCalled();
+      await c.close();
+    },
+  );
+  it('retains the C10 FINAL on later C2 publication failure and retries only the same registered derived scope', async () => {
+    fixture.readCommand.mockResolvedValue({
+      ...command,
+      countryId: 'COUNTRY_10',
+      officeId: 'INDUSTRY',
+    });
+    const c = controller(true, false, ['COUNTRY_02', 'COUNTRY_10']);
+    const published = await fixture.publish();
+    fixture.publish.mockClear();
+    fixture.publish
+      .mockResolvedValueOnce(published)
+      .mockRejectedValueOnce(Error('C2_ACK_UNKNOWN'));
+    const failed = await c.afterCommitted(step);
+    expect(failed).toMatchObject({
+      status: 'PROCESSED',
+      receipt,
+      derivedPublication: { status: 'UNAVAILABLE' },
+    });
+    expect(failed.status === 'PROCESSED' && failed.receipt).toBe(step.receipt);
+    expect((await c.retryCommitted(command.commandId)).status).toBe(
+      'PUBLISHED',
+    );
+    expect(fixture.publish.mock.calls.map((call) => call[0])).toEqual([
+      'COUNTRY_10',
+      'COUNTRY_02',
+      'COUNTRY_10',
+      'COUNTRY_02',
+    ]);
+    expect(fixture.readCommand).toHaveBeenCalledTimes(2);
+    expect(fixture.readReceipt).toHaveBeenCalledTimes(2);
+    expect(
+      fixture.queries.every(
+        (sql) =>
+          sql.startsWith('select ') ||
+          sql === 'set transaction isolation level repeatable read',
+      ),
+    ).toBe(true);
+    await c.close();
+  });
+  it('refuses a later registered country or Industry publisher at another head while preserving the FINAL', async () => {
+    const c = controller(true, false, ['COUNTRY_02', 'COUNTRY_10']);
+    const published = await fixture.publish();
+    fixture.publish.mockClear();
+    fixture.publish.mockResolvedValueOnce(published).mockResolvedValueOnce({
+      ...published,
+      head: { worldId: world, worldVersion: '4', eventSequence: '5' },
+    });
+    expect((await c.afterCommitted(step)).derivedPublication?.status).toBe(
+      'UNAVAILABLE',
+    );
+    expect(fixture.industryPublish).toHaveBeenCalledTimes(1);
+    fixture.industryPublish
+      .mockResolvedValueOnce({ head: published.head, documents: [{}] })
+      .mockResolvedValueOnce({
+        head: { worldId: world, worldVersion: '4', eventSequence: '5' },
+        documents: [{}],
+      });
+    expect((await c.retryCommitted(command.commandId)).status).toBe(
+      'UNAVAILABLE',
+    );
+    await c.close();
+  });
+
   it('explicitly rebuilds configured C10 current pages at the held expected head without inventing a Command or FINAL', async () => {
     const c = controller(true, true, ['COUNTRY_02', 'COUNTRY_10']);
     fixture.publish.mockResolvedValueOnce({
@@ -625,6 +748,23 @@ it('publishes both actual committed Trade parties at one observed head, and retr
     expect(
       fixture.publish.mock.calls.every((x) => x[1].includeTrade === true),
     ).toBe(true);
+    const formal = controller(true, true, ['COUNTRY_01', 'COUNTRY_10']);
+    fixture.publish.mockClear();
+    expect(await formal.retryCommitted(original.commandId)).toMatchObject({
+      status: 'PUBLISHED',
+      documentCount: 48,
+    });
+    expect(fixture.publish.mock.calls.map((call) => call[0])).toEqual([
+      'COUNTRY_01',
+      'COUNTRY_10',
+      'COUNTRY_02',
+    ]);
+    expect(fixture.industryPublish.mock.calls.map((call) => call[0])).toEqual([
+      'COUNTRY_01',
+      'COUNTRY_10',
+      'COUNTRY_02',
+    ]);
+    await formal.close();
     fixture.publish
       .mockResolvedValueOnce({
         head: { worldId: world, worldVersion: '3', eventSequence: '4' },
