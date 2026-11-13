@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import * as C from '../../packages/core/src/index.js';
 import {
   prepareFinanceSocialLedger,
+  prepareFinanceSocialLedgerFromOpening,
   replayPreparedFinanceSocialFxLedger,
   replayPreparedFinanceSocialLedger,
   type FinanceSocialFxOriginal,
@@ -10,6 +11,7 @@ import {
 } from '../../packages/core/src/commands/finance-social-prepared-ledger.js';
 import {
   prepareFinanceNativeBudgetTransition,
+  prepareFinanceNativeBudgetFinancialReplay,
   prepareFinanceNativeBudgetMixedPrefix,
   readFinanceNativeBudgetMixedPrefix,
   evaluateFinanceNativeBudgetSource,
@@ -26,6 +28,11 @@ import {
   mixedWorld as world,
   mixedSha as sha,
 } from '../support/finance-social-fx-replay-fixture.js';
+import { createIndustryLogisticsExecutionFixture } from '../support/industry-logistics-execution-fixture.js';
+import {
+  prepareIndustryInternalLogisticsFrame,
+  readIndustryInternalLogisticsExecutionState,
+} from '../../packages/core/src/inventory/industry-internal-logistics-execution.js';
 const at = '2026-10-29T00:00:00.000Z';
 function setup() {
   const f = mixedFinancialFixture(),
@@ -419,4 +426,73 @@ describe('complete Finance/Social/FX prepared-ledger replay', () => {
       ),
     ).toThrow('EXACT_GENUINE_FINANCIAL');
   });
+});
+
+it('prepared mixed replay preserves the first logistics BOOK inventory posting and requires its actual originals', () => {
+  const f = createIndustryLogisticsExecutionFixture();
+  const booked = prepareIndustryInternalLogisticsFrame(
+    {
+      state: f.state,
+      command: f.command(f.state, f.book, 'PREPARED_BOOK'),
+      observedAtReal: at,
+    },
+    sha,
+  );
+  const frames = [f.scheduled.frame, booked.frame];
+  expect(f.scheduled.frame.inventoryPostings).toHaveLength(0);
+  expect(booked.frame.inventoryPostings).toHaveLength(1);
+  const expectedHead = {
+    worldVersion: booked.frame.transition.worldVersionAfter,
+    eventSequence: booked.frame.events.at(-1)!.sequence,
+  };
+  const input = {
+    prepared: prepareFinanceSocialLedgerFromOpening(f.opening, sha),
+    frames,
+    socialCountries: [f.social],
+    openingEncumbrances: [],
+    fxOriginals: [],
+    industryWorkSources: [f.workSource],
+    industryLogisticsSources: [f.sources],
+    expectedHead,
+    sha256Hex: sha,
+  };
+  const replay = replayPreparedFinanceSocialFxLedger(input);
+  const direct = readFinanceNativeBudgetMixedPrefix(
+    prepareFinanceNativeBudgetMixedPrefix(
+      {
+        worldId: f.world,
+        frames,
+        socialCountries: input.socialCountries,
+        industryWorkSources: input.industryWorkSources,
+        industryLogisticsSources: input.industryLogisticsSources,
+        financialReplay: prepareFinanceNativeBudgetFinancialReplay(
+          {
+            financial: f.opening.financial,
+            opening: f.opening,
+            openingEncumbrances: [],
+            fxOriginals: [],
+          },
+          sha,
+        ),
+      },
+      sha,
+    ),
+    f.world,
+    frames,
+    sha,
+  );
+  expect(replay.inventory).toEqual(direct.inventoryState);
+  expect(replay.financial).toEqual(direct.financialState);
+  expect(replay.industryWorkState).toEqual(direct.industryWorkState);
+  expect(replay.budgetState).toEqual(direct.budgetState);
+  expect(replay.inventory).toEqual(
+    readIndustryInternalLogisticsExecutionState(booked.state).inventory,
+  );
+  expect(replay.inventory).not.toEqual(f.opening.inventory);
+  expect(() =>
+    replayPreparedFinanceSocialFxLedger({
+      ...input,
+      industryLogisticsSources: [],
+    }),
+  ).toThrow('UNSUPPORTED_MIXED_PREFIX_POSTING_EFFECT');
 });

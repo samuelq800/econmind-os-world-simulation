@@ -196,8 +196,27 @@ native('resumed committed-source registered Node and shipped browser', () => {
         'COMPLETE_CHECKPOINT_ORIGINAL_SET_REQUIRED',
       );
       assert.equal(beforeResume.commands, beforeResume.receipts);
-      assert.equal(beforeResume.batches, '0');
-      assert.equal(beforeResume.inventory, '0');
+      assert.equal(
+        beforeResume.batches,
+        String(
+          [...originals.values()].reduce(
+            (sum, value) => sum + Number(row(value.stored).financialBatchCount),
+            0,
+          ),
+        ),
+        'SAVED_FINANCIAL_RECEIPTS_MATCH_DATABASE',
+      );
+      assert.equal(
+        beforeResume.inventory,
+        String(
+          [...originals.values()].reduce(
+            (sum, value) =>
+              sum + Number(row(value.stored).inventoryPostingCount),
+            0,
+          ),
+        ),
+        'SAVED_INVENTORY_RECEIPTS_MATCH_DATABASE',
+      );
       const employmentCreations = [...originals.values()].filter(
         ({ original }) =>
           original.request.commandType ===
@@ -260,6 +279,27 @@ native('resumed committed-source registered Node and shipped browser', () => {
         );
       }
       assert.deepEqual(await s.counts(), beforeResume);
+      const savedBook = [...originals.values()].find(
+        ({ original }) =>
+          original.request.commandType ===
+            'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1' &&
+          row(row(original.request.payload).operation).action === 'BOOK',
+      );
+      if (savedBook) {
+        const runId = String(row(savedBook.original.request.payload).runId);
+        report.retainedC10Planning = await d.rpc('C10_LOGISTICS_ORDERS', {
+          countryId: 'COUNTRY_10',
+          facilityId: 'OPEN-10-REFINED_FUEL',
+          runId,
+          refPrefix: 'C10_' + runId.slice('RUN_TEST_C10_'.length),
+        });
+        await save();
+        assert.equal(
+          row(report.retainedC10Planning).status,
+          'ACTUAL_PLANNING_ROWS',
+        );
+        assert.deepEqual(await s.counts(), beforeResume);
+      }
       if (process.env.ECONMIND_RESUME_STALE_PROJECTION === '1') {
         const before = await s.counts();
         const publication = row(

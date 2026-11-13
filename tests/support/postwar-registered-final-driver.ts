@@ -458,10 +458,15 @@ export function createRegisteredFinalDriver(
       Buffer.byteLength(text) <= 65536,
       'BOUNDED_HTTP_REPLY_REQUIRED',
     );
-    return {
-      status: response.status,
-      body: registeredFinalRecord(JSON.parse(text)),
-    };
+    const responseBody = registeredFinalRecord(JSON.parse(text));
+    if (response.status >= 400)
+      await checkpoint('HTTP_FAILURE', {
+        endpoint,
+        countryId,
+        status: response.status,
+        responseBody,
+      });
+    return { status: response.status, body: responseBody };
   };
   const makeRequest = async (
     request: Omit<
@@ -523,6 +528,7 @@ export function createRegisteredFinalDriver(
   ) => {
     const before = await readHead(),
       step = registeredFinalRecord(await rpc('CONSUME'));
+    await checkpoint('ACTUAL_CONSUMPTION_STEP', { step });
     registeredFinalAssert(
       step.status === 'PROCESSED' &&
         step.commandId === id &&

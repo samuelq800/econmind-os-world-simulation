@@ -1,6 +1,7 @@
 /** Tiny real Core calculations and full frames, TEST_ONLY principals/originals.
  * These tests make no native DB, admission, actor or production claim. */
 import { describe, it, expect } from 'vitest';
+import { canonicalSerialize as serializeWorkerFrame } from '@econmind/core';
 import * as C from '../../packages/core/src/index.js';
 import {
   prepareIndustryInternalLogisticsFrame,
@@ -30,6 +31,7 @@ import {
   logisticsAt as at,
 } from '../support/industry-logistics-execution-fixture.js';
 import type { FinanceNativeBudgetCanonicalFrame } from '../../packages/core/src/commands/finance-budget-native.js';
+import { decodePostwarBoundedReplayFrameData } from '../../apps/world-worker/src/persistence/postgres-postwar-bounded-prefix-pages.js';
 type Fixture = ReturnType<typeof createIndustryLogisticsExecutionFixture>;
 function context(f: Fixture, state: IndustryInternalLogisticsExecutionState) {
   const s = readIndustryInternalLogisticsExecutionState(state);
@@ -164,6 +166,85 @@ function fullView(
   );
 }
 describe('independent internal logistics full Core frames and named handover', () => {
+  it('round-trips every genuine logistics stage through the bounded paged frame decoder', () => {
+    const c = chain();
+    for (const frame of c.frames) {
+      const decoded = decodePostwarBoundedReplayFrameData({
+        worldId: c.f.world,
+        fromHead: {
+          worldVersion: frame.transition.worldVersionBefore,
+          eventSequence: String(BigInt(frame.events[0]!.sequence) - 1n),
+        },
+        frame: JSON.parse(C.canonicalSerialize(frame)),
+      });
+      expect(serializeWorkerFrame(decoded)).toBe(C.canonicalSerialize(frame));
+    }
+    expect(c.b.frame.inventoryPostings[0]!.operation).toBe('RESERVE');
+    expect(c.s.frame.inventoryPostings[0]!.operation).toBe('SHIP');
+    expect(c.d.frame.inventoryPostings[0]!.operation).toBe('DELIVER');
+    expect(c.p.frame.financialPostingBatches[0]!.legs).toHaveLength(6);
+  });
+  it('rejects missing, duplicate, altered and wrong-stage journals at the bounded decoder', () => {
+    const c = chain();
+    const decode = (frame: FinanceNativeBudgetCanonicalFrame) =>
+      decodePostwarBoundedReplayFrameData({
+        worldId: c.f.world,
+        fromHead: {
+          worldVersion: frame.transition.worldVersionBefore,
+          eventSequence: String(BigInt(frame.events[0]!.sequence) - 1n),
+        },
+        frame: JSON.parse(C.canonicalSerialize(frame)),
+      });
+    for (const frame of [c.b.frame, c.s.frame, c.d.frame]) {
+      expect(() => decode({ ...frame, inventoryPostings: [] })).toThrow();
+      expect(() =>
+        decode({
+          ...frame,
+          inventoryPostings: [
+            ...frame.inventoryPostings,
+            ...frame.inventoryPostings,
+          ],
+        }),
+      ).toThrow();
+      expect(() =>
+        decode({
+          ...frame,
+          inventoryPostings: [
+            {
+              ...frame.inventoryPostings[0]!,
+              fingerprint: 'sha256:' + '0'.repeat(64),
+            },
+          ],
+        }),
+      ).toThrow();
+    }
+    expect(() =>
+      decode({ ...c.p.frame, financialPostingBatches: [] }),
+    ).toThrow();
+    expect(() =>
+      decode({
+        ...c.p.frame,
+        financialPostingBatches: [
+          ...c.p.frame.financialPostingBatches,
+          ...c.p.frame.financialPostingBatches,
+        ],
+      }),
+    ).toThrow();
+    for (const frame of [c.b.frame, c.s.frame, c.w.frame, c.d.frame])
+      expect(() =>
+        decode({
+          ...frame,
+          financialPostingBatches: c.p.frame.financialPostingBatches,
+        }),
+      ).toThrow();
+    for (const frame of [c.f.scheduled.frame, c.w.frame, c.p.frame])
+      expect(() =>
+        decode({ ...frame, inventoryPostings: c.b.frame.inventoryPostings }),
+      ).toThrow();
+    expect(() =>
+      decode({ ...c.b.frame, inventoryPostings: c.s.frame.inventoryPostings }),
+    ).toThrow();
+  });
   it('executes actual reserve/transit/site journal movements without changing batch, title or risk', () => {
     const c = chain(),
       initial = c.f.seed.inventoryEntries[0]!,

@@ -24,10 +24,9 @@ export async function runFreshC10Prefix(input: {
     ? JSON.parse(await readFile(input.resumeEvidencePath, 'utf8'))
     : undefined;
   if (prior) {
-    assert.equal(
-      prior.stages.length,
-      1,
-      'ONLY_COMMITTED_RUN_WITH_NO_BOOK_MAY_RESUME_HERE',
+    assert(
+      prior.stages.length === 1 || prior.stages.length === 2,
+      'ONLY_EXACT_COMMITTED_RUN_OR_RUN_BOOK_MAY_RESUME_HERE',
     );
     assert.equal(prior.stages[0].stage, 'RUN');
     assert.equal(
@@ -36,12 +35,27 @@ export async function runFreshC10Prefix(input: {
     );
     assert.equal(prior.stages[0].original.request.countryId, 'COUNTRY_10');
     assert.equal(prior.stages[0].original.request.payload.runId, prior.runId);
-    assert(
-      !d.originals.some(
-        (o) =>
-          o.request.commandType === 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
-      ),
-      'EXISTING_LOGISTICS_ORIGINAL_REQUIRES_EXACT_STAGE_RECOVERY',
+    const savedLogistics = prior.stages.slice(1);
+    if (savedLogistics.length) {
+      const book = savedLogistics[0];
+      assert.equal(book.stage, 'BOOK');
+      assert.equal(
+        book.original.request.commandType,
+        'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+      );
+      assert.equal(book.original.request.countryId, 'COUNTRY_10');
+      assert.equal(book.original.request.payload.runId, prior.runId);
+      assert.equal(book.original.request.payload.operation.action, 'BOOK');
+      assert.equal(book.result.outcome, 'COMMITTED');
+    }
+    const actualLogistics = d.originals.filter(
+      (o) =>
+        o.request.commandType === 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
+    );
+    assert.deepEqual(
+      actualLogistics,
+      savedLogistics.map((stage: { original: unknown }) => stage.original),
+      'EXISTING_LOGISTICS_REQUIRES_EXACT_SAVED_STAGE_ORIGINAL',
     );
   }
   const runId =
@@ -94,71 +108,109 @@ export async function runFreshC10Prefix(input: {
       });
     }
     await save();
-    const planning = (await d.rpc('C10_LOGISTICS_ORDERS', {
-      countryId: 'COUNTRY_10',
-      facilityId: 'OPEN-10-REFINED_FUEL',
-      runId,
-      refPrefix: 'C10_' + uid,
-    })) as { status: string; rows: unknown[] };
-    assert.equal(planning.status, 'ACTUAL_PLANNING_ROWS');
-    const rows = planning.rows
-      .map(parseIndustryUtilityPlanningRow)
-      .filter(
-        (r) =>
-          r.countryId === 'COUNTRY_10' &&
-          r.facilityId === 'OPEN-10-REFINED_FUEL' &&
-          r.runId === runId &&
-          r.serviceKind === 'LOGISTICS' &&
-          r.action === 'BOOK',
-      );
-    assert.equal(rows.length, 1);
-    const row = rows[0]!;
-    assert(row.action === 'BOOK' && row.serviceKind === 'LOGISTICS');
-    const fact = (name: string) => {
-      const found = row.parameters.capacityFacts.filter((x) => x.name === name);
-      assert.equal(found.length, 1);
-      return new WorldDecimal(found[0]!.value);
+    let booking: {
+      quantity: string;
+      startsAtSimTime: string;
+      endsAtSimTime: string;
     };
-    const duration = new WorldDecimal(row.runEndsAtSimTime).minus(
-        row.runStartsAtSimTime,
-      ),
-      mass = fact('mass_per_unit');
-    assert(duration.isPositive() && mass.isPositive());
-    const quantity = WorldDecimal.min(
-      '1',
-      fact('available_warehouse_quantity'),
-      fact('route_capacity')
-        .times(duration)
-        .dividedBy('86400000')
-        .dividedBy(mass),
-    ).toDecimalPlaces(12, WorldDecimal.ROUND_DOWN);
-    assert(quantity.isPositive(), 'C10_NO_POSITIVE_SOURCE_BOUND_BOOKING');
-    const booking = {
-      quantity: canonicalDecimal(quantity),
-      startsAtSimTime: row.runStartsAtSimTime,
-      endsAtSimTime: row.runEndsAtSimTime,
-    };
-    report.bookingChoice = {
-      ...booking,
-      rule: 'MIN_ONE_SOURCE_UNIT_ACTUAL_STOCK_ACTUAL_INTERVAL_CAPACITY_ROUNDED_DOWN',
-      facts: row.parameters.capacityFacts,
-    };
-    const bookIdentity = identity('BOOK');
-    const book = await prepareRegisteredC10StageFromCurrentApi({
-      driver: d,
-      worldId: input.worldId,
-      runId,
-      identity: bookIdentity,
-      action: 'BOOK',
-      booking,
-    });
-    (report.stages as unknown[]).push({
-      stage: 'BOOK',
-      original: book,
-      result: await executeRegisteredC10Stage({ driver: d, original: book }),
-    });
-    await save();
-    const transferId = bookIdentity.commandId + '_TRANSFER';
+    let transferId: string;
+    if (prior?.stages.length === 2) {
+      const stage = prior.stages[1];
+      const book = stage.original;
+      const stored = await d.inspect(book.request.commandId);
+      assert.deepEqual(stored, stage.result, 'SAVED_C10_BOOK_FINAL_REQUIRED');
+      await d.recover(book, { duplicateProbe: false });
+      const request = book.request.payload.operation.request;
+      booking = {
+        quantity: request.quantity.amount,
+        startsAtSimTime: request.startsAtSimTime,
+        endsAtSimTime: request.endsAtSimTime,
+      };
+      transferId = book.request.payload.operation.transferId;
+      assert.equal(transferId, request.transferId);
+      assert.equal(transferId, book.request.commandId + '_TRANSFER');
+      assert.deepEqual(booking, {
+        quantity: prior.bookingChoice.quantity,
+        startsAtSimTime: prior.bookingChoice.startsAtSimTime,
+        endsAtSimTime: prior.bookingChoice.endsAtSimTime,
+      });
+      report.bookingChoice = prior.bookingChoice;
+      (report.stages as unknown[]).push({
+        stage: 'BOOK',
+        original: book,
+        result: stored,
+        recoveredWithoutResubmit: true,
+      });
+      await save();
+    } else {
+      const planning = (await d.rpc('C10_LOGISTICS_ORDERS', {
+        countryId: 'COUNTRY_10',
+        facilityId: 'OPEN-10-REFINED_FUEL',
+        runId,
+        refPrefix: 'C10_' + uid,
+      })) as { status: string; rows: unknown[] };
+      assert.equal(planning.status, 'ACTUAL_PLANNING_ROWS');
+      const rows = planning.rows
+        .map(parseIndustryUtilityPlanningRow)
+        .filter(
+          (r) =>
+            r.countryId === 'COUNTRY_10' &&
+            r.facilityId === 'OPEN-10-REFINED_FUEL' &&
+            r.runId === runId &&
+            r.serviceKind === 'LOGISTICS' &&
+            r.action === 'BOOK',
+        );
+      assert.equal(rows.length, 1);
+      const row = rows[0]!;
+      assert(row.action === 'BOOK' && row.serviceKind === 'LOGISTICS');
+      const fact = (name: string) => {
+        const found = row.parameters.capacityFacts.filter(
+          (x) => x.name === name,
+        );
+        assert.equal(found.length, 1);
+        return new WorldDecimal(found[0]!.value);
+      };
+      const duration = new WorldDecimal(row.runEndsAtSimTime).minus(
+          row.runStartsAtSimTime,
+        ),
+        mass = fact('mass_per_unit');
+      assert(duration.isPositive() && mass.isPositive());
+      const quantity = WorldDecimal.min(
+        '1',
+        fact('available_warehouse_quantity'),
+        fact('route_capacity')
+          .times(duration)
+          .dividedBy('86400000')
+          .dividedBy(mass),
+      ).toDecimalPlaces(12, WorldDecimal.ROUND_DOWN);
+      assert(quantity.isPositive(), 'C10_NO_POSITIVE_SOURCE_BOUND_BOOKING');
+      booking = {
+        quantity: canonicalDecimal(quantity),
+        startsAtSimTime: row.runStartsAtSimTime,
+        endsAtSimTime: row.runEndsAtSimTime,
+      };
+      report.bookingChoice = {
+        ...booking,
+        rule: 'MIN_ONE_SOURCE_UNIT_ACTUAL_STOCK_ACTUAL_INTERVAL_CAPACITY_ROUNDED_DOWN',
+        facts: row.parameters.capacityFacts,
+      };
+      const bookIdentity = identity('BOOK');
+      const book = await prepareRegisteredC10StageFromCurrentApi({
+        driver: d,
+        worldId: input.worldId,
+        runId,
+        identity: bookIdentity,
+        action: 'BOOK',
+        booking,
+      });
+      (report.stages as unknown[]).push({
+        stage: 'BOOK',
+        original: book,
+        result: await executeRegisteredC10Stage({ driver: d, original: book }),
+      });
+      await save();
+      transferId = bookIdentity.commandId + '_TRANSFER';
+    }
     const ship = await prepareRegisteredC10StageFromCurrentApi({
       driver: d,
       worldId: input.worldId,

@@ -31,6 +31,10 @@ import {
   type FinancialPostingBatch,
 } from '@econmind/core';
 import { POSTWAR_DAY_ONE_TREASURY_FX_SPOT_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import {
+  INDUSTRY_UTILITY_COMMANDS,
+  parseIndustryUtilityIntent,
+} from '@econmind/core/industry-utility-execution';
 import { decodeDurableFinancialPostingBatch } from './durable-v08-ledger-lineage-reader.js';
 import type { FinanceNativeBudgetCanonicalFrame } from '@econmind/core/finance-budget-native';
 export type BoundedPostwarCanonicalFrame = Omit<
@@ -51,6 +55,20 @@ function invalid(message: string): never {
     DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID,
     'Bounded FX postings: ' + message,
   );
+}
+function logisticsAction(command: CanonicalCommand) {
+  if (command.commandType !== INDUSTRY_UTILITY_COMMANDS.LOGISTICS)
+    return undefined;
+  const { action } = parseIndustryUtilityIntent(command, sha).operation;
+  if (
+    action !== 'BOOK' &&
+    action !== 'SHIP' &&
+    action !== 'SERVICE_WORK' &&
+    action !== 'PAY_INPUTS' &&
+    action !== 'DELIVER'
+  )
+    invalid('installed logistics operation required');
+  return action;
 }
 export const POSTWAR_BOUNDED_JOURNAL_QUERY =
   'select * from world_v2.read_postwar_bounded_journal($1,$2,$3)';
@@ -164,6 +182,25 @@ export function decodeBoundedPostwarFinancialPostings(input: {
   const rows = input.rows.filter(
     (r) => r.causation_command_id === input.command.commandId,
   );
+  const action = logisticsAction(input.command);
+  if (action !== undefined) {
+    if (action !== 'PAY_INPUTS') {
+      if (rows.length) invalid('financial effect outside logistics payment');
+      return Object.freeze([]);
+    }
+    if (rows.length !== 1)
+      invalid('exact one logistics payment batch required');
+    const batch = decodeDurableFinancialPostingBatch({
+      ...input,
+      row: rows[0]!,
+      sha256Hex: sha,
+    });
+    if (batch.settlementCurrency === 'GCU' || batch.legs.length !== 6)
+      invalid('exact six-leg logistics LC payment required');
+    // Data reconstruction only: Core rederives the expense order, earned
+    // labour, source accounts and all six actual payment legs.
+    return Object.freeze([batch]);
+  }
   if (input.command.commandType === 'CORE_INDUSTRY_OPERATING_WAGE_PAY_V1') {
     if (rows.length !== 1) invalid('exact one operating-wage batch required');
     const batch = decodeDurableFinancialPostingBatch({
@@ -241,7 +278,7 @@ export function decodeBoundedPostwarFinancialPostings(input: {
 }
 
 /** Exact whole-set decoder. This accepts no production/consumption effects;
- * the Core reducer must additionally rederive the complete Goods lifecycle. */
+ * Core must additionally rederive the complete Goods or logistics lifecycle. */
 export function decodeBoundedPostwarInventoryPostings(input: {
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
@@ -250,19 +287,30 @@ export function decodeBoundedPostwarInventoryPostings(input: {
   const rows = input.rows.filter(
     (r) => r.causation_command_id === input.command.commandId,
   );
-  const operation = (
-    {
-      CORE_GOODS_TRANSFER_V1: 'RESERVE',
-      CORE_GOODS_SHIPMENT_V1: 'SHIP',
-      CORE_GOODS_DELIVERY_V1: 'DELIVER',
-    } as const
-  )[input.command.commandType as 'CORE_GOODS_TRANSFER_V1'];
+  const action = logisticsAction(input.command);
+  const operation =
+    action === undefined
+      ? (
+          {
+            CORE_GOODS_TRANSFER_V1: 'RESERVE',
+            CORE_GOODS_SHIPMENT_V1: 'SHIP',
+            CORE_GOODS_DELIVERY_V1: 'DELIVER',
+          } as const
+        )[input.command.commandType as 'CORE_GOODS_TRANSFER_V1']
+      : action === 'BOOK'
+        ? 'RESERVE'
+        : action === 'SHIP'
+          ? 'SHIP'
+          : action === 'DELIVER'
+            ? 'DELIVER'
+            : undefined;
   if (!operation) {
     if (rows.length)
-      invalid('inventory effects outside installed Goods family');
+      invalid('inventory effects outside installed Goods/logistics movement');
     return Object.freeze([]);
   }
-  if (rows.length !== 1) invalid('exact one Goods inventory posting required');
+  if (rows.length !== 1)
+    invalid('exact one inventory movement posting required');
   const r = rows[0]!,
     raw = r.canonical_payload;
   if (typeof raw !== 'string') invalid('canonical inventory bytes required');
@@ -285,7 +333,7 @@ export function decodeBoundedPostwarInventoryPostings(input: {
     p.entries.length !== 2 ||
     !Array.isArray(p.causationEventIds)
   )
-    invalid('exact canonical Goods intent required');
+    invalid('exact canonical inventory movement intent required');
   const posting = createInventoryPosting(
     {
       schemaVersion: 'inventory-posting-v1',

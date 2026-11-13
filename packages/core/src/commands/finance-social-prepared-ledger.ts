@@ -232,6 +232,15 @@ export function replayPreparedFinanceSocialFxLedger(input: {
   readonly industryWageSources?: Parameters<
     typeof prepareFinanceNativeBudgetMixedPrefix
   >[0]['industryWageSources'];
+  readonly industryLogisticsSources?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['industryLogisticsSources'];
+  readonly industryPowerOriginals?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['industryPowerOriginals'];
+  readonly industryWaterOriginals?: Parameters<
+    typeof prepareFinanceNativeBudgetMixedPrefix
+  >[0]['industryWaterOriginals'];
   readonly captainCountries?: Parameters<
     typeof prepareFinanceNativeBudgetMixedPrefix
   >[0]['captainCountries'];
@@ -285,6 +294,15 @@ export function replayPreparedFinanceSocialFxLedger(input: {
       ...(input.industryWageSources === undefined
         ? {}
         : { industryWageSources: input.industryWageSources }),
+      ...(input.industryLogisticsSources === undefined
+        ? {}
+        : { industryLogisticsSources: input.industryLogisticsSources }),
+      ...(input.industryPowerOriginals === undefined
+        ? {}
+        : { industryPowerOriginals: input.industryPowerOriginals }),
+      ...(input.industryWaterOriginals === undefined
+        ? {}
+        : { industryWaterOriginals: input.industryWaterOriginals }),
       ...(input.captainCountries === undefined
         ? {}
         : { captainCountries: input.captainCountries }),
