@@ -201,6 +201,7 @@ export async function prepareRegisteredFinalNativeSqlPlan({
     schemaVersion: 'registered-final-native-sql-plan-v1',
     classification: 'PREPARED_NOT_EXECUTED_NOT_PRODUCTION_APPROVAL',
     expectedCommit,
+    reuseSafeOwnedClusterRoles: completeOpeningInventory,
     repositoryRoot: root,
     entries: Object.freeze(entries),
     planSha256: sha(
@@ -212,6 +213,64 @@ export async function prepareRegisteredFinalNativeSqlPlan({
   });
   issuedPlans.add(plan);
   return plan;
+}
+const fixedRoleCreation =
+  /^create role ([a-z0-9_]+) nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;/gmu;
+/** Read-only bounded catalogue check, before any fresh-clone DDL. This is not
+ * an authority grant and never edits existing role attributes/memberships. */
+export async function inspectRegisteredFinalExistingRolesFrom(plan, database) {
+  if (!issuedPlans.has(plan)) throw Error('GENUINE_FIXED_SQL_PLAN_REQUIRED');
+  const candidates = [
+    ...new Set(
+      plan.entries.flatMap((item) =>
+        [
+          ...item.bytes.matchAll(
+            /\bcreate role ([a-z0-9_]+) nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication/gu,
+          ),
+        ].map((match) => match[1]),
+      ),
+    ),
+  ].sort();
+  const result = await database.query(
+    'select rolname,rolcanlogin,rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,rolreplication from pg_roles where rolname=any($1::text[]) order by rolname',
+    [candidates],
+  );
+  if (
+    result.rows.some(
+      (r) =>
+        r.rolcanlogin ||
+        r.rolsuper ||
+        r.rolbypassrls ||
+        r.rolcreatedb ||
+        r.rolcreaterole ||
+        r.rolreplication,
+    )
+  )
+    throw Error('UNSAFE_TEST_ROLE_REUSE');
+  const unconditional = plan.entries.flatMap((item) =>
+    [...item.bytes.matchAll(fixedRoleCreation)].map((m) => ({
+      proposal: item.name,
+      role: m[1],
+    })),
+  );
+  return Object.freeze({
+    classification: 'READ_ONLY_EXISTING_FIXED_ROLE_PROFILE_NOT_ENROLLMENT',
+    candidates,
+    existing: result.rows,
+    unconditional,
+    absent: candidates.filter(
+      (name) => !result.rows.some((r) => r.rolname === name),
+    ),
+  });
+}
+function safeOwnedRoleReuseSql(bytes) {
+  // Existing native fixture pattern, scoped to the exact six negative role
+  // attributes. Every function/table/policy body remains byte-for-byte intact.
+  return bytes.replace(
+    fixedRoleCreation,
+    (_, role) =>
+      `do $$begin if not exists(select 1 from pg_roles where rolname='${role}')then create role ${role} nologin nosuperuser nobypassrls nocreatedb nocreaterole noreplication;end if;if exists(select 1 from pg_roles where rolname='${role}'and(rolcanlogin or rolsuper or rolbypassrls or rolcreatedb or rolcreaterole or rolreplication))then raise exception 'UNSAFE_TEST_ROLE_REUSE';end if;end;$$;`,
+  );
 }
 /** The fixture must provide exact receipts for already installed source files.
  * Existence alone cannot stand in for installing the current candidate bytes.
@@ -236,6 +295,12 @@ export async function installRegisteredFinalNativeSqlFrom({
   ).rows;
   if (actual.length !== 1 || actual[0].database !== fixture.clone.database)
     throw Error('ACTUAL_OWNED_CLONE_CONNECTION_REQUIRED');
+  const rolePreflight = plan.reuseSafeOwnedClusterRoles
+    ? await inspectRegisteredFinalExistingRolesFrom(
+        plan,
+        fixture.clone.installer,
+      )
+    : undefined;
   const committed = [];
   for (const item of plan.entries) {
     if (installedSources[item.name] !== undefined) {
@@ -245,11 +310,27 @@ export async function installRegisteredFinalNativeSqlFrom({
     }
     // A failed/unknown DDL transaction is retained by the caller; never repair,
     // drop objects, grant runtime privileges or replay economics automatically.
-    await fixture.clone.installer.query(item.bytes);
+    const executed = plan.reuseSafeOwnedClusterRoles
+      ? safeOwnedRoleReuseSql(item.bytes)
+      : item.bytes;
+    await fixture.clone.installer.query(executed);
     const receipt = Object.freeze({
       name: item.name,
       sha256: item.sha256,
       status: 'DDL_COMMITTED',
+      ...(rolePreflight
+        ? {
+            executedSha256: sha(executed),
+            roleReuse: {
+              changedOnlyFixedRoleCreation: executed !== item.bytes,
+              readback: rolePreflight.existing.filter((r) =>
+                rolePreflight.unconditional.some(
+                  (v) => v.proposal === item.name && v.role === r.rolname,
+                ),
+              ),
+            },
+          }
+        : {}),
     });
     committed.push(receipt);
     await recordCommitted(receipt);

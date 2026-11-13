@@ -6,7 +6,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { parseOpeningSeed } from '@econmind/core';
+import { canonicalSerialize, parseOpeningSeed } from '@econmind/core';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -22,8 +22,9 @@ export async function prepareRehearsalChildSource({
     throw Error('ABSOLUTE_PARENT_AND_NEW_OUTPUT_REQUIRED');
   await mkdir(outputDirectory, { recursive: false, mode: 0o700 });
   const json = (value) => JSON.stringify(value, null, 2) + '\n';
-  const save = (name, value) =>
-    writeFile(path.join(outputDirectory, name), json(value), {
+  const canonicalJson = (value) => canonicalSerialize(value) + '\n';
+  const save = (name, value, serialize = json) =>
+    writeFile(path.join(outputDirectory, name), serialize(value), {
       flag: 'wx',
       mode: 0o600,
     });
@@ -76,8 +77,8 @@ export async function prepareRehearsalChildSource({
       candidateModule.preparePostwarBeneficialHousingRentCandidate({
         parentSeed: parent,
       });
-    await save('candidate-seed.json', candidate.seed);
-    await save('receipts.json', candidate.receipts);
+    await save('candidate-seed.json', candidate.seed, canonicalJson);
+    await save('receipts.json', candidate.receipts, canonicalJson);
     await stage('CHILD_DERIVED_FROM_UNMODIFIED_PARENT', {
       childFingerprint: candidate.seed.fingerprint,
       countryReceipts: candidate.receipts.length,
