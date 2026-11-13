@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "postwar-function-forward-manifest-v1",
+  "id": "postwar-industry-run-parameters-capacity-v2",
+  "classification": "UNAPPROVED_FIXED_FUNCTION_FORWARD_NOT_FRESH_PROPOSAL_REPLAY",
+  "installationAllowed": false,
+  "productionApproval": "NOT_GRANTED",
+  "predecessorWorldCommit": "ae79a0599ea3da984e6dce969ffd9f7dec043409",
+  "targetSourceCommit": "a490fd8913ddecd97b9b8afc483dc16202d391b7",
+  "sourcePin": {
+    "path": "database/proposals/postwar-industry-run-parameters-read.sql",
+    "oldSha256": "a44e93e16868d79441b95aae811a7a6c7c36d161d6f838cc7ab13b4453561f27",
+    "newSha256": "9e01af82b76922907700e73dc241cf022bba9324dca6869cc824aa511fb21690"
+  },
+  "functions": [
+    {
+      "signature": "world_v2.postwar_industry_run_parameter_originals(text,text,text,text)",
+      "sourcePath": "database/proposals/postwar-industry-run-parameters-read.sql",
+      "oldBodySha256": "f6f0d33f55f942e7fecb4d67814433600f695bf1b74c2cd9a249585a504d389b",
+      "newBodySha256": "858bc48d7c8dd516b3a9d03d375f95ca6e7d512ba1fe9cf1f255e21d014fabcf",
+      "owner": "world_v2_industry_source_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": ["p_world", "p_country", "p_seed", "p_admission"],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "jsonb",
+      "acl": [
+        {
+          "grantee": "world_v2_industry_source_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ],
+      "oldBody": "\ndeclare result jsonb;begin\n perform set_config('econmind.industry_source_world',p_world,true);\n select jsonb_agg(jsonb_build_object('schemaVersion','postwar-industry-run-parameter-row-v1','countryId',s.country_id,'facilityId',s.facility_id,'locationId',s.source_text::jsonb->>'locationId','operatorId',s.source_text::jsonb->>'operatorId','sourceRef',s.source_ref,'sourceRawSha256',s.source_sha256,'policyVersion',s.policy_version,'policyRawSha256',s.policy_raw_sha256,'userAdoptionRawSha256',s.user_adoption_raw_sha256,'outputUnit',s.source_text::jsonb->'recipe'->>'outputUnit','expenseCurrency',d.asset_account->>'currency','windowStartsAtSimTime',s.source_text::jsonb->>'openingWindowStartsAtSimTime','windowEndsAtSimTime',s.source_text::jsonb->>'openingWindowEndsAtSimTime','maximumMinutesPerWorkerFirstSimDay',s.source_text::jsonb->>'maximumMinutesPerWorkerFirstSimDay','measurement','ADOPTED_PARAMETERS_NOT_RUN_WORK_PAYMENT_OR_OUTPUT_AUTHORITY')order by s.facility_id collate\"C\")into result\n from world_v2.postwar_industry_first_day_source s\n join world_v2.postwar_industry_original o on o.world_id=s.world_id and o.registration_ref=s.registration_ref and o.country_id=s.country_id and o.facility_id=s.facility_id and o.seed_fingerprint=s.seed_fingerprint and o.admission_ref=s.admission_ref and o.document_sha256=s.source_text::jsonb->>'siteDocumentSha256'and o.document_sha256=encode(sha256(convert_to(o.document_text,'UTF8')),'hex')\n join world_v2.postwar_industry_deposit_original d on d.world_id=s.world_id and d.country_id=s.country_id and d.kind='OPERATOR_BANK_DEPOSIT'and d.seed_fingerprint=s.seed_fingerprint and d.admission_ref=s.admission_ref and d.asset_account->>'ownerId'=s.source_text::jsonb->>'operatorId'and d.asset_account->>'currency'=d.liability_account->>'currency'\n where s.world_id=p_world and s.country_id=p_country and s.seed_fingerprint=p_seed and s.admission_ref=p_admission\n and exists(select 1 from world_v2.runtime_opening_admission a where a.world_id=p_world and a.seed_id=s.seed_id and a.seed_fingerprint=p_seed and a.admission_ref=p_admission) and s.source_text::jsonb->>'seedId'=s.seed_id\n and s.source_sha256=encode(sha256(convert_to(s.source_text,'UTF8')),'hex')and s.source_ref='INDUSTRY_FIRST_DAY_'||upper(s.source_sha256)\n and s.source_text::jsonb->>'worldId'=p_world and s.source_text::jsonb->>'countryId'=p_country and s.source_text::jsonb->>'facilityId'=s.facility_id and s.source_text::jsonb->>'seedFingerprint'=p_seed and s.source_text::jsonb->>'admissionRef'=p_admission\n and s.source_text::jsonb->>'policyVersion'=s.policy_version and s.source_text::jsonb->>'policyRawSha256'=s.policy_raw_sha256 and s.source_text::jsonb->>'userAdoptionRawSha256'=s.user_adoption_raw_sha256\n and not exists(select 1 from world_v2.postwar_industry_first_day_source_revocation v where v.world_id=p_world and v.source_ref=s.source_ref)\n and not exists(select 1 from world_v2.postwar_industry_original_revocation v where v.world_id=p_world and v.registration_ref=s.registration_ref);\n return result;\nend;"
+    },
+    {
+      "signature": "world_v2.read_postwar_industry_run_parameters_page(text,integer,integer,text)",
+      "sourcePath": "database/proposals/postwar-industry-run-parameters-read.sql",
+      "oldBodySha256": "d9daefb8be11f88c4cb3585491502445081b7cc3beb1aedb19fad414d2c62ff1",
+      "newBodySha256": "cda9dc098c7ea6445ea05cfd98a63fd7963d878e359e631bd77b5b3939e9a9bc",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": ["search_path=pg_catalog"],
+      "argumentNames": [
+        "p_world",
+        "p_offset",
+        "p_limit",
+        "p_expected",
+        "status",
+        "scope",
+        "source",
+        "page",
+        "rows_text"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(status text, scope jsonb, source jsonb, page jsonb, rows_text text)",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantee": "world_v2_postwar_projection_reader",
+          "grantor": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ],
+      "oldBody": "\ndeclare s record;b world_v2.postwar_office_projection_document%rowtype;items jsonb;selected jsonb;version text;total integer;returned integer;begin\n if current_setting('transaction_read_only')<>'on'or current_setting('transaction_isolation')not in('repeatable read','serializable')then raise exception 'INDUSTRY_RUN_PARAMETER_STABLE_READ_ONLY_REQUIRED'using errcode='25001';end if;\n if p_offset is null or p_limit is null or p_offset<0 or p_offset>100000 or p_limit<1 or p_limit>100 or(p_offset>0 and p_expected is null)or(p_expected is not null and p_expected!~'^sha256:[a-f0-9]{64}$')then raise exception 'INDUSTRY_RUN_PARAMETER_INVALID_PAGE'using errcode='22023';end if;\n select * into s from world_v2.read_postwar_office_projection_seats(p_world)h where h.office_id='INDUSTRY';\n if not found then return query select'DENIED',null::jsonb,null::jsonb,null::jsonb,'[]';return;end if;\n select * into b from world_v2.postwar_office_projection_document d where d.world_id=p_world and d.country_id=s.country_id and d.office_id='INDUSTRY'and d.dataset='regional-source-capacity'and d.seed_id=s.seed_id and d.seed_fingerprint=s.seed_fingerprint and d.admission_ref=s.admission_ref and d.source_bundle_sha256=s.source_bundle_sha256 and not exists(select 1 from world_v2.postwar_office_projection_revocation v where v.world_id=p_world and v.document_ref=d.document_ref);\n if not found then return query select'UNAVAILABLE',null::jsonb,null::jsonb,null::jsonb,'[]';return;end if;\n items:=world_v2.postwar_industry_run_parameter_originals(p_world,s.country_id,s.seed_fingerprint,s.admission_ref);\n -- No installed source is unknown/unavailable, never a known empty facility set.\n if items is null then return query select'UNAVAILABLE',null::jsonb,null::jsonb,null::jsonb,'[]';return;end if;\n total:=jsonb_array_length(items);if total<1 or total>100 or octet_length(items::text)>48000 then raise exception 'INDUSTRY_RUN_PARAMETER_BOUNDED_SOURCE_REQUIRED'using errcode='54000';end if;\n version:='sha256:'||encode(sha256(convert_to(jsonb_build_array(p_world,s.country_id,s.seed_fingerprint,s.admission_ref,s.world_version,s.event_sequence,items)::text,'UTF8')),'hex');\n if p_expected is not null and version<>p_expected then return query select'STALE',null::jsonb,null::jsonb,null::jsonb,'[]';return;end if;\n select coalesce(jsonb_agg(x order by n),'[]'::jsonb)into selected from jsonb_array_elements(items)with ordinality q(x,n)where n>p_offset and n<=p_offset+p_limit;returned:=jsonb_array_length(selected);\n return query select case when returned=0 then'EMPTY'else'PAGE'end,\n jsonb_build_object('worldId',s.world_id,'countryId',s.country_id,'officeId',s.office_id,'authSubject',s.auth_subject,'teamId',s.team_id,'authorizationVersion',s.authorization_revision,'scopeKey',s.scope_key,'seatRef',s.seat_ref),\n jsonb_build_object('dataNature','ADMITTED_IMMUTABLE_OPENING_FACTS','sourceVersion',version,'sourceRevision','postwar-industry-run-parameters-v1','seedId',s.seed_id,'seedFingerprint',s.seed_fingerprint,'admissionRef',s.admission_ref,'modelVersion',s.model_version,'replayBinding',s.replay_binding,'sourceBundleSha256',s.source_bundle_sha256,'canonicalSeedSha256',b.canonical_seed_sha256,'worldVersion','0','eventSequence','0','originWorldVersion','0','originEventSequence','0','observedHead',jsonb_build_object('worldVersion',s.world_version,'eventSequence',s.event_sequence),'pageHash',encode(sha256(convert_to(items::text,'UTF8')),'hex'),'returnedRowsHash',encode(sha256(convert_to(selected::text,'UTF8')),'hex'),'hashAlgorithm','POSTGRES_JSONB_TEXT_UTF8_SHA256','sourcePointer',jsonb_build_object('rowOrigin','world_v2.postwar_industry_first_day_source.source_text','rowBinding','sourceRef+sourceRawSha256','adoptionContext','exact immutable World seed/admission and original site document; not a replacement row origin')),\n jsonb_build_object('offset',p_offset,'limit',p_limit,'returned',returned,'total',total,'nextOffset',case when p_offset+returned<total then p_offset+returned else null end),selected::text;\nend;"
+    }
+  ],
+  "upgrade": {
+    "path": "database/upgrades/postwar-industry-run-parameters-capacity-upgrade.sql",
+    "sha256": "9064f3c12fc7c97cdcfac7610fa3cac95b874df4920c79352e6fa07ed689799a",
+    "bytes": 15543,
+    "existingFunctionCount": 2,
+    "newFunctionCount": 0,
+    "newRelationCount": 0
+  },
+  "operatorPreconditions": [
+    "ISOLATED_OR_SEPARATELY_APPROVED_TARGET_ONLY",
+    "ALL_READERS_CONSUMERS_AND_SOURCE_PUBLICATION_TRANSACTIONS_STOPPED_AND_DRAINED",
+    "EXACT_OLD_FUNCTION_BODIES_AND_METADATA_REQUIRED",
+    "UNKNOWN_COMMIT_RESULT_STOP_INSPECT_NO_BLIND_RETRY"
+  ],
+  "repeat": "REFUSED_INSPECT_CONFIRMED_RECEIPT_NO_BLIND_RETRY",
+  "sourceInitializationPerformed": false,
+  "economicCommandsPerformed": false,
+  "permissionChanges": false,
+  "notCovered": [
+    "Production target and release approval",
+    "Installed target catalog observation",
+    "Node or browser deployment",
+    "Official source/financial adoption"
+  ]
+}
