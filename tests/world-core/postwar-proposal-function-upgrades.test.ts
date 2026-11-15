@@ -13,7 +13,9 @@ const readTarget = (name: string) =>
   read(
     name === 'postwar-industry-first-day-source'
       ? 'tests/fixtures/sql/postwar-industry-first-day-source.4b6d400c.sql'
-      : 'database/proposals/' + name + '.sql',
+      : name === 'postwar-paged-current-projection'
+        ? 'tests/fixtures/sql/postwar-paged-current-projection.4b6d400c.sql'
+        : 'database/proposals/' + name + '.sql',
   );
 const names = [
   'postwar-captain-current-derived-read',

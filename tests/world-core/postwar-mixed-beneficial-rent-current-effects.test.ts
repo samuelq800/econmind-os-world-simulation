@@ -222,9 +222,15 @@ it('replays two real paid periods at the same legal HH claim, keeps committed hi
       '0007_world_v2_atomic_transition_facts',
       '0009_world_v2_posting_payload_integrity',
       '0011_world_v2_current_commit_authorization',
+      '0013_world_v2_read_projection_boundary',
       '0016_world_v2_opening_seed',
     ])
       await db.exec(await read('migrations/artifacts/' + id + '.sql'));
+    // This test intentionally supplies catalog seams rather than an admitted
+    // opening. Custody's read-role grants also require the seat relation.
+    await db.exec(`create table world_v2.runtime_read_seat(
+      world_id text,auth_subject uuid,country_id text,office_id text,
+      team_id text,authorization_revision text,seat_ref text);`);
     await db.exec(`create table world_v2.runtime_opening_admission(world_id text,seed_id text,seed_fingerprint text,replay_binding text,model_version text,admission_ref text,admitted_at_real timestamptz);
   create table world_v2.runtime_admission_publication_permit(authorization_id text,authorization_sha256 text,world_id text,seed_id text,seed_fingerprint text,model_version text,replay_binding text,valid_from timestamptz,valid_until timestamptz);
   create table world_v2.runtime_admission_publication_revocation(authorization_id text);`);

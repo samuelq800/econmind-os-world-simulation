@@ -149,10 +149,10 @@ async function waitUntil<T>(
   );
 }
 
-async function waitForHttp(port: number) {
+async function waitForHttp(port: number, startupBudgetMs = 15_000) {
   return waitUntil(
     () => probePublicRuntimeEndpoint(port, '/readyz'),
-    15_000,
+    startupBudgetMs,
     `readiness on port ${port}`,
   );
 }
@@ -417,7 +417,16 @@ async function repeatedSignalAttack(
   let captured: ProcessRow[] = [];
   let socket: Socket | undefined;
   try {
-    await waitForHttp(port);
+    // dev:api/worker compile their real TypeScript graph before listening.
+    // Allow that startup phase on shared CI without changing any shutdown,
+    // repeated-signal, socket-drain or descendant-termination assertions.
+    try {
+      await waitForHttp(port, 30_000);
+    } catch (error) {
+      throw new Error(`Public runtime startup failed: ${managed.output()}`, {
+        cause: error,
+      });
+    }
     captured = descendants(await readProcessTable(), managed.child.pid ?? -1);
     const runtime = captured.find((row) =>
       service.runtimePattern.test(row.command),

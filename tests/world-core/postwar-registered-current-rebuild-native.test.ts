@@ -245,7 +245,7 @@ native(
         const subjectRows =
           await f.clone.installer.query<RegisteredCurrentBrowserActorBinding>(
             REGISTERED_CURRENT_BROWSER_SUBJECT_QUERY,
-            [f.marker.worldId],
+            [f.marker.worldId, ['COUNTRY_02']],
           );
         const authSubject = registeredCurrentC2BrowserSubject(
           subjectRows.rows,

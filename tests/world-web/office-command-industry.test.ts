@@ -61,6 +61,10 @@ describe('Industry reference-only intent and bounded labour read surface', () =>
     expect(officeFamilies.INDUSTRY).toEqual([
       'CORE_INDUSTRY_PRODUCTION_V1',
       'CORE_INDUSTRY_RUN_SCHEDULE_V1',
+      'CORE_INDUSTRY_UTILISATION_TARGET_SET_V1',
+      'INDUSTRY_FIRST_DAY_POWER_EXECUTE_V1',
+      'INDUSTRY_FIRST_DAY_WATER_EXECUTE_V1',
+      'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1',
     ]);
     expect(parseOfficeIntent(f.request, f.read)).toEqual(f.request);
     expect(

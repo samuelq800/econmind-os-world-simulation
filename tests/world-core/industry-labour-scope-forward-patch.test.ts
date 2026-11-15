@@ -9,7 +9,7 @@ import {
 } from '../support/industry-labour-scope-forward-patch.js';
 const previousSql = readFileSync(
   new URL(
-    '../../database/proposals/postwar-industry-labour-current-read.sql',
+    '../fixtures/sql/postwar-industry-labour-current-read.da94940a.sql',
     import.meta.url,
   ),
   'utf8',
