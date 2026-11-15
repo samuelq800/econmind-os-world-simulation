@@ -75,6 +75,7 @@ import {
   createFinanceBudgetAuthorizationDatabase,
 } from '../persistence/postgres-finance-budget-custody.js';
 import { createFinanceBudgetIntakeAuthorizationPool } from '../persistence/finance-budget-intake-authorization.js';
+import { createFinanceBudgetSourceRoleDatabase } from '../persistence/finance-budget-source-role-database.js';
 import {
   createPostwarDayOneFxAuthorizationDatabase,
   createPostwarDayOneFxIntakeAuthorizationPool,
@@ -476,8 +477,11 @@ function constructFinanceSocialRuntimeConnection(
     const fxDatabase = input.treasuryFx
       ? createPostwarDayOneFxAuthorizationDatabase(executionDatabase)
       : executionDatabase;
-    const financeDatabase =
-      createFinanceBudgetAuthorizationDatabase(fxDatabase);
+    const financeDatabase = createFinanceBudgetAuthorizationDatabase(
+      createFinanceBudgetSourceRoleDatabase(fxDatabase, {
+        workerRole: resources.workerRole,
+      }),
+    );
     const captainDatabase = input.captain
       ? createPostwarCaptainAuthorizationDatabase(financeDatabase)
       : financeDatabase;
