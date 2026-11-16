@@ -594,9 +594,14 @@ process.on('message', async (m) => {
       if (
         !binding ||
         !Array.isArray(m.countryIds) ||
-        m.countryIds.length !== 1 ||
-        m.countryIds[0] !== 'COUNTRY_10' ||
-        !configuredPublicationCountries.has('COUNTRY_10') ||
+        m.countryIds.length < 1 ||
+        m.countryIds.length > 2 ||
+        new Set(m.countryIds).size !== m.countryIds.length ||
+        m.countryIds.some(
+          (country) =>
+            !['COUNTRY_02', 'COUNTRY_10'].includes(country) ||
+            !configuredPublicationCountries.has(country),
+        ) ||
         !m.expectedHead ||
         Object.keys(m.expectedHead).sort().join(',') !==
           'eventSequence,worldVersion' ||
@@ -609,7 +614,7 @@ process.on('message', async (m) => {
           (k) => !['id', 'type', 'countryIds', 'expectedHead'].includes(k),
         )
       )
-        throw Error('FIXED_CONFIGURED_C10_CURRENT_PUBLICATION_REQUIRED');
+        throw Error('FIXED_CONFIGURED_C2_C10_CURRENT_PUBLICATION_REQUIRED');
       send({
         id: m.id,
         ok: true,

@@ -276,6 +276,23 @@ native('same observed H7 C10 resume without reexecuting committed work', () => {
       });
       assert.deepEqual(await ledger(), report.before);
       await save();
+      // FINAL recovery must not reexecute work. The earlier failed post-commit
+      // replay left H6 derived pages behind; explicitly rebuild the registered
+      // countries at the held H7 head before demanding current ledger readback.
+      report.h7DerivedRecovery = await d.rpc('PUBLISH_CURRENT_COUNTRIES', {
+        countryIds: ['COUNTRY_02', 'COUNTRY_10'],
+        expectedHead: { worldVersion: '7', eventSequence: '7' },
+      });
+      const publication = row(report.h7DerivedRecovery);
+      assert.equal(publication.status, 'PUBLISHED');
+      assert.deepEqual(publication.head, {
+        worldId: m.worldId,
+        worldVersion: '7',
+        eventSequence: '7',
+      });
+      assert.deepEqual(publication.countries, ['COUNTRY_02', 'COUNTRY_10']);
+      assert.deepEqual(await ledger(), report.before);
+      await save();
       report.fxQuotesBefore = await probeRetainedFxQuotes({
         driver: d,
         installer: f.clone.installer,
