@@ -3,6 +3,7 @@
  * admission/actor/consumer authority. Core continuation must reject unknowns. */
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { PGlite } from '@electric-sql/pglite';
 import { beforeAll, afterAll, it, expect } from 'vitest';
 import * as C from '@econmind/core';
@@ -689,90 +690,107 @@ it('restricts the private MATCH page entry to the fixed publishing role and exac
   }
 });
 
-it('independently verifies complete page chains over 257 actual Core Budget transitions with no raw publisher reads', async () => {
-  const w = 'WORLD_FX_TEST_ONLY',
-    admissionRef = 'ADMISSION_' + sha(w).toUpperCase(),
-    probe = createFinanceSocialContinuationFixture({ admissionRef }),
-    adopted = await loadAdoptedCaptainOpeningPolicy(
-      new URL('../../', import.meta.url).pathname,
-    ),
-    candidate = createAdoptedCaptainOpeningCandidate(adopted, {
-      worldId: w,
-      seedId: probe.f.seed.seedId,
-      seedFingerprint: probe.f.seed.fingerprint,
-      worldAdmissionRef: admissionRef,
-      countryIds: Array.from(
-        { length: 70 },
-        (_, i) => 'COUNTRY_' + String(i + 1).padStart(2, '0'),
+// Full Core generation, SQL installation, publication and rejection checks;
+// the macOS 26 CI took >30s while macOS 15 completed in 20.4s. This is a
+// correctness integration test, with all 257 transitions retained.
+it(
+  'independently verifies complete page chains over 257 actual Core Budget transitions with no raw publisher reads',
+  { timeout: 60_000 },
+  async () => {
+    const startedAt = performance.now();
+    const timing = (phase: string) =>
+      console.info(
+        'BOUNDED_PREFIX_PHASE',
+        JSON.stringify({
+          phase,
+          elapsed_ms: Math.round(performance.now() - startedAt),
+        }),
+      );
+    const w = 'WORLD_FX_TEST_ONLY',
+      admissionRef = 'ADMISSION_' + sha(w).toUpperCase(),
+      probe = createFinanceSocialContinuationFixture({ admissionRef }),
+      adopted = await loadAdoptedCaptainOpeningPolicy(
+        fileURLToPath(new URL('../../', import.meta.url)),
       ),
-    }),
-    capital = C.validatePoliticalCapitalSnapshot(
-      JSON.parse(candidate.packets[0]!.genesis.canonicalPayload).capital,
-    ),
-    f = createFinanceSocialContinuationFixture({
-      admissionRef,
-      captainCountries: [{ countryId: 'COUNTRY_01', capital }],
-    }),
-    records: Awaited<ReturnType<typeof f.budget>>[] = [];
-  let cursor = f.start({ worldVersion: '257', eventSequence: '257' });
-  for (let n = 0; n < 257; n++) {
-    const frame = await f.budget(cursor, 'VERIFY_' + n);
-    records.push(frame);
-    cursor = f.append(cursor, [frame]);
-  }
-  // Core/src test issuers and package/dist issuers are distinct. Persist only
-  // canonical DATA across that boundary, then genuinely parse the package seed.
-  const persisted = JSON.parse(sourceCanonicalSerialize(records)) as Frame[];
-  const parsedSeed = C.parseOpeningSeed(
-    JSON.parse(sourceCanonicalSerialize(f.f.seed)),
-    sha,
-  );
-  await install(w, persisted, parsedSeed, async () => {
-    // Real approved numeric policy, but source issuer/admission/reason remain
-    // explicit TEST_ONLY. This is not the official70-scope adoption procedure.
-    const packet = createTestOnlyCaptainPublicationPacket({
-      worldId: w,
-      countryId: 'COUNTRY_01',
-      seedId: parsedSeed.seedId,
-      seedFingerprint: parsedSeed.fingerprint,
-      worldAdmissionRef: admissionRef,
-      capital,
-      reasonFactRef: 'REASON_TEST_ONLY_COUNTRY_01',
-      reasonRecordRef: 'RECORD_TEST_ONLY_COUNTRY_01',
-      reason:
-        'TEST_ONLY allocation reason; not an official governance decision',
-    });
-    expect(
-      (
-        await db.query<{ n: number }>(
-          'select world_version::int as n from world_v2.world_head where world_id=$1',
-          [w],
-        )
-      ).rows[0]!.n,
-    ).toBe(0);
-    await db.exec('set role world_v2_admission_release');
-    try {
-      await registerAndPublishTestOnlyCaptainFrom(executor, packet);
-    } finally {
-      await db.exec('reset role');
+      candidate = createAdoptedCaptainOpeningCandidate(adopted, {
+        worldId: w,
+        seedId: probe.f.seed.seedId,
+        seedFingerprint: probe.f.seed.fingerprint,
+        worldAdmissionRef: admissionRef,
+        countryIds: Array.from(
+          { length: 70 },
+          (_, i) => 'COUNTRY_' + String(i + 1).padStart(2, '0'),
+        ),
+      }),
+      capital = C.validatePoliticalCapitalSnapshot(
+        JSON.parse(candidate.packets[0]!.genesis.canonicalPayload).capital,
+      ),
+      f = createFinanceSocialContinuationFixture({
+        admissionRef,
+        captainCountries: [{ countryId: 'COUNTRY_01', capital }],
+      }),
+      records: Awaited<ReturnType<typeof f.budget>>[] = [];
+    let cursor = f.start({ worldVersion: '257', eventSequence: '257' });
+    for (let n = 0; n < 257; n++) {
+      const frame = await f.budget(cursor, 'VERIFY_' + n);
+      records.push(frame);
+      cursor = f.append(cursor, [frame]);
     }
-  });
-  const coreCurrent = readSourceContinuation(cursor);
-  expect(coreCurrent.complete).toBe(true);
-  expect(coreCurrent.result.financialState!.worldVersion).toBe('257');
-  const currentPositions = JSON.parse(
-    sourceCanonicalSerialize(coreCurrent.result.financialState!.positions),
-  ) as {
-    account: C.FinancialAccount;
-    netDebitBalance: { amount: string; currency: string };
-  }[];
-  expect(
-    sourceCanonicalSerialize(coreCurrent.result.financialState!.positions),
-  ).toBe(sourceCanonicalSerialize(f.opening.financial.positions));
+    // Core/src test issuers and package/dist issuers are distinct. Persist only
+    timing('core-257-transitions');
+    // canonical DATA across that boundary, then genuinely parse the package seed.
+    const persisted = JSON.parse(sourceCanonicalSerialize(records)) as Frame[];
+    const parsedSeed = C.parseOpeningSeed(
+      JSON.parse(sourceCanonicalSerialize(f.f.seed)),
+      sha,
+    );
+    await install(w, persisted, parsedSeed, async () => {
+      // Real approved numeric policy, but source issuer/admission/reason remain
+      // explicit TEST_ONLY. This is not the official70-scope adoption procedure.
+      const packet = createTestOnlyCaptainPublicationPacket({
+        worldId: w,
+        countryId: 'COUNTRY_01',
+        seedId: parsedSeed.seedId,
+        seedFingerprint: parsedSeed.fingerprint,
+        worldAdmissionRef: admissionRef,
+        capital,
+        reasonFactRef: 'REASON_TEST_ONLY_COUNTRY_01',
+        reasonRecordRef: 'RECORD_TEST_ONLY_COUNTRY_01',
+        reason:
+          'TEST_ONLY allocation reason; not an official governance decision',
+      });
+      expect(
+        (
+          await db.query<{ n: number }>(
+            'select world_version::int as n from world_v2.world_head where world_id=$1',
+            [w],
+          )
+        ).rows[0]!.n,
+      ).toBe(0);
+      await db.exec('set role world_v2_admission_release');
+      try {
+        await registerAndPublishTestOnlyCaptainFrom(executor, packet);
+      } finally {
+        await db.exec('reset role');
+      }
+    });
+    const coreCurrent = readSourceContinuation(cursor);
+    timing('persisted-prefix');
+    expect(coreCurrent.complete).toBe(true);
+    expect(coreCurrent.result.financialState!.worldVersion).toBe('257');
+    const currentPositions = JSON.parse(
+      sourceCanonicalSerialize(coreCurrent.result.financialState!.positions),
+    ) as {
+      account: C.FinancialAccount;
+      netDebitBalance: { amount: string; currency: string };
+    }[];
+    expect(
+      sourceCanonicalSerialize(coreCurrent.result.financialState!.positions),
+    ).toBe(sourceCanonicalSerialize(f.opening.financial.positions));
 
-  // Explicit TEST_ONLY H0 metadata seam. Economic frames and their arithmetic
-  // above are genuine Core output; this seam grants no production admission.
-  await db.exec(`create role world_v2_postwar_projection_owner nologin nosuperuser nobypassrls;
+    // Explicit TEST_ONLY H0 metadata seam. Economic frames and their arithmetic
+    // above are genuine Core output; this seam grants no production admission.
+    await db.exec(`create role world_v2_postwar_projection_owner nologin nosuperuser nobypassrls;
   create role world_v2_postwar_projection_publisher nologin nosuperuser nobypassrls;
   create role world_v2_postwar_projection_reader nologin nosuperuser nobypassrls;
   grant usage on schema world_v2 to world_v2_postwar_projection_owner,world_v2_postwar_projection_publisher,world_v2_postwar_projection_reader;
@@ -783,13 +801,119 @@ it('independently verifies complete page chains over 257 actual Core Budget tran
   create function world_v2.postwar_projection_admission_header(text)returns table(world_id text,seed_id text,seed_fingerprint text,admission_ref text,source_bundle_sha256 text,model_version text,replay_binding text)language sql security definer set search_path=pg_catalog as $$select a.world_id,a.seed_id,a.seed_fingerprint,a.admission_ref,repeat('b',64),a.model_version,a.replay_binding from world_v2.runtime_opening_admission a where a.world_id=$1$$;
   revoke all on function world_v2.postwar_projection_admission_header(text)from public;
   grant execute on function world_v2.postwar_projection_admission_header(text)to world_v2_postwar_projection_owner;`);
-  const treasury = f.f.accounts.treasuryAsset;
-  await db.query(
-    'insert into world_v2.postwar_social_prefix_scope(world_id,country_id,scope_document)values($1,$2,$3)',
-    [
-      w,
-      'COUNTRY_01',
-      C.canonicalSerialize({
+    const treasury = f.f.accounts.treasuryAsset;
+    await db.query(
+      'insert into world_v2.postwar_social_prefix_scope(world_id,country_id,scope_document)values($1,$2,$3)',
+      [
+        w,
+        'COUNTRY_01',
+        C.canonicalSerialize({
+          funding: [
+            {
+              payerRole: 'GOV',
+              accountRef: treasury.accountId,
+              claimId: treasury.claimId,
+              payerEntityId: treasury.ownerId,
+              currency: treasury.currency,
+            },
+          ],
+        }),
+      ],
+    );
+    for (const [office, dataset] of [
+      ['SOCIAL', 'positions'],
+      ['SOCIAL', 'service-pools'],
+      ['FINANCE', 'opening-financial-legs'],
+    ])
+      await db.query(
+        'insert into world_v2.postwar_office_projection_document(document_ref,world_id,country_id,office_id,dataset,source_pointer,source_bundle_sha256,seed_fingerprint,admission_ref)values($1,$2,$3,$4,$5,$6,$7,$8,$9)',
+        [
+          'TEST_ONLY_' + office + '_' + dataset,
+          w,
+          'COUNTRY_01',
+          office,
+          dataset,
+          C.canonicalSerialize({
+            financialSourceId: f.f.seed.sources[0]!.sourceId,
+          }),
+          'b'.repeat(64),
+          f.f.seed.fingerprint,
+          admissionRef,
+        ],
+      );
+    for (const table of [
+      'world_head',
+      'runtime_admission_publication_permit',
+      'command_submission',
+      'command_receipt',
+      'authoritative_event',
+      'financial_posting_batch',
+      'inventory_posting',
+      'postwar_social_prefix_scope',
+      'postwar_office_projection_document',
+      'postwar_office_projection_page',
+      'postwar_office_projection_revocation',
+    ])
+      await db.exec(
+        `grant select on world_v2.${table} to world_v2_postwar_projection_owner;create policy test_only_projection_owner on world_v2.${table} for select to world_v2_postwar_projection_owner using(world_id=current_setting('econmind.postwar_projection_world',true))`,
+      );
+    await db.exec(
+      'grant update on world_v2.world_head,world_v2.runtime_admission_publication_permit,world_v2.postwar_office_projection_document to world_v2_postwar_projection_owner',
+    );
+    for (const table of [
+      'world_head',
+      'runtime_admission_publication_permit',
+      'postwar_office_projection_document',
+    ])
+      await db.exec(
+        `create policy test_only_projection_lock on world_v2.${table} for update to world_v2_postwar_projection_owner using(world_id=current_setting('econmind.postwar_projection_world',true))with check(false)`,
+      );
+    await db.exec(
+      'grant select on world_v2.runtime_admission_publication_revocation to world_v2_postwar_projection_owner',
+    );
+    const main = await read(
+      'proposals/postwar-mixed-current-projection-read.sql',
+    );
+    await db.exec(
+      main.slice(
+        main.indexOf('create function world_v2.postwar_mixed_fx_group('),
+        main.indexOf(
+          'create function world_v2.postwar_write_mixed_current_document(',
+        ),
+      ),
+    );
+    await db.exec(
+      main.slice(
+        main.indexOf('grant create on schema world_v2'),
+        main.indexOf('create function world_v2.postwar_mixed_fx_group('),
+      ),
+    );
+    await db.exec(`    alter table world_v2.postwar_office_projection_document add column source_revision text default 'TEST_ONLY_H0';
+    alter table world_v2.postwar_office_projection_document add column model_version text;
+    alter table world_v2.postwar_office_projection_document add column replay_binding text;`);
+    const captainSql = await read(
+      'proposals/postwar-captain-current-derived-read.sql',
+    );
+    await db.exec(captainSql);
+    const socialSql = await read(
+      'proposals/postwar-social-current-prefix-read.sql',
+    );
+    await db.exec(
+      socialSql.slice(
+        socialSql.indexOf(
+          'create function world_v2.postwar_social_origin_at_prefix(',
+        ),
+        socialSql.indexOf(
+          'create function world_v2.publish_postwar_social_current_prefix_projection(',
+        ),
+      ),
+    );
+    await db.exec(`grant select on world_v2.current_materialization to world_v2_postwar_projection_owner;
+    grant update on world_v2.postwar_social_prefix_scope to world_v2_postwar_projection_owner;`);
+    const scopeRows = {
+        countryId: 'COUNTRY_01',
+        positions: f.social.state.labour.positions,
+        servicePools: f.social.state.servicePools,
         funding: [
           {
             payerRole: 'GOV',
@@ -799,464 +923,363 @@ it('independently verifies complete page chains over 257 actual Core Budget tran
             currency: treasury.currency,
           },
         ],
-      }),
-    ],
-  );
-  for (const [office, dataset] of [
-    ['SOCIAL', 'positions'],
-    ['SOCIAL', 'service-pools'],
-    ['FINANCE', 'opening-financial-legs'],
-  ])
+      },
+      scopeRaw = sourceCanonicalSerialize(scopeRows);
     await db.query(
-      'insert into world_v2.postwar_office_projection_document(document_ref,world_id,country_id,office_id,dataset,source_pointer,source_bundle_sha256,seed_fingerprint,admission_ref)values($1,$2,$3,$4,$5,$6,$7,$8,$9)',
+      'update world_v2.postwar_social_prefix_scope set scope_document=$2,scope_sha256=$3,seed_fingerprint=$4,admission_ref=$5,source_bundle_sha256=$6 where world_id=$1',
       [
-        'TEST_ONLY_' + office + '_' + dataset,
         w,
-        'COUNTRY_01',
-        office,
-        dataset,
-        C.canonicalSerialize({
-          financialSourceId: f.f.seed.sources[0]!.sourceId,
-        }),
-        'b'.repeat(64),
+        scopeRaw,
+        sha(scopeRaw),
         f.f.seed.fingerprint,
         admissionRef,
+        'b'.repeat(64),
       ],
     );
-  for (const table of [
-    'world_head',
-    'runtime_admission_publication_permit',
-    'command_submission',
-    'command_receipt',
-    'authoritative_event',
-    'financial_posting_batch',
-    'inventory_posting',
-    'postwar_social_prefix_scope',
-    'postwar_office_projection_document',
-    'postwar_office_projection_page',
-    'postwar_office_projection_revocation',
-  ])
-    await db.exec(
-      `grant select on world_v2.${table} to world_v2_postwar_projection_owner;create policy test_only_projection_owner on world_v2.${table} for select to world_v2_postwar_projection_owner using(world_id=current_setting('econmind.postwar_projection_world',true))`,
-    );
-  await db.exec(
-    'grant update on world_v2.world_head,world_v2.runtime_admission_publication_permit,world_v2.postwar_office_projection_document to world_v2_postwar_projection_owner',
-  );
-  for (const table of [
-    'world_head',
-    'runtime_admission_publication_permit',
-    'postwar_office_projection_document',
-  ])
-    await db.exec(
-      `create policy test_only_projection_lock on world_v2.${table} for update to world_v2_postwar_projection_owner using(world_id=current_setting('econmind.postwar_projection_world',true))with check(false)`,
-    );
-  await db.exec(
-    'grant select on world_v2.runtime_admission_publication_revocation to world_v2_postwar_projection_owner',
-  );
-  const main = await read(
-    'proposals/postwar-mixed-current-projection-read.sql',
-  );
-  await db.exec(
-    main.slice(
-      main.indexOf('create function world_v2.postwar_mixed_fx_group('),
-      main.indexOf(
-        'create function world_v2.postwar_write_mixed_current_document(',
-      ),
-    ),
-  );
-  await db.exec(
-    main.slice(
-      main.indexOf('grant create on schema world_v2'),
-      main.indexOf('create function world_v2.postwar_mixed_fx_group('),
-    ),
-  );
-  await db.exec(`    alter table world_v2.postwar_office_projection_document add column source_revision text default 'TEST_ONLY_H0';
-    alter table world_v2.postwar_office_projection_document add column model_version text;
-    alter table world_v2.postwar_office_projection_document add column replay_binding text;`);
-  const captainSql = await read(
-    'proposals/postwar-captain-current-derived-read.sql',
-  );
-  await db.exec(captainSql);
-  const socialSql = await read(
-    'proposals/postwar-social-current-prefix-read.sql',
-  );
-  await db.exec(
-    socialSql.slice(
-      socialSql.indexOf(
-        'create function world_v2.postwar_social_origin_at_prefix(',
-      ),
-      socialSql.indexOf(
-        'create function world_v2.publish_postwar_social_current_prefix_projection(',
-      ),
-    ),
-  );
-  await db.exec(`grant select on world_v2.current_materialization to world_v2_postwar_projection_owner;
-    grant update on world_v2.postwar_social_prefix_scope to world_v2_postwar_projection_owner;`);
-  const scopeRows = {
-      countryId: 'COUNTRY_01',
-      positions: f.social.state.labour.positions,
-      servicePools: f.social.state.servicePools,
-      funding: [
-        {
-          payerRole: 'GOV',
-          accountRef: treasury.accountId,
-          claimId: treasury.claimId,
-          payerEntityId: treasury.ownerId,
-          currency: treasury.currency,
-        },
+    await db.query(
+      'update world_v2.postwar_office_projection_document set seed_id=$2,canonical_seed_sha256=$3,model_version=$4,replay_binding=$5 where world_id=$1',
+      [
+        w,
+        f.f.seed.seedId,
+        'c'.repeat(64),
+        f.f.seed.replayBinding.modelVersion,
+        sourceCanonicalSerialize(f.f.seed.replayBinding),
       ],
-    },
-    scopeRaw = sourceCanonicalSerialize(scopeRows);
-  await db.query(
-    'update world_v2.postwar_social_prefix_scope set scope_document=$2,scope_sha256=$3,seed_fingerprint=$4,admission_ref=$5,source_bundle_sha256=$6 where world_id=$1',
-    [
-      w,
-      scopeRaw,
-      sha(scopeRaw),
-      f.f.seed.fingerprint,
-      admissionRef,
-      'b'.repeat(64),
-    ],
-  );
-  await db.query(
-    'update world_v2.postwar_office_projection_document set seed_id=$2,canonical_seed_sha256=$3,model_version=$4,replay_binding=$5 where world_id=$1',
-    [
-      w,
-      f.f.seed.seedId,
-      'c'.repeat(64),
-      f.f.seed.replayBinding.modelVersion,
-      sourceCanonicalSerialize(f.f.seed.replayBinding),
-    ],
-  );
-  await db
-    .exec(await read('proposals/postwar-paged-current-projection.sql'))
-    .catch((error: unknown) => {
-      const e = error as {
-        position?: string;
-        internalPosition?: string;
-        where?: string;
-        internalQuery?: string;
-      };
-      console.error(
-        'PAGED_DDL_DIAGNOSTIC',
-        JSON.stringify({
-          position: e.position,
-          internalPosition: e.internalPosition,
-          where: e.where,
-        }),
-      );
-      throw error;
-    });
-  await db.exec(await read('proposals/postwar-source-revocation-fence.sql'));
-  await db.exec(
-    `create function world_v2.test_only_paged_verify(text,text,jsonb)returns jsonb language sql security definer set search_path=pg_catalog as $$select to_jsonb(p)from world_v2.verify_postwar_paged_current_coverage($1,$2,$3)p$$;alter function world_v2.test_only_paged_verify(text,text,jsonb)owner to world_v2_postwar_projection_owner;revoke all on function world_v2.test_only_paged_verify(text,text,jsonb)from public;grant execute on function world_v2.test_only_paged_verify(text,text,jsonb)to world_v2_postwar_projection_publisher;`,
-  );
-  const pages: Frame[][] = [];
-  await begin();
-  try {
-    const reader = createPostwarBoundedPrefixPageReaderFrom(executor, scope(w));
-    for (
-      let page = await reader.readNext();
-      page;
-      page = await reader.readNext()
-    )
-      pages.push([...page.frames]);
-  } finally {
-    await rollback();
-  }
-  const hash = (v: unknown) => C.canonicalSha256(C.canonicalHashInput(v), sha),
-    expectedHead = { worldVersion: '257', eventSequence: '257' },
-    origin = {
-      worldId: w,
-      seedFingerprint: f.f.seed.fingerprint,
-      expectedHead,
-    };
-  let prefix = hash({
-      schemaVersion: 'finance-social-replay-origin-v1',
-      ...origin,
-    }),
-    effects = hash({
-      schemaVersion: 'postwar-effects-page-origin-v1',
-      ...origin,
-    }),
-    journal = hash({
-      schemaVersion: 'postwar-financial-page-origin-v1',
-      ...origin,
-    }),
-    fromHead = { worldVersion: '0', eventSequence: '0' };
-  for (const page of pages) {
-    const last = page.at(-1)!,
-      throughHead = {
-        worldVersion: last.transition.worldVersionAfter,
-        eventSequence: last.events.at(-1)!.sequence,
-      },
-      anchor = { ...origin, fromHead, throughHead };
-    prefix = hash({
-      schemaVersion: 'finance-social-replay-page-chain-v1',
-      previous: prefix,
-      ...anchor,
-      framesSha256: hash(page),
-    });
-    effects = hash({
-      schemaVersion: 'postwar-effects-page-chain-v1',
-      previous: effects,
-      ...anchor,
-      effects: page.map((f) => ({
-        commandId: f.command.commandId,
-        countryId: f.command.countryId,
-        commandType: f.command.commandType,
-        transitionFingerprint: hash(f.transition),
-        receiptFingerprint: hash(f.receipt),
-        eventFingerprints: f.events.map((e) => e.fingerprint),
-        worldVersionBefore: f.transition.worldVersionBefore,
-        worldVersionAfter: f.transition.worldVersionAfter,
-        events: f.events.map((e) => ({
-          eventId: e.eventId,
-          fingerprint: e.fingerprint,
-          sequence: e.sequence,
-          worldVersion: e.worldVersion,
-        })),
-      })),
-    });
-    journal = hash({
-      schemaVersion: 'postwar-financial-page-chain-v1',
-      previous: journal,
-      ...anchor,
-      batches: page.flatMap((f) => f.financialPostingBatches),
-    });
-    fromHead = throughHead;
-  }
-  const last = records.at(-1)!.events.at(-1)!,
-    coverage = {
-      prefixFingerprint: prefix,
-      knownEffectsFingerprint: effects,
-      coveredThroughEventId: last.eventId,
-      coveredThroughEventFingerprint: last.fingerprint,
-      financialPostingCount: '0',
-      financialBatchCount: '0',
-      financialPostingsFingerprint: journal,
-      pageProof: {
-        schemaVersion: 'postwar-complete-page-proof-v1',
-        hashAlgorithm: 'COMPLETE_CANONICAL_PAGE_CHAINS_SHA256_V1',
-        pageCount: pages.length.toString(),
-        frameCount: '257',
-      },
-    };
-  expect(pages.length).toBeGreaterThan(1);
-  currentBudgetContext = Object.freeze({
-    seed: parsedSeed,
-    coverage,
-    positions: Object.freeze(currentPositions),
-    capital,
-  });
-  const verify = () =>
-    db.query<{
-      value: { prefix_fingerprint: string; budget_envelopes: unknown[] };
-    }>('select world_v2.test_only_paged_verify($1,$2,$3)as value', [
-      w,
-      'COUNTRY_01',
-      C.canonicalSerialize(coverage),
-    ]);
-  await begin('world_v2_postwar_projection_publisher');
-  try {
-    const value = (
-      await verify().catch((error: unknown) => {
-        console.error('PAGED_VERIFY_DIAGNOSTIC', error);
+    );
+    await db
+      .exec(await read('proposals/postwar-paged-current-projection.sql'))
+      .catch((error: unknown) => {
+        const e = error as {
+          position?: string;
+          internalPosition?: string;
+          where?: string;
+          internalQuery?: string;
+        };
+        console.error(
+          'PAGED_DDL_DIAGNOSTIC',
+          JSON.stringify({
+            position: e.position,
+            internalPosition: e.internalPosition,
+            where: e.where,
+          }),
+        );
         throw error;
-      })
-    ).rows[0]!.value;
-    expect(value.prefix_fingerprint).toBe(prefix);
-    expect(value.budget_envelopes).toHaveLength(257);
-  } finally {
-    await rollback();
-  }
-  await begin('world_v2_postwar_projection_publisher');
-  try {
-    await expect(
-      db.query('select canonical_payload from world_v2.opening_seed'),
-    ).rejects.toThrow('permission denied');
-  } finally {
-    await rollback();
-  }
-  await begin('world_v2_postwar_projection_publisher');
-  try {
-    await expect(
-      db.query('select world_v2.test_only_paged_verify($1,$2,$3)', [
+      });
+    await db.exec(await read('proposals/postwar-source-revocation-fence.sql'));
+    await db.exec(
+      `create function world_v2.test_only_paged_verify(text,text,jsonb)returns jsonb language sql security definer set search_path=pg_catalog as $$select to_jsonb(p)from world_v2.verify_postwar_paged_current_coverage($1,$2,$3)p$$;alter function world_v2.test_only_paged_verify(text,text,jsonb)owner to world_v2_postwar_projection_owner;revoke all on function world_v2.test_only_paged_verify(text,text,jsonb)from public;grant execute on function world_v2.test_only_paged_verify(text,text,jsonb)to world_v2_postwar_projection_publisher;`,
+    );
+    const pages: Frame[][] = [];
+    await begin();
+    try {
+      const reader = createPostwarBoundedPrefixPageReaderFrom(
+        executor,
+        scope(w),
+      );
+      for (
+        let page = await reader.readNext();
+        page;
+        page = await reader.readNext()
+      )
+        pages.push([...page.frames]);
+    } finally {
+      await rollback();
+    }
+    const hash = (v: unknown) =>
+        C.canonicalSha256(C.canonicalHashInput(v), sha),
+      expectedHead = { worldVersion: '257', eventSequence: '257' },
+      origin = {
+        worldId: w,
+        seedFingerprint: f.f.seed.fingerprint,
+        expectedHead,
+      };
+    let prefix = hash({
+        schemaVersion: 'finance-social-replay-origin-v1',
+        ...origin,
+      }),
+      effects = hash({
+        schemaVersion: 'postwar-effects-page-origin-v1',
+        ...origin,
+      }),
+      journal = hash({
+        schemaVersion: 'postwar-financial-page-origin-v1',
+        ...origin,
+      }),
+      fromHead = { worldVersion: '0', eventSequence: '0' };
+    for (const page of pages) {
+      const last = page.at(-1)!,
+        throughHead = {
+          worldVersion: last.transition.worldVersionAfter,
+          eventSequence: last.events.at(-1)!.sequence,
+        },
+        anchor = { ...origin, fromHead, throughHead };
+      prefix = hash({
+        schemaVersion: 'finance-social-replay-page-chain-v1',
+        previous: prefix,
+        ...anchor,
+        framesSha256: hash(page),
+      });
+      effects = hash({
+        schemaVersion: 'postwar-effects-page-chain-v1',
+        previous: effects,
+        ...anchor,
+        effects: page.map((f) => ({
+          commandId: f.command.commandId,
+          countryId: f.command.countryId,
+          commandType: f.command.commandType,
+          transitionFingerprint: hash(f.transition),
+          receiptFingerprint: hash(f.receipt),
+          eventFingerprints: f.events.map((e) => e.fingerprint),
+          worldVersionBefore: f.transition.worldVersionBefore,
+          worldVersionAfter: f.transition.worldVersionAfter,
+          events: f.events.map((e) => ({
+            eventId: e.eventId,
+            fingerprint: e.fingerprint,
+            sequence: e.sequence,
+            worldVersion: e.worldVersion,
+          })),
+        })),
+      });
+      journal = hash({
+        schemaVersion: 'postwar-financial-page-chain-v1',
+        previous: journal,
+        ...anchor,
+        batches: page.flatMap((f) => f.financialPostingBatches),
+      });
+      fromHead = throughHead;
+    }
+    const last = records.at(-1)!.events.at(-1)!,
+      coverage = {
+        prefixFingerprint: prefix,
+        knownEffectsFingerprint: effects,
+        coveredThroughEventId: last.eventId,
+        coveredThroughEventFingerprint: last.fingerprint,
+        financialPostingCount: '0',
+        financialBatchCount: '0',
+        financialPostingsFingerprint: journal,
+        pageProof: {
+          schemaVersion: 'postwar-complete-page-proof-v1',
+          hashAlgorithm: 'COMPLETE_CANONICAL_PAGE_CHAINS_SHA256_V1',
+          pageCount: pages.length.toString(),
+          frameCount: '257',
+        },
+      };
+    expect(pages.length).toBeGreaterThan(1);
+    currentBudgetContext = Object.freeze({
+      seed: parsedSeed,
+      coverage,
+      positions: Object.freeze(currentPositions),
+      capital,
+    });
+    const verify = () =>
+      db.query<{
+        value: { prefix_fingerprint: string; budget_envelopes: unknown[] };
+      }>('select world_v2.test_only_paged_verify($1,$2,$3)as value', [
         w,
         'COUNTRY_01',
-        C.canonicalSerialize({
-          ...coverage,
-          prefixFingerprint: 'sha256:' + 'f'.repeat(64),
-        }),
-      ]),
-    ).rejects.toThrow('PAGED_CURRENT_CORE_SQL_COMPLETE_COVERAGE_MISMATCH');
-  } finally {
-    await rollback();
-  }
-  await begin('world_v2_postwar_projection_publisher', 'read committed');
-  try {
-    await expect(verify()).rejects.toThrow(
-      'PAGED_HELD_REPEATABLE_PUBLICATION_REQUIRED',
-    );
-  } finally {
-    await rollback();
-  }
-  await db.exec(`create function world_v2.read_postwar_office_projection_seats(p_world text)returns table(world_id text,country_id text,office_id text,auth_subject text,team_id text,authorization_revision text,scope_key text,seat_ref text,seed_id text,seed_fingerprint text,admission_ref text,source_bundle_sha256 text,model_version text,replay_binding text,world_version text,event_sequence text)language plpgsql security definer set search_path=pg_catalog as $$begin
+        C.canonicalSerialize(coverage),
+      ]);
+    await begin('world_v2_postwar_projection_publisher');
+    try {
+      const value = (
+        await verify().catch((error: unknown) => {
+          console.error('PAGED_VERIFY_DIAGNOSTIC', error);
+          throw error;
+        })
+      ).rows[0]!.value;
+      expect(value.prefix_fingerprint).toBe(prefix);
+      expect(value.budget_envelopes).toHaveLength(257);
+    } finally {
+      await rollback();
+    }
+    await begin('world_v2_postwar_projection_publisher');
+    try {
+      await expect(
+        db.query('select canonical_payload from world_v2.opening_seed'),
+      ).rejects.toThrow('permission denied');
+    } finally {
+      await rollback();
+    }
+    await begin('world_v2_postwar_projection_publisher');
+    try {
+      await expect(
+        db.query('select world_v2.test_only_paged_verify($1,$2,$3)', [
+          w,
+          'COUNTRY_01',
+          C.canonicalSerialize({
+            ...coverage,
+            prefixFingerprint: 'sha256:' + 'f'.repeat(64),
+          }),
+        ]),
+      ).rejects.toThrow('PAGED_CURRENT_CORE_SQL_COMPLETE_COVERAGE_MISMATCH');
+    } finally {
+      await rollback();
+    }
+    await begin('world_v2_postwar_projection_publisher', 'read committed');
+    try {
+      await expect(verify()).rejects.toThrow(
+        'PAGED_HELD_REPEATABLE_PUBLICATION_REQUIRED',
+      );
+    } finally {
+      await rollback();
+    }
+    await db.exec(`create function world_v2.read_postwar_office_projection_seats(p_world text)returns table(world_id text,country_id text,office_id text,auth_subject text,team_id text,authorization_revision text,scope_key text,seat_ref text,seed_id text,seed_fingerprint text,admission_ref text,source_bundle_sha256 text,model_version text,replay_binding text,world_version text,event_sequence text)language plpgsql security definer set search_path=pg_catalog as $$begin
     perform set_config('econmind.postwar_projection_world',p_world,true);
     if current_setting('role')<>'world_v2_postwar_projection_reader'or p_world<>'WORLD_FX_TEST_ONLY'then return;end if;
     return query select a.world_id,'COUNTRY_01'::text,o.office,'11111111-1111-4111-8111-111111111111'::text,'TEAM_TEST_ONLY'::text,'REV_TEST_ONLY'::text,'SCOPE_TEST_ONLY'::text,'SEAT_TEST_ONLY'::text,a.seed_id,a.seed_fingerprint,a.admission_ref,repeat('b',64),a.model_version,a.replay_binding,h.world_version::text,h.event_sequence::text from world_v2.runtime_opening_admission a join world_v2.world_head h using(world_id)cross join(values('SOCIAL'::text),('CAPTAIN'::text),('FINANCE'::text),('CENTRAL_BANK'::text))o(office)where a.world_id=p_world;
     end;$$;revoke all on function world_v2.read_postwar_office_projection_seats(text)from public;grant execute on function world_v2.read_postwar_office_projection_seats(text)to world_v2_postwar_projection_owner;`);
-  const assertion = {
-    head: { worldId: w, ...expectedHead },
-    seedPins: {
-      worldId: w,
-      seedId: f.f.seed.seedId,
-      seedFingerprint: f.f.seed.fingerprint,
-      admissionRef,
-    },
-    coverage,
-    employmentStateHash: hash(
-      JSON.parse(sourceCanonicalSerialize(f.social.state)),
-    ),
-    materializationHash: hash(
-      JSON.parse(sourceCanonicalSerialize(f.social.state)),
-    ),
-    positionsHash: hash(
-      JSON.parse(sourceCanonicalSerialize(f.social.state.labour.positions)),
-    ),
-    servicePoolsHash: hash(
-      JSON.parse(sourceCanonicalSerialize(f.social.state.servicePools)),
-    ),
-  };
-  await begin('world_v2_postwar_projection_publisher');
-  let published: {
-    document_ref: string;
-    source_version: string;
-    coverage: unknown;
-  }[];
-  try {
-    published = (
-      await db.query<{
-        document_ref: string;
-        source_version: string;
-        coverage: unknown;
-      }>(
-        'select * from world_v2.publish_postwar_paged_social_current($1,$2,$3)',
-        [w, 'COUNTRY_01', C.canonicalSerialize(assertion)],
-      )
-    ).rows;
-    expect(published).toHaveLength(2);
-    await db.exec('commit');
-  } catch (error) {
-    await rollback();
-    throw error;
-  }
-  expect(published![0]!.coverage).toMatchObject({
-    schemaVersion: 'postwar-social-current-page-chain-coverage-v4',
-    reducerVersion: 'POSTWAR_COMPLETE_MIXED_PAGED_PREFIX_V1',
-    pageProof: coverage.pageProof,
-  });
-  expect(
-    (
-      await db.query<{ n: number }>(
-        'select count(*)::int as n from world_v2.postwar_mixed_current_document',
-      )
-    ).rows[0]!.n,
-  ).toBe(0);
-  // Deliberately poisoned TEST_ONLY legacy cache at the same head. It is not
-  // economic evidence. A revoked genuine new version must never expose it.
-  const legacyRows = '[{"notice":"TEST_ONLY_POISON_LEGACY"}]',
-    legacyCoverage = {
-      ...coverage,
-      countryId: 'COUNTRY_01',
-      globalWorldVersion: '257',
-      globalEventSequence: '257',
+    const assertion = {
+      head: { worldId: w, ...expectedHead },
+      seedPins: {
+        worldId: w,
+        seedId: f.f.seed.seedId,
+        seedFingerprint: f.f.seed.fingerprint,
+        admissionRef,
+      },
+      coverage,
+      employmentStateHash: hash(
+        JSON.parse(sourceCanonicalSerialize(f.social.state)),
+      ),
+      materializationHash: hash(
+        JSON.parse(sourceCanonicalSerialize(f.social.state)),
+      ),
+      positionsHash: hash(
+        JSON.parse(sourceCanonicalSerialize(f.social.state.labour.positions)),
+      ),
+      servicePoolsHash: hash(
+        JSON.parse(sourceCanonicalSerialize(f.social.state.servicePools)),
+      ),
     };
-  await db.query(
-    `insert into world_v2.postwar_mixed_current_document values($1,$2,$3,'SOCIAL','positions',$4,257,257,0,0,$5,$6,$7,'{}',1,1)`,
-    [
-      'TEST_ONLY_POISON_LEGACY',
-      w,
-      'COUNTRY_01',
-      'TEST_ONLY_SOCIAL_positions',
-      'sha256:' + 'a'.repeat(64),
-      sha(legacyRows),
-      C.canonicalSerialize(legacyCoverage),
-    ],
-  );
-  await db.query(
-    'insert into world_v2.postwar_mixed_current_page values($1,$2,0,0,1,$3,$4)',
-    ['TEST_ONLY_POISON_LEGACY', w, legacyRows, sha(legacyRows)],
-  );
-  const pageQuery =
-      'select * from world_v2.read_postwar_mixed_current_page($1,$2,$3,$4,$5,$6)',
-    version = published!.find((x) =>
-      x.document_ref.includes('PAGED'),
-    )!.source_version;
-  await begin('world_v2_postwar_projection_reader');
-  try {
-    const row = (
-      await db.query<{
-        status: string;
-        source: { currentPrefixCoverage: { pageProof: unknown } };
-        rows_text: string;
-      }>(pageQuery, [w, 'SOCIAL', 'positions', 0, 25, version])
-    ).rows[0]!;
-    expect(row.status).toBe('PAGE');
-    expect(row.source.currentPrefixCoverage.pageProof).toEqual(
-      coverage.pageProof,
+    await begin('world_v2_postwar_projection_publisher');
+    let published: {
+      document_ref: string;
+      source_version: string;
+      coverage: unknown;
+    }[];
+    try {
+      published = (
+        await db.query<{
+          document_ref: string;
+          source_version: string;
+          coverage: unknown;
+        }>(
+          'select * from world_v2.publish_postwar_paged_social_current($1,$2,$3)',
+          [w, 'COUNTRY_01', C.canonicalSerialize(assertion)],
+        )
+      ).rows;
+      expect(published).toHaveLength(2);
+      await db.exec('commit');
+    } catch (error) {
+      await rollback();
+      throw error;
+    }
+    expect(published![0]!.coverage).toMatchObject({
+      schemaVersion: 'postwar-social-current-page-chain-coverage-v4',
+      reducerVersion: 'POSTWAR_COMPLETE_MIXED_PAGED_PREFIX_V1',
+      pageProof: coverage.pageProof,
+    });
+    expect(
+      (
+        await db.query<{ n: number }>(
+          'select count(*)::int as n from world_v2.postwar_mixed_current_document',
+        )
+      ).rows[0]!.n,
+    ).toBe(0);
+    // Deliberately poisoned TEST_ONLY legacy cache at the same head. It is not
+    // economic evidence. A revoked genuine new version must never expose it.
+    const legacyRows = '[{"notice":"TEST_ONLY_POISON_LEGACY"}]',
+      legacyCoverage = {
+        ...coverage,
+        countryId: 'COUNTRY_01',
+        globalWorldVersion: '257',
+        globalEventSequence: '257',
+      };
+    await db.query(
+      `insert into world_v2.postwar_mixed_current_document values($1,$2,$3,'SOCIAL','positions',$4,257,257,0,0,$5,$6,$7,'{}',1,1)`,
+      [
+        'TEST_ONLY_POISON_LEGACY',
+        w,
+        'COUNTRY_01',
+        'TEST_ONLY_SOCIAL_positions',
+        'sha256:' + 'a'.repeat(64),
+        sha(legacyRows),
+        C.canonicalSerialize(legacyCoverage),
+      ],
     );
-    expect(JSON.parse(row.rows_text)).toEqual(
-      JSON.parse(sourceCanonicalSerialize(f.social.state.labour.positions)),
+    await db.query(
+      'insert into world_v2.postwar_mixed_current_page values($1,$2,0,0,1,$3,$4)',
+      ['TEST_ONLY_POISON_LEGACY', w, legacyRows, sha(legacyRows)],
     );
-    expect(
-      (
-        await db.query<{ status: string }>(pageQuery, [
-          w,
-          'SOCIAL',
-          'positions',
-          100000,
-          25,
-          version,
-        ])
-      ).rows[0]!.status,
-    ).toBe('EMPTY');
-    expect(
-      (
-        await db.query<{ status: string }>(pageQuery, [
-          w,
-          'SOCIAL',
-          'positions',
-          0,
-          25,
-          'sha256:' + 'd'.repeat(64),
-        ])
-      ).rows[0]!.status,
-    ).toBe('STALE');
-  } finally {
-    await rollback();
-  }
-  await db.query(
-    "insert into world_v2.postwar_paged_current_revocation(world_id,document_ref,reason_ref)select world_id,document_ref,'TEST_ONLY_REVOKED'from world_v2.postwar_paged_current_document where dataset='positions'",
-  );
-  await begin('world_v2_postwar_projection_reader');
-  try {
-    expect(
-      (
-        await db.query<{ status: string }>(pageQuery, [
-          w,
-          'SOCIAL',
-          'positions',
-          0,
-          25,
-          null,
-        ])
-      ).rows[0]!.status,
-    ).toBe('UNAVAILABLE');
-  } finally {
-    await rollback();
-  }
-});
+    const pageQuery =
+        'select * from world_v2.read_postwar_mixed_current_page($1,$2,$3,$4,$5,$6)',
+      version = published!.find((x) =>
+        x.document_ref.includes('PAGED'),
+      )!.source_version;
+    await begin('world_v2_postwar_projection_reader');
+    try {
+      const row = (
+        await db.query<{
+          status: string;
+          source: { currentPrefixCoverage: { pageProof: unknown } };
+          rows_text: string;
+        }>(pageQuery, [w, 'SOCIAL', 'positions', 0, 25, version])
+      ).rows[0]!;
+      expect(row.status).toBe('PAGE');
+      expect(row.source.currentPrefixCoverage.pageProof).toEqual(
+        coverage.pageProof,
+      );
+      expect(JSON.parse(row.rows_text)).toEqual(
+        JSON.parse(sourceCanonicalSerialize(f.social.state.labour.positions)),
+      );
+      expect(
+        (
+          await db.query<{ status: string }>(pageQuery, [
+            w,
+            'SOCIAL',
+            'positions',
+            100000,
+            25,
+            version,
+          ])
+        ).rows[0]!.status,
+      ).toBe('EMPTY');
+      expect(
+        (
+          await db.query<{ status: string }>(pageQuery, [
+            w,
+            'SOCIAL',
+            'positions',
+            0,
+            25,
+            'sha256:' + 'd'.repeat(64),
+          ])
+        ).rows[0]!.status,
+      ).toBe('STALE');
+    } finally {
+      await rollback();
+    }
+    await db.query(
+      "insert into world_v2.postwar_paged_current_revocation(world_id,document_ref,reason_ref)select world_id,document_ref,'TEST_ONLY_REVOKED'from world_v2.postwar_paged_current_document where dataset='positions'",
+    );
+    await begin('world_v2_postwar_projection_reader');
+    try {
+      expect(
+        (
+          await db.query<{ status: string }>(pageQuery, [
+            w,
+            'SOCIAL',
+            'positions',
+            0,
+            25,
+            null,
+          ])
+        ).rows[0]!.status,
+      ).toBe('UNAVAILABLE');
+    } finally {
+      await rollback();
+    }
+  },
+);
 
 it('publishes all ten paged Finance/CB documents from genuine Core balances and seven exact H0 originals', async () => {
   const ctx = currentBudgetContext;
