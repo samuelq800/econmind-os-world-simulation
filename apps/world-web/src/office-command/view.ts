@@ -554,7 +554,7 @@ export function installOfficeCommand(
       );
       if (planning?.page.nextOffset !== null && planning)
         dialog.append(
-          button('更多服务调度', 'next-utility-planning', state.canStage, () =>
+          button('更多服务调度', 'next-utility-planning', state.canRead, () =>
             owner.nextIndustryUtilityPlanningPage(),
           ),
         );

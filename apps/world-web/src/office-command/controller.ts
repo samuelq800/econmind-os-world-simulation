@@ -439,6 +439,9 @@ export function createOfficeCommandController(
   }
   async function readUtilityPlanning(previous?: RuntimePage) {
     if (!industryUtilityReader || !currentHead()) return;
+    utilityPlanningPage = null;
+    utilityPlanningCode = 'READING';
+    notify();
     const next = await industryUtilityReader.readPage(
       INDUSTRY_UTILITY_PLANNING_DATASET,
       requestId(),
@@ -454,7 +457,7 @@ export function createOfficeCommandController(
       return;
     }
     utilityPlanningPage = null;
-    utilityPlanningCode = next.status;
+    utilityPlanningCode = 'code' in next ? next.code : next.status;
     if (next.status === 'PAGE' || next.status === 'EMPTY') {
       const head = currentHead();
       if (
@@ -1279,7 +1282,6 @@ export function createOfficeCommandController(
     nextIndustryUtilityPlanningPage: () =>
       operation(async () => {
         if (
-          !attempted &&
           utilityPlanningPage?.page.nextOffset !== null &&
           utilityPlanningPage
         )
