@@ -24,6 +24,10 @@ import {
   createRegisteredFinalDriver,
   registeredFinalRecord as row,
 } from '../support/postwar-registered-final-driver.js';
+import {
+  runRetainedSocialApplication,
+  recoverRetainedSocialApplication,
+} from '../support/run-retained-social-application.js';
 import { probeRetainedFxQuotes } from '../support/probe-retained-fx-quotes.js';
 import { runRetainedC10Completion } from '../support/run-retained-c10-completion.js';
 import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
@@ -129,6 +133,53 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
       );
       await originalFixture.clone.installer.query(fxSql);
       report.fxReadSqlSha256 = sha(fxSql);
+      const socialSqlPath =
+        'database/proposals/postwar-social-application-prefix.sql';
+      const socialSql = await readFile(path.join(root, socialSqlPath), 'utf8');
+      const socialManifest = JSON.parse(
+        await readFile(
+          path.join(
+            root,
+            'database/proposals/postwar-social-application-prefix.manifest.json',
+          ),
+          'utf8',
+        ),
+      );
+      assert.equal(
+        sha(socialSql),
+        '026a6b1c4ee9b021da3c26c981ef058d15eeebac444219597adcef8655566647',
+      );
+      assert.equal(socialManifest.sqlSha256, sha(socialSql));
+      for (const [file, hash] of Object.entries(
+        socialManifest.requiredPredecessorFiles,
+      ))
+        assert.equal(sha(await readFile(path.join(root, file))), hash);
+      const socialSignatures = socialManifest.replacedFunctions.map(
+        (f: { signature: string }) => f.signature,
+      );
+      assert.equal(socialSignatures.length, 6);
+      const functionIdentity = async () =>
+        (
+          await originalFixture.clone.installer.query(
+            'select x.signature,p.oid::text,p.proowner::text,p.proacl::text,p.prosecdef,p.proconfig from unnest($1::text[])x(signature)join pg_proc p on p.oid=to_regprocedure(x.signature)order by x.signature',
+            [socialSignatures],
+          )
+        ).rows;
+      const beforeSocialFunctions = await functionIdentity();
+      assert.equal(beforeSocialFunctions.length, 6);
+      await originalFixture.clone.installer.query(socialSql);
+      const afterSocialFunctions = await functionIdentity();
+      assert.deepEqual(
+        afterSocialFunctions,
+        beforeSocialFunctions,
+        'SOCIAL_FORWARD_PRESERVES_SIX_OIDS_OWNERS_ACLS',
+      );
+      report.socialForward = {
+        sqlSha256: sha(socialSql),
+        before: beforeSocialFunctions,
+        after: afterSocialFunctions,
+      };
+
       const lease = (
         await originalFixture.clone.installer.query(
           'select holder_id,fencing_token::text from world_v2.world_writer_lease where world_id=$1',
@@ -244,6 +295,11 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
         sha256: sha(fxSql),
         status: 'DDL_COMMITTED',
       });
+      ddl.entries.push({
+        name: 'postwar-social-application-prefix',
+        sha256: sha(socialSql),
+        status: 'DDL_COMMITTED',
+      });
       await writeFile(
         path.join(preparationDirectory, 'setup-ddl.json'),
         JSON.stringify(ddl, null, 2) + '\n',
@@ -354,6 +410,21 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
       });
       await publisher.end();
       publisher = undefined;
+      report.socialApplication = await runRetainedSocialApplication({
+        driver: d,
+        installer: f.clone.installer,
+        worldId: marker.worldId,
+        evidencePath: path.join(out, 'social-application.json'),
+        ledgerSnapshot: ledger,
+        browser: {
+          applicationOrigin: 'https://pages-test.example',
+          authSubject: s.subjects.COUNTRY_02,
+          countryId: 'COUNTRY_02',
+          countryDisplayId: '02',
+          readConfiguration: descriptor.configuration,
+          getAccessToken: () => 'Bearer ' + s.signToken('COUNTRY_02'),
+        },
+      });
       report.beforeRestart = await ledger();
       await save();
       const head = await d.readHead(),
@@ -382,6 +453,12 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
         refPrefix: 'C10_COLD_RESTORE',
       });
       assert.equal(row(report.coldLogistics).status, 'ALREADY_DELIVERED');
+      report.socialApplicationAfterRestart =
+        await recoverRetainedSocialApplication({
+          driver: d,
+          worldId: marker.worldId,
+          prior: row(report.socialApplication),
+        });
       report.fxQuotesAfterRestart = await probeRetainedFxQuotes({
         driver: d,
         installer: f.clone.installer,
