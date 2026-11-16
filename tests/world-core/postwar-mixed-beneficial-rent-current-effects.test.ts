@@ -222,6 +222,7 @@ it('replays two real paid periods at the same legal HH claim, keeps committed hi
       '0007_world_v2_atomic_transition_facts',
       '0009_world_v2_posting_payload_integrity',
       '0011_world_v2_current_commit_authorization',
+      '0013_world_v2_read_projection_boundary',
       '0016_world_v2_opening_seed',
     ])
       await db.exec(await read('migrations/artifacts/' + id + '.sql'));

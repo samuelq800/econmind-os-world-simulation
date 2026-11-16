@@ -225,12 +225,28 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
         repositoryRoot,
         'node_modules/typescript/bin/tsc',
       );
+      const buildStartedAt = performance.now();
+      console.log(
+        JSON.stringify({
+          event: 'PUBLIC_BUILD_START',
+          service: `world-${serviceName}`,
+        }),
+      );
       const build = spawnOwned(
         process.execPath,
         [compiler, '-p', definition.buildConfig],
         repositoryRoot,
       );
       const result = await build.exit;
+      console.log(
+        JSON.stringify({
+          event: 'PUBLIC_BUILD_COMPLETE',
+          service: `world-${serviceName}`,
+          duration_ms: Math.round(performance.now() - buildStartedAt),
+          code: result.code,
+          signal: result.signal,
+        }),
+      );
       if (activeChild === build) activeChild = undefined;
       if (stoppingPromise === undefined && result.code !== 0) {
         if (parentWatch !== undefined) parentWatch();

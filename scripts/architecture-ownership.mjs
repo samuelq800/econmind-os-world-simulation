@@ -34,6 +34,7 @@ export const SERVER_TOOLS = [
   'scripts/run-development-service.mjs',
   'scripts/run-development-stack.mjs',
   'scripts/process-parent-pid.mjs',
+  'scripts/bootstrap-http-probe.mjs',
 ];
 export const GOVERNED_ROOTS = [
   'apps',

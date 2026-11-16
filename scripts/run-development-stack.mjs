@@ -1,3 +1,4 @@
+import { singleProbe } from './bootstrap-http-probe.mjs';
 import { execFile, spawn } from 'node:child_process';
 import { constants as osConstants } from 'node:os';
 import path from 'node:path';
@@ -139,46 +140,6 @@ function readConfiguration(environment = process.env) {
 
 function serviceUrl(service, pathName) {
   return `http://${connectHost(service.host)}:${service.port}${pathName}`;
-}
-
-async function readSmallJson(response) {
-  if (!response.body) return undefined;
-  const reader = response.body.getReader();
-  const chunks = [];
-  let length = 0;
-  try {
-    while (true) {
-      const result = await reader.read();
-      if (result.done) break;
-      length += result.value.byteLength;
-      if (length > 4_096) throw new Error('Operational response too large');
-      chunks.push(result.value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
-}
-
-async function singleProbe(url, validate, timeoutMs) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  timeout.unref();
-  try {
-    const response = await fetch(url, {
-      cache: 'no-store',
-      credentials: 'omit',
-      method: 'GET',
-      redirect: 'error',
-      signal: controller.signal,
-    });
-    if (response.status !== 200) return false;
-    return validate(await readSmallJson(response));
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timeout);
-  }
 }
 
 function isObject(value) {
