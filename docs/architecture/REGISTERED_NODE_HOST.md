@@ -180,3 +180,23 @@ facility and run scope and inspect the original publication/receipt; an explicit
 invocation with that same scope uses the existing recovery-first publisher.
 Never change the RUN or manufacture a new command ID to bypass an unknown
 outcome. These entry tests do not establish native GRANT or delivery acceptance.
+
+## Recover current pages after a committed command
+
+If a command has a committed FINAL but derived publication failed, retain that
+original command ID and explicitly rebuild its authorized current pages:
+
+```sh
+node apps/world-api/dist/registered-main.js /absolute/node-config.json \
+  --recover-publication ORIGINAL_COMMITTED_COMMAND_ID
+```
+
+This uses the existing receipt-bound `retryDerivedPublication` service. It
+verifies the immutable command and COMMITTED receipt, then rechecks current
+registered country scope, source, head and the separate restricted publisher.
+It does not enqueue, consume or resend a command, initialize a World, advance
+Clock, or change authoritative financial/inventory records. Publication may be
+partly completed when an error occurs; retry the same original ID after fixing
+the cause. `UNAVAILABLE` exits unsuccessfully and is not a completed readback.
+The action cannot be combined with consumption or water-grant publication and
+drains its service on completion. Ordinary FINAL recovery remains read-only.

@@ -67,6 +67,10 @@ function service() {
       status: 'QUEUED' as 'QUEUED' | 'FINAL',
       command,
     })),
+    retryDerivedPublication: vi.fn(async () => ({
+      status: 'PUBLISHED' as 'PUBLISHED' | 'UNAVAILABLE',
+      commandId: 'CMD_EXISTING_FINAL',
+    })),
     shutdown: vi.fn(async () => undefined),
     consumer: { consumeOnce: vi.fn() },
   };
@@ -86,6 +90,13 @@ describe('explicit registered water grant entry', () => {
     expect(
       parseRegisteredNodeArguments([args[0]!, '--consume', '1000']).action,
     ).toEqual({ kind: 'CONSUME', maxSteps: 1000 });
+    expect(
+      parseRegisteredNodeArguments([
+        args[0]!,
+        '--recover-publication',
+        'CMD_EXISTING_FINAL',
+      ]).action,
+    ).toEqual({ kind: 'RECOVER_PUBLICATION', commandId: 'CMD_EXISTING_FINAL' });
   });
   it.each([
     args.slice(0, -1),
@@ -96,6 +107,9 @@ describe('explicit registered water grant entry', () => {
     [args[0]!, args[1]!, args[2]!, '', args[4]!],
     [args[0]!, '--consume', '1001'],
     ['relative.json', ...args.slice(1)],
+    [args[0]!, '--recover-publication', ''],
+    [args[0]!, '--recover-publication', 'not a command'],
+    [args[0]!, '--recover-publication', 'CMD_EXISTING_FINAL', '--consume', '1'],
   ])(
     'rejects malformed or conflicting arguments before opening connections: %j',
     async (...bad) => {
@@ -123,6 +137,48 @@ describe('explicit registered water grant entry', () => {
         clockStarted: false,
       }),
     );
+  });
+  it('recovers derived pages for the exact existing command without issuing or consuming commands', async () => {
+    const s = service();
+    await main([args[0]!, '--recover-publication', 'CMD_EXISTING_FINAL']);
+    expect(s.retryDerivedPublication).toHaveBeenCalledExactlyOnceWith(
+      'CMD_EXISTING_FINAL',
+    );
+    expect(s.publishIndustryWaterGrant).not.toHaveBeenCalled();
+    expect(ports.consume).not.toHaveBeenCalled();
+    expect(s.consumer.consumeOnce).not.toHaveBeenCalled();
+    expect(s.shutdown).toHaveBeenCalledTimes(1);
+    expect(process.exitCode).toBeUndefined();
+  });
+  it('reports unavailable derived recovery as a failure without retrying or consuming', async () => {
+    const s = service();
+    s.retryDerivedPublication.mockResolvedValue({
+      status: 'UNAVAILABLE',
+      commandId: 'CMD_EXISTING_FINAL',
+    });
+    await main([args[0]!, '--recover-publication', 'CMD_EXISTING_FINAL']);
+    expect(s.retryDerivedPublication).toHaveBeenCalledTimes(1);
+    expect(ports.consume).not.toHaveBeenCalled();
+    expect(s.shutdown).toHaveBeenCalledTimes(1);
+    expect(process.exitCode).toBe(1);
+  });
+  it('stops an unknown derived recovery without exposing provider details or retrying', async () => {
+    const s = service();
+    s.retryDerivedPublication.mockRejectedValue(
+      Error('connection lost: postgres://private-test-only'),
+    );
+    await main([args[0]!, '--recover-publication', 'CMD_EXISTING_FINAL']);
+    expect(s.retryDerivedPublication).toHaveBeenCalledTimes(1);
+    expect(s.publishIndustryWaterGrant).not.toHaveBeenCalled();
+    expect(ports.consume).not.toHaveBeenCalled();
+    expect(s.shutdown).toHaveBeenCalledTimes(1);
+    expect(console.error).toHaveBeenCalledWith(
+      JSON.stringify({
+        event: 'REGISTERED_DERIVED_PUBLICATION_RECOVERY_STOPPED',
+        code: 'DERIVED_PUBLICATION_REQUIRES_RETRY',
+      }),
+    );
+    expect(process.exitCode).toBe(1);
   });
   it('passes an unchanged scope to existing publication recovery and preserves the original FINAL identity', async () => {
     const s = service();

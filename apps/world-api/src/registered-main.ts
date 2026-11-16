@@ -13,6 +13,7 @@ let shutdown: Promise<void> | undefined;
 const consumerStop = new AbortController();
 let consuming = false;
 let publishingWaterGrant = false;
+let recoveringPublication = false;
 const stop = () => {
   stopping = true;
   consumerStop.abort();
@@ -51,7 +52,23 @@ try {
         clockStarted: false,
       }),
     );
-    if (action.kind === 'PUBLISH_WATER_GRANT') {
+    if (action.kind === 'RECOVER_PUBLICATION') {
+      recoveringPublication = true;
+      // Rebuild only derived views of an existing committed FINAL. The fixed
+      // service verifies its original receipt and rechecks the current scope.
+      const result = await service.retryDerivedPublication(action.commandId);
+      console.log(
+        JSON.stringify({
+          event: 'REGISTERED_DERIVED_PUBLICATION_RECOVERY',
+          result,
+          consumerStarted: false,
+          clockStarted: false,
+        }),
+      );
+      if (result.status !== 'PUBLISHED') process.exitCode = 1;
+      stop();
+      await shutdown;
+    } else if (action.kind === 'PUBLISH_WATER_GRANT') {
       publishingWaterGrant = true;
       // One explicit call only. The fixed publisher recovers an existing
       // publication before considering issuance. Unknown outcomes stop here.
@@ -88,18 +105,22 @@ try {
   const message = error instanceof Error ? error.message : '';
   console.error(
     JSON.stringify({
-      event: publishingWaterGrant
-        ? 'REGISTERED_WATER_GRANT_PUBLICATION_STOPPED'
-        : consuming
-          ? 'REGISTERED_NODE_CONSUMER_STOPPED'
-          : 'REGISTERED_NODE_STARTUP_FAILED',
+      event: recoveringPublication
+        ? 'REGISTERED_DERIVED_PUBLICATION_RECOVERY_STOPPED'
+        : publishingWaterGrant
+          ? 'REGISTERED_WATER_GRANT_PUBLICATION_STOPPED'
+          : consuming
+            ? 'REGISTERED_NODE_CONSUMER_STOPPED'
+            : 'REGISTERED_NODE_STARTUP_FAILED',
       code: /^[A-Z][A-Z0-9_:]{0,180}$/u.test(message)
         ? message
-        : publishingWaterGrant
-          ? 'WATER_GRANT_PUBLICATION_REQUIRES_RECOVERY'
-          : consuming
-            ? 'REGISTERED_CONSUMER_REQUIRES_RECOVERY'
-            : 'STARTUP_DEPENDENCY_FAILED',
+        : recoveringPublication
+          ? 'DERIVED_PUBLICATION_REQUIRES_RETRY'
+          : publishingWaterGrant
+            ? 'WATER_GRANT_PUBLICATION_REQUIRES_RECOVERY'
+            : consuming
+              ? 'REGISTERED_CONSUMER_REQUIRES_RECOVERY'
+              : 'STARTUP_DEPENDENCY_FAILED',
     }),
   );
   process.exitCode = 1;

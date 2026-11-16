@@ -1,8 +1,11 @@
 /** Explicit bounded operator choices. No caller supplies a water amount,
  * entitlement, actor or clock; the registered publisher derives all of them. */
+import { commandId } from '@econmind/core';
+
 export type RegisteredNodeAction =
   | Readonly<{ kind: 'HTTP' }>
   | Readonly<{ kind: 'CONSUME'; maxSteps: number }>
+  | Readonly<{ kind: 'RECOVER_PUBLICATION'; commandId: string }>
   | Readonly<{
       kind: 'PUBLISH_WATER_GRANT';
       scope: Readonly<{
@@ -22,6 +25,11 @@ export function parseRegisteredNodeArguments(
   if (!configurationPath?.startsWith('/'))
     throw Error('ABSOLUTE_NODE_CONFIGURATION_PATH_REQUIRED');
   if (args.length === 1) return { configurationPath, action: { kind: 'HTTP' } };
+  if (args.length === 3 && args[1] === '--recover-publication')
+    return {
+      configurationPath,
+      action: { kind: 'RECOVER_PUBLICATION', commandId: commandId(args[2]!) },
+    };
   if (
     args.length === 3 &&
     args[1] === '--consume' &&
