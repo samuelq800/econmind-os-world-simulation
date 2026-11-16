@@ -52,7 +52,9 @@ function command(payload: unknown, change: Record<string, unknown> = {}) {
     sha,
   );
 }
-function fixture() {
+function fixture(
+  kind: 'RELOCATION_SUPPORT' | 'RETURN_TO_WORK' = 'RELOCATION_SUPPORT',
+) {
   const populationAvailability = [
       { countryId: country, locationId: location, workingAgeAvailable: '22' },
     ],
@@ -90,10 +92,19 @@ function fixture() {
     {
       schemaVersion: 'social-labour-programme-create-v1',
       programmeId: 'PROGRAMME_TEST_ONLY',
-      kind: 'RELOCATION_SUPPORT',
-      locationId: location,
-      participants: '2',
-      benefit: { amount: '3', currency: 'XAA' },
+      ...(kind === 'RELOCATION_SUPPORT'
+        ? {
+            kind,
+            locationId: location,
+            participants: '2',
+            benefit: { amount: '3', currency: 'XAA' },
+          }
+        : {
+            kind,
+            eligible: 'TEST_ONLY_PROPOSED_CONDITION_NOT_APPROVED',
+            capacity: '2',
+            duration: { amount: '5', unit: 'SIM_DAY' },
+          }),
     },
     {
       commandType: SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
@@ -189,6 +200,41 @@ describe('Social whole current group application, not eligibility or funding', (
     });
     expect(page.total).toBe(1);
     expect(page.nextOffset).toBeNull();
+    expect(
+      readSocialLabourProgrammeApplications({
+        state: result.state,
+        countryId: country,
+        offset: 1,
+        limit: 1,
+        sha256Hex: sha,
+      }),
+    ).toEqual({ rows: [], total: 1, nextOffset: null });
+
+    expect(page.rows[0]!.reviewFacts).toMatchObject({
+      currentGroupPersonCount: '22',
+      membership: 'UNCHANGED_LABOUR_SNAPSHOT',
+      proposedCapacity: '2',
+      capacityComparison: 'EXCEEDS_PROPOSED_CAPACITY',
+      locationRelation: 'SAME_REGION',
+      eligibility: 'NOT_VERIFIED',
+      budgetBinding: 'NO_APPROVED_PROGRAMME_BUDGET_LINK',
+      payment: 'NOT_SCHEDULED',
+    });
+    for (const bad of [
+      { eligibility: 'VERIFIED' },
+      { payment: 'PAID' },
+      { currentGroupPersonCount: '21' },
+      { proposedCapacity: '22' },
+      { locationRelation: 'CROSS_REGION' },
+    ]) {
+      expect(() =>
+        parseSocialProgrammeApplicationRowDto({
+          ...page.rows[0],
+          reviewFacts: { ...page.rows[0]!.reviewFacts, ...bad },
+        }),
+      ).toThrow();
+    }
+
     expect(parseSocialProgrammeApplicationRowDto(page.rows[0])).toEqual(
       page.rows[0],
     );
@@ -211,6 +257,32 @@ describe('Social whole current group application, not eligibility or funding', (
         sha256Hex: sha,
       }).rows,
     ).toEqual([]);
+  });
+  it('exposes proposed return-to-work conditions without inventing a long-term threshold, budget or eligibility', () => {
+    const f = fixture('RETURN_TO_WORK'),
+      result = apply(f);
+    const current = readSocialLabourProgrammeApplications({
+      state: result.state,
+      countryId: country,
+      offset: 0,
+      limit: 1,
+      sha256Hex: sha,
+    }).rows[0]!;
+    expect(current.reviewFacts).toMatchObject({
+      terms: {
+        kind: 'RETURN_TO_WORK',
+        eligible: 'TEST_ONLY_PROPOSED_CONDITION_NOT_APPROVED',
+        capacity: '2',
+        duration: { amount: '5', unit: 'SIM_DAY' },
+      },
+      locationRelation: 'NOT_APPLICABLE',
+      eligibility: 'NOT_VERIFIED',
+      budgetBinding: 'NO_APPROVED_PROGRAMME_BUDGET_LINK',
+      payment: 'NOT_SCHEDULED',
+    });
+    expect(parseSocialProgrammeApplicationRowDto(current)).toEqual(current);
+    expect(current.reviewFacts).not.toHaveProperty('eligiblePeople');
+    expect(current.reviewFacts).not.toHaveProperty('nonEmploymentDuration');
   });
   it('replays exactly, rejects changed derived counts and restores duplicates without reevaluating current group size', () => {
     const f = fixture(),
@@ -404,6 +476,22 @@ describe('Social whole current group application, not eligibility or funding', (
       ),
     ).toThrow('GROUP_MEMBERSHIP_CHANGED_INDIVIDUAL_MAPPING_REQUIRED');
     expect(canonicalSerialize(next.state)).toBe(before);
+    const current = readSocialLabourProgrammeApplications({
+      state: next.state,
+      countryId: country,
+      offset: 0,
+      limit: 10,
+      sha256Hex: sha,
+    }).rows[0]!;
+    expect(current.personCount).toBe('22');
+    expect(current.reviewFacts).toMatchObject({
+      currentGroupPersonCount: '20',
+      membership: 'UNRESOLVED_AFTER_LABOUR_CHANGE',
+      eligibility: 'NOT_VERIFIED',
+      payment: 'NOT_SCHEDULED',
+    });
+    expect(parseSocialProgrammeApplicationRowDto(current)).toEqual(current);
+
     expect(apply(next)).toMatchObject({
       source: 'EXACT_DUPLICATE',
       result: { personCount: '22' },

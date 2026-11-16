@@ -2500,7 +2500,7 @@ export function readSocialLabourProgrammeApplications(input: {
     input.limit > 100
   )
     invalid('Bounded application page required');
-  const rows = validateProgrammeApplicationRecords(
+  const records = validateProgrammeApplicationRecords(
     input.state.programmeApplications ?? [],
     input.state.programmes ?? [],
     input.state.worldId,
@@ -2519,9 +2519,68 @@ export function readSocialLabourProgrammeApplications(input: {
         (input.programmeId === undefined ||
           applicationCommand(command, input.sha256Hex).programmeId ===
             input.programmeId),
-    )
+    );
+  const currentLabourHash = hash(input.state.labour, input.sha256Hex);
+  const programmesByFingerprint = new Map(
+    (input.state.programmes ?? []).map((p) => {
+      const c = parseCanonicalCommand(
+        JSON.parse(p.canonicalCommand),
+        input.sha256Hex,
+      );
+      return [c.fingerprint, c] as const;
+    }),
+  );
+  const rows = records
+    .slice(input.offset, input.offset + input.limit)
     .map(({ record, command }) => {
       const intent = applicationCommand(command, input.sha256Hex);
+      const programme = programmesByFingerprint.get(
+        intent.programmeCommandFingerprint,
+      );
+      if (!programme)
+        invalid('Application exact programme review source required');
+      const terms = programmeCommand(programme, input.sha256Hex);
+      const groups = input.state.labour.aggregates.filter(
+        (g) =>
+          g.countryId === command.countryId &&
+          g.locationId === record.applicant.locationId &&
+          g.skill === record.applicant.skill &&
+          g.status === record.applicant.status,
+      );
+      if (groups.length > 1)
+        invalid('Unique current application group required');
+      const currentGroupPersonCount = groups.length
+        ? integer(groups[0]!.count)
+        : null;
+      const proposedCapacity =
+        terms.kind === 'RELOCATION_SUPPORT'
+          ? terms.participants
+          : terms.capacity;
+      const reviewFacts = {
+        schemaVersion: 'social-programme-application-review-v1' as const,
+        classification:
+          'CURRENT_FACTS_NOT_ELIGIBILITY_ADMISSION_OR_PAYMENT' as const,
+        terms,
+        currentGroupPersonCount,
+        membership:
+          currentLabourHash === record.labourStateHash
+            ? ('UNCHANGED_LABOUR_SNAPSHOT' as const)
+            : ('UNRESOLVED_AFTER_LABOUR_CHANGE' as const),
+        proposedCapacity,
+        capacityComparison:
+          BigInt(record.personCount) > BigInt(proposedCapacity)
+            ? ('EXCEEDS_PROPOSED_CAPACITY' as const)
+            : ('WITHIN_PROPOSED_CAPACITY' as const),
+        locationRelation:
+          terms.kind !== 'RELOCATION_SUPPORT'
+            ? ('NOT_APPLICABLE' as const)
+            : terms.locationId === record.applicant.locationId
+              ? ('SAME_REGION' as const)
+              : ('CROSS_REGION' as const),
+        eligibility: 'NOT_VERIFIED' as const,
+        budgetBinding: 'NO_APPROVED_PROGRAMME_BUDGET_LINK' as const,
+        payment: 'NOT_SCHEDULED' as const,
+      };
       return {
         countryId: command.countryId!,
         programmeId: intent.programmeId,
@@ -2536,13 +2595,14 @@ export function readSocialLabourProgrammeApplications(input: {
         sourceFingerprint: record.sourceFingerprint,
         status: record.status,
         classification: SOCIAL_LABOUR_APPLICATION_CLASSIFICATION,
+        reviewFacts,
       };
     });
   return freeze({
-    rows: rows.slice(input.offset, input.offset + input.limit),
-    total: rows.length,
+    rows,
+    total: records.length,
     nextOffset:
-      input.offset + input.limit < rows.length
+      input.offset + input.limit < records.length
         ? input.offset + input.limit
         : null,
   });

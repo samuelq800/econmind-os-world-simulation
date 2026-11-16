@@ -191,7 +191,24 @@ export function parseSocialProgrammeApplicationIntentDto(
   applicantDto(r.applicant);
   return value as SocialProgrammeApplicationIntentDto;
 }
+export interface SocialProgrammeApplicationReviewFactsDto {
+  readonly schemaVersion: 'social-programme-application-review-v1';
+  readonly classification: 'CURRENT_FACTS_NOT_ELIGIBILITY_ADMISSION_OR_PAYMENT';
+  readonly terms: SocialProgrammeTermsDto;
+  readonly currentGroupPersonCount: string | null;
+  readonly membership:
+    'UNCHANGED_LABOUR_SNAPSHOT' | 'UNRESOLVED_AFTER_LABOUR_CHANGE';
+  readonly proposedCapacity: string;
+  readonly capacityComparison:
+    'EXCEEDS_PROPOSED_CAPACITY' | 'WITHIN_PROPOSED_CAPACITY';
+  readonly locationRelation: 'NOT_APPLICABLE' | 'SAME_REGION' | 'CROSS_REGION';
+  readonly eligibility: 'NOT_VERIFIED';
+  readonly budgetBinding: 'NO_APPROVED_PROGRAMME_BUDGET_LINK';
+  readonly payment: 'NOT_SCHEDULED';
+}
 export interface SocialProgrammeApplicationRowDto {
+  /** Optional only for historical read deployments; absence is not verification. */
+  readonly reviewFacts?: SocialProgrammeApplicationReviewFactsDto;
   readonly countryId: string;
   readonly programmeId: string;
   readonly programmeCommandFingerprint: string;
@@ -209,6 +226,7 @@ export interface SocialProgrammeApplicationRowDto {
 export function parseSocialProgrammeApplicationRowDto(
   value: unknown,
 ): SocialProgrammeApplicationRowDto {
+  const hasReview = Object.hasOwn(record(value), 'reviewFacts');
   const r = exact(value, [
     'countryId',
     'programmeId',
@@ -223,6 +241,7 @@ export function parseSocialProgrammeApplicationRowDto(
     'sourceFingerprint',
     'status',
     'classification',
+    ...(hasReview ? ['reviewFacts'] : []),
   ]);
   applicantDto(r.applicant);
   if (
@@ -244,5 +263,53 @@ export function parseSocialProgrammeApplicationRowDto(
       'APPLICATION_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE'
   )
     throw Error('SOCIAL_PROGRAMME_APPLICATION_ROW_INVALID');
+  if (hasReview) {
+    const f = exact(r.reviewFacts, [
+      'schemaVersion',
+      'classification',
+      'terms',
+      'currentGroupPersonCount',
+      'membership',
+      'proposedCapacity',
+      'capacityComparison',
+      'locationRelation',
+      'eligibility',
+      'budgetBinding',
+      'payment',
+    ]);
+    const terms = parseSocialProgrammeTermsDto(f.terms);
+    const capacity =
+      terms.kind === 'RELOCATION_SUPPORT' ? terms.participants : terms.capacity;
+    const location =
+      terms.kind !== 'RELOCATION_SUPPORT'
+        ? 'NOT_APPLICABLE'
+        : terms.locationId === applicantDto(r.applicant).locationId
+          ? 'SAME_REGION'
+          : 'CROSS_REGION';
+    if (
+      f.schemaVersion !== 'social-programme-application-review-v1' ||
+      f.classification !==
+        'CURRENT_FACTS_NOT_ELIGIBILITY_ADMISSION_OR_PAYMENT' ||
+      terms.programmeId !== r.programmeId ||
+      f.proposedCapacity !== capacity ||
+      f.capacityComparison !==
+        (BigInt(r.personCount as string) > BigInt(capacity)
+          ? 'EXCEEDS_PROPOSED_CAPACITY'
+          : 'WITHIN_PROPOSED_CAPACITY') ||
+      f.locationRelation !== location ||
+      (f.currentGroupPersonCount !== null &&
+        (typeof f.currentGroupPersonCount !== 'string' ||
+          !/^(0|[1-9][0-9]{0,77})$/u.test(f.currentGroupPersonCount))) ||
+      !['UNCHANGED_LABOUR_SNAPSHOT', 'UNRESOLVED_AFTER_LABOUR_CHANGE'].includes(
+        String(f.membership),
+      ) ||
+      (f.membership === 'UNCHANGED_LABOUR_SNAPSHOT' &&
+        f.currentGroupPersonCount !== r.personCount) ||
+      f.eligibility !== 'NOT_VERIFIED' ||
+      f.budgetBinding !== 'NO_APPROVED_PROGRAMME_BUDGET_LINK' ||
+      f.payment !== 'NOT_SCHEDULED'
+    )
+      throw Error('SOCIAL_PROGRAMME_APPLICATION_REVIEW_INVALID');
+  }
   return value as SocialProgrammeApplicationRowDto;
 }

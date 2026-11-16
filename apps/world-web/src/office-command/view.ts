@@ -356,6 +356,57 @@ export function installOfficeCommand(
               `${application.applicationId} · ${application.programmeId} · ${application.applicant.locationId} / ${application.applicant.skill} / ${application.applicant.status} · ${application.personCount} 人 · 已申请，未核验资格或付款`,
             ),
           );
+          const review = application.reviewFacts;
+          if (!review) {
+            applicationSection.append(
+              node('p', '尚未读取当前人口、地区及条款核对信息。'),
+            );
+            continue;
+          }
+          applicationSection.append(
+            node(
+              'p',
+              `申请时 ${application.personCount} 人；当前同标签群体 ${review.currentGroupPersonCount ?? '未找到'}。` +
+                (review.membership === 'UNCHANGED_LABOUR_SNAPSHOT'
+                  ? '人口劳动记录与申请时一致。'
+                  : '劳动记录已变化，不能据当前群体人数认定原申请人的身份或资格。'),
+            ),
+          );
+          applicationSection.append(
+            node(
+              'p',
+              `提议容量 ${review.proposedCapacity} 人；` +
+                (review.capacityComparison === 'EXCEEDS_PROPOSED_CAPACITY'
+                  ? '申请人数超过提议容量。'
+                  : '申请人数未超过提议容量。') +
+                '这不是名额预留或录取。',
+            ),
+          );
+          if (review.terms.kind === 'RELOCATION_SUPPORT') {
+            applicationSection.append(
+              node(
+                'p',
+                `拟迁入地区 ${review.terms.locationId}；` +
+                  (review.locationRelation === 'SAME_REGION'
+                    ? '与申请群体当前地区相同，尚不构成跨地区就业迁移。'
+                    : '与申请群体地区不同，仍需就业及迁移资格核验。') +
+                  `条款请求人均补助 ${review.terms.benefit.amount} ${review.terms.benefit.currency}，尚未生成支付义务。`,
+              ),
+            );
+          } else {
+            applicationSection.append(
+              node(
+                'p',
+                `提议资格：${review.terms.eligible}；提议期限 ${review.terms.duration.amount} 模拟日。持续非就业时间尚无核验记录。`,
+              ),
+            );
+          }
+          applicationSection.append(
+            node(
+              'p',
+              '资格尚未核验，尚未关联本项目已批准预算，不能排款或支付。',
+            ),
+          );
         }
       if (state.socialApplicationsPage?.page.nextOffset != null)
         applicationSection.append(

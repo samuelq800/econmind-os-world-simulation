@@ -840,6 +840,12 @@ export function createPostwarOfficeRuntimeReadService(
                           countryId: fresh.scope.countryId,
                           source: fresh.source,
                           dataset: request.dataset,
+                          ...(applications
+                            ? {
+                                reviewSchema:
+                                  'social-programme-application-review-v1',
+                              }
+                            : {}),
                         }),
                       )
                       .digest('hex');

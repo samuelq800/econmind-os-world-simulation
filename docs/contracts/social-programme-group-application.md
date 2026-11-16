@@ -1,9 +1,10 @@
 # Social programme group applications
 
 `CORE_SOCIAL_LABOUR_PROGRAMME_APPLY_V1` records an application to an existing
-relocation or return-to-work programme. It implements the `Applied` step of the
-original U0549–U0554 pipeline for the U0933/U0934 programme records. It does not
-advance to `Verified`, `Approved`, `Scheduled` or `Paid`.
+relocation or return-to-work programme under U0933/U0934. `APPLIED` records a
+request, not qualification or payment. U0549–U0554 defines those separate states
+in the Welfare chapter; it does not supply missing Labour eligibility or payment
+rules. No Welfare policy is silently applied to these Labour programmes.
 
 The authorised Social actor selects an existing whole E03 labour aggregate by
 country, location, skill and employment status. The server reads its current
@@ -65,3 +66,23 @@ These are targeted Core, embedded SQL and offline UI/transport checks. They are
 not evidence of production installation or a full native Node/browser APPLY chain.
 The eligibility, admission and payment steps still need their own implemented
 contracts and acceptance; this slice does not declare U0933/U0934 complete.
+
+## Current review facts
+
+The current application read joins each immutable application to its exact original
+programme terms and the same-head labour aggregate. It exposes the originally
+requested count, current same-label group count (or unknown when absent), snapshot
+continuity, proposed capacity and source/destination region relation. A changed
+labour snapshot does not identify the old applicants in today's aggregate. A
+capacity comparison is not a reservation, and the benefit remains requested terms.
+
+The server emits `reviewFacts` under `social-programme-application-review-v1` and
+the browser rejects false paid/verified flags or inconsistent capacity/location
+facts. Older read responses without the new field remain readable as historical
+application records; the UI explicitly reports missing current review information.
+The read-source version includes the review schema, and existing JWT/seat/head
+guards and byte/page bounds remain unchanged. No new command or SQL is introduced.
+
+Actual eligibility, approved budget linkage, beneficiary selection, obligation
+scheduling, payment, and physical relocation are not implemented by these facts.
+The UI therefore keeps the application unverified and unscheduled.

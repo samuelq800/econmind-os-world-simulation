@@ -289,7 +289,7 @@ it('stages an actual whole group without client count, approval or qualification
 });
 
 it('reads a bounded application page while distinguishing APPLIED from eligibility and rejects foreign rows', async () => {
-  for (const foreign of [false, true]) {
+  for (const mode of ['OK', 'FOREIGN', 'FALSE_PAID_REVIEW']) {
     const f = fixture();
     const applicant = {
       locationId: 'REGION_TEST_ONLY',
@@ -297,12 +297,26 @@ it('reads a bounded application page while distinguishing APPLIED from eligibili
       status: 'NOT_IN_LABOUR_FORCE',
     };
     const value = {
-      countryId: foreign ? 'COUNTRY_FOREIGN' : f.read.identity.countryId,
+      countryId:
+        mode === 'FOREIGN' ? 'COUNTRY_FOREIGN' : f.read.identity.countryId,
       programmeId: terms.programmeId,
       programmeCommandFingerprint: fp,
       applicationId: 'APPLICATION_TEST_ONLY',
       applicant,
       personCount: '5',
+      reviewFacts: {
+        schemaVersion: 'social-programme-application-review-v1',
+        classification: 'CURRENT_FACTS_NOT_ELIGIBILITY_ADMISSION_OR_PAYMENT',
+        terms,
+        currentGroupPersonCount: '5',
+        membership: 'UNCHANGED_LABOUR_SNAPSHOT',
+        proposedCapacity: '2',
+        capacityComparison: 'EXCEEDS_PROPOSED_CAPACITY',
+        locationRelation: 'SAME_REGION',
+        eligibility: 'NOT_VERIFIED',
+        budgetBinding: 'NO_APPROVED_PROGRAMME_BUDGET_LINK',
+        payment: mode === 'FALSE_PAID_REVIEW' ? 'PAID' : 'NOT_SCHEDULED',
+      },
       submittedAtSimTime: '1000',
       commandId: 'APPLY_TEST_ONLY',
       commandFingerprint: fp,
@@ -342,7 +356,7 @@ it('reads a bounded application page while distinguishing APPLIED from eligibili
       dataset,
       '11111111-1111-4111-8111-111111111111',
     );
-    expect(result.status).toBe(foreign ? 'UNAVAILABLE' : 'PAGE');
+    expect(result.status).toBe(mode === 'OK' ? 'PAGE' : 'UNAVAILABLE');
     client.disconnect();
   }
 });
