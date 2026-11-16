@@ -169,6 +169,9 @@ import {
 import {
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT,
+  reduceSocialLabourProgrammeAppliedEvent,
   SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT,
   reduceSocialLabourProgrammeCreatedEvent,
   type SocialLabourProgrammeReadFacts,
@@ -1700,7 +1703,8 @@ function foldFinanceNativeBudgetMixedPrefix(
       financialReplay ||
       captainEnabled ||
       command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
-      command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+      command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+      command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND
     ) {
       const canonicalReceipt = createFinalCommandReceipt({
         command,
@@ -2257,15 +2261,17 @@ function foldFinanceNativeBudgetMixedPrefix(
       const type =
         command.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND
           ? SOCIAL_POSITION_OFFER_CREATED_EVENT
-          : command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
-            ? SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT
-            : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
-              ? SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT
-              : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
-                ? SOCIAL_SERVICE_PLAN_EVENT
-                : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
-                  ? SOCIAL_JOB_MATCH_EVENT
-                  : null;
+          : command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND
+            ? SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT
+            : command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+              ? SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT
+              : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND
+                ? SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT
+                : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
+                  ? SOCIAL_SERVICE_PLAN_EVENT
+                  : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
+                    ? SOCIAL_JOB_MATCH_EVENT
+                    : null;
       const event = frame.events[0];
       if (
         type === null ||
@@ -2329,7 +2335,10 @@ function foldFinanceNativeBudgetMixedPrefix(
             eventSequence: event.sequence,
           },
         });
-      } else if (type === SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT) {
+      } else if (
+        type === SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT ||
+        type === SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT
+      ) {
         const original = socialCreationOriginals.get(country.countryId),
           facts = payload.readFacts as SocialLabourProgrammeReadFacts;
         if (
@@ -2348,7 +2357,11 @@ function foldFinanceNativeBudgetMixedPrefix(
           facts.head?.eventSequence !== budget.eventSequence
         )
           invalid('SOCIAL_PROGRAMME_ACTUAL_SOURCE_AND_HEAD_REQUIRED');
-        const employment = reduceSocialLabourProgrammeCreatedEvent({
+        const employment = (
+          type === SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT
+            ? reduceSocialLabourProgrammeAppliedEvent
+            : reduceSocialLabourProgrammeCreatedEvent
+        )({
           state: beforeEmployment,
           event: replayEvent,
           sha256Hex: sha,

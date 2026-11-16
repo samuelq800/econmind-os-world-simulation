@@ -245,6 +245,8 @@ export interface SocialEmploymentServiceState {
   readonly creations?: readonly SocialEmploymentServiceCreationRecord[];
   /** Absent in old history; proposed terms do not confer execution rights. */
   readonly programmes?: readonly SocialLabourProgrammeRecord[];
+  /** Actual application originals only; never eligibility, approval or payment. */
+  readonly programmeApplications?: readonly SocialLabourProgrammeApplicationRecord[];
 }
 export interface SocialEmploymentServiceCreateIntent {
   readonly schemaVersion: 'social-employment-service-create-v1';
@@ -543,6 +545,9 @@ function validateServiceStateFromPopulation(
     'appliedOperations',
     ...(Object.hasOwn(r, 'creations') ? ['creations'] : []),
     ...(Object.hasOwn(r, 'programmes') ? ['programmes'] : []),
+    ...(Object.hasOwn(r, 'programmeApplications')
+      ? ['programmeApplications']
+      : []),
   ]);
   if (r.schemaVersion !== 'social-employment-service-state-v1')
     invalid('Unsupported social service state');
@@ -835,6 +840,16 @@ function validateServiceStateFromPopulation(
       ? {
           programmes: validateProgrammeRecords(
             r.programmes,
+            text(r.worldId),
+            digest,
+          ),
+        }
+      : {}),
+    ...(Object.hasOwn(r, 'programmeApplications')
+      ? {
+          programmeApplications: validateProgrammeApplicationRecords(
+            r.programmeApplications,
+            r.programmes ?? [],
             text(r.worldId),
             digest,
           ),
@@ -1643,6 +1658,12 @@ export function createSocialEmploymentServiceReplayReducers(
       sha256Hex: digest,
     });
   return Object.freeze({
+    [SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT]: ({ state, event }) =>
+      reduceSocialLabourProgrammeAppliedEvent({
+        state: state as SocialEmploymentServiceState,
+        event,
+        sha256Hex: digest,
+      }),
     [SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT]: ({ state, event }) =>
       reduceSocialLabourProgrammeCreatedEvent({
         state: state as SocialEmploymentServiceState,
@@ -2058,4 +2079,471 @@ export function reduceSocialLabourProgrammeCreatedEvent(input: {
   )
     invalid('Programme replay differs from actual calculation');
   return operation.state;
+}
+
+/** U0549-U0554: a Social actor may submit a real current labour group for a
+ * programme. Submission is not participant consent, eligibility or admission. */
+export const SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND =
+  'CORE_SOCIAL_LABOUR_PROGRAMME_APPLY_V1';
+export const SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT =
+  'SOCIAL_LABOUR_PROGRAMME_APPLIED_V1';
+export const SOCIAL_LABOUR_APPLICATION_CLASSIFICATION =
+  'APPLICATION_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE' as const;
+export interface SocialLabourProgrammeApplicant {
+  readonly locationId: string;
+  readonly skill: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly status:
+    'EMPLOYED' | 'UNEMPLOYED_SEARCHING' | 'NOT_IN_LABOUR_FORCE' | 'STUDENT';
+}
+export interface SocialLabourProgrammeApplyIntent {
+  readonly schemaVersion: 'social-labour-programme-apply-v1';
+  readonly programmeId: string;
+  readonly programmeCommandFingerprint: CanonicalSha256;
+  readonly applicationId: string;
+  readonly applicant: SocialLabourProgrammeApplicant;
+}
+export type SocialLabourProgrammeApplicationReadFacts =
+  SocialLabourProgrammeReadFacts;
+export interface SocialLabourProgrammeApplicationRecord {
+  readonly canonicalCommand: string;
+  readonly commandFingerprint: CanonicalSha256;
+  readonly sourceRef: string;
+  readonly sourceFingerprint: CanonicalSha256;
+  readonly applicant: SocialLabourProgrammeApplicant;
+  readonly personCount: string;
+  readonly labourStateHash: CanonicalSha256;
+  readonly status: 'APPLIED';
+}
+function applicationApplicant(value: unknown): SocialLabourProgrammeApplicant {
+  const r = inert(value);
+  keys(r, ['locationId', 'skill', 'status']);
+  if (
+    ![
+      'EMPLOYED',
+      'UNEMPLOYED_SEARCHING',
+      'NOT_IN_LABOUR_FORCE',
+      'STUDENT',
+    ].includes(text(r.status))
+  )
+    invalid('Explicit existing labour status required');
+  return freeze({
+    locationId: idempotencyKey(text(r.locationId)),
+    skill: skill(r.skill),
+    status: r.status as SocialLabourProgrammeApplicant['status'],
+  });
+}
+export function parseSocialLabourProgrammeApplyIntent(
+  value: unknown,
+): SocialLabourProgrammeApplyIntent {
+  const r = inert(value);
+  keys(r, [
+    'schemaVersion',
+    'programmeId',
+    'programmeCommandFingerprint',
+    'applicationId',
+    'applicant',
+  ]);
+  if (r.schemaVersion !== 'social-labour-programme-apply-v1')
+    invalid('Explicit Social programme application required');
+  return freeze({
+    schemaVersion: r.schemaVersion,
+    programmeId: idempotencyKey(text(r.programmeId)),
+    programmeCommandFingerprint: sha(r.programmeCommandFingerprint),
+    applicationId: idempotencyKey(text(r.applicationId)),
+    applicant: applicationApplicant(r.applicant),
+  });
+}
+function applicationCommand(command: CanonicalCommand, digest: Sha256Hex) {
+  validateCanonicalCommand(command, digest);
+  if (
+    command.commandType !== SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND ||
+    command.officeId !== 'SOCIAL' ||
+    command.countryId === null ||
+    command.expectedWorldVersion === null ||
+    command.idempotencyKey === null
+  )
+    invalid('Exact manual Social application command required');
+  return parseSocialLabourProgrammeApplyIntent(
+    JSON.parse(command.canonicalPayload),
+  );
+}
+function assertProgrammeApplicationBinding(
+  command: CanonicalCommand,
+  programmes: readonly SocialLabourProgrammeRecord[],
+  digest: Sha256Hex,
+) {
+  const intent = applicationCommand(command, digest);
+  const programme = programmes
+    .map((r) => parseCanonicalCommand(JSON.parse(r.canonicalCommand), digest))
+    .find(
+      (p) =>
+        p.countryId === command.countryId &&
+        programmeCommand(p, digest).programmeId === intent.programmeId,
+    );
+  if (
+    !programme ||
+    programme.fingerprint !== intent.programmeCommandFingerprint ||
+    programme.simTime.ticks > command.simTime.ticks
+  )
+    invalid('Application actual programme, fingerprint or time differs');
+  return intent;
+}
+function validateProgrammeApplicationRecords(
+  value: unknown,
+  programmesValue: unknown,
+  world: string,
+  digest: Sha256Hex,
+): readonly SocialLabourProgrammeApplicationRecord[] {
+  const programmes = validateProgrammeRecords(programmesValue, world, digest);
+  const commands = new Set<string>(),
+    applications = new Set<string>(),
+    applicants = new Set<string>(),
+    snapshots = new Map<string, CanonicalSha256>();
+  return freeze(
+    array(value)
+      .map((value) => {
+        const r = inert(value);
+        keys(r, [
+          'canonicalCommand',
+          'commandFingerprint',
+          'sourceRef',
+          'sourceFingerprint',
+          'applicant',
+          'personCount',
+          'labourStateHash',
+          'status',
+        ]);
+        const command = parseCanonicalCommand(
+            JSON.parse(text(r.canonicalCommand)),
+            digest,
+          ),
+          intent = assertProgrammeApplicationBinding(
+            command,
+            programmes,
+            digest,
+          ),
+          applicant = applicationApplicant(r.applicant),
+          identity = canonicalSerialize([
+            command.countryId,
+            intent.applicationId,
+          ]),
+          group = canonicalSerialize([
+            command.countryId,
+            intent.programmeId,
+            applicant,
+          ]);
+        if (
+          command.worldId !== world ||
+          r.status !== 'APPLIED' ||
+          command.fingerprint !== sha(r.commandFingerprint) ||
+          canonicalSerialize(wire(command)) !== r.canonicalCommand ||
+          canonicalSerialize(intent.applicant) !==
+            canonicalSerialize(applicant) ||
+          commands.has(command.commandId) ||
+          applications.has(identity) ||
+          applicants.has(group)
+        )
+          invalid('Exact unique programme application record required');
+        const scope = canonicalSerialize([
+            command.countryId,
+            intent.programmeId,
+            applicant.locationId,
+            applicant.skill,
+          ]),
+          snapshot = sha(r.labourStateHash);
+        if (snapshots.has(scope) && snapshots.get(scope) !== snapshot)
+          invalid('GROUP_MEMBERSHIP_CHANGED_INDIVIDUAL_MAPPING_REQUIRED');
+        snapshots.set(scope, snapshot);
+        commands.add(command.commandId);
+        applications.add(identity);
+        applicants.add(group);
+        return {
+          canonicalCommand: text(r.canonicalCommand),
+          commandFingerprint: command.fingerprint,
+          sourceRef: idempotencyKey(text(r.sourceRef)),
+          sourceFingerprint: sha(r.sourceFingerprint),
+          applicant,
+          personCount: integer(r.personCount, true),
+          labourStateHash: snapshot,
+          status: 'APPLIED' as const,
+        };
+      })
+      .sort((a, b) =>
+        a.canonicalCommand < b.canonicalCommand
+          ? -1
+          : a.canonicalCommand > b.canonicalCommand
+            ? 1
+            : 0,
+      ),
+  );
+}
+function applicationResult(
+  intent: SocialLabourProgrammeApplyIntent,
+  personCount: string,
+) {
+  return {
+    programmeId: intent.programmeId,
+    applicationId: intent.applicationId,
+    personCount,
+    status: 'APPLIED' as const,
+    classification: SOCIAL_LABOUR_APPLICATION_CLASSIFICATION,
+  };
+}
+export function prepareSocialLabourProgrammeApplication(input: {
+  command: CanonicalCommand;
+  state: SocialEmploymentServiceState;
+  readFacts: SocialLabourProgrammeApplicationReadFacts;
+  sha256Hex: Sha256Hex;
+}) {
+  const { command, sha256Hex: digest } = input;
+  applicationCommand(command, digest);
+  const f = inert(input.readFacts);
+  keys(f, [
+    'worldId',
+    'countryId',
+    'boundary',
+    'simTime',
+    'populationAvailability',
+    'head',
+    'localCurrency',
+    'sourceRef',
+    'sourceFingerprint',
+    'sourceRevocations',
+  ]);
+  const population = populationFacts({
+    boundary: f.boundary,
+    simTime: f.simTime,
+    populationAvailability: f.populationAvailability,
+  });
+  const state = validateServiceStateFromPopulation(
+    input.state,
+    population,
+    digest,
+  );
+  if (
+    state.worldId !== command.worldId ||
+    f.worldId !== command.worldId ||
+    f.countryId !== command.countryId ||
+    population.populationAvailability.some(
+      (p) => p.countryId !== command.countryId,
+    )
+  )
+    invalid('Application actual source scope differs');
+  const sourceRef = idempotencyKey(text(f.sourceRef)),
+    sourceFingerprint = sha(f.sourceFingerprint);
+  text(f.localCurrency);
+  if (array(f.sourceRevocations).length !== 0)
+    invalid('Application source revoked');
+  const intent = assertProgrammeApplicationBinding(
+    command,
+    state.programmes ?? [],
+    digest,
+  );
+  const head = inert(f.head);
+  keys(head, ['worldVersion', 'eventSequence']);
+  integer(head.eventSequence);
+  const duplicate = state.programmeApplications?.find(
+    (r) =>
+      parseCanonicalCommand(JSON.parse(r.canonicalCommand), digest)
+        .commandId === command.commandId,
+  );
+  // An exact prior result is immutable even if the current group's size changed.
+  if (duplicate) {
+    if (
+      duplicate.commandFingerprint !== command.fingerprint ||
+      duplicate.canonicalCommand !== canonicalSerialize(wire(command))
+    )
+      invalid('Application idempotency conflict');
+    return freeze({
+      source: 'EXACT_DUPLICATE' as const,
+      state,
+      result: applicationResult(intent, duplicate.personCount),
+      eventPayload: null,
+    });
+  }
+  if (
+    integer(head.worldVersion) !== command.expectedWorldVersion ||
+    population.simTime !== command.simTime.toCanonicalValue()
+  )
+    invalid('Application exact current head and simulated time required');
+  const labourStateHash = hash(state.labour, digest);
+  if (
+    state.programmeApplications?.some((prior) => {
+      const c = parseCanonicalCommand(
+        JSON.parse(prior.canonicalCommand),
+        digest,
+      );
+      return (
+        c.countryId === command.countryId &&
+        applicationCommand(c, digest).programmeId === intent.programmeId &&
+        prior.applicant.locationId === intent.applicant.locationId &&
+        prior.applicant.skill === intent.applicant.skill &&
+        prior.labourStateHash !== labourStateHash
+      );
+    })
+  )
+    invalid('GROUP_MEMBERSHIP_CHANGED_INDIVIDUAL_MAPPING_REQUIRED');
+  const groups = state.labour.aggregates.filter(
+    (a) =>
+      a.countryId === command.countryId &&
+      a.locationId === intent.applicant.locationId &&
+      a.skill === intent.applicant.skill &&
+      a.status === intent.applicant.status,
+  );
+  if (groups.length !== 1 || BigInt(groups[0]!.count) <= 0n)
+    invalid('Application actual nonempty labour group required');
+  const personCount = integer(groups[0]!.count, true);
+  const record: SocialLabourProgrammeApplicationRecord = freeze({
+    canonicalCommand: canonicalSerialize(wire(command)),
+    commandFingerprint: command.fingerprint,
+    sourceRef,
+    sourceFingerprint,
+    applicant: intent.applicant,
+    personCount,
+    labourStateHash,
+    status: 'APPLIED',
+  });
+  const next = validateServiceStateFromPopulation(
+    {
+      ...state,
+      programmeApplications: [...(state.programmeApplications ?? []), record],
+    },
+    population,
+    digest,
+  );
+  const result = applicationResult(intent, personCount);
+  return freeze({
+    source: 'APPLIED' as const,
+    state: next,
+    result,
+    eventPayload: {
+      schemaVersion: 'social-labour-programme-applied-v1',
+      command: wire(command),
+      readFacts: f,
+      beforeStateHash: hash(state, digest),
+      afterStateHash: hash(next, digest),
+      result,
+    },
+  });
+}
+export function reduceSocialLabourProgrammeAppliedEvent(input: {
+  state: SocialEmploymentServiceState;
+  event: ReplayReducerEvent;
+  sha256Hex: Sha256Hex;
+}): SocialEmploymentServiceState {
+  const r = inert(input.event.payload);
+  keys(r, [
+    'schemaVersion',
+    'command',
+    'readFacts',
+    'beforeStateHash',
+    'afterStateHash',
+    'result',
+  ]);
+  const command = parseCanonicalCommand(r.command, input.sha256Hex);
+  applicationCommand(command, input.sha256Hex);
+  const f = r.readFacts as unknown as SocialLabourProgrammeApplicationReadFacts;
+  if (
+    r.schemaVersion !== 'social-labour-programme-applied-v1' ||
+    input.event.eventType !== SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT ||
+    input.event.causationCommandId !== command.commandId ||
+    input.event.transitionId !== command.commandId ||
+    input.event.worldId !== command.worldId ||
+    input.event.worldVersionBefore !== command.expectedWorldVersion ||
+    input.event.worldVersionAfter !==
+      (BigInt(command.expectedWorldVersion!) + 1n).toString() ||
+    input.event.simTime.ticks !== command.simTime.ticks ||
+    input.event.correctsEventId !== null ||
+    input.event.sequence !== (BigInt(f.head.eventSequence) + 1n).toString()
+  )
+    invalid('Application replay causation mismatch');
+  const state = validateServiceStateFromPopulation(
+    input.state,
+    populationFacts({
+      boundary: f.boundary,
+      simTime: f.simTime,
+      populationAvailability: f.populationAvailability,
+    }),
+    input.sha256Hex,
+  );
+  if (hash(state, input.sha256Hex) !== sha(r.beforeStateHash))
+    invalid('Application replay predecessor mismatch');
+  const operation = prepareSocialLabourProgrammeApplication({
+    command,
+    state,
+    readFacts: f,
+    sha256Hex: input.sha256Hex,
+  });
+  if (
+    operation.source !== 'APPLIED' ||
+    canonicalSerialize(operation.eventPayload) !== canonicalSerialize(r)
+  )
+    invalid('Application replay differs from actual calculation');
+  return operation.state;
+}
+/** Bounded DATA projection; the caller separately holds reader authorization. */
+export function readSocialLabourProgrammeApplications(input: {
+  state: SocialEmploymentServiceState;
+  countryId: string;
+  programmeId?: string;
+  offset: number;
+  limit: number;
+  sha256Hex: Sha256Hex;
+}) {
+  countryId(input.countryId);
+  if (input.programmeId !== undefined) idempotencyKey(input.programmeId);
+  if (
+    !Number.isSafeInteger(input.offset) ||
+    input.offset < 0 ||
+    !Number.isSafeInteger(input.limit) ||
+    input.limit < 1 ||
+    input.limit > 100
+  )
+    invalid('Bounded application page required');
+  const rows = validateProgrammeApplicationRecords(
+    input.state.programmeApplications ?? [],
+    input.state.programmes ?? [],
+    input.state.worldId,
+    input.sha256Hex,
+  )
+    .map((record) => ({
+      record,
+      command: parseCanonicalCommand(
+        JSON.parse(record.canonicalCommand),
+        input.sha256Hex,
+      ),
+    }))
+    .filter(
+      ({ command }) =>
+        command.countryId === input.countryId &&
+        (input.programmeId === undefined ||
+          applicationCommand(command, input.sha256Hex).programmeId ===
+            input.programmeId),
+    )
+    .map(({ record, command }) => {
+      const intent = applicationCommand(command, input.sha256Hex);
+      return {
+        countryId: command.countryId!,
+        programmeId: intent.programmeId,
+        programmeCommandFingerprint: intent.programmeCommandFingerprint,
+        applicationId: intent.applicationId,
+        applicant: record.applicant,
+        personCount: record.personCount,
+        submittedAtSimTime: command.simTime.toCanonicalValue(),
+        commandId: command.commandId,
+        commandFingerprint: command.fingerprint,
+        sourceRef: record.sourceRef,
+        sourceFingerprint: record.sourceFingerprint,
+        status: record.status,
+        classification: SOCIAL_LABOUR_APPLICATION_CLASSIFICATION,
+      };
+    });
+  return freeze({
+    rows: rows.slice(input.offset, input.offset + input.limit),
+    total: rows.length,
+    nextOffset:
+      input.offset + input.limit < rows.length
+        ? input.offset + input.limit
+        : null,
+  });
 }

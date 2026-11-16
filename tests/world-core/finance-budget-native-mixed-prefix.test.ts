@@ -1151,6 +1151,115 @@ it('keeps pending programme terms across the same real Core PLAN/MATCH prefix wi
   expect(result.socialCountries[0]!.lifecycle.employment.programmes).toEqual(
     prepared.state.programmes,
   );
+  const currentEmployment = result.socialCountries[0]!.lifecycle.employment;
+  const group = currentEmployment.labour.aggregates.find(
+    (a) => a.countryId === country && BigInt(a.count) > 0n,
+  )!;
+  const applyCommand = C.parseCanonicalCommand(
+    {
+      schemaVersion: C.COMMAND_SCHEMA_VERSION,
+      worldId: world,
+      countryId: country,
+      officeId: 'SOCIAL',
+      actorId: 'ACTOR_TEST_ONLY',
+      authSubject: subject,
+      commandId: 'COMMAND_APPLY_TEST_ONLY',
+      idempotencyKey: 'KEY_APPLY_TEST_ONLY',
+      commandType: C.SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
+      expectedWorldVersion: '3',
+      simTime: match.command.simTime.toCanonicalValue(),
+      submittedAtReal: at,
+      correlationId: 'CORRELATION_APPLY_TEST_ONLY',
+      payload: {
+        schemaVersion: 'social-labour-programme-apply-v1',
+        programmeId: 'PROGRAMME_TEST_ONLY',
+        programmeCommandFingerprint: command.fingerprint,
+        applicationId: 'APPLICATION_TEST_ONLY',
+        applicant: {
+          locationId: group.locationId,
+          skill: group.skill,
+          status: group.status,
+        },
+      },
+    },
+    sha,
+  );
+  const application = C.prepareSocialLabourProgrammeApplication({
+    command: applyCommand,
+    state: currentEmployment,
+    sha256Hex: sha,
+    readFacts: {
+      worldId: world,
+      countryId: country,
+      boundary: c1.facts.boundary,
+      simTime: applyCommand.simTime.toCanonicalValue(),
+      populationAvailability: source.populationAvailability,
+      head: { worldVersion: '3', eventSequence: '3' },
+      localCurrency: source.localCurrency,
+      sourceRef: source.sourceRef,
+      sourceFingerprint: source.sourceFingerprint,
+      sourceRevocations: [],
+    },
+  });
+  const applyEvent = C.parseAuthoritativeEvent(
+    {
+      schemaVersion: C.EVENT_SCHEMA_VERSION,
+      eventId: 'EVENT_APPLY_TEST_ONLY',
+      eventType: C.SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT,
+      worldId: world,
+      causationCommandId: applyCommand.commandId,
+      correlationId: applyCommand.correlationId,
+      worldVersion: '4',
+      sequence: '4',
+      simTime: applyCommand.simTime.toCanonicalValue(),
+      recordedAtReal: at,
+      correctsEventId: null,
+      payload: application.eventPayload,
+    },
+    sha,
+  );
+  const applyTransition = C.createAuthoritativeTransition({
+    command: applyCommand,
+    worldVersionBefore: '3',
+    worldVersionAfter: '4',
+    events: [applyEvent],
+  });
+  const withApply = [
+    ...frames,
+    {
+      command: applyCommand,
+      transition: applyTransition,
+      events: [applyEvent],
+      inventoryPostings: [],
+      financialPostingBatches: [],
+      receipt: C.createFinalCommandReceipt({
+        command: applyCommand,
+        transition: applyTransition,
+        outcome: 'COMMITTED',
+        reasonCode: null,
+        simTime: applyCommand.simTime,
+        recordedAtReal: at,
+      }),
+    },
+  ];
+  const applicationProof = prepareFinanceNativeBudgetMixedPrefix(
+    { ...input, frames: withApply },
+    sha,
+  );
+  const afterApplication = readFinanceNativeBudgetMixedPrefix(
+    applicationProof,
+    world,
+    withApply,
+    sha,
+  );
+  expect(
+    afterApplication.socialCountries[0]!.lifecycle.employment
+      .programmeApplications,
+  ).toEqual(application.state.programmeApplications);
+  expect(
+    afterApplication.socialCountries[0]!.lifecycle.employment.labour,
+  ).toEqual(currentEmployment.labour);
+  expect(afterApplication.budgetEncumbrances).toEqual([]);
   expect(() =>
     prepareFinanceNativeBudgetMixedPrefix(
       {

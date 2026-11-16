@@ -135,3 +135,114 @@ export function parseSocialProgrammeRowDto(
     throw Error('SOCIAL_PROGRAMME_ROW_INVALID');
   return value as SocialProgrammeRowDto;
 }
+
+/** The server selects the real whole E03 group and its current count. */
+export const SOCIAL_PROGRAMME_APPLY_COMMAND =
+  'CORE_SOCIAL_LABOUR_PROGRAMME_APPLY_V1';
+export const SOCIAL_PROGRAMME_APPLICATIONS_DATASET =
+  'social-labour-programme-applications';
+export const SOCIAL_PROGRAMME_APPLICATIONS_NATURE =
+  'ADMITTED_CURRENT_SOCIAL_LABOUR_PROGRAMME_APPLICATIONS';
+export interface SocialProgrammeApplicantDto {
+  readonly locationId: string;
+  readonly skill: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly status:
+    'EMPLOYED' | 'UNEMPLOYED_SEARCHING' | 'NOT_IN_LABOUR_FORCE' | 'STUDENT';
+}
+function applicantDto(value: unknown): SocialProgrammeApplicantDto {
+  const r = exact(value, ['locationId', 'skill', 'status']);
+  if (
+    !identifier(r.locationId) ||
+    !['LOW', 'MEDIUM', 'HIGH'].includes(String(r.skill)) ||
+    ![
+      'EMPLOYED',
+      'UNEMPLOYED_SEARCHING',
+      'NOT_IN_LABOUR_FORCE',
+      'STUDENT',
+    ].includes(String(r.status))
+  )
+    throw Error('SOCIAL_PROGRAMME_APPLICANT_INVALID');
+  return value as SocialProgrammeApplicantDto;
+}
+export interface SocialProgrammeApplicationIntentDto {
+  readonly schemaVersion: 'social-labour-programme-apply-v1';
+  readonly programmeId: string;
+  readonly programmeCommandFingerprint: string;
+  readonly applicationId: string;
+  readonly applicant: SocialProgrammeApplicantDto;
+}
+export function parseSocialProgrammeApplicationIntentDto(
+  value: unknown,
+): SocialProgrammeApplicationIntentDto {
+  const r = exact(value, [
+    'schemaVersion',
+    'programmeId',
+    'programmeCommandFingerprint',
+    'applicationId',
+    'applicant',
+  ]);
+  if (
+    r.schemaVersion !== 'social-labour-programme-apply-v1' ||
+    !identifier(r.programmeId) ||
+    !identifier(r.applicationId) ||
+    !fingerprint(r.programmeCommandFingerprint)
+  )
+    throw Error('SOCIAL_PROGRAMME_APPLICATION_INTENT_INVALID');
+  applicantDto(r.applicant);
+  return value as SocialProgrammeApplicationIntentDto;
+}
+export interface SocialProgrammeApplicationRowDto {
+  readonly countryId: string;
+  readonly programmeId: string;
+  readonly programmeCommandFingerprint: string;
+  readonly applicationId: string;
+  readonly applicant: SocialProgrammeApplicantDto;
+  readonly personCount: string;
+  readonly submittedAtSimTime: string;
+  readonly commandId: string;
+  readonly commandFingerprint: string;
+  readonly sourceRef: string;
+  readonly sourceFingerprint: string;
+  readonly status: 'APPLIED';
+  readonly classification: 'APPLICATION_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE';
+}
+export function parseSocialProgrammeApplicationRowDto(
+  value: unknown,
+): SocialProgrammeApplicationRowDto {
+  const r = exact(value, [
+    'countryId',
+    'programmeId',
+    'programmeCommandFingerprint',
+    'applicationId',
+    'applicant',
+    'personCount',
+    'submittedAtSimTime',
+    'commandId',
+    'commandFingerprint',
+    'sourceRef',
+    'sourceFingerprint',
+    'status',
+    'classification',
+  ]);
+  applicantDto(r.applicant);
+  if (
+    ![
+      'countryId',
+      'programmeId',
+      'applicationId',
+      'commandId',
+      'sourceRef',
+    ].every((k) => identifier(r[k])) ||
+    !positive(r.personCount) ||
+    typeof r.submittedAtSimTime !== 'string' ||
+    !/^(0|[1-9][0-9]{0,77})$/u.test(r.submittedAtSimTime) ||
+    !fingerprint(r.programmeCommandFingerprint) ||
+    !fingerprint(r.commandFingerprint) ||
+    !fingerprint(r.sourceFingerprint) ||
+    r.status !== 'APPLIED' ||
+    r.classification !==
+      'APPLICATION_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE'
+  )
+    throw Error('SOCIAL_PROGRAMME_APPLICATION_ROW_INVALID');
+  return value as SocialProgrammeApplicationRowDto;
+}
