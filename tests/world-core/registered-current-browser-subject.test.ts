@@ -23,7 +23,7 @@ const rows = [
   },
 ];
 describe('current-rebuild browser registered HTTP subject', () => {
-  it('uses the exact existing restore join and revocation exclusion instead of the authorization-only scan', () => {
+  it('uses the exact existing country-scoped restore join and revocation exclusion instead of the authorization-only scan', () => {
     const restore = readFileSync(
       new URL(
         '../support/registered-utility-checkpoint-restore.ts',

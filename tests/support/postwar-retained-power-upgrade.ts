@@ -11,9 +11,9 @@ const hash = (bytes: string | Buffer) =>
   createHash('sha256').update(bytes).digest('hex');
 const OLD = '0cf65bc0e6cbf1b117ca625bb16ec7280938e239';
 const TARGET = '4b6d400c2620303bfdc167d6645adfbfed3f3e04';
-// This commit contains the immutable upgrade package; the former c51d0279
-// reference cannot supply it. All existing per-artifact SHA checks still apply.
-const PACKAGE = 'bb4b430db0d687e940aa475742407a036869a57d';
+// First committed final manifest; all seven package artifacts are byte-pinned
+// to this repository ancestor, independently of the caller's current HEAD.
+const PACKAGE_COMMIT = 'bb4b430db0d687e940aa475742407a036869a57d';
 const MANIFEST = 'database/upgrades/postwar-0cf65bc0-to-4b6d400c.manifest.json';
 const REPAIR = {
   path: 'database/proposals/postwar-complete-opening-inventory-read-repair.sql',
@@ -133,7 +133,7 @@ export async function prepareRetainedPostwarPowerUpgrade(input: {
   // The reference is the reviewed immutable upgrade package, not mutable HEAD.
   assert.equal(
     rawManifest.toString('utf8'),
-    git('show', PACKAGE + ':' + MANIFEST),
+    git('show', PACKAGE_COMMIT + ':' + MANIFEST),
   );
   const manifest = JSON.parse(rawManifest.toString('utf8')) as Manifest;
   assert.equal(manifest.oldCommit, OLD);
@@ -154,7 +154,7 @@ export async function prepareRetainedPostwarPowerUpgrade(input: {
       'utf8',
     );
     assert.equal(hash(bytes), item.rawSha256, item.path);
-    assert.equal(bytes, git('show', PACKAGE + ':' + item.path));
+    assert.equal(bytes, git('show', PACKAGE_COMMIT + ':' + item.path));
     artifacts.push({ ...item, bytes });
   }
   const repairBytes = git('show', REPAIR.commit + ':' + REPAIR.path);
