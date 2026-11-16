@@ -10,6 +10,64 @@ afterAll(async () => {
   await f?.close();
 });
 describe('Industry true cumulative page-chain publication', () => {
+  it.each([
+    { kind: 'authority', status: 403 },
+    { kind: 'source', status: 503 },
+  ])(
+    'rechecks $kind revocation after waiting for publication',
+    async ({ kind, status }) => {
+      const g = await createPostwarIndustryLabourChainFixture({ paged: true });
+      try {
+        await g.planAndMatch();
+        g.afterNextRead(async () => {
+          await g.publishCurrent('COUNTRY_01', 'PAGED');
+          if (kind === 'authority') await g.revokeAuthority(false);
+          else await g.revokeSource();
+        });
+        const response = await g.call();
+        expect(response.status, JSON.stringify(response.body)).toBe(status);
+        expect(response.body.ok).toBe(false);
+        expect(response.body).not.toHaveProperty('rows');
+        expect(g.counts().acquired).toBe(2);
+        expect(g.counts().released).toBe(2);
+      } finally {
+        await g.close();
+      }
+    },
+  );
+
+  it('rereads a fresh authorized snapshot after the missing-head publication completes', async () => {
+    const g = await createPostwarIndustryLabourChainFixture({ paged: true });
+    try {
+      await g.planAndMatch();
+      const before = g.counts();
+      expect(await g.inspectWorld()).toEqual([
+        { world_version: '2', event_sequence: '2', commands: '2', events: '2' },
+      ]);
+      let publicationError: unknown;
+      g.afterNextRead(async () => {
+        try {
+          expect(g.counts().acquired).toBe(g.counts().released);
+          await g.publishCurrent('COUNTRY_01', 'PAGED');
+        } catch (error) {
+          publicationError = error;
+          throw error;
+        }
+      });
+      const response = await g.call();
+      expect(publicationError).toBeUndefined();
+      expect(response.status, JSON.stringify(response.body)).toBe(200);
+      expect(response.body.source).toMatchObject({
+        worldVersion: '2',
+        eventSequence: '2',
+      });
+      expect(g.counts().acquired - before.acquired).toBe(2);
+      expect(g.counts().acquired).toBe(g.counts().released);
+    } finally {
+      await g.close();
+    }
+  });
+
   it('keeps opening unavailable at the new head, publishes independently verified V2, and expires V1 cursor at that same head', async () => {
     const h0 = await f.call();
     expect(h0.status, JSON.stringify(h0.body)).toBe(200);
@@ -61,7 +119,9 @@ describe('Industry true cumulative page-chain publication', () => {
     expect((await f.call()).status).toBe(403);
     await f.revokeAuthority(true);
     await f.revokeSource();
+    const beforeDeniedSource = f.counts();
     expect((await f.call()).status).toBe(503);
+    expect(f.counts().acquired - beforeDeniedSource.acquired).toBe(1);
     expect(f.counts().acquired).toBe(f.counts().released);
   });
 });

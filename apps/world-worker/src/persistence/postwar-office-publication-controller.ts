@@ -1,6 +1,7 @@
 /** Fixed admitted-opening and post-commit derived publication. A failed projection never changes a
  * durable FINAL or retries an economic command. No consumer/Clock is created. */
 import { createHash } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 import {
   canonicalSerialize,
   worldId,
@@ -23,7 +24,18 @@ import {
 import type { SqlDatabase } from './sql-database.js';
 import { createPostwarIndustryLabourCurrentPublisher } from './postwar-industry-labour-current-publication.js';
 
-export type PostwarDerivedPublicationResult =
+export type PostwarPublicationStage =
+  | 'PUBLISHER_IDENTITY'
+  | 'COMMITTED_RECEIPT'
+  | 'REGISTERED_SCOPE'
+  | 'OFFICE_CURRENT'
+  | 'INDUSTRY_LABOUR';
+export interface PostwarPublicationDiagnostic {
+  readonly stage: PostwarPublicationStage;
+  readonly countryId?: string;
+  readonly elapsedMs: number;
+}
+export type PostwarDerivedPublicationResult = (
   | Readonly<{
       status: 'PUBLISHED';
       commandId: string;
@@ -41,7 +53,8 @@ export type PostwarDerivedPublicationResult =
       status: 'UNAVAILABLE';
       commandId: string;
       reason: 'DERIVED_PUBLICATION_REQUIRES_RETRY';
-    }>;
+    }>
+) & { readonly diagnostic?: PostwarPublicationDiagnostic };
 export type PostwarOfficeConsumptionStep = DurableConsumptionStep & {
   readonly derivedPublication?: PostwarDerivedPublicationResult;
 };
@@ -198,11 +211,21 @@ export function createPostwarOfficePublicationController(input: {
   ): Promise<PostwarDerivedPublicationResult> {
     if (closed) return Promise.resolve(unavailable(commandId));
     const task = (async (): Promise<PostwarDerivedPublicationResult> => {
+      const started = performance.now();
+      let stage: PostwarPublicationStage = 'PUBLISHER_IDENTITY';
+      let countryId: string | undefined;
+      const diagnostic = (): PostwarPublicationDiagnostic =>
+        Object.freeze({
+          stage,
+          ...(countryId === undefined ? {} : { countryId }),
+          elapsedMs: performance.now() - started,
+        });
       try {
         // Check the explicit publisher before holding a source connection.
         // Miswired ordinary worker pools fail here, not while nesting a second
         // checkout behind a held source transaction.
         await requirePublisher();
+        stage = 'COMMITTED_RECEIPT';
         const { command, tradeCountries } = await input.database.transaction(
           async (tx) => {
             await tx.query('set transaction isolation level repeatable read');
@@ -299,6 +322,7 @@ export function createPostwarOfficePublicationController(input: {
         // A commit advances the one global head even when its economic effect
         // belongs to another country. Refresh the already registered scope;
         // otherwise an unaffected country's valid derived pages become stale.
+        stage = 'REGISTERED_SCOPE';
         if (currentCountries) {
           const configured = readPostwarSocialRuntimeConnectionResources(
             input.socialConnection,
@@ -317,6 +341,8 @@ export function createPostwarOfficePublicationController(input: {
           )
             throw Error('EXACT_REGISTERED_POST_COMMIT_COUNTRY_SCOPE_REQUIRED');
         }
+        countryId = command.countryId;
+        stage = 'OFFICE_CURRENT';
         const result = await publisher.publishOfficeCurrentCountry(
           command.countryId,
           {
@@ -324,6 +350,7 @@ export function createPostwarOfficePublicationController(input: {
             ...(input.tradeCurrent ? { includeTrade: true } : {}),
           },
         );
+        if (industryPublisher) stage = 'INDUSTRY_LABOUR';
         const industry = await industryPublisher?.publishCountry(
           command.countryId,
           result.head,
@@ -338,6 +365,8 @@ export function createPostwarOfficePublicationController(input: {
           ...new Set([...(currentCountries ?? []), ...tradeCountries]),
         ].filter((country) => country !== command.countryId);
         for (const country of otherCountries) {
+          countryId = country;
+          stage = 'OFFICE_CURRENT';
           const other = await publisher.publishOfficeCurrentCountry(country, {
             requireCaptain: false,
             ...(input.tradeCurrent ? { includeTrade: true } : {}),
@@ -349,6 +378,7 @@ export function createPostwarOfficePublicationController(input: {
             throw Error('CURRENT_COUNTRIES_SAME_OBSERVED_HEAD_REQUIRED');
           // Legacy Trade-only counterpart behavior remains unchanged. Formal
           // registered publication keeps Industry labour at that same head too.
+          if (currentCountries && industryPublisher) stage = 'INDUSTRY_LABOUR';
           const otherIndustry = currentCountries
             ? await industryPublisher?.publishCountry(country, result.head)
             : undefined;
@@ -381,11 +411,15 @@ export function createPostwarOfficePublicationController(input: {
           captain: result.captain.length
             ? 'PUBLISHED'
             : 'NO_REGISTERED_ORIGINAL',
+          diagnostic: diagnostic(),
         });
       } catch {
         // Commit may already be FINAL. Only the derived publication is unknown;
         // callers retain the original receipt and can repeat this readback.
-        return unavailable(commandId);
+        return Object.freeze({
+          ...unavailable(commandId),
+          diagnostic: diagnostic(),
+        });
       }
     })();
     pending.add(task);

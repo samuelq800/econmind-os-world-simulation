@@ -176,6 +176,11 @@ export function createPostwarSocialMixedCurrentProjectionStore(config: {
       }
       if (result.rows.length !== 1) invalid('UNIQUE_RESULT_REQUIRED');
       const row = result.rows[0]!;
+      if (row.status === 'NOT_PUBLISHED')
+        return Object.freeze({
+          status: 'UNAVAILABLE' as const,
+          code: 'CURRENT_SOCIAL_NOT_PUBLISHED',
+        });
       if (['DENIED', 'STALE', 'UNAVAILABLE'].includes(String(row.status)))
         return freeze({
           status: row.status as 'DENIED' | 'STALE' | 'UNAVAILABLE',

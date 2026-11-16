@@ -927,8 +927,16 @@ export async function createPostwarIndustryLabourChainFixture(
       key_ops: ['verify'],
     };
   const issuer = 'https://abcdefghijklmnopqrst.supabase.co/auth/v1';
+  let afterRead: (() => Promise<void>) | undefined;
+  let readReleased = false;
   const pool = {
     async connect() {
+      if (readReleased && afterRead) {
+        const action = afterRead;
+        afterRead = undefined;
+        readReleased = false;
+        await action();
+      }
       acquired++;
       await admin();
       await db.exec(
@@ -947,6 +955,7 @@ export async function createPostwarIndustryLabourChainFixture(
         },
         release() {
           released++;
+          if (afterRead) readReleased = true;
         },
       } as unknown as PoolClient;
     },
@@ -1047,7 +1056,29 @@ export async function createPostwarIndustryLabourChainFixture(
     apiSqlErrors,
     call,
     publishCurrent,
+    afterNextRead(action: () => Promise<void>) {
+      if (afterRead) throw Error('TEST_READ_ACTION_ALREADY_ARMED');
+      afterRead = action;
+      readReleased = false;
+    },
     counts: () => ({ acquired, released }),
+    async inspectWorld() {
+      await admin();
+      return (
+        await db.query<{
+          world_version: string;
+          event_sequence: string;
+          commands: string;
+          events: string;
+        }>(
+          `select h.world_version::text,h.event_sequence::text,
+        (select count(*)::text from world_v2.command_submission c where c.world_id=h.world_id) as commands,
+        (select count(*)::text from world_v2.authoritative_event e where e.world_id=h.world_id) as events
+        from world_v2.world_head h where h.world_id=$1`,
+          [world],
+        )
+      ).rows;
+    },
     async planAndMatch() {
       const plan = frame();
       await persist(plan);

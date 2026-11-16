@@ -198,6 +198,16 @@ function protocol(
     });
 }
 describe('bounded posting-aware financial current protocol', () => {
+  it('keeps missing-head publication distinct from a rejected source without accepting any rows', async () => {
+    expect(
+      await protocol(true, (row) => {
+        row.status = 'NOT_PUBLISHED';
+      })(),
+    ).toEqual({
+      status: 'UNAVAILABLE',
+      code: 'CURRENT_FINANCIAL_NOT_PUBLISHED',
+    });
+  });
   it('allows legal empty current result with actual head coverage', async () =>
     expect((await protocol()()).status).toBe('EMPTY'));
   it('retains historical origin zero while observing H6', async () => {

@@ -156,6 +156,11 @@ export function createPostwarIndustryLabourCurrentProjectionStore(config: {
       }
       const row = r.rows[0];
       if (r.rows.length !== 1 || !row) invalid('UNIQUE_RESULT_REQUIRED');
+      if (row.status === 'NOT_PUBLISHED')
+        return Object.freeze({
+          status: 'UNAVAILABLE' as const,
+          code: 'CURRENT_INDUSTRY_LABOUR_NOT_PUBLISHED',
+        });
       if (['DENIED', 'STALE', 'UNAVAILABLE'].includes(String(row.status)))
         return Object.freeze({
           status: row.status as 'DENIED' | 'STALE' | 'UNAVAILABLE',

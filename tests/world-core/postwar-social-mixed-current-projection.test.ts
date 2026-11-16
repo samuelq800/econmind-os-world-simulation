@@ -171,6 +171,14 @@ describe('Social mixed-current V3 wire and bounded store', () => {
   });
   it('does not turn missing publication into an empty accepted dataset', async () => {
     expect(
+      await protocol((row) => {
+        row.status = 'NOT_PUBLISHED';
+      })(),
+    ).toEqual({
+      status: 'UNAVAILABLE',
+      code: 'CURRENT_SOCIAL_NOT_PUBLISHED',
+    });
+    expect(
       await protocol((r) => {
         r.status = 'UNAVAILABLE';
       })(),

@@ -1,4 +1,5 @@
 import { POSTWAR_DAY_ONE_FX_QUOTES_DATASET } from '@econmind/core/postwar-day-one-fx-command-contract';
+import { readAfterCurrentPublication } from './current-publication-read-retry.js';
 import {
   INDUSTRY_UTILISATION_TARGETS_DATASET,
   INDUSTRY_UTILISATION_TARGETS_NATURE,
@@ -696,7 +697,7 @@ export function createPostwarOfficeRuntimeReadService(
       return { status: 401, code: 'AUTHENTICATION_INVALID', retryable: false };
     return { status: 503, code: 'SOURCE_UNAVAILABLE', retryable: true };
   }
-  return Object.freeze({
+  const service = Object.freeze({
     async handle(input: {
       authorization: unknown;
       request: unknown;
@@ -1463,6 +1464,42 @@ export function createPostwarOfficeRuntimeReadService(
         const failure = errorCode(error);
         return fail(failure.status, failure.code, failure.retryable);
       }
+    },
+  });
+  return Object.freeze({
+    ...service,
+    async handle(input: Parameters<typeof service.handle>[0]) {
+      const pendingCodes = new Set([
+        'CURRENT_FINANCIAL_NOT_PUBLISHED',
+        'CURRENT_SOCIAL_NOT_PUBLISHED',
+        'CURRENT_INDUSTRY_LABOUR_NOT_PUBLISHED',
+      ]);
+      const result = await readAfterCurrentPublication({
+        read: () => service.handle(input),
+        notPublished: (response) =>
+          response.httpStatus === 503 &&
+          !response.body.ok &&
+          pendingCodes.has(response.body.error.code),
+        ...(input.signal ? { signal: input.signal } : {}),
+      });
+      if (input.signal?.aborted) return service.handle(input);
+      // Keep the existing public failure contract after the finite wait. A
+      // missing publication is not proof that it will eventually be available.
+      if (!result.body.ok && pendingCodes.has(result.body.error.code))
+        return {
+          ...result,
+          body: {
+            ...result.body,
+            error: {
+              code: result.body.error.code.replace(
+                '_NOT_PUBLISHED',
+                '_UNAVAILABLE',
+              ),
+              retryable: false,
+            },
+          },
+        };
+      return result;
     },
   });
 }

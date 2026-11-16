@@ -1075,7 +1075,7 @@ describe('mixed current SQL infrastructure (TEST_ONLY, not native/Core adoption)
   it('distinguishes missing publication from EMPTY and invalidates cursor after uncovered head', async () => {
     await prepare();
     await position(0);
-    expect((await mixedPage()).rows[0]!.status).toBe('UNAVAILABLE');
+    expect((await mixedPage()).rows[0]!.status).toBe('NOT_PUBLISHED');
     await db.exec('reset role;set session authorization postgres');
     await publishMixed();
     const result = await mixedPage(),
