@@ -1854,9 +1854,22 @@ function foldFinanceNativeBudgetMixedPrefix(
         const country = countries.get(command.countryId);
         if (!country)
           invalid('ACTUAL_LOGISTICS_CURRENT_LABOUR_COUNTRY_REQUIRED');
-        const allocations = intent.operation.allocations;
-        if (!Array.isArray(allocations))
+        // Controlled commands carry only the work-order ref/hash. The domain
+        // replay above resolves that exact registered original, validates its
+        // person/time allocations and compares the complete committed frame.
+        // Reuse its matching work result for the current-employment check;
+        // neither raw client allocations nor source staffing are authority.
+        const work = readIndustryInternalLogisticsExecutionState(
+          reduced.state,
+        ).transfers.flatMap((transfer) =>
+          transfer.work?.frame.command.commandId === command.commandId &&
+          transfer.work.frame.command.fingerprint === command.fingerprint
+            ? [transfer.work]
+            : [],
+        );
+        if (work.length !== 1)
           invalid('EXACT_LOGISTICS_WORK_ALLOCATIONS_REQUIRED');
+        const allocations = work[0]!.allocations;
         for (const allocation of allocations) {
           if (
             !allocation ||
@@ -1864,7 +1877,7 @@ function foldFinanceNativeBudgetMixedPrefix(
             Array.isArray(allocation)
           )
             invalid('EXACT_LOGISTICS_WORK_ALLOCATION_REQUIRED');
-          const a = allocation as Readonly<Record<string, unknown>>;
+          const a = allocation;
           const positions =
             country.lifecycle.employment.labour.positions.filter(
               (p) => p.positionId === a.positionId,

@@ -138,6 +138,140 @@ describe('fixed logistics orders and existing child wage claims', () => {
     expect(
       readIndustryInternalLogisticsExecutionState(result.state).bookings,
     ).toHaveLength(1);
+    // A native controlled WORK carries only ref/hash; the complete mixed
+    // prefix must obtain allocations from the exact rederived domain result.
+    expect(JSON.parse(command.canonicalPayload).operation).not.toHaveProperty(
+      'allocations',
+    );
+    const expense = f.expense(result.frame.events[0]!.fingerprint);
+    const pay = prepareIndustryInternalLogisticsFrame(
+      {
+        state: result.state,
+        command: f.command(
+          result.state,
+          {
+            action: 'PAY_INPUTS',
+            transferId: f.request.transferId,
+            workEventFingerprint: result.frame.events[0]!.fingerprint,
+            expenseOrderRef: expense.reference,
+            expenseOrderSha256: expense.rawSha256,
+          },
+          'CONTROLLED_PAY',
+          '60000',
+        ),
+        observedAtReal: at,
+        expenseOriginal: expense,
+      },
+      sha,
+    );
+    const deliver = prepareIndustryInternalLogisticsFrame(
+      {
+        state: pay.state,
+        command: f.command(
+          pay.state,
+          { action: 'DELIVER', transferId: f.request.transferId },
+          'CONTROLLED_DELIVER',
+          '60000',
+        ),
+        observedAtReal: at,
+      },
+      sha,
+    );
+    const replayWork = (social = f.social, throughDelivery = false) => {
+      const completeFrames = [
+        ...frames,
+        result.frame,
+        ...(throughDelivery ? [pay.frame, deliver.frame] : []),
+      ];
+      const last = completeFrames.at(-1)!;
+      const completeHead = {
+        worldVersion: last.transition.worldVersionAfter,
+        eventSequence: last.events.at(-1)!.sequence,
+      };
+      return readFinanceSocialReplayContinuation(
+        appendFinanceSocialReplayPage({
+          continuation: prepareFinanceSocialReplayContinuation(
+            {
+              opening: f.opening,
+              expectedHead: completeHead,
+              socialCountries: [social],
+              fxOriginals: [],
+              openingEncumbrances: [],
+              industryWorkSources: [f.workSource],
+              industryLogisticsSources: [f.sourceInput([expense], [order])],
+            },
+            sha,
+          ),
+          sha256Hex: sha,
+          page: {
+            schemaVersion: 'finance-social-replay-page-v1',
+            worldId: f.world,
+            seedFingerprint: f.seed.fingerprint,
+            fromHead: { worldVersion: '0', eventSequence: '0' },
+            throughHead: completeHead,
+            expectedHead: completeHead,
+            frames: completeFrames,
+            framesSha256: C.canonicalSha256(
+              C.canonicalHashInput(completeFrames),
+              sha,
+            ),
+          },
+        }),
+      );
+    };
+    const full = replayWork();
+    expect(full.complete).toBe(true);
+    const worked = readIndustryInternalLogisticsExecutionState(
+      full.result.industryLogisticsState![0]!,
+    );
+    expect(worked.bookings).toEqual([f.allocation]);
+    expect(worked.financial).toEqual({
+      ...readIndustryInternalLogisticsExecutionState(ship.state).financial,
+      worldVersion: '4',
+    });
+    const delivered = replayWork(f.social, true);
+    expect(delivered.complete).toBe(true);
+    const deliveryState = readIndustryInternalLogisticsExecutionState(
+      delivered.result.industryLogisticsState![0]!,
+    );
+    expect(deliveryState.transfers[0]!.status).toBe('DELIVERED');
+    expect(deliveryState.bookings).toEqual([f.allocation]);
+    expect(deliveryState.financial).toEqual(
+      readIndustryInternalLogisticsExecutionState(deliver.state).financial,
+    );
+    expect(deliveryState.inventory).toEqual(
+      readIndustryInternalLogisticsExecutionState(deliver.state).inventory,
+    );
+
+    const separated = C.applyLabourFacts({
+      boundary: C.createE01DailyBoundary('0'),
+      populationAvailability: [
+        {
+          countryId: f.country,
+          locationId: 'REGION_02_E1',
+          workingAgeAvailable: '11',
+        },
+      ],
+      state: f.social.state.labour,
+      facts: [
+        {
+          kind: 'LABOUR_SEPARATION',
+          factId: 'CONTROLLED_WORK_CURRENT_SEPARATION',
+          countryId: f.country,
+          locationId: 'REGION_02_E1',
+          dayIndex: '0',
+          positionId: f.allocation.positionId,
+          skill: 'LOW',
+          count: '1',
+        },
+      ],
+    });
+    expect(() =>
+      replayWork({
+        ...f.social,
+        state: { ...f.social.state, labour: separated.state },
+      }),
+    ).toThrow('ACTUAL_CURRENT_LOGISTICS_EMPLOYMENT_REQUIRED');
     expect(() =>
       prepareIndustryInternalLogisticsFrame(
         { state: ship.state, command, observedAtReal: at },
