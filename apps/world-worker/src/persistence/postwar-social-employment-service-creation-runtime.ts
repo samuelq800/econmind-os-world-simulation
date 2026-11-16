@@ -5,6 +5,10 @@ import { createHash } from 'node:crypto';
 import {
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT,
+  prepareSocialLabourProgrammeApplication,
+  readSocialLabourProgrammeApplications,
   SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT,
   prepareSocialLabourProgrammeCreation,
   readSocialLabourProgrammes,
@@ -59,12 +63,18 @@ import type {
 } from './atomic-transition-repository.js';
 export const SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE =
   'SOCIAL_LABOUR_PROGRAMME_CREATE_SOURCE_EVALUATION_V1' as const;
+export const SOCIAL_PROGRAMME_APPLICATION_SOURCE_PURPOSE =
+  'SOCIAL_LABOUR_PROGRAMME_APPLY_SOURCE_EVALUATION_V1' as const;
 function sourcePurpose(command: CanonicalCommand) {
+  if (command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND)
+    return SOCIAL_PROGRAMME_APPLICATION_SOURCE_PURPOSE;
   return command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
     ? SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE
     : SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE;
 }
 function createdEventType(command: CanonicalCommand) {
+  if (command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND)
+    return SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT;
   return command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
     ? SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT
     : SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT;
@@ -89,7 +99,8 @@ export interface SocialServiceCreationSourceReadBinding {
   readonly schemaVersion: 'social-service-create-source-read-binding-v1';
   readonly purpose:
     | typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE
-    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE;
+    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE
+    | typeof SOCIAL_PROGRAMME_APPLICATION_SOURCE_PURPOSE;
   readonly commandFingerprint: string;
   readonly readHead: DecisionResultHead;
   readonly seedFingerprint: string;
@@ -112,7 +123,8 @@ export interface SocialServiceCreationSourceCommitRequest {
   readonly phase: 'BEFORE_EVENTS';
   readonly purpose:
     | typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE
-    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE;
+    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE
+    | typeof SOCIAL_PROGRAMME_APPLICATION_SOURCE_PURPOSE;
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
   readonly currentHead: DecisionResultHead;
@@ -124,7 +136,8 @@ export interface SocialServiceCreationSourceCommitAudit {
   readonly status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY';
   readonly purpose:
     | typeof SOCIAL_SERVICE_CREATION_SOURCE_PURPOSE
-    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE;
+    | typeof SOCIAL_PROGRAMME_CREATION_SOURCE_PURPOSE
+    | typeof SOCIAL_PROGRAMME_APPLICATION_SOURCE_PURPOSE;
   readonly commandFingerprint: string;
   readonly currentHead: DecisionResultHead;
   readonly readBindingFingerprint: string;
@@ -142,13 +155,20 @@ export function isPostwarSocialEmploymentServiceCreationSourceCommitProtectionPo
 ): value is SocialServiceCreationSourceCommitProtectionPort {
   return !!value && typeof value === 'object' && issuedSourcePorts.has(value);
 }
-export type PostwarSocialLabourProgrammeReadData = ReturnType<
-  typeof readSocialLabourProgrammes
-> &
+export type PostwarSocialLabourProgrammeReadData = (
+  | ReturnType<typeof readSocialLabourProgrammes>
+  | ReturnType<typeof readSocialLabourProgrammeApplications>
+) &
   Readonly<{
     creationContext: Readonly<{
       localCurrency: string;
       locationIds: readonly string[];
+      applicantGroups: readonly Readonly<{
+        locationId: string;
+        skill: string;
+        status: string;
+        personCount: string;
+      }>[];
     }>;
   }>;
 export interface PostwarSocialEmploymentServiceCreationRuntime {
@@ -164,6 +184,7 @@ export interface PostwarSocialEmploymentServiceCreationRuntime {
     selection: {
       readonly countryId: string;
       readonly offset: number;
+      readonly applications?: boolean;
       readonly limit: number;
       readonly expectedHead: {
         readonly worldVersion: string;
@@ -202,7 +223,8 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
     if (
       c.worldId !== configuration.worldId ||
       (c.commandType !== SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND &&
-        c.commandType !== SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND) ||
+        c.commandType !== SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND &&
+        c.commandType !== SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND) ||
       c.officeId !== 'SOCIAL' ||
       c.countryId === null ||
       c.expectedWorldVersion === null ||
@@ -305,9 +327,23 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
         invalid('PROGRAMME_INSTALLED_COMPLETE_PREFIX_REQUIRED');
     });
   };
+  const assertApplicationContractFrom = async (tx: SqlExecutor) => {
+    await roles.withSourceReaderFrom(tx, async () => {
+      const r = await tx.query<{ version: string }>(
+        'select world_v2.postwar_social_application_contract_version() as version',
+      );
+      if (
+        r.rows.length !== 1 ||
+        r.rows[0]?.version !== 'postwar-social-labour-application-v1'
+      )
+        invalid('APPLICATION_INSTALLED_COMPLETE_PREFIX_REQUIRED');
+    });
+  };
   const deriveFrom = async (tx: SqlExecutor, command: CanonicalCommand) => {
     if (command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND)
       await assertProgrammeContractFrom(tx);
+    if (command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND)
+      await assertApplicationContractFrom(tx);
     const {
       ticks,
       source,
@@ -337,7 +373,10 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
       invalid('COMMAND_PRECEDES_CURRENT_PREFIX');
 
     const { facts, operation, before } = (() => {
-      if (command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND) {
+      if (
+        command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+        command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND
+      ) {
         const f = originalCountry.validationReadFacts.facts;
         const facts = {
           worldId: command.worldId,
@@ -354,15 +393,20 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
           sourceFingerprint: source.source.payloadHash,
           sourceRevocations: [],
         };
-        const operation = prepareSocialLabourProgrammeCreation({
+        const operation = (
+          command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND
+            ? prepareSocialLabourProgrammeApplication
+            : prepareSocialLabourProgrammeCreation
+        )({
           command,
           state: country.lifecycle.employment,
           readFacts: facts,
           sha256Hex: digest,
         });
         const unchanged = (state: typeof country.lifecycle.employment) => {
-          const { programmes, ...existing } = state;
+          const { programmes, programmeApplications, ...existing } = state;
           void programmes;
+          void programmeApplications;
           return existing;
         };
         const before = unchanged(country.lifecycle.employment);
@@ -649,7 +693,8 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
         selection.limit > 100
       )
         invalid('BOUNDED_PROGRAMME_PAGE_REQUIRED');
-      await assertProgrammeContractFrom(tx);
+      if (selection.applications) await assertApplicationContractFrom(tx);
+      else await assertProgrammeContractFrom(tx);
       const current = await readCurrentFrom(tx, selection.countryId);
       if (
         !same(selection.expectedHead, {
@@ -659,7 +704,9 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
       )
         invalid('PROGRAMME_CURRENT_HEAD_DIFFERS');
       return {
-        ...readSocialLabourProgrammes({
+        ...(selection.applications
+          ? readSocialLabourProgrammeApplications
+          : readSocialLabourProgrammes)({
           state: current.country.lifecycle.employment,
           countryId: selection.countryId,
           offset: selection.offset,
@@ -668,6 +715,18 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
         }),
         creationContext: {
           localCurrency: current.originalCountry.minimumWage.currency,
+          applicantGroups:
+            current.country.lifecycle.employment.labour.aggregates
+              .filter(
+                (a) =>
+                  a.countryId === selection.countryId && BigInt(a.count) > 0n,
+              )
+              .map((a) => ({
+                locationId: a.locationId,
+                skill: a.skill,
+                status: a.status,
+                personCount: a.count,
+              })),
           locationIds: [
             ...new Set(
               current.originalCountry.validationReadFacts.facts.populationAvailability
@@ -739,6 +798,8 @@ export function createPostwarSocialEmploymentServiceCreationRuntime(configuratio
       const command = capturedCommand(input);
       if (command.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND)
         await configuration.database.transaction(assertProgrammeContractFrom);
+      if (command.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND)
+        await configuration.database.transaction(assertApplicationContractFrom);
       return authorizePostwarSocialOperatingCommandFrom(
         configuration.database,
         command,

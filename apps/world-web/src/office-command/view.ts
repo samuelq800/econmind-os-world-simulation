@@ -1,4 +1,5 @@
 import { renderTreasuryFxForm } from '../finance-fx/form.js';
+import { parseSocialProgrammeApplicationRowDto } from '@econmind/core/social-labour-programme-public-contract';
 import { parseIndustryUtilisationTargetRow } from '@econmind/core/postwar-industry-utilisation-targets-contract';
 import { renderSocialProgrammeForm } from '../social-employment/programme-form.js';
 import { parseIndustryCommittedRunRow } from '@econmind/core/postwar-industry-committed-runs-contract';
@@ -322,6 +323,9 @@ export function installOfficeCommand(
           stage: (draft) =>
             active(owner, lifetime, dialog!) &&
             owner.stageSocialProgramme(draft),
+          stageApplication: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialProgrammeApplication(draft),
         }),
       );
       if (
@@ -333,6 +337,33 @@ export function installOfficeCommand(
             owner.nextSocialProgrammesPage(),
           ),
         );
+
+      const applicationSection = document.createElement('section');
+      applicationSection.dataset.socialApplications = '';
+      applicationSection.append(node('h4', '群体申请记录（资格尚未核验）'));
+      if (!state.socialApplicationsPage)
+        applicationSection.append(
+          node('p', state.socialApplicationsCode ?? '等待当前申请记录'),
+        );
+      else if (!state.socialApplicationsPage.rows.length)
+        applicationSection.append(node('p', '当前没有已登记群体申请。'));
+      else
+        for (const row of state.socialApplicationsPage.rows) {
+          const application = parseSocialProgrammeApplicationRowDto(row);
+          applicationSection.append(
+            node(
+              'p',
+              `${application.applicationId} · ${application.programmeId} · ${application.applicant.locationId} / ${application.applicant.skill} / ${application.applicant.status} · ${application.personCount} 人 · 已申请，未核验资格或付款`,
+            ),
+          );
+        }
+      if (state.socialApplicationsPage?.page.nextOffset != null)
+        applicationSection.append(
+          button('下一申请页', 'social-next-applications', state.canRead, () =>
+            owner.nextSocialApplicationsPage(),
+          ),
+        );
+      dialog.append(applicationSection);
 
       dialog.append(
         renderSocialEmploymentServiceCreateForm(document, {

@@ -8,6 +8,9 @@ import {
 } from '@econmind/core/postwar-industry-utilisation-targets-contract';
 import {
   SOCIAL_PROGRAMMES_DATASET,
+  SOCIAL_PROGRAMME_APPLICATIONS_DATASET,
+  SOCIAL_PROGRAMME_APPLICATIONS_NATURE,
+  parseSocialProgrammeApplicationRowDto,
   SOCIAL_PROGRAMMES_NATURE,
   parseSocialProgrammeRowDto,
 } from '@econmind/core/social-labour-programme-public-contract';
@@ -127,7 +130,8 @@ type PageSourceNature =
   | typeof INDUSTRY_UTILITY_PLANNING_NATURE
   | typeof INDUSTRY_COMMITTED_RUNS_NATURE
   | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
-  | typeof SOCIAL_PROGRAMMES_NATURE;
+  | typeof SOCIAL_PROGRAMMES_NATURE
+  | typeof SOCIAL_PROGRAMME_APPLICATIONS_NATURE;
 type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
   readonly source: Omit<
     OriginalSuccessPage['source'],
@@ -168,7 +172,8 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
             | typeof INDUSTRY_UTILITY_PLANNING_NATURE
             | typeof INDUSTRY_COMMITTED_RUNS_NATURE
             | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
-            | typeof SOCIAL_PROGRAMMES_NATURE;
+            | typeof SOCIAL_PROGRAMMES_NATURE
+            | typeof SOCIAL_PROGRAMME_APPLICATIONS_NATURE;
           canonicalSeedSha256?: never;
         }>
       | Readonly<{
@@ -178,6 +183,7 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
             | typeof INDUSTRY_COMMITTED_RUNS_NATURE
             | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
             | typeof SOCIAL_PROGRAMMES_NATURE
+            | typeof SOCIAL_PROGRAMME_APPLICATIONS_NATURE
           >;
           canonicalSeedSha256: string;
         }>
@@ -190,7 +196,11 @@ const OFFICE_RUNTIME_DATASETS = Object.freeze({
     POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
     ...POSTWAR_FINANCIAL_CURRENT_DATASETS.FINANCE,
   ],
-  SOCIAL: [SOCIAL_PROGRAMMES_DATASET, ...POSTWAR_PROJECTION_DATASETS.SOCIAL],
+  SOCIAL: [
+    SOCIAL_PROGRAMMES_DATASET,
+    SOCIAL_PROGRAMME_APPLICATIONS_DATASET,
+    ...POSTWAR_PROJECTION_DATASETS.SOCIAL,
+  ],
   INDUSTRY: [
     INDUSTRY_UTILITY_PLANNING_DATASET,
     INDUSTRY_COMMITTED_RUNS_DATASET,
@@ -716,8 +726,11 @@ export function createPostwarOfficeRuntimeReadService(
         const claims = await claimsFor(input.authorization, signal);
         if (
           request.office === 'SOCIAL' &&
-          request.dataset === SOCIAL_PROGRAMMES_DATASET
+          (request.dataset === SOCIAL_PROGRAMMES_DATASET ||
+            request.dataset === SOCIAL_PROGRAMME_APPLICATIONS_DATASET)
         ) {
+          const applications =
+            request.dataset === SOCIAL_PROGRAMME_APPLICATIONS_DATASET;
           const programmeReader = socialServiceCreationPlanningReader;
           const selectSocial = (identity: ValidatedJwtClaims) =>
             snapshots.withReadOnlyExecutor(
@@ -745,6 +758,7 @@ export function createPostwarOfficeRuntimeReadService(
               if (!programmeReader?.readProgrammes)
                 return fail(503, 'SOCIAL_PROGRAMMES_NOT_INSTALLED');
               const read = await programmeReader.readProgrammes({
+                applications,
                 countryId: before.scope.countryId,
                 expectedHead: {
                   worldVersion: before.source.worldVersion,
@@ -759,7 +773,9 @@ export function createPostwarOfficeRuntimeReadService(
               if (read.status !== 'AVAILABLE')
                 return fail(read.status === 'STALE' ? 409 : 503, read.code);
               const rows = read.data.rows.map((r) =>
-                parseSocialProgrammeRowDto({
+                (applications
+                  ? parseSocialProgrammeApplicationRowDto
+                  : parseSocialProgrammeRowDto)({
                   countryId: before.scope.countryId,
                   ...r,
                 }),
@@ -774,9 +790,14 @@ export function createPostwarOfficeRuntimeReadService(
                   nextOffset !== request.offset + rows.length) ||
                 (nextOffset === null) !==
                   (request.offset + rows.length === total) ||
-                new Set(rows.map((r) => r.programmeId)).size !== rows.length ||
+                new Set(
+                  rows.map((r) =>
+                    'applicationId' in r ? r.applicationId : r.programmeId,
+                  ),
+                ).size !== rows.length ||
                 !creationContext ||
-                creationContext.locationIds.length > 1000
+                creationContext.locationIds.length > 1000 ||
+                creationContext.applicantGroups.length > 1000
               )
                 return fail(503, 'SOCIAL_PROGRAMME_PAGE_INVALID');
               // Each checkout ends before the next: works with a one-connection
@@ -818,7 +839,7 @@ export function createPostwarOfficeRuntimeReadService(
                           worldId: fresh.scope.worldId,
                           countryId: fresh.scope.countryId,
                           source: fresh.source,
-                          dataset: SOCIAL_PROGRAMMES_DATASET,
+                          dataset: request.dataset,
                         }),
                       )
                       .digest('hex');
@@ -828,7 +849,11 @@ export function createPostwarOfficeRuntimeReadService(
                   )
                     return fail(409, 'STALE_SOURCE_SCOPE');
                   const encoded = canonicalSerialize(rows);
-                  if (Buffer.byteLength(encoded) > 48000)
+                  if (
+                    Buffer.byteLength(encoded) +
+                      Buffer.byteLength(canonicalSerialize(creationContext)) >
+                    48000
+                  )
                     return fail(503, 'RESPONSE_LIMIT_EXCEEDED');
                   const hashed = await executor.query<{ hash: string }>(
                     "select encode(sha256(convert_to($1::jsonb::text,'UTF8')),'hex') hash",
@@ -845,16 +870,21 @@ export function createPostwarOfficeRuntimeReadService(
                       scope: fresh.scope,
                       source: {
                         ...fresh.source,
-                        dataNature: SOCIAL_PROGRAMMES_NATURE,
+                        dataNature: applications
+                          ? SOCIAL_PROGRAMME_APPLICATIONS_NATURE
+                          : SOCIAL_PROGRAMMES_NATURE,
                         sourceVersion,
-                        sourceRevision: 'SOCIAL_PROGRAMME_TERMS_READ_V1',
+                        sourceRevision: applications
+                          ? 'SOCIAL_PROGRAMME_APPLICATIONS_READ_V1'
+                          : 'SOCIAL_PROGRAMME_TERMS_READ_V1',
                         pageHash: hashed.rows[0]!.hash,
                         returnedRowsHash: hashed.rows[0]!.hash,
                         hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
                         sourcePointer: {
                           rowOrigin: 'fixed-social-programme-runtime',
-                          rowBinding:
-                            'programmeId+commandFingerprint+sourceRef+sourceFingerprint',
+                          rowBinding: applications
+                            ? 'applicationId+programmeCommandFingerprint+commandFingerprint+sourceRef+sourceFingerprint'
+                            : 'programmeId+commandFingerprint+sourceRef+sourceFingerprint',
                         },
                         currentSocialProgrammeContext: creationContext,
                       },

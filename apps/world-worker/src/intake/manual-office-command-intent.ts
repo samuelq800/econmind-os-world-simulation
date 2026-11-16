@@ -18,7 +18,9 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
   parseSocialLabourProgrammeCreateIntent,
+  parseSocialLabourProgrammeApplyIntent,
   parseSocialPositionOfferCreateIntent,
   parseSocialEmploymentServiceCreateIntent,
   DomainError,
@@ -161,6 +163,17 @@ export function validateManualOfficeCommandIntent(
         parseSocialEmploymentServiceCommand(command, sha).kind !== 'PLAN'
       )
         invalid();
+      return;
+    case SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialLabourProgrammeApplyIntent(
+        JSON.parse(command.canonicalPayload),
+      );
       return;
     case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
       if (

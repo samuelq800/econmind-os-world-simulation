@@ -22,6 +22,7 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DomainError,
   DOMAIN_ERROR_CODES,
@@ -133,7 +134,8 @@ export function parseManualOfficeCommandRequest(
     (row.officeId === 'TRADE' &&
       row.commandType === 'CORE_GOODS_TRANSFER_V1') ||
     (row.officeId === 'SOCIAL' &&
-      (row.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+      (row.commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND ||
+        row.commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
         row.commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
         row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
         row.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)) ||
@@ -173,7 +175,8 @@ export function manualOfficeCommandCapability(request: {
     return CENTRAL_BANK_OMO_CAPABILITY;
   if (
     office === 'SOCIAL' &&
-    (family === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+    (family === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND ||
+      family === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
       family === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
       family === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
       family === SOCIAL_POSITION_OFFER_CREATE_COMMAND)

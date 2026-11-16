@@ -1,5 +1,5 @@
 /** Browser DATA/transport tests only; no source adoption or economic acceptance. */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { parseSocialLabourProgrammeCreateIntent } from '@econmind/core';
 import {
   SOCIAL_PROGRAMMES_DATASET,
@@ -7,12 +7,17 @@ import {
   parseSocialProgrammeTermsDto,
   parseSocialProgrammeRowDto,
 } from '@econmind/core/social-labour-programme-public-contract';
-import { buildSocialProgrammeRequest } from '../../apps/world-web/src/social-employment/programme-form.js';
+import {
+  renderSocialProgrammeForm,
+  buildSocialProgrammeRequest,
+  buildSocialProgrammeApplicationRequest,
+} from '../../apps/world-web/src/social-employment/programme-form.js';
 import {
   createPostwarRuntimeClient,
   type RuntimePage,
 } from '../../apps/world-web/src/postwar-office-runtime/client.js';
 import { officeCommandFixture } from './office-command-fixture.js';
+import { HostDocument, HostElement } from './trusted-host-dom.js';
 const fp = 'sha256:' + 'a'.repeat(64);
 const terms = {
   schemaVersion: 'social-labour-programme-create-v1',
@@ -230,4 +235,163 @@ describe('pending Social programme browser connection', () => {
       c.disconnect();
     }
   });
+});
+
+it('stages an actual whole group without client count, approval or qualification authority', () => {
+  const f = fixture();
+  const applicant = {
+    locationId: 'REGION_TEST_ONLY',
+    skill: 'LOW' as const,
+    status: 'NOT_IN_LABOUR_FORCE' as const,
+  };
+  const page = {
+    ...f.page,
+    source: {
+      ...f.page.source,
+      currentSocialProgrammeContext: {
+        localCurrency: 'XAA',
+        locationIds: ['REGION_TEST_ONLY'],
+        applicantGroups: [{ ...applicant, personCount: '5' }],
+      },
+    },
+  };
+  const input = {
+    page,
+    draft: { programmeId: terms.programmeId, applicant },
+    applicationId: 'APPLICATION_TEST_ONLY',
+    commandId: 'APPLY_TEST_ONLY',
+    idempotencyKey: 'APPLY_KEY_TEST_ONLY',
+    requestId: '11111111-1111-4111-8111-111111111111',
+  };
+  const request = buildSocialProgrammeApplicationRequest(input);
+  expect(request.request.commandType).toBe(
+    'CORE_SOCIAL_LABOUR_PROGRAMME_APPLY_V1',
+  );
+  expect(request.request.payload).toEqual({
+    schemaVersion: 'social-labour-programme-apply-v1',
+    programmeId: terms.programmeId,
+    programmeCommandFingerprint: fp,
+    applicationId: 'APPLICATION_TEST_ONLY',
+    applicant,
+  });
+  expect(() =>
+    buildSocialProgrammeApplicationRequest({
+      ...input,
+      draft: {
+        ...input.draft,
+        applicant: { ...applicant, locationId: 'REGION_FOREIGN' },
+      },
+    }),
+  ).toThrow('CURRENT_SOCIAL_PROGRAMME_AND_GROUP');
+  expect(() =>
+    buildSocialProgrammeApplicationRequest({ ...input, page: f.page }),
+  ).toThrow('CURRENT_SOCIAL_APPLICANT_GROUPS');
+});
+
+it('reads a bounded application page while distinguishing APPLIED from eligibility and rejects foreign rows', async () => {
+  for (const foreign of [false, true]) {
+    const f = fixture();
+    const applicant = {
+      locationId: 'REGION_TEST_ONLY',
+      skill: 'LOW',
+      status: 'NOT_IN_LABOUR_FORCE',
+    };
+    const value = {
+      countryId: foreign ? 'COUNTRY_FOREIGN' : f.read.identity.countryId,
+      programmeId: terms.programmeId,
+      programmeCommandFingerprint: fp,
+      applicationId: 'APPLICATION_TEST_ONLY',
+      applicant,
+      personCount: '5',
+      submittedAtSimTime: '1000',
+      commandId: 'APPLY_TEST_ONLY',
+      commandFingerprint: fp,
+      sourceRef: 'SOURCE_TEST_ONLY',
+      sourceFingerprint: fp,
+      status: 'APPLIED',
+      classification:
+        'APPLICATION_ONLY_NOT_ELIGIBILITY_APPROVAL_FUNDING_OR_SERVICE',
+    };
+    const dataset = 'social-labour-programme-applications';
+    const page = {
+      ...f.page,
+      dataset,
+      rows: [value],
+      source: {
+        ...f.page.source,
+        dataNature: 'ADMITTED_CURRENT_SOCIAL_LABOUR_PROGRAMME_APPLICATIONS',
+        sourceRevision: 'SOCIAL_PROGRAMME_APPLICATIONS_READ_V1',
+        sourcePointer: {
+          rowOrigin: 'fixed-social-programme-runtime',
+          rowBinding:
+            'applicationId+programmeCommandFingerprint+commandFingerprint+sourceRef+sourceFingerprint',
+        },
+      },
+    };
+    const client = createPostwarRuntimeClient(f.read, {
+      fetcher: async (_url, init) =>
+        Response.json({
+          ...page,
+          status: 'AVAILABLE',
+          schemaVersion: 'postwar-office-runtime-read-v1',
+          requestId: JSON.parse(String(init?.body)).requestId,
+          ok: true,
+        }),
+    });
+    const result = await client.readPage(
+      dataset,
+      '11111111-1111-4111-8111-111111111111',
+    );
+    expect(result.status).toBe(foreign ? 'UNAVAILABLE' : 'PAGE');
+    client.disconnect();
+  }
+});
+
+it('renders actual group count and only stages the selected group for review', () => {
+  const f = fixture();
+  const applicant = {
+    locationId: 'REGION_TEST_ONLY',
+    skill: 'LOW' as const,
+    status: 'NOT_IN_LABOUR_FORCE' as const,
+  };
+  const page = {
+    ...f.page,
+    source: {
+      ...f.page.source,
+      currentSocialProgrammeContext: {
+        localCurrency: 'XAA',
+        locationIds: ['REGION_TEST_ONLY'],
+        applicantGroups: [{ ...applicant, personCount: '5' }],
+      },
+    },
+  };
+  const document = new HostDocument('social');
+  const stage = vi.fn(() => true);
+  const stageApplication = vi.fn(() => true);
+  const section = renderSocialProgrammeForm(document as unknown as Document, {
+    page,
+    code: null,
+    enabled: true,
+    stage,
+    stageApplication,
+  }) as unknown as HostElement;
+  const form = section.querySelector(
+    '[data-social-programme-application="PROGRAMME_TEST_ONLY"]',
+  )!;
+  const select = form.all().find((el) => el.tag === 'select')!;
+  expect(form.textContent).toContain('5 人');
+  expect(form.textContent).toContain('未占用项目容量或付款');
+  expect(stageApplication).not.toHaveBeenCalled();
+  Object.assign(select, { value: '0' });
+  (
+    form.listeners.get('submit') as unknown as (event: {
+      preventDefault: () => void;
+    }) => void
+  )({ preventDefault() {} });
+  expect(stageApplication).toHaveBeenCalledExactlyOnceWith({
+    programmeId: terms.programmeId,
+    applicant,
+  });
+  expect(stage).not.toHaveBeenCalled();
+  expect(form.textContent).toContain('尚未提交、核验资格或获得批准');
 });

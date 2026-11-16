@@ -170,6 +170,17 @@ describe('Social programme read requires genuine runtime and current seat', () =
       ),
     ).toBe(false);
   });
+  it('keeps application reads unavailable without the genuine runtime and enforces the current Social seat', async () => {
+    const extra = { dataset: 'social-labour-programme-applications' };
+    const unavailable = await call(token(), extra);
+    expect(unavailable.status).toBe(503);
+    expect(unavailable.body.rows).toBeUndefined();
+    expect((await call('BAD_JWT', extra)).status).toBe(401);
+    expect(
+      (await call(token('33333333-3333-4333-8333-333333333333'), extra)).status,
+    ).toBe(403);
+    expect(acquired).toBe(released);
+  });
   it('retains signature, current subject and request-scope checks before source inspection', async () => {
     const before = queries.length;
     expect((await call('BAD_JWT')).status).toBe(401);

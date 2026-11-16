@@ -54,6 +54,7 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
   SOCIAL_JOB_MATCH_DUE_COMMAND,
   SimTime,
   bindAuthoritativeTransition,
@@ -2365,7 +2366,9 @@ export class AtomicTransitionRepository {
     if (
       candidate.command.commandType !==
         SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND &&
-      candidate.command.commandType !== SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+      candidate.command.commandType !==
+        SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND &&
+      candidate.command.commandType !== SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND
     )
       return;
     const captured = candidate.deferredOfficeOperatingSourceReadBinding;
@@ -2388,9 +2391,12 @@ export class AtomicTransitionRepository {
         phase: 'BEFORE_EVENTS',
         purpose:
           candidate.command.commandType ===
-          SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
-            ? 'SOCIAL_LABOUR_PROGRAMME_CREATE_SOURCE_EVALUATION_V1'
-            : 'SOCIAL_EMPLOYMENT_SERVICE_CREATE_SOURCE_EVALUATION_V1',
+          SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND
+            ? 'SOCIAL_LABOUR_PROGRAMME_APPLY_SOURCE_EVALUATION_V1'
+            : candidate.command.commandType ===
+                SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+              ? 'SOCIAL_LABOUR_PROGRAMME_CREATE_SOURCE_EVALUATION_V1'
+              : 'SOCIAL_EMPLOYMENT_SERVICE_CREATE_SOURCE_EVALUATION_V1',
         command: candidate.command,
         transition: candidate.transition,
         currentHead: Object.freeze({

@@ -19,6 +19,7 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
 } from '@econmind/core';
 import {
@@ -213,6 +214,7 @@ export function createPostwarOfficeCommandFetchHandler(
                               SOCIAL_POSITION_OFFER_CREATE_COMMAND,
                               SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
                               SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+                              SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
                               SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
                             ].some((f) => f === selector.commandType)
                           ? social

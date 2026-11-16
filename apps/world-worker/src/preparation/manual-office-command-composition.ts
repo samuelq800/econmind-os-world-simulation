@@ -59,6 +59,7 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DOMAIN_ERROR_CODES,
   DomainError,
@@ -195,6 +196,7 @@ export function manualOfficeCapability(command: CanonicalCommand) {
       return command.officeId === 'SOCIAL'
         ? SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY
         : null;
+    case SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND:
     case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
     case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND:
     case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
@@ -444,6 +446,7 @@ export function createManualOfficeCommandComposition(input: {
           runtime.preflightCanonical(command, observedAtReal),
       };
     }
+    case SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND:
     case SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND:
     case SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND: {
       validateManualOfficeCommandIntent(command);
