@@ -1,0 +1,786 @@
+{
+  "schemaVersion": "CAPACITY_RETEST_20261116_V1",
+  "status": "MIXED_LOAD_FAILED_NOT_V30_ACCEPTANCE",
+  "candidate": "189a511c5124bcad1a457710442634286417e731",
+  "branch": "codex/office-next-connections-20261108",
+  "purchaseConclusion": "DO_NOT_BUY_OR_UPSIZE_TO_FIX_OBSERVED_FAILURE; repair read availability during writes before sizing final deployment",
+  "environment": {
+    "host": "Windows Core Ultra 5 125H, 18 logical CPUs, 31.6GiB, user working concurrently",
+    "runtime": "Docker Desktop 29.7.2 / WSL2 6.6.87.2 / Debian bookworm",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "postgres": "16.15-1.pgdg13+2",
+    "nodeImage": "node@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2",
+    "postgresImage": "postgres@sha256:1beaa3084eee2676f20a9cd9928f0bf2c5bf674f8e49f81017912183d377c61c",
+    "runnerCpu": 2,
+    "runnerMemoryBytes": 6442450944,
+    "databaseCpu": 1,
+    "databaseMemoryBytes": 3221225472,
+    "runnerLifetimeCgroupPeakBytes": 4304060416,
+    "runnerOomEvents": 0,
+    "databaseOomKilled": false,
+    "nativeFixturePoolMax": 1,
+    "productionNodeDocumentedPoolMax": 2,
+    "clockTickHz": 100,
+    "sampleIntervalSeconds": 2,
+    "network": "private loopback HTTP + Unix socket PG; no public TLS/remote DB latency",
+    "dockerCliImage": "docker@sha256:3f4743208d2338c934d7b8bcfbe1bb54c0b2355c510ad5e0f31c0c4a54bd704e"
+  },
+  "lockfileSha256": "95877b09a3ea23080417c0af6b04b2a82adf13e246ca1fcfd6f90ab356dad0e9",
+  "sourceManifest": {
+    "schemaVersion": "postwar-fresh-rehearsal-source-v1",
+    "classification": "NEW_OFFLINE_REHEARSAL_NOT_RESTORED_H3",
+    "status": "ACTUAL_SOURCE_DERIVED_AND_VERIFIED_NOT_RUNTIME_ADMITTED",
+    "repositoryCommit": "189a511c5124bcad1a457710442634286417e731",
+    "parentFile": "/workspace/.cloud-setup/evidence/postwar-gcu-opening-fresh-20261029T020748Z/final-seed.json",
+    "parentRawSha256": "ee2f777126e9050ce7139e2d9d9e24d2ec7305de95b8380d3e4c35fc4edb314f",
+    "parentSeedFingerprint": "sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274",
+    "seedFingerprint": "sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a",
+    "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+    "seedId": "SEED_POSTWAR_GCU_OPENING_20261029_V1",
+    "countries": 70,
+    "population": "14712146434",
+    "households": "4449317385",
+    "retainedInventoryEntries": 863,
+    "exactLegalHouseholdClaims": true,
+    "exactNonHouseholdAccounts": true,
+    "openingRentPaid": "0",
+    "openingRentAccrued": "0",
+    "files": {
+      "candidate-seed.json": {
+        "sha256": "835f9ec096746e3bc8f8cd1a7235fc7a2af0daee06d4ceeedff1fdff99d0262f",
+        "bytes": 125315829
+      },
+      "receipts.json": {
+        "sha256": "7d37e721da1021b290d8a1464e4fec096046efe623c2a5d12ee719a28fba5ae6",
+        "bytes": 644672
+      },
+      "full-core-verification.json": {
+        "sha256": "bf8c34a01ba707f925a272726158ea69808e05e852a51c044a931d11aa4db58f",
+        "bytes": 612
+      },
+      "country-originals.json": {
+        "sha256": "c0db4b22b7c3a6ef65478cc6f8eea270f1798c0270933a212bbf9bdf961f5d16",
+        "bytes": 10491368
+      },
+      "finance-social-manifest.json": {
+        "sha256": "7dc24a99d3d57d4a3a29b38bcfb5f9581f5667f343cb0f7549195cd975cd1a89",
+        "bytes": 21416
+      },
+      "day-one-fx-policy.json": {
+        "sha256": "7256f648c1cdde4a884e15d257b0b8c7ab38f84afbca92e42cad9c0171aa79ca",
+        "bytes": 115386
+      }
+    },
+    "databaseOperations": 0,
+    "runtimeAdmission": "NOT_RUN",
+    "sourcePublications": 0,
+    "WorldClockStarted": false,
+    "maxRssKiB": 2611184,
+    "elapsedMs": 633993
+  },
+  "fixtureCorrectionAttempt": {
+    "classification": "ISOLATED_100_VIRTUAL_SESSIONS_TWO_SCOPED_IDENTITIES_NOT_PRODUCTION",
+    "candidate": "189a511c5124bcad1a457710442634286417e731",
+    "status": "FAILED",
+    "started": "2026-11-16T03:47:54.246Z",
+    "limits": {
+      "runnerCpu": 2,
+      "runnerGiB": 6,
+      "databaseCpu": 1,
+      "databaseGiB": 3
+    },
+    "errors": [
+      {
+        "kind": "SMOKE_READ",
+        "dataset": "industry-labour-current",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "d21b817b-c24a-4579-9993-d7fe810e793b",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_INDUSTRY_LABOUR_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "error": "Error: SMOKE_READ_FAILED",
+        "stack": "Error: SMOKE_READ_FAILED\n    at file:///workspace/.capacity-load.mjs:30:59\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+      }
+    ],
+    "stages": [
+      {
+        "name": "DATABASE_READY",
+        "at": "2026-11-16T03:55:27.464Z",
+        "counts": {
+          "worldVersion": "0",
+          "eventSequence": "0",
+          "commands": "0",
+          "receipts": "0",
+          "events": "0",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "0"
+        },
+        "database": "postwar_clone_rent_child_acceptance_ef687f6cba"
+      },
+      {
+        "name": "API_READY",
+        "at": "2026-11-16T04:00:29.744Z",
+        "startupMs": 302290.903915,
+        "pid": 3837
+      }
+    ],
+    "latencies": {
+      "SMOKE_READ": {
+        "count": 4,
+        "failures": 1,
+        "p50": 31.667974999989383,
+        "p95": 45.55456299998332,
+        "p99": 45.55456299998332,
+        "max": 98.87594499997795
+      }
+    },
+    "workload": {
+      "sessions": 100,
+      "minutes": 30,
+      "readsPerSecond": 20,
+      "commandsPerSecond": 1.6666666666666667,
+      "receiptPollsPerCommand": 2,
+      "maxReadInFlight": 32,
+      "distinctAuthSubjects": 2
+    },
+    "clock": "NOT_STARTED",
+    "finished": "2026-11-16T04:00:30.539Z"
+  },
+  "mixedLoadFailure": {
+    "classification": "ISOLATED_100_VIRTUAL_SESSIONS_TWO_SCOPED_IDENTITIES_NOT_PRODUCTION",
+    "candidate": "189a511c5124bcad1a457710442634286417e731",
+    "status": "FAILED",
+    "started": "2026-11-16T04:01:51.372Z",
+    "limits": {
+      "runnerCpu": 2,
+      "runnerGiB": 6,
+      "databaseCpu": 1,
+      "databaseGiB": 3
+    },
+    "errors": [
+      {
+        "kind": "READ",
+        "dataset": "currency-fx",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "5e7f02f9-e154-469a-8938-1b349cdb2471",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "cb-holdings",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "6f2c8920-1830-4a6b-bcb6-c38973cb0a1c",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "positions",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "ddbba746-839d-4a9a-82c2-930f7ef96970",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_SOCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "industry-labour-current",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "4b9c70ee-2544-4f59-86b6-0fccb859e274",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_INDUSTRY_LABOUR_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "currency-fx",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "6a62de2c-33d8-4789-bd55-88b005138749",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "cb-holdings",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "19246eb8-e6d1-4d3c-b7f2-566bdd5b9f51",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "positions",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "94a18792-bc8f-43f6-9c60-61f89f290dcb",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_SOCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "industry-labour-current",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "0da2c40e-2571-4df9-92f0-3c902ccd49d9",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_INDUSTRY_LABOUR_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "currency-fx",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "bcb61fe7-d84d-41d6-a49d-42fe6d2f5d83",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "cb-holdings",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "eed43f18-827e-4509-b7a5-245d5c565a01",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "industry-labour-current",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "f484d87e-7d7b-4b15-9def-680a42a7b6f4",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_INDUSTRY_LABOUR_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "industry-labour-current",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "693de1e4-375c-46c9-9624-99181d0bf6bc",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_INDUSTRY_LABOUR_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "READ",
+        "dataset": "industry-labour-current",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "911968d6-c36c-4ae9-90ab-48609b15fb80",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_INDUSTRY_LABOUR_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "error": "Error: FIVE_READ_FAILURES_UNDER_LOAD",
+        "stack": "Error: FIVE_READ_FAILURES_UNDER_LOAD\n    at file:///workspace/.capacity-load.mjs:40:473"
+      }
+    ],
+    "stages": [
+      {
+        "name": "DATABASE_READY",
+        "at": "2026-11-16T04:11:59.961Z",
+        "counts": {
+          "worldVersion": "0",
+          "eventSequence": "0",
+          "commands": "0",
+          "receipts": "0",
+          "events": "0",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "0"
+        },
+        "database": "postwar_clone_completed_fresh_h0_b248b546a8"
+      },
+      {
+        "name": "API_READY",
+        "at": "2026-11-16T04:16:50.691Z",
+        "startupMs": 290743.484464,
+        "pid": 7545
+      },
+      {
+        "name": "BUSINESS_SMOKE_PASS",
+        "at": "2026-11-16T04:16:53.137Z",
+        "head": {
+          "worldVersion": "1",
+          "eventSequence": "1"
+        }
+      },
+      {
+        "name": "LOAD_RUNNING",
+        "at": "2026-11-16T04:16:54.885Z"
+      }
+    ],
+    "latencies": {
+      "SMOKE_READ": {
+        "count": 5,
+        "failures": 0,
+        "p50": 29.09479200001806,
+        "p95": 31.75032300001476,
+        "p99": 31.75032300001476,
+        "max": 100.63031100004446
+      },
+      "COMMAND_HTTP": {
+        "count": 2,
+        "failures": 0,
+        "p50": 261.75961599999573,
+        "p95": 261.75961599999573,
+        "p99": 261.75961599999573,
+        "max": 485.1132599998964
+      },
+      "RECEIPT": {
+        "count": 4,
+        "failures": 0,
+        "p50": 52.097367999958806,
+        "p95": 85.42243099992629,
+        "p99": 85.42243099992629,
+        "max": 791.8124160000589
+      },
+      "COMMAND_FINAL": {
+        "count": 2,
+        "failures": 0,
+        "p50": 2157.842589000007,
+        "p95": 2157.842589000007,
+        "p99": 2157.842589000007,
+        "max": 4275.648747000028
+      },
+      "BURST_100": {
+        "count": 100,
+        "failures": 0,
+        "p50": 973.0394780000206,
+        "p95": 1626.3511550000403,
+        "p99": 1681.1331749999663,
+        "max": 1704.2626399999717
+      },
+      "READ": {
+        "count": 85,
+        "failures": 13,
+        "p50": 770.749645999982,
+        "p95": 1335.2129209999694,
+        "p99": 1449.092157999985,
+        "max": 1486.7311520000221
+      }
+    },
+    "workload": {
+      "sessions": 100,
+      "minutes": 30,
+      "readsPerSecond": 20,
+      "commandsPerSecond": 1.6666666666666667,
+      "receiptPollsPerCommand": 2,
+      "maxReadInFlight": 32,
+      "distinctAuthSubjects": 2
+    },
+    "clock": "NOT_STARTED",
+    "finished": "2026-11-16T04:16:59.444Z"
+  },
+  "diagnosticCompletion": {
+    "classification": "ISOLATED_100_VIRTUAL_SESSIONS_TWO_SCOPED_IDENTITIES_NOT_PRODUCTION",
+    "candidate": "189a511c5124bcad1a457710442634286417e731",
+    "status": "COMPLETED",
+    "started": "2026-11-16T04:18:53.076Z",
+    "limits": {
+      "runnerCpu": 2,
+      "runnerGiB": 6,
+      "databaseCpu": 1,
+      "databaseGiB": 3
+    },
+    "errors": [
+      {
+        "kind": "ONE_SESSION_DURING_WRITE",
+        "dataset": "currency-fx",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "9a0f89f9-34de-472a-9aef-b68dcba5055a",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      },
+      {
+        "kind": "ONE_SESSION_DURING_WRITE",
+        "dataset": "industry-labour-current",
+        "status": 503,
+        "body": {
+          "schemaVersion": "postwar-office-runtime-read-v1",
+          "requestId": "c11adeb4-c68f-4c5d-b67e-7e99a12fec02",
+          "ok": false,
+          "error": {
+            "code": "CURRENT_INDUSTRY_LABOUR_UNAVAILABLE",
+            "retryable": false
+          }
+        }
+      }
+    ],
+    "stages": [
+      {
+        "name": "DATABASE_READY",
+        "at": "2026-11-16T04:18:53.388Z",
+        "counts": {
+          "worldVersion": "2",
+          "eventSequence": "4",
+          "commands": "2",
+          "receipts": "2",
+          "events": "4",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "2"
+        },
+        "database": "postwar_clone_committed_resume_08adcfa7bc"
+      },
+      {
+        "name": "API_READY",
+        "at": "2026-11-16T04:23:41.698Z",
+        "startupMs": 288324.849863,
+        "pid": 9147
+      },
+      {
+        "name": "STABLE_H2_READ_CHECK_PASS",
+        "at": "2026-11-16T04:23:41.904Z",
+        "head": {
+          "worldVersion": "2",
+          "eventSequence": "4"
+        }
+      },
+      {
+        "name": "STATIC_LOAD_RUNNING",
+        "at": "2026-11-16T04:23:43.629Z"
+      },
+      {
+        "name": "STATIC_LOAD_COMPLETE",
+        "at": "2026-11-16T04:28:43.624Z",
+        "elapsedMs": 300002.57854,
+        "skipped": 0,
+        "head": {
+          "worldVersion": "2",
+          "eventSequence": "4"
+        }
+      },
+      {
+        "name": "LOW_RATE_MIXED_COMPLETE",
+        "at": "2026-11-16T04:28:49.099Z",
+        "head": {
+          "worldVersion": "3",
+          "eventSequence": "7"
+        },
+        "counts": {
+          "worldVersion": "3",
+          "eventSequence": "7",
+          "commands": "3",
+          "receipts": "3",
+          "events": "7",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "3"
+        }
+      }
+    ],
+    "latencies": {
+      "SMOKE_READ": {
+        "count": 5,
+        "failures": 0,
+        "p50": 30.149230999988504,
+        "p95": 32.94298599998001,
+        "p99": 32.94298599998001,
+        "max": 92.95154999999795
+      },
+      "BURST_100_STABLE": {
+        "count": 100,
+        "failures": 0,
+        "p50": 898.7449539999943,
+        "p95": 1620.8878930000355,
+        "p99": 1670.0141580000054,
+        "max": 1691.382883000013
+      },
+      "STATIC_READ": {
+        "count": 5968,
+        "failures": 0,
+        "p50": 18.723483000008855,
+        "p95": 29.67892199999187,
+        "p99": 36.362529000034556,
+        "max": 76.44429200002924
+      },
+      "ONE_SESSION_DURING_WRITE": {
+        "count": 9,
+        "failures": 2,
+        "p50": 300.6931469999254,
+        "p95": 382.1423300000606,
+        "p99": 382.1423300000606,
+        "max": 415.6800300000468
+      },
+      "COMMAND_HTTP": {
+        "count": 1,
+        "failures": 0,
+        "p50": 546.1664860000601,
+        "p95": 546.1664860000601,
+        "p99": 546.1664860000601,
+        "max": 546.1664860000601
+      },
+      "RECEIPT": {
+        "count": 2,
+        "failures": 0,
+        "p50": 17.66397900006268,
+        "p95": 17.66397900006268,
+        "p99": 17.66397900006268,
+        "max": 30.852411999949254
+      },
+      "COMMAND_FINAL": {
+        "count": 1,
+        "failures": 0,
+        "p50": 4136.5581049999455,
+        "p95": 4136.5581049999455,
+        "p99": 4136.5581049999455,
+        "max": 4136.5581049999455
+      },
+      "AFTER_WRITE_IDLE": {
+        "count": 5,
+        "failures": 0,
+        "p50": 25.292745999991894,
+        "p95": 30.927886000019498,
+        "p99": 30.927886000019498,
+        "max": 40.299510999931954
+      }
+    },
+    "workload": {
+      "sessions": 100,
+      "minutes": 5,
+      "readsPerSecond": 20,
+      "commandsPerSecond": 0,
+      "receiptPollsPerCommand": 2,
+      "maxReadInFlight": 32,
+      "distinctAuthSubjects": 2
+    },
+    "clock": "NOT_STARTED",
+    "finished": "2026-11-16T04:28:49.352Z"
+  },
+  "diagnosticCompletionIsNotPass": true,
+  "lastOwnedCheckpoint": {
+    "classification": "SEALED_OWNED_DATABASE_NOT_RESTORED_AUTHORITY",
+    "parentMarker": "/workspace/.cloud-setup/evidence/cap16/pg/reference-db.json",
+    "parentDatabase": "postwar_clone_completed_fresh_h0_b248b546a8",
+    "templateDatabase": "postwar_clone_committed_resume_08adcfa7bc",
+    "ownershipNonce": "d5526339-7d4b-4081-ac3a-299d19e732c3",
+    "head": {
+      "world_version": "3",
+      "event_sequence": "7"
+    },
+    "economicCounts": {
+      "worldVersion": "3",
+      "eventSequence": "7",
+      "commands": "3",
+      "receipts": "3",
+      "events": "7",
+      "batches": "0",
+      "inventory": "0",
+      "queues": "3"
+    },
+    "h0RestoreEligible": false,
+    "resourceState": "RETAINED_STOPPED",
+    "nodeAuthority": "REQUIRES_FRESH_VALIDATION"
+  },
+  "apiProcessMetrics": {
+    "3837": {
+      "peakHwmGiB": 2.3489227294921875,
+      "peakSampledRssGiB": 2.3243408203125,
+      "cpuObservedSeconds": 311.53000000000003,
+      "samples": 150
+    },
+    "7545": {
+      "peakHwmGiB": 2.3679122924804688,
+      "peakSampledRssGiB": 2.222278594970703,
+      "cpuObservedSeconds": 303.78,
+      "samples": 148
+    },
+    "9147": {
+      "peakHwmGiB": 2.3503074645996094,
+      "peakSampledRssGiB": 2.273815155029297,
+      "cpuObservedSeconds": 328.39000000000004,
+      "samples": 297
+    }
+  },
+  "staticReadProcessMetrics": {
+    "processRssMinMiB": 359.328125,
+    "processRssMaxMiB": 1187.328125,
+    "processRssFirstMiB": 1187.1875,
+    "processRssLastMiB": 470.5625,
+    "meanProcessCpuPercentOneCore": 8.989570889762835,
+    "actualReadsPerSecond": 19.893162348950522
+  },
+  "apiColdStartMilliseconds": [302290.903915, 290743.484464, 288324.849863],
+  "limits": [
+    "100 virtual HTTP sessions, only two scoped identities",
+    "No full season/WorldClock/due settlement/forecast stress",
+    "30 minute mixed profile stopped on ordinary 503 failures; not completed",
+    "Native fixture pool max=1, production documented pool max=2",
+    "5 minute static read only, not 30 minute endurance",
+    "H2 sealed checkpoint clone and fresh process recovered; not a same-database post-30min restart",
+    "All latency summaries include failed responses where failures>0",
+    "Cold peak measured under 6GiB runner; no 2/4GiB hard-limit trial",
+    "Two command final samples in initial mixed preparation, not enough for write P95",
+    "No production/Supabase load or live shared-database interference test"
+  ],
+  "sources": [
+    {
+      "title": "Registered Node host architecture",
+      "path": "docs/architecture/REGISTERED_NODE_HOST.md"
+    },
+    {
+      "title": "Cloudflare Workers limits",
+      "url": "https://developers.cloudflare.com/workers/platform/limits/"
+    }
+  ],
+  "cleanup": {
+    "status": "COMPLETE_VERIFIED",
+    "containers": [
+      "econmind-capacity-runner-20261116",
+      "econmind-postwar-reference-d5526339"
+    ],
+    "volumes": [
+      "econmind-capacity-workspace-20261116",
+      "econmind-postwar-reference-data-d5526339"
+    ],
+    "ownershipNonce": "d5526339-7d4b-4081-ac3a-299d19e732c3",
+    "productionTouched": false,
+    "unrelatedApplicationsPreserved": true,
+    "dockerServiceLeftRunningToPreserveOtherApplications": true,
+    "dockerWslIntegrationSettingsChanged": false,
+    "temporaryWindowsDirectoryRemoved": "D:/data/temp/econmind-capacity-20261116",
+    "unusedWslNodeRuntimeRemoved": "/workspace/captools",
+    "testImagesRemoved": true,
+    "temporaryHarnessSeedDatabaseCacheDeleted": true,
+    "retainedOnlyReports": true
+  },
+  "sourceArtifactComparison": {
+    "candidate-seed.json": true,
+    "receipts.json": true,
+    "full-core-verification.json": true,
+    "country-originals.json": true,
+    "finance-social-manifest.json": true,
+    "day-one-fx-policy.json": true
+  },
+  "execution": [
+    {
+      "command": "pnpm install --frozen-lockfile; pnpm run pretest; pinned parent/child offline source producers",
+      "exitCode": 0,
+      "meaning": "PREPARATION_COMPLETED_NOT_LOAD_PASS"
+    },
+    {
+      "command": "node --import beneficial-child-source-loader.mjs .capacity-load.mjs",
+      "exitCode": 1,
+      "meaning": "HARNESS_TS_STRIP_ONLY_LOAD_ERROR_BEFORE_TEST"
+    },
+    {
+      "command": "node --experimental-transform-types --import beneficial-child-source-loader.mjs .capacity-load.mjs (first H0)",
+      "exitCode": 0,
+      "reportedStatus": "FAILED",
+      "meaning": "caught failure written to evidence; Industry H0 preparation missing"
+    },
+    {
+      "command": "same temporary harness, restored H0 plus existing Industry H0 preparation",
+      "exitCode": 0,
+      "reportedStatus": "FAILED",
+      "meaning": "caught mixed read failure written to evidence"
+    },
+    {
+      "command": "H2 sealed clone, 300s static reads and one-session mixed diagnostic",
+      "exitCode": 0,
+      "reportedStatus": "COMPLETED",
+      "meaning": "diagnostic finished with two read errors; NOT_PASS"
+    }
+  ],
+  "temporaryHarnessSha256": {
+    "load.mjs": "0c83c736d7e531a60f1057b3218634fbefec67b074505ef1ac865cdd25f10c83",
+    "diagnostic.mjs": "e56399aee0de2a0e55752bdac5047a368ebfa7e2eb98945a6c441f109c1c7ea7"
+  },
+  "affectedOwners": [
+    "API current-read transport",
+    "Worker derived publication"
+  ],
+  "productMutations": {
+    "production": false,
+    "permissions": false,
+    "migrations": false,
+    "sourceCode": false,
+    "testBusinessWrites": "owned isolated PostgreSQL only, deleted"
+  }
+}

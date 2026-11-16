@@ -164,6 +164,44 @@ beforeEach(() => {
   fixture.close.mockResolvedValue(undefined);
 });
 describe('fixed post-commit derived publication', () => {
+  it('keeps a durable FINAL distinct from pending publication and retries only the derived publication', async () => {
+    let rejectPublication!: (error: Error) => void;
+    let entered!: () => void;
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const blocked = new Promise<never>((_resolve, reject) => {
+      rejectPublication = reject;
+    });
+    fixture.industryPublish.mockImplementationOnce(() => {
+      entered();
+      return blocked;
+    });
+    const c = controller(true);
+    let finished = false;
+    const pending = c.afterCommitted(step).then((result) => {
+      finished = true;
+      return result;
+    });
+    await started;
+    expect(finished).toBe(false);
+    expect(step.receipt).toBe(receipt);
+    rejectPublication(Error('TEST_PUBLICATION_FAILED'));
+    const result = await pending;
+    expect(result).toMatchObject({
+      status: 'PROCESSED',
+      receipt,
+      derivedPublication: {
+        status: 'UNAVAILABLE',
+      },
+    });
+    expect((await c.retryCommitted(command.commandId)).status).toBe(
+      'PUBLISHED',
+    );
+    expect(fixture.readReceipt).toHaveBeenCalledTimes(2);
+    await c.close();
+  });
+
   it('refreshes the registered C1/C2/C10 scope after a C10 RUN advances the global head, deduplicating the primary country', async () => {
     fixture.readCommand.mockResolvedValue({
       ...command,

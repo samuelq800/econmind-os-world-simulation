@@ -12,7 +12,6 @@ import {
 } from './postwar-beneficial-rent-child-native-fixture.js';
 import { createRegisteredFinalNodeSetup } from './registered-final-node-setup.js';
 import { prepareRegisteredFinalNativeSqlPlan } from '../../tools/office-connection/registered-final-native-sql.mjs';
-import { preparePostwarSocialEmploymentCreationForward } from './postwar-social-employment-creation-forward.js';
 import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
 
 import { attachRegisteredC10IndustryCheckpoint } from './registered-c10-checkpoint-attachment.js';
@@ -107,17 +106,24 @@ export async function prepareFreshRegisteredNodeRehearsal(input: {
     await save();
     // Fresh installation needs the supplement only. The retained v1->v2
     // thirteen-function forward must never be applied to already-current SQL.
-    const forward = await preparePostwarSocialEmploymentCreationForward(
-      input.repositoryRoot,
+    // A fresh schema executes only the supplement. The historical forward's
+    // source-body pins belong to its old upgrade target, not today's schema.
+    const manifestBytes = await readFile(
+      path.join(
+        input.repositoryRoot,
+        'database/upgrades/postwar-social-employment-creation.manifest.json',
+      ),
+      'utf8',
+    );
+    assert.equal(
+      sha(manifestBytes),
+      'fec489c6828cc7b91e99584e468e83b97ac63a4eea89cc64504a84964238a4da',
     );
     const supplement =
       'database/proposals/postwar-social-employment-creation.sql';
-    const metadata = JSON.parse(
-      await readFile(
-        path.join(input.repositoryRoot, forward.manifestPath),
-        'utf8',
-      ),
-    ) as { newSupplement: { path: string; sha256: string } };
+    const metadata = JSON.parse(manifestBytes) as {
+      newSupplement: { path: string; sha256: string };
+    };
     assert.equal(metadata.newSupplement.path, supplement);
     const sql = await readFile(
       path.join(input.repositoryRoot, supplement),

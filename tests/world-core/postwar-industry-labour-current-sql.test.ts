@@ -336,7 +336,7 @@ describe('Industry SQL derived current headcount mechanism', () => {
     );
 
     await reader();
-    expect((await page()).status).toBe('UNAVAILABLE');
+    expect((await page()).status).toBe('NOT_PUBLISHED');
     expect((await page(0, 25, h0.source.sourceVersion as string)).status).toBe(
       'STALE',
     );
@@ -414,7 +414,7 @@ describe('Industry SQL derived current headcount mechanism', () => {
       'update world_v2.world_head set world_version=2,event_sequence=2',
     );
     await reader();
-    expect((await page()).status).toBe('UNAVAILABLE');
+    expect((await page()).status).toBe('NOT_PUBLISHED');
     expect((await page(0, 25, version)).status).toBe('STALE');
     await admin();
     await db.exec(

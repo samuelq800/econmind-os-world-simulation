@@ -1,4 +1,5 @@
 import { POSTWAR_DAY_ONE_FX_QUOTES_DATASET } from '@econmind/core/postwar-day-one-fx-command-contract';
+import { readAfterCurrentPublication } from './current-publication-read-retry.js';
 import {
   INDUSTRY_UTILISATION_TARGETS_DATASET,
   INDUSTRY_UTILISATION_TARGETS_NATURE,
@@ -696,7 +697,7 @@ export function createPostwarOfficeRuntimeReadService(
       return { status: 401, code: 'AUTHENTICATION_INVALID', retryable: false };
     return { status: 503, code: 'SOURCE_UNAVAILABLE', retryable: true };
   }
-  return Object.freeze({
+  const service = Object.freeze({
     async handle(input: {
       authorization: unknown;
       request: unknown;
@@ -1463,6 +1464,15 @@ export function createPostwarOfficeRuntimeReadService(
         const failure = errorCode(error);
         return fail(failure.status, failure.code, failure.retryable);
       }
+    },
+  });
+  return Object.freeze({
+    ...service,
+    handle(input: Parameters<typeof service.handle>[0]) {
+      return readAfterCurrentPublication(
+        () => service.handle(input),
+        input.signal,
+      );
     },
   });
 }
