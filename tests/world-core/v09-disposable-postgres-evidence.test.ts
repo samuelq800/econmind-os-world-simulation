@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
@@ -23,7 +25,7 @@ import {
   createV09StagingTargetFingerprint,
 } from '../../scripts/v09-staging-evidence-policy.mjs';
 
-const OUTPUT = '/private/tmp/v09-disposable-evidence-test.json';
+const OUTPUT = path.join(tmpdir(), 'v09-disposable-evidence-test.json');
 
 function environment(
   overrides: Record<string, string | undefined> = {},
@@ -217,7 +219,10 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
         reader: 'v09_staging_reader',
       },
       owner_confirmation: V09_STAGING_OWNER_CONFIRMATION,
-      evidence_output_path: '/private/tmp/v09-dedicated-fail-closed.json',
+      evidence_output_path: path.join(
+        tmpdir(),
+        'v09-dedicated-fail-closed.json',
+      ),
     };
     const target_fingerprint = createV09StagingTargetFingerprint(approvalBase);
     let clientsCreated = 0;

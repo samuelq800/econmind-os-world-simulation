@@ -4,7 +4,17 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { expect, it } from 'vitest';
+import { afterAll, beforeAll, expect, it } from 'vitest';
+import { createSocialCreationForwardSourceFixture } from '../support/social-creation-forward-source-fixture.js';
+let source: Awaited<
+  ReturnType<typeof createSocialCreationForwardSourceFixture>
+>;
+beforeAll(async () => {
+  source = await createSocialCreationForwardSourceFixture();
+});
+afterAll(async () => {
+  await source?.cleanup();
+});
 import { createSocialEmploymentCreationSqlFixture } from '../support/social-employment-creation-sql-fixture.js';
 import { preparePostwarSocialEmploymentCreationForward } from '../support/postwar-social-employment-creation-forward.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -27,7 +37,7 @@ it('applies the exact dc5/bde increment, preserves old rows/OIDs/ACL/RLS and rep
       upgrade: { path: string; sha256: string };
     };
     const prepared = await preparePostwarSocialEmploymentCreationForward(
-      resolve('.'),
+      source.root,
     );
     const sql = prepared.sql;
     expect(prepared.sourceInitializer.performed).toBe(false);
@@ -234,7 +244,7 @@ it('refuses unknown body/ACL/search-path metadata and rolls back a known mid-pac
   }
 }, 60000);
 it('loads only the fixed review package without executing or approving its source initializer', async () => {
-  const a = await preparePostwarSocialEmploymentCreationForward(resolve('.'));
+  const a = await preparePostwarSocialEmploymentCreationForward(source.root);
   expect(a.functions).toHaveLength(13);
   expect(a.sourceEnvelope).toBe('SOURCE_BEGIN_COMMIT');
   expect(a.classification).toBe(

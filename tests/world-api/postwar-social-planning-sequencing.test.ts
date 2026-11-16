@@ -42,7 +42,10 @@ vi.mock(
 );
 vi.mock(
   '../../apps/world-worker/dist/runtime-preparation/postwar-office-runtime-exports.js',
-  () => ({
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import('../../apps/world-worker/dist/runtime-preparation/postwar-office-runtime-exports.js')
+    >()),
     PostwarOfficeProjectionStoreError: class extends Error {},
     POSTWAR_PROJECTION_DATASETS: {
       SOCIAL: ['service-pools'],
@@ -62,8 +65,10 @@ vi.mock(
 );
 vi.mock(
   '../../apps/world-worker/dist/runtime-preparation/postwar-financial-current-exports.js',
-  () => ({
-    POSTWAR_FINANCIAL_CURRENT_DATASETS: {},
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import('../../apps/world-worker/dist/runtime-preparation/postwar-financial-current-exports.js')
+    >()),
     createPostwarFinancialMixedCurrentProjectionStore: () => ({}),
   }),
 );

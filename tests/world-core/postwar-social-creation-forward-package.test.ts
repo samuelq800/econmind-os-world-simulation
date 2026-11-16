@@ -4,7 +4,8 @@ import { spawnSync } from 'node:child_process';
 import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { createSocialCreationForwardSourceFixture } from '../support/social-creation-forward-source-fixture.js';
 import {
   createUnapprovedSocialCreationForwardPlan,
   createUnapprovedSocialCreationOrdinalForwardPlan,
@@ -12,7 +13,17 @@ import {
   SOCIAL_CREATION_FORWARD_MANIFEST_PATH,
   LOGISTICS_FORWARD_MANIFEST_PATH,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
-const root = path.resolve(import.meta.dirname, '../..');
+let source: Awaited<
+  ReturnType<typeof createSocialCreationForwardSourceFixture>
+>;
+let root: string;
+beforeAll(async () => {
+  source = await createSocialCreationForwardSourceFixture();
+  root = source.root;
+});
+afterAll(async () => {
+  await source?.cleanup();
+});
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 async function fixture(manifestPath = SOCIAL_CREATION_FORWARD_MANIFEST_PATH) {
   const forward = JSON.parse(
@@ -156,7 +167,7 @@ describe('fixed Social13 source-review package entry', () => {
   });
   it('accepts only the known Social/logistics flags and leaves default fresh argument validation unchanged', () => {
     const script = path.join(
-      root,
+      path.resolve(import.meta.dirname, '../..'),
       'tools/office-connection/postwar-schema-delta.mjs',
     );
     const args = [

@@ -1,7 +1,17 @@
 /** Owned TEST_ONLY PGlite schema, not native PostgreSQL or official source proof. */
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { expect, it } from 'vitest';
+import { afterAll, beforeAll, expect, it } from 'vitest';
+import { createSocialCreationForwardSourceFixture } from '../support/social-creation-forward-source-fixture.js';
+let source: Awaited<
+  ReturnType<typeof createSocialCreationForwardSourceFixture>
+>;
+beforeAll(async () => {
+  source = await createSocialCreationForwardSourceFixture();
+});
+afterAll(async () => {
+  await source?.cleanup();
+});
 import { createSocialEmploymentCreationSqlFixture } from '../support/social-employment-creation-sql-fixture.js';
 import {
   preparePostwarSocialEmploymentCreationForward,
@@ -13,10 +23,10 @@ it('repairs only the exact V1 initializer, retaining catalog/rows and rejecting 
   const f = await createSocialEmploymentCreationSqlFixture('DC5_PREDECESSOR');
   try {
     const repair = await preparePostwarSocialEmploymentCreationOrdinalForward(
-      resolve('.'),
+      source.root,
     );
     const full = await preparePostwarSocialEmploymentCreationForward(
-      resolve('.'),
+      source.root,
     );
     const oldDefinition = await readFile(
       resolve(
