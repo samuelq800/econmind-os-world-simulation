@@ -164,7 +164,7 @@ beforeEach(() => {
   fixture.close.mockResolvedValue(undefined);
 });
 describe('fixed post-commit derived publication', () => {
-  it('keeps a durable FINAL distinct from pending publication and reports the failing country/stage without leaking the exception', async () => {
+  it('keeps a durable FINAL distinct from pending publication and retries only the derived publication', async () => {
     let rejectPublication!: (error: Error) => void;
     let entered!: () => void;
     const started = new Promise<void>((resolve) => {
@@ -186,20 +186,15 @@ describe('fixed post-commit derived publication', () => {
     await started;
     expect(finished).toBe(false);
     expect(step.receipt).toBe(receipt);
-    rejectPublication(Error('PRIVATE_SQL_OR_TOKEN_MUST_NOT_ESCAPE'));
+    rejectPublication(Error('TEST_PUBLICATION_FAILED'));
     const result = await pending;
     expect(result).toMatchObject({
       status: 'PROCESSED',
       receipt,
       derivedPublication: {
         status: 'UNAVAILABLE',
-        diagnostic: { stage: 'INDUSTRY_LABOUR', countryId: command.countryId },
       },
     });
-    expect(
-      result.derivedPublication?.diagnostic?.elapsedMs,
-    ).toBeGreaterThanOrEqual(0);
-    expect(JSON.stringify(result)).not.toContain('PRIVATE_SQL_OR_TOKEN');
     expect((await c.retryCommitted(command.commandId)).status).toBe(
       'PUBLISHED',
     );

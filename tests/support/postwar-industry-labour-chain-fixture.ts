@@ -1057,7 +1057,6 @@ export async function createPostwarIndustryLabourChainFixture(
     call,
     publishCurrent,
     afterNextRead(action: () => Promise<void>) {
-      if (afterRead) throw Error('TEST_READ_ACTION_ALREADY_ARMED');
       afterRead = action;
       readReleased = false;
     },

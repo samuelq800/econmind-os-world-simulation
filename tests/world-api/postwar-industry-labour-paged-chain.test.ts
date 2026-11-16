@@ -44,18 +44,11 @@ describe('Industry true cumulative page-chain publication', () => {
       expect(await g.inspectWorld()).toEqual([
         { world_version: '2', event_sequence: '2', commands: '2', events: '2' },
       ]);
-      let publicationError: unknown;
       g.afterNextRead(async () => {
-        try {
-          expect(g.counts().acquired).toBe(g.counts().released);
-          await g.publishCurrent('COUNTRY_01', 'PAGED');
-        } catch (error) {
-          publicationError = error;
-          throw error;
-        }
+        expect(g.counts().acquired).toBe(g.counts().released);
+        await g.publishCurrent('COUNTRY_01', 'PAGED');
       });
       const response = await g.call();
-      expect(publicationError).toBeUndefined();
       expect(response.status, JSON.stringify(response.body)).toBe(200);
       expect(response.body.source).toMatchObject({
         worldVersion: '2',

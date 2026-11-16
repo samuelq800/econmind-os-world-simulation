@@ -1468,38 +1468,11 @@ export function createPostwarOfficeRuntimeReadService(
   });
   return Object.freeze({
     ...service,
-    async handle(input: Parameters<typeof service.handle>[0]) {
-      const pendingCodes = new Set([
-        'CURRENT_FINANCIAL_NOT_PUBLISHED',
-        'CURRENT_SOCIAL_NOT_PUBLISHED',
-        'CURRENT_INDUSTRY_LABOUR_NOT_PUBLISHED',
-      ]);
-      const result = await readAfterCurrentPublication({
-        read: () => service.handle(input),
-        notPublished: (response) =>
-          response.httpStatus === 503 &&
-          !response.body.ok &&
-          pendingCodes.has(response.body.error.code),
-        ...(input.signal ? { signal: input.signal } : {}),
-      });
-      if (input.signal?.aborted) return service.handle(input);
-      // Keep the existing public failure contract after the finite wait. A
-      // missing publication is not proof that it will eventually be available.
-      if (!result.body.ok && pendingCodes.has(result.body.error.code))
-        return {
-          ...result,
-          body: {
-            ...result.body,
-            error: {
-              code: result.body.error.code.replace(
-                '_NOT_PUBLISHED',
-                '_UNAVAILABLE',
-              ),
-              retryable: false,
-            },
-          },
-        };
-      return result;
+    handle(input: Parameters<typeof service.handle>[0]) {
+      return readAfterCurrentPublication(
+        () => service.handle(input),
+        input.signal,
+      );
     },
   });
 }

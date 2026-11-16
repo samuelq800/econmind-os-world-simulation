@@ -1,29 +1,56 @@
 import { setTimeout as delay } from 'node:timers/promises';
 
-/** Retry only a missing publication at the observed head, never a rejected
- * source or corrupt document. Each attempt owns fresh authentication and a
- * complete read snapshot; no connection is retained during the wait. */
-export async function readAfterCurrentPublication<T>(input: {
-  readonly read: () => Promise<T>;
-  readonly notPublished: (result: T) => boolean;
-  readonly signal?: AbortSignal;
-}): Promise<T> {
-  const started = performance.now();
-  let result = await input.read();
-  for (const waitMs of [100, 200, 400, 800, 1000, 1000]) {
+import type { PostwarOfficeRuntimeServiceResponse } from './postwar-office-runtime-read-service.js';
+
+const unpublishedErrors = new Map([
+  ['CURRENT_FINANCIAL_NOT_PUBLISHED', 'CURRENT_FINANCIAL_UNAVAILABLE'],
+  ['CURRENT_SOCIAL_NOT_PUBLISHED', 'CURRENT_SOCIAL_UNAVAILABLE'],
+  [
+    'CURRENT_INDUSTRY_LABOUR_NOT_PUBLISHED',
+    'CURRENT_INDUSTRY_LABOUR_UNAVAILABLE',
+  ],
+]);
+
+/** Each attempt reauthenticates and reads a fresh snapshot. Wait only after
+ * releasing that snapshot; never retry economic commands or rejected sources. */
+export async function readAfterCurrentPublication(
+  read: () => Promise<PostwarOfficeRuntimeServiceResponse>,
+  signal?: AbortSignal,
+): Promise<PostwarOfficeRuntimeServiceResponse> {
+  let result = await read();
+  for (const waitMs of [500, 1000, 2000]) {
     if (
-      input.signal?.aborted ||
-      !input.notPublished(result) ||
-      performance.now() - started + waitMs > 4000
+      signal?.aborted ||
+      result.body.ok ||
+      result.httpStatus !== 503 ||
+      !unpublishedErrors.has(result.body.error.code)
     )
       break;
     try {
-      await delay(waitMs, undefined, { signal: input.signal });
+      await delay(waitMs, undefined, { signal });
     } catch (error) {
-      if (!input.signal?.aborted) throw error;
+      if (!signal?.aborted) throw error;
+      break;
     }
-    // The service performs its cancellation check before authentication/SQL.
-    result = await input.read();
+    result = await read();
+  }
+  if (signal?.aborted)
+    return {
+      httpStatus: 499,
+      body: {
+        schemaVersion: result.body.schemaVersion,
+        requestId: result.body.requestId,
+        ok: false,
+        error: { code: 'CANCELLED', retryable: false },
+      },
+    };
+  if (!result.body.ok) {
+    const code = unpublishedErrors.get(result.body.error.code);
+    if (code)
+      return {
+        ...result,
+        body: { ...result.body, error: { code, retryable: false } },
+      };
   }
   return result;
 }
