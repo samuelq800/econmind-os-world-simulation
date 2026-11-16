@@ -7,10 +7,14 @@ do $$begin
  or to_regprocedure('world_v2.revoke_world_command_execution(text,text,text)')is null
  or to_regprocedure('world_v2.execution_registration_admission(text,text,text,text)')is null
  then raise exception 'FINITE_CLOCK_EXECUTION_PREDECESSOR_REQUIRED';end if;
- if exists(select 1 from pg_roles where rolname='world_v2_test_clock_guard_owner')
- or to_regclass('world_v2.test_only_finite_clock_observation')is not null
- then raise exception 'FINITE_CLOCK_ALREADY_INSTALLED_STOP_INSPECT';end if;
- create role world_v2_test_clock_guard_owner nologin nosuperuser nocreatedb nocreaterole noinherit noreplication nobypassrls;
+ if to_regclass('world_v2.test_only_finite_clock_observation')is not null then raise exception 'FINITE_CLOCK_ALREADY_INSTALLED_STOP_INSPECT';end if;
+ if exists(select 1 from pg_roles where rolname='world_v2_test_clock_guard_owner')then
+  if exists(select 1 from pg_roles r where r.rolname='world_v2_test_clock_guard_owner'and(r.rolcanlogin or r.rolsuper or r.rolcreatedb or r.rolcreaterole or r.rolinherit or r.rolreplication or r.rolbypassrls or r.rolconfig is not null))
+  or exists(select 1 from pg_auth_members m join pg_roles r on r.oid=m.roleid or r.oid=m.member where r.rolname='world_v2_test_clock_guard_owner')
+  then raise exception 'FINITE_CLOCK_EXISTING_OWNER_MUST_REMAIN_INACCESSIBLE';end if;
+ else
+  create role world_v2_test_clock_guard_owner nologin nosuperuser nocreatedb nocreaterole noinherit noreplication nobypassrls;
+ end if;
 end;$$;
 grant usage,create on schema world_v2 to world_v2_test_clock_guard_owner;
 grant create on schema world_v2 to world_v2_admission_owner;
