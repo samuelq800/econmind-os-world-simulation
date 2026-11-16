@@ -1,3 +1,4 @@
+import { POSTWAR_DAY_ONE_FX_QUOTES_DATASET } from '@econmind/core/postwar-day-one-fx-command-contract';
 import {
   INDUSTRY_UTILISATION_TARGETS_DATASET,
   INDUSTRY_UTILISATION_TARGETS_NATURE,
@@ -59,6 +60,7 @@ import {
 } from '@econmind/core';
 import {
   createPostwarOfficeProjectionStore,
+  createPostwarDayOneFxQuotesReader,
   createPostwarSocialMixedCurrentProjectionStore,
   createPostwarCaptainCurrentProjectionStore,
   type PostwarCaptainCurrentSource,
@@ -184,6 +186,10 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
 const OFFICE_RUNTIME_DATASETS = Object.freeze({
   ...POSTWAR_PROJECTION_DATASETS,
   ...POSTWAR_FINANCIAL_CURRENT_DATASETS,
+  FINANCE: [
+    POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
+    ...POSTWAR_FINANCIAL_CURRENT_DATASETS.FINANCE,
+  ],
   SOCIAL: [SOCIAL_PROGRAMMES_DATASET, ...POSTWAR_PROJECTION_DATASETS.SOCIAL],
   INDUSTRY: [
     INDUSTRY_UTILITY_PLANNING_DATASET,
@@ -575,6 +581,12 @@ export function createPostwarOfficeRuntimeReadService(
   const financialStore = c
     ? createPostwarFinancialMixedCurrentProjectionStore({
         includeCentralBankOpeningInstruments: true,
+        runtimeReaderRole: c.readerRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+      })
+    : null;
+  const fxQuotesStore = c
+    ? createPostwarDayOneFxQuotesReader({
         runtimeReaderRole: c.readerRole,
         authorizationPublisherRole: c.authorizationPublisherRole,
       })
@@ -1115,24 +1127,17 @@ export function createPostwarOfficeRuntimeReadService(
                   };
                   const head = selected[0]!.source;
                   const page =
-                    request.office === 'TRADE' &&
-                    POSTWAR_TRADE_CURRENT_DATASETS.some(
-                      (x) => x === request.dataset,
-                    )
-                      ? await tradeStore!.readPageFrom(read, {
-                          worldId: pageRequest.worldId,
-                          dataset:
-                            request.dataset as PostwarTradeCurrentDataset,
-                          offset: pageRequest.offset,
-                          limit: pageRequest.limit,
-                          ...(pageRequest.expectedVersion
-                            ? { expectedVersion: pageRequest.expectedVersion }
-                            : {}),
-                        })
-                      : request.office === 'INDUSTRY' &&
-                          request.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
-                        ? await industryParametersStore!.readPageFrom(read, {
+                    request.office === 'FINANCE' &&
+                    request.dataset === POSTWAR_DAY_ONE_FX_QUOTES_DATASET
+                      ? await fxQuotesStore!.readPageFrom(read, pageRequest)
+                      : request.office === 'TRADE' &&
+                          POSTWAR_TRADE_CURRENT_DATASETS.some(
+                            (x) => x === request.dataset,
+                          )
+                        ? await tradeStore!.readPageFrom(read, {
                             worldId: pageRequest.worldId,
+                            dataset:
+                              request.dataset as PostwarTradeCurrentDataset,
                             offset: pageRequest.offset,
                             limit: pageRequest.limit,
                             ...(pageRequest.expectedVersion
@@ -1140,9 +1145,8 @@ export function createPostwarOfficeRuntimeReadService(
                               : {}),
                           })
                         : request.office === 'INDUSTRY' &&
-                            request.dataset ===
-                              POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET
-                          ? await industryLabourStore!.readPageFrom(read, {
+                            request.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
+                          ? await industryParametersStore!.readPageFrom(read, {
                               worldId: pageRequest.worldId,
                               offset: pageRequest.offset,
                               limit: pageRequest.limit,
@@ -1153,10 +1157,10 @@ export function createPostwarOfficeRuntimeReadService(
                                   }
                                 : {}),
                             })
-                          : request.office === 'CAPTAIN' &&
+                          : request.office === 'INDUSTRY' &&
                               request.dataset ===
-                                POSTWAR_CAPTAIN_CURRENT_DATASET
-                            ? await captainStore!.readPageFrom(read, {
+                                POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET
+                            ? await industryLabourStore!.readPageFrom(read, {
                                 worldId: pageRequest.worldId,
                                 offset: pageRequest.offset,
                                 limit: pageRequest.limit,
@@ -1167,43 +1171,57 @@ export function createPostwarOfficeRuntimeReadService(
                                     }
                                   : {}),
                               })
-                            : (request.office === 'FINANCE' ||
-                                  request.office === 'CENTRAL_BANK') &&
-                                (head.worldVersion !== '0' ||
-                                  [
-                                    'ledger-balances',
-                                    'treasury-capacity',
-                                  ].includes(request.dataset))
-                              ? await financialStore!.readPageFrom(read, {
-                                  ...pageRequest,
-                                  officeId: request.office,
+                            : request.office === 'CAPTAIN' &&
+                                request.dataset ===
+                                  POSTWAR_CAPTAIN_CURRENT_DATASET
+                              ? await captainStore!.readPageFrom(read, {
+                                  worldId: pageRequest.worldId,
+                                  offset: pageRequest.offset,
+                                  limit: pageRequest.limit,
+                                  ...(pageRequest.expectedVersion
+                                    ? {
+                                        expectedVersion:
+                                          pageRequest.expectedVersion,
+                                      }
+                                    : {}),
                                 })
-                              : request.office === 'SOCIAL' &&
-                                  head.worldVersion !== '0' &&
-                                  ['positions', 'service-pools'].includes(
-                                    request.dataset,
-                                  )
-                                ? await socialStore!.readPageFrom(read, {
+                              : (request.office === 'FINANCE' ||
+                                    request.office === 'CENTRAL_BANK') &&
+                                  (head.worldVersion !== '0' ||
+                                    [
+                                      'ledger-balances',
+                                      'treasury-capacity',
+                                    ].includes(request.dataset))
+                                ? await financialStore!.readPageFrom(read, {
                                     ...pageRequest,
-                                    officeId: 'SOCIAL',
+                                    officeId: request.office,
                                   })
-                                : (request.office === 'INDUSTRY' ||
-                                      request.office === 'TRADE' ||
-                                      request.office === 'CAPTAIN') &&
-                                    head.worldVersion !== '0'
-                                  ? await (
-                                      request.dataset ===
-                                      'opening-inventory-entries'
-                                        ? inventoryStore!
-                                        : physicalStore!
-                                    ).readPageFrom(read, {
+                                : request.office === 'SOCIAL' &&
+                                    head.worldVersion !== '0' &&
+                                    ['positions', 'service-pools'].includes(
+                                      request.dataset,
+                                    )
+                                  ? await socialStore!.readPageFrom(read, {
                                       ...pageRequest,
-                                      officeId: request.office,
+                                      officeId: 'SOCIAL',
                                     })
-                                  : await store.readPageFrom(read, {
-                                      ...pageRequest,
-                                      officeId: request.office,
-                                    });
+                                  : (request.office === 'INDUSTRY' ||
+                                        request.office === 'TRADE' ||
+                                        request.office === 'CAPTAIN') &&
+                                      head.worldVersion !== '0'
+                                    ? await (
+                                        request.dataset ===
+                                        'opening-inventory-entries'
+                                          ? inventoryStore!
+                                          : physicalStore!
+                                      ).readPageFrom(read, {
+                                        ...pageRequest,
+                                        officeId: request.office,
+                                      })
+                                    : await store.readPageFrom(read, {
+                                        ...pageRequest,
+                                        officeId: request.office,
+                                      });
                   if (!('scope' in page))
                     return fail(
                       page.status === 'DENIED'

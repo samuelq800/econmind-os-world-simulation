@@ -1,3 +1,8 @@
+import { POSTWAR_DAY_ONE_FX_QUOTES_DATASET } from '@econmind/core/postwar-day-one-fx-command-contract';
+import {
+  buildTreasuryFxRequest,
+  type TreasuryFxDraft,
+} from '../finance-fx/form.js';
 import { INDUSTRY_UTILISATION_TARGETS_DATASET } from '@econmind/core/postwar-industry-utilisation-targets-contract';
 import { SOCIAL_PROGRAMMES_DATASET } from '@econmind/core/social-labour-programme-public-contract';
 import {
@@ -138,6 +143,10 @@ export function createOfficeCommandController(
       b?.read.identity.projectionVersion === POSTWAR_RUNTIME_SCHEMA
         ? createPostwarRuntimeClient(b.read, options)
         : null,
+    fxQuotesReader =
+      b?.read.identity.officeId === 'FINANCE' && runtimeReader
+        ? createPostwarRuntimeClient(b.read, options)
+        : null,
     industryUtilityReader =
       b?.read.identity.officeId === 'INDUSTRY' && runtimeReader
         ? createPostwarRuntimeClient(b.read, options)
@@ -177,6 +186,8 @@ export function createOfficeCommandController(
   let status: Status = b ? 'READY_TO_READ' : 'MISSING',
     code: string | null = b ? null : 'OFFICE_BINDING_MISSING_OR_UNSUPPORTED';
   let runtimePage: RuntimePage | null = null;
+  let fxQuotesPage: RuntimePage | null = null;
+  let fxQuotesCode: string | null = null;
   let runParametersPage: RuntimePage | null = null;
   let runParametersCode: string | null = null;
   let targetPage: RuntimePage | null = null;
@@ -224,6 +235,8 @@ export function createOfficeCommandController(
     code = reason;
     model = null;
     runtimePage = null;
+    fxQuotesPage = null;
+    fxQuotesCode = null;
     runParametersPage = null;
     runParametersCode = null;
     committedRunsPage = null;
@@ -254,6 +267,7 @@ export function createOfficeCommandController(
     socialPoolsReader?.disconnect();
     socialProgrammesReader?.disconnect();
     recoverer?.disconnect();
+    fxQuotesReader?.disconnect();
     writer?.disconnect();
     const cleanup = stop;
     stop = null;
@@ -299,6 +313,8 @@ export function createOfficeCommandController(
     }
     model = null;
     runtimePage = null;
+    fxQuotesPage = null;
+    fxQuotesCode = null;
     runParametersPage = null;
     runParametersCode = null;
     committedRunsPage = null;
@@ -327,6 +343,38 @@ export function createOfficeCommandController(
         busy = false;
         notify();
       }
+    }
+  }
+  async function readFxQuotes() {
+    if (!fxQuotesReader || !currentHead()) return;
+    fxQuotesPage = null;
+    fxQuotesCode = 'READING';
+    const result = await fxQuotesReader.readPage(
+      POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
+      requestId(),
+    );
+    if (!checkLiveness()) return;
+    if (result.status === 'DENIED') {
+      disconnect('DENIED');
+      return;
+    }
+    if (result.status === 'STALE') {
+      fail('STALE');
+      return;
+    }
+    fxQuotesCode = 'code' in result ? result.code : result.status;
+    if (result.status === 'PAGE' || result.status === 'EMPTY') {
+      const h = currentHead();
+      if (
+        !h ||
+        result.authority.readback.worldVersion !== h.worldVersion ||
+        result.authority.readback.eventSequence !== h.eventSequence
+      ) {
+        fail('STALE');
+        return;
+      }
+      fxQuotesPage = result;
+      fxQuotesCode = null;
     }
   }
   async function readRunParameters(previous?: RuntimePage) {
@@ -566,6 +614,8 @@ export function createOfficeCommandController(
     if (!b || !reader) return;
     model = null;
     runtimePage = null;
+    fxQuotesPage = null;
+    fxQuotesCode = null;
     runParametersPage = null;
     runParametersCode = null;
     committedRunsPage = null;
@@ -652,6 +702,8 @@ export function createOfficeCommandController(
       }
       floor = result.authority.readback.worldVersion;
       runtimePage = result;
+      await readFxQuotes();
+      if (!checkLiveness() || !runtimePage) return;
       await readSocialPools();
       if (checkLiveness() && runtimePage) await readSocialProgrammes();
       if (!checkLiveness() || !runtimePage) return;
@@ -866,6 +918,10 @@ export function createOfficeCommandController(
         socialPoolsPage: socialPoolsPage
           ? (JSON.parse(JSON.stringify(socialPoolsPage)) as RuntimePage)
           : null,
+        fxQuotesPage: fxQuotesPage
+          ? (JSON.parse(JSON.stringify(fxQuotesPage)) as RuntimePage)
+          : null,
+        fxQuotesCode,
         socialPoolsCode,
         socialProgrammesPage: socialProgrammesPage
           ? (JSON.parse(JSON.stringify(socialProgrammesPage)) as RuntimePage)
@@ -1038,6 +1094,43 @@ export function createOfficeCommandController(
       )
         return Promise.resolve();
       return operation(() => read(opening, previous));
+    },
+    nextFinanceLedgerPage() {
+      if (
+        b?.read.identity.officeId !== 'FINANCE' ||
+        runtimePage?.dataset !== 'ledger-balances' ||
+        runtimePage.page.nextOffset === null
+      )
+        return Promise.resolve();
+      const previous = runtimePage;
+      return operation(() => read(false, previous));
+    },
+    stageTreasuryFx(draft: TreasuryFxDraft) {
+      if (
+        !b ||
+        busy ||
+        attempted ||
+        !checkLiveness() ||
+        b.read.identity.officeId !== 'FINANCE' ||
+        !fxQuotesPage ||
+        !runtimePage
+      )
+        return false;
+      try {
+        const id = requestId().replaceAll('-', '').toUpperCase();
+        return stageIntent(
+          buildTreasuryFxRequest({
+            quotes: fxQuotesPage,
+            ledger: runtimePage,
+            draft,
+            requestId: requestId(),
+            commandId: 'TREASURY_FX_' + id,
+            idempotencyKey: 'TREASURY_FX_KEY_' + id,
+          }),
+        );
+      } catch {
+        return false;
+      }
     },
     stage: stageIntent,
     restoreOriginalForRecovery,

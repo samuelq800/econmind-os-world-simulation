@@ -1,4 +1,8 @@
 import {
+  POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
+  parsePostwarDayOneFxQuoteRow,
+} from '@econmind/core/postwar-day-one-fx-command-contract';
+import {
   INDUSTRY_UTILISATION_TARGETS_DATASET,
   INDUSTRY_UTILISATION_TARGETS_NATURE,
   parseIndustryUtilisationTargetRow,
@@ -88,6 +92,7 @@ export const officeDatasets: Readonly<Record<string, readonly string[]>> =
       SOCIAL_PROGRAMMES_DATASET,
     ],
     FINANCE: [
+      POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
       'currency-fx',
       'opening-financial-legs',
       'ledger-balances',
@@ -608,6 +613,27 @@ export function createPostwarRuntimeClient(
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
         } else if (source.currentCaptainCoverage !== undefined)
           throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (dataset === POSTWAR_DAY_ONE_FX_QUOTES_DATASET) {
+          const pointer = row(source.sourcePointer),
+            quotes = rows.map(parsePostwarDayOneFxQuoteRow);
+          if (
+            c.identity.officeId !== 'FINANCE' ||
+            !historical ||
+            !observedHeadMatches(source, authority) ||
+            pointer?.rowOrigin !==
+              'world_v2.postwar_day_one_fx_quote_original.quote_text' ||
+            pointer.rowBinding !== 'quoteRef+quoteSha256' ||
+            quotes.some((q) => q.countryId !== c.identity.countryId) ||
+            page.total !== 1 ||
+            new Set(quotes.map((q) => q.quoteRef)).size !== quotes.length ||
+            (previous &&
+              quotes.some((q) =>
+                previous.rows.some((old) => old.quoteRef === q.quoteRef),
+              )) ||
+            source.currentFinancialCoverage !== undefined
+          )
+            throw Error('DAY_ONE_FX_QUOTE_SCOPE_MISMATCH');
+        }
         if (dataset === INDUSTRY_RUN_PARAMETERS_DATASET) {
           const pointer = row(source.sourcePointer),
             parameters = rows.map(parseIndustryRunParameterRow);

@@ -1,3 +1,4 @@
+import { renderTreasuryFxForm } from '../finance-fx/form.js';
 import { parseIndustryUtilisationTargetRow } from '@econmind/core/postwar-industry-utilisation-targets-contract';
 import { renderSocialProgrammeForm } from '../social-employment/programme-form.js';
 import { parseIndustryCommittedRunRow } from '@econmind/core/postwar-industry-committed-runs-contract';
@@ -373,6 +374,26 @@ export function installOfficeCommand(
         dialog.append(
           button('下一授权服务池页', 'social-next-pools', state.canRead, () =>
             owner.nextSocialPoolsPage(),
+          ),
+        );
+    }
+    if (currentView()?.role === 'finance') {
+      dialog.append(
+        renderTreasuryFxForm(document, {
+          quotes: state.fxQuotesPage,
+          ledger: state.runtimePage,
+          code: state.fxQuotesCode,
+          enabled: state.canStage,
+          stage: (draft) => owner.stageTreasuryFx(draft),
+        }),
+      );
+      if (
+        state.runtimePage?.dataset === 'ledger-balances' &&
+        state.runtimePage.page.nextOffset !== null
+      )
+        dialog.append(
+          button('下一授权账本页', 'finance-next-ledger', state.canRead, () =>
+            owner.nextFinanceLedgerPage(),
           ),
         );
     }
@@ -758,10 +779,17 @@ export function installOfficeCommand(
       }
       if (trigger && !document.body.contains(trigger)) removePrivateShell();
       if (!trigger || !dialog) {
-        trigger = button('Office intent', 'open', true, () => {
-          if (dialog && !dialog.open) dialog.showModal();
-          reconcile(true);
-        });
+        trigger = button(
+          currentView()?.role === 'finance'
+            ? '首日换汇 / Office intent'
+            : 'Office intent',
+          'open',
+          true,
+          () => {
+            if (dialog && !dialog.open) dialog.showModal();
+            reconcile(true);
+          },
+        );
         trigger.dataset.officeCommandEntry = '';
         trigger.className = 'national-atlas';
         tools.append(trigger);
