@@ -5,7 +5,10 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 import { assertSafeEnvironment } from './environment-policy.mjs';
-import { readProcessParentPid } from './process-parent-pid.mjs';
+import {
+  readProcessParentPid,
+  watchProcessOwnership,
+} from './process-parent-pid.mjs';
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(
@@ -161,7 +164,7 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
 
   function beginShutdown(reason, signal) {
     stoppingPromise ??= (async () => {
-      if (parentWatch !== undefined) clearInterval(parentWatch);
+      if (parentWatch !== undefined) parentWatch();
       console.log(
         JSON.stringify({
           event: 'PUBLIC_LAUNCHER_SHUTDOWN',
@@ -193,25 +196,26 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
     });
   }
 
-  parentWatch = setInterval(() => {
-    void parentStillOwnsLauncher().then((stillOwned) => {
-      if (!stillOwned) {
-        void beginShutdown('parent-exit', 'SIGTERM').catch((error) => {
-          console.error(
-            JSON.stringify({
-              event: 'PUBLIC_LAUNCHER_SHUTDOWN_FAILED',
-              service: `world-${serviceName}`,
-              error:
-                error instanceof Error
-                  ? error.message
-                  : 'Unknown launcher shutdown failure',
-            }),
-          );
-          process.exitCode = 1;
-        });
-      }
-    });
-  }, 25);
+  parentWatch = watchProcessOwnership({
+    isDirectParent: () =>
+      originalParentIsPnpm && process.ppid === originalParentPid,
+    observeOwnership: parentStillOwnsLauncher,
+    onLost: () => {
+      void beginShutdown('parent-exit', 'SIGTERM').catch((error) => {
+        console.error(
+          JSON.stringify({
+            event: 'PUBLIC_LAUNCHER_SHUTDOWN_FAILED',
+            service: `world-${serviceName}`,
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Unknown launcher shutdown failure',
+          }),
+        );
+        process.exitCode = 1;
+      });
+    },
+  });
 
   try {
     if (!(await parentStillOwnsLauncher())) {
@@ -229,7 +233,7 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
       const result = await build.exit;
       if (activeChild === build) activeChild = undefined;
       if (stoppingPromise === undefined && result.code !== 0) {
-        if (parentWatch !== undefined) clearInterval(parentWatch);
+        if (parentWatch !== undefined) parentWatch();
         process.exitCode = resultExitCode(result);
       }
     }
@@ -243,14 +247,14 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
       const result = await runtime.exit;
       if (activeChild === runtime) activeChild = undefined;
       if (stoppingPromise === undefined) {
-        if (parentWatch !== undefined) clearInterval(parentWatch);
+        if (parentWatch !== undefined) parentWatch();
         process.exitCode = resultExitCode(result);
       }
     }
 
     if (stoppingPromise !== undefined) await stoppingPromise;
   } catch (error) {
-    if (parentWatch !== undefined) clearInterval(parentWatch);
+    if (parentWatch !== undefined) parentWatch();
     console.error(
       JSON.stringify({
         event: 'PUBLIC_LAUNCHER_FAILED',

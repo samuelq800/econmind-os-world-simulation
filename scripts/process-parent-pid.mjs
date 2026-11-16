@@ -39,3 +39,46 @@ export async function readProcessParentPid(pid) {
     return undefined;
   }
 }
+
+/** Keep direct-parent loss prompt without flooding non-procfs hosts with ps.
+ * Ownership observations are single-flight; a slow observation never overlaps
+ * the next one. No observation is reused for READY or application authority. */
+export function watchProcessOwnership({
+  isDirectParent,
+  observeOwnership,
+  onLost,
+  platform = process.platform,
+}) {
+  let stopped = false;
+  let pending = false;
+  let lastObservation = -Infinity;
+  const observationInterval = platform === 'linux' ? 25 : 250;
+  const stop = () => {
+    stopped = true;
+    clearInterval(timer);
+  };
+  const lost = () => {
+    if (stopped) return;
+    stop();
+    onLost();
+  };
+  const timer = setInterval(() => {
+    if (stopped) return;
+    if (!isDirectParent()) {
+      lost();
+      return;
+    }
+    if (pending || Date.now() - lastObservation < observationInterval) return;
+    pending = true;
+    lastObservation = Date.now();
+    void Promise.resolve()
+      .then(observeOwnership)
+      .then((owned) => {
+        if (!owned) lost();
+      }, lost)
+      .finally(() => {
+        pending = false;
+      });
+  }, 25);
+  return stop;
+}

@@ -5,7 +5,10 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 import { assertSafeEnvironment } from './environment-policy.mjs';
-import { readProcessParentPid } from './process-parent-pid.mjs';
+import {
+  readProcessParentPid,
+  watchProcessOwnership,
+} from './process-parent-pid.mjs';
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(
@@ -503,13 +506,12 @@ async function run() {
     phase = 'WAITING_FOR_DEPENDENCIES';
     emit('BOOTSTRAP_WAITING');
 
-    parentWatch = setInterval(() => {
-      void parentStillOwnsBootstrap().then((stillOwned) => {
-        if (!stillOwned) {
-          requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' });
-        }
-      });
-    }, 25);
+    parentWatch = watchProcessOwnership({
+      isDirectParent: () =>
+        originalParentIsPnpm && process.ppid === originalParentPid,
+      observeOwnership: parentStillOwnsBootstrap,
+      onLost: () => requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' }),
+    });
 
     const readiness = (async () => {
       const deadline = Date.now() + configuration.startupTimeoutMs;
@@ -585,7 +587,7 @@ async function run() {
     phase = 'SHUTTING_DOWN';
     stopping = true;
     emit('BOOTSTRAP_SHUTDOWN_START');
-    if (parentWatch !== undefined) clearInterval(parentWatch);
+    if (parentWatch !== undefined) parentWatch();
     const cleanup = await cleanupChildren(
       children,
       configuration.cleanupTimeoutMs,
@@ -605,7 +607,7 @@ async function run() {
       ready_emitted: readyEmitted,
     });
   } catch (error) {
-    if (parentWatch !== undefined) clearInterval(parentWatch);
+    if (parentWatch !== undefined) parentWatch();
     outcome = 'FAILED';
     failure = {
       failed_service: 'bootstrap-stack',
