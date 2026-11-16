@@ -24,6 +24,7 @@ import {
   createRegisteredFinalDriver,
   registeredFinalRecord as row,
 } from '../support/postwar-registered-final-driver.js';
+import { probeRetainedFxQuotes } from '../support/probe-retained-fx-quotes.js';
 import { runRetainedC10Completion } from '../support/run-retained-c10-completion.js';
 import { wireColdError } from '../../tools/office-connection/native-mixed-cold-errors.mjs';
 const flag = process.env.ECONMIND_RETAINED_C10_FINITE_OBSERVATION_NATIVE;
@@ -115,6 +116,19 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
       );
       await originalFixture.clone.installer.query(sql);
       report.bridgeSqlSha256 = sha(sql);
+      const fxSql = await readFile(
+        path.join(
+          root,
+          'database/proposals/postwar-day-one-fx-quotes-read.sql',
+        ),
+        'utf8',
+      );
+      assert.equal(
+        sha(fxSql),
+        '50dcdfa0b87b1ff0a4c9c5b055d80c313fc77f587acc5e5365996344de9337c5',
+      );
+      await originalFixture.clone.installer.query(fxSql);
+      report.fxReadSqlSha256 = sha(fxSql);
       const lease = (
         await originalFixture.clone.installer.query(
           'select holder_id,fencing_token::text from world_v2.world_writer_lease where world_id=$1',
@@ -225,6 +239,11 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
         sha256: sha(sql),
         status: 'DDL_COMMITTED',
       });
+      ddl.entries.push({
+        name: 'postwar-day-one-fx-quotes-read',
+        sha256: sha(fxSql),
+        status: 'DDL_COMMITTED',
+      });
       await writeFile(
         path.join(preparationDirectory, 'setup-ddl.json'),
         JSON.stringify(ddl, null, 2) + '\n',
@@ -305,6 +324,25 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
       }
       assert.deepEqual((await ledger()).facts, initial);
       await save();
+      report.fxQuotesBefore = await probeRetainedFxQuotes({
+        driver: d,
+        installer: f.clone.installer,
+        worldId: marker.worldId,
+        browser: {
+          applicationOrigin: 'https://pages-test.example',
+          authSubject: s.subjects.COUNTRY_02,
+          countryId: 'COUNTRY_02',
+          countryDisplayId: '02',
+          readConfiguration: descriptor.configuration,
+          getAccessToken: () => 'Bearer ' + s.signToken('COUNTRY_02'),
+        },
+      });
+      assert.deepEqual(
+        (await ledger()).facts,
+        initial,
+        'FX_READS_MUST_NOT_EXECUTE',
+      );
+      await save();
       publisher = poolFor(s.roles.industryPublication);
       report.c10 = await runRetainedC10Completion({
         driver: d,
@@ -344,6 +382,11 @@ native('retained H6 finite observed clock and genuine C10 completion', () => {
         refPrefix: 'C10_COLD_RESTORE',
       });
       assert.equal(row(report.coldLogistics).status, 'ALREADY_DELIVERED');
+      report.fxQuotesAfterRestart = await probeRetainedFxQuotes({
+        driver: d,
+        installer: f.clone.installer,
+        worldId: marker.worldId,
+      });
       report.finalLedger = await ledger();
       assert.deepEqual(report.finalLedger, report.beforeRestart);
       report.status =
