@@ -25,6 +25,7 @@ export async function runRetainedC10Completion(input: {
   publisher: Pick<Pool, 'connect'>;
   evidencePath: string;
   ledgerSnapshot: () => Promise<unknown>;
+  resumeCommittedWork?: true;
 }) {
   const d = input.driver;
   const books = d.originals.filter(
@@ -86,12 +87,43 @@ export async function runRetainedC10Completion(input: {
     report.before = await snapshot();
     await save();
     const initial = row(row(report.before).logistics);
-    assert(
-      ['WORK_ORDER_DRAFT', 'REGISTERED_WORK_ORDER'].includes(
-        String(initial.status),
-      ),
-      'C10_REAL_CLOCK_AND_UNOCCUPIED_PERSON_REQUIRED:' + initial.status,
+    const retainedWork = d.originals.filter(
+      (o) =>
+        o.request.commandType === 'INDUSTRY_FIRST_DAY_LOGISTICS_EXECUTE_V1' &&
+        row(o.request.payload).runId === runId &&
+        row(row(o.request.payload).operation).action === 'SERVICE_WORK',
     );
+    if (input.resumeCommittedWork) {
+      assert.equal(
+        retainedWork.length,
+        1,
+        'EXACT_SAVED_COMMITTED_WORK_REQUIRED',
+      );
+      const stored = await d.inspect(retainedWork[0]!.request.commandId);
+      assert.equal(row(stored).outcome, 'COMMITTED');
+      report.retainedWork = {
+        original: retainedWork[0],
+        stored,
+        recovery: await d.recover(retainedWork[0]!, { duplicateProbe: false }),
+      };
+      assert.equal(
+        initial.status,
+        'PAY_ORDER_DRAFTS',
+        'H7_REAL_COMMITTED_WORK_MUST_REPLAY_BEFORE_PAY',
+      );
+    } else {
+      assert.equal(
+        retainedWork.length,
+        0,
+        'EXISTING_WORK_REQUIRES_EXPLICIT_RECOVERY',
+      );
+      assert(
+        ['WORK_ORDER_DRAFT', 'REGISTERED_WORK_ORDER'].includes(
+          String(initial.status),
+        ),
+        'C10_REAL_CLOCK_AND_UNOCCUPIED_PERSON_REQUIRED:' + initial.status,
+      );
+    }
     const runStage = async (
       action: 'SERVICE_WORK' | 'PAY_INPUTS' | 'DELIVER',
       order?: unknown,
@@ -154,9 +186,11 @@ export async function runRetainedC10Completion(input: {
       stage.after = await snapshot();
       await save();
     };
-    assert(Array.isArray(initial.orders));
-    assert.equal(initial.orders.length, 1);
-    await runStage('SERVICE_WORK', initial.orders[0]);
+    if (!input.resumeCommittedWork) {
+      assert(Array.isArray(initial.orders));
+      assert.equal(initial.orders.length, 1);
+      await runStage('SERVICE_WORK', initial.orders[0]);
+    }
     const payment = row(await planning());
     report.paymentPlan = payment;
     await save();
