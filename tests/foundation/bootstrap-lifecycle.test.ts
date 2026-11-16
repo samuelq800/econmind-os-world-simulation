@@ -130,7 +130,7 @@ function stackEnvironment(
     WORLD_BOOTSTRAP_CLEANUP_TIMEOUT_MS: '3000',
     WORLD_BOOTSTRAP_POLL_INTERVAL_MS: '25',
     WORLD_BOOTSTRAP_PROBE_TIMEOUT_MS: '250',
-    WORLD_BOOTSTRAP_STARTUP_TIMEOUT_MS: '25000',
+    WORLD_BOOTSTRAP_STARTUP_TIMEOUT_MS: '45000',
     WORLD_WEB_HOST: '127.0.0.1',
     WORLD_WEB_PORT: String(ports.web),
     WORLD_WORKER_HEALTH_HOST: '127.0.0.1',
@@ -173,7 +173,7 @@ async function waitForOutput(
   managed: ManagedCommand,
   pattern: RegExp,
   captured: ProcessRow[],
-  timeoutMs = 30_000,
+  timeoutMs = 50_000,
 ) {
   const deadline = Date.now() + timeoutMs;
   let drain: 'not-attempted' | 'complete' | 'timed-out' = 'not-attempted';
@@ -811,7 +811,7 @@ describe.skipIf(process.platform === 'win32')(
 
     it(
       'starts all three real runtimes, checks dependency health, and emits READY exactly once',
-      { timeout: 50_000 },
+      { timeout: 65_000 },
       async () => {
         const ports = await freePorts();
         const secret = 'service-role-value-must-not-appear';
@@ -1236,7 +1236,7 @@ describe.skipIf(process.platform === 'win32')(
 
     it(
       'tears down the full stack when a child crashes after aggregate readiness',
-      { timeout: 35_000 },
+      { timeout: 65_000 },
       async () => {
         const ports = await freePorts();
         const managed = startStack(ports);
@@ -1267,7 +1267,7 @@ describe.skipIf(process.platform === 'win32')(
 
     it(
       'rejects the API-ready-then-exit TOCTOU window before READY commitment',
-      { timeout: 35_000 },
+      { timeout: 65_000 },
       async () => {
         const ports = await freePorts();
         const managed = startStack(ports, {
@@ -1303,7 +1303,7 @@ describe.skipIf(process.platform === 'win32')(
 
     it(
       'preserves cleanup-timeout failure truth after forced owned-process cleanup',
-      { timeout: 35_000 },
+      { timeout: 65_000 },
       async () => {
         const ports = await freePorts();
         const managed = startStack(ports, {

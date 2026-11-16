@@ -96,7 +96,7 @@ jobs:
       - name: Regress official-check failures before the complete suite
         run: |
           pnpm run pretest
-          pnpm exec vitest run tests/foundation/process-ownership-watch.test.ts tests/foundation/bootstrap-lifecycle.test.ts tests/world-core/postwar-bounded-prefix-pages.test.ts tests/foundation/public-runtime-lifecycle.test.ts tests/world-web/office-command-industry.test.ts tests/world-core/industry-labour-scope-forward-patch.test.ts tests/world-core/postwar-mixed-beneficial-rent-current-effects.test.ts tests/world-core/postwar-proposal-function-upgrades.test.ts tests/world-core/postwar-retained-power-upgrade.test.ts tests/world-core/registered-current-browser-subject.test.ts
+          pnpm exec vitest run tests/foundation/bootstrap-http-probe.test.ts tests/foundation/process-ownership-watch.test.ts tests/foundation/bootstrap-lifecycle.test.ts tests/world-core/postwar-bounded-prefix-pages.test.ts tests/foundation/public-runtime-lifecycle.test.ts tests/world-web/office-command-industry.test.ts tests/world-core/industry-labour-scope-forward-patch.test.ts tests/world-core/postwar-mixed-beneficial-rent-current-effects.test.ts tests/world-core/postwar-proposal-function-upgrades.test.ts tests/world-core/postwar-retained-power-upgrade.test.ts tests/world-core/registered-current-browser-subject.test.ts
       - name: Unmodified complete official check
         shell: bash
         run: |
