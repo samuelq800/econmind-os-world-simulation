@@ -6,6 +6,8 @@ import {
   DOMAIN_ERROR_CODES,
   SOCIAL_SERVICE_PLAN_EVENT,
   SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT,
+  SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT,
+  SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT,
   resolveSocialEmploymentPhysicalServicePool,
   canonicalHashInput,
   canonicalSha256,
@@ -317,6 +319,8 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
             event.eventType === 'SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATED_V1'
               ? 'POSITION'
               : event.eventType === SOCIAL_EMPLOYMENT_SERVICE_CREATED_EVENT ||
+                  event.eventType === SOCIAL_LABOUR_PROGRAMME_CREATED_EVENT ||
+                  event.eventType === SOCIAL_LABOUR_PROGRAMME_APPLIED_EVENT ||
                   event.eventType === 'SOCIAL_EMPLOYMENT_SERVICE_PLANNED_V1' ||
                   event.eventType === 'SOCIAL_JOB_MATCH_SETTLED_V1'
                 ? 'SERVICE'
