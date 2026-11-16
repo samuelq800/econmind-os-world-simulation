@@ -7,9 +7,11 @@ import {
   buildIndustryLabourScopeForwardPatch,
   INDUSTRY_LABOUR_FORWARD_PREDECESSOR_SHA256,
 } from '../support/industry-labour-scope-forward-patch.js';
+// Exact original proposal bytes, not the current already-forwarded proposal.
+// Its pinned SHA below remains the forward generator's predecessor contract.
 const previousSql = readFileSync(
   new URL(
-    '../../database/proposals/postwar-industry-labour-current-read.sql',
+    '../fixtures/sql/postwar-industry-labour-current-read.6d9be232.sql',
     import.meta.url,
   ),
   'utf8',

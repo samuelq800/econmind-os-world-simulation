@@ -11,8 +11,11 @@ const read = (p: string) =>
 // has its own tests; it must not rewrite this upgrade's target or receipt.
 const readTarget = (name: string) =>
   read(
-    name === 'postwar-industry-first-day-source'
-      ? 'tests/fixtures/sql/postwar-industry-first-day-source.4b6d400c.sql'
+    [
+      'postwar-industry-first-day-source',
+      'postwar-paged-current-projection',
+    ].includes(name)
+      ? 'tests/fixtures/sql/' + name + '.4b6d400c.sql'
       : 'database/proposals/' + name + '.sql',
   );
 const names = [
@@ -126,9 +129,7 @@ it('installs exact predecessor proposals and upgrades in place, preserving rows/
       primaryKey(legacy.get('postwar-industry-utility-custody')!),
     );
     expect(tableChange.targetPrimaryKey).toEqual(
-      primaryKey(
-        await read('database/proposals/postwar-industry-utility-custody.sql'),
-      ),
+      primaryKey(await readTarget('postwar-industry-utility-custody')),
     );
     for (const n of [
       '0001_world_v2_namespace',

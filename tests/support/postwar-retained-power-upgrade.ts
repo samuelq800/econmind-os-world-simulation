@@ -11,10 +11,13 @@ const hash = (bytes: string | Buffer) =>
   createHash('sha256').update(bytes).digest('hex');
 const OLD = '0cf65bc0e6cbf1b117ca625bb16ec7280938e239';
 const TARGET = '4b6d400c2620303bfdc167d6645adfbfed3f3e04';
+// First committed final manifest; all seven package artifacts are byte-pinned
+// to this repository ancestor, independently of the caller's current HEAD.
+const PACKAGE_COMMIT = 'bb4b430db0d687e940aa475742407a036869a57d';
 const MANIFEST = 'database/upgrades/postwar-0cf65bc0-to-4b6d400c.manifest.json';
 const REPAIR = {
   path: 'database/proposals/postwar-complete-opening-inventory-read-repair.sql',
-  commit: '79a31c939789c300bfdb7249e72180082cda7554',
+  commit: '8a96c074278dc60ce2d9937a7c722deed59b5861',
   sha256: 'aa47ebbae894c4c9f0dbaff22a18757962a294e5fa18fb0fcea802ae8454cb37',
 };
 const LABOUR = {
@@ -130,7 +133,7 @@ export async function prepareRetainedPostwarPowerUpgrade(input: {
   // The reference is the reviewed immutable upgrade package, not mutable HEAD.
   assert.equal(
     rawManifest.toString('utf8'),
-    git('show', 'c51d0279ddd285e02f278fc7761f30f1e8e963fd:' + MANIFEST),
+    git('show', PACKAGE_COMMIT + ':' + MANIFEST),
   );
   const manifest = JSON.parse(rawManifest.toString('utf8')) as Manifest;
   assert.equal(manifest.oldCommit, OLD);
@@ -151,10 +154,7 @@ export async function prepareRetainedPostwarPowerUpgrade(input: {
       'utf8',
     );
     assert.equal(hash(bytes), item.rawSha256, item.path);
-    assert.equal(
-      bytes,
-      git('show', 'c51d0279ddd285e02f278fc7761f30f1e8e963fd:' + item.path),
-    );
+    assert.equal(bytes, git('show', PACKAGE_COMMIT + ':' + item.path));
     artifacts.push({ ...item, bytes });
   }
   const repairBytes = git('show', REPAIR.commit + ':' + REPAIR.path);
