@@ -1,3 +1,5 @@
+import { renderTreasuryFxForm } from '../finance-fx/form.js';
+import { parseSocialProgrammeApplicationRowDto } from '@econmind/core/social-labour-programme-public-contract';
 import { parseIndustryUtilisationTargetRow } from '@econmind/core/postwar-industry-utilisation-targets-contract';
 import { renderSocialProgrammeForm } from '../social-employment/programme-form.js';
 import { parseIndustryCommittedRunRow } from '@econmind/core/postwar-industry-committed-runs-contract';
@@ -321,6 +323,9 @@ export function installOfficeCommand(
           stage: (draft) =>
             active(owner, lifetime, dialog!) &&
             owner.stageSocialProgramme(draft),
+          stageApplication: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialProgrammeApplication(draft),
         }),
       );
       if (
@@ -332,6 +337,84 @@ export function installOfficeCommand(
             owner.nextSocialProgrammesPage(),
           ),
         );
+
+      const applicationSection = document.createElement('section');
+      applicationSection.dataset.socialApplications = '';
+      applicationSection.append(node('h4', '群体申请记录（资格尚未核验）'));
+      if (!state.socialApplicationsPage)
+        applicationSection.append(
+          node('p', state.socialApplicationsCode ?? '等待当前申请记录'),
+        );
+      else if (!state.socialApplicationsPage.rows.length)
+        applicationSection.append(node('p', '当前没有已登记群体申请。'));
+      else
+        for (const row of state.socialApplicationsPage.rows) {
+          const application = parseSocialProgrammeApplicationRowDto(row);
+          applicationSection.append(
+            node(
+              'p',
+              `${application.applicationId} · ${application.programmeId} · ${application.applicant.locationId} / ${application.applicant.skill} / ${application.applicant.status} · ${application.personCount} 人 · 已申请，未核验资格或付款`,
+            ),
+          );
+          const review = application.reviewFacts;
+          if (!review) {
+            applicationSection.append(
+              node('p', '尚未读取当前人口、地区及条款核对信息。'),
+            );
+            continue;
+          }
+          applicationSection.append(
+            node(
+              'p',
+              `申请时 ${application.personCount} 人；当前同标签群体 ${review.currentGroupPersonCount ?? '未找到'}。` +
+                (review.membership === 'UNCHANGED_LABOUR_SNAPSHOT'
+                  ? '人口劳动记录与申请时一致。'
+                  : '劳动记录已变化，不能据当前群体人数认定原申请人的身份或资格。'),
+            ),
+          );
+          applicationSection.append(
+            node(
+              'p',
+              `提议容量 ${review.proposedCapacity} 人；` +
+                (review.capacityComparison === 'EXCEEDS_PROPOSED_CAPACITY'
+                  ? '申请人数超过提议容量。'
+                  : '申请人数未超过提议容量。') +
+                '这不是名额预留或录取。',
+            ),
+          );
+          if (review.terms.kind === 'RELOCATION_SUPPORT') {
+            applicationSection.append(
+              node(
+                'p',
+                `拟迁入地区 ${review.terms.locationId}；` +
+                  (review.locationRelation === 'SAME_REGION'
+                    ? '与申请群体当前地区相同，尚不构成跨地区就业迁移。'
+                    : '与申请群体地区不同，仍需就业及迁移资格核验。') +
+                  `条款请求人均补助 ${review.terms.benefit.amount} ${review.terms.benefit.currency}，尚未生成支付义务。`,
+              ),
+            );
+          } else {
+            applicationSection.append(
+              node(
+                'p',
+                `提议资格：${review.terms.eligible}；提议期限 ${review.terms.duration.amount} 模拟日。持续非就业时间尚无核验记录。`,
+              ),
+            );
+          }
+          applicationSection.append(
+            node(
+              'p',
+              '资格尚未核验，尚未关联本项目已批准预算，不能排款或支付。',
+            ),
+          );
+        }
+      if (state.socialApplicationsPage?.page.nextOffset != null)
+        applicationSection.append(
+          button('下一申请页', 'social-next-applications', state.canRead, () =>
+            owner.nextSocialApplicationsPage(),
+          ),
+        );
+      dialog.append(applicationSection);
 
       dialog.append(
         renderSocialEmploymentServiceCreateForm(document, {
@@ -373,6 +456,26 @@ export function installOfficeCommand(
         dialog.append(
           button('下一授权服务池页', 'social-next-pools', state.canRead, () =>
             owner.nextSocialPoolsPage(),
+          ),
+        );
+    }
+    if (currentView()?.role === 'finance') {
+      dialog.append(
+        renderTreasuryFxForm(document, {
+          quotes: state.fxQuotesPage,
+          ledger: state.runtimePage,
+          code: state.fxQuotesCode,
+          enabled: state.canStage,
+          stage: (draft) => owner.stageTreasuryFx(draft),
+        }),
+      );
+      if (
+        state.runtimePage?.dataset === 'ledger-balances' &&
+        state.runtimePage.page.nextOffset !== null
+      )
+        dialog.append(
+          button('下一授权账本页', 'finance-next-ledger', state.canRead, () =>
+            owner.nextFinanceLedgerPage(),
           ),
         );
     }
@@ -554,7 +657,7 @@ export function installOfficeCommand(
       );
       if (planning?.page.nextOffset !== null && planning)
         dialog.append(
-          button('更多服务调度', 'next-utility-planning', state.canStage, () =>
+          button('更多服务调度', 'next-utility-planning', state.canRead, () =>
             owner.nextIndustryUtilityPlanningPage(),
           ),
         );
@@ -758,10 +861,17 @@ export function installOfficeCommand(
       }
       if (trigger && !document.body.contains(trigger)) removePrivateShell();
       if (!trigger || !dialog) {
-        trigger = button('Office intent', 'open', true, () => {
-          if (dialog && !dialog.open) dialog.showModal();
-          reconcile(true);
-        });
+        trigger = button(
+          currentView()?.role === 'finance'
+            ? '首日换汇 / Office intent'
+            : 'Office intent',
+          'open',
+          true,
+          () => {
+            if (dialog && !dialog.open) dialog.showModal();
+            reconcile(true);
+          },
+        );
         trigger.dataset.officeCommandEntry = '';
         trigger.className = 'national-atlas';
         tools.append(trigger);

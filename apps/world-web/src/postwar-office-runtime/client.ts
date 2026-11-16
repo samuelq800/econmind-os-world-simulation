@@ -1,4 +1,8 @@
 import {
+  POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
+  parsePostwarDayOneFxQuoteRow,
+} from '@econmind/core/postwar-day-one-fx-command-contract';
+import {
   INDUSTRY_UTILISATION_TARGETS_DATASET,
   INDUSTRY_UTILISATION_TARGETS_NATURE,
   parseIndustryUtilisationTargetRow,
@@ -6,6 +10,9 @@ import {
 } from '@econmind/core/postwar-industry-utilisation-targets-contract';
 import {
   SOCIAL_PROGRAMMES_DATASET,
+  SOCIAL_PROGRAMME_APPLICATIONS_DATASET,
+  SOCIAL_PROGRAMME_APPLICATIONS_NATURE,
+  parseSocialProgrammeApplicationRowDto,
   SOCIAL_PROGRAMMES_NATURE,
   parseSocialProgrammeRowDto,
 } from '@econmind/core/social-labour-programme-public-contract';
@@ -86,8 +93,10 @@ export const officeDatasets: Readonly<Record<string, readonly string[]>> =
       'offers',
       'minimum-wage',
       SOCIAL_PROGRAMMES_DATASET,
+      SOCIAL_PROGRAMME_APPLICATIONS_DATASET,
     ],
     FINANCE: [
+      POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
       'currency-fx',
       'opening-financial-legs',
       'ledger-balances',
@@ -608,6 +617,27 @@ export function createPostwarRuntimeClient(
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
         } else if (source.currentCaptainCoverage !== undefined)
           throw Error('CURRENT_STATE_BINDING_MISMATCH');
+        if (dataset === POSTWAR_DAY_ONE_FX_QUOTES_DATASET) {
+          const pointer = row(source.sourcePointer),
+            quotes = rows.map(parsePostwarDayOneFxQuoteRow);
+          if (
+            c.identity.officeId !== 'FINANCE' ||
+            !historical ||
+            !observedHeadMatches(source, authority) ||
+            pointer?.rowOrigin !==
+              'world_v2.postwar_day_one_fx_quote_original.quote_text' ||
+            pointer.rowBinding !== 'quoteRef+quoteSha256' ||
+            quotes.some((q) => q.countryId !== c.identity.countryId) ||
+            page.total !== 1 ||
+            new Set(quotes.map((q) => q.quoteRef)).size !== quotes.length ||
+            (previous &&
+              quotes.some((q) =>
+                previous.rows.some((old) => old.quoteRef === q.quoteRef),
+              )) ||
+            source.currentFinancialCoverage !== undefined
+          )
+            throw Error('DAY_ONE_FX_QUOTE_SCOPE_MISMATCH');
+        }
         if (dataset === INDUSTRY_RUN_PARAMETERS_DATASET) {
           const pointer = row(source.sourcePointer),
             parameters = rows.map(parseIndustryRunParameterRow);
@@ -630,6 +660,28 @@ export function createPostwarRuntimeClient(
             source.currentFinancialCoverage !== undefined
           )
             throw Error('INDUSTRY_RUN_PARAMETER_SCOPE_MISMATCH');
+        }
+        if (dataset === SOCIAL_PROGRAMME_APPLICATIONS_DATASET) {
+          const applications = rows.map(parseSocialProgrammeApplicationRowDto),
+            pointer = row(source.sourcePointer);
+          if (
+            c.identity.officeId !== 'SOCIAL' ||
+            source.dataNature !== SOCIAL_PROGRAMME_APPLICATIONS_NATURE ||
+            source.sourceRevision !== 'SOCIAL_PROGRAMME_APPLICATIONS_READ_V1' ||
+            pointer?.rowOrigin !== 'fixed-social-programme-runtime' ||
+            pointer.rowBinding !==
+              'applicationId+programmeCommandFingerprint+commandFingerprint+sourceRef+sourceFingerprint' ||
+            applications.some((a) => a.countryId !== c.identity.countryId) ||
+            new Set(applications.map((a) => a.applicationId)).size !==
+              applications.length ||
+            (previous &&
+              applications.some((a) =>
+                previous.rows.some(
+                  (old) => old.applicationId === a.applicationId,
+                ),
+              ))
+          )
+            throw Error('CURRENT_STATE_BINDING_MISMATCH');
         }
         const currentSocialProgrammes =
           dataset === SOCIAL_PROGRAMMES_DATASET &&
@@ -654,8 +706,10 @@ export function createPostwarRuntimeClient(
                 previous.rows.some((old) => old.programmeId === p.programmeId),
               )) ||
             !context ||
-            Object.keys(context).sort().join('|') !==
-              'localCurrency|locationIds' ||
+            ![
+              'localCurrency|locationIds',
+              'applicantGroups|localCurrency|locationIds',
+            ].includes(Object.keys(context).sort().join('|')) ||
             !canonicalId(context.localCurrency) ||
             !Array.isArray(context.locationIds) ||
             context.locationIds.length > 1000 ||
@@ -665,7 +719,10 @@ export function createPostwarRuntimeClient(
             source.currentPrefixCoverage !== undefined
           )
             throw Error('CURRENT_STATE_BINDING_MISMATCH');
-        } else if (source.currentSocialProgrammeContext !== undefined)
+        } else if (
+          dataset !== SOCIAL_PROGRAMME_APPLICATIONS_DATASET &&
+          source.currentSocialProgrammeContext !== undefined
+        )
           throw Error('CURRENT_STATE_BINDING_MISMATCH');
         const currentCommittedRuns =
           dataset === INDUSTRY_COMMITTED_RUNS_DATASET &&
@@ -870,6 +927,7 @@ export function createPostwarRuntimeClient(
           !currentCommittedRuns &&
           !currentUtilisationTargets &&
           !currentSocialProgrammes &&
+          dataset !== SOCIAL_PROGRAMME_APPLICATIONS_DATASET &&
           !financialCurrent &&
           !historicalFacts
         )

@@ -1,3 +1,4 @@
+import { POSTWAR_DAY_ONE_FX_QUOTES_DATASET } from '@econmind/core/postwar-day-one-fx-command-contract';
 import {
   INDUSTRY_UTILISATION_TARGETS_DATASET,
   INDUSTRY_UTILISATION_TARGETS_NATURE,
@@ -7,6 +8,9 @@ import {
 } from '@econmind/core/postwar-industry-utilisation-targets-contract';
 import {
   SOCIAL_PROGRAMMES_DATASET,
+  SOCIAL_PROGRAMME_APPLICATIONS_DATASET,
+  SOCIAL_PROGRAMME_APPLICATIONS_NATURE,
+  parseSocialProgrammeApplicationRowDto,
   SOCIAL_PROGRAMMES_NATURE,
   parseSocialProgrammeRowDto,
 } from '@econmind/core/social-labour-programme-public-contract';
@@ -59,6 +63,7 @@ import {
 } from '@econmind/core';
 import {
   createPostwarOfficeProjectionStore,
+  createPostwarDayOneFxQuotesReader,
   createPostwarSocialMixedCurrentProjectionStore,
   createPostwarCaptainCurrentProjectionStore,
   type PostwarCaptainCurrentSource,
@@ -125,7 +130,8 @@ type PageSourceNature =
   | typeof INDUSTRY_UTILITY_PLANNING_NATURE
   | typeof INDUSTRY_COMMITTED_RUNS_NATURE
   | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
-  | typeof SOCIAL_PROGRAMMES_NATURE;
+  | typeof SOCIAL_PROGRAMMES_NATURE
+  | typeof SOCIAL_PROGRAMME_APPLICATIONS_NATURE;
 type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
   readonly source: Omit<
     OriginalSuccessPage['source'],
@@ -166,7 +172,8 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
             | typeof INDUSTRY_UTILITY_PLANNING_NATURE
             | typeof INDUSTRY_COMMITTED_RUNS_NATURE
             | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
-            | typeof SOCIAL_PROGRAMMES_NATURE;
+            | typeof SOCIAL_PROGRAMMES_NATURE
+            | typeof SOCIAL_PROGRAMME_APPLICATIONS_NATURE;
           canonicalSeedSha256?: never;
         }>
       | Readonly<{
@@ -176,6 +183,7 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
             | typeof INDUSTRY_COMMITTED_RUNS_NATURE
             | typeof INDUSTRY_UTILISATION_TARGETS_NATURE
             | typeof SOCIAL_PROGRAMMES_NATURE
+            | typeof SOCIAL_PROGRAMME_APPLICATIONS_NATURE
           >;
           canonicalSeedSha256: string;
         }>
@@ -184,7 +192,15 @@ type SuccessPage = Omit<OriginalSuccessPage, 'source'> & {
 const OFFICE_RUNTIME_DATASETS = Object.freeze({
   ...POSTWAR_PROJECTION_DATASETS,
   ...POSTWAR_FINANCIAL_CURRENT_DATASETS,
-  SOCIAL: [SOCIAL_PROGRAMMES_DATASET, ...POSTWAR_PROJECTION_DATASETS.SOCIAL],
+  FINANCE: [
+    POSTWAR_DAY_ONE_FX_QUOTES_DATASET,
+    ...POSTWAR_FINANCIAL_CURRENT_DATASETS.FINANCE,
+  ],
+  SOCIAL: [
+    SOCIAL_PROGRAMMES_DATASET,
+    SOCIAL_PROGRAMME_APPLICATIONS_DATASET,
+    ...POSTWAR_PROJECTION_DATASETS.SOCIAL,
+  ],
   INDUSTRY: [
     INDUSTRY_UTILITY_PLANNING_DATASET,
     INDUSTRY_COMMITTED_RUNS_DATASET,
@@ -579,6 +595,12 @@ export function createPostwarOfficeRuntimeReadService(
         authorizationPublisherRole: c.authorizationPublisherRole,
       })
     : null;
+  const fxQuotesStore = c
+    ? createPostwarDayOneFxQuotesReader({
+        runtimeReaderRole: c.readerRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+      })
+    : null;
   const industryParametersStore = c
     ? createPostwarIndustryRunParametersReader({
         runtimeReaderRole: c.readerRole,
@@ -704,8 +726,11 @@ export function createPostwarOfficeRuntimeReadService(
         const claims = await claimsFor(input.authorization, signal);
         if (
           request.office === 'SOCIAL' &&
-          request.dataset === SOCIAL_PROGRAMMES_DATASET
+          (request.dataset === SOCIAL_PROGRAMMES_DATASET ||
+            request.dataset === SOCIAL_PROGRAMME_APPLICATIONS_DATASET)
         ) {
+          const applications =
+            request.dataset === SOCIAL_PROGRAMME_APPLICATIONS_DATASET;
           const programmeReader = socialServiceCreationPlanningReader;
           const selectSocial = (identity: ValidatedJwtClaims) =>
             snapshots.withReadOnlyExecutor(
@@ -733,6 +758,7 @@ export function createPostwarOfficeRuntimeReadService(
               if (!programmeReader?.readProgrammes)
                 return fail(503, 'SOCIAL_PROGRAMMES_NOT_INSTALLED');
               const read = await programmeReader.readProgrammes({
+                applications,
                 countryId: before.scope.countryId,
                 expectedHead: {
                   worldVersion: before.source.worldVersion,
@@ -747,7 +773,9 @@ export function createPostwarOfficeRuntimeReadService(
               if (read.status !== 'AVAILABLE')
                 return fail(read.status === 'STALE' ? 409 : 503, read.code);
               const rows = read.data.rows.map((r) =>
-                parseSocialProgrammeRowDto({
+                (applications
+                  ? parseSocialProgrammeApplicationRowDto
+                  : parseSocialProgrammeRowDto)({
                   countryId: before.scope.countryId,
                   ...r,
                 }),
@@ -762,9 +790,14 @@ export function createPostwarOfficeRuntimeReadService(
                   nextOffset !== request.offset + rows.length) ||
                 (nextOffset === null) !==
                   (request.offset + rows.length === total) ||
-                new Set(rows.map((r) => r.programmeId)).size !== rows.length ||
+                new Set(
+                  rows.map((r) =>
+                    'applicationId' in r ? r.applicationId : r.programmeId,
+                  ),
+                ).size !== rows.length ||
                 !creationContext ||
-                creationContext.locationIds.length > 1000
+                creationContext.locationIds.length > 1000 ||
+                creationContext.applicantGroups.length > 1000
               )
                 return fail(503, 'SOCIAL_PROGRAMME_PAGE_INVALID');
               // Each checkout ends before the next: works with a one-connection
@@ -806,7 +839,13 @@ export function createPostwarOfficeRuntimeReadService(
                           worldId: fresh.scope.worldId,
                           countryId: fresh.scope.countryId,
                           source: fresh.source,
-                          dataset: SOCIAL_PROGRAMMES_DATASET,
+                          dataset: request.dataset,
+                          ...(applications
+                            ? {
+                                reviewSchema:
+                                  'social-programme-application-review-v1',
+                              }
+                            : {}),
                         }),
                       )
                       .digest('hex');
@@ -816,7 +855,11 @@ export function createPostwarOfficeRuntimeReadService(
                   )
                     return fail(409, 'STALE_SOURCE_SCOPE');
                   const encoded = canonicalSerialize(rows);
-                  if (Buffer.byteLength(encoded) > 48000)
+                  if (
+                    Buffer.byteLength(encoded) +
+                      Buffer.byteLength(canonicalSerialize(creationContext)) >
+                    48000
+                  )
                     return fail(503, 'RESPONSE_LIMIT_EXCEEDED');
                   const hashed = await executor.query<{ hash: string }>(
                     "select encode(sha256(convert_to($1::jsonb::text,'UTF8')),'hex') hash",
@@ -833,16 +876,21 @@ export function createPostwarOfficeRuntimeReadService(
                       scope: fresh.scope,
                       source: {
                         ...fresh.source,
-                        dataNature: SOCIAL_PROGRAMMES_NATURE,
+                        dataNature: applications
+                          ? SOCIAL_PROGRAMME_APPLICATIONS_NATURE
+                          : SOCIAL_PROGRAMMES_NATURE,
                         sourceVersion,
-                        sourceRevision: 'SOCIAL_PROGRAMME_TERMS_READ_V1',
+                        sourceRevision: applications
+                          ? 'SOCIAL_PROGRAMME_APPLICATIONS_READ_V1'
+                          : 'SOCIAL_PROGRAMME_TERMS_READ_V1',
                         pageHash: hashed.rows[0]!.hash,
                         returnedRowsHash: hashed.rows[0]!.hash,
                         hashAlgorithm: 'POSTGRES_JSONB_TEXT_UTF8_SHA256',
                         sourcePointer: {
                           rowOrigin: 'fixed-social-programme-runtime',
-                          rowBinding:
-                            'programmeId+commandFingerprint+sourceRef+sourceFingerprint',
+                          rowBinding: applications
+                            ? 'applicationId+programmeCommandFingerprint+commandFingerprint+sourceRef+sourceFingerprint'
+                            : 'programmeId+commandFingerprint+sourceRef+sourceFingerprint',
                         },
                         currentSocialProgrammeContext: creationContext,
                       },
@@ -1115,24 +1163,17 @@ export function createPostwarOfficeRuntimeReadService(
                   };
                   const head = selected[0]!.source;
                   const page =
-                    request.office === 'TRADE' &&
-                    POSTWAR_TRADE_CURRENT_DATASETS.some(
-                      (x) => x === request.dataset,
-                    )
-                      ? await tradeStore!.readPageFrom(read, {
-                          worldId: pageRequest.worldId,
-                          dataset:
-                            request.dataset as PostwarTradeCurrentDataset,
-                          offset: pageRequest.offset,
-                          limit: pageRequest.limit,
-                          ...(pageRequest.expectedVersion
-                            ? { expectedVersion: pageRequest.expectedVersion }
-                            : {}),
-                        })
-                      : request.office === 'INDUSTRY' &&
-                          request.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
-                        ? await industryParametersStore!.readPageFrom(read, {
+                    request.office === 'FINANCE' &&
+                    request.dataset === POSTWAR_DAY_ONE_FX_QUOTES_DATASET
+                      ? await fxQuotesStore!.readPageFrom(read, pageRequest)
+                      : request.office === 'TRADE' &&
+                          POSTWAR_TRADE_CURRENT_DATASETS.some(
+                            (x) => x === request.dataset,
+                          )
+                        ? await tradeStore!.readPageFrom(read, {
                             worldId: pageRequest.worldId,
+                            dataset:
+                              request.dataset as PostwarTradeCurrentDataset,
                             offset: pageRequest.offset,
                             limit: pageRequest.limit,
                             ...(pageRequest.expectedVersion
@@ -1140,9 +1181,8 @@ export function createPostwarOfficeRuntimeReadService(
                               : {}),
                           })
                         : request.office === 'INDUSTRY' &&
-                            request.dataset ===
-                              POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET
-                          ? await industryLabourStore!.readPageFrom(read, {
+                            request.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
+                          ? await industryParametersStore!.readPageFrom(read, {
                               worldId: pageRequest.worldId,
                               offset: pageRequest.offset,
                               limit: pageRequest.limit,
@@ -1153,10 +1193,10 @@ export function createPostwarOfficeRuntimeReadService(
                                   }
                                 : {}),
                             })
-                          : request.office === 'CAPTAIN' &&
+                          : request.office === 'INDUSTRY' &&
                               request.dataset ===
-                                POSTWAR_CAPTAIN_CURRENT_DATASET
-                            ? await captainStore!.readPageFrom(read, {
+                                POSTWAR_INDUSTRY_LABOUR_CURRENT_DATASET
+                            ? await industryLabourStore!.readPageFrom(read, {
                                 worldId: pageRequest.worldId,
                                 offset: pageRequest.offset,
                                 limit: pageRequest.limit,
@@ -1167,43 +1207,57 @@ export function createPostwarOfficeRuntimeReadService(
                                     }
                                   : {}),
                               })
-                            : (request.office === 'FINANCE' ||
-                                  request.office === 'CENTRAL_BANK') &&
-                                (head.worldVersion !== '0' ||
-                                  [
-                                    'ledger-balances',
-                                    'treasury-capacity',
-                                  ].includes(request.dataset))
-                              ? await financialStore!.readPageFrom(read, {
-                                  ...pageRequest,
-                                  officeId: request.office,
+                            : request.office === 'CAPTAIN' &&
+                                request.dataset ===
+                                  POSTWAR_CAPTAIN_CURRENT_DATASET
+                              ? await captainStore!.readPageFrom(read, {
+                                  worldId: pageRequest.worldId,
+                                  offset: pageRequest.offset,
+                                  limit: pageRequest.limit,
+                                  ...(pageRequest.expectedVersion
+                                    ? {
+                                        expectedVersion:
+                                          pageRequest.expectedVersion,
+                                      }
+                                    : {}),
                                 })
-                              : request.office === 'SOCIAL' &&
-                                  head.worldVersion !== '0' &&
-                                  ['positions', 'service-pools'].includes(
-                                    request.dataset,
-                                  )
-                                ? await socialStore!.readPageFrom(read, {
+                              : (request.office === 'FINANCE' ||
+                                    request.office === 'CENTRAL_BANK') &&
+                                  (head.worldVersion !== '0' ||
+                                    [
+                                      'ledger-balances',
+                                      'treasury-capacity',
+                                    ].includes(request.dataset))
+                                ? await financialStore!.readPageFrom(read, {
                                     ...pageRequest,
-                                    officeId: 'SOCIAL',
+                                    officeId: request.office,
                                   })
-                                : (request.office === 'INDUSTRY' ||
-                                      request.office === 'TRADE' ||
-                                      request.office === 'CAPTAIN') &&
-                                    head.worldVersion !== '0'
-                                  ? await (
-                                      request.dataset ===
-                                      'opening-inventory-entries'
-                                        ? inventoryStore!
-                                        : physicalStore!
-                                    ).readPageFrom(read, {
+                                : request.office === 'SOCIAL' &&
+                                    head.worldVersion !== '0' &&
+                                    ['positions', 'service-pools'].includes(
+                                      request.dataset,
+                                    )
+                                  ? await socialStore!.readPageFrom(read, {
                                       ...pageRequest,
-                                      officeId: request.office,
+                                      officeId: 'SOCIAL',
                                     })
-                                  : await store.readPageFrom(read, {
-                                      ...pageRequest,
-                                      officeId: request.office,
-                                    });
+                                  : (request.office === 'INDUSTRY' ||
+                                        request.office === 'TRADE' ||
+                                        request.office === 'CAPTAIN') &&
+                                      head.worldVersion !== '0'
+                                    ? await (
+                                        request.dataset ===
+                                        'opening-inventory-entries'
+                                          ? inventoryStore!
+                                          : physicalStore!
+                                      ).readPageFrom(read, {
+                                        ...pageRequest,
+                                        officeId: request.office,
+                                      })
+                                    : await store.readPageFrom(read, {
+                                        ...pageRequest,
+                                        officeId: request.office,
+                                      });
                   if (!('scope' in page))
                     return fail(
                       page.status === 'DENIED'

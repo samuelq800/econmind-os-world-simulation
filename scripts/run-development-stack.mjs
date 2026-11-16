@@ -467,8 +467,11 @@ async function run() {
     phase = 'WAITING_FOR_DEPENDENCIES';
     emit('BOOTSTRAP_WAITING');
 
-    parentWatch = watchProcessOwnership(parentStillOwnsBootstrap, () => {
-      requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' });
+    parentWatch = watchProcessOwnership({
+      isDirectParent: () =>
+        originalParentIsPnpm && process.ppid === originalParentPid,
+      observeOwnership: parentStillOwnsBootstrap,
+      onLost: () => requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' }),
     });
 
     const readiness = (async () => {
@@ -545,7 +548,7 @@ async function run() {
     phase = 'SHUTTING_DOWN';
     stopping = true;
     emit('BOOTSTRAP_SHUTDOWN_START');
-    parentWatch?.();
+    if (parentWatch !== undefined) parentWatch();
     const cleanup = await cleanupChildren(
       children,
       configuration.cleanupTimeoutMs,
@@ -565,7 +568,7 @@ async function run() {
       ready_emitted: readyEmitted,
     });
   } catch (error) {
-    parentWatch?.();
+    if (parentWatch !== undefined) parentWatch();
     outcome = 'FAILED';
     failure = {
       failed_service: 'bootstrap-stack',

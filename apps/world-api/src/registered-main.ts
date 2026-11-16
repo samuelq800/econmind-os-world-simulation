@@ -1,8 +1,10 @@
-/** Dedicated registered host entry. Default is HTTP only; --consume N explicitly
- * runs a finite FIFO batch. Neither mode initializes a World or moves Clock. */
+/** Dedicated registered host entry. Default is HTTP only; consumption and fixed
+ * water-grant publication are separate explicit actions. No mode initializes
+ * a World or moves Clock. */
 import { fileURLToPath } from 'node:url';
 import { startConfiguredRegisteredNodeService } from './runtime/registered-node-service.js';
 import { runRegisteredConsumer } from './runtime/registered-consumer-runner.js';
+import { parseRegisteredNodeArguments } from './runtime/registered-node-arguments.js';
 
 let service:
   Awaited<ReturnType<typeof startConfiguredRegisteredNodeService>> | undefined;
@@ -10,6 +12,8 @@ let stopping = false;
 let shutdown: Promise<void> | undefined;
 const consumerStop = new AbortController();
 let consuming = false;
+let publishingWaterGrant = false;
+let recoveringPublication = false;
 const stop = () => {
   stopping = true;
   consumerStop.abort();
@@ -26,19 +30,13 @@ const stop = () => {
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
 try {
-  if (
-    ![3, 5].includes(process.argv.length) ||
-    !process.argv[2]?.startsWith('/') ||
-    (process.argv.length === 5 &&
-      (process.argv[3] !== '--consume' ||
-        !/^[1-9][0-9]{0,3}$/u.test(process.argv[4] ?? '') ||
-        Number(process.argv[4]) > 1000))
-  )
-    throw Error('ABSOLUTE_NODE_CONFIGURATION_PATH_REQUIRED');
-  const consumeRequested = process.argv[3] === '--consume';
+  const { configurationPath, action } = parseRegisteredNodeArguments(
+    process.argv.slice(2),
+  );
+  const consumeRequested = action.kind === 'CONSUME';
   service = await startConfiguredRegisteredNodeService({
     repositoryRoot: fileURLToPath(new URL('../../../', import.meta.url)),
-    configurationPath: process.argv[2],
+    configurationPath,
     environment: process.env,
   });
   if (stopping) {
@@ -54,12 +52,46 @@ try {
         clockStarted: false,
       }),
     );
-    if (consumeRequested) {
+    if (action.kind === 'RECOVER_PUBLICATION') {
+      recoveringPublication = true;
+      // Rebuild only derived views of an existing committed FINAL. The fixed
+      // service verifies its original receipt and rechecks the current scope.
+      const result = await service.retryDerivedPublication(action.commandId);
+      console.log(
+        JSON.stringify({
+          event: 'REGISTERED_DERIVED_PUBLICATION_RECOVERY',
+          result,
+          consumerStarted: false,
+          clockStarted: false,
+        }),
+      );
+      if (result.status !== 'PUBLISHED') process.exitCode = 1;
+      stop();
+      await shutdown;
+    } else if (action.kind === 'PUBLISH_WATER_GRANT') {
+      publishingWaterGrant = true;
+      // One explicit call only. The fixed publisher recovers an existing
+      // publication before considering issuance. Unknown outcomes stop here.
+      const result = await service.publishIndustryWaterGrant(action.scope);
+      console.log(
+        JSON.stringify({
+          event: 'REGISTERED_WATER_GRANT_PUBLICATION',
+          status: result.status,
+          commandId: result.command.commandId,
+          commandFingerprint: result.command.fingerprint,
+          countryId: result.command.countryId,
+          consumerStarted: false,
+          clockStarted: false,
+        }),
+      );
+      stop();
+      await shutdown;
+    } else if (action.kind === 'CONSUME') {
       consuming = true;
       await runRegisteredConsumer({
         consumer: service.consumer,
         signal: consumerStop.signal,
-        maxSteps: Number(process.argv[4]),
+        maxSteps: action.maxSteps,
         report: (observation) => console.log(JSON.stringify(observation)),
       });
       console.log(
@@ -73,14 +105,22 @@ try {
   const message = error instanceof Error ? error.message : '';
   console.error(
     JSON.stringify({
-      event: consuming
-        ? 'REGISTERED_NODE_CONSUMER_STOPPED'
-        : 'REGISTERED_NODE_STARTUP_FAILED',
+      event: recoveringPublication
+        ? 'REGISTERED_DERIVED_PUBLICATION_RECOVERY_STOPPED'
+        : publishingWaterGrant
+          ? 'REGISTERED_WATER_GRANT_PUBLICATION_STOPPED'
+          : consuming
+            ? 'REGISTERED_NODE_CONSUMER_STOPPED'
+            : 'REGISTERED_NODE_STARTUP_FAILED',
       code: /^[A-Z][A-Z0-9_:]{0,180}$/u.test(message)
         ? message
-        : consuming
-          ? 'REGISTERED_CONSUMER_REQUIRES_RECOVERY'
-          : 'STARTUP_DEPENDENCY_FAILED',
+        : recoveringPublication
+          ? 'DERIVED_PUBLICATION_REQUIRES_RETRY'
+          : publishingWaterGrant
+            ? 'WATER_GRANT_PUBLICATION_REQUIRES_RECOVERY'
+            : consuming
+              ? 'REGISTERED_CONSUMER_REQUIRES_RECOVERY'
+              : 'STARTUP_DEPENDENCY_FAILED',
     }),
   );
   process.exitCode = 1;

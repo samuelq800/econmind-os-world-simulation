@@ -2,6 +2,9 @@ import {
   SOCIAL_PROGRAMMES_DATASET,
   SOCIAL_PROGRAMMES_NATURE,
   SOCIAL_PROGRAMME_COMMAND,
+  SOCIAL_PROGRAMME_APPLY_COMMAND,
+  parseSocialProgrammeApplicationIntentDto,
+  type SocialProgrammeApplicantDto,
   parseSocialProgrammeTermsDto,
   parseSocialProgrammeRowDto,
 } from '@econmind/core/social-labour-programme-public-contract';
@@ -31,7 +34,10 @@ function context(page: RuntimePage) {
     page.authority.identity.officeId !== 'SOCIAL' ||
     page.source.dataNature !== SOCIAL_PROGRAMMES_NATURE ||
     !c ||
-    Object.keys(c).sort().join('|') !== 'localCurrency|locationIds' ||
+    ![
+      'localCurrency|locationIds',
+      'applicantGroups|localCurrency|locationIds',
+    ].includes(Object.keys(c).sort().join('|')) ||
     !canonicalId(c.localCurrency) ||
     !Array.isArray(c.locationIds) ||
     c.locationIds.length > 1000 ||
@@ -41,7 +47,13 @@ function context(page: RuntimePage) {
     page.source.eventSequence !== page.authority.readback.eventSequence
   )
     throw Error('CURRENT_SOCIAL_PROGRAMME_CONTEXT_REQUIRED');
-  return c as { localCurrency: string; locationIds: string[] };
+  return c as {
+    localCurrency: string;
+    locationIds: string[];
+    applicantGroups?: readonly (SocialProgrammeApplicantDto & {
+      personCount: string;
+    })[];
+  };
 }
 export function buildSocialProgrammeRequest(input: {
   page: RuntimePage;
@@ -87,6 +99,78 @@ export function buildSocialProgrammeRequest(input: {
     },
   };
 }
+export interface SocialProgrammeApplicationDraft {
+  readonly programmeId: string;
+  readonly applicant: SocialProgrammeApplicantDto;
+}
+function applicantGroups(page: RuntimePage) {
+  const groups = context(page).applicantGroups;
+  if (
+    !Array.isArray(groups) ||
+    groups.length > 1000 ||
+    groups.some(
+      (g) =>
+        !g ||
+        Object.keys(g).sort().join('|') !==
+          'locationId|personCount|skill|status' ||
+        !/^[1-9][0-9]{0,77}$/u.test(g.personCount),
+    )
+  )
+    throw Error('CURRENT_SOCIAL_APPLICANT_GROUPS_REQUIRED');
+  for (const g of groups)
+    parseSocialProgrammeApplicationIntentDto({
+      schemaVersion: 'social-labour-programme-apply-v1',
+      programmeId: 'CHECK_ONLY',
+      programmeCommandFingerprint: 'sha256:' + '0'.repeat(64),
+      applicationId: 'CHECK_ONLY',
+      applicant: { locationId: g.locationId, skill: g.skill, status: g.status },
+    });
+  return groups;
+}
+export function buildSocialProgrammeApplicationRequest(input: {
+  page: RuntimePage;
+  draft: SocialProgrammeApplicationDraft;
+  applicationId: string;
+  commandId: string;
+  idempotencyKey: string;
+  requestId: string;
+}): AuthenticatedOfficeCommandRequestDto {
+  const programme = input.page.rows
+    .map(parseSocialProgrammeRowDto)
+    .find((r) => r.programmeId === input.draft.programmeId);
+  const a = input.draft.applicant;
+  if (
+    !programme ||
+    !applicantGroups(input.page).some(
+      (g) =>
+        g.locationId === a.locationId &&
+        g.skill === a.skill &&
+        g.status === a.status,
+    )
+  )
+    throw Error('CURRENT_SOCIAL_PROGRAMME_AND_GROUP_REQUIRED');
+  const payload = parseSocialProgrammeApplicationIntentDto({
+    schemaVersion: 'social-labour-programme-apply-v1',
+    programmeId: programme.programmeId,
+    programmeCommandFingerprint: programme.commandFingerprint,
+    applicationId: input.applicationId,
+    applicant: { locationId: a.locationId, skill: a.skill, status: a.status },
+  });
+  return {
+    schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
+    requestId: input.requestId,
+    request: {
+      worldId: input.page.authority.identity.worldId,
+      countryId: input.page.authority.identity.countryId,
+      officeId: 'SOCIAL',
+      commandType: SOCIAL_PROGRAMME_APPLY_COMMAND,
+      commandId: input.commandId,
+      idempotencyKey: input.idempotencyKey,
+      expectedWorldVersion: input.page.authority.readback.worldVersion,
+      payload,
+    },
+  };
+}
 export function renderSocialProgrammeForm(
   document: Document,
   input: {
@@ -94,6 +178,7 @@ export function renderSocialProgrammeForm(
     enabled: boolean;
     code: string | null;
     stage: (draft: SocialProgrammeDraft) => boolean;
+    stageApplication?: (draft: SocialProgrammeApplicationDraft) => boolean;
   },
 ) {
   const section = document.createElement('section');
@@ -217,6 +302,57 @@ export function renderSocialProgrammeForm(
     section.append(
       text('p', `${r.programmeId} · 待审批 · ${JSON.stringify(r.terms)}`),
     );
+    const form = document.createElement('form');
+    form.dataset.socialProgrammeApplication = r.programmeId;
+    form.append(
+      text(
+        'p',
+        '登记现有完整人口群体的申请。人数由当前记录确定；未核验资格、未批准、未占用项目容量或付款。',
+      ),
+    );
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', '实际申请群体');
+    let groups: ReturnType<typeof applicantGroups> = [];
+    try {
+      groups = applicantGroups(input.page);
+    } catch {
+      /* no actual current group source */
+    }
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '选择实际完整群体';
+    select.append(placeholder);
+    groups.forEach((g, i) => {
+      const o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = `${g.locationId} · ${g.skill} · ${g.status} · ${g.personCount} 人`;
+      select.append(o);
+    });
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.textContent = '审阅群体申请';
+    select.disabled = submit.disabled =
+      !input.enabled || !input.stageApplication || !groups.length;
+    const message = text('p', '');
+    message.setAttribute('role', 'status');
+    form.append(select, submit, message);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const g = select.value === '' ? null : groups[Number(select.value)];
+      message.textContent =
+        g &&
+        input.stageApplication?.({
+          programmeId: r.programmeId,
+          applicant: {
+            locationId: g.locationId,
+            skill: g.skill,
+            status: g.status,
+          },
+        })
+          ? '申请已进入审阅；尚未提交、核验资格或获得批准。'
+          : '请选择当前实际群体并重新读取。';
+    });
+    section.append(form);
   }
   return section;
 }

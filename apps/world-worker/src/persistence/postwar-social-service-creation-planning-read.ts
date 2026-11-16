@@ -29,6 +29,7 @@ export interface PostwarSocialServiceCreationPlanningReader {
     input: Readonly<{
       countryId: string;
       offset: number;
+      applications?: boolean;
       limit: number;
       expectedHead: Readonly<{ worldVersion: string; eventSequence: string }>;
     }>,

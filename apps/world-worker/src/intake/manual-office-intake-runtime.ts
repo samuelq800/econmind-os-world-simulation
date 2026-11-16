@@ -31,6 +31,7 @@ import {
   SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND,
   SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND,
+  SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   type CanonicalCommand,
   type Sha256Hex,
@@ -552,7 +553,8 @@ export function manualOfficeIntakeRuntimeSupportsFamily(
     );
   if (
     commandType === SOCIAL_EMPLOYMENT_SERVICE_CREATE_COMMAND ||
-    commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND
+    commandType === SOCIAL_LABOUR_PROGRAMME_CREATE_COMMAND ||
+    commandType === SOCIAL_LABOUR_PROGRAMME_APPLY_COMMAND
   )
     return (
       !!construction &&

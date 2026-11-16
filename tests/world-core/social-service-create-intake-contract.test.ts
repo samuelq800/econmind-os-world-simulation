@@ -84,3 +84,36 @@ it('registers explicit pending programme terms under Social without accepting ap
     build({ ...programme, payload: { ...programme.payload, approved: true } }),
   ).toThrow();
 });
+
+it('accepts only Social whole-group application references, never client counts or eligibility flags', () => {
+  const application = {
+    ...request,
+    commandType: 'CORE_SOCIAL_LABOUR_PROGRAMME_APPLY_V1',
+    payload: {
+      schemaVersion: 'social-labour-programme-apply-v1',
+      programmeId: 'PROGRAMME_PENDING_TEST_ONLY',
+      programmeCommandFingerprint: 'sha256:' + '1'.repeat(64),
+      applicationId: 'APPLICATION_TEST_ONLY',
+      applicant: {
+        locationId: 'REGION_01_E1',
+        skill: 'LOW',
+        status: 'NOT_IN_LABOUR_FORCE',
+      },
+    },
+  };
+  expect(JSON.parse(build(application).canonicalPayload)).toEqual(
+    application.payload,
+  );
+  expect(() => build({ ...application, officeId: 'FINANCE' })).toThrow();
+  for (const injected of [
+    { personCount: '999' },
+    { eligible: true },
+    { sourceRef: 'CLIENT_ASSERTED' },
+  ])
+    expect(() =>
+      build({
+        ...application,
+        payload: { ...application.payload, ...injected },
+      }),
+    ).toThrow();
+});

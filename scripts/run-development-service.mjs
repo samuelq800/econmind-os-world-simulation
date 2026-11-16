@@ -164,7 +164,7 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
 
   function beginShutdown(reason, signal) {
     stoppingPromise ??= (async () => {
-      parentWatch?.();
+      if (parentWatch !== undefined) parentWatch();
       console.log(
         JSON.stringify({
           event: 'PUBLIC_LAUNCHER_SHUTDOWN',
@@ -196,20 +196,25 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
     });
   }
 
-  parentWatch = watchProcessOwnership(parentStillOwnsLauncher, () => {
-    void beginShutdown('parent-exit', 'SIGTERM').catch((error) => {
-      console.error(
-        JSON.stringify({
-          event: 'PUBLIC_LAUNCHER_SHUTDOWN_FAILED',
-          service: `world-${serviceName}`,
-          error:
-            error instanceof Error
-              ? error.message
-              : 'Unknown launcher shutdown failure',
-        }),
-      );
-      process.exitCode = 1;
-    });
+  parentWatch = watchProcessOwnership({
+    isDirectParent: () =>
+      originalParentIsPnpm && process.ppid === originalParentPid,
+    observeOwnership: parentStillOwnsLauncher,
+    onLost: () => {
+      void beginShutdown('parent-exit', 'SIGTERM').catch((error) => {
+        console.error(
+          JSON.stringify({
+            event: 'PUBLIC_LAUNCHER_SHUTDOWN_FAILED',
+            service: `world-${serviceName}`,
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Unknown launcher shutdown failure',
+          }),
+        );
+        process.exitCode = 1;
+      });
+    },
   });
 
   try {
@@ -244,7 +249,7 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
       );
       if (activeChild === build) activeChild = undefined;
       if (stoppingPromise === undefined && result.code !== 0) {
-        parentWatch?.();
+        if (parentWatch !== undefined) parentWatch();
         process.exitCode = resultExitCode(result);
       }
     }
@@ -258,14 +263,14 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
       const result = await runtime.exit;
       if (activeChild === runtime) activeChild = undefined;
       if (stoppingPromise === undefined) {
-        parentWatch?.();
+        if (parentWatch !== undefined) parentWatch();
         process.exitCode = resultExitCode(result);
       }
     }
 
     if (stoppingPromise !== undefined) await stoppingPromise;
   } catch (error) {
-    parentWatch?.();
+    if (parentWatch !== undefined) parentWatch();
     console.error(
       JSON.stringify({
         event: 'PUBLIC_LAUNCHER_FAILED',

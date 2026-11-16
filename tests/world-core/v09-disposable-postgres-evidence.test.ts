@@ -7,6 +7,8 @@ import {
   assertV09DisposablePostgresEvidenceExecution,
   expectedV09StagingCleanupInventory,
   loadV09StagingMigrationChain,
+  loadV09DisposableMigrationChain,
+  selectV09DisposableHistoricalPrefix,
   runV09DedicatedStagingEvidence,
   runV09DisposablePostgresEvidence,
 } from '../../scripts/v09-staging-evidence-runner.mjs';
@@ -73,6 +75,62 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
     );
     expect(inventory).not.toContain(
       'POLICY|country_candidate_artifact_selected_full_source_server_read|country_candidate_artifact|v09_staging_migration_owner',
+    );
+  });
+
+  it('loads only the exact historical 0021 prefix for disposable evidence after full current provenance validation', async () => {
+    const chain = await loadV09DisposableMigrationChain();
+    expect(chain).toHaveLength(21);
+    expect(chain.at(-1)?.migration_id).toBe(
+      V09_STAGING_CANDIDATE_0021.migration_id,
+    );
+    expect(
+      chain.some(
+        (m) =>
+          m.migration_id.startsWith('0022_') ||
+          m.migration_id.startsWith('0023_'),
+      ),
+    ).toBe(false);
+  });
+
+  it('refuses unknown, altered, reordered or extra suffixes before selecting the disposable prefix', async () => {
+    const manifest = JSON.parse(
+      await readFile(
+        new URL('../../database/migrations/manifest.json', import.meta.url),
+        'utf8',
+      ),
+    );
+    const original = manifest.migrations;
+    expect(selectV09DisposableHistoricalPrefix(original)).toEqual(
+      original.slice(0, 21),
+    );
+    for (const patch of [
+      { migration_id: '0023_unreviewed' },
+      { sha256: '0'.repeat(64) },
+      { artifact_source_commit: '0'.repeat(40) },
+      { path: 'database/migrations/artifacts/unreviewed.sql' },
+      { release_order: 24 },
+      { affected_schemas: ['public'] },
+      { rls_or_grants_changed: true },
+      { production_approval: 'unreviewed' },
+    ]) {
+      const altered = structuredClone(original);
+      Object.assign(altered[22], patch);
+      expect(() => selectV09DisposableHistoricalPrefix(altered)).toThrow(
+        'WORLD_ONLY_REHEARSAL_SUFFIX_INVALID',
+      );
+    }
+    const extra = [
+      ...original,
+      { ...original[22], migration_id: '0024_unreviewed' },
+    ];
+    expect(() => selectV09DisposableHistoricalPrefix(extra)).toThrow(
+      'STORAGE_VETO_HISTORICAL_PREFIX_INVALID',
+    );
+    const reordered = structuredClone(original);
+    [reordered[21], reordered[22]] = [reordered[22], reordered[21]];
+    expect(() => selectV09DisposableHistoricalPrefix(reordered)).toThrow(
+      'STORAGE_VETO_HISTORICAL_PREFIX_INVALID',
     );
   });
 

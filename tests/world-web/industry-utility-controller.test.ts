@@ -1,8 +1,10 @@
 /** Actual shipped clients/controller over explicit synthetic responses.
  * No backend/source/queue/native service execution is claimed. */
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parseIndustryUtilityPlanningRow } from '../../packages/core/src/read-models/postwar-industry-utility-planning-contract.js';
 import { createOfficeCommandController } from '../../apps/world-web/src/office-command/controller.js';
+import { installOfficeCommand } from '../../apps/world-web/src/office-command/view.js';
+import { HostDocument } from './trusted-host-dom.js';
 import {
   industryUtilityPlanningWireFixture,
   planningRow,
@@ -20,7 +22,202 @@ const draft = (ref: string) => ({
   startsAtSimTime: '20',
   endsAtSimTime: '30',
 });
+afterEach(() => vi.unstubAllGlobals());
+function pagedFixture(unknownSubmission = false) {
+  const f = industryUtilityPlanningWireFixture();
+  f.setRows(
+    Array.from({ length: 26 }, (_, index) => ({
+      ...planningRow('POWER', 'BOOK', f.binding.read.identity.countryId),
+      planningRef: 'PLANNING_PAGE_TEST_ONLY_' + index,
+    })),
+  );
+  const fetcher: typeof fetch = async (url, init) => {
+    const response = await f.fetcher(url, init);
+    const body = JSON.parse(String(init?.body)) as {
+      dataset?: string;
+      page?: { offset: number };
+    };
+    if (
+      unknownSubmission &&
+      new URL(String(url)).pathname === '/v1/office-command'
+    )
+      throw Error('TEST_ONLY_ACK_LOST_AFTER_SUBMISSION');
+    if (body.dataset !== 'industry-utility-planning' || !response.ok)
+      return response;
+    const wire = (await response.json()) as { rows: unknown[]; page: object };
+    const offset = body.page?.offset ?? 0,
+      total = wire.rows.length;
+    wire.rows = wire.rows.slice(offset, offset + 25);
+    wire.page = {
+      offset,
+      limit: 25,
+      total,
+      returned: wire.rows.length,
+      nextOffset:
+        offset + wire.rows.length < total ? offset + wire.rows.length : null,
+    };
+    return Response.json(wire);
+  };
+  return { ...f, fetcher };
+}
 describe('Industry source-bound service selection and original recovery', () => {
+  it.each(['QUEUE_ACK', 'UNKNOWN', 'FINAL_VERIFIED'] as const)(
+    'reads the next utility page after %s without changing the original request or resubmitting',
+    async (status) => {
+      const f = pagedFixture(status === 'UNKNOWN'),
+        c = controller(f);
+      try {
+        await c.refresh();
+        expect(c.stageIndustryUtility(draft('PLANNING_PAGE_TEST_ONLY_0'))).toBe(
+          true,
+        );
+        expect(c.review()).toBe(true);
+        await c.confirm();
+        if (status === 'FINAL_VERIFIED') await c.recoverOriginal();
+        const before = c.getState();
+        expect(before.status).toBe(status);
+        expect(before.canRead).toBe(true);
+        expect(before.canStage).toBe(false);
+        await c.nextIndustryUtilityPlanningPage();
+        const after = c.getState();
+        expect(after.utilityPlanningPage?.page).toMatchObject({
+          offset: 25,
+          returned: 1,
+          total: 26,
+          nextOffset: null,
+        });
+        expect(after.status).toBe(status);
+        expect(after.intent).toEqual(before.intent);
+        expect(after.acknowledgement).toEqual(before.acknowledgement);
+        expect(after.receipt).toEqual(before.receipt);
+        expect(
+          c.stageIndustryUtility(draft('PLANNING_PAGE_TEST_ONLY_25')),
+        ).toBe(false);
+        expect(c.review()).toBe(false);
+        await c.confirm();
+        const count = f.calls.length;
+        await c.nextIndustryUtilityPlanningPage();
+        expect(f.calls).toHaveLength(count);
+        expect(
+          f.calls.filter((call) => call.path === '/v1/office-command'),
+        ).toHaveLength(1);
+        if (status !== 'FINAL_VERIFIED') {
+          await c.recoverOriginal();
+          expect(c.getState().status).toBe('FINAL_VERIFIED');
+          expect(c.getState().intent).toEqual(before.intent);
+        }
+      } finally {
+        c.disconnect();
+      }
+    },
+  );
+  it.each(['UNAVAILABLE', 'DENIED', 'STALE_HEAD'] as const)(
+    'clears the previous utility page after %s on continuation and never replays the command',
+    async (mode) => {
+      const f = pagedFixture(),
+        c = controller(f);
+      try {
+        await c.refresh();
+        expect(c.stageIndustryUtility(draft('PLANNING_PAGE_TEST_ONLY_0'))).toBe(
+          true,
+        );
+        expect(c.review()).toBe(true);
+        await c.confirm();
+        const original = c.getState().intent;
+        f.setMode(mode);
+        await c.nextIndustryUtilityPlanningPage();
+        expect(c.getState().utilityPlanningPage).toBeNull();
+        expect(c.getState().canStage).toBe(false);
+        if (mode === 'DENIED') {
+          expect(c.getState()).toMatchObject({
+            status: 'DENIED',
+            intent: null,
+            receipt: null,
+            canRead: false,
+          });
+          const count = f.calls.length;
+          await c.nextIndustryUtilityPlanningPage();
+          expect(f.calls).toHaveLength(count);
+        } else {
+          expect(c.getState().intent).toEqual(original);
+          if (mode === 'UNAVAILABLE')
+            expect(c.getState().utilityPlanningCode).toBe(
+              'TEST_ONLY_SOURCE_MISSING',
+            );
+          else expect(c.getState().status).toBe('UNAVAILABLE');
+        }
+        await c.confirm();
+        expect(
+          f.calls.filter((call) => call.path === '/v1/office-command'),
+        ).toHaveLength(1);
+      } finally {
+        c.disconnect();
+      }
+    },
+  );
+  it('keeps the rendered next-page control usable after a restored FINAL while command controls remain locked', async () => {
+    vi.stubGlobal(
+      'MutationObserver',
+      class {
+        observe() {}
+      },
+    );
+    const f = pagedFixture(),
+      doc = new HostDocument('industry');
+    let active: ReturnType<typeof controller> | undefined;
+    const ui = installOfficeCommand(
+      doc as unknown as Document,
+      { addEventListener() {} } as unknown as Window,
+      (binding, view) => {
+        active = createOfficeCommandController(binding, view, {
+          fetcher: f.fetcher,
+          requestId: () => planningRequestId,
+        });
+        return active;
+      },
+    );
+    try {
+      ui.connect(f.binding);
+      const c = active!;
+      await c.refresh();
+      expect(c.stageIndustryUtility(draft('PLANNING_PAGE_TEST_ONLY_0'))).toBe(
+        true,
+      );
+      const original = c.getState().intent;
+      expect(c.review()).toBe(true);
+      await c.confirm();
+      ui.connect(f.binding);
+      const restored = active!;
+      expect(restored.restoreOriginalForRecovery(original)).toBe(true);
+      await restored.recoverOriginal();
+      doc.body
+        .all()
+        .find((el) => el.dataset.officeCommandAction === 'open')!
+        .click();
+      const button = doc.body
+        .all()
+        .find(
+          (el) => el.dataset.officeCommandAction === 'next-utility-planning',
+        );
+      expect(button).toBeDefined();
+      expect(button!.disabled).toBe(false);
+      button!.click();
+      await expect
+        .poll(() => ui.getState().utilityPlanningPage?.page.offset)
+        .toBe(25);
+      expect(ui.getState()).toMatchObject({
+        status: 'FINAL_VERIFIED',
+        canConfirm: false,
+        canStage: false,
+      });
+      expect(ui.getState().intent).toEqual(original);
+      expect(
+        f.calls.filter((call) => call.path === '/v1/office-command'),
+      ).toHaveLength(1);
+    } finally {
+      ui.disconnect();
+    }
+  });
   it('keeps an authorized blocked WATER row visible but cannot stage or submit it', async () => {
     const f = industryUtilityPlanningWireFixture();
     const blocked = parseIndustryUtilityPlanningRow({

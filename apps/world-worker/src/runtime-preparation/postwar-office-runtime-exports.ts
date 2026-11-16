@@ -23,3 +23,5 @@ export {
   type PostwarCaptainCurrentSource,
   type PostwarCaptainCurrentPage,
 } from '../persistence/postwar-captain-current-projection.js';
+
+export { createPostwarDayOneFxQuotesReader } from '../persistence/postwar-day-one-fx-quotes-read.js';

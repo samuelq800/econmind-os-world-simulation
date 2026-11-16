@@ -147,3 +147,56 @@ Only existing admitted, country-scoped sources and actually recorded labour,
 payment and resource movements may produce a delivery. The source adapter takes
 its opening calendar from the immutable opening evidence, never the server's
 wall clock or a new user-supplied date.
+
+### Explicit first-day water-right publication
+
+The registered entry exposes the existing fixed publisher as a separate,
+one-shot operator action. Use the actual committed RUN's country, facility and
+run identifiers; the following syntax contains placeholders, not source data:
+
+```sh
+node apps/world-api/dist/registered-main.js /run/econmind/node.json \
+  --publish-water-grant COUNTRY_NN FACILITY_ID EXISTING_RUN_ID
+```
+
+This requires the already reviewed Industry publisher binding, admitted utility
+original, live writer/Clock registration and a committed RUN. It accepts no
+quota, owner, source hash, actor or simulation-time override. The existing fixed
+publisher derives the exact original regional industrial quota, same OP and
+first-day period, and checks the current source, head and run before queuing.
+It neither registers a missing source nor grants additional water allocation.
+
+`QUEUED` means the original automatic command was durably published; it is not
+proof of a committed water right. `FINAL` means the existing publication already
+has a final receipt; inspect that receipt's outcome rather than assuming it
+committed. The output preserves its original command ID and fingerprint. Actual
+grant execution remains in the sole FIFO consumer and delivery still requires
+actual service work, wages and power. Browser GRANT submission remains forbidden.
+This action closes its service after publication and does not start consumption
+or advance Clock. It cannot be combined with `--consume`.
+
+An uncertain publication result stops without retry. Preserve the exact country,
+facility and run scope and inspect the original publication/receipt; an explicit
+invocation with that same scope uses the existing recovery-first publisher.
+Never change the RUN or manufacture a new command ID to bypass an unknown
+outcome. These entry tests do not establish native GRANT or delivery acceptance.
+
+## Recover current pages after a committed command
+
+If a command has a committed FINAL but derived publication failed, retain that
+original command ID and explicitly rebuild its authorized current pages:
+
+```sh
+node apps/world-api/dist/registered-main.js /absolute/node-config.json \
+  --recover-publication ORIGINAL_COMMITTED_COMMAND_ID
+```
+
+This uses the existing receipt-bound `retryDerivedPublication` service. It
+verifies the immutable command and COMMITTED receipt, then rechecks current
+registered country scope, source, head and the separate restricted publisher.
+It does not enqueue, consume or resend a command, initialize a World, advance
+Clock, or change authoritative financial/inventory records. Publication may be
+partly completed when an error occurs; retry the same original ID after fixing
+the cause. `UNAVAILABLE` exits unsuccessfully and is not a completed readback.
+The action cannot be combined with consumption or water-grant publication and
+drains its service on completion. Ordinary FINAL recovery remains read-only.
