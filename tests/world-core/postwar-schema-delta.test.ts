@@ -14,9 +14,13 @@ import {
   preparePostwarSchemaDelta,
 } from '../../tools/office-connection/postwar-schema-delta.mjs';
 const sha = (v: Buffer) => createHash('sha256').update(v).digest('hex');
-// Explicit source inventory: companion fixed 85-proposal policy, with its
-// isolated Clock deliberately excluded. New proposals require an explicit
+// Explicit source inventory, with both isolated Clock proposals excluded.
+// New proposals require an explicit
 // inventory update; never accept an arbitrary directory count or widen scope.
+const EXCLUDED_CLOCK_PROPOSALS = Object.freeze([
+  'isolated-world-clock.sql',
+  'postwar-test-only-finite-clock-observation.sql',
+]);
 const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'captain-operating-custody.sql',
   'central-bank-omo-custody.sql',
@@ -40,6 +44,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-complete-opening-inventory-read-repair.sql',
   'postwar-day-one-fx-custody.sql',
   'postwar-day-one-fx-history-read.sql',
+  'postwar-day-one-fx-quotes-read.sql',
   'postwar-finance-social-source-publication.sql',
   'postwar-financial-current-derived-read.sql',
   'postwar-industry-operating-receipts.sql',
@@ -78,6 +83,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-social-current-derived-read.sql',
   'postwar-social-current-prefix-read.sql',
   'postwar-social-employment-creation.sql',
+  'postwar-social-application-prefix.sql',
   'postwar-social-mixed-match-publisher.sql',
   'postwar-social-startup-seed-header.sql',
   'runtime-admission-publication.sql',
@@ -370,15 +376,20 @@ describe('unapproved postwar schema delta package boundary', () => {
         ),
       ).toThrow('DESTRUCTIVE_CREDENTIAL_OR_NONTRANSACTIONAL_SQL_DENIED');
   });
-  it('classifies the complete eighty-four non-Clock source proposal paths without running or editing SQL', async () => {
+  it('classifies the exact non-Clock source proposal inventory without running or editing SQL', async () => {
     const directory = new URL('../../database/proposals/', import.meta.url),
       names = await readdir(directory);
     const selected = names
-      .filter((n) => n.endsWith('.sql') && n !== 'isolated-world-clock.sql')
+      .filter(
+        (n) => n.endsWith('.sql') && !EXCLUDED_CLOCK_PROPOSALS.includes(n),
+      )
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(84);
-    expect(selected).not.toContain('isolated-world-clock.sql');
+    expect(selected).toHaveLength(86);
+    for (const name of EXCLUDED_CLOCK_PROPOSALS) {
+      expect(names).toContain(name);
+      expect(selected).not.toContain(name);
+    }
     for (const name of selected) {
       const bytes = await readFile(new URL(name, directory));
       const result = classifyDeltaTransaction(bytes);
