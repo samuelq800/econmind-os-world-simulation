@@ -135,6 +135,43 @@ async function call(
   };
 }
 describe('registered first-day FX quote JWT and actual SQL read', () => {
+  it('installs only the two fixed definer functions with restricted execution and pg_catalog search path', async () => {
+    await f.f.reset();
+    const contracts = await f.db.query<{
+      name: string;
+      owner: string;
+      definer: boolean;
+      config: string[];
+      public_execute: boolean;
+      reader_execute: boolean;
+      projection_execute: boolean;
+    }>(`
+      select p.proname name,pg_get_userbyid(p.proowner) owner,p.prosecdef definer,p.proconfig config,
+      exists(select 1 from aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a where a.grantee=0 and a.privilege_type='EXECUTE') public_execute,
+      has_function_privilege('world_v2_postwar_projection_reader',p.oid,'EXECUTE') reader_execute,
+      has_function_privilege('world_v2_postwar_projection_owner',p.oid,'EXECUTE') projection_execute
+      from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='world_v2' and p.proname in ('postwar_day_one_fx_quote_rows','read_postwar_day_one_fx_quotes_page') order by p.proname`);
+    expect(contracts.rows).toEqual([
+      {
+        name: 'postwar_day_one_fx_quote_rows',
+        owner: 'world_v2_day_one_fx_source_owner',
+        definer: true,
+        config: ['search_path=pg_catalog'],
+        public_execute: false,
+        reader_execute: false,
+        projection_execute: true,
+      },
+      {
+        name: 'read_postwar_day_one_fx_quotes_page',
+        owner: 'world_v2_postwar_projection_owner',
+        definer: true,
+        config: ['search_path=pg_catalog'],
+        public_execute: false,
+        reader_execute: true,
+        projection_execute: true,
+      },
+    ]);
+  });
   it('returns only registered own-country quote refs and the existing runtime destination selector', async () => {
     const r = await call();
     expect(r.status, JSON.stringify(r.body)).toBe(200);
