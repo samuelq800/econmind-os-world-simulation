@@ -143,6 +143,7 @@ export function createPostwarOfficePublicationController(input: {
   const publisher = createPostwarCaptainCurrentPublisher({
     source,
     publicationDatabase: input.publicationDatabase,
+    socialConnection: input.socialConnection,
   });
   const openingCaptainPublisher = createPostwarCaptainOpeningCurrentPublisher({
     worldId: world,
@@ -317,17 +318,22 @@ export function createPostwarOfficePublicationController(input: {
           )
             throw Error('EXACT_REGISTERED_POST_COMMIT_COUNTRY_SCOPE_REQUIRED');
         }
+        const combinedIndustry =
+          currentCountries !== null && industryPublisher !== null;
         const result = await publisher.publishOfficeCurrentCountry(
           command.countryId,
           {
             requireCaptain: command.officeId === 'CAPTAIN',
             ...(input.tradeCurrent ? { includeTrade: true } : {}),
+            ...(combinedIndustry ? { includeIndustryLabour: true } : {}),
           },
         );
-        const industry = await industryPublisher?.publishCountry(
-          command.countryId,
-          result.head,
-        );
+        const industry = combinedIndustry
+          ? { head: result.head, documents: result.industryLabour! }
+          : await industryPublisher?.publishCountry(
+              command.countryId,
+              result.head,
+            );
         if (
           industry &&
           canonicalSerialize(industry.head) !== canonicalSerialize(result.head)
@@ -341,6 +347,7 @@ export function createPostwarOfficePublicationController(input: {
           const other = await publisher.publishOfficeCurrentCountry(country, {
             requireCaptain: false,
             ...(input.tradeCurrent ? { includeTrade: true } : {}),
+            ...(combinedIndustry ? { includeIndustryLabour: true } : {}),
             expectedHead: result.head,
           });
           if (
@@ -349,15 +356,9 @@ export function createPostwarOfficePublicationController(input: {
             throw Error('CURRENT_COUNTRIES_SAME_OBSERVED_HEAD_REQUIRED');
           // Legacy Trade-only counterpart behavior remains unchanged. Formal
           // registered publication keeps Industry labour at that same head too.
-          const otherIndustry = currentCountries
-            ? await industryPublisher?.publishCountry(country, result.head)
+          const otherIndustry = combinedIndustry
+            ? { head: other.head, documents: other.industryLabour! }
             : undefined;
-          if (
-            otherIndustry &&
-            canonicalSerialize(otherIndustry.head) !==
-              canonicalSerialize(result.head)
-          )
-            throw Error('INDUSTRY_EXPECTED_PUBLICATION_HEAD_MISMATCH');
           additionalDocuments +=
             other.captain.length +
             other.financial.length +

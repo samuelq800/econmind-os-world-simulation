@@ -1,10 +1,13 @@
-/** Rejection ordering only. The snapshot consumer/predicate are protocol
- * doubles, not a genuine admitted source. No positive projection or SQL commit
- * is issued; real same-head/current-source acceptance remains Native's gate. */
+/** Publisher orchestration only. Snapshot/mapper/SQL protocol doubles do not
+ * issue a genuine admitted source or economic authority. Native acceptance
+ * still verifies real same-head/source derivation and SQL publication. */
 import { expect, it, vi, beforeEach } from 'vitest';
 const fixture = vi.hoisted(() => ({
   source: { withCaptainSnapshot: vi.fn() },
   consume: vi.fn(),
+  financial: vi.fn(),
+  social: vi.fn(),
+  industry: vi.fn(),
 }));
 vi.mock(
   '../../apps/world-worker/src/persistence/postwar-mixed-current-projection-publication.js',
@@ -15,6 +18,25 @@ vi.mock(
     isPostwarMixedCurrentProjectionSource: (value: unknown) =>
       value === fixture.source,
     consumePostwarMixedCurrentProjectionSnapshotFrom: fixture.consume,
+    derivePostwarMixedSocialCurrentFrom: fixture.social,
+  }),
+);
+vi.mock(
+  '../../apps/world-worker/src/persistence/postwar-mixed-financial-current-publication.js',
+  async (original) => ({
+    ...(await original<
+      typeof import('../../apps/world-worker/src/persistence/postwar-mixed-financial-current-publication.js')
+    >()),
+    derivePostwarMixedFinancialCurrentFrom: fixture.financial,
+  }),
+);
+vi.mock(
+  '../../apps/world-worker/src/persistence/postwar-industry-labour-current-publication.js',
+  async (original) => ({
+    ...(await original<
+      typeof import('../../apps/world-worker/src/persistence/postwar-industry-labour-current-publication.js')
+    >()),
+    derivePostwarIndustryLabourCurrentFrom: fixture.industry,
   }),
 );
 import { createPostwarCaptainCurrentPublisher } from '../../apps/world-worker/src/persistence/postwar-captain-current-publication.js';
@@ -90,3 +112,97 @@ it('does not convert an actual upstream revoked-source failure into an absent Ca
   expect(publisherBorrows).toBe(0);
   expect(fixture.consume).not.toHaveBeenCalled();
 });
+
+it.each(['success', 'wrongIndustryHead', 'industrySqlFailure'])(
+  'shares one held replay and one atomic publication transaction with Industry: %s',
+  async (scenario) => {
+    const tx = {},
+      token = {},
+      social = {},
+      outcomes: string[] = [],
+      queries: string[] = [];
+    fixture.consume.mockReturnValue({
+      head: {
+        worldId: 'WORLD_TEST_ONLY',
+        worldVersion: '3',
+        eventSequence: '4',
+      },
+      captainOriginalStatus: 'NO_REGISTERED_CAPTAIN_ORIGINAL',
+      coverage: { pageProof: {} },
+    });
+    fixture.financial.mockReturnValue({ assertion: 'FINANCIAL_TEST_ONLY' });
+    fixture.social.mockReturnValue('SOCIAL_TEST_ONLY');
+    fixture.industry.mockResolvedValue({ assertion: 'INDUSTRY_TEST_ONLY' });
+    fixture.source.withCaptainSnapshot.mockImplementation(
+      async (_country, consume) => consume(tx, token),
+    );
+    const publication = {
+      async query(sql: string) {
+        queries.push(sql);
+        if (sql.startsWith('set ')) return { rows: [] };
+        const industry = sql.includes('industry_labour_current');
+        if (industry && scenario === 'industrySqlFailure')
+          throw Error('TEST_ONLY_INDUSTRY_SQL_FAILURE');
+        const head =
+          industry && scenario === 'wrongIndustryHead'
+            ? { world_version: '4', event_sequence: '5' }
+            : { world_version: '3', event_sequence: '4' };
+        return {
+          rows: Array.from(
+            {
+              length: industry ? 1 : sql.includes('financial_current') ? 10 : 2,
+            },
+            () => ({ ...head, country_id: 'COUNTRY_10' }),
+          ),
+        };
+      },
+    };
+    const database = {
+      async transaction(
+        consume: (executor: typeof publication) => Promise<unknown>,
+      ) {
+        try {
+          const value = await consume(publication);
+          outcomes.push('COMMIT');
+          return value;
+        } catch (error) {
+          outcomes.push('ROLLBACK');
+          throw error;
+        }
+      },
+    } as unknown as SqlDatabase;
+    const publisher = createPostwarCaptainCurrentPublisher({
+      source: fixture.source as never,
+      publicationDatabase: database,
+      socialConnection: social as never,
+    });
+    const work = publisher.publishOfficeCurrentCountry('COUNTRY_10', {
+      requireCaptain: false,
+      includeIndustryLabour: true,
+    });
+    if (scenario === 'success') {
+      expect(await work).toMatchObject({
+        documentCounts: {
+          financial: 10,
+          social: 2,
+          industryLabour: 1,
+          total: 13,
+        },
+        industryLabour: [
+          { country_id: 'COUNTRY_10', world_version: '3', event_sequence: '4' },
+        ],
+      });
+      expect(outcomes).toEqual(['COMMIT']);
+    } else {
+      await expect(work).rejects.toThrow(
+        scenario === 'wrongIndustryHead'
+          ? 'CURRENT_PUBLICATION_HEAD_DIFFERS_FROM_HELD_CORE'
+          : 'TEST_ONLY_INDUSTRY_SQL_FAILURE',
+      );
+      expect(outcomes).toEqual(['ROLLBACK']);
+    }
+    expect(fixture.source.withCaptainSnapshot).toHaveBeenCalledOnce();
+    expect(fixture.industry).toHaveBeenCalledExactlyOnceWith(tx, token, social);
+    expect(queries.filter((q) => q.startsWith('select '))).toHaveLength(3);
+  },
+);

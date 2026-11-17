@@ -156,6 +156,7 @@ beforeEach(() => {
     financial: Array.from({ length: 10 }, () => ({})),
     social: [{}, {}],
     trade: [],
+    industryLabour: [{}],
   });
   fixture.industryPublish.mockResolvedValue({
     head: { worldId: world, worldVersion: '3', eventSequence: '4' },
@@ -229,15 +230,12 @@ describe('fixed post-commit derived publication', () => {
       'COUNTRY_01',
       'COUNTRY_02',
     ]);
-    expect(fixture.industryPublish.mock.calls.map((call) => call[0])).toEqual([
-      'COUNTRY_10',
-      'COUNTRY_01',
-      'COUNTRY_02',
-    ]);
+    expect(fixture.industryPublish).not.toHaveBeenCalled();
     for (const country of ['COUNTRY_01', 'COUNTRY_02'])
       expect(fixture.publish).toHaveBeenCalledWith(country, {
         requireCaptain: false,
         includeTrade: true,
+        includeIndustryLabour: true,
         expectedHead: { worldId: world, worldVersion: '3', eventSequence: '4' },
       });
     await c.close();
@@ -312,16 +310,19 @@ describe('fixed post-commit derived publication', () => {
     expect((await c.afterCommitted(step)).derivedPublication?.status).toBe(
       'UNAVAILABLE',
     );
-    expect(fixture.industryPublish).toHaveBeenCalledTimes(1);
-    fixture.industryPublish
-      .mockResolvedValueOnce({ head: published.head, documents: [{}] })
-      .mockResolvedValueOnce({
-        head: { worldId: world, worldVersion: '4', eventSequence: '5' },
-        documents: [{}],
-      });
-    expect((await c.retryCommitted(command.commandId)).status).toBe(
+    expect(fixture.industryPublish).not.toHaveBeenCalled();
+    // The legacy separate publisher still has to reject an independent head.
+    // Registered same-transaction Industry row rejection is covered at the
+    // combined publisher boundary, where its SQL readback is validated.
+    const legacy = controller(true);
+    fixture.industryPublish.mockResolvedValueOnce({
+      head: { worldId: world, worldVersion: '4', eventSequence: '5' },
+      documents: [{}],
+    });
+    expect((await legacy.retryCommitted(command.commandId)).status).toBe(
       'UNAVAILABLE',
     );
+    await legacy.close();
     await c.close();
   });
 
@@ -771,6 +772,7 @@ it('publishes both actual committed Trade parties at one observed head, and retr
     financial: Array(10).fill({}),
     social: [{}, {}],
     trade: [{}, {}],
+    industryLabour: [{}],
   });
   const c = controller(false, true);
   try {
@@ -797,11 +799,7 @@ it('publishes both actual committed Trade parties at one observed head, and retr
       'COUNTRY_10',
       'COUNTRY_02',
     ]);
-    expect(fixture.industryPublish.mock.calls.map((call) => call[0])).toEqual([
-      'COUNTRY_01',
-      'COUNTRY_10',
-      'COUNTRY_02',
-    ]);
+    expect(fixture.industryPublish).not.toHaveBeenCalled();
     await formal.close();
     fixture.publish
       .mockResolvedValueOnce({

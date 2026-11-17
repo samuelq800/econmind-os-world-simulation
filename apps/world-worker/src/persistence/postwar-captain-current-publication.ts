@@ -22,6 +22,8 @@ import {
 } from './postwar-mixed-current-projection-publication.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import { derivePostwarMixedFinancialCurrentFrom } from './postwar-mixed-financial-current-publication.js';
+import { derivePostwarIndustryLabourCurrentFrom } from './postwar-industry-labour-current-publication.js';
+import type { PostwarSocialRuntimeConnection } from '../runtime-preparation/social-runtime-connection.js';
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const hash = (v: unknown) => canonicalSha256(canonicalHashInput(v), sha);
 /** Fixed H0-only publication from already registered actual genesis. This is
@@ -136,6 +138,7 @@ export function derivePostwarCaptainCurrentFrom(
 export function createPostwarCaptainCurrentPublisher(input: {
   readonly source: PostwarMixedCurrentProjectionSource;
   readonly publicationDatabase: SqlDatabase;
+  readonly socialConnection?: Readonly<PostwarSocialRuntimeConnection>;
 }) {
   if (!isPostwarMixedCurrentProjectionSource(input.source))
     throw Error('GENUINE_MIXED_CURRENT_SOURCE_REQUIRED');
@@ -148,6 +151,7 @@ export function createPostwarCaptainCurrentPublisher(input: {
       options: {
         readonly requireCaptain: boolean;
         readonly includeTrade?: boolean;
+        readonly includeIndustryLabour?: boolean;
         readonly expectedHead?: Readonly<{
           worldId: string;
           worldVersion: string;
@@ -155,6 +159,9 @@ export function createPostwarCaptainCurrentPublisher(input: {
         }>;
       } = { requireCaptain: true },
     ) {
+      const socialConnection = input.socialConnection;
+      if (options.includeIndustryLabour && !socialConnection)
+        throw Error('INDUSTRY_GENUINE_SOCIAL_SOURCE_REQUIRED');
       return input.source.withCaptainSnapshot(
         countryId,
         async (tx, token) => {
@@ -173,6 +180,13 @@ export function createPostwarCaptainCurrentPublisher(input: {
             social = derivePostwarMixedSocialCurrentFrom(tx, token),
             trade = options.includeTrade
               ? derivePostwarTradeCurrentFrom(tx, token)
+              : null,
+            industry = options.includeIndustryLabour
+              ? await derivePostwarIndustryLabourCurrentFrom(
+                  tx,
+                  token,
+                  socialConnection!,
+                )
               : null;
           return input.publicationDatabase.transaction(async (pub) => {
             const paged = 'pageProof' in f.coverage;
@@ -213,6 +227,17 @@ export function createPostwarCaptainCurrentPublisher(input: {
                   [f.head.worldId, countryId, trade.assertion],
                 )
               : { rows: [] };
+            const ind = industry
+              ? await pub.query<Record<string, unknown>>(
+                  'select * from world_v2.publish_postwar_industry_labour_current($1,$2,$3)',
+                  [f.head.worldId, countryId, industry.assertion],
+                )
+              : { rows: [] };
+            if (
+              industry &&
+              (ind.rows.length !== 1 || ind.rows[0]?.country_id !== countryId)
+            )
+              throw Error('INDUSTRY_EXACT_CURRENT_PUBLICATION_REQUIRED');
             if (trd.rows.length !== (trade ? 2 : 0))
               throw Error('EXACT_TWO_TRADE_CURRENT_DOCUMENTS_REQUIRED');
             if (
@@ -226,6 +251,7 @@ export function createPostwarCaptainCurrentPublisher(input: {
               ...fin.rows,
               ...soc.rows,
               ...trd.rows,
+              ...ind.rows,
             ])
               if (
                 String(row.world_version) !== f.head.worldVersion ||
@@ -242,16 +268,19 @@ export function createPostwarCaptainCurrentPublisher(input: {
                 financial: fin.rows.length,
                 social: soc.rows.length,
                 trade: trd.rows.length,
+                ...(industry ? { industryLabour: ind.rows.length } : {}),
                 total:
                   cap.rows.length +
                   fin.rows.length +
                   soc.rows.length +
-                  trd.rows.length,
+                  trd.rows.length +
+                  ind.rows.length,
               }),
               captain: Object.freeze(cap.rows),
               financial: Object.freeze(fin.rows),
               social: Object.freeze(soc.rows),
               trade: Object.freeze(trd.rows),
+              ...(industry ? { industryLabour: Object.freeze(ind.rows) } : {}),
             });
           });
         },
