@@ -73,15 +73,15 @@ import {
   replayPostwarNarrowGoodsFrame,
   type PostwarNarrowGoodsReplayEntry,
 } from '../transfers/postwar-narrow-trade-mixed-replay.js';
-import {
-  parseInventoryLedgerSnapshot,
-  type InventoryLedgerState,
-} from '../inventory/inventory-ledger.js';
+import type { InventoryLedgerState } from '../inventory/inventory-ledger.js';
 import {
   reconcileV08LedgerSnapshots,
   type RebuiltV08Ledgers,
 } from '../opening/opening-seed.js';
-import { authorizeInventoryLedgerState } from '../opening/ledger-authority.js';
+import {
+  authorizeInventoryLedgerState,
+  isAuthoritativeInventoryLedgerState,
+} from '../opening/ledger-authority.js';
 import {
   BENEFICIAL_HOUSING_RENT_COMMAND,
   type BeneficialHousingReclassificationReceipt,
@@ -98,7 +98,6 @@ import { Money } from '../numeric/money.js';
 import { canonicalDecimal } from '../numeric/world-decimal.js';
 import {
   createFinancialAccount,
-  parseFinancialLedgerSnapshot,
   type FinancialAccount,
 } from '../finance/financial-ledger.js';
 import { authorizeFinancialLedgerState } from '../opening/ledger-authority.js';
@@ -892,13 +891,31 @@ export function prepareFinanceNativeBudgetFinancialReplay(
   });
   return token;
 }
-function financialAtVersion(
+/** Private to the complete fold. The actual transition has already passed
+ * canonical Command/FINAL and every sibling posting check before this call.
+ * Only the cursor changes; immutable ledger contents need no transport reparse. */
+function reducedLedgerHead(
+  state: { readonly worldId: string; readonly worldVersion: string },
+  transition: Readonly<AuthoritativeTransition>,
+): string {
+  if (
+    state.worldId !== transition.worldId ||
+    (state.worldVersion !== transition.worldVersionBefore &&
+      state.worldVersion !== transition.worldVersionAfter)
+  )
+    invalid('ACTUAL_REDUCED_LEDGER_TRANSITION_HEAD_REQUIRED');
+  return transition.worldVersionAfter;
+}
+function financialAtTransition(
   state: Readonly<FinancialLedgerState>,
-  worldVersion: string,
+  transition: Readonly<AuthoritativeTransition>,
 ): Readonly<FinancialLedgerState> {
+  if (!isAuthoritativeFinancialLedgerState(state))
+    invalid('GENUINE_REDUCED_FINANCIAL_LEDGER_REQUIRED');
+  const worldVersion = reducedLedgerHead(state, transition);
   if (state.worldVersion === worldVersion) return state;
   const next = authorizeFinancialLedgerState(
-    parseFinancialLedgerSnapshot({ ...state, worldVersion }),
+    Object.freeze({ ...state, worldVersion }),
   );
   inheritProductionDepositInstruments(next, state);
   return next;
@@ -2448,15 +2465,17 @@ function foldFinanceNativeBudgetMixedPrefix(
         }),
       );
     // This is after complete real sibling reduction, never a caller no-effect flag.
-    if (inventory && inventory.worldVersion !== transition.worldVersionAfter)
+    if (inventory && inventory.worldVersion !== transition.worldVersionAfter) {
+      if (!isAuthoritativeInventoryLedgerState(inventory))
+        invalid('GENUINE_REDUCED_INVENTORY_LEDGER_REQUIRED');
       inventory = authorizeInventoryLedgerState(
-        parseInventoryLedgerSnapshot({
+        Object.freeze({
           ...inventory,
-          worldVersion: transition.worldVersionAfter,
+          worldVersion: reducedLedgerHead(inventory, transition),
         }),
       );
-    if (financial)
-      financial = financialAtVersion(financial, transition.worldVersionAfter);
+    }
+    if (financial) financial = financialAtTransition(financial, transition);
     if (industryLogisticsState.length) {
       if (!financial || !inventory || !industryWorkState)
         invalid(
