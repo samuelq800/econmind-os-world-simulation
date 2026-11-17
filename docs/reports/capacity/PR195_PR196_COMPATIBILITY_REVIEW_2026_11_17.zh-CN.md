@@ -6,11 +6,11 @@
 
 `git merge-base --is-ancestor` 确认：#195 的头 `aeece72d` 在 #196 的头 `46532148` 中；两者均是当前 #199 分支的祖先，`HEAD..旧分支` 没有遗漏提交。实际开发关系为 **#195 → #196 → #199（已包含 #200、#201）**。不是三套需要重新拼接的实现。
 
-| PR | 功能层次 | 当前处理 |
-| --- | --- | --- |
-| [#195](https://github.com/samuelq800/econmind-os-world-simulation/pull/195) | 战后开局与银行 GCU 来源、Finance/Social 共享执行、首日 FX、受限历史读取、当前页发布和回执恢复 | 已包含，属于基础层；其旧绿灯和有限历史验收不等于 #199 当前候选通过 |
-| [#196](https://github.com/samuelq800/econmind-os-world-simulation/pull/196) | 注册 Node 入口、World actor/control 绑定、共享消费器、Captain/CB OMO、窄 Trade 来源与回放、租金候选及截止校验 | 已包含，并被 #199 继续扩展；不需要重复合并 |
-| [#199](https://github.com/samuelq800/econmind-os-world-simulation/pull/199) | 在前两层上增加 Office 操作、Industry/水电物流、Social 申请及审查读取、FX 表单、派生发布恢复等接线 | 当前待验收集成层，应在此修复契约与 CI 问题 |
+| PR                                                                          | 功能层次                                                                                                      | 当前处理                                                           |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [#195](https://github.com/samuelq800/econmind-os-world-simulation/pull/195) | 战后开局与银行 GCU 来源、Finance/Social 共享执行、首日 FX、受限历史读取、当前页发布和回执恢复                 | 已包含，属于基础层；其旧绿灯和有限历史验收不等于 #199 当前候选通过 |
+| [#196](https://github.com/samuelq800/econmind-os-world-simulation/pull/196) | 注册 Node 入口、World actor/control 绑定、共享消费器、Captain/CB OMO、窄 Trade 来源与回放、租金候选及截止校验 | 已包含，并被 #199 继续扩展；不需要重复合并                         |
+| [#199](https://github.com/samuelq800/econmind-os-world-simulation/pull/199) | 在前两层上增加 Office 操作、Industry/水电物流、Social 申请及审查读取、FX 表单、派生发布恢复等接线             | 当前待验收集成层，应在此修复契约与 CI 问题                         |
 
 #195 到 #196 改动 155 文件；#196 到当前集成分支继续改动 681 文件。因此旧 PR 的说明、配置和测试通过记录不能直接作为当前行为说明或发布凭证。祖先关系证明代码包含，不代表每个新增链路已完成原生验收。
 

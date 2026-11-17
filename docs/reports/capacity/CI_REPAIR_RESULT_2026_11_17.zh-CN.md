@@ -1,5 +1,16 @@
 # CI 契约与历史回归修复结果
 
+## 第二轮 CI 格式修正
+
+提交 `b6692d624a98b16ed5a7e208923d61033631e6b5` 的 13 项检查已结束：11 成功，2 失败。`combined-candidate` 与 `trusted-country-runtime` 已通过。
+
+两个失败任务均在 `pnpm check` 的 `prettier --check .` 阶段退出，指向本报告、CI 修理计划及 PR195/196 适配报告。上次只检查了修改的测试/fixture，漏检这三份新增 Markdown；本轮补齐格式化，不修改产品或测试行为。
+
+- [Isolated official pnpm check 日志](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43982563147/job/133702463171)：前置 71 个测试通过，ESLint 通过，格式检查失败。
+- [official-and-native-postgres 日志](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43982563163/job/133702463002)：前置 92 个测试通过，ESLint 通过，格式检查失败；后续原生步骤未据此判定通过。
+
+修正后对三份报告执行 `pnpm exec prettier --write`、`pnpm exec prettier --check`，并执行 `git diff --check`，均 exit 0。本轮不重复运行与 Markdown 排版无关的功能测试。推送后仍需读取完整 CI 结果；此前被格式错误阻断的后续检查尚无本轮通过证据。
+
 2026-11-17，Windows，Node 24.20.0 / pnpm 12.3.4。基线 `4fab2f93a9d035c19e880fcda36bb30d241a2588`，分支 `codex/office-next-connections-20261108`。状态：IMPLEMENTED_UNVERIFIED，等待新提交的 GitHub CI；不代表容量验收、独立审批或生产批准。
 
 ## 改动
@@ -16,18 +27,18 @@
 
 所有命令在仓库根目录执行。
 
-| 检查 | 命令 / 范围 | 结果 |
-| --- | --- | --- |
-| 固定工具链 | `node --version` / `pnpm --version` | 24.20.0 / 12.3.4，exit 0 |
-| 构建测试依赖 | `pnpm pretest`（core、worker、API） | exit 0 |
-| 严格类型 | `pnpm exec tsc -p tests/world-web/office-command.tsconfig.json --noEmit --strict --skipLibCheck false` | exit 0 |
-| 来源与保护段 | `node --test tests/foundation/migration-rehearsal-filtered-provenance.test.mjs` | 13 PASS，exit 0；含两个实际 PGlite migration rehearsal |
-| 定向 Vitest 首轮 | 计划中的 6 个测试文件 | 53 PASS / 14 FAIL，exit 1；暴露缺少 FX 导出、遗漏的历史 loader 调用和 Windows 路径问题 |
-| 定向 Vitest 修正后 | `pnpm exec vitest run tests/world-core/v09-disposable-postgres-evidence.test.ts tests/world-api/postwar-social-planning-sequencing.test.ts tests/world-core/postwar-social-employment-creation-upgrade.test.ts` | 26 PASS，exit 0 |
-| 其余三文件 | Office family、Social forward package、Social ordinal upgrade | 首轮均 PASS，未再次修改行为；合计最终覆盖 6 文件 67 个用例 |
-| ESLint | 修改的 8 份测试/fixture；后续改动的 3 文件再次检查 | exit 0 |
-| Prettier | 修改的测试/fixture | 格式化完成，exit 0 |
-| whitespace | `git diff --check` | exit 0 |
+| 检查               | 命令 / 范围                                                                                                                                                                                                     | 结果                                                                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 固定工具链         | `node --version` / `pnpm --version`                                                                                                                                                                             | 24.20.0 / 12.3.4，exit 0                                                               |
+| 构建测试依赖       | `pnpm pretest`（core、worker、API）                                                                                                                                                                             | exit 0                                                                                 |
+| 严格类型           | `pnpm exec tsc -p tests/world-web/office-command.tsconfig.json --noEmit --strict --skipLibCheck false`                                                                                                          | exit 0                                                                                 |
+| 来源与保护段       | `node --test tests/foundation/migration-rehearsal-filtered-provenance.test.mjs`                                                                                                                                 | 13 PASS，exit 0；含两个实际 PGlite migration rehearsal                                 |
+| 定向 Vitest 首轮   | 计划中的 6 个测试文件                                                                                                                                                                                           | 53 PASS / 14 FAIL，exit 1；暴露缺少 FX 导出、遗漏的历史 loader 调用和 Windows 路径问题 |
+| 定向 Vitest 修正后 | `pnpm exec vitest run tests/world-core/v09-disposable-postgres-evidence.test.ts tests/world-api/postwar-social-planning-sequencing.test.ts tests/world-core/postwar-social-employment-creation-upgrade.test.ts` | 26 PASS，exit 0                                                                        |
+| 其余三文件         | Office family、Social forward package、Social ordinal upgrade                                                                                                                                                   | 首轮均 PASS，未再次修改行为；合计最终覆盖 6 文件 67 个用例                             |
+| ESLint             | 修改的 8 份测试/fixture；后续改动的 3 文件再次检查                                                                                                                                                              | exit 0                                                                                 |
+| Prettier           | 修改的测试/fixture                                                                                                                                                                                              | 格式化完成，exit 0                                                                     |
+| whitespace         | `git diff --check`                                                                                                                                                                                              | exit 0                                                                                 |
 
 首轮失败已保留记录，不算作通过；最终受影响用例已修复并重跑。没有本地重复完整 `pnpm check`，由本次推送后的既有 CI 执行正式全量与原生 PostgreSQL 检查。远端结果尚不能标为 PASS。
 

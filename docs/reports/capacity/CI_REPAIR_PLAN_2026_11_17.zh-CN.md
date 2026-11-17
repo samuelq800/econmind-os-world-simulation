@@ -13,12 +13,12 @@
 - 相比上一份适配分析，两个全量任务现已结束，新增暴露 Social mock 加载错误和历史升级制品来源不匹配。相同错误在两个任务出现，只修一次。
 - #195/#196 已包含在当前分支，不需要重复合并。此计划不推进 `status/progress.json` 的 V09 gate。
 
-| 失败任务 | 直接证据 | 修理项 |
-| --- | --- | --- |
-| [combined-candidate](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644858/job/133359367845) | Office family 严格类型检查失败 | A |
-| [trusted-country-runtime](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644276/job/133359366485) | staging runner 与历史提交逐字节比较失败 | B |
-| [Isolated official pnpm check](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644052/job/133359366779) | Social planning suite 加载失败；另有 6 个历史升级包测试失败 | C、D |
-| [official-and-native-postgres](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644066/job/133359367149) | 相同的 suite 加载失败与 6 个测试失败 | C、D；后续原生步骤是否完成须看新运行结果 |
+| 失败任务                                                                                                                             | 直接证据                                                    | 修理项                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- | ---------------------------------------- |
+| [combined-candidate](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644858/job/133359367845)           | Office family 严格类型检查失败                              | A                                        |
+| [trusted-country-runtime](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644276/job/133359366485)      | staging runner 与历史提交逐字节比较失败                     | B                                        |
+| [Isolated official pnpm check](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644052/job/133359366779) | Social planning suite 加载失败；另有 6 个历史升级包测试失败 | C、D                                     |
+| [official-and-native-postgres](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43884644066/job/133359367149) | 相同的 suite 加载失败与 6 个测试失败                        | C、D；后续原生步骤是否完成须看新运行结果 |
 
 ## 按顺序修理
 
