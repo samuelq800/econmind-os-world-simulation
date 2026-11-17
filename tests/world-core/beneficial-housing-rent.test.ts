@@ -365,16 +365,24 @@ describe('beneficial housing rights on real Core seed/ledger accounts', () => {
       hashes++;
       return sha(value);
     };
-    expect(
-      synchronizeBeneficialHousingRentStates(
-        { financial, values },
-        countingSha,
-      ),
-    ).toEqual([
+    const synchronized = synchronizeBeneficialHousingRentStates(
+      { financial, values },
+      countingSha,
+    );
+    expect(synchronized).toEqual([
       synchronizeBeneficialHousingRentState({ financial, receipt, state }, sha),
       synchronizeBeneficialHousingRentState({ financial, receipt, state }, sha),
     ]);
     expect(hashes).toBe(0);
+    expect(() =>
+      synchronizeBeneficialHousingRentStates(
+        {
+          financial: { ...financial },
+          values: [{ receipt, state: synchronized[0]! }],
+        },
+        sha,
+      ),
+    ).toThrow('authoritative ledger');
     expect(() =>
       aggregateBeneficialHousingLiquidClaims({ ...financial }, [receipt]),
     ).toThrow('authoritative ledger');
@@ -408,7 +416,10 @@ describe('beneficial housing rights on real Core seed/ledger accounts', () => {
     );
     expect(() =>
       synchronizeBeneficialHousingRentStates(
-        { financial: paid.financial, values },
+        {
+          financial: paid.financial,
+          values: [{ receipt, state: synchronized[0]! }],
+        },
         sha,
       ),
     ).toThrow('unrecorded actual rent');

@@ -722,6 +722,16 @@ export interface BeneficialHousingRentState {
   readonly worldVersion: string;
   readonly paid: readonly BeneficialRentPaidReceipt[];
 }
+// Pure validation reuse along a genuine rights state, never balances or source
+// admission. Head-only sibling frames retain the exact immutable ledger arrays;
+// any posting/rebuild changes those references and runs the full checks again.
+const synchronizedLedgers = new WeakMap<
+  BeneficialHousingRentState,
+  {
+    readonly receipt: BeneficialHousingReclassificationReceipt;
+    readonly financial: FinancialLedgerState;
+  }
+>();
 export function createBeneficialHousingRentState(
   receipt: BeneficialHousingReclassificationReceipt,
 ): BeneficialHousingRentState {
@@ -762,8 +772,10 @@ export function synchronizeBeneficialHousingRentStates(
   sha: Sha256Hex,
 ): readonly BeneficialHousingRentState[] {
   const { financial } = input;
-  const aggregate = liquidClaimReader(financial),
-    batches = new Map<string, CanonicalSha256>(
+  if (!isAuthoritativeFinancialLedgerState(financial))
+    invalid('genuine receipt and authoritative ledger required');
+  let aggregate: ReturnType<typeof liquidClaimReader> | undefined;
+  const batches = new Map<string, CanonicalSha256>(
       financial.appliedBatches.map((b) => [b.batchId, b.fingerprint]),
     ),
     hasRent = financial.appliedBatches.some((b) =>
@@ -778,30 +790,44 @@ export function synchronizeBeneficialHousingRentStates(
         uint(financial.worldVersion) < uint(state.worldVersion)
       )
         invalid('genuine non-regressing rights/financial head required');
-      aggregate(receipt);
-      for (const paid of state.paid)
-        if (batches.get(paid.batchId) !== paid.batchFingerprint)
-          invalid('paid rights receipt missing from actual ledger');
-      // Without an actual rent batch, no lease's derived rent batch ID can match.
-      // Once any rent exists, retain the exact per-period replay check below.
-      if (hasRent)
-        for (const lease of receipt.leases) {
-          const periodIndex = state.paid
-              .filter((p) => p.leaseId === lease.leaseId)
-              .length.toString(),
-            logical = id(
-              {
-                receipt: receipt.fingerprint,
-                leaseId: lease.leaseId,
-                periodIndex,
-              },
-              sha,
-            );
-          if (batches.has(`BATCH_BENEFICIAL_RENT_${logical}`))
-            invalid('unrecorded actual rent settlement requires domain replay');
-        }
+      if (financial.worldId !== receipt.worldId)
+        invalid('genuine receipt and authoritative ledger required');
+      const checked = synchronizedLedgers.get(state);
+      const unchanged =
+        checked &&
+        checked.receipt === receipt &&
+        checked.financial.accounts === financial.accounts &&
+        checked.financial.positions === financial.positions &&
+        checked.financial.appliedBatches === financial.appliedBatches;
+      if (!unchanged) {
+        (aggregate ??= liquidClaimReader(financial))(receipt);
+        for (const paid of state.paid)
+          if (batches.get(paid.batchId) !== paid.batchFingerprint)
+            invalid('paid rights receipt missing from actual ledger');
+        // Without an actual rent batch, no lease's derived rent batch ID can match.
+        // Once any rent exists, retain the exact per-period replay check below.
+        if (hasRent)
+          for (const lease of receipt.leases) {
+            const periodIndex = state.paid
+                .filter((p) => p.leaseId === lease.leaseId)
+                .length.toString(),
+              logical = id(
+                {
+                  receipt: receipt.fingerprint,
+                  leaseId: lease.leaseId,
+                  periodIndex,
+                },
+                sha,
+              );
+            if (batches.has(`BATCH_BENEFICIAL_RENT_${logical}`))
+              invalid(
+                'unrecorded actual rent settlement requires domain replay',
+              );
+          }
+      }
       const result = freeze({ ...state, worldVersion: financial.worldVersion });
       states.add(result);
+      synchronizedLedgers.set(result, { receipt, financial });
       return result;
     }),
   );
