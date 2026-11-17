@@ -1,0 +1,2419 @@
+{
+  "schemaVersion": "CONNECTION_WAIT_DIAGNOSTIC_20261117_V1",
+  "status": "SOCIAL_CPU_AND_READER_QUEUE_AMPLIFICATION_CONFIRMED_NOT_CAPACITY_ACCEPTANCE",
+  "candidate": "26e1a7e9efd16b841344114b026793d8d9cc1f22",
+  "environment": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "postgres": "16.15",
+    "applicationCpu": 2,
+    "applicationGiB": 6,
+    "databaseCpu": 1,
+    "databaseGiB": 3,
+    "rolePoolMax": 2,
+    "identitiesUsed": 1,
+    "worldCountries": 70,
+    "clockStarted": false,
+    "network": "Loopback HTTP / isolated native PG over UDS",
+    "appBaseImageId": "sha256:a9abf4275f9e99bff8e6aed712b3b7dfec9cac1341bba01c1ffdfce9ff9fc34a",
+    "nodeArchive": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz",
+    "postgresImage": "postgres@sha256:1beaa3084eee2676f20a9cd9928f0bf2c5bf674f8e49f81017912183d377c61c"
+  },
+  "source": {
+    "parent": "sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274",
+    "child": "sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a",
+    "seedBytes": 125315829,
+    "receipts": 70
+  },
+  "clean": {
+    "status": "DIAGNOSIS_FINISHED",
+    "stages": [
+      {
+        "name": "DATABASE_PREPARATION",
+        "at": "2026-11-17T07:47:30.103Z"
+      },
+      {
+        "name": "DATABASE_READY",
+        "at": "2026-11-17T07:47:30.921Z"
+      },
+      {
+        "name": "NODE_READY",
+        "at": "2026-11-17T07:52:26.659Z"
+      }
+    ],
+    "stopError": null,
+    "cleanupError": null,
+    "phases": [
+      {
+        "name": "SEQUENTIAL_CENTRAL_BANK",
+        "totalIncludingDrainMs": 167.9293760000146,
+        "requests": 3,
+        "errors": 0,
+        "actualInputRatePerSecond": 15.302160984947445,
+        "injectionSpanMs": 130.7004939999897,
+        "byOffice": {
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 3,
+              "meanMs": 55.88082400001198,
+              "p50Ms": 37.015528000018094,
+              "p95Ms": 96.8621770000318,
+              "maxMs": 96.8621770000318
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 3,
+              "meanMs": 1.256889333347014,
+              "p50Ms": 0.18664700002409518,
+              "p95Ms": 3.515133999986574,
+              "maxMs": 3.515133999986574
+            },
+            "hold": {
+              "count": 3,
+              "meanMs": 28.87170399999013,
+              "p50Ms": 25.430437000002712,
+              "p95Ms": 37.07466799998656,
+              "maxMs": 37.07466799998656
+            },
+            "queryAwait": {
+              "count": 27,
+              "meanMs": 2.931409222222606,
+              "p50Ms": 0.557572000019718,
+              "p95Ms": 13.550947999989148,
+              "maxMs": 17.304111999983434
+            },
+            "meanQueryAwaitPerHoldMs": 26.382683000003453,
+            "meanOutsideQueryAwaitPerHoldMs": 2.4890209999866784
+          }
+        },
+        "eventLoop": {
+          "meanMs": 10.894267733333333,
+          "maxMs": 20.021247,
+          "p95Ms": 12.550143
+        },
+        "profileTop": [
+          [":0:0:(idle)", 99],
+          ["node:internal/stream_base_commons:166:22:onStreamRead", 2],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:200:40:",
+            2
+          ],
+          ["node:internal/streams/writable:452:16:_write", 2],
+          ["node:_http_incoming:58:25:IncomingMessage", 2],
+          [":0:0:(program)", 2],
+          [":0:0:dispatch", 2],
+          ["node:inspector:115:7:post", 1],
+          ["node:events:332:29:", 1],
+          ["node:net:1067:33:Socket.read", 1],
+          ["node:internal/streams/readable:655:35:Readable.read", 1],
+          ["node:_http_server:204:24:ServerResponse", 1],
+          [
+            "file:///workspace/apps/world-api/dist/runtime/postwar-finance-node-route.js:202:15:handle",
+            1
+          ],
+          [
+            "node:internal/deps/undici/undici:5219:44:webidl.converters.ByteString",
+            1
+          ],
+          ["node:internal/process/task_queues:160:24:queueMicrotask", 1],
+          ["node:internal/deps/undici/undici:12055:18:_Request", 1],
+          ["node:internal/async_local_storage/async_context_frame:58:6:run", 1],
+          ["node:internal/streams/readable:393:35:Readable.push", 1],
+          ["node:internal/streams/readable:556:18:addChunk", 1],
+          ["node:_http_incoming:258:49:_read", 1],
+          ["node:net:738:52:_unrefTimer", 1],
+          ["node:events:489:44:emit", 1],
+          ["node:internal/webstreams/readablestream:1187:8:close", 1],
+          ["node:internal/streams/duplex:161:8:get", 1],
+          ["node:internal/errors:164:32:ErrorPrepareStackTrace", 1],
+          ["node:vm:225:23:createContext", 1],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postwar-office-runtime-read-service.js:1012:48:",
+            1
+          ],
+          ["node:buffer:804:24:getEncodingOps", 1],
+          [
+            "file:///workspace/apps/world-api/dist/integration/supabase-jwks-signature-verifier.js:35:15:bytes",
+            1
+          ],
+          ["node:internal/deps/undici/undici:6827:25:extractBody", 1],
+          ["node:internal/async_hooks:526:25:emitAfterScript", 1],
+          [":0:0:init", 1],
+          ["node:internal/event_target:793:20:", 1],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postgres-server-read-binding.js:422:34:withReadOnlyExecutor",
+            1
+          ],
+          ["node:internal/streams/readable:138:8:get", 1]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {},
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "SEQUENTIAL_CENTRAL_BANK",
+        "totalIncludingDrainMs": 67.9814689999912,
+        "requests": 3,
+        "errors": 0,
+        "actualInputRatePerSecond": 45.33629089162858,
+        "injectionSpanMs": 44.11476899997797,
+        "byOffice": {
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 3,
+              "meanMs": 22.649465333340533,
+              "p50Ms": 23.20827800000552,
+              "p95Ms": 23.840497000026517,
+              "maxMs": 23.840497000026517
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 3,
+              "meanMs": 0.07595233333995566,
+              "p50Ms": 0.07391000003553927,
+              "p95Ms": 0.0863649999955669,
+              "maxMs": 0.0863649999955669
+            },
+            "hold": {
+              "count": 3,
+              "meanMs": 15.985617333324626,
+              "p50Ms": 16.371853999968152,
+              "p95Ms": 17.239572999998927,
+              "maxMs": 17.239572999998927
+            },
+            "queryAwait": {
+              "count": 27,
+              "meanMs": 1.6748082222227283,
+              "p50Ms": 0.4456849999842234,
+              "p95Ms": 8.385952999989968,
+              "maxMs": 9.084432999952696
+            },
+            "meanQueryAwaitPerHoldMs": 15.073274000004554,
+            "meanOutsideQueryAwaitPerHoldMs": 0.9123433333200713
+          }
+        },
+        "eventLoop": {
+          "meanMs": 10.341034666666665,
+          "maxMs": 11.239423,
+          "p95Ms": 11.239423
+        },
+        "profileTop": [
+          [":0:0:(idle)", 47],
+          ["node:inspector:115:7:post", 1],
+          [
+            "file:///workspace/apps/world-api/dist/runtime-preparation/bounded-executor-transport.js:201:26:jsonBytes",
+            1
+          ],
+          [":0:0:now", 1],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:28:21:addCommandComplete",
+            1
+          ],
+          [":0:0:writev", 1],
+          ["node:_http_outgoing:382:49:_send", 1],
+          ["node:_http_incoming:446:24:_addHeaderLine", 1],
+          [
+            "file:///workspace/apps/world-api/dist/integration/supabase-jwks-signature-verifier.js:301:21:verify",
+            1
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg-protocol@1.16.0/node_modules/pg-protocol/dist/buffer-reader.js:40:12:cstring",
+            1
+          ],
+          [
+            "file:///workspace/packages/core/dist/read-models/postwar-financial-mixed-current-contract.js:61:51:parsePostwarFinancialMixedCoverage",
+            1
+          ],
+          [
+            "node:internal/webstreams/readablestream:2487:44:readableStreamReaderGenericRelease",
+            1
+          ],
+          [
+            "node:internal/webstreams/readablestream:2772:46:setupReadableStreamDefaultController",
+            1
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postgres-server-read-binding.js:198:23:run",
+            1
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:146:35:canonicalSerialize",
+            1
+          ],
+          ["node:_http_outgoing:438:22:_storeHeader", 1]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {},
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "SEQUENTIAL_SOCIAL",
+        "totalIncludingDrainMs": 1075.3976029999903,
+        "requests": 3,
+        "errors": 0,
+        "actualInputRatePerSecond": 2.66022503460752,
+        "injectionSpanMs": 751.8160959999659,
+        "byOffice": {
+          "SOCIAL": {
+            "latency": {
+              "count": 3,
+              "meanMs": 358.4555246666617,
+              "p50Ms": 336.5345320000197,
+              "p95Ms": 415.2743109999574,
+              "maxMs": 415.2743109999574
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": ["AVAILABLE"]
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 6,
+              "meanMs": 0.07683616667054594,
+              "p50Ms": 0.06126699998276308,
+              "p95Ms": 0.15180500003043562,
+              "maxMs": 0.15180500003043562
+            },
+            "hold": {
+              "count": 6,
+              "meanMs": 10.544317833322566,
+              "p50Ms": 6.009834000025876,
+              "p95Ms": 16.9297839999781,
+              "maxMs": 16.9297839999781
+            },
+            "queryAwait": {
+              "count": 48,
+              "meanMs": 1.208791479167606,
+              "p50Ms": 0.3536290000192821,
+              "p95Ms": 7.440492999972776,
+              "maxMs": 8.24318700004369
+            },
+            "meanQueryAwaitPerHoldMs": 9.670331833340848,
+            "meanOutsideQueryAwaitPerHoldMs": 0.8739859999817176
+          },
+          "fixture_rent_child_worker_89497423": {
+            "connect": {
+              "count": 3,
+              "meanMs": 1.048395333326577,
+              "p50Ms": 0.04890599998179823,
+              "p95Ms": 3.0576209999853745,
+              "maxMs": 3.0576209999853745
+            },
+            "hold": {
+              "count": 3,
+              "meanMs": 328.9326486666687,
+              "p50Ms": 309.0111710000201,
+              "p95Ms": 381.8442619999987,
+              "maxMs": 381.8442619999987
+            },
+            "queryAwait": {
+              "count": 87,
+              "meanMs": 0.7570601494256246,
+              "p50Ms": 0.31907299999147654,
+              "p95Ms": 2.855477000004612,
+              "maxMs": 7.762526999984402
+            },
+            "meanQueryAwaitPerHoldMs": 21.954744333343115,
+            "meanOutsideQueryAwaitPerHoldMs": 306.97790433332557
+          }
+        },
+        "eventLoop": {
+          "meanMs": 53.7432064,
+          "maxMs": 297.533439,
+          "p95Ms": 255.590399
+        },
+        "profileTop": [
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:75:25:normalizeRecord",
+            108
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:38:24:ownDescriptors",
+            105
+          ],
+          [":0:0:(idle)", 95],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:146:35:canonicalSerialize",
+            68
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:160:50:",
+            63
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:37:18:position",
+            56
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:371:49:",
+            36
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:363:54:aggregateBeneficialHousingLiquidClaim",
+            34
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:56:16:freeze",
+            28
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/money.js:36:24:isMoney",
+            27
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:178:37:",
+            23
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/money.js:7:16:Money",
+            22
+          ],
+          [":0:0:(garbage collector)", 18],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:105:19:normalize",
+            14
+          ],
+          [":0:0:update", 14],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:38:35:",
+            13
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:372:45:",
+            11
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:2515:24:digitsToString",
+            10
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:568:44:foldFinanceNativeBudgetMixedPrefix",
+            10
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/world-decimal.js:37:33:canonicalDecimal",
+            8
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:231:58:prepareFinanceNativeBudgetFinancialReplay",
+            8
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:246:51:",
+            8
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:46:24:normalizeArray",
+            7
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:389:42:",
+            7
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:162:25:",
+            7
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/financial-ledger.js:40:25:validateAccount",
+            7
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:12:16:freeze",
+            6
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:91:47:",
+            5
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:3108:24:finiteToString",
+            5
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:3518:22:parseDecimal",
+            5
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/social-employment-position-lifecycle.js:21:16:freeze",
+            5
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/financial-ledger.js:209:45:parseFinancialLedgerSnapshot",
+            5
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js:19:15:check",
+            4
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:24:16:freeze",
+            4
+          ],
+          [":0:0:writeBuffer", 3]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 5,
+          "idle in transaction|Client|ClientRead": 3
+        },
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "WITHOUT_SOCIAL_20RPS_5S",
+        "totalIncludingDrainMs": 5090.366276999994,
+        "requests": 100,
+        "errors": 0,
+        "actualInputRatePerSecond": 19.64427311297675,
+        "injectionSpanMs": 5039.636713999964,
+        "byOffice": {
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 100,
+              "meanMs": 20.814016940000002,
+              "p50Ms": 19.61396699998295,
+              "p95Ms": 26.959769999957643,
+              "maxMs": 46.868550000013784
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 100,
+              "meanMs": 0.06499155999568756,
+              "p50Ms": 0.06283700000494719,
+              "p95Ms": 0.10719399998197332,
+              "maxMs": 0.17945299996063113
+            },
+            "hold": {
+              "count": 100,
+              "meanMs": 15.536579610001645,
+              "p50Ms": 14.492460000037681,
+              "p95Ms": 19.905763000017032,
+              "maxMs": 37.7866090000025
+            },
+            "queryAwait": {
+              "count": 900,
+              "meanMs": 1.6550421500000327,
+              "p50Ms": 0.38703599997097626,
+              "p95Ms": 7.844051000021864,
+              "maxMs": 22.72331099997973
+            },
+            "meanQueryAwaitPerHoldMs": 14.895379350000294,
+            "meanOutsideQueryAwaitPerHoldMs": 0.6412002600013511
+          }
+        },
+        "eventLoop": {
+          "meanMs": 10.0864,
+          "maxMs": 12.214271,
+          "p95Ms": 10.723327
+        },
+        "profileTop": [
+          [":0:0:(idle)", 4114],
+          [":0:0:(program)", 60],
+          [":0:0:writev", 19],
+          [":0:0:writeBuffer", 15],
+          [":0:0:run", 14],
+          [":0:0:runMicrotasks", 14],
+          [":0:0:SignJob", 9],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:82:12:addFields",
+            9
+          ],
+          ["node:internal/stream_base_commons:166:22:onStreamRead", 8],
+          ["node:internal/process/task_queues:113:18:nextTick", 8],
+          [
+            "file:///workspace/tools/office-connection/native-registered-final-host.mjs:212:26:",
+            7
+          ],
+          ["node:internal/crypto/keys:219:27:getKeyObjectSlots", 7],
+          ["node:internal/streams/readable:867:23:maybeReadMore", 7],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-financial-mixed-current-projection.js:47:27:readPageFrom",
+            6
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postwar-office-runtime-read-service.js:395:21:handle",
+            5
+          ],
+          ["node:internal/per_context/domexception:72:14:DOMException", 5],
+          [
+            "node:internal/streams/readable:469:38:readableAddChunkPushByteMode",
+            5
+          ],
+          ["node:internal/streams/readable:393:35:Readable.push", 5],
+          ["node:buffer:918:46:toString", 4],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:28:21:addCommandComplete",
+            4
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/runtime/postwar-finance-node-route.js:29:25:serve",
+            4
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:63:11:parseRow",
+            4
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/runtime/postwar-finance-node-route.js:202:15:handle",
+            4
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/runtime-preparation/bounded-executor-transport.js:142:35:boundedBytes",
+            3
+          ],
+          ["node:internal/deps/undici/undici:12055:18:_Request", 3],
+          [
+            "file:///workspace/apps/world-api/dist/runtime-preparation/bounded-executor-transport.js:126:37:awaitTransport",
+            3
+          ],
+          ["node:internal/streams/readable:556:18:addChunk", 3],
+          [
+            "file:///workspace/apps/world-api/dist/runtime-preparation/bounded-executor-transport.js:216:29:responseJson",
+            3
+          ],
+          ["node:internal/priority_queue:22:9:insert", 3],
+          ["file:///workspace/apps/world-api/dist/runtime.js:259:33:", 3],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:498:19:_pulseQueryQueue",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:540:36:",
+            3
+          ],
+          ["node:internal/deps/undici/undici:6827:25:extractBody", 3],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postgres-server-read-binding.js:229:31:query",
+            3
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:68:16:freeze",
+            3
+          ]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 18,
+          "active||": 4
+        },
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "WITH_SOCIAL_20RPS_5S",
+        "totalIncludingDrainMs": 10447.333010000002,
+        "requests": 100,
+        "errors": 0,
+        "actualInputRatePerSecond": 19.678149634824003,
+        "injectionSpanMs": 5030.960828999989,
+        "byOffice": {
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 67,
+              "meanMs": 2638.2983816268656,
+              "p50Ms": 2748.2553179999813,
+              "p95Ms": 4951.689861999999,
+              "maxMs": 5146.658357000037
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          },
+          "SOCIAL": {
+            "latency": {
+              "count": 33,
+              "meanMs": 5566.909491030304,
+              "p50Ms": 6214.938846999954,
+              "p95Ms": 7736.412142999994,
+              "maxMs": 7817.737328999967
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": ["AVAILABLE"]
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 133,
+              "meanMs": 2397.4749163007523,
+              "p50Ms": 2402.997822000005,
+              "p95Ms": 4628.495129999996,
+              "maxMs": 4866.2582809999585
+            },
+            "hold": {
+              "count": 133,
+              "meanMs": 151.4684563609023,
+              "p50Ms": 82.34280399995623,
+              "p95Ms": 311.614533999993,
+              "maxMs": 340.08399899996584
+            },
+            "queryAwait": {
+              "count": 1131,
+              "meanMs": 17.765234502209182,
+              "p50Ms": 0.6457710000104271,
+              "p95Ms": 231.62817400001222,
+              "maxMs": 325.27300300000934
+            },
+            "meanQueryAwaitPerHoldMs": 151.07127986465102,
+            "meanOutsideQueryAwaitPerHoldMs": 0.39717649625127616
+          },
+          "fixture_rent_child_worker_89497423": {
+            "connect": {
+              "count": 33,
+              "meanMs": 0.4833942424315451,
+              "p50Ms": 0.028643000056035817,
+              "p95Ms": 2.7878749999799766,
+              "maxMs": 12.09317700000247
+            },
+            "hold": {
+              "count": 33,
+              "meanMs": 330.2967826969636,
+              "p50Ms": 317.09309999999823,
+              "p95Ms": 406.05978299997514,
+              "maxMs": 578.888432000007
+            },
+            "queryAwait": {
+              "count": 957,
+              "meanMs": 1.4603233678163494,
+              "p50Ms": 0.3787069999962114,
+              "p95Ms": 3.106361000041943,
+              "maxMs": 233.78508000000147
+            },
+            "meanQueryAwaitPerHoldMs": 42.34937766667413,
+            "meanOutsideQueryAwaitPerHoldMs": 287.9474050302895
+          }
+        },
+        "eventLoop": {
+          "meanMs": 80.93527714728681,
+          "maxMs": 324.009983,
+          "p95Ms": 263.192575
+        },
+        "profileTop": [
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:75:25:normalizeRecord",
+            1272
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:38:24:ownDescriptors",
+            1096
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:160:50:",
+            730
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:146:35:canonicalSerialize",
+            697
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:37:18:position",
+            663
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:371:49:",
+            483
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:363:54:aggregateBeneficialHousingLiquidClaim",
+            471
+          ],
+          [":0:0:(idle)", 392],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:56:16:freeze",
+            282
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/money.js:36:24:isMoney",
+            269
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:178:37:",
+            259
+          ],
+          [":0:0:(garbage collector)", 218],
+          [
+            "file:///workspace/packages/core/dist/numeric/money.js:7:16:Money",
+            197
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:231:58:prepareFinanceNativeBudgetFinancialReplay",
+            177
+          ],
+          [":0:0:update", 172],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:2515:24:digitsToString",
+            145
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:105:19:normalize",
+            137
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:46:24:normalizeArray",
+            93
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:568:44:foldFinanceNativeBudgetMixedPrefix",
+            91
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/world-decimal.js:37:33:canonicalDecimal",
+            89
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:162:25:",
+            73
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:91:47:",
+            71
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:12:16:freeze",
+            69
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/social-employment-position-lifecycle.js:21:16:freeze",
+            55
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/financial-ledger.js:40:25:validateAccount",
+            52
+          ],
+          ["file:///workspace/packages/core/dist/ids.js:4:17:parseId", 39],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:4287:19:Decimal",
+            38
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js:19:15:check",
+            34
+          ],
+          [":0:0:writev", 33],
+          [":0:0:writeBuffer", 28],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:3518:22:parseDecimal",
+            28
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:19:48:replayPostwarSharedOfficePrefix",
+            28
+          ],
+          [":0:0:(program)", 26],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:2021:22:P.toFixed",
+            25
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:3108:24:finiteToString",
+            24
+          ]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 2,
+            "idle": 2,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 2,
+            "idle": 2,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 36,
+          "idle in transaction|Client|ClientRead": 116,
+          "active||": 6
+        },
+        "command": null,
+        "head": null
+      }
+    ]
+  },
+  "supplementalWithUnreadyFinance": {
+    "status": "DIAGNOSIS_FINISHED",
+    "stages": [
+      {
+        "name": "DATABASE_PREPARATION",
+        "at": "2026-11-17T07:35:26.503Z"
+      },
+      {
+        "name": "DATABASE_READY",
+        "at": "2026-11-17T07:35:26.906Z"
+      },
+      {
+        "name": "NODE_READY",
+        "at": "2026-11-17T07:40:21.560Z"
+      }
+    ],
+    "stopError": null,
+    "cleanupError": null,
+    "phases": [
+      {
+        "name": "SEQUENTIAL_FINANCE",
+        "totalIncludingDrainMs": 10947.586324999982,
+        "requests": 3,
+        "errors": 3,
+        "actualInputRatePerSecond": null,
+        "injectionSpanMs": null,
+        "byOffice": {
+          "FINANCE": {
+            "latency": {
+              "count": 3,
+              "meanMs": 3649.0528466666583,
+              "p50Ms": 3622.923101000022,
+              "p95Ms": 3702.3956489999546,
+              "maxMs": 3702.3956489999546
+            },
+            "errors": 3,
+            "codes": ["CURRENT_FINANCIAL_UNAVAILABLE"],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 12,
+              "meanMs": 1.8440219166708023,
+              "p50Ms": 2.831570999987889,
+              "p95Ms": 3.5389730000169948,
+              "maxMs": 3.5389730000169948
+            },
+            "hold": {
+              "count": 12,
+              "meanMs": 28.03262349999568,
+              "p50Ms": 31.99808699998539,
+              "p95Ms": 37.189337000017986,
+              "maxMs": 37.189337000017986
+            },
+            "queryAwait": {
+              "count": 108,
+              "meanMs": 3.0362630000001647,
+              "p50Ms": 0.4559119999757968,
+              "p95Ms": 14.719158000021707,
+              "maxMs": 20.707967000023928
+            },
+            "meanQueryAwaitPerHoldMs": 27.326367000001483,
+            "meanOutsideQueryAwaitPerHoldMs": 0.7062564999941969
+          }
+        },
+        "eventLoop": {
+          "meanMs": 10.0889085640553,
+          "maxMs": 63.111167,
+          "p95Ms": 10.199039
+        },
+        "profileTop": [
+          [":(idle)", 9587],
+          [":(program)", 88],
+          [":(garbage collector)", 79],
+          ["node:internal/stream_base_commons:onStreamRead", 5],
+          [":writev", 5],
+          ["node:net:get", 2],
+          ["node:internal/streams/readable:get", 2],
+          [
+            "file:///workspace/node_modules/.pnpm/pg-protocol@1.16.0/node_modules/pg-protocol/dist/parser.js:handlePacket",
+            2
+          ],
+          [
+            "file:///workspace/tools/office-connection/native-registered-final-host.mjs:",
+            2
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:",
+            2
+          ],
+          [":writeBuffer", 2],
+          [
+            "file:///workspace/apps/world-api/dist/integration/supabase-jwks-signature-verifier.js:json",
+            2
+          ],
+          [":SignJob", 2],
+          [":dispatch", 2],
+          ["node:inspector:post", 1],
+          ["node:internal/streams/readable:readableAddChunkPushByteMode", 1],
+          ["node:internal/streams/readable:Readable.read", 1],
+          ["node:net:onReadableStreamEnd", 1],
+          ["node:events:", 1],
+          ["node:net:Socket.read", 1],
+          ["node:events:_addListener", 1],
+          ["node:_http_incoming:_addHeaderLine", 1],
+          [
+            "file:///workspace/apps/world-api/dist/runtime/postwar-finance-node-route.js:serve",
+            1
+          ],
+          [
+            "node:internal/webstreams/readablestream:setupReadableStreamDefaultControllerFromSource",
+            1
+          ],
+          ["node:internal/deps/undici/undici:makeRequest", 1],
+          ["node:internal/url:URL", 1],
+          ["node:internal/event_target:isEventTarget", 1],
+          ["node:internal/streams/readable:Readable.push", 1],
+          ["node:internal/streams/readable:addChunk", 1],
+          ["node:internal/webstreams/readablestream:enqueue", 1],
+          ["node:net:_unrefTimer", 1],
+          ["node:events:emit", 1],
+          ["node:internal/streams/duplex:get", 1],
+          [
+            "file:///workspace/apps/world-api/dist/runtime-preparation/bounded-executor-transport.js:boundedBytes",
+            1
+          ],
+          ["node:vm:runInNewContext", 1]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 30,
+          "active||": 1
+        },
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "SEQUENTIAL_CENTRAL_BANK",
+        "totalIncludingDrainMs": 91.55343600001652,
+        "requests": 3,
+        "errors": 0,
+        "actualInputRatePerSecond": null,
+        "injectionSpanMs": null,
+        "byOffice": {
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 3,
+              "meanMs": 30.50549966667313,
+              "p50Ms": 27.6961350000347,
+              "p95Ms": 40.01390799996443,
+              "maxMs": 40.01390799996443
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 3,
+              "meanMs": 0.05499299999792129,
+              "p50Ms": 0.049961999990046024,
+              "p95Ms": 0.0659250000026077,
+              "maxMs": 0.0659250000026077
+            },
+            "hold": {
+              "count": 3,
+              "meanMs": 24.040892000019085,
+              "p50Ms": 20.666603000019677,
+              "p95Ms": 33.5638340000296,
+              "maxMs": 33.5638340000296
+            },
+            "queryAwait": {
+              "count": 27,
+              "meanMs": 2.5519145925925977,
+              "p50Ms": 0.40931600000476465,
+              "p95Ms": 12.86941400001524,
+              "maxMs": 21.517725000041537
+            },
+            "meanQueryAwaitPerHoldMs": 22.967231333333377,
+            "meanOutsideQueryAwaitPerHoldMs": 1.0736606666857067
+          }
+        },
+        "eventLoop": {
+          "meanMs": 10.2656,
+          "maxMs": 11.018239,
+          "p95Ms": 11.018239
+        },
+        "profileTop": [
+          [":(idle)", 68],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:freeze",
+            3
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:readCurrentSeatHeadersFrom",
+            2
+          ],
+          ["node:internal/stream_base_commons:onStreamRead", 2],
+          ["node:inspector:post", 1],
+          ["node:internal/deps/undici/undici:_Request", 1],
+          ["node:timers:clearTimeout", 1],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:addFields",
+            1
+          ],
+          [":(garbage collector)", 1],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:readPageFrom",
+            1
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/runtime/postwar-finance-node-route.js:handle",
+            1
+          ],
+          ["node:internal/event_target:addEventListener", 1],
+          [
+            "node:internal/webstreams/readablestream:readableStreamAddReadRequest",
+            1
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/connection.js:",
+            1
+          ],
+          ["node:internal/event_target:Event", 1],
+          [":dispatch", 1]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {},
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "SEQUENTIAL_SOCIAL",
+        "totalIncludingDrainMs": 865.0657689999789,
+        "requests": 3,
+        "errors": 0,
+        "actualInputRatePerSecond": null,
+        "injectionSpanMs": null,
+        "byOffice": {
+          "SOCIAL": {
+            "latency": {
+              "count": 3,
+              "meanMs": 288.34414633332443,
+              "p50Ms": 250.41170999995666,
+              "p95Ms": 376.7671609999961,
+              "maxMs": 376.7671609999961
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 6,
+              "meanMs": 0.06227749999379739,
+              "p50Ms": 0.05644900002516806,
+              "p95Ms": 0.08846699999412522,
+              "maxMs": 0.08846699999412522
+            },
+            "hold": {
+              "count": 6,
+              "meanMs": 14.42930916667683,
+              "p50Ms": 7.149740000022575,
+              "p95Ms": 22.69829500000924,
+              "maxMs": 22.69829500000924
+            },
+            "queryAwait": {
+              "count": 48,
+              "meanMs": 1.7358212500039372,
+              "p50Ms": 0.37199100002180785,
+              "p95Ms": 15.505487999995239,
+              "maxMs": 15.622551000036765
+            },
+            "meanQueryAwaitPerHoldMs": 13.886570000031497,
+            "meanOutsideQueryAwaitPerHoldMs": 0.5427391666453332
+          },
+          "fixture_rent_child_worker_89497423": {
+            "connect": {
+              "count": 3,
+              "meanMs": 1.0507910000160336,
+              "p50Ms": 0.03324100002646446,
+              "p95Ms": 3.0864109999965876,
+              "maxMs": 3.0864109999965876
+            },
+            "hold": {
+              "count": 3,
+              "meanMs": 251.13624433332976,
+              "p50Ms": 216.12282200000482,
+              "p95Ms": 336.0983459999552,
+              "maxMs": 336.0983459999552
+            },
+            "queryAwait": {
+              "count": 87,
+              "meanMs": 0.7677305977030164,
+              "p50Ms": 0.3658999999752268,
+              "p95Ms": 2.7123589999973774,
+              "maxMs": 5.841408999986015
+            },
+            "meanQueryAwaitPerHoldMs": 22.26418733338748,
+            "meanOutsideQueryAwaitPerHoldMs": 228.8720569999423
+          }
+        },
+        "eventLoop": {
+          "meanMs": 41.15758323809524,
+          "maxMs": 230.162431,
+          "p95Ms": 167.510015
+        },
+        "profileTop": [
+          [":(idle)", 112],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:",
+            108
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:ownDescriptors",
+            74
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalizeRecord",
+            64
+          ],
+          [":(garbage collector)", 55],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:canonicalSerialize",
+            35
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:freeze",
+            29
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:",
+            28
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:position",
+            16
+          ],
+          [":update", 15],
+          ["file:///workspace/packages/core/dist/numeric/money.js:isMoney", 14],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalize",
+            14
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:foldFinanceNativeBudgetMixedPrefix",
+            14
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/world-decimal.js:canonicalDecimal",
+            12
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalizeArray",
+            11
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:digitsToString",
+            11
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:",
+            10
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:prepareFinanceNativeBudgetFinancialReplay",
+            10
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:aggregateBeneficialHousingLiquidClaim",
+            10
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:",
+            9
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:freeze",
+            9
+          ],
+          ["file:///workspace/packages/core/dist/numeric/money.js:Money", 6],
+          [
+            "file:///workspace/packages/core/dist/commands/social-employment-position-lifecycle.js:freeze",
+            5
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:replayPostwarSharedOfficePrefix",
+            5
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-paged-finance-social-replay.js:readPostwarPagedFinanceSocialReplayFrom",
+            4
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:parseDecimal",
+            4
+          ],
+          [":writeBuffer", 3],
+          [
+            "file:///workspace/packages/core/dist/numeric/quantity.js:isQuantity",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:addFields",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:P.toFixed",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:finiteToString",
+            3
+          ],
+          [":SignJob", 2],
+          [
+            "file:///workspace/node_modules/.pnpm/pg-protocol@1.16.0/node_modules/pg-protocol/dist/parser.js:handlePacket",
+            2
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postwar-office-runtime-read-service.js:",
+            2
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-social-employment-service-creation-runtime.js:readPlanningFrom",
+            2
+          ]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 3,
+          "idle in transaction|Client|ClientRead": 3
+        },
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "WITHOUT_SOCIAL_20RPS_5S",
+        "totalIncludingDrainMs": 8547.086820999975,
+        "requests": 100,
+        "errors": 50,
+        "actualInputRatePerSecond": null,
+        "injectionSpanMs": null,
+        "byOffice": {
+          "FINANCE": {
+            "latency": {
+              "count": 50,
+              "meanMs": 3576.799686440001,
+              "p50Ms": 3571.132393000007,
+              "p95Ms": 3638.738362000033,
+              "maxMs": 3660.3852349999943
+            },
+            "errors": 50,
+            "codes": ["CURRENT_FINANCIAL_UNAVAILABLE"],
+            "planningStatuses": []
+          },
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 50,
+              "meanMs": 24.694072039999302,
+              "p50Ms": 22.16446800000267,
+              "p95Ms": 32.84267899999395,
+              "maxMs": 72.95155800000066
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 250,
+              "meanMs": 1.7239957679954823,
+              "p50Ms": 0.06286700000055134,
+              "p95Ms": 8.179882000025827,
+              "maxMs": 86.81200199999148
+            },
+            "hold": {
+              "count": 250,
+              "meanMs": 15.999182456000709,
+              "p50Ms": 13.892735000001267,
+              "p95Ms": 22.795662000018638,
+              "maxMs": 78.25070600002073
+            },
+            "queryAwait": {
+              "count": 2250,
+              "meanMs": 1.7431987697771854,
+              "p50Ms": 0.32811399997444823,
+              "p95Ms": 7.675845000019763,
+              "maxMs": 69.62045899999794
+            },
+            "meanQueryAwaitPerHoldMs": 15.688788927994668,
+            "meanOutsideQueryAwaitPerHoldMs": 0.3103935280060396
+          }
+        },
+        "eventLoop": {
+          "meanMs": 10.074991094339623,
+          "maxMs": 11.812863,
+          "p95Ms": 10.919935
+        },
+        "profileTop": [
+          [":(idle)", 7080],
+          [":(program)", 85],
+          [":writev", 28],
+          [":writeBuffer", 23],
+          [":SignJob", 19],
+          [
+            "file:///workspace/tools/office-connection/native-registered-final-host.mjs:",
+            15
+          ],
+          [":run", 15],
+          [":runMicrotasks", 14],
+          ["node:internal/stream_base_commons:onStreamRead", 13],
+          ["node:internal/process/task_queues:nextTick", 13],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:readCurrentSeatHeadersFrom",
+            11
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postwar-office-runtime-read-service.js:",
+            10
+          ],
+          ["node:internal/per_context/domexception:DOMException", 8],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:addFields",
+            8
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-office-projection-store.js:freeze",
+            7
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postwar-office-runtime-read-service.js:handle",
+            7
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:query",
+            6
+          ],
+          ["node:events:emit", 6],
+          [":utf8Slice", 6],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:",
+            6
+          ],
+          [":(garbage collector)", 6],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postgres-server-read-binding.js:query",
+            5
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/runtime/postwar-finance-node-route.js:serve",
+            5
+          ],
+          ["node:internal/timers:insert", 4],
+          ["node:internal/errors:wrappedFn", 4],
+          [":", 4],
+          ["node:internal/streams/readable:maybeReadMore_", 3],
+          ["node:events:", 3],
+          [
+            "file:///workspace/node_modules/.pnpm/pg-protocol@1.16.0/node_modules/pg-protocol/dist/buffer-reader.js:cstring",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:parseRow",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg-pool@3.14.0_pg@8.16.3/node_modules/pg-pool/index.js:_pulseQueue",
+            3
+          ],
+          [
+            "file:///workspace/apps/world-api/dist/integration/postwar-office-runtime-read-service.js:validHeader",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg-protocol@1.16.0/node_modules/pg-protocol/dist/index.js:",
+            3
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/pg-protocol@1.16.0/node_modules/pg-protocol/dist/buffer-writer.js:ensure",
+            3
+          ],
+          ["node:internal/deps/undici/undici:_Response", 3]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 50,
+          "active||": 10,
+          "idle in transaction|Client|ClientRead": 3
+        },
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "WITH_SOCIAL_20RPS_5S",
+        "totalIncludingDrainMs": 10474.392557999992,
+        "requests": 100,
+        "errors": 34,
+        "actualInputRatePerSecond": null,
+        "injectionSpanMs": null,
+        "byOffice": {
+          "FINANCE": {
+            "latency": {
+              "count": 34,
+              "meanMs": 6451.715006205882,
+              "p50Ms": 6510.468851999962,
+              "p95Ms": 7145.634981000039,
+              "maxMs": 7298.7890999999945
+            },
+            "errors": 34,
+            "codes": ["CURRENT_FINANCIAL_UNAVAILABLE"],
+            "planningStatuses": []
+          },
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 33,
+              "meanMs": 963.5848201818175,
+              "p50Ms": 1011.3100529999938,
+              "p95Ms": 1842.4303799999761,
+              "maxMs": 1950.0187269999878
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          },
+          "SOCIAL": {
+            "latency": {
+              "count": 33,
+              "meanMs": 2134.9478514545426,
+              "p50Ms": 2410.8502940000035,
+              "p95Ms": 3311.7862789999926,
+              "maxMs": 3355.457105999987
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 235,
+              "meanMs": 733.8107265744695,
+              "p50Ms": 688.6781599999522,
+              "p95Ms": 1671.7665849999757,
+              "maxMs": 1800.5903300000355
+            },
+            "hold": {
+              "count": 235,
+              "meanMs": 63.26767168510631,
+              "p50Ms": 22.306926999997813,
+              "p95Ms": 183.31148299999768,
+              "maxMs": 245.43818300002022
+            },
+            "queryAwait": {
+              "count": 2049,
+              "meanMs": 7.220744596388811,
+              "p50Ms": 0.3476770000415854,
+              "p95Ms": 41.08379399997648,
+              "maxMs": 184.7676109999884
+            },
+            "meanQueryAwaitPerHoldMs": 62.958747565960316,
+            "meanOutsideQueryAwaitPerHoldMs": 0.3089241191459958
+          },
+          "fixture_rent_child_worker_89497423": {
+            "connect": {
+              "count": 33,
+              "meanMs": 0.3236811212069976,
+              "p50Ms": 0.023303000023588538,
+              "p95Ms": 2.8588249999447726,
+              "maxMs": 4.195536000013817
+            },
+            "hold": {
+              "count": 33,
+              "meanMs": 201.57824654545755,
+              "p50Ms": 192.56190999998944,
+              "p95Ms": 248.46701899997424,
+              "maxMs": 248.87522799998987
+            },
+            "queryAwait": {
+              "count": 957,
+              "meanMs": 0.8251373375134757,
+              "p50Ms": 0.31200500001432374,
+              "p95Ms": 2.591840000008233,
+              "maxMs": 42.59853000001749
+            },
+            "meanQueryAwaitPerHoldMs": 23.928982787890796,
+            "meanOutsideQueryAwaitPerHoldMs": 177.64926375756676
+          }
+        },
+        "eventLoop": {
+          "meanMs": 21.374290546938777,
+          "maxMs": 191.889407,
+          "p95Ms": 135.135231
+        },
+        "profileTop": [
+          [":(idle)", 3526],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:",
+            1065
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalizeRecord",
+            737
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:ownDescriptors",
+            630
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:canonicalSerialize",
+            426
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:freeze",
+            283
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:",
+            277
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/money.js:isMoney",
+            174
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:position",
+            164
+          ],
+          [":update", 154],
+          [":(garbage collector)", 140],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:digitsToString",
+            121
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalize",
+            114
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:aggregateBeneficialHousingLiquidClaim",
+            97
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalizeArray",
+            85
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:",
+            82
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:prepareFinanceNativeBudgetFinancialReplay",
+            77
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:foldFinanceNativeBudgetMixedPrefix",
+            73
+          ],
+          [":(program)", 68],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:freeze",
+            68
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/world-decimal.js:canonicalDecimal",
+            61
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/social-employment-position-lifecycle.js:freeze",
+            57
+          ],
+          ["file:///workspace/packages/core/dist/numeric/money.js:Money", 54],
+          [":writev", 46],
+          [":writeBuffer", 37],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:",
+            34
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:replayPostwarSharedOfficePrefix",
+            31
+          ],
+          [":runMicrotasks", 24],
+          [":run", 23],
+          [
+            "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js:addFields",
+            22
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:P.toFixed",
+            22
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-social-service-creation-originals.js:",
+            21
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js:check",
+            20
+          ],
+          [":SignJob", 19],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:finiteToString",
+            19
+          ]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 2,
+            "idle": 2,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 47,
+          "idle in transaction|Client|ClientRead": 71,
+          "active||": 13
+        },
+        "command": null,
+        "head": null
+      },
+      {
+        "name": "SINGLE_BUDGET_WITH_READS",
+        "totalIncludingDrainMs": 1908.3596520000137,
+        "requests": 3,
+        "errors": 0,
+        "actualInputRatePerSecond": null,
+        "injectionSpanMs": null,
+        "byOffice": {
+          "FINANCE": {
+            "latency": {
+              "count": 1,
+              "meanMs": 1591.56262599997,
+              "p50Ms": 1591.56262599997,
+              "p95Ms": 1591.56262599997,
+              "maxMs": 1591.56262599997
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          },
+          "CENTRAL_BANK": {
+            "latency": {
+              "count": 1,
+              "meanMs": 27.269830999954138,
+              "p50Ms": 27.269830999954138,
+              "p95Ms": 27.269830999954138,
+              "maxMs": 27.269830999954138
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          },
+          "SOCIAL": {
+            "latency": {
+              "count": 1,
+              "meanMs": 402.41414900001837,
+              "p50Ms": 402.41414900001837,
+              "p95Ms": 402.41414900001837,
+              "maxMs": 402.41414900001837
+            },
+            "errors": 0,
+            "codes": [],
+            "planningStatuses": []
+          }
+        },
+        "byRole": {
+          "final_read_d7cd1aa776": {
+            "connect": {
+              "count": 12,
+              "meanMs": 1.8260260000048827,
+              "p50Ms": 0.04424700001254678,
+              "p95Ms": 18.624228000000585,
+              "maxMs": 18.624228000000585
+            },
+            "hold": {
+              "count": 12,
+              "meanMs": 23.943925583337357,
+              "p50Ms": 5.969379000016488,
+              "p95Ms": 164.94848700001603,
+              "maxMs": 164.94848700001603
+            },
+            "queryAwait": {
+              "count": 89,
+              "meanMs": 3.172391460683286,
+              "p50Ms": 0.3436179999844171,
+              "p95Ms": 11.651536000019405,
+              "maxMs": 158.4285619999864
+            },
+            "meanQueryAwaitPerHoldMs": 23.528570000067702,
+            "meanOutsideQueryAwaitPerHoldMs": 0.41535558326965355
+          },
+          "fixture_rent_child_intake_89497423": {
+            "connect": {
+              "count": 1,
+              "meanMs": 3.182904999994207,
+              "p50Ms": 3.182904999994207,
+              "p95Ms": 3.182904999994207,
+              "maxMs": 3.182904999994207
+            },
+            "hold": {
+              "count": 1,
+              "meanMs": 289.4392110000481,
+              "p50Ms": 289.4392110000481,
+              "p95Ms": 289.4392110000481,
+              "maxMs": 289.4392110000481
+            },
+            "queryAwait": {
+              "count": 15,
+              "meanMs": 1.330023133327874,
+              "p50Ms": 0.551699000003282,
+              "p95Ms": 7.910297999973409,
+              "maxMs": 7.910297999973409
+            },
+            "meanQueryAwaitPerHoldMs": 19.95034699991811,
+            "meanOutsideQueryAwaitPerHoldMs": 269.48886400013
+          },
+          "fixture_rent_child_worker_89497423": {
+            "connect": {
+              "count": 26,
+              "meanMs": 0.2697886538450033,
+              "p50Ms": 0.02499599999282509,
+              "p95Ms": 2.9731250000186265,
+              "maxMs": 3.4160810000030324
+            },
+            "hold": {
+              "count": 26,
+              "meanMs": 71.15308876923743,
+              "p50Ms": 5.602683000033721,
+              "p95Ms": 282.4504559999914,
+              "maxMs": 412.7596000000485
+            },
+            "queryAwait": {
+              "count": 417,
+              "meanMs": 0.94341926858565,
+              "p50Ms": 0.27000899997074157,
+              "p95Ms": 2.217761000036262,
+              "maxMs": 133.35292100004153
+            },
+            "meanQueryAwaitPerHoldMs": 15.130993653854462,
+            "meanOutsideQueryAwaitPerHoldMs": 56.02209511538296
+          },
+          "final_projection_pub_d7cd1aa776": {
+            "connect": {
+              "count": 3,
+              "meanMs": 1.0762409999927816,
+              "p50Ms": 0.08106599998427555,
+              "p95Ms": 3.090468999987934,
+              "maxMs": 3.090468999987934
+            },
+            "hold": {
+              "count": 3,
+              "meanMs": 44.24792800001645,
+              "p50Ms": 5.616991000017151,
+              "p95Ms": 125.37861100002192,
+              "maxMs": 125.37861100002192
+            },
+            "queryAwait": {
+              "count": 17,
+              "meanMs": 7.717877588234842,
+              "p50Ms": 0.3147910000407137,
+              "p95Ms": 43.530228000017814,
+              "maxMs": 43.530228000017814
+            },
+            "meanQueryAwaitPerHoldMs": 43.7346396666641,
+            "meanOutsideQueryAwaitPerHoldMs": 0.5132883333523447
+          }
+        },
+        "eventLoop": {
+          "meanMs": 28.887226181818182,
+          "maxMs": 260.702207,
+          "p95Ms": 150.732799
+        },
+        "profileTop": [
+          [":(idle)", 441],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:ownDescriptors",
+            193
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalizeRecord",
+            173
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:canonicalSerialize",
+            106
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:",
+            76
+          ],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:position",
+            75
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:freeze",
+            59
+          ],
+          ["file:///workspace/packages/core/dist/numeric/money.js:isMoney", 47],
+          [
+            "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js:aggregateBeneficialHousingLiquidClaim",
+            39
+          ],
+          [":update", 36],
+          [":(garbage collector)", 32],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-shared-office-prefix.js:",
+            32
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:digitsToString",
+            27
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalize",
+            26
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:foldFinanceNativeBudgetMixedPrefix",
+            26
+          ],
+          ["file:///workspace/packages/core/dist/numeric/money.js:Money", 22],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:prepareFinanceNativeBudgetFinancialReplay",
+            20
+          ],
+          [
+            "file:///workspace/packages/core/dist/numeric/world-decimal.js:canonicalDecimal",
+            19
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:normalizeArray",
+            17
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/finance-budget-native.js:",
+            16
+          ],
+          [
+            "file:///workspace/packages/core/dist/serialization/canonical.js:",
+            13
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js:check",
+            9
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-industry-labour-source.js:uniqueBy",
+            9
+          ],
+          [
+            "file:///workspace/packages/core/dist/commands/social-employment-position-lifecycle.js:freeze",
+            8
+          ],
+          [":(program)", 7],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:finiteToString",
+            6
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:P.toFixed",
+            6
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:Decimal",
+            5
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-industry-labour-source.js:projectPostwarIndustryLabourAllocation",
+            5
+          ],
+          [":writeBuffer", 4],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-social-service-creation-originals.js:",
+            4
+          ],
+          [
+            "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs:parseDecimal",
+            4
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/postwar-beneficial-housing-rent-mixed-source.js:read",
+            4
+          ],
+          [
+            "file:///workspace/apps/world-worker/dist/persistence/atomic-transition-repository.js:",
+            4
+          ],
+          ["node:internal/stream_base_commons:onStreamRead", 3]
+        ],
+        "poolsAtEnd": [
+          {
+            "total": 1,
+            "idle": 1,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ],
+        "postgresActivitySamples": {
+          "idle|Client|ClientRead": 21,
+          "idle in transaction|Client|ClientRead": 8
+        },
+        "command": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "countryId": "COUNTRY_01",
+          "commandId": "COMMAND_DIAG17_SET",
+          "commandType": "CORE_FINANCE_BUDGET_APPROPRIATION_V1",
+          "commandFingerprint": "sha256:50a978bae68c61c478e972b2cd35dfec3eef6fb8535fd2863810784ce1ad4f5a",
+          "officeId": "FINANCE",
+          "authorityKind": "DISCRETIONARY_USER",
+          "queueState": "FINALIZED",
+          "receiptCount": 1,
+          "outcome": "COMMITTED",
+          "worldVersionBefore": "0",
+          "worldVersionAfter": "1",
+          "receiptEventIds": [
+            "EVENT_NATIVE_BUDGET_50A978BAE68C61C478E972B2CD35DFEC3EEF6FB8535FD2863810784CE1AD4F5A_1"
+          ],
+          "eventIds": [
+            "EVENT_NATIVE_BUDGET_50A978BAE68C61C478E972B2CD35DFEC3EEF6FB8535FD2863810784CE1AD4F5A_1"
+          ],
+          "eventTypes": ["FINANCE_NATIVE_BUDGET_ENVELOPE_SET_V1"],
+          "eventSequences": ["1"],
+          "financialBatchCount": 0,
+          "financialLegCount": 0,
+          "inventoryPostingCount": 0,
+          "financialBatchFingerprints": [],
+          "inventoryPostingFingerprints": []
+        },
+        "head": {
+          "worldVersion": "1",
+          "eventSequence": "1"
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Five-second finite bursts, not five-minute capacity acceptance",
+    "One active JWT subject, not 100 independent accounts",
+    "Finance H0 returned 503 and is excluded from clean control",
+    "Industry H0 optional preparation omitted; first budget COMMITTED but Industry derived publication failed P0002",
+    "Original ten-second timeout not reproduced in clean short run",
+    "query await includes client scheduling and is not server execution time",
+    "250ms pg_stat_activity samples cannot rule out every transient lock"
+  ],
+  "cleanup": {
+    "containersRemoved": [
+      "econmind-diagnosis-app-20261117",
+      "econmind-postwar-reference-6629afb6",
+      "econmind-diagnosis-cli-20261117"
+    ],
+    "volumesRemoved": [
+      "econmind-diagnosis-work-20261117",
+      "econmind-postwar-reference-data-6629afb6",
+      "17b2ee25724327f911edaeda3e5e2dbe8cd690690ffab15c922fbb9a3ad6df13"
+    ],
+    "images": [
+      {
+        "image": "docker@sha256:3f4743208d2338c934d7b8bcfbe1bb54c0b2355c510ad5e0f31c0c4a54bd704e",
+        "removed": true
+      },
+      {
+        "image": "postgres@sha256:1beaa3084eee2676f20a9cd9928f0bf2c5bf674f8e49f81017912183d377c61c",
+        "removed": true
+      }
+    ],
+    "otherContainerNames": [
+      "reactive_resume-reactive_resume-1",
+      "reactive_resume-seaweedfs_create_bucket-1",
+      "reactive_resume-postgres-1",
+      "reactive_resume-redis-1",
+      "reactive_resume-seaweedfs-1"
+    ],
+    "otherVolumeCount": 4,
+    "activeContainers": "",
+    "dockerRestoredStopped": true,
+    "hostTemporaryDirectory": "REMOVED_VERIFIED",
+    "cleanupMethod": "Verified exact root; file-by-file deletion without following links"
+  }
+}
