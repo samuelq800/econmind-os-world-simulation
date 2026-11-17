@@ -87,7 +87,10 @@ export async function currentPages(
       {
         schemaVersion: 'postwar-office-runtime-read-v1',
         requestId: randomUUID(),
-        operation: 'READ_CURRENT_OFFICE_OPENING',
+        operation:
+          dataset === 'service-pools'
+            ? 'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING'
+            : 'READ_CURRENT_OFFICE_OPENING',
         officeId: 'SOCIAL',
         dataset,
         page: {

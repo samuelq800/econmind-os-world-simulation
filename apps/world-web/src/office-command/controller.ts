@@ -207,6 +207,7 @@ export function createOfficeCommandController(
   let utilityPlanningCode: string | null = null;
   let socialPoolsPage: RuntimePage | null = null;
   let socialPoolsCode: string | null = null;
+  let socialServiceCreateOpen = false;
   let socialApplicationsPage: RuntimePage | null = null;
   let socialApplicationsCode: string | null = null;
   let socialProgrammesPage: RuntimePage | null = null;
@@ -239,6 +240,7 @@ export function createOfficeCommandController(
     for (const fn of [...listeners]) fn();
   };
   function disconnect(reason = 'SESSION_OR_VIEW_LOST') {
+    socialServiceCreateOpen = false;
     retired = true;
     epoch++;
     busy = false;
@@ -321,6 +323,7 @@ export function createOfficeCommandController(
     checkLiveness();
   }
   function fail(reason: string, publicCode = reason) {
+    socialServiceCreateOpen = false;
     if (reason === 'DENIED') {
       disconnect('DENIED');
       return;
@@ -559,6 +562,7 @@ export function createOfficeCommandController(
       'service-pools',
       requestId(),
       previous,
+      socialServiceCreateOpen,
     );
     if (!checkLiveness()) return;
     if (next.status === 'DENIED') {
@@ -670,6 +674,7 @@ export function createOfficeCommandController(
   }
   async function read(tradeOpeningH0 = false, previous?: RuntimePage) {
     if (!b || !reader) return;
+    socialServiceCreateOpen = false;
     model = null;
     runtimePage = null;
     fxQuotesPage = null;
@@ -984,6 +989,7 @@ export function createOfficeCommandController(
           : null,
         fxQuotesCode,
         socialPoolsCode,
+        socialServiceCreateOpen,
         socialProgrammesPage: socialProgrammesPage
           ? (JSON.parse(JSON.stringify(socialProgrammesPage)) as RuntimePage)
           : null,
@@ -1221,6 +1227,27 @@ export function createOfficeCommandController(
       const previous = socialPoolsPage;
       return operation(() => readSocialPools(previous));
     },
+    openSocialServiceCreate() {
+      if (b?.read.identity.officeId !== 'SOCIAL' || attempted || !currentHead())
+        return Promise.resolve();
+      return operation(async () => {
+        socialServiceCreateOpen = true;
+        await readSocialPools();
+      });
+    },
+    closeSocialServiceCreate() {
+      socialServiceCreateOpen = false;
+      if (
+        !attempted &&
+        intent?.request.commandType ===
+          'CORE_SOCIAL_EMPLOYMENT_SERVICE_CREATE_V1'
+      ) {
+        intent = null;
+        status = 'CURRENT_AUTHORIZED_HEAD';
+        code = null;
+      }
+      notify();
+    },
     nextSocialProgrammesPage() {
       if (
         !socialProgrammesPage ||
@@ -1316,6 +1343,7 @@ export function createOfficeCommandController(
     ) {
       const h = currentHead();
       if (
+        !socialServiceCreateOpen ||
         !b ||
         busy ||
         attempted ||

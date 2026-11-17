@@ -417,14 +417,28 @@ export function installOfficeCommand(
       dialog.append(applicationSection);
 
       dialog.append(
-        renderSocialEmploymentServiceCreateForm(document, {
-          page: state.socialPoolsPage,
-          enabled: state.canStage,
-          stage: (draft) =>
-            active(owner, lifetime, dialog!) &&
-            owner.stageSocialEmploymentServiceCreate(draft),
-        }),
+        button(
+          state.socialServiceCreateOpen ? '收起创建表单' : '创建就业服务',
+          state.socialServiceCreateOpen
+            ? 'social-close-create'
+            : 'social-open-create',
+          state.canRead,
+          () =>
+            state.socialServiceCreateOpen
+              ? owner.closeSocialServiceCreate()
+              : owner.openSocialServiceCreate(),
+        ),
       );
+      if (state.socialServiceCreateOpen)
+        dialog.append(
+          renderSocialEmploymentServiceCreateForm(document, {
+            page: state.socialPoolsPage,
+            enabled: state.canStage,
+            stage: (draft) =>
+              active(owner, lifetime, dialog!) &&
+              owner.stageSocialEmploymentServiceCreate(draft),
+          }),
+        );
       dialog.append(
         renderSocialEmploymentPlanForm(document, {
           positions:
@@ -889,7 +903,10 @@ export function installOfficeCommand(
         });
         const surface = dialog;
         surface.addEventListener('close', () => {
-          if (!surface.open) clearPrivateContent(surface);
+          if (!surface.open) {
+            controller.closeSocialServiceCreate();
+            clearPrivateContent(surface);
+          }
         });
         root.append(dialog);
         redraw = true;
@@ -942,9 +959,22 @@ export function installOfficeCommand(
       event.preventDefault();
       event.stopImmediatePropagation();
       dialog.showModal();
-      void controller.refresh().finally(() => {
-        reconcile(true);
-      });
+      const owner = controller,
+        lifetime = generation,
+        surface = dialog;
+      void owner
+        .refresh()
+        .then(async () => {
+          if (
+            role === 'social' &&
+            surface.open &&
+            active(owner, lifetime, surface)
+          )
+            await owner.openSocialServiceCreate();
+        })
+        .finally(() => {
+          reconcile(true);
+        });
     },
     true,
   );

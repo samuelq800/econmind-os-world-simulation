@@ -276,6 +276,11 @@ async function fixture(
           },
           allTextContents: async () => [],
           click: async () => {
+            if (selector.includes('social-open-create')) {
+              events.push('open-create');
+              read();
+              return;
+            }
             if (selector.includes('"next-request"')) {
               events.push('next-request');
               await emit({}, '/v1/postwar-office-runtime');

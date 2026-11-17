@@ -218,7 +218,11 @@ beforeEach(() => {
     return { status: 'UNAVAILABLE', code: 'TEST_ONLY_NO_SOURCE_ISSUED' };
   });
 });
-function call() {
+function call(
+  operation = 'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING',
+  officeId = 'SOCIAL',
+  dataset = 'service-pools',
+) {
   return createPostwarOfficeRuntimeReadService(config, {
     socialServiceCreationPlanningReader: h.planning,
   }).handle({
@@ -226,13 +230,41 @@ function call() {
     request: {
       schemaVersion: 'postwar-office-runtime-read-v1',
       requestId: '22222222-2222-4222-8222-222222222222',
-      operation: 'READ_CURRENT_OFFICE_OPENING',
-      officeId: 'SOCIAL',
-      dataset: 'service-pools',
+      operation,
+      officeId,
+      dataset,
     },
   });
 }
 describe('Social planning API sequencing, transport mocks only', () => {
+  it.each(['READ_CURRENT_OFFICE_OPENING', 'READ_CURRENT_SOCIAL_OPENING'])(
+    'reads ordinary pools without acquiring a Worker planning transaction: %s',
+    async (operation) => {
+      const result = await call(operation);
+      expect(result.httpStatus).toBe(200);
+      expect(h.planning.read).not.toHaveBeenCalled();
+      expect(events).toEqual(['jwt', 'acquire-1', 'release-1']);
+      expect(result.body).not.toHaveProperty(
+        'source.currentEmploymentServiceCreationOptions',
+      );
+    },
+  );
+  it.each([
+    ['FINANCE', 'ledger-balances'],
+    ['SOCIAL', 'positions'],
+  ])(
+    'rejects creation planning outside Social pools: %s/%s',
+    async (office, dataset) => {
+      const result = await call(
+        'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING',
+        office,
+        dataset,
+      );
+      expect(result.httpStatus).toBe(400);
+      expect(h.planning.read).not.toHaveBeenCalled();
+      expect(h.snapshot).not.toHaveBeenCalled();
+    },
+  );
   it('releases the page client, passes only the two head keys and freshly reauthorizes before returning', async () => {
     const result = await call();
     expect(result.httpStatus).toBe(200);

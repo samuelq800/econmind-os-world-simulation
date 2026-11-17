@@ -326,6 +326,7 @@ export function createPostwarRuntimeClient(
       dataset: string,
       requestId: string,
       previous?: RuntimePage,
+      includeCreationPlanning = false,
     ): Promise<RuntimeResult> {
       const fail = (
         status: 'NOT_CONNECTED' | 'STALE' | 'DENIED' | 'UNAVAILABLE',
@@ -339,7 +340,9 @@ export function createPostwarRuntimeClient(
       }
       if (
         !uuid(requestId) ||
-        !officeDatasets[c.identity.officeId]?.includes(dataset)
+        !officeDatasets[c.identity.officeId]?.includes(dataset) ||
+        (includeCreationPlanning &&
+          (c.identity.officeId !== 'SOCIAL' || dataset !== 'service-pools'))
       )
         return fail('DENIED', 'INVALID_DATASET');
       if (
@@ -393,7 +396,9 @@ export function createPostwarRuntimeClient(
               body: JSON.stringify({
                 schemaVersion: POSTWAR_RUNTIME_SCHEMA,
                 requestId,
-                operation: 'READ_CURRENT_OFFICE_OPENING',
+                operation: includeCreationPlanning
+                  ? 'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING'
+                  : 'READ_CURRENT_OFFICE_OPENING',
                 officeId: c.identity.officeId,
                 dataset,
                 page: {

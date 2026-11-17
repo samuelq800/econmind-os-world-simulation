@@ -114,6 +114,8 @@ export const POSTWAR_OFFICE_RUNTIME_OPERATION =
   'READ_CURRENT_SOCIAL_OPENING' as const;
 export const POSTWAR_CURRENT_OFFICE_RUNTIME_OPERATION =
   'READ_CURRENT_OFFICE_OPENING' as const;
+export const POSTWAR_SOCIAL_CREATION_PLANNING_OPERATION =
+  'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING' as const;
 type OriginalSuccessPage = Extract<
   PostwarOfficeProjectionPage,
   { status: 'PAGE' | 'EMPTY' }
@@ -302,6 +304,11 @@ function parseRequest(value: unknown) {
     !Object.hasOwn(OFFICE_RUNTIME_DATASETS, office) ||
     (request.operation !== POSTWAR_CURRENT_OFFICE_RUNTIME_OPERATION &&
       !(
+        request.operation === POSTWAR_SOCIAL_CREATION_PLANNING_OPERATION &&
+        office === 'SOCIAL' &&
+        request.dataset === 'service-pools'
+      ) &&
+      !(
         request.operation === POSTWAR_OFFICE_RUNTIME_OPERATION &&
         office === 'SOCIAL'
       )) ||
@@ -343,6 +350,8 @@ function parseRequest(value: unknown) {
     throw Error('INVALID_REQUEST');
   return {
     requestId: request.requestId,
+    includeCreationPlanning:
+      request.operation === POSTWAR_SOCIAL_CREATION_PLANNING_OPERATION,
     office: office as PostwarProjectionOffice,
     dataset: request.dataset,
     offset: Number(offset),
@@ -1301,6 +1310,7 @@ export function createPostwarOfficeRuntimeReadService(
             );
             if (
               !response?.body.ok ||
+              !request.includeCreationPlanning ||
               request.office !== 'SOCIAL' ||
               request.dataset !== 'service-pools' ||
               !socialServiceCreationPlanningReader

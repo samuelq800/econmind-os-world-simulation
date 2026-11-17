@@ -224,6 +224,8 @@ function fixture() {
       });
     if (mode === 'denied') return new Response(null, { status: 403 });
     const p = page(body.dataset);
+    if (body.operation !== 'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING')
+      delete p.source.currentEmploymentServiceCreationOptions;
     return Response.json({
       schemaVersion: POSTWAR_RUNTIME_SCHEMA,
       requestId: body.requestId,
@@ -489,10 +491,41 @@ describe('first-day licensed service creation user intent (TEST_ONLY)', () => {
     expect(panel.textContent).toContain('0 XAA');
     expect(panel.textContent).toContain('当前求职人数 20 person');
   });
+  it('plans only on explicit open, clears an unsubmitted create on close and reads fresh options on reopen', async () => {
+    const f = fixture(),
+      c = f.controller();
+    const planningCalls = () =>
+      f.calls.filter(
+        (x) =>
+          x.body.operation === 'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING',
+      );
+    await c.refresh();
+    expect(planningCalls()).toHaveLength(0);
+    expect(c.stageSocialEmploymentServiceCreate(f.draft)).toBe(false);
+    await c.openSocialServiceCreate();
+    expect(planningCalls()).toHaveLength(1);
+    expect(c.stageSocialEmploymentServiceCreate(f.draft)).toBe(true);
+    c.closeSocialServiceCreate();
+    expect(c.getState()).toMatchObject({
+      socialServiceCreateOpen: false,
+      intent: null,
+    });
+    expect(c.stageSocialEmploymentServiceCreate(f.draft)).toBe(false);
+    await c.openSocialServiceCreate();
+    expect(planningCalls()).toHaveLength(2);
+    await c.refresh();
+    expect(c.getState().socialServiceCreateOpen).toBe(false);
+    expect(c.getState().socialPoolsPage?.source).not.toHaveProperty(
+      'currentEmploymentServiceCreationOptions',
+    );
+    expect(planningCalls()).toHaveLength(2);
+    c.disconnect();
+  });
   it('uses existing review/one-submit/unknown original recovery without inventing economic FINAL', async () => {
     const f = fixture(),
       c = f.controller();
     await c.refresh();
+    await c.openSocialServiceCreate();
     expect(c.stageSocialEmploymentServiceCreate(f.draft)).toBe(true);
     await c.confirm();
     expect(f.calls.filter((x) => x.path === '/v1/office-command')).toHaveLength(
@@ -527,6 +560,7 @@ describe('first-day licensed service creation user intent (TEST_ONLY)', () => {
     const f = fixture(),
       c = f.controller();
     await c.refresh();
+    await c.openSocialServiceCreate();
     c.stageSocialEmploymentServiceCreate(f.draft);
     c.review();
     f.mode('missing');
@@ -576,6 +610,22 @@ describe('first-day licensed service creation user intent (TEST_ONLY)', () => {
       .find((e) => e.dataset.officeCommandAction === 'open')!
       .click();
     await c!.refresh();
+    expect(
+      f.calls.some(
+        (x) =>
+          x.body.operation === 'READ_CURRENT_SOCIAL_SERVICE_CREATION_PLANNING',
+      ),
+    ).toBe(false);
+    expect(
+      doc.body
+        .all()
+        .some((e) => e.dataset.socialServiceCreateAction === 'stage'),
+    ).toBe(false);
+    doc.body
+      .all()
+      .find((e) => e.dataset.officeCommandAction === 'social-open-create')!
+      .click();
+    await expect.poll(() => c!.getState().socialPoolsCode).toBeNull();
     expect(
       doc.body
         .all()
@@ -682,6 +732,13 @@ describe('first-day licensed service creation user intent (TEST_ONLY)', () => {
         await expect
           .poll(() => api.getState().status)
           .toBe('CURRENT_AUTHORIZED_HEAD');
+        await expect
+          .poll(
+            () =>
+              api.getState().socialServiceCreateOpen &&
+              api.getState().socialPoolsCode === null,
+          )
+          .toBe(true);
         expect(prevented).toBe(1);
         expect(stopped).toBe(1);
         const dialog = doc.root

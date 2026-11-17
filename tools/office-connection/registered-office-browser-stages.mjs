@@ -598,6 +598,16 @@ export async function createRegisteredOfficeBrowserStages(input) {
           : []),
         ['socialPoolsPage', selection.poolPageOffset, 'social-next-pools'],
       ]) {
+        if (field === 'socialPoolsPage') {
+          await page
+            .locator('[data-office-command-action="social-open-create"]')
+            .click();
+          await page.waitForFunction(() => {
+            const s = window.EconMindFixedOfficeProbe.state();
+            return s.canRead || s.status === 'DENIED' || s.status === 'MISSING';
+          });
+          current = await state();
+        }
         for (let n = 0; current[field]?.page.offset !== offset; n++) {
           assert.ok(n < 64, 'BOUNDED_SOCIAL_PAGE_SELECTION_EXCEEDED');
           const p = current[field];
