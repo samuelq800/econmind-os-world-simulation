@@ -11,7 +11,7 @@ import {
 } from '../finance/financial-ledger.js';
 import type { InventoryLedgerState } from '../inventory/inventory-ledger.js';
 import {
-  reconcileV08LedgerSnapshots,
+  assertRebuiltV08LedgerLineage,
   type RebuiltV08Ledgers,
 } from '../opening/opening-seed.js';
 import { inheritProductionDepositInstruments } from '../finance/production-deposit-funding.js';
@@ -72,9 +72,11 @@ export function prepareFinanceSocialLedger(
  * full seed/raw source is not retained; each request still checks actual pins. */
 export function prepareFinanceSocialLedgerFromOpening(
   opening: Readonly<RebuiltV08Ledgers>,
-  sha256Hex: Sha256Hex,
+  _sha256Hex: Sha256Hex,
 ): PreparedFinanceSocialLedger {
-  reconcileV08LedgerSnapshots({ reconstructed: opening, sha256Hex });
+  // Retain the public call signature; no reconciliation hash is requested.
+  void _sha256Hex;
+  assertRebuiltV08LedgerLineage(opening);
   if (
     opening.worldVersion !== '0' ||
     opening.financial.worldVersion !== '0' ||

@@ -47,6 +47,26 @@ beforeAll(async () => {
   retireFinanceSocialReplayContinuation(cursor);
 });
 describe('private genuine complete-domain page continuation', () => {
+  it('checks issued paired lineage without hashing an unrequested report, while real snapshot comparison still rejects a mismatch', () => {
+    const unrequestedHash = () => {
+      throw Error('UNREQUESTED_LEDGER_HASH');
+    };
+    const prepared = prepareFinanceSocialLedgerFromOpening(
+      small.opening,
+      unrequestedHash,
+    );
+    expect(readPreparedFinanceSocialOpening(prepared)).toBe(small.opening);
+    expect(() =>
+      prepareFinanceSocialLedgerFromOpening({ ...small.opening }, sha),
+    ).toThrow('validated reconstructed lineage');
+    const report = C.reconcileV08LedgerSnapshots({
+      reconstructed: small.opening,
+      financialSnapshot: { ...small.opening.financial, worldVersion: '1' },
+      sha256Hex: sha,
+    });
+    expect(report.financial.status).toBe('MISMATCH');
+    expect(() => C.assertV08LedgerReconciled(report)).toThrow('does not match');
+  });
   it('checks a new Budget command against earlier pages, not only the last page witness', async () => {
     let cursor = small.start({ worldVersion: '257', eventSequence: '259' });
     cursor = small.append(cursor, [frames[0]!]);

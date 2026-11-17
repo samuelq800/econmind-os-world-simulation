@@ -7,7 +7,7 @@ import {
 } from '../serialization/canonical.js';
 import { canonicalSha256, type Sha256Hex } from './command.js';
 import {
-  reconcileV08LedgerSnapshots,
+  assertRebuiltV08LedgerLineage,
   type RebuiltV08Ledgers,
 } from '../opening/opening-seed.js';
 import {
@@ -209,7 +209,7 @@ export function prepareFinanceSocialReplayContinuation(
   },
   sha256Hex: Sha256Hex,
 ): FinanceSocialReplayContinuation {
-  reconcileV08LedgerSnapshots({ reconstructed: input.opening, sha256Hex });
+  assertRebuiltV08LedgerLineage(input.opening);
   if (
     input.opening.worldVersion !== '0' ||
     input.opening.financial.worldVersion !== '0' ||

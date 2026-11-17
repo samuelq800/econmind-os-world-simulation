@@ -1003,15 +1003,22 @@ function comparison(
   });
 }
 
+/** Check the factory-issued paired lineage without producing a reconciliation
+ * report or hashing immutable ledgers when no snapshot is being compared. */
+export function assertRebuiltV08LedgerLineage(
+  reconstructed: Readonly<RebuiltV08Ledgers>,
+): void {
+  if (!rebuiltLedgerInstances.has(reconstructed))
+    invalid('Reconciliation accepts validated reconstructed lineage only');
+}
+
 export function reconcileV08LedgerSnapshots(input: {
   readonly reconstructed: RebuiltV08Ledgers;
   readonly inventorySnapshot?: InventoryLedgerSnapshot;
   readonly financialSnapshot?: FinancialLedgerSnapshot;
   readonly sha256Hex: Sha256Hex;
 }): Readonly<V08LedgerReconciliation> {
-  if (!rebuiltLedgerInstances.has(input.reconstructed)) {
-    invalid('Reconciliation accepts validated reconstructed lineage only');
-  }
+  assertRebuiltV08LedgerLineage(input.reconstructed);
   const inventorySnapshot =
     input.inventorySnapshot === undefined
       ? undefined

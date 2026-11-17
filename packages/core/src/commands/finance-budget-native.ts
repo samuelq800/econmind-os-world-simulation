@@ -75,7 +75,7 @@ import {
 } from '../transfers/postwar-narrow-trade-mixed-replay.js';
 import type { InventoryLedgerState } from '../inventory/inventory-ledger.js';
 import {
-  reconcileV08LedgerSnapshots,
+  assertRebuiltV08LedgerLineage,
   type RebuiltV08Ledgers,
 } from '../opening/opening-seed.js';
 import {
@@ -760,10 +760,7 @@ export function prepareFinanceNativeBudgetFinancialReplay(
   if (!isAuthoritativeFinancialLedgerState(base) || base.worldVersion !== '0')
     invalid('GENUINE_H0_FINANCIAL_REPLAY_BASE_REQUIRED');
   if (input.opening !== undefined) {
-    reconcileV08LedgerSnapshots({
-      reconstructed: input.opening,
-      sha256Hex: sha,
-    });
+    assertRebuiltV08LedgerLineage(input.opening);
     if (
       input.opening.financial !== base ||
       input.opening.worldVersion !== '0' ||
