@@ -1,5 +1,16 @@
 # CI 契约与历史回归修复结果
 
+## 第四轮：完整检查成功，另一任务总时限不足
+
+提交 `6e885bea81d2a70692b86a15971257d74dd7f427` 的结果为 12 成功、1 取消，没有检测到新的断言失败。
+
+- [official-and-native-postgres](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43993680941/job/133740347099) 成功：完整官方检查的全量测试为 9093 PASS、389 SKIP，另有既有 Edge 29 个、边界 46 个测试通过，任务整体成功。跳过的数据库用例仍不是通过；该任务的后续原生步骤以任务实际记录为准。
+- [Isolated official pnpm check](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43993681024/job/133740347224) 从 01:11:49Z 开始、02:12:10Z 结束，完整检查步骤在 02:12:02Z 被取消，符合现有 60 分钟任务预算耗尽。日志停止在全量测试接近尾部处，没有失败断言和完整通过汇总；不可视作 PASS。
+
+最小修正：仅将 `.github/workflows/v09-postgres.yml` 中该任务的 `timeout-minutes` 从 60 调至同类 `official-and-native-postgres` 已有的 70。触发条件、所有检查、串行测试设置和单项超时保持，不新增工作流或本地重跑全量。运行时间后续若继续增长，应根据测量优化，本轮不引入拆分/并发机制。
+
+本地执行修改 YAML 和本报告的 Prettier 检查、Prettier YAML parser 解析及 `git diff --check`，均 exit 0。额外尝试直接导入 `yaml` 失败（ERR_MODULE_NOT_FOUND，Node exit 1），随后使用仓库已有 Prettier parser 完成解析，未安装依赖。未将本地静态检查作为远端任务完成证据。产品、SQL、权限和测试行为未改变。当前工作分支及此前保留的源分支不变；不在本轮删除或合并分支。
+
 ## 第三轮 CI 平台适配
 
 `db233643af16da272b9649b7499a02b93469b546` 的结果为 11 成功、2 失败。报告格式检查已通过，本轮失败分别如下：

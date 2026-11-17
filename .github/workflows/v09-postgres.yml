@@ -81,8 +81,9 @@ jobs:
   official-pnpm-check:
     name: Isolated official pnpm check
     runs-on: macos-latest
-    # The growing serial suite exceeded 25m; retain every check and test limit.
-    timeout-minutes: 60
+    # Full serial check plus startup regression exceeds 60m on hosted macOS.
+    # Match official-and-native-postgres; retain every check and test limit.
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v5
         with:
