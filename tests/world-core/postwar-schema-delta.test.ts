@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import {
   classifyDeltaTransaction,
@@ -75,6 +76,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-narrow-trade-intake-binding.sql',
   'postwar-narrow-trade-source.sql',
   'postwar-office-derived-read.sql',
+  'postwar-office-seat-admission-once.sql',
   'postwar-office-opening-read-base-repair.sql',
   'postwar-office-recovery-read.sql',
   'postwar-physical-inventory-provenance.sql',
@@ -385,7 +387,7 @@ describe('unapproved postwar schema delta package boundary', () => {
       )
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(86);
+    expect(selected).toHaveLength(87);
     for (const name of EXCLUDED_CLOCK_PROPOSALS) {
       expect(names).toContain(name);
       expect(selected).not.toContain(name);
@@ -403,10 +405,14 @@ describe('unapproved postwar schema delta package boundary', () => {
       '../../tools/office-connection/postwar-schema-delta.mjs',
       import.meta.url,
     );
-    const result = spawnSync(process.execPath, [script.pathname, '--execute'], {
-      encoding: 'utf8',
-      env: { PATH: process.env.PATH },
-    });
+    const result = spawnSync(
+      process.execPath,
+      [fileURLToPath(script), '--execute'],
+      {
+        encoding: 'utf8',
+        env: { PATH: process.env.PATH },
+      },
+    );
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain(
       'ONLY_SOURCE_SHA_COMPANION_FRESH_OUTPUT_ARGUMENTS_ALLOWED',
@@ -427,10 +433,12 @@ describe('fixed pending-programme and target forward packaging', () => {
     const result = spawnSync(
       process.execPath,
       [
-        new URL(
-          '../../tools/office-connection/postwar-schema-delta.mjs',
-          import.meta.url,
-        ).pathname,
+        fileURLToPath(
+          new URL(
+            '../../tools/office-connection/postwar-schema-delta.mjs',
+            import.meta.url,
+          ),
+        ),
         '--source-root',
         'relative-source',
         '--candidate-sha',
@@ -782,10 +790,12 @@ describe('fixed logistics V2 utility forward', () => {
     const result = spawnSync(
       process.execPath,
       [
-        new URL(
-          '../../tools/office-connection/postwar-schema-delta.mjs',
-          import.meta.url,
-        ).pathname,
+        fileURLToPath(
+          new URL(
+            '../../tools/office-connection/postwar-schema-delta.mjs',
+            import.meta.url,
+          ),
+        ),
         '--source-root',
         'relative',
         '--candidate-sha',

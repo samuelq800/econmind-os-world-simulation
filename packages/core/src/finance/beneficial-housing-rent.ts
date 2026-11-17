@@ -45,6 +45,7 @@ import {
   applyFinancialPostingBatch,
   FINANCIAL_POSTING_SCHEMA_VERSION,
   type FinancialAccount,
+  type FinancialPosition,
   type FinancialLedgerState,
   type FinancialPostingBatch,
 } from './financial-ledger.js';
@@ -610,75 +611,101 @@ export function aggregateBeneficialHousingLiquidClaim(
   ledger: FinancialLedgerState,
   receipt: BeneficialHousingReclassificationReceipt,
 ) {
-  if (
-    !receipts.has(receipt) ||
-    !isAuthoritativeFinancialLedgerState(ledger) ||
-    ledger.worldId !== receipt.worldId
-  )
+  return liquidClaimReader(ledger)(receipt);
+}
+/** One calculation over the same immutable authoritative ledger; no retained
+ * balances, admission result or caller-supplied index. */
+export function aggregateBeneficialHousingLiquidClaims(
+  ledger: FinancialLedgerState,
+  values: readonly BeneficialHousingReclassificationReceipt[],
+) {
+  return Object.freeze(values.map(liquidClaimReader(ledger)));
+}
+function sameAccount(a: FinancialAccount, b: FinancialAccount): boolean {
+  // Both definitions come from genuine Core receipts/ledgers, whose account
+  // constructor retains exactly these eight fields.
+  return (
+    a.worldId === b.worldId &&
+    a.accountId === b.accountId &&
+    a.ownerId === b.ownerId &&
+    a.countryId === b.countryId &&
+    a.accountClass === b.accountClass &&
+    a.currency === b.currency &&
+    a.claimId === b.claimId &&
+    a.counterpartyEntityId === b.counterpartyEntityId
+  );
+}
+function liquidClaimReader(ledger: FinancialLedgerState) {
+  if (!isAuthoritativeFinancialLedgerState(ledger))
     invalid('genuine receipt and authoritative ledger required');
-  const currency = receipt.originalAccount.currency,
-    allowed = new Set(receipt.subaccounts.map((s) => s.account.accountId));
-  if (
-    !position(
-      ledger,
-      receipt.originalAccount.accountId,
-      currency,
-    ).amount.isZero()
-  )
-    invalid(
-      'parent claim must not coexist with duplicated beneficial balances',
-    );
-  const subaccounts = receipt.subaccounts.map((s) => {
-    const actual = ledger.accounts.find(
-      (a) => a.accountId === s.account.accountId,
-    );
-    if (actual)
-      equal(actual, s.account, 'beneficial account definition changed');
-    const balance = position(ledger, s.account.accountId, currency);
-    if (balance.amount.isNegative()) invalid('beneficial account overdraft');
-    return { ...s, availableAmount: canonicalDecimal(balance.amount) };
-  });
-  for (const p of ledger.positions)
+  const accounts = new Map(ledger.accounts.map((a) => [a.accountId, a])),
+    positions = new Map(ledger.positions.map((p) => [p.account.accountId, p])),
+    byOwner = new Map<string, FinancialPosition[]>();
+  for (const p of ledger.positions) {
+    const owned = byOwner.get(p.account.ownerId);
+    if (owned) owned.push(p);
+    else byOwner.set(p.account.ownerId, [p]);
+  }
+  return (receipt: BeneficialHousingReclassificationReceipt) => {
+    if (!receipts.has(receipt) || ledger.worldId !== receipt.worldId)
+      invalid('genuine receipt and authoritative ledger required');
+    const currency = receipt.originalAccount.currency,
+      allowed = new Set(receipt.subaccounts.map((s) => s.account.accountId));
     if (
-      p.account.claimId === receipt.claimId &&
-      p.account.ownerId === receipt.householdEntityId &&
-      !allowed.has(p.account.accountId)
+      !(
+        positions.get(receipt.originalAccount.accountId)?.netDebitBalance ??
+        Money.from('0', currency)
+      ).amount.isZero()
     )
-      invalid('unregistered/duplicated household claim');
-  const total = subaccounts.reduce(
-    (n, s) => n.add(Money.from(s.availableAmount, currency)),
-    Money.from('0', currency),
-  );
-  if (
-    ledger.worldVersion === '0' &&
-    !total.amount.equals(Money.from(receipt.originalAmount, currency).amount)
-  )
-    invalid('household legal claim total changed');
-  const mirror = ledger.positions.find(
-    (p) =>
-      p.account.accountId === receipt.counterpartLiabilityAccount.accountId,
-  );
-  if (!mirror) invalid('bank mirror missing');
-  equal(
-    mirror.account,
-    receipt.counterpartLiabilityAccount,
-    'bank mirror definition changed',
-  );
-  if (!mirror.netDebitBalance.amount.equals(total.amount.negated()))
-    invalid('bank liability mirror changed');
-  return freeze({
-    worldId: ledger.worldId,
-    worldVersion: ledger.worldVersion,
-    ownerId: receipt.householdEntityId,
-    countryId: receipt.countryId,
-    claimId: receipt.claimId,
-    currency,
-    originalAccountId: receipt.originalAccount.accountId,
-    counterpartLiabilityAccountId:
-      receipt.counterpartLiabilityAccount.accountId,
-    availableAmount: canonicalDecimal(total.amount),
-    subaccounts,
-  });
+      invalid(
+        'parent claim must not coexist with duplicated beneficial balances',
+      );
+    const subaccounts = receipt.subaccounts.map((s) => {
+      const actual = accounts.get(s.account.accountId);
+      if (actual && !sameAccount(actual, s.account))
+        invalid('beneficial account definition changed');
+      const balance =
+        positions.get(s.account.accountId)?.netDebitBalance ??
+        Money.from('0', currency);
+      if (balance.amount.isNegative()) invalid('beneficial account overdraft');
+      return { ...s, availableAmount: canonicalDecimal(balance.amount) };
+    });
+    for (const p of byOwner.get(receipt.householdEntityId) ?? [])
+      if (
+        p.account.claimId === receipt.claimId &&
+        p.account.ownerId === receipt.householdEntityId &&
+        !allowed.has(p.account.accountId)
+      )
+        invalid('unregistered/duplicated household claim');
+    const total = subaccounts.reduce(
+      (n, s) => n.add(Money.from(s.availableAmount, currency)),
+      Money.from('0', currency),
+    );
+    if (
+      ledger.worldVersion === '0' &&
+      !total.amount.equals(Money.from(receipt.originalAmount, currency).amount)
+    )
+      invalid('household legal claim total changed');
+    const mirror = positions.get(receipt.counterpartLiabilityAccount.accountId);
+    if (!mirror) invalid('bank mirror missing');
+    if (!sameAccount(mirror.account, receipt.counterpartLiabilityAccount))
+      invalid('bank mirror definition changed');
+    if (!mirror.netDebitBalance.amount.equals(total.amount.negated()))
+      invalid('bank liability mirror changed');
+    return freeze({
+      worldId: ledger.worldId,
+      worldVersion: ledger.worldVersion,
+      ownerId: receipt.householdEntityId,
+      countryId: receipt.countryId,
+      claimId: receipt.claimId,
+      currency,
+      originalAccountId: receipt.originalAccount.accountId,
+      counterpartLiabilityAccountId:
+        receipt.counterpartLiabilityAccount.accountId,
+      availableAmount: canonicalDecimal(total.amount),
+      subaccounts,
+    });
+  };
 }
 export interface BeneficialRentPaidReceipt {
   readonly leaseId: string;
@@ -717,41 +744,67 @@ export function synchronizeBeneficialHousingRentState(
   },
   sha: Sha256Hex,
 ): BeneficialHousingRentState {
-  const { receipt, state, financial } = input;
-  if (
-    !receipts.has(receipt) ||
-    !states.has(state) ||
-    state.genesisReceiptFingerprint !== receipt.fingerprint ||
-    uint(financial.worldVersion) < uint(state.worldVersion)
-  )
-    invalid('genuine non-regressing rights/financial head required');
-  aggregateBeneficialHousingLiquidClaim(financial, receipt);
-  for (const paid of state.paid)
-    if (
-      !financial.appliedBatches.some(
-        (b) =>
-          b.batchId === paid.batchId && b.fingerprint === paid.batchFingerprint,
+  return synchronizeBeneficialHousingRentStates(
+    { financial: input.financial, values: [input] },
+    sha,
+  )[0]!;
+}
+/** Synchronize a batch against one genuine ledger, checking each receipt/state
+ * while sharing only the local account/position lookup and applied-batch index. */
+export function synchronizeBeneficialHousingRentStates(
+  input: {
+    financial: FinancialLedgerState;
+    values: readonly {
+      receipt: BeneficialHousingReclassificationReceipt;
+      state: BeneficialHousingRentState;
+    }[];
+  },
+  sha: Sha256Hex,
+): readonly BeneficialHousingRentState[] {
+  const { financial } = input;
+  const aggregate = liquidClaimReader(financial),
+    batches = new Map<string, CanonicalSha256>(
+      financial.appliedBatches.map((b) => [b.batchId, b.fingerprint]),
+    ),
+    hasRent = financial.appliedBatches.some((b) =>
+      b.batchId.startsWith('BATCH_BENEFICIAL_RENT_'),
+    );
+  return Object.freeze(
+    input.values.map(({ receipt, state }) => {
+      if (
+        !receipts.has(receipt) ||
+        !states.has(state) ||
+        state.genesisReceiptFingerprint !== receipt.fingerprint ||
+        uint(financial.worldVersion) < uint(state.worldVersion)
       )
-    )
-      invalid('paid rights receipt missing from actual ledger');
-  for (const lease of receipt.leases) {
-    const periodIndex = state.paid
-        .filter((p) => p.leaseId === lease.leaseId)
-        .length.toString(),
-      logical = id(
-        { receipt: receipt.fingerprint, leaseId: lease.leaseId, periodIndex },
-        sha,
-      );
-    if (
-      financial.appliedBatches.some(
-        (b) => b.batchId === `BATCH_BENEFICIAL_RENT_${logical}`,
-      )
-    )
-      invalid('unrecorded actual rent settlement requires domain replay');
-  }
-  const result = freeze({ ...state, worldVersion: financial.worldVersion });
-  states.add(result);
-  return result;
+        invalid('genuine non-regressing rights/financial head required');
+      aggregate(receipt);
+      for (const paid of state.paid)
+        if (batches.get(paid.batchId) !== paid.batchFingerprint)
+          invalid('paid rights receipt missing from actual ledger');
+      // Without an actual rent batch, no lease's derived rent batch ID can match.
+      // Once any rent exists, retain the exact per-period replay check below.
+      if (hasRent)
+        for (const lease of receipt.leases) {
+          const periodIndex = state.paid
+              .filter((p) => p.leaseId === lease.leaseId)
+              .length.toString(),
+            logical = id(
+              {
+                receipt: receipt.fingerprint,
+                leaseId: lease.leaseId,
+                periodIndex,
+              },
+              sha,
+            );
+          if (batches.has(`BATCH_BENEFICIAL_RENT_${logical}`))
+            invalid('unrecorded actual rent settlement requires domain replay');
+        }
+      const result = freeze({ ...state, worldVersion: financial.worldVersion });
+      states.add(result);
+      return result;
+    }),
+  );
 }
 export interface BeneficialHousingRentDraft {
   readonly batchId: FinancialPostingBatchId;

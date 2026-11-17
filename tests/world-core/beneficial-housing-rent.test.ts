@@ -8,8 +8,10 @@ import {
   reclassifyBeneficialHousingSeed,
   verifyBeneficialHousingReclassification,
   aggregateBeneficialHousingLiquidClaim,
+  aggregateBeneficialHousingLiquidClaims,
   createBeneficialHousingRentState,
   synchronizeBeneficialHousingRentState,
+  synchronizeBeneficialHousingRentStates,
   prepareBeneficialHousingRent,
   settleBeneficialHousingRent,
   replayBeneficialHousingRent,
@@ -339,6 +341,83 @@ describe('beneficial housing rights on real Core seed/ledger accounts', () => {
         sha,
       ),
     ).toThrow('non-regressing');
+  });
+  it('shares batch lookups without retaining stale balances or accepting copied ledger/rights', () => {
+    const result = reclassifyBeneficialHousingSeed(fixture('BATCH'), sha),
+      financial = C.rebuildV08LedgersFromLineage({
+        seed: result.seed,
+        sha256Hex: sha,
+      }).financial,
+      receipt = result.receipt,
+      state = createBeneficialHousingRentState(receipt),
+      values = [
+        { receipt, state },
+        { receipt, state },
+      ];
+    expect(
+      aggregateBeneficialHousingLiquidClaims(financial, [receipt, receipt]),
+    ).toEqual([
+      aggregateBeneficialHousingLiquidClaim(financial, receipt),
+      aggregateBeneficialHousingLiquidClaim(financial, receipt),
+    ]);
+    let hashes = 0;
+    const countingSha = (value: string) => {
+      hashes++;
+      return sha(value);
+    };
+    expect(
+      synchronizeBeneficialHousingRentStates(
+        { financial, values },
+        countingSha,
+      ),
+    ).toEqual([
+      synchronizeBeneficialHousingRentState({ financial, receipt, state }, sha),
+      synchronizeBeneficialHousingRentState({ financial, receipt, state }, sha),
+    ]);
+    expect(hashes).toBe(0);
+    expect(() =>
+      aggregateBeneficialHousingLiquidClaims({ ...financial }, [receipt]),
+    ).toThrow('authoritative ledger');
+    expect(() =>
+      aggregateBeneficialHousingLiquidClaims(financial, [{ ...receipt }]),
+    ).toThrow('genuine receipt');
+    expect(() =>
+      synchronizeBeneficialHousingRentStates(
+        { financial, values: [{ receipt, state: { ...state } }] },
+        sha,
+      ),
+    ).toThrow('genuine non-regressing');
+    const paid = settleBeneficialHousingRent(
+      {
+        receipt,
+        state,
+        financialBefore: financial,
+        ...transition(receipt, state, financial),
+      },
+      sha,
+    );
+    expect(
+      aggregateBeneficialHousingLiquidClaims(paid.financial, [receipt]),
+    ).toEqual([aggregateBeneficialHousingLiquidClaim(paid.financial, receipt)]);
+    expect(
+      aggregateBeneficialHousingLiquidClaims(paid.financial, [receipt])[0]!
+        .subaccounts,
+    ).not.toEqual(
+      aggregateBeneficialHousingLiquidClaims(financial, [receipt])[0]!
+        .subaccounts,
+    );
+    expect(() =>
+      synchronizeBeneficialHousingRentStates(
+        { financial: paid.financial, values },
+        sha,
+      ),
+    ).toThrow('unrecorded actual rent');
+    expect(
+      synchronizeBeneficialHousingRentStates(
+        { financial: paid.financial, values: [{ receipt, state: paid.state }] },
+        sha,
+      )[0]!.paid,
+    ).toEqual(paid.state.paid);
   });
   it('rejects wrong command/event/head/idempotency and conflicting retries while accepting an exact authoritative retry with new audit time', () => {
     const result = reclassifyBeneficialHousingSeed(fixture('INTENT'), sha),

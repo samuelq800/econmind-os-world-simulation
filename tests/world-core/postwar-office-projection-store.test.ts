@@ -304,6 +304,44 @@ afterAll(async () => {
   await db.close();
 });
 describe('bounded exact-country projection SQL and runtime reader', () => {
+  it('installs the forward single-admission query with identical multi-capability seats, owner and ACL', async () => {
+    await admin();
+    const metadata = async () =>
+      (
+        await db.query(
+          "select proowner,proacl,prosecdef,proconfig from pg_proc where oid='world_v2.read_postwar_office_projection_seats(text)'::regprocedure",
+        )
+      ).rows;
+    const beforeMetadata = await metadata();
+    await db.query(
+      "insert into world_v2.current_commit_authorization select world_id,auth_subject,country_id,office_id,unnest(array['SOCIAL_EDUCATION','SOCIAL_DEVELOPMENT']),team_id,authorization_version,active,refreshed_at_real from world_v2.current_commit_authorization where world_id=$1 and auth_subject=$2::uuid and office_id='SOCIAL' and capability='SOCIAL_LABOUR'",
+      [world, subject],
+    );
+    await readerSession();
+    const before = await store.readCurrentSeatHeadersFrom(executor, {
+      worldId: world,
+    });
+    expect(before).toHaveLength(1);
+    await admin();
+    await db.exec(
+      await read('database/proposals/postwar-office-seat-admission-once.sql'),
+    );
+    expect(await metadata()).toEqual(beforeMetadata);
+    await readerSession();
+    expect(
+      await store.readCurrentSeatHeadersFrom(executor, { worldId: world }),
+    ).toEqual(before);
+    expect(
+      await store.readCurrentSeatHeadersFrom(executor, {
+        worldId: 'WORLD_TEST_ONLY_OTHER',
+      }),
+    ).toEqual([]);
+    await admin();
+    await db.query(
+      "delete from world_v2.current_commit_authorization where world_id=$1 and auth_subject=$2::uuid and capability in('SOCIAL_EDUCATION','SOCIAL_DEVELOPMENT')",
+      [world, subject],
+    );
+  });
   it('reads a verified empty CB security declaration from admitted bounded source docs without OMO adoption or synthetic accounts', async () => {
     await admin();
     await db.query(

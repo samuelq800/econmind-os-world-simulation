@@ -10,9 +10,10 @@ import {
 } from './receipt.js';
 import {
   BENEFICIAL_HOUSING_RENT_COMMAND,
-  aggregateBeneficialHousingLiquidClaim,
+  aggregateBeneficialHousingLiquidClaims,
   createBeneficialHousingRentState,
   synchronizeBeneficialHousingRentState,
+  synchronizeBeneficialHousingRentStates,
   settleBeneficialHousingRent,
   type BeneficialHousingReclassificationReceipt,
   type BeneficialHousingRentState,
@@ -42,7 +43,7 @@ function origin(
   issued.add(value);
   return value;
 }
-function check(
+function checkOrigins(
   origins: readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[],
   financial: Readonly<FinancialLedgerState>,
 ): void {
@@ -59,8 +60,17 @@ function check(
       o.receipt.worldId !== financial.worldId
     )
       invalid('GENUINE_SAME_WORLD_RENT_ORIGIN_REQUIRED');
-    aggregateBeneficialHousingLiquidClaim(financial, o.receipt);
   }
+}
+function check(
+  origins: readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[],
+  financial: Readonly<FinancialLedgerState>,
+): void {
+  checkOrigins(origins, financial);
+  aggregateBeneficialHousingLiquidClaims(
+    financial,
+    origins.map((o) => o.receipt),
+  );
 }
 /** Receipts must already be genuine Core reclassifications of the exact
  * admitted seed. No field, signature boolean or caller callback mints them. */
@@ -85,17 +95,13 @@ export function synchronizeBeneficialHousingRentMixedReplayOrigins(input: {
   readonly financial: Readonly<FinancialLedgerState>;
   readonly sha256Hex: Sha256Hex;
 }): readonly Readonly<BeneficialHousingRentMixedReplayOrigin>[] {
-  check(input.origins, input.financial);
+  checkOrigins(input.origins, input.financial);
+  const states = synchronizeBeneficialHousingRentStates(
+    { financial: input.financial, values: input.origins },
+    input.sha256Hex,
+  );
   return Object.freeze(
-    input.origins.map((o) =>
-      origin(
-        o.receipt,
-        synchronizeBeneficialHousingRentState(
-          { receipt: o.receipt, state: o.state, financial: input.financial },
-          input.sha256Hex,
-        ),
-      ),
-    ),
+    input.origins.map((o, i) => origin(o.receipt, states[i]!)),
   );
 }
 /** Exact command/group/FINAL/posting reduction. A balanced substituted batch,
