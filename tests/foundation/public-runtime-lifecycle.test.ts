@@ -340,7 +340,9 @@ async function publicBoundaryAttack(
   let captured: ProcessRow[] = [];
   let observed;
   try {
-    await waitForHttp(port);
+    // dev:api/worker compile their real TypeScript graph before listening,
+    // as in repeatedSignalAttack; this is setup time, not the shutdown budget.
+    await waitForHttp(port, 30_000);
     captured = descendants(await readProcessTable(), managed.child.pid ?? -1);
     signalOwnedGroup(managed, signal);
     const launcherExit = await Promise.race([
@@ -676,7 +678,7 @@ describe.skipIf(process.platform === 'win32')(
       ),
     )(
       'stops every descendant and releases the listener for $command $signal',
-      { timeout: 30_000 },
+      { timeout: 60_000 },
       async ({ service, signal }) => {
         const observed = await publicBoundaryAttack(service, signal);
         expect(observed.captured.length).toBeGreaterThanOrEqual(3);

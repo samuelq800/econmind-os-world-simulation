@@ -1,12 +1,21 @@
 /** Historical source tree for fixed upgrade regressions; never a current candidate. */
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  realpath,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 export async function createSocialCreationForwardSourceFixture() {
   const repositoryRoot = path.resolve(import.meta.dirname, '../..');
-  const root = await mkdtemp(path.join(tmpdir(), 'social-forward-source-'));
+  const root = await realpath(
+    await mkdtemp(path.join(tmpdir(), 'social-forward-source-')),
+  );
   const copy = async (relative: string, bytes: string | Buffer) => {
     await mkdir(path.dirname(path.join(root, relative)), { recursive: true });
     await writeFile(path.join(root, relative), bytes);

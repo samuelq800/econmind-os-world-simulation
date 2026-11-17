@@ -1,5 +1,18 @@
 # CI 契约与历史回归修复结果
 
+## 第三轮 CI 平台适配
+
+`db233643af16da272b9649b7499a02b93469b546` 的结果为 11 成功、2 失败。报告格式检查已通过，本轮失败分别如下：
+
+- [Isolated official pnpm check](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43984519819/job/133709113927)：全量测试 9090 PASS、389 SKIP、3 FAIL；失败均在历史 forward package 的 `REGULAR_COMPANION_MODULE_REQUIRED`。macOS 临时目录可能包含符号链接，fixture 的路径与工具要求的 realpath 不一致。本轮在创建临时目录时取 realpath，保留工具对普通文件及真实路径的校验。
+- [official-and-native-postgres](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/43984519716/job/133709113345)：前置回归 91 PASS、1 FAIL，Worker SIGINT 用例等待 readyz 超过 15 秒，尚未进入关闭断言。同轮 bootstrap 编译启动相关用例有 17.46 秒耗时，表明 15 秒设置存在环境负载敏感性，但日志不能排除其他启动失败。本轮让该启动阶段采用同文件 repeatedSignalAttack 已有的 30 秒预算，并将该用例总预算设为 60 秒以容纳启动与原关闭等待；关闭超时、进程消失、端口释放和 SHUTDOWN_COMPLETE 断言保持。
+
+实际本地检查：三个历史升级/打包文件共 10 个用例 PASS（exit 0），修改的两个 TS 文件 ESLint、Prettier 及 `git diff --check` 均 exit 0。临时 fixture 已按既有 cleanup 清理。
+
+POSIX 生命周期测试在 Windows 本机不能提供有效执行证据；只读检查 WSL Ubuntu 后未找到 Linux Node，不为此额外安装工具链。该修正的实际生命周期运行由既有 macOS CI 验证，仍为待验证；未将 Windows skip 或增加等待预算表述为通过。
+
+本轮改动仅测试 fixture、测试启动等待和本报告，产品/SQL/权限/打包校验/workflow 均未变化。推送后读取新一轮 CI；未合并、未推进 gate、未清理分支。
+
 ## 第二轮 CI 格式修正
 
 提交 `b6692d624a98b16ed5a7e208923d61033631e6b5` 的 13 项检查已结束：11 成功，2 失败。`combined-candidate` 与 `trusted-country-runtime` 已通过。
