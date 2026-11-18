@@ -1,0 +1,1213 @@
+{
+  "schemaVersion": "LAZY_SOCIAL_CAPACITY_20261117_V1",
+  "candidate": "6ef840af8f296d6b6f359d56462a3e1b063550ea",
+  "status": "FAILED_MIXED_LOAD_NOT_CAPACITY_ACCEPTANCE",
+  "error": {
+    "message": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1270 !== 6000\n",
+    "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1270 !== 6000\n\n    at file:///task/run-capacity.mjs:114:10\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+  },
+  "environment": {
+    "node": "v24.20.0",
+    "poolMax": 2,
+    "appCpu": 2,
+    "appGiB": 6,
+    "postgresCpu": 1,
+    "postgresGiB": 3,
+    "countries": 70,
+    "identities": 2,
+    "virtualSessions": 100,
+    "readsPerSecond": 20,
+    "writesPerMinute": 20,
+    "clockStarted": false
+  },
+  "stages": [
+    {
+      "name": "SOURCE_ADMISSION_START",
+      "at": "2026-11-17T11:29:50.349Z"
+    },
+    {
+      "name": "SOURCE_ADMISSION_READY",
+      "at": "2026-11-17T11:35:10.906Z"
+    },
+    {
+      "name": "H0_INDUSTRY_PREPARATION_START",
+      "at": "2026-11-17T11:36:26.6Z"
+    },
+    {
+      "name": "NODE_COLD_START",
+      "at": "2026-11-17T11:46:14.66Z"
+    },
+    {
+      "name": "NODE_READY",
+      "at": "2026-11-17T11:51:03.941Z",
+      "startupMs": 288912.10777299997
+    },
+    {
+      "name": "H1_BASELINE_READY",
+      "at": "2026-11-17T11:51:07.871Z"
+    },
+    {
+      "name": "SHORT_CB_CONTROL_START",
+      "at": "2026-11-17T11:51:07.874Z"
+    },
+    {
+      "name": "SHORT_CB_CONTROL",
+      "at": "2026-11-17T11:51:12.92Z"
+    },
+    {
+      "name": "SHORT_CB_SOCIAL_START",
+      "at": "2026-11-17T11:51:12.926Z"
+    },
+    {
+      "name": "SHORT_CB_SOCIAL",
+      "at": "2026-11-17T11:51:17.938Z"
+    },
+    {
+      "name": "SINGLE_WRITE_WITH_READS_START",
+      "at": "2026-11-17T11:51:18.355Z"
+    },
+    {
+      "name": "SINGLE_WRITE_WITH_READS_END",
+      "at": "2026-11-17T11:51:21.468Z"
+    },
+    {
+      "name": "MIXED_100_SESSION_5_MIN_START",
+      "at": "2026-11-17T11:51:21.472Z"
+    },
+    {
+      "name": "MIXED_100_SESSION_5_MIN",
+      "at": "2026-11-17T11:52:36.405Z"
+    },
+    {
+      "name": "STOPPED",
+      "at": "2026-11-17T11:52:36.412Z"
+    },
+    {
+      "name": "FINISHED",
+      "at": "2026-11-17T11:52:36.952Z"
+    }
+  ],
+  "phases": [
+    {
+      "name": "SHORT_CB_CONTROL",
+      "plannedReads": 100,
+      "sentReads": 100,
+      "completedReads": 100,
+      "errors": 0,
+      "firstErrors": [],
+      "latency": {
+        "count": 100,
+        "p50Ms": 47.35377599997446,
+        "p95Ms": 104.74243099987507,
+        "p99Ms": 150.90749799995683,
+        "maxMs": 176.7405059998855
+      },
+      "byOffice": {
+        "CENTRAL_BANK": {
+          "count": 100,
+          "p50Ms": 47.35377599997446,
+          "p95Ms": 104.74243099987507,
+          "p99Ms": 150.90749799995683,
+          "maxMs": 176.7405059998855,
+          "errors": 0
+        }
+      },
+      "inputSpanMs": 4948.279318999965,
+      "totalIncludingDrainMs": 5034.76570099988,
+      "sessionBusy": 0,
+      "plannedWrites": 0,
+      "actualWrites": 0,
+      "pendingWrites": 0,
+      "metrics": {
+        "poolMax": 2,
+        "roles": {
+          "final_read_1846a43d2e": {
+            "wait": {
+              "n": 100,
+              "meanMs": 1.8740987800015136,
+              "p95Ms": 3.422102000040468,
+              "maxMs": 53.79048399999738
+            },
+            "hold": {
+              "n": 100,
+              "meanMs": 48.19314799999527,
+              "p95Ms": 88.0263730000006,
+              "maxMs": 166.91820399998687
+            },
+            "errors": 0
+          }
+        },
+        "eventLoopP95Ms": 10.878975,
+        "cpuMicros": {
+          "user": 799484,
+          "system": 42137
+        },
+        "elapsedMs": 5034.556993999984,
+        "memory": {
+          "rss": 1326534656,
+          "heapTotal": 973996032,
+          "heapUsed": 850706736,
+          "external": 173028259,
+          "arrayBuffers": 2560882
+        }
+      },
+      "stopReason": null
+    },
+    {
+      "name": "SHORT_CB_SOCIAL",
+      "plannedReads": 100,
+      "sentReads": 100,
+      "completedReads": 100,
+      "errors": 0,
+      "firstErrors": [],
+      "latency": {
+        "count": 100,
+        "p50Ms": 46.002033999888226,
+        "p95Ms": 52.07403700007126,
+        "p99Ms": 92.4396720000077,
+        "maxMs": 126.92891500005499
+      },
+      "byOffice": {
+        "CENTRAL_BANK": {
+          "count": 67,
+          "p50Ms": 47.21819499996491,
+          "p95Ms": 71.46775900013745,
+          "p99Ms": 126.92891500005499,
+          "maxMs": 126.92891500005499,
+          "errors": 0
+        },
+        "SOCIAL": {
+          "count": 33,
+          "p50Ms": 18.083150000078604,
+          "p95Ms": 22.8086070001591,
+          "p99Ms": 40.82774700014852,
+          "maxMs": 40.82774700014852,
+          "errors": 0
+        }
+      },
+      "inputSpanMs": 4948.435225999914,
+      "totalIncludingDrainMs": 5000.278447000077,
+      "sessionBusy": 0,
+      "plannedWrites": 0,
+      "actualWrites": 0,
+      "pendingWrites": 0,
+      "metrics": {
+        "poolMax": 2,
+        "roles": {
+          "final_read_1846a43d2e": {
+            "wait": {
+              "n": 100,
+              "meanMs": 0.1323313400009647,
+              "p95Ms": 0.09872599999653175,
+              "maxMs": 4.833679999981541
+            },
+            "hold": {
+              "n": 100,
+              "meanMs": 34.84291301999765,
+              "p95Ms": 47.38162499997998,
+              "maxMs": 116.09986600000411
+            },
+            "errors": 0
+          }
+        },
+        "eventLoopP95Ms": 10.854399,
+        "cpuMicros": {
+          "user": 584954,
+          "system": 84430
+        },
+        "elapsedMs": 4999.921252999979,
+        "memory": {
+          "rss": 1334939648,
+          "heapTotal": 981598208,
+          "heapUsed": 861231992,
+          "external": 174252532,
+          "arrayBuffers": 3785155
+        }
+      },
+      "stopReason": null
+    },
+    {
+      "name": "MIXED_100_SESSION_5_MIN",
+      "plannedReads": 6000,
+      "sentReads": 1270,
+      "completedReads": 1270,
+      "errors": 5,
+      "firstErrors": [
+        {
+          "office": "INDUSTRY",
+          "dataset": "industry-labour-current",
+          "status": 503,
+          "ok": false,
+          "elapsedMs": 10427.09961299994,
+          "code": {
+            "code": "UPSTREAM_UNAVAILABLE",
+            "retryable": true
+          }
+        },
+        {
+          "office": "SOCIAL",
+          "dataset": "service-pools",
+          "status": 503,
+          "ok": false,
+          "elapsedMs": 10329.240015000105,
+          "code": {
+            "code": "UPSTREAM_UNAVAILABLE",
+            "retryable": true
+          }
+        },
+        {
+          "office": "FINANCE",
+          "dataset": "ledger-balances",
+          "status": 503,
+          "ok": false,
+          "elapsedMs": 10231.164542000042,
+          "code": {
+            "code": "UPSTREAM_UNAVAILABLE",
+            "retryable": true
+          }
+        },
+        {
+          "office": "INDUSTRY",
+          "dataset": "industry-labour-current",
+          "status": 503,
+          "ok": false,
+          "elapsedMs": 10129.532464999938,
+          "code": {
+            "code": "UPSTREAM_UNAVAILABLE",
+            "retryable": true
+          }
+        },
+        {
+          "office": "SOCIAL",
+          "dataset": "service-pools",
+          "status": 503,
+          "ok": false,
+          "elapsedMs": 10032.78100399999,
+          "code": {
+            "code": "UPSTREAM_UNAVAILABLE",
+            "retryable": true
+          }
+        }
+      ],
+      "latency": {
+        "count": 1270,
+        "p50Ms": 2100.226364000002,
+        "p95Ms": 7150.354204999981,
+        "p99Ms": 9705.4983049999,
+        "maxMs": 10427.09961299994
+      },
+      "byOffice": {
+        "FINANCE": {
+          "count": 424,
+          "p50Ms": 2089.3883840001654,
+          "p95Ms": 7058.137331000064,
+          "p99Ms": 9506.378576999996,
+          "maxMs": 10231.164542000042,
+          "errors": 1
+        },
+        "SOCIAL": {
+          "count": 423,
+          "p50Ms": 2061.5650640001986,
+          "p95Ms": 7069.377065000124,
+          "p99Ms": 9185.659274000209,
+          "maxMs": 10329.240015000105,
+          "errors": 2
+        },
+        "INDUSTRY": {
+          "count": 423,
+          "p50Ms": 2148.756063000066,
+          "p95Ms": 7236.678542000009,
+          "p99Ms": 9720.03191700019,
+          "maxMs": 10427.09961299994,
+          "errors": 2
+        }
+      },
+      "inputSpanMs": 63448.7545909998,
+      "totalIncludingDrainMs": 74925.71134199994,
+      "sessionBusy": 213,
+      "plannedWrites": 22,
+      "actualWrites": 8,
+      "pendingWrites": 0,
+      "metrics": {
+        "poolMax": 2,
+        "roles": {
+          "final_read_1846a43d2e": {
+            "wait": {
+              "n": 1781,
+              "meanMs": 1431.3099742650184,
+              "p95Ms": 3271.64072700002,
+              "maxMs": 4046.4812279999605
+            },
+            "hold": {
+              "n": 1781,
+              "meanMs": 61.01446621055699,
+              "p95Ms": 129.11702700000023,
+              "maxMs": 1398.8306749999756
+            },
+            "errors": 0
+          },
+          "fixture_rent_child_intake_8b85d6d7": {
+            "wait": {
+              "n": 8,
+              "meanMs": 2.8438618749933084,
+              "p95Ms": 3.2602370000095107,
+              "maxMs": 3.2602370000095107
+            },
+            "hold": {
+              "n": 8,
+              "meanMs": 1069.2449655000019,
+              "p95Ms": 1677.5948119999957,
+              "maxMs": 1677.5948119999957
+            },
+            "errors": 0
+          },
+          "fixture_rent_child_worker_8b85d6d7": {
+            "wait": {
+              "n": 216,
+              "meanMs": 0.10988749073887313,
+              "p95Ms": 0.08511500002350658,
+              "maxMs": 4.380013000045437
+            },
+            "hold": {
+              "n": 216,
+              "meanMs": 295.979245916667,
+              "p95Ms": 1332.1363219999475,
+              "maxMs": 2033.8542369999923
+            },
+            "errors": 0
+          },
+          "final_projection_pub_1846a43d2e": {
+            "wait": {
+              "n": 40,
+              "meanMs": 2.2789518749996205,
+              "p95Ms": 7.529585000011139,
+              "maxMs": 13.385375000012573
+            },
+            "hold": {
+              "n": 40,
+              "meanMs": 233.00738755000492,
+              "p95Ms": 779.1187100000097,
+              "maxMs": 897.0811269999831
+            },
+            "errors": 0
+          }
+        },
+        "eventLoopP95Ms": 11.386879,
+        "cpuMicros": {
+          "user": 56586063,
+          "system": 1557202
+        },
+        "elapsedMs": 74924.815565,
+        "memory": {
+          "rss": 1246621696,
+          "heapTotal": 255356928,
+          "heapUsed": 102682088,
+          "external": 87509109,
+          "arrayBuffers": 280814
+        }
+      },
+      "stopReason": "THREE_CONSECUTIVE_READ_FAILURES"
+    }
+  ],
+  "single": {
+    "reads": {
+      "count": 8,
+      "p50Ms": 67.35848699999042,
+      "p95Ms": 777.6432499999646,
+      "p99Ms": 777.6432499999646,
+      "maxMs": 777.6432499999646
+    },
+    "errors": []
+  },
+  "explicitPlanning": {
+    "office": "SOCIAL",
+    "dataset": "service-pools",
+    "status": 200,
+    "ok": true,
+    "elapsedMs": 357.7024449999444
+  },
+  "runtimeReady": {
+    "pid": 3489,
+    "origin": "http://127.0.0.1:32833",
+    "port": 32833,
+    "ready": true,
+    "environment": "staging",
+    "formalBinding": true,
+    "consumerState": "PREPARED",
+    "startupMs": 288912.10777299997,
+    "heapUsed": 864710632,
+    "rss": 1320165376,
+    "sourceEvidence": {
+      "files": [
+        {
+          "path": "/workspace/.cloud-setup/evidence/beneficial-rent-candidate-20261101/candidate-seed.json",
+          "sha256": "835f9ec096746e3bc8f8cd1a7235fc7a2af0daee06d4ceeedff1fdff99d0262f",
+          "bytes": 125315829
+        },
+        {
+          "path": "/workspace/.cloud-setup/evidence/postwar-gcu-opening-fresh-20261029T020748Z/final-seed.json",
+          "sha256": "ee2f777126e9050ce7139e2d9d9e24d2ec7305de95b8380d3e4c35fc4edb314f",
+          "bytes": 124697345
+        },
+        {
+          "path": "/workspace/.cloud-setup/evidence/beneficial-rent-candidate-20261101/receipts.json",
+          "sha256": "7d37e721da1021b290d8a1464e4fec096046efe623c2a5d12ee719a28fba5ae6",
+          "bytes": 644672
+        }
+      ],
+      "childFingerprint": "sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a",
+      "parentFingerprint": "sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274",
+      "receiptCount": 70,
+      "industryExecution": "GENUINE_COMPONENT_CONFIGURED_COMMANDS_NOT_YET_EXECUTED"
+    }
+  },
+  "industryPreparation": {
+    "status": "PASSED_SEVENTY_COUNTRY_H0_DERIVED_PREPARATION",
+    "scopes": [
+      {
+        "scopes": "70",
+        "h0_countries": "70"
+      }
+    ],
+    "countryRepairs": 71
+  },
+  "commands": {
+    "plannedMixed": 100,
+    "attempted": 10,
+    "accepted": 10,
+    "committed": 10,
+    "failed": 0,
+    "writeInclusivePublicationMs": {
+      "count": 9,
+      "min": 2912.1040889997967,
+      "mean": 8648.097911555527,
+      "p50": 8658.125449999934,
+      "p95": 13493.343250999926,
+      "p99": 13493.343250999926,
+      "max": 13493.343250999926
+    },
+    "durableFinalMs": {
+      "count": 9,
+      "min": 676,
+      "mean": 2774.6666666666665,
+      "p50": 2855,
+      "p95": 4559,
+      "p99": 4559,
+      "max": 4559
+    },
+    "records": [
+      {
+        "id": "COMMAND_LAZY_CAPACITY_0",
+        "initial": true,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 377.3973250000272,
+        "elapsedMs": 2277.2519880000036,
+        "durableFinalMs": 563,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "1",
+          "event_sequence": "1"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_0",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "1",
+            "eventSequence": "1"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_1",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 381.79036599979736,
+        "elapsedMs": 2912.1040889997967,
+        "durableFinalMs": 676,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "2",
+          "event_sequence": "4"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_1",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "2",
+            "eventSequence": "4"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_2",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 492.16847599996254,
+        "elapsedMs": 4493.284059999976,
+        "durableFinalMs": 912,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "3",
+          "event_sequence": "7"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_2",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "3",
+            "eventSequence": "7"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_3",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 1959.3191839999054,
+        "elapsedMs": 6738.593245999888,
+        "durableFinalMs": 2475,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "4",
+          "event_sequence": "10"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_3",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "4",
+            "eventSequence": "10"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_4",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 1444.1843870000448,
+        "elapsedMs": 7138.801652000053,
+        "durableFinalMs": 2092,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "5",
+          "event_sequence": "13"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_4",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "5",
+            "eventSequence": "13"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_5",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 2014.9712769999169,
+        "elapsedMs": 8658.125449999934,
+        "durableFinalMs": 2855,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "6",
+          "event_sequence": "16"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_5",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "6",
+            "eventSequence": "16"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_6",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 2310.347248000093,
+        "elapsedMs": 9899.33553000004,
+        "durableFinalMs": 3146,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "7",
+          "event_sequence": "19"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_6",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "7",
+            "eventSequence": "19"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_7",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 2929.6248320001177,
+        "elapsedMs": 12016.739512,
+        "durableFinalMs": 3880,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "8",
+          "event_sequence": "22"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_7",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "8",
+            "eventSequence": "22"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_8",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 3392.323664000025,
+        "elapsedMs": 13493.343250999926,
+        "durableFinalMs": 4559,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "9",
+          "event_sequence": "25"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_8",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "9",
+            "eventSequence": "25"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      },
+      {
+        "id": "COMMAND_LAZY_CAPACITY_9",
+        "initial": false,
+        "status": "COMMITTED",
+        "httpStatus": 202,
+        "ackMs": 3153.6956840001512,
+        "elapsedMs": 12482.55441400013,
+        "durableFinalMs": 4377,
+        "outcome": "COMMITTED",
+        "after": {
+          "world_version": "10",
+          "event_sequence": "28"
+        },
+        "derivedPublication": {
+          "status": "PUBLISHED",
+          "commandId": "COMMAND_LAZY_CAPACITY_9",
+          "countryId": "COUNTRY_01",
+          "head": {
+            "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+            "worldVersion": "10",
+            "eventSequence": "28"
+          },
+          "documentCount": 32,
+          "industryLabour": "PUBLISHED",
+          "captain": "PUBLISHED"
+        },
+        "resultStatus": "PROCESSED"
+      }
+    ]
+  },
+  "finalCounts": {
+    "worldVersion": "10",
+    "eventSequence": "28",
+    "commands": "10",
+    "receipts": "10",
+    "events": "28",
+    "batches": "0",
+    "inventory": "0",
+    "queues": "10",
+    "unfinished": 0
+  },
+  "receiptReconciliation": {
+    "accepted_receipts": 10,
+    "committed_receipts": 10
+  },
+  "resources": {
+    "WARMUP": {
+      "samples": 1,
+      "applicationCpuPercent": {
+        "count": 1,
+        "min": 0.79,
+        "mean": 0.79,
+        "p50": 0.79,
+        "p95": 0.79,
+        "p99": 0.79,
+        "max": 0.79
+      },
+      "postgresCpuPercent": {
+        "count": 1,
+        "min": 0.03,
+        "mean": 0.03,
+        "p50": 0.03,
+        "p95": 0.03,
+        "p99": 0.03,
+        "max": 0.03
+      },
+      "applicationContainerMemoryBytes": {
+        "count": 1,
+        "min": 2651068563.456,
+        "mean": 2651068563.456,
+        "p50": 2651068563.456,
+        "p95": 2651068563.456,
+        "p99": 2651068563.456,
+        "max": 2651068563.456
+      },
+      "postgresMemoryBytes": {
+        "count": 1,
+        "min": 154769817.6,
+        "mean": 154769817.6,
+        "p50": 154769817.6,
+        "p95": 154769817.6,
+        "p99": 154769817.6,
+        "max": 154769817.6
+      },
+      "runtimeRssBytes": {
+        "count": 1,
+        "min": 1146994688,
+        "mean": 1146994688,
+        "p50": 1146994688,
+        "p95": 1146994688,
+        "p99": 1146994688,
+        "max": 1146994688
+      },
+      "queueSamples": [
+        {
+          "at": "2026-11-17T11:51:05.584Z",
+          "unfinished": 0,
+          "head": "0",
+          "writerBusy": false
+        }
+      ]
+    },
+    "SHORT_CB_CONTROL": {
+      "samples": 1,
+      "applicationCpuPercent": {
+        "count": 1,
+        "min": 21.86,
+        "mean": 21.86,
+        "p50": 21.86,
+        "p95": 21.86,
+        "p99": 21.86,
+        "max": 21.86
+      },
+      "postgresCpuPercent": {
+        "count": 1,
+        "min": 74.33,
+        "mean": 74.33,
+        "p50": 74.33,
+        "p95": 74.33,
+        "p99": 74.33,
+        "max": 74.33
+      },
+      "applicationContainerMemoryBytes": {
+        "count": 1,
+        "min": 2677912109.056,
+        "mean": 2677912109.056,
+        "p50": 2677912109.056,
+        "p95": 2677912109.056,
+        "p99": 2677912109.056,
+        "max": 2677912109.056
+      },
+      "postgresMemoryBytes": {
+        "count": 1,
+        "min": 164626432,
+        "mean": 164626432,
+        "p50": 164626432,
+        "p95": 164626432,
+        "p99": 164626432,
+        "max": 164626432
+      },
+      "runtimeRssBytes": {
+        "count": 1,
+        "min": 1324130304,
+        "mean": 1324130304,
+        "p50": 1324130304,
+        "p95": 1324130304,
+        "p99": 1324130304,
+        "max": 1324130304
+      },
+      "queueSamples": [
+        {
+          "at": "2026-11-17T11:51:10.985Z",
+          "unfinished": 0,
+          "head": "1",
+          "writerBusy": false
+        }
+      ]
+    },
+    "SHORT_CB_SOCIAL": {
+      "samples": 2,
+      "applicationCpuPercent": {
+        "count": 2,
+        "min": 18.81,
+        "mean": 57.145,
+        "p50": 18.81,
+        "p95": 95.48,
+        "p99": 95.48,
+        "max": 95.48
+      },
+      "postgresCpuPercent": {
+        "count": 2,
+        "min": 15.35,
+        "mean": 42.41,
+        "p50": 15.35,
+        "p95": 69.47,
+        "p99": 69.47,
+        "max": 69.47
+      },
+      "applicationContainerMemoryBytes": {
+        "count": 2,
+        "min": 2685428301.824,
+        "mean": 2703145041.92,
+        "p50": 2685428301.824,
+        "p95": 2720861782.016,
+        "p99": 2720861782.016,
+        "max": 2720861782.016
+      },
+      "postgresMemoryBytes": {
+        "count": 2,
+        "min": 172700467.2,
+        "mean": 180774502.39999998,
+        "p50": 172700467.2,
+        "p95": 188848537.6,
+        "p99": 188848537.6,
+        "max": 188848537.6
+      },
+      "runtimeRssBytes": {
+        "count": 2,
+        "min": 1326534656,
+        "mean": 1330737152,
+        "p50": 1326534656,
+        "p95": 1334939648,
+        "p99": 1334939648,
+        "max": 1334939648
+      },
+      "queueSamples": [
+        {
+          "at": "2026-11-17T11:51:15.594Z",
+          "unfinished": 0,
+          "head": "1",
+          "writerBusy": false
+        },
+        {
+          "at": "2026-11-17T11:51:19.988Z",
+          "unfinished": 0,
+          "head": "2",
+          "writerBusy": true
+        }
+      ]
+    },
+    "MIXED_100_SESSION_5_MIN": {
+      "samples": 15,
+      "applicationCpuPercent": {
+        "count": 15,
+        "min": 26.39,
+        "mean": 74.62866666666669,
+        "p50": 78.04,
+        "p95": 110.91,
+        "p99": 110.91,
+        "max": 110.91
+      },
+      "postgresCpuPercent": {
+        "count": 15,
+        "min": 1.47,
+        "mean": 34.013333333333335,
+        "p50": 24.64,
+        "p95": 99.98,
+        "p99": 99.98,
+        "max": 99.98
+      },
+      "applicationContainerMemoryBytes": {
+        "count": 15,
+        "min": 2680059592.704,
+        "mean": 2900677746.1418667,
+        "p50": 2911987826.688,
+        "p95": 3096671420.416,
+        "p99": 3096671420.416,
+        "max": 3096671420.416
+      },
+      "postgresMemoryBytes": {
+        "count": 15,
+        "min": 166409011.2,
+        "mean": 190875784.53333336,
+        "p50": 187485388.8,
+        "p95": 204891750.4,
+        "p99": 204891750.4,
+        "max": 204891750.4
+      },
+      "runtimeRssBytes": {
+        "count": 15,
+        "min": 1251901440,
+        "mean": 1487870361.6,
+        "p50": 1503514624,
+        "p95": 1662550016,
+        "p99": 1662550016,
+        "max": 1662550016
+      },
+      "queueSamples": [
+        {
+          "at": "2026-11-17T11:51:25.615Z",
+          "unfinished": 0,
+          "head": "3",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:51:30.985Z",
+          "unfinished": 0,
+          "head": "4",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:51:35.595Z",
+          "unfinished": 1,
+          "head": "4",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:51:39.984Z",
+          "unfinished": 0,
+          "head": "5",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:51:45.604Z",
+          "unfinished": 0,
+          "head": "6",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:51:51.005Z",
+          "unfinished": 1,
+          "head": "6",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:51:55.61Z",
+          "unfinished": 0,
+          "head": "7",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:00.991Z",
+          "unfinished": 0,
+          "head": "7",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:05.597Z",
+          "unfinished": 0,
+          "head": "8",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:10.984Z",
+          "unfinished": 0,
+          "head": "8",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:15.613Z",
+          "unfinished": 1,
+          "head": "8",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:20.984Z",
+          "unfinished": 0,
+          "head": "9",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:25.641Z",
+          "unfinished": 0,
+          "head": "9",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:30.983Z",
+          "unfinished": 0,
+          "head": "10",
+          "writerBusy": true
+        },
+        {
+          "at": "2026-11-17T11:52:35.633Z",
+          "unfinished": 0,
+          "head": "10",
+          "writerBusy": true
+        }
+      ]
+    }
+  },
+  "shutdown": {
+    "pid": 3489,
+    "exitCode": 0,
+    "close": {
+      "ok": true,
+      "value": {
+        "pid": 3489,
+        "errors": [],
+        "idleErrors": [],
+        "pools": [
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ]
+      }
+    }
+  },
+  "cleanup": "OWNED_NATIVE_FIXTURE_REMOVED",
+  "preparationCorrections": [
+    "First offline parent used 2026-10-28; fingerprint mismatch detected before admission; discarded and rebuilt using exact 2026-10-29 parent."
+  ],
+  "unverified": [
+    "PRODUCTION",
+    "PUBLIC_NETWORK",
+    "100_DISTINCT_ACCOUNTS",
+    "FULL_OFFICE_COMMAND_MIX",
+    "LONG_TERM_STABILITY"
+  ],
+  "runnerStatus": "FAILED_OR_PREPARATION_BLOCKED",
+  "methodNotes": [
+    "Fixed schedule: 20 reads/s, 100 rotating session IDs, two JWT subjects/countries.",
+    "Short paired controls use the same two-subject distribution; earlier diagnostic used one subject, so cross-run comparison is not an exact matched experiment.",
+    "Generator continued fixed-rate polling; 213 observed same-session overlaps after slow responses. This is offered-load evidence, not a strict 100-in-flight cap acceptance.",
+    "Mixed stage scheduled 22 writes before read failure; eight were dispatched and committed. Fourteen unsent scheduled writes were cancelled after the failure, not lost accepted commands.",
+    "Ordinary Social reads acquired only the read pool during the short paired phase; explicit planning remained AVAILABLE.",
+    "Mixed resource bucket includes in-flight drain. Earlier short resource bucket also includes subsequent single-command work; use exact phase HTTP/pool metrics for short comparisons."
+  ],
+  "runtimeDiagnostics": {
+    "CONNECT_errors": 0,
+    "note": "Two optional OMO source-adoption denials were logged during startup; OMO execution is not accepted by this budget/read test.",
+    "CB_OMO_INDEPENDENT_SOURCE_ADOPTION_REQUIRED": 2
+  },
+  "applicationCgroup": {
+    "memoryPeakBytes": 5472739328,
+    "oom": 0,
+    "oomKill": 0,
+    "scope": "Full lifecycle including preparation, parent harness and Node startup, not only load",
+    "memoryMaxEvents": 0
+  },
+  "runnerExitCode": 1,
+  "finalCleanup": {
+    "productionMutation": false,
+    "downloadedImageReferencesRemoved": 2,
+    "taskVolumesRemoved": 3,
+    "dockerRestore": "STOP_COMMAND_COMPLETED",
+    "temporaryWindowsDirectoryRemoved": false,
+    "seedAndDatabaseVolumesRemoved": true,
+    "reportFormat": "PASS",
+    "temporaryWindowsDeletion": "AUTOMATIC_APPROVAL_REJECTED_BLOCKED_BY_POLICY_RECURSIVE_AND_FILE_ONLY",
+    "secretScan": {
+      "files": 4009,
+      "status": "PASS"
+    },
+    "temporaryWindowsDirectory": "D:/data/temp/econmind-lazy-capacity-20261117",
+    "originalContainersPreserved": 5,
+    "originalVolumesPreserved": 4,
+    "taskContainersRemoved": 3,
+    "temporaryScriptsAndRawWindowsSamplesRemoved": false
+  }
+}
