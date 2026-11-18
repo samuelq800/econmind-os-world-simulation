@@ -269,11 +269,60 @@ describe('native Finance own-administration budget rules / Core TEST_ONLY fixtur
       '4',
     ]);
     expect(second.result.receipt.worldVersionAfter).toBe('2');
+    const states = [
+      { worldId: world, worldVersion: '0', eventSequence: '0', envelopes: [] },
+      first.result.nextState,
+      second.result.nextState,
+    ];
+    const preimages = states.map((state) => {
+      let preimage = '';
+      C.canonicalSha256(C.canonicalHashInput(state), (text) => {
+        preimage = text;
+        return sha(text);
+      });
+      return preimage;
+    });
+    const hashes = new Map(preimages.map((value) => [value, 0]));
     const replay = replayFinanceNativeBudgetHistory(
       world,
       [frame, { command: line, events: second.result.transition.events }],
-      sha,
+      (text) => {
+        if (hashes.has(text)) hashes.set(text, hashes.get(text)! + 1);
+        return sha(text);
+      },
     );
+    expect([...hashes.values()]).toEqual([1, 1, 1]);
+    const changedEvents = second.result.transition.events.map((event, index) =>
+      index !== 1
+        ? event
+        : C.parseAuthoritativeEvent(
+            {
+              schemaVersion: event.schemaVersion,
+              eventId: event.eventId,
+              eventType: event.eventType,
+              worldId: event.worldId,
+              causationCommandId: event.causationCommandId,
+              correlationId: event.correlationId,
+              correctsEventId: event.correctsEventId,
+              worldVersion: event.worldVersion,
+              sequence: event.sequence,
+              simTime: event.simTime.toCanonicalValue(),
+              recordedAtReal: event.recordedAtReal,
+              payload: {
+                ...JSON.parse(event.canonicalPayload),
+                stateAfterHash: 'sha256:' + '0'.repeat(64),
+              },
+            },
+            sha,
+          ),
+    );
+    expect(() =>
+      replayFinanceNativeBudgetHistory(
+        world,
+        [frame, { command: line, events: changedEvents }],
+        sha,
+      ),
+    ).toThrow('CANONICAL_BUDGET_EVENT_REPLAY_MISMATCH');
     expect(replay).toEqual(second.result.nextState);
     expect(replay.envelopes[0]?.lines[0]).toMatchObject({
       appropriation: '600',

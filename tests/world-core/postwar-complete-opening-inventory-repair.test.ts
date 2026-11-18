@@ -292,6 +292,33 @@ it('appends complete inventory from exact adopted seed without changing legacy p
       )
     ).rows[0];
     expect(bulkAcl).toEqual({ publisher: true, reader: false });
+    const frameBody = async () =>
+      (
+        await db.query<{ body: string }>(
+          "select prosrc body from pg_proc where oid='world_v2.postwar_apply_current_frame_page(text,text,jsonb)'::regprocedure",
+        )
+      ).rows[0]!.body;
+    const originalFrameBody = await frameBody();
+    await db.exec(
+      await read('database/proposals/postwar-budget-frame-state-hash-once.sql'),
+    );
+    const hashBefore =
+      "'sha256:'||encode(sha256(convert_to('SHA-256'||chr(10)||world_v2.canonical_json(before_state),'UTF8')),'hex')";
+    const unchangedFrameBody = (await frameBody())
+      .replace(
+        'declare budget_before_hash text;budget_after_hash text;previous_budget_after jsonb;previous_budget_hash text;wanted jsonb;',
+        'declare wanted jsonb;',
+      )
+      .replace(
+        /^ {3}-- Reuse only exact locally reduced DATA\.[\s\S]*?previous_budget_after:=after_state;previous_budget_hash:=budget_after_hash;\n/m,
+        '',
+      )
+      .replace('(budget_before_hash)', hashBefore)
+      .replace(
+        '(budget_after_hash)',
+        hashBefore.replace('before_state', 'after_state'),
+      );
+    expect(unchangedFrameBody).toBe(originalFrameBody);
     // Compare with the actual fully installed standalone publishers, including
     // forward repairs. Sharing coverage must not restore an older mapper.
     for (const kind of [

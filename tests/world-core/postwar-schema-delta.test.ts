@@ -78,6 +78,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-office-derived-read.sql',
   'postwar-office-current-bundle.sql',
   'postwar-current-countries-bundle.sql',
+  'postwar-budget-frame-state-hash-once.sql',
   'postwar-office-seat-admission-once.sql',
   'postwar-office-opening-read-base-repair.sql',
   'postwar-office-recovery-read.sql',
@@ -389,7 +390,7 @@ describe('unapproved postwar schema delta package boundary', () => {
       )
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(89);
+    expect(selected).toHaveLength(90);
     for (const name of EXCLUDED_CLOCK_PROPOSALS) {
       expect(names).toContain(name);
       expect(selected).not.toContain(name);

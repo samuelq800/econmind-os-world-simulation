@@ -567,11 +567,10 @@ function eventPayload(
   p: BudgetPayload,
   policy: FinanceNativeBudgetPolicy,
   binding: FinanceNativeBudgetBinding,
-  before: FinanceNativeBudgetState,
-  after: FinanceNativeBudgetState,
+  stateBeforeHash: string,
+  stateAfterHash: string,
   index: number,
   count: number,
-  sha: Sha256Hex,
 ) {
   return {
     schemaVersion: 'finance-native-budget-event-v1',
@@ -579,8 +578,8 @@ function eventPayload(
     payload: p,
     policy,
     binding,
-    stateBeforeHash: hash(before, sha),
-    stateAfterHash: hash(after, sha),
+    stateBeforeHash,
+    stateAfterHash,
     intentIndex: String(index),
     intentCount: String(count),
   };
@@ -594,6 +593,7 @@ function replayBudgetFrame(
   state: FinanceNativeBudgetState,
   frame: FinanceNativeBudgetFrame,
   sha: Sha256Hex,
+  stateHashes: WeakMap<FinanceNativeBudgetState, string>,
 ): FinanceNativeBudgetState {
   const c = frame.command,
     p = payload(c, sha);
@@ -606,6 +606,8 @@ function replayBudgetFrame(
     types = kinds(p);
   if (frame.events.length !== types.length)
     invalid('COMPLETE_EVENT_GROUP_REQUIRED');
+  const beforeHash = stateHashes.get(state) ?? hash(state, sha),
+    afterHash = hash(after, sha);
   for (const [i, event] of frame.events.entries()) {
     validateAuthoritativeEvent(event, sha);
     const body = JSON.parse(event.canonicalPayload) as ReturnType<
@@ -628,17 +630,18 @@ function replayBudgetFrame(
           p,
           body.policy,
           body.binding,
-          state,
-          after,
+          beforeHash,
+          afterHash,
           i,
           types.length,
-          sha,
         ),
       )
     )
       invalid('CANONICAL_BUDGET_EVENT_REPLAY_MISMATCH');
   }
-  return freeze(after);
+  const result = freeze(after);
+  stateHashes.set(result, afterHash);
+  return result;
 }
 
 /** Immutable source data only. The owning Worker still holds/rechecks its own
@@ -1611,6 +1614,8 @@ function foldFinanceNativeBudgetMixedPrefix(
     eventSequence: '0',
     envelopes: [],
   };
+  // Local DATA digests only; never retain a state or admission across replays.
+  const budgetStateHashes = new WeakMap<FinanceNativeBudgetState, string>();
   const countries = new Map<string, MixedSocialCountryCursor>(
     [...(prior?.countries ?? [])].map(([id, country]) => [
       id,
@@ -1992,7 +1997,7 @@ function foldFinanceNativeBudgetMixedPrefix(
         eventSequence: frame.events.at(-1)!.sequence,
       });
     } else if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND) {
-      budget = replayBudgetFrame(budget, frame, sha);
+      budget = replayBudgetFrame(budget, frame, sha, budgetStateHashes);
       const body = JSON.parse(frame.events[0]!.canonicalPayload) as {
         payload: BudgetPayload;
         binding: FinanceNativeBudgetBinding;
@@ -2708,13 +2713,14 @@ export function replayFinanceNativeBudgetHistory(
   };
   const ids = new Set<string>(),
     keys = new Set<string>();
+  const stateHashes = new WeakMap<FinanceNativeBudgetState, string>();
   for (const frame of frames) {
     if (
       ids.has(frame.command.commandId) ||
       keys.has(frame.command.idempotencyKey!)
     )
       invalid('COMPLETE_UNIQUE_BUDGET_PREFIX_REQUIRED');
-    state = replayBudgetFrame(state, frame, sha);
+    state = replayBudgetFrame(state, frame, sha, stateHashes);
     ids.add(frame.command.commandId);
     keys.add(frame.command.idempotencyKey!);
   }
@@ -2974,6 +2980,8 @@ export async function prepareFinanceNativeBudgetTransition(input: {
     sha256Hex: sha,
   });
   const types = kinds(p);
+  const beforeHash = hash(before, sha),
+    afterHash = hash(after, sha);
   const events = types.map((type, i) =>
     parseAuthoritativeEvent(
       {
@@ -2993,11 +3001,10 @@ export async function prepareFinanceNativeBudgetTransition(input: {
           p,
           source.policy,
           source.binding,
-          before,
-          after,
+          beforeHash,
+          afterHash,
           i,
           types.length,
-          sha,
         ),
       },
       sha,
