@@ -43,7 +43,7 @@ it('does not retry denied, stale or rejected sources', async () => {
   }
 });
 
-it('keeps the 3.5s wait budget and a finite probe count, preserving the public unavailable error', async () => {
+it('keeps six reads and 3.25s waiting within the original budget, preserving the public unavailable error', async () => {
   let waited = 0;
   timing.wait = async (ms) => {
     waited += ms;
@@ -53,8 +53,8 @@ it('keeps the 3.5s wait budget and a finite probe count, preserving the public u
     expect(await readAfterCurrentPublication(read)).toEqual(
       failure('CURRENT_FINANCIAL_UNAVAILABLE'),
     );
-    expect(read).toHaveBeenCalledTimes(15);
-    expect(waited).toBe(3500);
+    expect(read).toHaveBeenCalledTimes(6);
+    expect(waited).toBe(3250);
   } finally {
     timing.wait = undefined;
   }
@@ -78,7 +78,7 @@ it('observes a published head between recurring commits instead of skipping its 
   try {
     expect(await readAfterCurrentPublication(read)).toBe(published);
     expect(elapsed).toBe(1750);
-    expect(read).toHaveBeenCalledTimes(8);
+    expect(read).toHaveBeenCalledTimes(4);
   } finally {
     timing.wait = undefined;
   }
