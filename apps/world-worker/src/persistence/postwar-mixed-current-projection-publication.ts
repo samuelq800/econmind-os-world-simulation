@@ -148,6 +148,16 @@ export function derivePostwarMixedSocialCurrentFrom(
 }
 export interface PostwarMixedCurrentProjectionSource {
   readonly worldId: string;
+  withCaptainCountriesSnapshot<T>(
+    countries: readonly Readonly<{
+      countryId: string;
+      requireCaptain: boolean;
+    }>[],
+    consume: (
+      tx: SqlExecutor,
+      snapshots: readonly PostwarMixedCurrentProjectionSnapshot[],
+    ) => Promise<T>,
+  ): Promise<T>;
   /** Server-only DATA mapper scope; no writes to authoritative state. */
   withSnapshot<T>(
     country: string,
@@ -216,30 +226,50 @@ export function createPostwarMixedCurrentProjectionSource(config: {
     purpose: 'STANDARD' | 'CAPTAIN_CURRENT',
     consume: (
       tx: SqlExecutor,
-      value: PostwarMixedCurrentProjectionSnapshot,
+      values: readonly PostwarMixedCurrentProjectionSnapshot[],
     ) => Promise<T>,
     requireCaptain = true,
+    requestedCountries?: readonly Readonly<{
+      countryId: string;
+      requireCaptain: boolean;
+    }>[],
   ): Promise<T> => {
     return run(async () => {
       const country = countryId(requestedCountry),
         baseline = readPostwarSocialRuntimeFinancialReplayBase(social, world),
         b = consumePreparedPostwarSocialFinancialReplayBase(baseline);
-      if (!b.document.countries.some((c) => c.countryId === country))
+      const countries = requestedCountries ?? [
+        { countryId: country, requireCaptain },
+      ];
+      if (
+        countries.length === 0 ||
+        countries.length > 70 ||
+        new Set(countries.map((c) => c.countryId)).size !== countries.length ||
+        !countries.every((selected) =>
+          b.document.countries.some((c) => c.countryId === selected.countryId),
+        )
+      )
         throw Error('ACTUAL_ADOPTED_COUNTRY_REQUIRED');
       return social.database.transaction(async (tx) => {
         // The issued Social database starts RR and, for the paged profile,
         // takes the versioned revocation fence before any H/source snapshot.
         // Do not try to change isolation after that first protected query.
         return roles.withSourceReaderFrom(tx, async () => {
-          const locked = await lockRegisteredSourceFrom(tx, world, country),
-            r = locked.rows[0];
-          if (
-            locked.rows.length !== 1 ||
-            !r ||
-            r.seed_fingerprint !== b.pins.contentHash ||
-            r.admission_ref !== b.pins.admissionRef
-          )
-            throw Error('ACTUAL_CURRENT_SOURCE_PINS_REQUIRED');
+          for (const selected of countries) {
+            const locked = await lockRegisteredSourceFrom(
+                tx,
+                world,
+                selected.countryId,
+              ),
+              r = locked.rows[0];
+            if (
+              locked.rows.length !== 1 ||
+              !r ||
+              r.seed_fingerprint !== b.pins.contentHash ||
+              r.admission_ref !== b.pins.admissionRef
+            )
+              throw Error('ACTUAL_CURRENT_SOURCE_PINS_REQUIRED');
+          }
           if (historyMode === 'PAGED_COMPLETE_V1') {
             const paged = await readPostwarPagedFinanceSocialReplayFrom({
               executor: tx,
@@ -250,6 +280,9 @@ export function createPostwarMixedCurrentProjectionSource(config: {
               seedId: b.pins.seedRef,
               seedFingerprint: b.pins.contentHash,
               admissionRef: b.pins.admissionRef,
+              ...(requestedCountries === undefined
+                ? {}
+                : { currentCaptainCountries: countries }),
               ...(purpose === 'CAPTAIN_CURRENT'
                 ? { captainCountryId: country, requireCaptain }
                 : {}),
@@ -310,11 +343,33 @@ export function createPostwarMixedCurrentProjectionSource(config: {
                 value = Object.freeze(
                   {},
                 ) as PostwarMixedCurrentProjectionSnapshot;
-              snapshots.set(value, { executor: tx, facts });
+              const values =
+                requestedCountries === undefined
+                  ? [value]
+                  : countries.map((selected) => {
+                      const status =
+                        paged.captainOriginalStatuses?.[selected.countryId];
+                      if (status === undefined)
+                        throw Error('ACTUAL_COUNTRY_CAPTAIN_STATUS_REQUIRED');
+                      const token = Object.freeze(
+                        {},
+                      ) as PostwarMixedCurrentProjectionSnapshot;
+                      snapshots.set(token, {
+                        executor: tx,
+                        facts: Object.freeze({
+                          ...facts,
+                          countryId: selected.countryId,
+                          captainOriginalStatus: status,
+                        }),
+                      });
+                      return token;
+                    });
+              if (requestedCountries === undefined)
+                snapshots.set(value, { executor: tx, facts });
               try {
-                return await consume(tx, value);
+                return await consume(tx, values);
               } finally {
-                snapshots.delete(value);
+                for (const token of values) snapshots.delete(token);
               }
             } finally {
               releasePostwarPagedFinanceSocialReplay(paged);
@@ -420,7 +475,7 @@ export function createPostwarMixedCurrentProjectionSource(config: {
           ) as PostwarMixedCurrentProjectionSnapshot;
           snapshots.set(value, { executor: tx, facts });
           try {
-            return await consume(tx, value);
+            return await consume(tx, [value]);
           } finally {
             snapshots.delete(value);
           }
@@ -430,6 +485,28 @@ export function createPostwarMixedCurrentProjectionSource(config: {
   };
   const source: Readonly<PostwarMixedCurrentProjectionSource> = Object.freeze({
     worldId: world,
+    withCaptainCountriesSnapshot<T>(
+      countries: readonly Readonly<{
+        countryId: string;
+        requireCaptain: boolean;
+      }>[],
+      consume: (
+        tx: SqlExecutor,
+        tokens: readonly PostwarMixedCurrentProjectionSnapshot[],
+      ) => Promise<T>,
+    ) {
+      if (historyMode !== 'PAGED_COMPLETE_V1' || countries.length === 0)
+        return Promise.reject(
+          Error('PAGED_REGISTERED_COUNTRIES_SNAPSHOT_REQUIRED'),
+        );
+      return withSnapshotFrom(
+        countries[0]!.countryId,
+        'CAPTAIN_CURRENT',
+        consume,
+        countries[0]!.requireCaptain,
+        countries,
+      );
+    },
     withSnapshot<T>(
       country: string,
       consume: (
@@ -437,7 +514,9 @@ export function createPostwarMixedCurrentProjectionSource(config: {
         snapshot: PostwarMixedCurrentProjectionSnapshot,
       ) => Promise<T>,
     ) {
-      return withSnapshotFrom(country, 'STANDARD', consume);
+      return withSnapshotFrom(country, 'STANDARD', (tx, values) =>
+        consume(tx, values[0]!),
+      );
     },
     withCaptainSnapshot<T>(
       country: string,
@@ -450,7 +529,7 @@ export function createPostwarMixedCurrentProjectionSource(config: {
       return withSnapshotFrom(
         country,
         'CAPTAIN_CURRENT',
-        consume,
+        (tx, values) => consume(tx, values[0]!),
         options?.requireCaptain ?? true,
       );
     },

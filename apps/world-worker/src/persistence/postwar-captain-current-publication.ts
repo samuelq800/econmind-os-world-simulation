@@ -142,22 +142,191 @@ export function createPostwarCaptainCurrentPublisher(input: {
 }) {
   if (!isPostwarMixedCurrentProjectionSource(input.source))
     throw Error('GENUINE_MIXED_CURRENT_SOURCE_REQUIRED');
+
+  type OfficePublicationOptions = {
+    readonly requireCaptain: boolean;
+    readonly includeTrade?: boolean;
+    readonly includeIndustryLabour?: boolean;
+    readonly expectedHead?: Readonly<{
+      worldId: string;
+      worldVersion: string;
+      eventSequence: string;
+    }>;
+  };
+  async function mapOfficeCurrent(
+    tx: SqlExecutor,
+    token: PostwarMixedCurrentProjectionSnapshot,
+    options: OfficePublicationOptions,
+  ) {
+    const socialConnection = input.socialConnection;
+    const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token);
+    if (
+      options.expectedHead &&
+      canonicalSerialize(options.expectedHead) !== canonicalSerialize(f.head)
+    )
+      throw Error('CURRENT_COUNTRIES_EXPECTED_PUBLICATION_HEAD_MISMATCH');
+    const captain =
+        f.captainOriginalStatus === 'PRESENT'
+          ? derivePostwarCaptainCurrentFrom(tx, token)
+          : null,
+      financial = derivePostwarMixedFinancialCurrentFrom(tx, token),
+      social = derivePostwarMixedSocialCurrentFrom(tx, token),
+      trade = options.includeTrade
+        ? derivePostwarTradeCurrentFrom(tx, token)
+        : null,
+      industry = options.includeIndustryLabour
+        ? await derivePostwarIndustryLabourCurrentFrom(
+            tx,
+            token,
+            socialConnection!,
+          )
+        : null;
+
+    if (
+      f.captainOriginalStatus !== 'PRESENT' &&
+      f.captainOriginalStatus !== 'NO_REGISTERED_CAPTAIN_ORIGINAL'
+    )
+      throw Error('ACTUAL_CAPTAIN_CUSTODY_PRESENCE_REQUIRED');
+    if (options.requireCaptain && !captain)
+      throw Error('CAPTAIN_CURRENT_REGISTERED_ORIGINAL_REQUIRED');
+    return { f, captain, financial, social, trade, industry };
+  }
+  type MappedOfficeCurrent = Awaited<ReturnType<typeof mapOfficeCurrent>>;
+  function readOfficePublication(
+    mapped: MappedOfficeCurrent,
+    rows: {
+      captain: readonly Record<string, unknown>[];
+      financial: readonly Record<string, unknown>[];
+      social: readonly Record<string, unknown>[];
+      trade: readonly Record<string, unknown>[];
+      industryLabour: readonly Record<string, unknown>[];
+    },
+  ) {
+    const { f, captain, industry, trade } = mapped;
+    const cap = { rows: rows.captain },
+      fin = { rows: rows.financial },
+      soc = { rows: rows.social },
+      trd = { rows: rows.trade },
+      ind = { rows: rows.industryLabour };
+    if (
+      industry &&
+      (ind.rows.length !== 1 || ind.rows[0]?.country_id !== f.countryId)
+    )
+      throw Error('INDUSTRY_EXACT_CURRENT_PUBLICATION_REQUIRED');
+    if (trd.rows.length !== (trade ? 2 : 0))
+      throw Error('EXACT_TWO_TRADE_CURRENT_DOCUMENTS_REQUIRED');
+    if (
+      cap.rows.length !== (captain ? 1 : 0) ||
+      fin.rows.length !== 10 ||
+      soc.rows.length !== 2
+    )
+      throw Error('EXACT_THIRTEEN_CURRENT_DOCUMENTS_REQUIRED');
+    for (const row of [
+      ...cap.rows,
+      ...fin.rows,
+      ...soc.rows,
+      ...trd.rows,
+      ...ind.rows,
+    ])
+      if (
+        String(row.world_version) !== f.head.worldVersion ||
+        String(row.event_sequence) !== f.head.eventSequence
+      )
+        throw Error('CURRENT_PUBLICATION_HEAD_DIFFERS_FROM_HELD_CORE');
+    return Object.freeze({
+      head: f.head,
+      captainStatus: captain
+        ? ('PUBLISHED' as const)
+        : ('NO_REGISTERED_CAPTAIN_ORIGINAL' as const),
+      documentCounts: Object.freeze({
+        captain: cap.rows.length,
+        financial: fin.rows.length,
+        social: soc.rows.length,
+        trade: trd.rows.length,
+        ...(industry ? { industryLabour: ind.rows.length } : {}),
+        total:
+          cap.rows.length +
+          fin.rows.length +
+          soc.rows.length +
+          trd.rows.length +
+          ind.rows.length,
+      }),
+      captain: Object.freeze(cap.rows),
+      financial: Object.freeze(fin.rows),
+      social: Object.freeze(soc.rows),
+      trade: Object.freeze(trd.rows),
+      ...(industry ? { industryLabour: Object.freeze(ind.rows) } : {}),
+    });
+  }
   return Object.freeze({
     /** Fixed finite post-commit readback: all related current pages are derived
      * from ONE held complete prefix, committed atomically in one publisher tx.
      * Does not resend a command, acquire a lease, deliver another outbox or loop. */
+
+    publishOfficeCurrentCountries(
+      countries: readonly Readonly<{
+        countryId: string;
+        requireCaptain: boolean;
+      }>[],
+      options: Omit<OfficePublicationOptions, 'requireCaptain'> = {},
+    ) {
+      if (options.includeIndustryLabour && !input.socialConnection)
+        throw Error('INDUSTRY_GENUINE_SOCIAL_SOURCE_REQUIRED');
+      return input.source.withCaptainCountriesSnapshot(
+        countries,
+        async (tx, tokens) => {
+          const mapped: MappedOfficeCurrent[] = [];
+          for (let i = 0; i < tokens.length; i++)
+            mapped.push(
+              await mapOfficeCurrent(tx, tokens[i]!, {
+                ...options,
+                requireCaptain: countries[i]!.requireCaptain,
+              }),
+            );
+          return input.publicationDatabase.transaction(async (pub) => {
+            await pub.query('set transaction isolation level repeatable read');
+            const result = await pub.query<Record<string, unknown>>(
+              'select * from world_v2.publish_postwar_current_countries_bundle($1,$2::jsonb)',
+              [
+                input.source.worldId,
+                JSON.stringify(
+                  mapped.map((m) => ({
+                    countryId: m.f.countryId,
+                    financial: m.financial.assertion,
+                    social: m.social,
+                    captain: m.captain?.assertion ?? null,
+                    trade: m.trade?.assertion ?? null,
+                    industry: m.industry?.assertion ?? null,
+                  })),
+                ),
+              ],
+            );
+            return Object.freeze(
+              mapped.map((m) => {
+                const rows = result.rows.filter(
+                  (r) => r.country_id === m.f.countryId,
+                );
+                const kind = (name: string) =>
+                  rows.filter((r) => r.publication_kind === name);
+                return Object.freeze({
+                  countryId: m.f.countryId,
+                  ...readOfficePublication(m, {
+                    captain: kind('CAPTAIN'),
+                    financial: kind('FINANCIAL'),
+                    social: kind('SOCIAL'),
+                    trade: kind('TRADE'),
+                    industryLabour: kind('INDUSTRY'),
+                  }),
+                });
+              }),
+            );
+          });
+        },
+      );
+    },
     publishOfficeCurrentCountry(
       countryId: string,
-      options: {
-        readonly requireCaptain: boolean;
-        readonly includeTrade?: boolean;
-        readonly includeIndustryLabour?: boolean;
-        readonly expectedHead?: Readonly<{
-          worldId: string;
-          worldVersion: string;
-          eventSequence: string;
-        }>;
-      } = { requireCaptain: true },
+      options: OfficePublicationOptions = { requireCaptain: true },
     ) {
       const socialConnection = input.socialConnection;
       if (options.includeIndustryLabour && !socialConnection)
@@ -165,29 +334,8 @@ export function createPostwarCaptainCurrentPublisher(input: {
       return input.source.withCaptainSnapshot(
         countryId,
         async (tx, token) => {
-          const f = consumePostwarMixedCurrentProjectionSnapshotFrom(tx, token);
-          if (
-            options.expectedHead &&
-            canonicalSerialize(options.expectedHead) !==
-              canonicalSerialize(f.head)
-          )
-            throw Error('CURRENT_COUNTRIES_EXPECTED_PUBLICATION_HEAD_MISMATCH');
-          const captain =
-              f.captainOriginalStatus === 'PRESENT'
-                ? derivePostwarCaptainCurrentFrom(tx, token)
-                : null,
-            financial = derivePostwarMixedFinancialCurrentFrom(tx, token),
-            social = derivePostwarMixedSocialCurrentFrom(tx, token),
-            trade = options.includeTrade
-              ? derivePostwarTradeCurrentFrom(tx, token)
-              : null,
-            industry = options.includeIndustryLabour
-              ? await derivePostwarIndustryLabourCurrentFrom(
-                  tx,
-                  token,
-                  socialConnection!,
-                )
-              : null;
+          const mapped = await mapOfficeCurrent(tx, token, options);
+          const { f, captain, financial, social, trade, industry } = mapped;
           return input.publicationDatabase.transaction(async (pub) => {
             const paged = 'pageProof' in f.coverage;
             if (paged)
@@ -280,54 +428,12 @@ export function createPostwarCaptainCurrentPublisher(input: {
                     [f.head.worldId, countryId, industry.assertion],
                   )
                 : { rows: [] };
-            if (
-              industry &&
-              (ind.rows.length !== 1 || ind.rows[0]?.country_id !== countryId)
-            )
-              throw Error('INDUSTRY_EXACT_CURRENT_PUBLICATION_REQUIRED');
-            if (trd.rows.length !== (trade ? 2 : 0))
-              throw Error('EXACT_TWO_TRADE_CURRENT_DOCUMENTS_REQUIRED');
-            if (
-              cap.rows.length !== (captain ? 1 : 0) ||
-              fin.rows.length !== 10 ||
-              soc.rows.length !== 2
-            )
-              throw Error('EXACT_THIRTEEN_CURRENT_DOCUMENTS_REQUIRED');
-            for (const row of [
-              ...cap.rows,
-              ...fin.rows,
-              ...soc.rows,
-              ...trd.rows,
-              ...ind.rows,
-            ])
-              if (
-                String(row.world_version) !== f.head.worldVersion ||
-                String(row.event_sequence) !== f.head.eventSequence
-              )
-                throw Error('CURRENT_PUBLICATION_HEAD_DIFFERS_FROM_HELD_CORE');
-            return Object.freeze({
-              head: f.head,
-              captainStatus: captain
-                ? ('PUBLISHED' as const)
-                : ('NO_REGISTERED_CAPTAIN_ORIGINAL' as const),
-              documentCounts: Object.freeze({
-                captain: cap.rows.length,
-                financial: fin.rows.length,
-                social: soc.rows.length,
-                trade: trd.rows.length,
-                ...(industry ? { industryLabour: ind.rows.length } : {}),
-                total:
-                  cap.rows.length +
-                  fin.rows.length +
-                  soc.rows.length +
-                  trd.rows.length +
-                  ind.rows.length,
-              }),
-              captain: Object.freeze(cap.rows),
-              financial: Object.freeze(fin.rows),
-              social: Object.freeze(soc.rows),
-              trade: Object.freeze(trd.rows),
-              ...(industry ? { industryLabour: Object.freeze(ind.rows) } : {}),
+            return readOfficePublication(mapped, {
+              captain: cap.rows,
+              financial: fin.rows,
+              social: soc.rows,
+              trade: trd.rows,
+              industryLabour: ind.rows,
             });
           });
         },

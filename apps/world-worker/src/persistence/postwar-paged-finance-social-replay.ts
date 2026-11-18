@@ -11,6 +11,7 @@ import {
   resolveSocialEmploymentPhysicalServicePool,
   canonicalHashInput,
   canonicalSha256,
+  canonicalSerialize,
   parseSocialEmploymentServiceCommand,
   type SocialEmploymentReadFacts,
 } from '@econmind/core';
@@ -46,6 +47,7 @@ import {
   type PostwarPagedCurrentProof,
 } from './postwar-paged-current-proof.js';
 import type { PostwarCaptainOriginalStatus } from './postwar-captain-history-originals.js';
+import { readPostwarPagedCaptainHistoryOriginalsFrom } from './postwar-paged-office-history-originals.js';
 import {
   isPostwarSocialRuntimeConnection,
   readPostwarSocialRuntimeFinancialReplayBase,
@@ -93,6 +95,9 @@ export interface PostwarPagedFinanceSocialReplay {
     >;
   }>;
   readonly captainOriginalStatus?: PostwarCaptainOriginalStatus;
+  readonly captainOriginalStatuses?: Readonly<
+    Record<string, PostwarCaptainOriginalStatus>
+  >;
 }
 export interface PostwarPagedSocialMaterialization {
   readonly sourceCommandId: string;
@@ -185,6 +190,10 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
     'frames' | 'pageBoundary' | 'expectedHead'
   > & {
     readonly expectedHead?: PreparedPostwarFinanceSocialFxReplayRequest['expectedHead'];
+    readonly currentCaptainCountries?: readonly Readonly<{
+      countryId: string;
+      requireCaptain: boolean;
+    }>[];
   },
 ): Promise<Readonly<PostwarPagedFinanceSocialReplay>> {
   const b = consumePreparedPostwarSocialFinancialReplayBase(input.baseline);
@@ -218,6 +227,8 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
     successful = false,
     captainOriginalStatus: PostwarCaptainOriginalStatus | undefined;
   const seenCommandTypes = new Set<string>();
+  const captainOriginalStatuses: Record<string, PostwarCaptainOriginalStatus> =
+    {};
   const captainPredecessorSnapshotHashes: Record<string, string> = {};
   const lastSocialOrigins: Record<string, PostwarPagedSocialOrigin> = {};
   const pendingSocialPlanReceiptFingerprints: Record<string, string> = {};
@@ -272,6 +283,61 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
         });
       if (originals.captainOriginalStatus !== undefined)
         captainOriginalStatus = originals.captainOriginalStatus;
+      const captainCountries = new Map(
+        originals.captainCountries?.map((c) => [c.countryId, c]),
+      );
+      for (const selected of input.currentCaptainCountries ?? []) {
+        const current =
+          selected.countryId === input.hostCountryId
+            ? {
+                captainOriginalStatus,
+                captainCountries: originals.captainCountries ?? [],
+              }
+            : await readPostwarPagedCaptainHistoryOriginalsFrom(
+                input.executor,
+                {
+                  worldId: input.worldId,
+                  hostCountryId: selected.countryId,
+                  officeId: input.officeId,
+                  seedFingerprint: input.seedFingerprint,
+                  admissionRef: input.admissionRef,
+                  expectedHead,
+                  fromHead: page.fromHead,
+                  throughHead: page.throughHead,
+                  frames: page.frames,
+                  sourceMetadata: b.sourceMetadata,
+                },
+              );
+        if (
+          current.captainOriginalStatus === undefined ||
+          current.captainOriginalStatus === 'REVOKED'
+        )
+          invalid('current country Captain source absent or revoked');
+        if (
+          current.captainOriginalStatus === 'NO_REGISTERED_CAPTAIN_ORIGINAL' &&
+          (selected.requireCaptain ||
+            page.frames.some(
+              (f) =>
+                f.command.countryId === selected.countryId &&
+                f.command.commandType ===
+                  'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
+            ))
+        )
+          invalid('current country Captain genesis required');
+        captainOriginalStatuses[selected.countryId] =
+          current.captainOriginalStatus;
+        for (const original of current.captainCountries) {
+          const prior = captainCountries.get(original.countryId);
+          if (
+            prior &&
+            canonicalSerialize(prior) !== canonicalSerialize(original)
+          )
+            invalid(
+              'same country Captain originals differ within held snapshot',
+            );
+          captainCountries.set(original.countryId, original);
+        }
+      }
       // Same-source facts and every full frame reach the same original Core
       // reducers. Selecting source witnesses never removes foreign frames.
       cursor = appendFinanceSocialReplayPage({
@@ -298,9 +364,9 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
           ...(originals.omoOriginals === undefined
             ? {}
             : { omoOriginals: originals.omoOriginals }),
-          ...(originals.captainCountries === undefined
+          ...(captainCountries.size === 0
             ? {}
-            : { captainCountries: originals.captainCountries }),
+            : { captainCountries: [...captainCountries.values()] }),
         },
       });
       assertHistoricalPlanPhysicalOriginals(
@@ -467,6 +533,9 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
         ),
       }),
       ...(captainOriginalStatus === undefined ? {} : { captainOriginalStatus }),
+      ...(input.currentCaptainCountries === undefined
+        ? {}
+        : { captainOriginalStatuses: Object.freeze(captainOriginalStatuses) }),
     });
     results.add(result);
     return result;

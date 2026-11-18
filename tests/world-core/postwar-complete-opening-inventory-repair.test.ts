@@ -282,6 +282,16 @@ it('appends complete inventory from exact adopted seed without changing legacy p
     await db.exec(
       await read('database/proposals/postwar-office-current-bundle.sql'),
     );
+    await db.exec(
+      await read('database/proposals/postwar-current-countries-bundle.sql'),
+    );
+    const bulkAcl = (
+      await db.query<{ publisher: boolean; reader: boolean }>(
+        "select has_function_privilege($1,'world_v2.publish_postwar_current_countries_bundle(text,jsonb)','EXECUTE') publisher,has_function_privilege($2,'world_v2.publish_postwar_current_countries_bundle(text,jsonb)','EXECUTE') reader",
+        [publisher, readerRole],
+      )
+    ).rows[0];
+    expect(bulkAcl).toEqual({ publisher: true, reader: false });
     // Compare with the actual fully installed standalone publishers, including
     // forward repairs. Sharing coverage must not restore an older mapper.
     for (const kind of [

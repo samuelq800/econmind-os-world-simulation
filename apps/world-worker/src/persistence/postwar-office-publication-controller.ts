@@ -318,53 +318,90 @@ export function createPostwarOfficePublicationController(input: {
           )
             throw Error('EXACT_REGISTERED_POST_COMMIT_COUNTRY_SCOPE_REQUIRED');
         }
-        const combinedIndustry =
-          currentCountries !== null && industryPublisher !== null;
+        if (currentCountries) {
+          const countries = [
+            command.countryId,
+            ...new Set(
+              [...currentCountries, ...tradeCountries].filter(
+                (c) => c !== command.countryId,
+              ),
+            ),
+          ];
+          const publications = await publisher.publishOfficeCurrentCountries(
+            countries.map((countryId) => ({
+              countryId,
+              requireCaptain:
+                countryId === command.countryId &&
+                command.officeId === 'CAPTAIN',
+            })),
+            {
+              ...(input.tradeCurrent ? { includeTrade: true } : {}),
+              ...(industryPublisher ? { includeIndustryLabour: true } : {}),
+            },
+          );
+          const primary = publications[0];
+          if (
+            !primary ||
+            publications.length !== countries.length ||
+            publications.some(
+              (p, i) =>
+                p.countryId !== countries[i] ||
+                canonicalSerialize(p.head) !== canonicalSerialize(primary.head),
+            )
+          )
+            throw Error('CURRENT_COUNTRIES_SAME_OBSERVED_HEAD_REQUIRED');
+          return Object.freeze({
+            status: 'PUBLISHED',
+            commandId,
+            countryId: command.countryId,
+            head: primary.head,
+            documentCount: publications.reduce(
+              (n, p) => n + p.documentCounts.total,
+              0,
+            ),
+            ...(industryPublisher
+              ? { industryLabour: 'PUBLISHED' as const }
+              : {}),
+            captain: primary.captain.length
+              ? 'PUBLISHED'
+              : 'NO_REGISTERED_ORIGINAL',
+          });
+        }
         const result = await publisher.publishOfficeCurrentCountry(
           command.countryId,
           {
             requireCaptain: command.officeId === 'CAPTAIN',
             ...(input.tradeCurrent ? { includeTrade: true } : {}),
-            ...(combinedIndustry ? { includeIndustryLabour: true } : {}),
           },
         );
-        const industry = combinedIndustry
-          ? { head: result.head, documents: result.industryLabour! }
-          : await industryPublisher?.publishCountry(
-              command.countryId,
-              result.head,
-            );
+        const industry = await industryPublisher?.publishCountry(
+          command.countryId,
+          result.head,
+        );
         if (
           industry &&
           canonicalSerialize(industry.head) !== canonicalSerialize(result.head)
         )
           throw Error('INDUSTRY_EXPECTED_PUBLICATION_HEAD_MISMATCH');
         let additionalDocuments = 0;
-        const otherCountries = [
-          ...new Set([...(currentCountries ?? []), ...tradeCountries]),
-        ].filter((country) => country !== command.countryId);
+        const otherCountries = [...new Set(tradeCountries)].filter(
+          (country) => country !== command.countryId,
+        );
         for (const country of otherCountries) {
           const other = await publisher.publishOfficeCurrentCountry(country, {
             requireCaptain: false,
             ...(input.tradeCurrent ? { includeTrade: true } : {}),
-            ...(combinedIndustry ? { includeIndustryLabour: true } : {}),
             expectedHead: result.head,
           });
           if (
             canonicalSerialize(other.head) !== canonicalSerialize(result.head)
           )
             throw Error('CURRENT_COUNTRIES_SAME_OBSERVED_HEAD_REQUIRED');
-          // Legacy Trade-only counterpart behavior remains unchanged. Formal
-          // registered publication keeps Industry labour at that same head too.
-          const otherIndustry = combinedIndustry
-            ? { head: other.head, documents: other.industryLabour! }
-            : undefined;
           additionalDocuments +=
             other.captain.length +
             other.financial.length +
             other.social.length +
-            other.trade.length +
-            (otherIndustry?.documents.length ?? 0);
+            other.trade.length;
         }
         return Object.freeze({
           status: 'PUBLISHED',

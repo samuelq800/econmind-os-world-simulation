@@ -3,7 +3,10 @@
  * still verifies real same-head/source derivation and SQL publication. */
 import { expect, it, vi, beforeEach } from 'vitest';
 const fixture = vi.hoisted(() => ({
-  source: { withCaptainSnapshot: vi.fn() },
+  source: {
+    withCaptainSnapshot: vi.fn(),
+    withCaptainCountriesSnapshot: vi.fn(),
+  },
   consume: vi.fn(),
   financial: vi.fn(),
   social: vi.fn(),
@@ -20,6 +23,125 @@ vi.mock(
     consumePostwarMixedCurrentProjectionSnapshotFrom: fixture.consume,
     derivePostwarMixedSocialCurrentFrom: fixture.social,
   }),
+);
+
+it.each([
+  'success',
+  'wrongSecondHead',
+  'secondCountrySqlFailure',
+  'revokedSource',
+])(
+  'publishes countries from one held replay and one atomic SQL call: %s',
+  async (scenario) => {
+    const tx = {},
+      tokens = [{}, {}],
+      outcomes: string[] = [],
+      queries: string[] = [];
+    fixture.consume.mockImplementation((_tx, token) => ({
+      countryId: token === tokens[0] ? 'COUNTRY_01' : 'COUNTRY_02',
+      head: {
+        worldId: 'WORLD_TEST_ONLY',
+        worldVersion: '3',
+        eventSequence: '4',
+      },
+      captainOriginalStatus: 'NO_REGISTERED_CAPTAIN_ORIGINAL',
+      coverage: { pageProof: {} },
+    }));
+    fixture.financial.mockReturnValue({ assertion: 'FINANCIAL_TEST_ONLY' });
+    fixture.social.mockReturnValue('SOCIAL_TEST_ONLY');
+    fixture.industry.mockResolvedValue({ assertion: 'INDUSTRY_TEST_ONLY' });
+    fixture.source.withCaptainCountriesSnapshot.mockImplementation(
+      async (_countries, consume) => {
+        if (scenario === 'revokedSource')
+          throw Error('TEST_ONLY_REVOKED_SECOND_SOURCE');
+        return consume(tx, tokens);
+      },
+    );
+    const publication = {
+      async query(sql: string) {
+        queries.push(sql);
+        if (sql.startsWith('set ')) return { rows: [] };
+        expect(sql).toContain('publish_postwar_current_countries_bundle');
+        if (scenario === 'secondCountrySqlFailure')
+          throw Error('TEST_ONLY_SECOND_COUNTRY_SQL_FAILED');
+        return {
+          rows: ['COUNTRY_01', 'COUNTRY_02'].flatMap((country) =>
+            [
+              ['FINANCIAL', 10],
+              ['SOCIAL', 2],
+              ['INDUSTRY', 1],
+            ].flatMap(([kind, count]) =>
+              Array.from({ length: Number(count) }, () => ({
+                country_id: country,
+                publication_kind: kind,
+                world_version:
+                  country === 'COUNTRY_02' && scenario === 'wrongSecondHead'
+                    ? '4'
+                    : '3',
+                event_sequence: '4',
+              })),
+            ),
+          ),
+        };
+      },
+    };
+    const database = {
+      async transaction(
+        consume: (pub: typeof publication) => Promise<unknown>,
+      ) {
+        try {
+          const result = await consume(publication);
+          outcomes.push('COMMIT');
+          return result;
+        } catch (error) {
+          outcomes.push('ROLLBACK');
+          throw error;
+        }
+      },
+    } as unknown as SqlDatabase;
+    const publisher = createPostwarCaptainCurrentPublisher({
+      source: fixture.source as never,
+      publicationDatabase: database,
+      socialConnection: {} as never,
+    });
+    const countries = [
+      { countryId: 'COUNTRY_01', requireCaptain: false },
+      { countryId: 'COUNTRY_02', requireCaptain: false },
+    ];
+    const work = publisher.publishOfficeCurrentCountries(countries, {
+      includeIndustryLabour: true,
+    });
+    if (scenario === 'success') {
+      expect(
+        (await work).map((p) => ({
+          country: p.countryId,
+          count: p.documentCounts.total,
+        })),
+      ).toEqual([
+        { country: 'COUNTRY_01', count: 13 },
+        { country: 'COUNTRY_02', count: 13 },
+      ]);
+      expect(outcomes).toEqual(['COMMIT']);
+    } else {
+      await expect(work).rejects.toThrow(
+        scenario === 'wrongSecondHead'
+          ? 'CURRENT_PUBLICATION_HEAD_DIFFERS_FROM_HELD_CORE'
+          : scenario === 'revokedSource'
+            ? 'TEST_ONLY_REVOKED_SECOND_SOURCE'
+            : 'TEST_ONLY_SECOND_COUNTRY_SQL_FAILED',
+      );
+      expect(outcomes).toEqual(
+        scenario === 'revokedSource' ? [] : ['ROLLBACK'],
+      );
+    }
+    expect(
+      fixture.source.withCaptainCountriesSnapshot,
+    ).toHaveBeenCalledExactlyOnceWith(countries, expect.any(Function));
+    expect(fixture.source.withCaptainSnapshot).not.toHaveBeenCalled();
+    expect(queries.filter((q) => q.startsWith('select '))).toHaveLength(
+      scenario === 'revokedSource' ? 0 : 1,
+    );
+  },
 );
 vi.mock(
   '../../apps/world-worker/src/persistence/postwar-mixed-financial-current-publication.js',
@@ -128,6 +250,7 @@ it.each(['success', 'wrongIndustryHead', 'industrySqlFailure'])(
         eventSequence: '4',
       },
       captainOriginalStatus: 'NO_REGISTERED_CAPTAIN_ORIGINAL',
+      countryId: 'COUNTRY_10',
       coverage: { pageProof: {} },
     });
     fixture.financial.mockReturnValue({ assertion: 'FINANCIAL_TEST_ONLY' });

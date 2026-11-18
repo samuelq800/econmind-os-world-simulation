@@ -10,6 +10,7 @@ const fixture = vi.hoisted(() => ({
   readCommand: vi.fn(),
   readReceipt: vi.fn(),
   publish: vi.fn(),
+  publishCountries: vi.fn(),
   openingPublish: vi.fn(),
   head: { world_version: '0', event_sequence: '0' },
   industryPublish: vi.fn(),
@@ -41,6 +42,7 @@ vi.mock(
   () => ({
     createPostwarCaptainCurrentPublisher: () => ({
       publishOfficeCurrentCountry: fixture.publish,
+      publishOfficeCurrentCountries: fixture.publishCountries,
     }),
     createPostwarCaptainOpeningCurrentPublisher: () => ({
       publishCountry: fixture.openingPublish,
@@ -142,6 +144,7 @@ function controller(
   });
 }
 beforeEach(() => {
+  vi.resetAllMocks();
   vi.clearAllMocks();
   fixture.head = { world_version: '0', event_sequence: '0' };
   fixture.openingPublish.mockResolvedValue({});
@@ -163,6 +166,27 @@ beforeEach(() => {
     documents: [{}],
   });
   fixture.close.mockResolvedValue(undefined);
+  fixture.publishCountries.mockImplementation(
+    async (
+      countries,
+      options: { includeTrade?: boolean; includeIndustryLabour?: boolean } = {},
+    ) =>
+      countries.map((c: { countryId: string }) => ({
+        countryId: c.countryId,
+        head: { worldId: world, worldVersion: '3', eventSequence: '4' },
+        captain: [{}],
+        financial: Array.from({ length: 10 }, () => ({})),
+        social: [{}, {}],
+        trade: options.includeTrade ? [{}, {}] : [],
+        industryLabour: [{}],
+        documentCounts: {
+          total:
+            13 +
+            (options.includeTrade ? 2 : 0) +
+            (options.includeIndustryLabour ? 1 : 0),
+        },
+      })),
+  );
 });
 describe('fixed post-commit derived publication', () => {
   it('keeps a durable FINAL distinct from pending publication and retries only the derived publication', async () => {
@@ -222,22 +246,19 @@ describe('fixed post-commit derived publication', () => {
       derivedPublication: {
         status: 'PUBLISHED',
         countryId: 'COUNTRY_10',
-        documentCount: 42,
+        documentCount: 48,
       },
     });
-    expect(fixture.publish.mock.calls.map((call) => call[0])).toEqual([
-      'COUNTRY_10',
-      'COUNTRY_01',
-      'COUNTRY_02',
-    ]);
+    expect(fixture.publishCountries).toHaveBeenCalledExactlyOnceWith(
+      [
+        { countryId: 'COUNTRY_10', requireCaptain: false },
+        { countryId: 'COUNTRY_01', requireCaptain: false },
+        { countryId: 'COUNTRY_02', requireCaptain: false },
+      ],
+      { includeTrade: true, includeIndustryLabour: true },
+    );
+    expect(fixture.publish).not.toHaveBeenCalled();
     expect(fixture.industryPublish).not.toHaveBeenCalled();
-    for (const country of ['COUNTRY_01', 'COUNTRY_02'])
-      expect(fixture.publish).toHaveBeenCalledWith(country, {
-        requireCaptain: false,
-        includeTrade: true,
-        includeIndustryLabour: true,
-        expectedHead: { worldId: world, worldVersion: '3', eventSequence: '4' },
-      });
     await c.close();
   });
   it.each([
@@ -256,6 +277,7 @@ describe('fixed post-commit derived publication', () => {
         derivedPublication: { status: 'UNAVAILABLE' },
       });
       expect(fixture.publish).not.toHaveBeenCalled();
+      expect(fixture.publishCountries).not.toHaveBeenCalled();
       expect(fixture.industryPublish).not.toHaveBeenCalled();
       await c.close();
     },
@@ -267,11 +289,7 @@ describe('fixed post-commit derived publication', () => {
       officeId: 'INDUSTRY',
     });
     const c = controller(true, false, ['COUNTRY_02', 'COUNTRY_10']);
-    const published = await fixture.publish();
-    fixture.publish.mockClear();
-    fixture.publish
-      .mockResolvedValueOnce(published)
-      .mockRejectedValueOnce(Error('C2_ACK_UNKNOWN'));
+    fixture.publishCountries.mockRejectedValueOnce(Error('C2_ACK_UNKNOWN'));
     const failed = await c.afterCommitted(step);
     expect(failed).toMatchObject({
       status: 'PROCESSED',
@@ -282,12 +300,11 @@ describe('fixed post-commit derived publication', () => {
     expect((await c.retryCommitted(command.commandId)).status).toBe(
       'PUBLISHED',
     );
-    expect(fixture.publish.mock.calls.map((call) => call[0])).toEqual([
-      'COUNTRY_10',
-      'COUNTRY_02',
-      'COUNTRY_10',
-      'COUNTRY_02',
-    ]);
+    expect(
+      fixture.publishCountries.mock.calls.flatMap((call) =>
+        call[0].map((c: { countryId: string }) => c.countryId),
+      ),
+    ).toEqual(['COUNTRY_10', 'COUNTRY_02', 'COUNTRY_10', 'COUNTRY_02']);
     expect(fixture.readCommand).toHaveBeenCalledTimes(2);
     expect(fixture.readReceipt).toHaveBeenCalledTimes(2);
     expect(
@@ -301,12 +318,18 @@ describe('fixed post-commit derived publication', () => {
   });
   it('refuses a later registered country or Industry publisher at another head while preserving the FINAL', async () => {
     const c = controller(true, false, ['COUNTRY_02', 'COUNTRY_10']);
-    const published = await fixture.publish();
-    fixture.publish.mockClear();
-    fixture.publish.mockResolvedValueOnce(published).mockResolvedValueOnce({
-      ...published,
-      head: { worldId: world, worldVersion: '4', eventSequence: '5' },
-    });
+    const published = (
+      await fixture.publishCountries([{ countryId: 'COUNTRY_02' }])
+    )[0];
+    fixture.publishCountries.mockClear();
+    fixture.publishCountries.mockResolvedValueOnce([
+      published,
+      {
+        ...published,
+        countryId: 'COUNTRY_10',
+        head: { worldId: world, worldVersion: '4', eventSequence: '5' },
+      },
+    ]);
     expect((await c.afterCommitted(step)).derivedPublication?.status).toBe(
       'UNAVAILABLE',
     );
@@ -794,11 +817,15 @@ it('publishes both actual committed Trade parties at one observed head, and retr
       status: 'PUBLISHED',
       documentCount: 48,
     });
-    expect(fixture.publish.mock.calls.map((call) => call[0])).toEqual([
-      'COUNTRY_01',
-      'COUNTRY_10',
-      'COUNTRY_02',
-    ]);
+    expect(fixture.publishCountries).toHaveBeenCalledExactlyOnceWith(
+      [
+        { countryId: 'COUNTRY_01', requireCaptain: false },
+        { countryId: 'COUNTRY_10', requireCaptain: false },
+        { countryId: 'COUNTRY_02', requireCaptain: false },
+      ],
+      { includeTrade: true, includeIndustryLabour: true },
+    );
+    expect(fixture.publish).not.toHaveBeenCalled();
     expect(fixture.industryPublish).not.toHaveBeenCalled();
     await formal.close();
     fixture.publish
