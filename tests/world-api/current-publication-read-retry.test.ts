@@ -15,6 +15,22 @@ const failure = (
   },
 });
 
+const timing = vi.hoisted(() => ({
+  wait: undefined as ((ms: number) => Promise<void>) | undefined,
+}));
+vi.mock('node:timers/promises', async (original) => {
+  const actual = await original<typeof import('node:timers/promises')>();
+  return {
+    ...actual,
+    setTimeout: (
+      ms: number,
+      value: undefined,
+      options: { signal?: AbortSignal },
+    ) =>
+      timing.wait ? timing.wait(ms) : actual.setTimeout(ms, value, options),
+  };
+});
+
 it('does not retry denied, stale or rejected sources', async () => {
   for (const response of [
     failure('CURRENT_OFFICE_SEAT_REQUIRED', 403),
@@ -27,12 +43,45 @@ it('does not retry denied, stale or rejected sources', async () => {
   }
 });
 
-it('stops after three retries and preserves the public unavailable error', async () => {
+it('keeps the 3.5s wait budget and a finite probe count, preserving the public unavailable error', async () => {
+  let waited = 0;
+  timing.wait = async (ms) => {
+    waited += ms;
+  };
   const read = vi.fn(async () => failure('CURRENT_FINANCIAL_NOT_PUBLISHED'));
-  expect(await readAfterCurrentPublication(read)).toEqual(
-    failure('CURRENT_FINANCIAL_UNAVAILABLE'),
+  try {
+    expect(await readAfterCurrentPublication(read)).toEqual(
+      failure('CURRENT_FINANCIAL_UNAVAILABLE'),
+    );
+    expect(read).toHaveBeenCalledTimes(15);
+    expect(waited).toBe(3500);
+  } finally {
+    timing.wait = undefined;
+  }
+});
+
+it('observes a published head between recurring commits instead of skipping its entire window', async () => {
+  let elapsed = 0;
+  timing.wait = async (ms) => {
+    elapsed += ms;
+  };
+  // Transport control-flow fixture only; no source or authorization proof.
+  const published = {
+    httpStatus: 200,
+    body: { ok: true },
+  } as unknown as PostwarOfficeRuntimeServiceResponse;
+  const read = vi.fn(async () =>
+    elapsed % 3000 >= 1750 && elapsed % 3000 < 2750
+      ? published
+      : failure('CURRENT_SOCIAL_NOT_PUBLISHED'),
   );
-  expect(read).toHaveBeenCalledTimes(4);
+  try {
+    expect(await readAfterCurrentPublication(read)).toBe(published);
+    expect(elapsed).toBe(1750);
+    expect(read).toHaveBeenCalledTimes(8);
+  } finally {
+    timing.wait = undefined;
+  }
 });
 
 it('returns 499 when cancelled during the wait without reading again', async () => {

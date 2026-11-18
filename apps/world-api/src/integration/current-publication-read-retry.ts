@@ -18,7 +18,10 @@ export async function readAfterCurrentPublication(
   signal?: AbortSignal,
 ): Promise<PostwarOfficeRuntimeServiceResponse> {
   let result = await read();
-  for (const waitMs of [500, 1000, 2000]) {
+  // A new global head can supersede a short publication window. Exponential
+  // waits can miss every window under steady writes; sample within the same
+  // 3.5s total wait budget instead. Each probe still authenticates afresh.
+  for (let attempt = 0; attempt < 14; attempt++) {
     if (
       signal?.aborted ||
       result.body.ok ||
@@ -27,7 +30,7 @@ export async function readAfterCurrentPublication(
     )
       break;
     try {
-      await delay(waitMs, undefined, { signal });
+      await delay(250, undefined, { signal });
     } catch (error) {
       if (!signal?.aborted) throw error;
       break;
