@@ -140,19 +140,27 @@ it.each(['success', 'wrongIndustryHead', 'industrySqlFailure'])(
       async query(sql: string) {
         queries.push(sql);
         if (sql.startsWith('set ')) return { rows: [] };
-        const industry = sql.includes('industry_labour_current');
-        if (industry && scenario === 'industrySqlFailure')
+        expect(sql).toContain('publish_postwar_office_current_bundle');
+        if (scenario === 'industrySqlFailure')
           throw Error('TEST_ONLY_INDUSTRY_SQL_FAILURE');
-        const head =
-          industry && scenario === 'wrongIndustryHead'
-            ? { world_version: '4', event_sequence: '5' }
-            : { world_version: '3', event_sequence: '4' };
         return {
-          rows: Array.from(
-            {
-              length: industry ? 1 : sql.includes('financial_current') ? 10 : 2,
-            },
-            () => ({ ...head, country_id: 'COUNTRY_10' }),
+          rows: [
+            ['FINANCIAL', 10],
+            ['SOCIAL', 2],
+            ['INDUSTRY', 1],
+          ].flatMap(([kind, count]) =>
+            Array.from({ length: Number(count) }, () => ({
+              publication_kind: kind,
+              country_id: 'COUNTRY_10',
+              world_version:
+                kind === 'INDUSTRY' && scenario === 'wrongIndustryHead'
+                  ? '4'
+                  : '3',
+              event_sequence:
+                kind === 'INDUSTRY' && scenario === 'wrongIndustryHead'
+                  ? '5'
+                  : '4',
+            })),
           ),
         };
       },
@@ -203,6 +211,6 @@ it.each(['success', 'wrongIndustryHead', 'industrySqlFailure'])(
     }
     expect(fixture.source.withCaptainSnapshot).toHaveBeenCalledOnce();
     expect(fixture.industry).toHaveBeenCalledExactlyOnceWith(tx, token, social);
-    expect(queries.filter((q) => q.startsWith('select '))).toHaveLength(3);
+    expect(queries.filter((q) => q.startsWith('select '))).toHaveLength(1);
   },
 );

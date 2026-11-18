@@ -189,6 +189,7 @@ export async function prepareRegisteredFinalNativeSqlPlan({
         ...REGISTERED_FINAL_NATIVE_SQL_ORDER,
         'postwar-complete-opening-inventory-read-repair',
         'postwar-office-seat-admission-once',
+        'postwar-office-current-bundle',
       ]
     : REGISTERED_FINAL_NATIVE_SQL_ORDER;
   for (const name of selectedNames) {

@@ -201,38 +201,85 @@ export function createPostwarCaptainCurrentPublisher(input: {
               throw Error('ACTUAL_CAPTAIN_CUSTODY_PRESENCE_REQUIRED');
             if (options.requireCaptain && !captain)
               throw Error('CAPTAIN_CURRENT_REGISTERED_ORIGINAL_REQUIRED');
-            const cap = captain
-              ? await pub.query<Record<string, unknown>>(
+            // The registered paged path verifies its SQL-owned complete
+            // prefix once, then runs the same per-family checks and mappers.
+            const bundle =
+              paged && industry
+                ? await pub.query<Record<string, unknown>>(
+                    'select * from world_v2.publish_postwar_office_current_bundle($1,$2,$3,$4,$5,$6,$7)',
+                    [
+                      f.head.worldId,
+                      countryId,
+                      financial.assertion,
+                      social,
+                      captain?.assertion ?? null,
+                      trade?.assertion ?? null,
+                      industry.assertion,
+                    ],
+                  )
+                : null;
+            const cap = bundle
+              ? {
+                  rows: bundle.rows.filter(
+                    (r) => r.publication_kind === 'CAPTAIN',
+                  ),
+                }
+              : captain
+                ? await pub.query<Record<string, unknown>>(
+                    paged
+                      ? 'select * from world_v2.publish_postwar_paged_captain_current($1,$2,$3)'
+                      : 'select * from world_v2.publish_postwar_captain_current($1,$2,$3)',
+                    [f.head.worldId, countryId, captain.assertion],
+                  )
+                : { rows: [] };
+            const fin = bundle
+              ? {
+                  rows: bundle.rows.filter(
+                    (r) => r.publication_kind === 'FINANCIAL',
+                  ),
+                }
+              : await pub.query<Record<string, unknown>>(
                   paged
-                    ? 'select * from world_v2.publish_postwar_paged_captain_current($1,$2,$3)'
-                    : 'select * from world_v2.publish_postwar_captain_current($1,$2,$3)',
-                  [f.head.worldId, countryId, captain.assertion],
-                )
-              : { rows: [] };
-            const fin = await pub.query<Record<string, unknown>>(
-              paged
-                ? 'select * from world_v2.publish_postwar_paged_financial_current($1,$2,$3)'
-                : 'select * from world_v2.publish_postwar_mixed_financial_current($1,$2,$3)',
-              [f.head.worldId, countryId, financial.assertion],
-            );
-            const soc = await pub.query<Record<string, unknown>>(
-              paged
-                ? 'select * from world_v2.publish_postwar_paged_social_current($1,$2,$3)'
-                : 'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',
-              [f.head.worldId, countryId, social],
-            );
-            const trd = trade
-              ? await pub.query<Record<string, unknown>>(
-                  'select * from world_v2.publish_postwar_paged_trade_current($1,$2,$3)',
-                  [f.head.worldId, countryId, trade.assertion],
-                )
-              : { rows: [] };
-            const ind = industry
-              ? await pub.query<Record<string, unknown>>(
-                  'select * from world_v2.publish_postwar_industry_labour_current($1,$2,$3)',
-                  [f.head.worldId, countryId, industry.assertion],
-                )
-              : { rows: [] };
+                    ? 'select * from world_v2.publish_postwar_paged_financial_current($1,$2,$3)'
+                    : 'select * from world_v2.publish_postwar_mixed_financial_current($1,$2,$3)',
+                  [f.head.worldId, countryId, financial.assertion],
+                );
+            const soc = bundle
+              ? {
+                  rows: bundle.rows.filter(
+                    (r) => r.publication_kind === 'SOCIAL',
+                  ),
+                }
+              : await pub.query<Record<string, unknown>>(
+                  paged
+                    ? 'select * from world_v2.publish_postwar_paged_social_current($1,$2,$3)'
+                    : 'select * from world_v2.publish_postwar_mixed_social_current($1,$2,$3)',
+                  [f.head.worldId, countryId, social],
+                );
+            const trd = bundle
+              ? {
+                  rows: bundle.rows.filter(
+                    (r) => r.publication_kind === 'TRADE',
+                  ),
+                }
+              : trade
+                ? await pub.query<Record<string, unknown>>(
+                    'select * from world_v2.publish_postwar_paged_trade_current($1,$2,$3)',
+                    [f.head.worldId, countryId, trade.assertion],
+                  )
+                : { rows: [] };
+            const ind = bundle
+              ? {
+                  rows: bundle.rows.filter(
+                    (r) => r.publication_kind === 'INDUSTRY',
+                  ),
+                }
+              : industry
+                ? await pub.query<Record<string, unknown>>(
+                    'select * from world_v2.publish_postwar_industry_labour_current($1,$2,$3)',
+                    [f.head.worldId, countryId, industry.assertion],
+                  )
+                : { rows: [] };
             if (
               industry &&
               (ind.rows.length !== 1 || ind.rows[0]?.country_id !== countryId)
