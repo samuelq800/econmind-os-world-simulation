@@ -741,6 +741,13 @@ export interface AtomicCommitResult {
   readonly transition: AuthoritativeTransition;
 }
 
+/** A different execution finalized the submission before in-transaction preparation. */
+export class AtomicFinalAlreadyRecorded extends Error {
+  constructor(readonly receipt: FinalCommandReceipt) {
+    super('Final receipt already exists for this command');
+  }
+}
+
 interface SubmissionRow {
   readonly actor_id: unknown;
   readonly auth_subject: unknown;
@@ -1334,9 +1341,7 @@ export class AtomicTransitionRepository {
     });
   }
 
-  async commit(
-    candidate: PrivateAtomicTransitionCandidate,
-  ): Promise<Readonly<AtomicCommitResult>> {
+  #validateCandidate(candidate: PrivateAtomicTransitionCandidate): boolean {
     if (!privateCandidates.has(candidate)) {
       invalid('Atomic repository accepts a validated private candidate only');
     }
@@ -1365,27 +1370,109 @@ export class AtomicTransitionRepository {
         'Candidate holder does not match this authoritative Worker',
       );
     }
+    return production;
+  }
+
+  async commitUsingFactory(
+    factory: AtomicTransitionCandidateFactory,
+    request: AtomicTransitionPreparation,
+  ): Promise<Readonly<AtomicCommitResult>> {
+    const build = (draft: AtomicTransitionDraft) =>
+      prepareAtomicTransitionCandidate({
+        command: request.command,
+        commitAuthorization: request.commitAuthorization,
+        draft,
+        sha256Hex: this.#sha256Hex,
+      });
+    const prepareFrom = factory.prepareFinanceBudgetFrom;
+    if (
+      request.command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+      prepareFrom !== undefined
+    ) {
+      return this.#commit(request.command, undefined, {
+        observedAtReal: request.observedAtReal,
+        prepare: async (tx) => build(await prepareFrom(tx, request)),
+      });
+    }
+    return this.commit(build(await factory.prepare(request)));
+  }
+
+  async commit(
+    candidate: PrivateAtomicTransitionCandidate,
+  ): Promise<Readonly<AtomicCommitResult>> {
+    const production = this.#validateCandidate(candidate);
+    return this.#commit(candidate.command, candidate, undefined, production);
+  }
+
+  async #commit(
+    command: CanonicalCommand,
+    prepared: PrivateAtomicTransitionCandidate | undefined,
+    finance?: {
+      readonly observedAtReal: string;
+      prepare(tx: SqlExecutor): Promise<PrivateAtomicTransitionCandidate>;
+    },
+    production = false,
+  ): Promise<Readonly<AtomicCommitResult>> {
+    let candidate = prepared;
     try {
       return await this.#database.transaction(async (transaction) => {
         await lockAndValidateSubmission(
           transaction,
           {
-            worldId: candidate.command.worldId,
-            commandId: candidate.command.commandId,
-            idempotencyKey: candidate.command.idempotencyKey,
+            worldId: command.worldId,
+            commandId: command.commandId,
+            idempotencyKey: command.idempotencyKey,
           },
           this.#sha256Hex,
-          candidate.command,
+          command,
         );
         await this.#faultInjector.hit('SUBMISSION_LOCKED');
-        const existing = await readReceipt(transaction, candidate.command);
+        const existing = await readReceipt(transaction, command);
         if (existing !== null) {
+          if (!candidate) throw new AtomicFinalAlreadyRecorded(existing);
           return this.#existingCommit(candidate, existing, 'EXISTING_COMMIT');
         }
-        const head = await this.#assertDatabaseCommitGuard(
-          transaction,
-          candidate,
-        );
+        let head;
+        if (finance) {
+          // Match the normal submission → lease → head order before acquiring
+          // source SHARE locks. The durable claim supplies the fence.
+          const claim = await transaction.query<{
+            claim_fencing_token: unknown;
+          }>(
+            `select claim_fencing_token from world_v2.command_queue
+              where world_id = $1 and command_id = $2
+                and queue_state = 'CLAIMED' and claimed_by = $3`,
+            [command.worldId, command.commandId, this.#workerId],
+          );
+          const token = claim.rows[0]?.claim_fencing_token;
+          if (token == null || command.expectedWorldVersion === null)
+            throw new DomainError(
+              DOMAIN_ERROR_CODES.WRITER_FENCE_STALE,
+              'Finance budget requires the current durable claim',
+            );
+          const fencingToken = databaseInteger(
+            token,
+            'claim fencing token',
+            true,
+          );
+          head = await this.#lockCommitHead(transaction, {
+            worldId: command.worldId,
+            holderId: this.#workerId,
+            fencingToken,
+            worldVersion: command.expectedWorldVersion,
+            observedAtReal: finance.observedAtReal,
+          });
+          candidate = await finance.prepare(transaction);
+          production = this.#validateCandidate(candidate);
+          if (candidate.commitAssertion.fencingToken !== fencingToken)
+            throw new DomainError(
+              DOMAIN_ERROR_CODES.WRITER_FENCE_STALE,
+              'Candidate fence differs from the held durable claim',
+            );
+        } else {
+          head = await this.#assertDatabaseCommitGuard(transaction, candidate!);
+        }
+        if (!candidate) invalid('Atomic transition candidate required');
         await this.#faultInjector.hit('COMMIT_GUARD_PASSED');
         await this.#authorizationGuard.assertCurrent(transaction, {
           command: candidate.command,
@@ -1514,7 +1601,8 @@ export class AtomicTransitionRepository {
         });
       });
     } catch (error) {
-      const recovered = await this.readFinalReceipt(candidate.command);
+      if (!candidate) throw error;
+      const recovered = await this.readFinalReceipt(command);
       if (recovered !== null) {
         return this.#existingCommit(
           candidate,
@@ -2573,9 +2661,28 @@ export class AtomicTransitionRepository {
       invalid('Source protection port returned a mismatched currentness audit');
   }
 
-  async #assertDatabaseCommitGuard(
+  #assertDatabaseCommitGuard(
     transaction: SqlExecutor,
     candidate: PrivateAtomicTransitionCandidate,
+  ) {
+    return this.#lockCommitHead(transaction, {
+      worldId: candidate.command.worldId,
+      holderId: candidate.commitAssertion.holderId,
+      fencingToken: candidate.commitAssertion.fencingToken,
+      worldVersion: candidate.transition.worldVersionBefore,
+      observedAtReal: candidate.observedAtReal,
+    });
+  }
+
+  async #lockCommitHead(
+    transaction: SqlExecutor,
+    expected: {
+      worldId: string;
+      holderId: string;
+      fencingToken: string;
+      worldVersion: string;
+      observedAtReal: string;
+    },
   ): Promise<{
     readonly worldVersion: string;
     readonly eventSequence: string;
@@ -2584,11 +2691,11 @@ export class AtomicTransitionRepository {
       `select world_version, event_sequence
          from world_v2.assert_world_writer_commit_guard($1, $2, $3, $4, $5)`,
       [
-        candidate.command.worldId,
-        candidate.commitAssertion.holderId,
-        candidate.commitAssertion.fencingToken,
-        candidate.transition.worldVersionBefore,
-        candidate.observedAtReal,
+        expected.worldId,
+        expected.holderId,
+        expected.fencingToken,
+        expected.worldVersion,
+        expected.observedAtReal,
       ],
     );
     const row = result.rows[0];
@@ -2596,10 +2703,7 @@ export class AtomicTransitionRepository {
       row === undefined
         ? null
         : databaseInteger(row.world_version, 'guard WorldVersion');
-    if (
-      row === undefined ||
-      actualWorldVersion !== candidate.transition.worldVersionBefore
-    ) {
+    if (row === undefined || actualWorldVersion !== expected.worldVersion) {
       throw new DomainError(
         DOMAIN_ERROR_CODES.WORLD_VERSION_MISMATCH,
         'Database commit guard returned a different WorldVersion',
@@ -2950,12 +3054,19 @@ export class AtomicTransitionRepository {
   }
 }
 
+type AtomicTransitionPreparation = {
+  readonly command: CanonicalCommand;
+  readonly commitAuthorization: CommitAuthorizationProof | null;
+  readonly observedAtReal: string;
+};
+
 export interface AtomicTransitionCandidateFactory {
-  prepare(input: {
-    readonly command: CanonicalCommand;
-    readonly commitAuthorization: CommitAuthorizationProof | null;
-    readonly observedAtReal: string;
-  }): Promise<AtomicTransitionDraft>;
+  prepare(input: AtomicTransitionPreparation): Promise<AtomicTransitionDraft>;
+  /** Finance budget only, after the repository locks submission, lease and head. */
+  prepareFinanceBudgetFrom?(
+    executor: SqlExecutor,
+    input: AtomicTransitionPreparation,
+  ): Promise<AtomicTransitionDraft>;
 }
 
 /**

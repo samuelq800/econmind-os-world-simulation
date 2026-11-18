@@ -17,11 +17,12 @@ import {
 } from '@econmind/core';
 
 import {
+  AtomicFinalAlreadyRecorded,
   AtomicTransitionRepository,
-  prepareAtomicTransitionCandidate,
   type AtomicCommitAuthorizationGuard,
   type AtomicTransitionCandidateFactory,
 } from './persistence/atomic-transition-repository.js';
+import { PostgresTransactionError } from './persistence/postgres-sql-database.js';
 import type { SqlDatabase, SqlExecutor } from './persistence/sql-database.js';
 import {
   WORKER_CURRENT_AUTHORIZATION_LOCK_QUERY,
@@ -370,18 +371,13 @@ export function createAuthoritativeWorkerExecution(input: {
           recordZeroEffectReceipt: (receipt) =>
             repository.recordZeroEffectReceipt(receipt),
           commitAuthorizedCommand: async ({ command, commitAuthorization }) => {
-            const draft = await input.candidateFactory.prepare({
-              command,
-              commitAuthorization,
-              observedAtReal: commandInput.recordedAtReal,
-            });
-            const committed = await repository.commit(
-              prepareAtomicTransitionCandidate({
+            const committed = await repository.commitUsingFactory(
+              input.candidateFactory,
+              {
                 command,
                 commitAuthorization,
-                draft,
-                sha256Hex: input.sha256Hex,
-              }),
+                observedAtReal: commandInput.recordedAtReal,
+              },
             );
             return Object.freeze({
               receipt: committed.receipt,
@@ -389,6 +385,18 @@ export function createAuthoritativeWorkerExecution(input: {
             });
           },
         },
+      }).catch((error: unknown) => {
+        const failure =
+          error instanceof PostgresTransactionError &&
+          error.outcome === 'ROLLED_BACK'
+            ? error.cause
+            : error;
+        if (failure instanceof AtomicFinalAlreadyRecorded)
+          return Object.freeze({
+            source: 'EXISTING_FINAL' as const,
+            receipt: failure.receipt,
+          });
+        throw error;
       }),
   });
 }

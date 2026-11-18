@@ -39,7 +39,10 @@ import {
   WORKER_REVOKED_AUTHORIZATION_LOCK_QUERY,
 } from './worker-authorization-sql.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
-import type { AtomicTransitionCandidateFactory } from './atomic-transition-repository.js';
+import type {
+  AtomicTransitionCandidateFactory,
+  AtomicTransitionDraft,
+} from './atomic-transition-repository.js';
 import {
   readPreparedFinanceBudgetSourceFrom,
   type PreparedFinanceBudgetSource,
@@ -431,65 +434,90 @@ export function createPostgresFinanceBudgetNativeRuntime(config: {
       ),
     };
   }
-  const factory: AtomicTransitionCandidateFactory = {
-    async prepare(input) {
-      if (!input.commitAuthorization)
-        invalid('COMMAND_BOUND_CURRENT_FINANCE_PROOF_REQUIRED');
-      return config.database.transaction((tx) =>
-        sourceFrom(
-          tx,
-          input.command,
-          input.observedAtReal,
-          async (source, lease, row) => {
-            const result = await prepareFinanceNativeBudgetTransition({
-              command: input.command,
-              authorization: input.commitAuthorization!,
-              source,
-              recordedAtReal: input.observedAtReal,
-              sha256Hex: config.sha256Hex,
-            });
-            return {
-              transition: result.transition,
-              receipt: result.receipt,
-              inventoryPostings: [],
-              financialPostingBatches: [],
-              currentMaterializations: [],
-              outboxMessages: [
-                createOutboxMessage({
-                  messageId: `OUTBOX_NATIVE_BUDGET_${input.command.fingerprint.slice(7).toUpperCase()}`,
-                  worldId: input.command.worldId,
-                  commandId: input.command.commandId,
-                  eventId: result.transition.eventIds[0]!,
-                  payload: {
-                    schemaVersion: 'finance-native-budget-outbox-v1',
-                    interpretation: result.interpretation,
-                  },
-                  payloadHash: canonicalSha256(
-                    canonicalHashInput({
-                      schemaVersion: 'finance-native-budget-outbox-v1',
-                      interpretation: result.interpretation,
-                    }),
-                    config.sha256Hex,
-                  ),
-                  availableAtSimTime: input.command.simTime,
+  const preparedInTransaction = new WeakMap<
+    SqlExecutor,
+    {
+      transition: AuthoritativeTransition;
+      proof: CommitAuthorizationProof;
+      observedAtReal: string;
+      binding: ReturnType<typeof binding>;
+      policyRow: string;
+    }
+  >();
+  async function prepareDraft(
+    tx: SqlExecutor,
+    input: Parameters<AtomicTransitionCandidateFactory['prepare']>[0],
+    retainForCommit: boolean,
+  ): Promise<AtomicTransitionDraft> {
+    const proof = input.commitAuthorization;
+    if (!proof) invalid('COMMAND_BOUND_CURRENT_FINANCE_PROOF_REQUIRED');
+    return sourceFrom(
+      tx,
+      input.command,
+      input.observedAtReal,
+      async (source, lease, row) => {
+        const result = await prepareFinanceNativeBudgetTransition({
+          command: input.command,
+          authorization: proof,
+          source,
+          recordedAtReal: input.observedAtReal,
+          sha256Hex: config.sha256Hex,
+        });
+        const sourceBinding = binding(input.command, source, row);
+        if (retainForCommit)
+          preparedInTransaction.set(tx, {
+            transition: result.transition,
+            proof,
+            observedAtReal: input.observedAtReal,
+            binding: sourceBinding,
+            policyRow: canonicalSerialize(row),
+          });
+        return {
+          transition: result.transition,
+          receipt: result.receipt,
+          inventoryPostings: [],
+          financialPostingBatches: [],
+          currentMaterializations: [],
+          outboxMessages: [
+            createOutboxMessage({
+              messageId: `OUTBOX_NATIVE_BUDGET_${input.command.fingerprint.slice(7).toUpperCase()}`,
+              worldId: input.command.worldId,
+              commandId: input.command.commandId,
+              eventId: result.transition.eventIds[0]!,
+              payload: {
+                schemaVersion: 'finance-native-budget-outbox-v1',
+                interpretation: result.interpretation,
+              },
+              payloadHash: canonicalSha256(
+                canonicalHashInput({
+                  schemaVersion: 'finance-native-budget-outbox-v1',
+                  interpretation: result.interpretation,
                 }),
-              ],
-              officeOperatingSourceReadBinding: binding(
-                input.command,
-                source,
-                row,
+                config.sha256Hex,
               ),
-              authorityKind: 'DISCRETIONARY_USER' as const,
-              commitAssertion: createWorldWriterCommitAssertion(
-                lease,
-                input.command.expectedWorldVersion!,
-              ),
-              observedAtReal: input.observedAtReal,
-            };
-          },
-        ),
-      );
-    },
+              availableAtSimTime: input.command.simTime,
+            }),
+          ],
+          officeOperatingSourceReadBinding: sourceBinding,
+          authorityKind: 'DISCRETIONARY_USER' as const,
+          commitAssertion: createWorldWriterCommitAssertion(
+            lease,
+            input.command.expectedWorldVersion!,
+          ),
+          observedAtReal: input.observedAtReal,
+        };
+      },
+    );
+  }
+  const factory: AtomicTransitionCandidateFactory = {
+    prepare: (input) =>
+      config.database.transaction((tx) => prepareDraft(tx, input, false)),
+    ...(config.capacitySource === undefined
+      ? {}
+      : {
+          prepareFinanceBudgetFrom: (tx, input) =>
+            prepareDraft(tx, input, true),
+        }),
   };
   const commitGuard: FinanceBudgetNativeCommitGuard = Object.freeze({
     async assertCurrentFrom(
@@ -502,6 +530,42 @@ export function createPostgresFinanceBudgetNativeRuntime(config: {
         !input.commitAuthorization
       )
         invalid('CURRENT_FINANCE_PROOF_AND_CLOSED_SOURCE_PURPOSE_REQUIRED');
+      const attest = (
+        actualBinding: ReturnType<typeof binding>,
+        policyRow: string,
+      ) => {
+        if (
+          canonicalSerialize(actualBinding) !==
+            canonicalSerialize(input.readBinding) ||
+          canonicalSerialize(actualBinding.currentHead) !==
+            canonicalSerialize(input.currentHead)
+        )
+          invalid('EXACT_HELD_SOURCE_READ_BINDING_REQUIRED');
+        held.set(tx, { commandId: input.command.commandId, policyRow });
+        return {
+          status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY' as const,
+          purpose: FINANCE_BUDGET_NATIVE_SOURCE_COMMIT_PURPOSE,
+          commandFingerprint: input.command.fingerprint,
+          currentHead: input.currentHead,
+          readBindingFingerprint: canonicalSha256(
+            canonicalHashInput(actualBinding),
+            config.sha256Hex,
+          ),
+          protectionMode: 'HELD_SOURCE_GUARDS' as const,
+        };
+      };
+      const prepared = preparedInTransaction.get(tx);
+      if (prepared) {
+        preparedInTransaction.delete(tx);
+        if (
+          prepared.transition !== input.transition ||
+          prepared.proof !== input.commitAuthorization ||
+          prepared.observedAtReal !== input.observedAtReal ||
+          prepared.binding.commandFingerprint !== input.command.fingerprint
+        )
+          invalid('CANDIDATE_DIFFERS_FROM_HELD_CANONICAL_SOURCE');
+        return attest(prepared.binding, prepared.policyRow);
+      }
       return sourceFrom(
         tx,
         input.command,
@@ -519,29 +583,10 @@ export function createPostgresFinanceBudgetNativeRuntime(config: {
             canonicalSerialize(input.transition)
           )
             invalid('CANDIDATE_DIFFERS_FROM_HELD_CANONICAL_SOURCE');
-          const actualBinding = binding(input.command, source, row);
-          if (
-            canonicalSerialize(actualBinding) !==
-              canonicalSerialize(input.readBinding) ||
-            canonicalSerialize(actualBinding.currentHead) !==
-              canonicalSerialize(input.currentHead)
-          )
-            invalid('EXACT_HELD_SOURCE_READ_BINDING_REQUIRED');
-          held.set(tx, {
-            commandId: input.command.commandId,
-            policyRow: canonicalSerialize(row),
-          });
-          return {
-            status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY' as const,
-            purpose: FINANCE_BUDGET_NATIVE_SOURCE_COMMIT_PURPOSE,
-            commandFingerprint: input.command.fingerprint,
-            currentHead: input.currentHead,
-            readBindingFingerprint: canonicalSha256(
-              canonicalHashInput(actualBinding),
-              config.sha256Hex,
-            ),
-            protectionMode: 'HELD_SOURCE_GUARDS' as const,
-          };
+          return attest(
+            binding(input.command, source, row),
+            canonicalSerialize(row),
+          );
         },
       );
     },
