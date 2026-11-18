@@ -279,6 +279,48 @@ it('appends complete inventory from exact adopted seed without changing legacy p
       ).rows[0]?.fn,
     ).toBeNull();
     await db.exec(candidate);
+    await db.exec(
+      await read('database/proposals/postwar-office-current-bundle.sql'),
+    );
+    // Compare with the actual fully installed standalone publishers, including
+    // forward repairs. Sharing coverage must not restore an older mapper.
+    for (const kind of [
+      'paged_financial',
+      'paged_social',
+      'paged_captain',
+      'paged_trade',
+      'industry_labour',
+    ]) {
+      const name = 'publish_postwar_' + kind + '_current';
+      const definitions = (
+        await db.query<{ original: string; shared: string }>(
+          `select original.prosrc original,shared.prosrc shared from pg_proc original,pg_proc shared
+         where original.oid=to_regprocedure($1)and shared.oid=to_regprocedure($2)`,
+          [
+            'world_v2.' + name + '(text,text,text)',
+            'world_v2.' +
+              name +
+              '_from_verified(text,text,text,world_v2.postwar_current_verified_prefix)',
+          ],
+        )
+      ).rows[0]!;
+      expect(
+        definitions.shared.replace(
+          'world_v2.verify_postwar_current_coverage_from(p_prefix,assertion',
+          'world_v2.verify_postwar_paged_current_coverage(p_world,p_country,assertion',
+        ),
+      ).toBe(definitions.original);
+    }
+    const privateHelpers = (
+      await db.query<{ name: string; publisher: boolean; reader: boolean }>(
+        `select p.proname name,has_function_privilege($1,p.oid,'EXECUTE') publisher,
+       has_function_privilege($2,p.oid,'EXECUTE') reader from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+       where n.nspname='world_v2'and(p.proname like '%_from_verified'or p.proname='verify_postwar_current_coverage_from')`,
+        [publisher, readerRole],
+      )
+    ).rows;
+    expect(privateHelpers).toHaveLength(6);
+    expect(privateHelpers.every((p) => !p.publisher && !p.reader)).toBe(true);
     for (const office of ['INDUSTRY', 'TRADE']) {
       await db.exec('set role ' + publisher);
       const fresh = await db.query<{ total_rows: number }>(
