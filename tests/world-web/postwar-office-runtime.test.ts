@@ -570,6 +570,21 @@ describe('bounded postwar office client', () => {
     release(Response.json(f.body()));
     d.disconnect();
   });
+  it('shares an in-flight page across request IDs and starts a fresh read after completion', async () => {
+    const f = fixture();
+    const c = createPostwarRuntimeClient(f.config, { fetcher: f.fetcher });
+    const first = c.readPage('positions', requestId);
+    const second = c.readPage(
+      'positions',
+      '22222222-2222-4222-8222-222222222222',
+    );
+    const results = await Promise.all([first, second]);
+    expect(results.map(({ status }) => status)).toEqual(['PAGE', 'PAGE']);
+    expect(f.calls).toHaveLength(1);
+    await c.readPage('positions', requestId);
+    expect(f.calls).toHaveLength(2);
+    c.disconnect();
+  });
   it('renders actual business fields and clears private rows on invalidation', async () => {
     const f = fixture();
     vi.stubGlobal('fetch', f.fetcher);

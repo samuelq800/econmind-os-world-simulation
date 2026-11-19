@@ -236,6 +236,13 @@ export function createOfficeCommandController(
     usedIdempotencyKeys = new Set<string>();
   const currentHead = () =>
     runtimePage?.authority.readback ?? model?.head ?? null;
+  const budgetWorkflow = () =>
+    !!runtimeReader &&
+    intent?.request.commandType === 'CORE_FINANCE_BUDGET_APPROPRIATION_V1';
+  const canAdvanceRequest = () =>
+    !!intent &&
+    ((status === 'FINAL_VERIFIED' && !!receipt) ||
+      (budgetWorkflow() && submitStatus === 'REJECTED'));
   const notify = () => {
     for (const fn of [...listeners]) fn();
   };
@@ -672,7 +679,11 @@ export function createOfficeCommandController(
       socialApplicationsCode = null;
     }
   }
-  async function read(tradeOpeningH0 = false, previous?: RuntimePage) {
+  async function read(
+    tradeOpeningH0 = false,
+    previous?: RuntimePage,
+    includeFxQuotes = true,
+  ) {
     if (!b || !reader) return;
     socialServiceCreateOpen = false;
     model = null;
@@ -767,7 +778,7 @@ export function createOfficeCommandController(
       }
       floor = result.authority.readback.worldVersion;
       runtimePage = result;
-      await readFxQuotes();
+      if (includeFxQuotes) await readFxQuotes();
       if (!checkLiveness() || !runtimePage) return;
       await readSocialPools();
       if (checkLiveness() && runtimePage) await readSocialProgrammes();
@@ -850,7 +861,7 @@ export function createOfficeCommandController(
       code = 'RECOVERY_PENDING';
       submitStatus = status;
       submitCode = code;
-      return;
+      return 'PENDING' as const;
     }
     if (result.status === 'FINAL') {
       receipt = Object.freeze({
@@ -868,7 +879,7 @@ export function createOfficeCommandController(
         BigInt(result.receipt.worldVersionAfter) > BigInt(floor)
       )
         floor = result.receipt.worldVersionAfter;
-      await read();
+      await read(false, undefined, !budgetWorkflow());
       return;
     }
     status = outcomeUnknown ? 'UNKNOWN' : 'QUEUE_ACK';
@@ -1021,13 +1032,12 @@ export function createOfficeCommandController(
             ) as AuthenticatedOfficeCommandRequestDto)
           : null,
         canRead: !retired && !busy,
+        budgetControls:
+          !!runtimeReader &&
+          b?.read.identity.officeId === 'FINANCE' &&
+          (!intent || budgetWorkflow()),
         canBeginNextRequest:
-          !retired &&
-          !busy &&
-          status === 'FINAL_VERIFIED' &&
-          !!receipt &&
-          !!intent &&
-          !!currentHead(),
+          !retired && !busy && canAdvanceRequest() && !!currentHead(),
         canRecoverPreviousFinal: !retired && !busy && !!previousFinal,
         canStage: !retired && !busy && !attempted && !!currentHead(),
         canRestoreOriginal: !retired && !busy && !attempted && !receipt,
@@ -1063,24 +1073,25 @@ export function createOfficeCommandController(
     },
     refresh: () =>
       operation(async () => {
-        await read();
+        await read(false, undefined, !budgetWorkflow());
       }),
     beginNextRequest: () =>
       operation(async () => {
-        if (status !== 'FINAL_VERIFIED' || !receipt || !intent) return;
+        if (!canAdvanceRequest()) return;
         await read();
         // A durable receipt alone cannot authorize another command. A failed
         // read keeps the original request locked and available for recovery.
         if (
           !checkLiveness() ||
-          status !== 'FINAL_VERIFIED' ||
+          !canAdvanceRequest() ||
           !currentHead() ||
-          !receipt ||
           !intent
         )
           return;
-        previousFinal = { original: intent, receipt };
-        previousFinalCode = null;
+        if (receipt) {
+          previousFinal = { original: intent, receipt };
+          previousFinalCode = null;
+        }
         intent = null;
         receipt = null;
         acknowledgement = null;
@@ -1609,6 +1620,14 @@ export function createOfficeCommandController(
         }
         submitStatus = status;
         submitCode = code;
+        if (result.status === 'QUEUE_ACK' && budgetWorkflow()) {
+          for (const waitMs of [500, 850, 1400, 1800]) {
+            notify();
+            await new Promise<void>((resolve) => setTimeout(resolve, waitMs));
+            if (!checkLiveness() || (await recoverOriginal()) !== 'PENDING')
+              break;
+          }
+        }
       }),
     recoverLookup(original: FinalLookupIdentity) {
       if (
@@ -1628,7 +1647,10 @@ export function createOfficeCommandController(
       notify();
       return true;
     },
-    recoverOriginal: () => operation(recoverOriginal),
+    recoverOriginal: () =>
+      operation(async () => {
+        await recoverOriginal();
+      }),
     lookupAndRefresh: () =>
       operation(async () => {
         if (runtimeReader) {

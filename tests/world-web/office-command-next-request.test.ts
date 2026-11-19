@@ -6,7 +6,10 @@ import { installOfficeCommand } from '../../apps/world-web/src/office-command/vi
 import { fixedOfficeCommandFixture } from './office-command-fixed-offices-fixture.js';
 import { HostDocument } from './trusted-host-dom.js';
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 function setup(
   override?: (f: ReturnType<typeof fixedOfficeCommandFixture>) => typeof fetch,
   requestId?: () => string,
@@ -298,5 +301,177 @@ describe('explicit next request after verified FINAL and fresh authorized read',
     expect(writes(f)).toBe(0);
     f.invalidate();
     expect(doc.root.textContent).not.toContain(f.request.request.commandId);
+  });
+});
+
+describe('budget submission and automatic receipt recovery', () => {
+  function setupBudget(
+    fetcher?: (f: ReturnType<typeof fixedOfficeCommandFixture>) => typeof fetch,
+  ) {
+    const f = fixedOfficeCommandFixture('finance');
+    f.read('empty');
+    const c = createOfficeCommandController(f.binding, () => f.binding.view, {
+      fetcher: fetcher?.(f) ?? f.fetcher,
+      requestId: () => f.request.requestId,
+    });
+    return { f, c };
+  }
+
+  it('queries the original after acknowledgement and exposes FINAL while the current page is pending', async () => {
+    vi.useFakeTimers();
+    let holdPage = false;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { f, c } = setupBudget((f) => async (input, init) => {
+      if (
+        holdPage &&
+        new URL(String(input)).pathname === '/v1/postwar-office-runtime'
+      )
+        await gate;
+      return f.fetcher(input, init);
+    });
+    await c.refresh();
+    expect(c.stage(f.request)).toBe(true);
+    expect(c.review()).toBe(true);
+    f.submit('ack');
+    const confirmed = c.confirm();
+    await vi.advanceTimersByTimeAsync(500);
+    expect(c.getState()).toMatchObject({ status: 'QUEUE_ACK', receipt: null });
+    const readsBefore = f.calls.length;
+    f.recover('final');
+    holdPage = true;
+    await vi.advanceTimersByTimeAsync(850);
+    expect(c.getState()).toMatchObject({
+      status: 'READING',
+      receipt: { outcome: 'COMMITTED', worldVersionAfter: '3' },
+      canBeginNextRequest: false,
+    });
+    release();
+    await confirmed;
+    expect(c.getState()).toMatchObject({
+      status: 'FINAL_VERIFIED',
+      currentHead: { worldVersion: '3' },
+      canBeginNextRequest: true,
+    });
+    expect(
+      f.calls.slice(readsBefore).map(({ path, body }) => [path, body.dataset]),
+    ).toEqual([
+      ['/v1/command-recovery', undefined],
+      ['/v1/postwar-office-runtime', 'ledger-balances'],
+    ]);
+    expect(writes(f)).toBe(1);
+    c.disconnect();
+  });
+
+  it('stops automatic queries at four pending responses and allows manual recovery', async () => {
+    vi.useFakeTimers();
+    const { f, c } = setupBudget();
+    await c.refresh();
+    expect(c.stage(f.request)).toBe(true);
+    expect(c.review()).toBe(true);
+    f.submit('ack');
+    const confirmed = c.confirm();
+    await vi.advanceTimersByTimeAsync(10_000);
+    await confirmed;
+    expect(
+      f.calls.filter(({ path }) => path === '/v1/command-recovery'),
+    ).toHaveLength(4);
+    expect(c.getState()).toMatchObject({
+      status: 'QUEUE_ACK',
+      canRecover: true,
+      canConfirm: false,
+    });
+    expect(writes(f)).toBe(1);
+    c.disconnect();
+  });
+
+  it('keeps a lost acknowledgement available for manual lookup only', async () => {
+    const { f, c } = setupBudget();
+    await c.refresh();
+    expect(c.stage(f.request)).toBe(true);
+    expect(c.review()).toBe(true);
+    await c.confirm();
+    expect(c.getState()).toMatchObject({
+      status: 'UNKNOWN',
+      canRecover: true,
+      canConfirm: false,
+    });
+    expect(
+      f.calls.filter(({ path }) => path === '/v1/command-recovery'),
+    ).toHaveLength(0);
+    expect(writes(f)).toBe(1);
+    c.disconnect();
+  });
+
+  it('lets an explicitly rejected budget request advance after a fresh authorized read', async () => {
+    const { f, c } = setupBudget();
+    await c.refresh();
+    expect(c.stage(f.request)).toBe(true);
+    expect(c.review()).toBe(true);
+    f.submit('source-rejected');
+    await c.confirm();
+    expect(c.getState()).toMatchObject({
+      status: 'REJECTED',
+      canBeginNextRequest: true,
+      canRecover: false,
+      canStage: false,
+    });
+    await c.beginNextRequest();
+    expect(c.getState()).toMatchObject({ canStage: true, intent: null });
+    expect(c.stage(f.request)).toBe(false);
+    expect(writes(f)).toBe(1);
+    c.disconnect();
+  });
+
+  it('renders the original amount and a retryable page state after a committed receipt', async () => {
+    vi.stubGlobal(
+      'MutationObserver',
+      class {
+        observe() {}
+      },
+    );
+    vi.useFakeTimers();
+    const f = fixedOfficeCommandFixture('finance');
+    f.read('empty');
+    const doc = new HostDocument('finance');
+    let c!: ReturnType<typeof createOfficeCommandController>;
+    const api = installOfficeCommand(
+      doc as unknown as Document,
+      { addEventListener() {} } as unknown as Window,
+      (b, view) => {
+        c = createOfficeCommandController(b, view, {
+          fetcher: f.fetcher,
+          requestId: () => f.request.requestId,
+        });
+        return c;
+      },
+    );
+    api.connect(f.binding);
+    const find = (key: string) =>
+      doc.root.all().find((e) => e.dataset.officeCommandAction === key);
+    find('open')!.click();
+    await c.refresh();
+    expect(c.stage(f.request)).toBe(true);
+    expect(c.review()).toBe(true);
+    expect(doc.root.textContent).toContain('设定预算额度 · 100 LC_TEST');
+    expect(find('confirm')?.textContent).toContain('确认提交');
+    f.submit('ack');
+    f.recover('final');
+    f.read('unavailable');
+    const confirmed = c.confirm();
+    await vi.advanceTimersByTimeAsync(500);
+    await confirmed;
+    expect(doc.root.textContent).toContain('预算申请已生效，当前页暂不可用');
+    expect(find('refresh')?.textContent).toContain('刷新页面');
+    expect(find('next-request')).toBeUndefined();
+    expect(find('confirm')).toBeUndefined();
+    f.read('empty');
+    await c.refresh();
+    expect(find('next-request')?.textContent).toContain('准备下一笔');
+    f.invalidate();
+    expect(doc.root.textContent).not.toContain('100 LC_TEST');
+    expect(writes(f)).toBe(1);
   });
 });

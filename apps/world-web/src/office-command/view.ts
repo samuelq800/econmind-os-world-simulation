@@ -33,6 +33,7 @@ import {
 } from '../office-projection/model.js';
 import { renderDecisionResult } from '../office-projection/decision-result-view.js';
 import { renderOfficeReadout } from '../office-projection/readout-view.js';
+import { row } from '../production-read/contract.js';
 
 /** Only the already licensed first-day CREATE subset of Social-10 is bound.
  * The zero budget is an actual local-currency licence constraint, not a general
@@ -180,32 +181,69 @@ export function installOfficeCommand(
     const focused = dialog.contains(document.activeElement)
       ? (document.activeElement as HTMLElement).dataset.officeCommandAction
       : undefined;
+    const finance = currentView()?.role === 'finance';
+    const budget = state.budgetControls;
+    const details = document.createElement('details');
+    details.dataset.officeCommandDetails = '';
+    details.open =
+      dialog.querySelector<HTMLDetailsElement>('[data-office-command-details]')
+        ?.open ?? false;
+    details.append(
+      node('summary', state.intent ? '查看详情' : '录入或查看申请'),
+    );
     clearPrivateContent(dialog);
     dialog.append(
       node(
         'h2',
-        'Manual Office intent — Captain / Central Bank / Finance / Industry / Trade / Social',
+        budget
+          ? '财政预算申请'
+          : 'Manual Office intent — Captain / Central Bank / Finance / Industry / Trade / Social',
       ),
     );
     const status = node(
       'p',
-      `${state.status}${state.code ? ' · ' + state.code : ''}`,
+      budget
+        ? budgetStatus(state)
+        : `${state.status}${state.code ? ' · ' + state.code : ''}`,
     );
     status.setAttribute('role', 'status');
     dialog.append(status);
+    if (budget && state.intent) {
+      const payload = row(state.intent.request.payload);
+      if (
+        (payload?.operation === 'SET_ENVELOPE' ||
+          payload?.operation === 'APPROVE_NEW_LINE') &&
+        typeof payload.amount === 'string' &&
+        typeof payload.currency === 'string'
+      ) {
+        const action =
+          payload.operation === 'SET_ENVELOPE'
+            ? '设定预算额度'
+            : '新增预算科目';
+        const envelope = row(payload.scope)?.envelopeRef;
+        dialog.append(
+          node('p', `${action} · ${payload.amount} ${payload.currency}`),
+        );
+        if (typeof envelope === 'string')
+          dialog.append(node('p', `预算额度编号 ${envelope}`));
+      }
+    }
+    const technical = budget ? details : dialog;
+    if (budget && state.code) details.append(node('p', state.code));
     if (state.lastAuthorizedReadAtClient)
-      dialog.append(
+      technical.append(
         node(
           'p',
           `${state.model ? 'Last read on this device' : 'Previous successful read'}: ${state.lastAuthorizedReadAtClient} · browser observation only`,
         ),
       );
-    dialog.append(
-      node(
-        'p',
-        'Only a current server-authorized seat can submit an installed manual family. Industry supports source-bound RUN plans and service schedules selected from current data; an acknowledgement does not establish work, wages, delivery or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
-      ),
-    );
+    if (!budget)
+      dialog.append(
+        node(
+          'p',
+          'Only a current server-authorized seat can submit an installed manual family. Industry supports source-bound RUN plans and service schedules selected from current data; an acknowledgement does not establish work, wages, delivery or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
+        ),
+      );
     if (state.tradeDataset) {
       const section = document.createElement('section');
       section.dataset.tradeCurrentReadout = '';
@@ -473,7 +511,7 @@ export function installOfficeCommand(
           ),
         );
     }
-    if (currentView()?.role === 'finance') {
+    if (finance && (!budget || !state.intent)) {
       dialog.append(
         renderTreasuryFxForm(document, {
           quotes: state.fxQuotesPage,
@@ -677,27 +715,39 @@ export function installOfficeCommand(
         );
     }
     const draft = document.createElement('textarea');
-    draft.setAttribute('aria-label', 'Original manual Office request JSON');
+    draft.setAttribute(
+      'aria-label',
+      budget ? '预算申请原文 JSON' : 'Original manual Office request JSON',
+    );
     draft.dataset.officeCommandDraft = '';
     draft.value = state.intent ? JSON.stringify(state.intent, null, 2) : '';
     draft.disabled = !state.canStage && !state.canRestoreOriginal;
-    dialog.append(
+    technical.append(
       node(
         'p',
-        'For a new command, read the current projection and load an explicit public request. To recover after a page reload, paste the exact submitted request and choose recovery only; its old head is retained and it cannot be submitted again. Reference forms generate only new command/booking IDs; source references and economic facts come from the authorized page.',
+        budget
+          ? '录入申请时使用当前授权版本。重新打开页面后，可粘贴曾提交的原文查询回执。'
+          : 'For a new command, read the current projection and load an explicit public request. To recover after a page reload, paste the exact submitted request and choose recovery only; its old head is retained and it cannot be submitted again. Reference forms generate only new command/booking IDs; source references and economic facts come from the authorized page.',
       ),
       draft,
     );
-    dialog.append(
-      button('Load explicit intent', 'stage', state.canStage, () => {
-        try {
-          owner.stage(JSON.parse(draft.value));
-        } catch {
-          owner.stage(null);
-        }
-      }),
+    technical.append(
       button(
-        'Restore submitted request for recovery only',
+        budget ? '载入预算申请' : 'Load explicit intent',
+        'stage',
+        state.canStage,
+        () => {
+          try {
+            owner.stage(JSON.parse(draft.value));
+          } catch {
+            owner.stage(null);
+          }
+        },
+      ),
+      button(
+        budget
+          ? '查询已提交的申请'
+          : 'Restore submitted request for recovery only',
         'restore',
         state.canRestoreOriginal,
         () => {
@@ -709,16 +759,16 @@ export function installOfficeCommand(
         },
       ),
     );
-    if (state.intent)
+    if (state.intent && !budget)
       dialog.append(node('pre', JSON.stringify(state.intent, null, 2)));
     if (state.acknowledgement)
-      dialog.append(
+      technical.append(
         node(
           'p',
           `QUEUE_ACK · ${state.acknowledgement.status} · ${state.acknowledgement.commandId} · ${state.acknowledgement.commandFingerprint}`,
         ),
       );
-    if (state.status === 'UNKNOWN' || state.canRecover) {
+    if (!budget && (state.status === 'UNKNOWN' || state.canRecover)) {
       dialog.append(
         node(
           'p',
@@ -736,7 +786,7 @@ export function installOfficeCommand(
     }
     if (state.runtimePage) {
       const page = state.runtimePage;
-      dialog.append(
+      technical.append(
         node(
           'p',
           `Verified authorized World head ${page.authority.readback.worldVersion} · ${page.dataset} · ${page.status} · ${page.page.returned} rows`,
@@ -746,7 +796,7 @@ export function installOfficeCommand(
           `Source ${page.source.sourceVersion} · Origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)} · ${String(page.source.dataNature)}. Source rows are not a grant or a source preflight.`,
         ),
       );
-      if (state.receipt)
+      if (state.receipt && !budget)
         dialog.append(
           node(
             'p',
@@ -755,14 +805,14 @@ export function installOfficeCommand(
         );
     }
     if (state.receipt)
-      dialog.append(
+      technical.append(
         node(
           'p',
           `Durable FINAL · ${state.receipt.outcome} · ${state.receipt.reasonCode ?? 'No rejection reason'} · ${state.receipt.commandId}`,
         ),
       );
     if (state.previousFinal)
-      dialog.append(
+      technical.append(
         node(
           'p',
           `Previous FINAL · ${state.previousFinal.receipt.outcome} · ${state.previousFinal.receipt.commandId} · ${state.previousFinalCode ?? 'Retained in this session'}`,
@@ -788,13 +838,39 @@ export function installOfficeCommand(
             'Original command DecisionResult is not correlated or the receipt did not commit. No decision completion claimed.',
           ),
         );
-    } else if (state.receipt && !state.runtimePage)
+    } else if (!budget && state.receipt && !state.runtimePage)
       dialog.append(
         node(
           'p',
           'Receipt is recorded; authorized current readback unavailable. No current result inferred.',
         ),
       );
+    const primary = state.canRecover
+      ? (['查询这笔申请', 'recover', () => owner.recoverOriginal()] as const)
+      : state.canBeginNextRequest
+        ? ([
+            state.receipt?.outcome === 'COMMITTED'
+              ? '准备下一笔'
+              : '准备新申请',
+            'next-request',
+            () => owner.beginNextRequest(),
+          ] as const)
+        : state.canConfirm
+          ? (['确认提交', 'confirm', () => owner.confirm()] as const)
+          : state.canReview
+            ? (['核对申请', 'review', () => owner.review()] as const)
+            : state.canRead
+              ? (['刷新页面', 'refresh', () => owner.refresh()] as const)
+              : null;
+    if (budget) {
+      if (primary) {
+        const [label, key, action] = primary;
+        const el = button(label, key, true, action);
+        dialog.append(el);
+        if (focused === key) el.focus();
+      }
+      dialog.append(details);
+    }
     for (const [label, key, enabled, action] of [
       ['Manual refresh', 'refresh', state.canRead, () => owner.refresh()],
       [
@@ -818,7 +894,7 @@ export function installOfficeCommand(
       ],
       ['Disconnect', 'disconnect', state.canRead, () => owner.disconnect()],
       [
-        'Close',
+        budget ? '关闭' : 'Close',
         'close',
         true,
         () => {
@@ -832,9 +908,53 @@ export function installOfficeCommand(
         },
       ],
     ] as const) {
+      if (budget && key !== 'close' && key !== 'disconnect') continue;
       const el = button(label, key, enabled, action);
-      dialog.append(el);
+      if (budget && key === 'disconnect') {
+        el.textContent = '断开连接';
+        details.append(el);
+      } else dialog.append(el);
       if (focused === key) el.focus();
+    }
+  }
+  function budgetStatus(state: ReturnType<typeof controller.getState>) {
+    if (state.receipt?.outcome === 'COMMITTED') {
+      if (state.status === 'FINAL_VERIFIED' && state.currentHead)
+        return '预算申请已生效，页面已更新。';
+      return state.status === 'READING'
+        ? '预算申请已生效，页面正在更新。'
+        : '预算申请已生效，当前页暂不可用。';
+    }
+    if (state.receipt?.outcome === 'AUTHORIZATION_REVOKED')
+      return '预算申请未获批准，原提交权限已撤销。';
+    if (state.receipt?.outcome === 'REJECTED' || state.status === 'REJECTED') {
+      const reason = state.receipt?.reasonCode ?? state.code;
+      if (reason === 'WORLD_VERSION_MISMATCH')
+        return '预算申请未获批准。世界版本已更新，请重新核对。';
+      return '预算申请未获批准。请查看详情中的原因。';
+    }
+    switch (state.status) {
+      case 'SUBMITTING':
+        return '正在提交预算申请。';
+      case 'UNKNOWN':
+        return '提交结果待确认，请查询这笔申请。';
+      case 'LOOKING_UP_FINAL':
+        return '正在查询这笔申请。';
+      case 'QUEUE_ACK':
+        return '已收到预算申请，正在处理。';
+      case 'REVIEW_REQUIRED':
+        return '申请已载入，请核对提交内容。';
+      case 'REVIEWED':
+        return '请确认提交这笔预算申请。';
+      case 'READING':
+        return '正在读取当前授权页面。';
+      case 'CURRENT_AUTHORIZED_HEAD':
+      case 'CURRENT':
+        return '当前授权页面已就绪。';
+      case 'UNAVAILABLE':
+        return '当前页面暂不可用。';
+      default:
+        return '请读取当前授权页面。';
     }
   }
   function notify() {
@@ -877,7 +997,7 @@ export function installOfficeCommand(
       if (!trigger || !dialog) {
         trigger = button(
           currentView()?.role === 'finance'
-            ? '首日换汇 / Office intent'
+            ? '财政预算与首日换汇'
             : 'Office intent',
           'open',
           true,

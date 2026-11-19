@@ -290,6 +290,7 @@ export function createPostwarRuntimeClient(
   let epoch = 0,
     retired = !c,
     active: AbortController | null = null,
+    inFlight: { key: string; result: Promise<RuntimeResult> } | null = null,
     unsubscribe: (() => void) | undefined;
   const current = () => {
     try {
@@ -308,6 +309,7 @@ export function createPostwarRuntimeClient(
     epoch++;
     active?.abort();
     active = null;
+    inFlight = null;
     const stop = unsubscribe;
     unsubscribe = undefined;
     stop?.();
@@ -320,9 +322,8 @@ export function createPostwarRuntimeClient(
       disconnect();
     }
   }
-  return Object.freeze({
-    disconnect,
-    async readPage(
+  const transport = {
+    async fetchPage(
       dataset: string,
       requestId: string,
       previous?: RuntimePage,
@@ -334,24 +335,6 @@ export function createPostwarRuntimeClient(
       ): RuntimeResult => ({ status, code });
       if (!c || retired)
         return fail('NOT_CONNECTED', 'TRUSTED_READ_BINDING_MISSING');
-      if (!current()) {
-        disconnect();
-        return fail('STALE', 'SESSION_CHANGED');
-      }
-      if (
-        !uuid(requestId) ||
-        !officeDatasets[c.identity.officeId]?.includes(dataset) ||
-        (includeCreationPlanning &&
-          (c.identity.officeId !== 'SOCIAL' || dataset !== 'service-pools'))
-      )
-        return fail('DENIED', 'INVALID_DATASET');
-      if (
-        previous &&
-        (previous.dataset !== dataset ||
-          !parseAuthority(previous.authority, c) ||
-          previous.page.nextOffset === null)
-      )
-        return fail('STALE', 'INVALID_CONTINUATION');
       const started = ++epoch;
       active?.abort();
       const abort = new AbortController();
@@ -1105,6 +1088,63 @@ export function createPostwarRuntimeClient(
         clearTimeout(timer);
         abort.abort();
         if (active === abort) active = null;
+      }
+    },
+  };
+  return Object.freeze({
+    disconnect,
+    async readPage(
+      dataset: string,
+      requestId: string,
+      previous?: RuntimePage,
+      includeCreationPlanning = false,
+    ): Promise<RuntimeResult> {
+      if (!c || retired)
+        return {
+          status: 'NOT_CONNECTED',
+          code: 'TRUSTED_READ_BINDING_MISSING',
+        };
+      if (!current()) {
+        disconnect();
+        return { status: 'STALE', code: 'SESSION_CHANGED' };
+      }
+      if (
+        !uuid(requestId) ||
+        !officeDatasets[c.identity.officeId]?.includes(dataset) ||
+        (includeCreationPlanning &&
+          (c.identity.officeId !== 'SOCIAL' || dataset !== 'service-pools'))
+      )
+        return { status: 'DENIED', code: 'INVALID_DATASET' };
+      if (
+        previous &&
+        (previous.dataset !== dataset ||
+          !parseAuthority(previous.authority, c) ||
+          previous.page.nextOffset === null)
+      )
+        return { status: 'STALE', code: 'INVALID_CONTINUATION' };
+
+      const key = JSON.stringify([
+        dataset,
+        includeCreationPlanning,
+        previous?.page.nextOffset,
+        previous?.source.sourceVersion,
+        previous?.source.bindingVersion,
+        previous?.authority.readback.worldVersion,
+        previous?.authority.readback.eventSequence,
+      ]);
+      if (inFlight?.key === key) return inFlight.result;
+
+      const result = transport.fetchPage(
+        dataset,
+        requestId,
+        previous,
+        includeCreationPlanning,
+      );
+      inFlight = { key, result };
+      try {
+        return await result;
+      } finally {
+        if (inFlight?.result === result) inFlight = null;
       }
     },
   });

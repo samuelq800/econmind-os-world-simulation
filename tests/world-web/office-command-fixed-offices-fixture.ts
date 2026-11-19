@@ -14,7 +14,9 @@ import {
   POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
   POSTWAR_FINANCIAL_MIXED_REDUCER,
 } from '@econmind/core/postwar-financial-mixed-current-contract';
-export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
+export function fixedOfficeCommandFixture(
+  role: 'trade' | 'central_bank' | 'finance',
+) {
   const base = officeProjectionFixture(role),
     identity = {
       ...base.config.identity,
@@ -85,25 +87,49 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
           },
           expiresAtReal: '2026-11-01T00:10:00.000Z',
         }
-      : {
-          schemaVersion: 'central-bank-omo-intent-v1',
-          direction: 'BUY_GOVERNMENT_SECURITIES',
-          securityRef: 'SECURITY_TEST_ONLY',
-          batchRef: 'BATCH_TEST_ONLY',
-          faceValue: { amount: '1', currency: 'LC_TEST' },
-          settlementSimTime: '0',
-        };
+      : role === 'finance'
+        ? {
+            operation: 'SET_ENVELOPE',
+            scope: {
+              worldId: identity.worldId,
+              countryId: identity.countryId,
+              entityRef: 'ENTITY_TEST_ONLY_GOV',
+              envelopeRef: 'ENVELOPE_TEST_ONLY',
+              effectivePeriodRef: 'PERIOD_TEST_ONLY',
+            },
+            amount: '100',
+            currency: 'LC_TEST',
+            envelopeRevisionRef: 'REVISION_TEST_ONLY',
+            lineRef: null,
+            revisionRef: 'REVISION_TEST_ONLY',
+            predecessorRevisionRef: null,
+          }
+        : {
+            schemaVersion: 'central-bank-omo-intent-v1',
+            direction: 'BUY_GOVERNMENT_SECURITIES',
+            securityRef: 'SECURITY_TEST_ONLY',
+            batchRef: 'BATCH_TEST_ONLY',
+            faceValue: { amount: '1', currency: 'LC_TEST' },
+            settlementSimTime: '0',
+          };
   const request: AuthenticatedOfficeCommandRequestDto = {
     schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
     requestId: '11111111-1111-4111-8111-111111111111',
     request: {
       worldId: identity.worldId,
       countryId: identity.countryId,
-      officeId: role === 'trade' ? 'TRADE' : 'CENTRAL_BANK',
+      officeId:
+        role === 'trade'
+          ? 'TRADE'
+          : role === 'finance'
+            ? 'FINANCE'
+            : 'CENTRAL_BANK',
       commandType:
         role === 'trade'
           ? 'CORE_GOODS_TRANSFER_V1'
-          : 'CORE_CENTRAL_BANK_OMO_V1',
+          : role === 'finance'
+            ? 'CORE_FINANCE_BUDGET_APPROPRIATION_V1'
+            : 'CORE_CENTRAL_BANK_OMO_V1',
       commandId: 'COMMAND_FIXED_OFFICE_TEST_ONLY',
       idempotencyKey: 'KEY_FIXED_OFFICE_TEST_ONLY',
       expectedWorldVersion: '2',
@@ -207,7 +233,7 @@ export function fixedOfficeCommandFixture(role: 'trade' | 'central_bank') {
             },
           }
         : {}),
-      ...(role === 'central_bank'
+      ...(role !== 'trade'
         ? {
             currentFinancialCoverage: {
               schemaVersion: POSTWAR_FINANCIAL_MIXED_COVERAGE_SCHEMA,
