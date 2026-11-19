@@ -391,7 +391,7 @@ describe('unapproved postwar schema delta package boundary', () => {
       )
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(90);
+    expect(selected).toHaveLength(91);
     for (const name of EXCLUDED_CLOCK_PROPOSALS) {
       expect(names).toContain(name);
       expect(selected).not.toContain(name);
