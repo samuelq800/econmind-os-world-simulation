@@ -965,6 +965,9 @@ it(
         );
         throw error;
       });
+    await db.exec(
+      await read('proposals/postwar-mixed-current-page-dispatch.sql'),
+    );
     await db.exec(await read('proposals/postwar-source-revocation-fence.sql'));
     await db.exec(
       `create function world_v2.test_only_paged_verify(text,text,jsonb)returns jsonb language sql security definer set search_path=pg_catalog as $$select to_jsonb(p)from world_v2.verify_postwar_paged_current_coverage($1,$2,$3)p$$;alter function world_v2.test_only_paged_verify(text,text,jsonb)owner to world_v2_postwar_projection_owner;revoke all on function world_v2.test_only_paged_verify(text,text,jsonb)from public;grant execute on function world_v2.test_only_paged_verify(text,text,jsonb)to world_v2_postwar_projection_publisher;`,

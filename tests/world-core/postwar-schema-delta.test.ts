@@ -79,6 +79,7 @@ const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
   'postwar-office-current-bundle.sql',
   'postwar-current-countries-bundle.sql',
   'postwar-budget-frame-state-hash-once.sql',
+  'postwar-mixed-current-page-dispatch.sql',
   'postwar-office-seat-admission-once.sql',
   'postwar-office-opening-read-base-repair.sql',
   'postwar-office-recovery-read.sql',
