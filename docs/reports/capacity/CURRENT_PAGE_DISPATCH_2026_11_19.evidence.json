@@ -1,0 +1,474 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "EXISTING_RUNTIME_MAINTENANCE",
+  "commit": "ff8a4abd7af0af2460a174cc4397a4568c7d2498",
+  "implementation_status": "IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "independent_review": "PENDING",
+  "environment": {
+    "name": "DISPOSABLE_LOCAL_POSTGRES",
+    "node": "v24.20.0",
+    "pnpm": "12.3.4",
+    "appCpu": 2,
+    "appGiB": 6,
+    "postgresCpu": 1,
+    "postgresGiB": 3,
+    "poolMax": 2,
+    "countries": 70,
+    "jwtSubjects": 2,
+    "rotatingSessionLabels": 100,
+    "readsPerSecond": 20,
+    "writesPerMinute": 20,
+    "worldClock": false,
+    "productionAccess": false,
+    "postgres": "16.15",
+    "frozenLockfile": true,
+    "postgresNetwork": "none",
+    "publishedHostPorts": 0
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm test [three current-page and schema regression files] --maxWorkers=1",
+      "exit_code": 1,
+      "result": "FAIL",
+      "tests_passed": 49,
+      "failed": "non-Clock proposal exact-count assertion expected 90 when the explicit inventory contained 91"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/postwar-bounded-prefix-pages.test.ts tests/world-core/postwar-schema-delta.test.ts tests/world-core/postwar-social-mixed-current-projection-sql.test.ts --maxWorkers=1",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests_passed": 50
+    },
+    {
+      "command": "pnpm exec eslint and pnpm exec prettier --check [three changed JS/TS files]; git diff --check 54a09534 HEAD",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests_passed": 46
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm secrets:check; ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm install --frozen-lockfile; pnpm pretest (Docker Linux, runtime source unchanged from d3c0a489 to ff8a4abd)",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "ECONMIND_REGISTERED_FINAL_NODE_NATIVE=1 NODE_OPTIONS=\"--experimental-transform-types --import=/workspace/tools/office-connection/beneficial-child-source-loader.mjs --import=/task/observer.mjs\" node /task/native.mjs (Docker Linux, disconnected bridge, PostgreSQL Unix socket)",
+      "exit_code": 0,
+      "result": "FAIL",
+      "capacity": "FAIL_FIVE_MINUTE_MIXED_LOAD"
+    }
+  ],
+  "preflight_retries": [
+    "ERR_MODULE_NOT_FOUND (missing repository source loader)",
+    "ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX (missing --experimental-transform-types)"
+  ],
+  "baseline": {
+    "seconds": 300,
+    "reads": 6000,
+    "readErrors": 0,
+    "inWindowWrites": 86,
+    "p95Ms": 2309.82,
+    "p99Ms": 2729.14,
+    "seatCalls": 27240,
+    "admissionCalls": 32144,
+    "readPoolP95Ms": 349.57
+  },
+  "native": {
+    "candidate": "ff8a4abd7af0af2460a174cc4397a4568c7d2498",
+    "status": "FAIL_FIVE_MINUTE_MIXED_LOAD",
+    "environment": {
+      "node": "v24.20.0",
+      "pnpm": "12.3.4",
+      "appCpu": 2,
+      "appGiB": 6,
+      "postgresCpu": 1,
+      "postgresGiB": 3,
+      "poolMax": 2,
+      "countries": 70,
+      "jwtSubjects": 2,
+      "rotatingSessionLabels": 100,
+      "readsPerSecond": 20,
+      "writesPerMinute": 20,
+      "worldClock": false,
+      "productionAccess": false
+    },
+    "stages": [
+      {
+        "name": "SOURCE_ADMISSION_READY",
+        "at": "2026-11-19T00:16:55.877Z"
+      },
+      {
+        "name": "SQL_SETUP_READY",
+        "at": "2026-11-19T00:18:09.226Z"
+      },
+      {
+        "name": "INDUSTRY_H0_READY",
+        "at": "2026-11-19T00:24:02.606Z"
+      },
+      {
+        "name": "NODE_READY",
+        "at": "2026-11-19T00:28:27.836Z"
+      },
+      {
+        "name": "LOAD_BEGIN",
+        "at": "2026-11-19T00:28:28.648Z",
+        "seconds": 60
+      },
+      {
+        "name": "LOAD_END",
+        "at": "2026-11-19T00:29:29.930Z",
+        "seconds": 60
+      },
+      {
+        "name": "LOAD_BEGIN",
+        "at": "2026-11-19T00:29:29.934Z",
+        "seconds": 300
+      },
+      {
+        "name": "LOAD_END",
+        "at": "2026-11-19T00:34:34.329Z",
+        "seconds": 300
+      }
+    ],
+    "sqlApplication": {
+      "name": "postwar-mixed-current-page-dispatch",
+      "sha256": "70644bb26bc3d62c62104c172e26cd225baea49c71506c986acaac76c00376de",
+      "status": "DDL_COMMITTED"
+    },
+    "initial": {
+      "publication": "PUBLISHED",
+      "documents": 32
+    },
+    "baseline": {
+      "attempted": 12,
+      "passed": 12
+    },
+    "phases": [
+      {
+        "seconds": 60,
+        "pass": true,
+        "plannedReads": 1200,
+        "reads": 1200,
+        "readErrors": 0,
+        "errorCodes": [],
+        "plannedWrites": 20,
+        "inWindowWrites": 20,
+        "completedWrites": 20,
+        "elapsedMs": 59961.93,
+        "inBudget": true,
+        "p95Ms": 546.67,
+        "p99Ms": 638.02,
+        "maxMs": 1056.44,
+        "counts": {
+          "worldVersion": "21",
+          "eventSequence": "61",
+          "commands": "21",
+          "receipts": "21",
+          "events": "61",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "21"
+        },
+        "writeLatencyMs": {
+          "ackMs": {
+            "0.5": 259.41,
+            "0.95": 323.63,
+            "0.99": 400.38
+          },
+          "finalObservedMs": {
+            "0.5": 652.33,
+            "0.95": 820.92,
+            "0.99": 832.39
+          },
+          "completionMs": {
+            "0.5": 1035.36,
+            "0.95": 1324.79,
+            "0.99": 1395.63
+          }
+        },
+        "projectionDocuments": [32],
+        "observedCommitTransactions": 20,
+        "startingPagesPerCommit": [1],
+        "nodeCpuMs": 17816.23,
+        "readPool": {
+          "wait": {
+            "count": 1492,
+            "sumMs": 815.0436509985011,
+            "p95Ms": 2.321681000001263,
+            "p99Ms": 12.61920699995244
+          },
+          "hold": {
+            "count": 1492,
+            "sumMs": 17360.522583001875,
+            "p95Ms": 26.94428199995309,
+            "p99Ms": 114.90460800001165
+          },
+          "query": {
+            "count": 13088,
+            "sumMs": 16708.32811100519,
+            "p95Ms": 3.3514470000518486,
+            "p99Ms": 8.411704999976791
+          }
+        },
+        "sql": [
+          {
+            "name": "canonical_json",
+            "calls": 393860,
+            "selfMs": 1151.61,
+            "totalMs": 1151.61
+          },
+          {
+            "name": "postwar_paged_mixed_current_prefix",
+            "calls": 20,
+            "selfMs": 69.69,
+            "totalMs": 1498.89
+          },
+          {
+            "name": "postwar_projection_admission_header",
+            "calls": 4039,
+            "selfMs": 3305.81,
+            "totalMs": 3305.81
+          },
+          {
+            "name": "read_postwar_mixed_current_page",
+            "calls": 915,
+            "selfMs": 44.34,
+            "totalMs": 2604.27
+          },
+          {
+            "name": "read_postwar_mixed_current_page_legacy_array_v1",
+            "calls": 115,
+            "selfMs": 27.77,
+            "totalMs": 294.33
+          },
+          {
+            "name": "read_postwar_office_projection_seats",
+            "calls": 2919,
+            "selfMs": 3236.37,
+            "totalMs": 6369.32
+          },
+          {
+            "name": "read_postwar_paged_current_page",
+            "calls": 915,
+            "selfMs": 428.54,
+            "totalMs": 2265.52
+          }
+        ]
+      },
+      {
+        "seconds": 300,
+        "pass": false,
+        "plannedReads": 6000,
+        "reads": 6000,
+        "readErrors": 0,
+        "errorCodes": [],
+        "plannedWrites": 100,
+        "inWindowWrites": 86,
+        "completedWrites": 86,
+        "elapsedMs": 303025.08,
+        "inBudget": true,
+        "p95Ms": 2291.53,
+        "p99Ms": 2662.76,
+        "maxMs": 3612.99,
+        "counts": {
+          "worldVersion": "107",
+          "eventSequence": "319",
+          "commands": "107",
+          "receipts": "107",
+          "events": "319",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "107"
+        },
+        "writeLatencyMs": {
+          "ackMs": {
+            "0.5": 689.51,
+            "0.95": 1109.82,
+            "0.99": 1226.69
+          },
+          "finalObservedMs": {
+            "0.5": 1810.89,
+            "0.95": 2830.81,
+            "0.99": 3051.85
+          },
+          "completionMs": {
+            "0.5": 2962.38,
+            "0.95": 4829.57,
+            "0.99": 5284.81
+          }
+        },
+        "projectionDocuments": [32],
+        "observedCommitTransactions": 86,
+        "startingPagesPerCommit": [1],
+        "nodeCpuMs": 193820.71,
+        "readPool": {
+          "wait": {
+            "count": 10700,
+            "sumMs": 622384.8305249959,
+            "p95Ms": 329.232033999986,
+            "p99Ms": 491.09949799999595
+          },
+          "hold": {
+            "count": 10700,
+            "sumMs": 260199.83804899955,
+            "p95Ms": 132.54192099999636,
+            "p99Ms": 289.20982300001197
+          },
+          "query": {
+            "count": 94838,
+            "sumMs": 256982.52885699534,
+            "p95Ms": 4.163208000012673,
+            "p99Ms": 53.57490000000689
+          }
+        },
+        "sql": [
+          {
+            "name": "canonical_json",
+            "calls": 9627556,
+            "selfMs": 31998.12,
+            "totalMs": 31998.12
+          },
+          {
+            "name": "postwar_paged_mixed_current_prefix",
+            "calls": 86,
+            "selfMs": 1304.31,
+            "totalMs": 43160.03
+          },
+          {
+            "name": "postwar_projection_admission_header",
+            "calls": 28318,
+            "selfMs": 26921.49,
+            "totalMs": 26921.49
+          },
+          {
+            "name": "read_postwar_mixed_current_page",
+            "calls": 6788,
+            "selfMs": 340.56,
+            "totalMs": 25688.71
+          },
+          {
+            "name": "read_postwar_mixed_current_page_legacy_array_v1",
+            "calls": 2788,
+            "selfMs": 379.41,
+            "totalMs": 8717.3
+          },
+          {
+            "name": "read_postwar_office_projection_seats",
+            "calls": 23414,
+            "selfMs": 28216.83,
+            "totalMs": 56914.11
+          },
+          {
+            "name": "read_postwar_paged_current_page",
+            "calls": 6788,
+            "selfMs": 2153.36,
+            "totalMs": 16630.41
+          }
+        ]
+      }
+    ],
+    "nativeChecks": [
+      {
+        "name": "private_helper_and_batch_acl",
+        "result": "PASS"
+      },
+      {
+        "name": "genuine_same_head_two_country_rebuild_rolled_back",
+        "result": "PASS",
+        "documents": 32
+      },
+      {
+        "name": "second_country_financial_bad_coverage",
+        "result": "PASS",
+        "sqlState": "23514"
+      },
+      {
+        "name": "second_country_social_bad_coverage",
+        "result": "PASS",
+        "sqlState": "23514"
+      },
+      {
+        "name": "second_country_captain_bad_coverage",
+        "result": "PASS",
+        "sqlState": "23514"
+      },
+      {
+        "name": "second_country_trade_bad_coverage",
+        "result": "PASS",
+        "sqlState": "23514"
+      },
+      {
+        "name": "second_country_industry_bad_coverage",
+        "result": "PASS",
+        "sqlState": "23514"
+      },
+      {
+        "name": "all_checks_rolled_back_and_world_unchanged",
+        "result": "PASS"
+      }
+    ],
+    "writeError": null,
+    "unfinished": 0,
+    "final": {
+      "worldVersion": "107",
+      "eventSequence": "319",
+      "commands": "107",
+      "receipts": "107",
+      "events": "319",
+      "batches": "0",
+      "inventory": "0",
+      "queues": "107"
+    },
+    "cleanup": {
+      "runtime": "CLOSE_RETURNED",
+      "setup": "CLOSE_RETURNED",
+      "fixture": "CLOSE_RETURNED"
+    }
+  },
+  "cleanup": {
+    "removedContainers": [
+      "econmind-dispatch-app-20261119",
+      "econmind-postwar-reference-e9718840"
+    ],
+    "removedVolumes": [
+      "econmind-dispatch-work-20261119",
+      "cd398e5307aa7bcab79a7b9aee419fc772778b5bc0fafe888cf665298200fdff",
+      "econmind-postwar-reference-data-e9718840"
+    ],
+    "removedTestImage": "postgres@sha256:1beaa3084eee2676f20a9cd9928f0bf2c5bf674f8e49f81017912183d377c61c",
+    "remainingContainers": [
+      "reactive_resume-reactive_resume-1",
+      "reactive_resume-seaweedfs_create_bucket-1",
+      "reactive_resume-postgres-1",
+      "reactive_resume-redis-1",
+      "reactive_resume-seaweedfs-1"
+    ],
+    "remainingVolumes": [
+      "multiplayer-3d-japanese-horror_postgres_data",
+      "reactive_resume_postgres_data",
+      "reactive_resume_redis_data",
+      "reactive_resume_seaweedfs_data"
+    ],
+    "desktopStop": "EXIT_0"
+  },
+  "unresolved_gaps": [
+    "Independent review is pending",
+    "100 distinct authenticated user identities, WorldClock, public network and cloud topology were not exercised"
+  ]
+}
