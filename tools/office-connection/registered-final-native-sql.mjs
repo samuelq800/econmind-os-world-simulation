@@ -193,6 +193,7 @@ export async function prepareRegisteredFinalNativeSqlPlan({
         'postwar-current-countries-bundle',
         'postwar-budget-frame-state-hash-once',
         'postwar-mixed-current-page-dispatch',
+        'canonical-json-scalar-fast-path',
       ]
     : REGISTERED_FINAL_NATIVE_SQL_ORDER;
   for (const name of selectedNames) {

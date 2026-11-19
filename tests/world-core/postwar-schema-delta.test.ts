@@ -23,6 +23,7 @@ const EXCLUDED_CLOCK_PROPOSALS = Object.freeze([
   'postwar-test-only-finite-clock-observation.sql',
 ]);
 const EXPECTED_NON_CLOCK_PROPOSALS = Object.freeze([
+  'canonical-json-scalar-fast-path.sql',
   'captain-operating-custody.sql',
   'central-bank-omo-custody.sql',
   'central-bank-omo-history-read.sql',
@@ -391,7 +392,7 @@ describe('unapproved postwar schema delta package boundary', () => {
       )
       .sort();
     expect(selected).toEqual([...EXPECTED_NON_CLOCK_PROPOSALS].sort());
-    expect(selected).toHaveLength(91);
+    expect(selected).toHaveLength(92);
     for (const name of EXCLUDED_CLOCK_PROPOSALS) {
       expect(names).toContain(name);
       expect(selected).not.toContain(name);

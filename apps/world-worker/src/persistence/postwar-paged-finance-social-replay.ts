@@ -369,10 +369,11 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
             : { captainCountries: [...captainCountries.values()] }),
         },
       });
+      const pageReplay = readFinanceSocialReplayContinuation(cursor).result;
       assertHistoricalPlanPhysicalOriginals(
         b.document,
         page.frames,
-        readFinanceSocialReplayContinuation(cursor).result,
+        pageReplay,
       );
       proof = advancePostwarPagedCurrentProof({ proof, continuation: cursor });
       for (const frame of page.frames) {
@@ -469,18 +470,19 @@ export async function readPostwarPagedFinanceSocialReplayFrom(
       // Only live pending claims need an exact PLAN receipt for a fresh MATCH.
       // Settled historical receipts remain in the verified page chains, not an
       // unbounded second collection of receipt bodies/fingerprints.
-      const pendingPlans = new Set(
-        readFinanceSocialReplayContinuation(
-          cursor,
-        ).result.socialCountries.flatMap((c) =>
-          c.lifecycle.employment.plans
-            .filter((p) => p.state === 'PENDING')
-            .map((p) => p.planCommandId),
-        ),
-      );
-      for (const planId of Object.keys(pendingSocialPlanReceiptFingerprints))
-        if (!pendingPlans.has(planId))
-          delete pendingSocialPlanReceiptFingerprints[planId];
+      const trackedPlans = Object.keys(pendingSocialPlanReceiptFingerprints);
+      if (trackedPlans.length > 0) {
+        const pendingPlans = new Set(
+          pageReplay.socialCountries.flatMap((c) =>
+            c.lifecycle.employment.plans
+              .filter((p) => p.state === 'PENDING')
+              .map((p) => p.planCommandId),
+          ),
+        );
+        for (const planId of trackedPlans)
+          if (!pendingPlans.has(planId))
+            delete pendingSocialPlanReceiptFingerprints[planId];
+      }
       consumePreparedPostwarSocialFinancialReplayBase(input.baseline);
       page = await reader.readNext();
     }
