@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "postwar-logistics-v2-utility-guarded-v1",
+  "installationAllowed": false,
+  "productionApproval": "NOT_GRANTED",
+  "sqlPath": "database/proposals/postwar-industry-logistics-v2-utility-forward.sql",
+  "sqlSha256": "9e6cf01285d85654cb312e941635db794b7a6777214acfdca6691fcd4fbdef65",
+  "replacedFunctions": [
+    {
+      "signature": "world_v2.postwar_mixed_industry_utility_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)",
+      "owner": "world_v2_postwar_projection_owner",
+      "acl": "{world_v2_postwar_projection_owner=X/world_v2_postwar_projection_owner}",
+      "definitionSha256": "68aa4022c34c5bef2f874ccaaf0d40123e913ad9a8be31ae17ca82a4924bdb69"
+    }
+  ],
+  "successorFunctions": [
+    {
+      "signature": "world_v2.postwar_mixed_industry_utility_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)",
+      "owner": "world_v2_postwar_projection_owner",
+      "acl": "{world_v2_postwar_projection_owner=X/world_v2_postwar_projection_owner}",
+      "definitionSha256": "5ac6a49584eaf5371c1a40d12516254a41b9404c2820819b7688c658b0ac3d03"
+    }
+  ],
+  "newFunctions": [],
+  "requiredPredecessorFiles": {
+    "database/proposals/postwar-mixed-industry-utility-effects.sql": "2f9b28b10c1c7f5f354946be1f8f2d6495df052e058ddbf4cc0a3caa3415fff4"
+  },
+  "policyVersions": [
+    "INDUSTRY_INTERNAL_LOGISTICS_FIRST_DAY_20261101_V1",
+    "INDUSTRY_INTERNAL_LOGISTICS_MULTICOUNTRY_FIRST_DAY_20261108_V2"
+  ],
+  "isolatedRehearsal": "AUTHORIZED_NOT_RUN",
+  "replay": "ALREADY_APPLIED_STOP_INSPECT_NO_RETRY"
+}

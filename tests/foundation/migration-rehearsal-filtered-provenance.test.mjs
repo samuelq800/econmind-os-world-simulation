@@ -181,7 +181,6 @@ test('shared migration policy and independent 20/21 staging allowlist are unchan
   for (const file of [
     'scripts/migration-policy.mjs',
     'scripts/v09-staging-evidence-policy.mjs',
-    'scripts/v09-staging-evidence-runner.mjs',
     'database/migrations/manifest.json',
   ]) {
     const base = execFileSync(
@@ -195,6 +194,42 @@ test('shared migration policy and independent 20/21 staging allowlist are unchan
     );
     assert.deepEqual(await readFile(path.join(root, file)), base);
   }
+});
+
+test('runner outside the validated disposable loader extension retains its historical guards', async () => {
+  const file = 'scripts/v09-staging-evidence-runner.mjs';
+  const base = execFileSync(
+    'git',
+    [
+      '--no-replace-objects',
+      'show',
+      `13fd4ce820d5c5a9296c9a3cc9bc2ece32ef8fe5:${file}`,
+    ],
+    { cwd: root },
+  ).toString('utf8');
+  const current = await readFile(path.join(root, file), 'utf8');
+  assert.equal(
+    current.slice(
+      0,
+      current.indexOf('async function loadValidatedV09MigrationChain('),
+    ),
+    base.slice(
+      0,
+      base.indexOf('export async function loadV09StagingMigrationChain('),
+    ),
+  );
+  const marker = 'async function preflightPristine(';
+  assert.notEqual(current.indexOf(marker), -1);
+  assert.notEqual(base.indexOf(marker), -1);
+  assert.equal(
+    current
+      .slice(current.indexOf(marker))
+      .replace(
+        'loadMigrationChain = loadV09DisposableMigrationChain,',
+        'loadMigrationChain = loadV09StagingMigrationChain,',
+      ),
+    base.slice(base.indexOf(marker)),
+  );
 });
 
 test('existing apply-chain/shared-schema/Storage/gate blocks are byte-identical to fixed base', async () => {

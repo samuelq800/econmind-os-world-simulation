@@ -1,0 +1,3233 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "EXISTING_RUNTIME_MAINTENANCE",
+  "commit": "ef440aea1d05961e87ce0334ea28e7a562e5780d",
+  "implementation_status": "IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "independent_review": "PENDING",
+  "environment": {
+    "name": "DISPOSABLE_LOCAL_POSTGRES",
+    "node": "v24.20.0",
+    "pnpm": "12.3.4",
+    "appCpu": 2,
+    "appGiB": 6,
+    "postgresCpu": 1,
+    "postgresGiB": 3,
+    "poolMax": 2,
+    "countries": 70,
+    "jwtSubjects": 2,
+    "rotatingSessionLabels": 100,
+    "readsPerSecond": 20,
+    "writesPerMinute": 20,
+    "worldClock": false,
+    "productionAccess": false,
+    "postgres": "16.15",
+    "frozenLockfile": true
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/v09-atomic-repository-preparation.test.ts tests/world-core/v09-commit-authorization-cutoff.test.ts tests/world-core/v09-worker-authoritative-execution.test.ts tests/world-core/postgres-finance-budget-custody.test.ts tests/world-core/finance-budget-native-mixed-prefix.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests": 48
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/industry-run-work-atomic-boundary.test.ts tests/world-core/industry-utility-atomic-boundary.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests": 14
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests": 46,
+      "scripts": 2
+    },
+    {
+      "command": "pnpm exec eslint [changed files]; pnpm exec prettier --check [changed files]; git diff --check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "files": 4020
+    },
+    {
+      "command": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm install --frozen-lockfile; pnpm pretest (isolated Linux)",
+      "exit_code": 0,
+      "result": "PASS"
+    }
+  ],
+  "negative_cases": [
+    {
+      "name": "stale_finance_commit_head_rejects_before_candidate_and_preserves_persistence",
+      "result": "PASS",
+      "engine": "PGlite",
+      "code": "WORLD_VERSION_MISMATCH"
+    },
+    {
+      "name": "stale_test_footprint_sql_initially_matched_two_queue_rows",
+      "result": "FAIL",
+      "resolved_by": "Select the pending command’s queue row; re-run all 48 related regressions"
+    }
+  ],
+  "infrastructure": {
+    "firstLaunch": "Error: BENEFICIAL_CHILD_NATIVE:REGISTERED_FINAL_NATIVE_EXPLICIT_OPT_IN_REQUIRED",
+    "load": "NOT_RUN",
+    "resolvedBy": "Set native fixture test opt-in for the owned container"
+  },
+  "database_rls_evidence": [
+    {
+      "name": "private_helper_and_batch_acl",
+      "result": "PASS",
+      "privileges": [
+        {
+          "proname": "publish_postwar_paged_captain_current_from_verified",
+          "owner": "world_v2_postwar_projection_owner",
+          "publisher": false,
+          "reader": false,
+          "worker": false
+        },
+        {
+          "proname": "publish_postwar_paged_trade_current_from_verified",
+          "owner": "world_v2_postwar_projection_owner",
+          "publisher": false,
+          "reader": false,
+          "worker": false
+        },
+        {
+          "proname": "publish_postwar_industry_labour_current_from_verified",
+          "owner": "world_v2_postwar_projection_owner",
+          "publisher": false,
+          "reader": false,
+          "worker": false
+        },
+        {
+          "proname": "verify_postwar_current_coverage_from",
+          "owner": "world_v2_postwar_projection_owner",
+          "publisher": false,
+          "reader": false,
+          "worker": false
+        },
+        {
+          "proname": "publish_postwar_paged_financial_current_from_verified",
+          "owner": "world_v2_postwar_projection_owner",
+          "publisher": false,
+          "reader": false,
+          "worker": false
+        },
+        {
+          "proname": "publish_postwar_paged_social_current_from_verified",
+          "owner": "world_v2_postwar_projection_owner",
+          "publisher": false,
+          "reader": false,
+          "worker": false
+        },
+        {
+          "proname": "publish_postwar_current_countries_bundle",
+          "owner": "world_v2_postwar_projection_owner",
+          "publisher": true,
+          "reader": false,
+          "worker": false
+        }
+      ]
+    },
+    {
+      "name": "genuine_same_head_two_country_rebuild_rolled_back",
+      "result": "PASS",
+      "documents": 32
+    },
+    {
+      "name": "second_country_financial_bad_coverage",
+      "result": "PASS",
+      "sqlState": "23514"
+    },
+    {
+      "name": "second_country_social_bad_coverage",
+      "result": "PASS",
+      "sqlState": "23514"
+    },
+    {
+      "name": "second_country_captain_bad_coverage",
+      "result": "PASS",
+      "sqlState": "23514"
+    },
+    {
+      "name": "second_country_trade_bad_coverage",
+      "result": "PASS",
+      "sqlState": "23514"
+    },
+    {
+      "name": "second_country_industry_bad_coverage",
+      "result": "PASS",
+      "sqlState": "23514"
+    },
+    {
+      "name": "all_checks_rolled_back_and_world_unchanged",
+      "result": "PASS"
+    }
+  ],
+  "invariant_evidence": {
+    "initialPublication": {
+      "status": "PUBLISHED",
+      "commandId": "GLOBAL_BUDGET_EE46EA2116A245D1BBFD95BE2FA96C59",
+      "countryId": "COUNTRY_01",
+      "head": {
+        "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+        "worldVersion": "1",
+        "eventSequence": "1"
+      },
+      "documentCount": 32,
+      "industryLabour": "PUBLISHED",
+      "captain": "PUBLISHED"
+    },
+    "final": {
+      "worldVersion": "107",
+      "eventSequence": "319",
+      "commands": "107",
+      "receipts": "107",
+      "events": "319",
+      "batches": "0",
+      "inventory": "0",
+      "queues": "107"
+    },
+    "unfinished": 0,
+    "writeError": null
+  },
+  "native": {
+    "status": "FAIL_FIVE_MINUTE_MIXED_LOAD",
+    "stages": [
+      {
+        "name": "SOURCE_ADMISSION_START",
+        "at": "2026-11-18T23:35:13.372Z"
+      },
+      {
+        "name": "SOURCE_ADMISSION_READY",
+        "at": "2026-11-18T23:40:47.114Z"
+      },
+      {
+        "name": "SQL_SETUP_READY",
+        "at": "2026-11-18T23:41:58.659Z"
+      },
+      {
+        "name": "INDUSTRY_H0_READY",
+        "at": "2026-11-18T23:47:51.380Z"
+      },
+      {
+        "name": "NODE_READY",
+        "at": "2026-11-18T23:52:34.832Z"
+      },
+      {
+        "name": "LOAD_BEGIN",
+        "at": "2026-11-18T23:52:35.801Z"
+      },
+      {
+        "name": "LOAD_END",
+        "at": "2026-11-18T23:53:37.082Z",
+        "reads": 1200,
+        "writes": 20,
+        "pass": true
+      },
+      {
+        "name": "LOAD_BEGIN",
+        "at": "2026-11-18T23:53:37.086Z"
+      },
+      {
+        "name": "LOAD_END",
+        "at": "2026-11-18T23:58:40.895Z",
+        "reads": 6000,
+        "writes": 86,
+        "pass": false
+      },
+      {
+        "name": "WAITING_LOCAL_REPAIR_OR_CLEANUP",
+        "at": "2026-11-18T23:58:40.996Z"
+      }
+    ],
+    "phases": [
+      {
+        "candidate": "ef440aea1d05961e87ce0334ea28e7a562e5780d",
+        "seconds": 60,
+        "plannedReads": 1200,
+        "plannedWrites": 20,
+        "reads": 1200,
+        "errors": [],
+        "elapsedMs": 59960.82054500014,
+        "inBudget": true,
+        "inWindowWrites": 20,
+        "overlaps": 0,
+        "p95Ms": 548.1092280000448,
+        "p99Ms": 648.3803590000607,
+        "maxMs": 1035.6421980001032,
+        "pass": true,
+        "counts": {
+          "worldVersion": "21",
+          "eventSequence": "61",
+          "commands": "21",
+          "receipts": "21",
+          "events": "61",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "21"
+        },
+        "observer": {
+          "pid": 3529,
+          "poolMax": 2,
+          "commitReplays": [
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            }
+          ],
+          "cpuMs": 16062.266,
+          "rss": 1096925184,
+          "eventLoop": {
+            "p95Ms": 10.969087,
+            "p99Ms": 78.053375,
+            "maxMs": 188.874751
+          },
+          "pools": {
+            "final_read_6a56c194b9": {
+              "wait": {
+                "count": 1485,
+                "sumMs": 1158.9793479985674,
+                "p95Ms": 2.7579360000090674,
+                "p99Ms": 16.317513999994844
+              },
+              "hold": {
+                "count": 1485,
+                "sumMs": 18064.72292300046,
+                "p95Ms": 23.473019000026397,
+                "p99Ms": 96.47615000000224
+              },
+              "query": {
+                "count": 13025,
+                "sumMs": 17430.570024998102,
+                "p95Ms": 4.463141999964137,
+                "p99Ms": 10.836653999984264
+              }
+            },
+            "fixture_rent_child_intake_5bbb5a37": {
+              "wait": {
+                "count": 20,
+                "sumMs": 51.47456600010628,
+                "p95Ms": 3.298614000028465,
+                "p99Ms": 3.39652800001204
+              },
+              "hold": {
+                "count": 20,
+                "sumMs": 4293.038935999968,
+                "p95Ms": 285.14037500001723,
+                "p99Ms": 314.92134499998065
+              },
+              "query": {
+                "count": 300,
+                "sumMs": 342.16092900029616,
+                "p95Ms": 6.066769000026397,
+                "p99Ms": 6.8862309999531135
+              }
+            },
+            "fixture_rent_child_worker_5bbb5a37": {
+              "wait": {
+                "count": 460,
+                "sumMs": 73.66543499974068,
+                "p95Ms": 0.09098000003723428,
+                "p99Ms": 2.763344999984838
+              },
+              "hold": {
+                "count": 460,
+                "sumMs": 17519.561257000314,
+                "p95Ms": 210.51153899997007,
+                "p99Ms": 466.6457600000431
+              },
+              "query": {
+                "count": 6800,
+                "sumMs": 3650.2399390005157,
+                "p95Ms": 1.6388389999628998,
+                "p99Ms": 7.311095999961253
+              }
+            },
+            "final_projection_pub_6a56c194b9": {
+              "wait": {
+                "count": 40,
+                "sumMs": 54.03039300011005,
+                "p95Ms": 3.0682549999910407,
+                "p99Ms": 4.215862000011839
+              },
+              "hold": {
+                "count": 40,
+                "sumMs": 4676.720233999833,
+                "p95Ms": 292.91987100004917,
+                "p99Ms": 336.40522399998736
+              },
+              "query": {
+                "count": 180,
+                "sumMs": 4623.866900999972,
+                "p95Ms": 219.5913189999992,
+                "p99Ms": 286.3114620000124
+              }
+            }
+          }
+        },
+        "writes": 20,
+        "completionMs": [
+          522.7027000000235, 715.0933509999886, 818.817023999989,
+          748.782481999835, 796.9705660000909, 912.0534749999642,
+          803.8985379999503, 850.4552469998598, 905.0956939999014,
+          904.3735229999293, 932.6495979998726, 962.1039790001232,
+          996.4876010001171, 1031.3834210000932, 1135.7806000001729,
+          1104.4842219999991, 1128.1106110000983, 1324.4951899999287,
+          1369.3327770000324, 1275.5796010000631
+        ],
+        "allWritesPublished32": true,
+        "resources": [
+          {
+            "elapsedMs": 6286.656952000107,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "31.15%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "46.63%",
+                "MemUsage": "2.798GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.93GB",
+                "CPUPerc": "27.34%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.54%",
+                "MemUsage": "139.5MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 12081.019221000024,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "15.48%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "47.11%",
+                "MemUsage": "2.826GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.93GB",
+                "CPUPerc": "20.49%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.26%",
+                "MemUsage": "131MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 16112.958435000037,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "56.93%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "47.56%",
+                "MemUsage": "2.854GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.93GB",
+                "CPUPerc": "51.14%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.28%",
+                "MemUsage": "162.3MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 22073.026501000044,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "57.17%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "47.98%",
+                "MemUsage": "2.879GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.93GB",
+                "CPUPerc": "18.58%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.29%",
+                "MemUsage": "131.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 26093.885745999985,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "15.87%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "48.26%",
+                "MemUsage": "2.895GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "19.96%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.10%",
+                "MemUsage": "126MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "8"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 31073.621856999933,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "61.40%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "48.48%",
+                "MemUsage": "2.909GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "48.69%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.34%",
+                "MemUsage": "163.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 36292.64918700012,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "25.95%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "48.80%",
+                "MemUsage": "2.928GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "26.34%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.69%",
+                "MemUsage": "144.1MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 42080.20835800015,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "12.97%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "49.17%",
+                "MemUsage": "2.95GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "20.55%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.12%",
+                "MemUsage": "126.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "8"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 46095.55143699993,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.39GB",
+                "CPUPerc": "72.10%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "49.64%",
+                "MemUsage": "2.979GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "47.62%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.36%",
+                "MemUsage": "164.5MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 52078.61945900007,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "12.84%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "49.77%",
+                "MemUsage": "2.986GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "35.13%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.12%",
+                "MemUsage": "157.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 56095.13352800009,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "15.39%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "40.99%",
+                "MemUsage": "2.459GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "46.56%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.19%",
+                "MemUsage": "159.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          }
+        ],
+        "busiestSql": [
+          {
+            "name": "read_postwar_office_projection_seats",
+            "calls": 3701,
+            "selfMs": 3856.547,
+            "totalMs": 7611.601
+          },
+          {
+            "name": "postwar_projection_admission_header",
+            "calls": 4821,
+            "selfMs": 3759.723,
+            "totalMs": 3759.723
+          },
+          {
+            "name": "canonical_json",
+            "calls": 393860,
+            "selfMs": 1101.194,
+            "totalMs": 1101.194
+          },
+          {
+            "name": "postwar_projection_reader_allowed",
+            "calls": 3701,
+            "selfMs": 1060.766,
+            "totalMs": 1060.766
+          },
+          {
+            "name": "read_postwar_bounded_prefix_page",
+            "calls": 180,
+            "selfMs": 731.206,
+            "totalMs": 1144.408
+          },
+          {
+            "name": "postwar_write_paged_current_document",
+            "calls": 520,
+            "selfMs": 610.49,
+            "totalMs": 1185.213
+          },
+          {
+            "name": "postwar_apply_current_frame_page",
+            "calls": 20,
+            "selfMs": 506.043,
+            "totalMs": 891.627
+          },
+          {
+            "name": "read_postwar_paged_current_page",
+            "calls": 800,
+            "selfMs": 403.396,
+            "totalMs": 1902.669
+          },
+          {
+            "name": "lock_postwar_source_revocation_fences",
+            "calls": 720,
+            "selfMs": 284.853,
+            "totalMs": 284.853
+          },
+          {
+            "name": "read_postwar_industry_labour_current_page",
+            "calls": 454,
+            "selfMs": 273.012,
+            "totalMs": 1219.617
+          },
+          {
+            "name": "lock_finance_budget_policy",
+            "calls": 180,
+            "selfMs": 188.704,
+            "totalMs": 188.704
+          },
+          {
+            "name": "lock_finance_budget_intake_binding",
+            "calls": 40,
+            "selfMs": 182.925,
+            "totalMs": 182.925
+          },
+          {
+            "name": "publish_postwar_paged_financial_current_from_verified",
+            "calls": 40,
+            "selfMs": 161.918,
+            "totalMs": 1206.435
+          },
+          {
+            "name": "publish_postwar_industry_labour_current_from_verified",
+            "calls": 40,
+            "selfMs": 143.519,
+            "totalMs": 235.649
+          },
+          {
+            "name": "publish_postwar_paged_trade_current_from_verified",
+            "calls": 40,
+            "selfMs": 122.411,
+            "totalMs": 447.847
+          }
+        ]
+      },
+      {
+        "candidate": "ef440aea1d05961e87ce0334ea28e7a562e5780d",
+        "seconds": 300,
+        "plannedReads": 6000,
+        "plannedWrites": 100,
+        "reads": 6000,
+        "errors": [],
+        "elapsedMs": 302436.3007400001,
+        "inBudget": true,
+        "inWindowWrites": 86,
+        "overlaps": 0,
+        "p95Ms": 2309.8211630000733,
+        "p99Ms": 2729.1426749997772,
+        "maxMs": 3520.47808000003,
+        "pass": false,
+        "counts": {
+          "worldVersion": "107",
+          "eventSequence": "319",
+          "commands": "107",
+          "receipts": "107",
+          "events": "319",
+          "batches": "0",
+          "inventory": "0",
+          "queues": "107"
+        },
+        "observer": {
+          "pid": 3529,
+          "poolMax": 2,
+          "commitReplays": [
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 2,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 3,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            },
+            {
+              "role": "fixture_rent_child_worker_5bbb5a37",
+              "pages": 4,
+              "starts": 1
+            }
+          ],
+          "cpuMs": 191198.785,
+          "rss": 1247649792,
+          "eventLoop": {
+            "p95Ms": 59.899903,
+            "p99Ms": 276.824063,
+            "maxMs": 387.973119
+          },
+          "pools": {
+            "final_read_6a56c194b9": {
+              "wait": {
+                "count": 10634,
+                "sumMs": 652151.9423059903,
+                "p95Ms": 349.574271999998,
+                "p99Ms": 503.286128000007
+              },
+              "hold": {
+                "count": 10634,
+                "sumMs": 270646.71819400444,
+                "p95Ms": 135.5898670000024,
+                "p99Ms": 285.84401200001594
+              },
+              "query": {
+                "count": 94244,
+                "sumMs": 267494.8394590392,
+                "p95Ms": 4.721006999956444,
+                "p99Ms": 56.49797899997793
+              }
+            },
+            "fixture_rent_child_intake_5bbb5a37": {
+              "wait": {
+                "count": 86,
+                "sumMs": 280.1599729995942,
+                "p95Ms": 3.4666929999366403,
+                "p99Ms": 45.84307900001295
+              },
+              "hold": {
+                "count": 86,
+                "sumMs": 59296.513606000284,
+                "p95Ms": 1150.5512599999784,
+                "p99Ms": 1205.6712439999683
+              },
+              "query": {
+                "count": 1290,
+                "sumMs": 1965.6362550009508,
+                "p95Ms": 6.356301000050735,
+                "p99Ms": 29.10953299998073
+              }
+            },
+            "fixture_rent_child_worker_5bbb5a37": {
+              "wait": {
+                "count": 1978,
+                "sumMs": 92.69807600078639,
+                "p95Ms": 0.04294699995080009,
+                "p99Ms": 1.2126029999926686
+              },
+              "hold": {
+                "count": 1978,
+                "sumMs": 246185.63784399797,
+                "p95Ms": 762.7931040000403,
+                "p99Ms": 1654.7615310000256
+              },
+              "query": {
+                "count": 29762,
+                "sumMs": 30927.745980985113,
+                "p95Ms": 2.0086759999394417,
+                "p99Ms": 29.066954000038095
+              }
+            },
+            "final_projection_pub_6a56c194b9": {
+              "wait": {
+                "count": 172,
+                "sumMs": 252.91494899999816,
+                "p95Ms": 3.225490999990143,
+                "p99Ms": 4.445271999982651
+              },
+              "hold": {
+                "count": 172,
+                "sumMs": 59911.33199899987,
+                "p95Ms": 1133.0569469999755,
+                "p99Ms": 1280.09810199996
+              },
+              "query": {
+                "count": 774,
+                "sumMs": 59695.5228289988,
+                "p95Ms": 663.8348859999678,
+                "p99Ms": 1151.9932549999794
+              }
+            }
+          }
+        },
+        "writes": 86,
+        "completionMs": [
+          1481.8870439999737, 1326.397641000105, 1328.2145950000267,
+          1417.130652999971, 1413.7254759999923, 1660.69471099996,
+          1458.0459390000906, 1539.919309000019, 1557.0572240001056,
+          1597.635013999883, 1791.1222139999736, 1658.1405200001318,
+          1653.205893999897, 1812.4943670001812, 1810.5778349998873,
+          1931.817195000127, 1904.8338839998469, 2024.1397339999676,
+          2048.8883360000327, 2064.695543000009, 2199.4413250000216,
+          2083.0188370000105, 2155.9981980000157, 2184.1436479999684,
+          2213.6266809999943, 2333.632108000107, 2305.499574000016,
+          2340.2500199999195, 2351.3435559999198, 2314.928007000126,
+          2538.638341000071, 2347.6415269998834, 2304.86021900014,
+          2588.8064139999915, 2504.678578999825, 2439.7870179999154,
+          2584.7611179999076, 2612.3550790001173, 2704.902602999937,
+          2702.3503680001013, 2805.186589999823, 2813.4186390000395,
+          2901.4928079999518, 2915.715147999814, 2921.2929519999307,
+          3008.562302000122, 3177.9598189999815, 3136.704170000041,
+          3101.4296190000605, 3207.9558429999743, 3543.6824749999214,
+          3260.494715000037, 3388.7908439999446, 3680.2282489999197,
+          3408.292192999972, 3593.6015250000637, 3608.30979999993,
+          3585.0904270000756, 3702.464464999968, 3728.5951700001024,
+          3897.480101000052, 3847.9003880000673, 3794.7978929998353,
+          3851.621628999943, 3895.624389000004, 3901.945181999821,
+          4232.230402000016, 4126.075763000175, 4399.796598999994,
+          4805.578040000051, 4703.217471999815, 4501.296476999996,
+          4416.234555999981, 4501.595053999918, 4565.392787999939,
+          4685.456227000104, 4432.032198000001, 4787.059673999902,
+          4590.509348000167, 4706.224910000106, 4674.650763999904,
+          4799.0881379998755, 5120.030717999907, 5381.611192999873,
+          5009.189817999955, 4613.754848000128
+        ],
+        "allWritesPublished32": true,
+        "resources": [
+          {
+            "elapsedMs": 6075.6627229999285,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "13.36%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.20%",
+                "MemUsage": "2.472GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "19.94%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.36%",
+                "MemUsage": "134.1MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 11076.64933699998,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "24.21%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.26%",
+                "MemUsage": "2.475GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.94GB",
+                "CPUPerc": "51.36%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.21%",
+                "MemUsage": "160.1MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 16080.32899700012,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "87.86%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.45%",
+                "MemUsage": "2.487GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "35.54%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.86%",
+                "MemUsage": "149.2MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 22080.425814999966,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "14.42%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.22%",
+                "MemUsage": "2.473GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "31.97%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.83%",
+                "MemUsage": "148.5MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 27081.267225000076,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "14.21%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.07%",
+                "MemUsage": "2.524GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "53.23%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.26%",
+                "MemUsage": "161.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 31082.081126000034,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "104.20%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.63%",
+                "MemUsage": "2.498GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "26.81%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.82%",
+                "MemUsage": "148.1MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 36075.618550000014,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.4GB",
+                "CPUPerc": "14.33%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.70%",
+                "MemUsage": "2.502GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "20.38%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.56%",
+                "MemUsage": "140.2MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 42091.857108999975,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.41GB",
+                "CPUPerc": "61.75%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.70%",
+                "MemUsage": "2.502GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "25.59%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.60%",
+                "MemUsage": "141.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 47087.15399300004,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.41GB",
+                "CPUPerc": "64.21%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.70%",
+                "MemUsage": "2.502GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "25.23%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.81%",
+                "MemUsage": "147.8MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 51079.3813430001,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.41GB",
+                "CPUPerc": "18.27%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.80%",
+                "MemUsage": "2.508GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "27.66%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.54%",
+                "MemUsage": "139.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 57080.69490600005,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.41GB",
+                "CPUPerc": "19.90%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "41.98%",
+                "MemUsage": "2.519GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.95GB",
+                "CPUPerc": "60.30%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.35%",
+                "MemUsage": "164.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 61086.435326999985,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.41GB",
+                "CPUPerc": "92.76%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.14%",
+                "MemUsage": "2.528GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.96GB",
+                "CPUPerc": "22.95%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.03%",
+                "MemUsage": "154.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 66081.41851300001,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.41GB",
+                "CPUPerc": "19.15%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.31%",
+                "MemUsage": "2.538GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.96GB",
+                "CPUPerc": "32.39%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.89%",
+                "MemUsage": "150.3MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 72089.80447300011,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.42GB",
+                "CPUPerc": "20.06%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.25%",
+                "MemUsage": "2.535GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.96GB",
+                "CPUPerc": "61.95%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.39%",
+                "MemUsage": "165.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 77087.41421899991,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.42GB",
+                "CPUPerc": "76.83%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.70%",
+                "MemUsage": "2.562GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.96GB",
+                "CPUPerc": "29.78%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.12%",
+                "MemUsage": "157.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 82087.67501599994,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.42GB",
+                "CPUPerc": "92.26%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.67%",
+                "MemUsage": "2.56GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.96GB",
+                "CPUPerc": "50.56%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.57%",
+                "MemUsage": "171.2MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 87080.10207300005,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.42GB",
+                "CPUPerc": "20.09%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.58%",
+                "MemUsage": "2.555GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.96GB",
+                "CPUPerc": "39.59%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.39%",
+                "MemUsage": "165.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 91101.65475700004,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.42GB",
+                "CPUPerc": "108.74%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.41%",
+                "MemUsage": "2.544GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.96GB",
+                "CPUPerc": "20.95%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.06%",
+                "MemUsage": "155.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 96075.49992999993,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.42GB",
+                "CPUPerc": "18.14%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.99%",
+                "MemUsage": "2.58GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.97GB",
+                "CPUPerc": "56.19%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.66%",
+                "MemUsage": "173.8MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 101078.49597100005,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.43GB",
+                "CPUPerc": "107.52%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.52%",
+                "MemUsage": "2.551GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.97GB",
+                "CPUPerc": "37.54%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.20%",
+                "MemUsage": "159.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 107076.59600199992,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.43GB",
+                "CPUPerc": "84.55%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.46%",
+                "MemUsage": "2.608GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.97GB",
+                "CPUPerc": "28.91%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.14%",
+                "MemUsage": "158MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 111079.36626500008,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.43GB",
+                "CPUPerc": "32.85%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.68%",
+                "MemUsage": "2.561GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.97GB",
+                "CPUPerc": "74.90%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.51%",
+                "MemUsage": "169.1MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 117084.23312800005,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.43GB",
+                "CPUPerc": "24.01%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "42.95%",
+                "MemUsage": "2.577GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.97GB",
+                "CPUPerc": "26.14%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.85%",
+                "MemUsage": "148.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 122083.66430600011,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.43GB",
+                "CPUPerc": "108.90%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.04%",
+                "MemUsage": "2.583GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.97GB",
+                "CPUPerc": "29.42%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.13%",
+                "MemUsage": "157.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 127087.10457800003,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.44GB",
+                "CPUPerc": "91.79%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.48%",
+                "MemUsage": "2.609GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.97GB",
+                "CPUPerc": "83.75%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.72%",
+                "MemUsage": "175.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 131085.25545800012,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.44GB",
+                "CPUPerc": "96.27%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.26%",
+                "MemUsage": "2.595GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.98GB",
+                "CPUPerc": "23.06%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.85%",
+                "MemUsage": "149MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 136080.58617500006,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.44GB",
+                "CPUPerc": "88.29%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.21%",
+                "MemUsage": "2.593GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.98GB",
+                "CPUPerc": "37.97%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.26%",
+                "MemUsage": "161.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 142085.7453330001,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.44GB",
+                "CPUPerc": "72.83%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.06%",
+                "MemUsage": "2.583GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.98GB",
+                "CPUPerc": "76.40%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.45%",
+                "MemUsage": "167.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 146082.91517399997,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.45GB",
+                "CPUPerc": "95.19%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.08%",
+                "MemUsage": "2.585GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.98GB",
+                "CPUPerc": "23.88%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.19%",
+                "MemUsage": "159.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 152081.842161,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.45GB",
+                "CPUPerc": "42.61%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.27%",
+                "MemUsage": "2.596GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.98GB",
+                "CPUPerc": "44.66%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.12%",
+                "MemUsage": "157.3MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 157124.34040899994,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.45GB",
+                "CPUPerc": "68.99%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.88%",
+                "MemUsage": "2.633GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.98GB",
+                "CPUPerc": "20.50%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.13%",
+                "MemUsage": "157.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 162086.00039399997,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.45GB",
+                "CPUPerc": "88.08%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.06%",
+                "MemUsage": "2.584GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.98GB",
+                "CPUPerc": "90.21%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.83%",
+                "MemUsage": "179MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 167085.87954799994,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.46GB",
+                "CPUPerc": "97.73%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.66%",
+                "MemUsage": "2.619GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "49.62%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.28%",
+                "MemUsage": "162.2MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 172083.23976100003,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.46GB",
+                "CPUPerc": "59.21%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.15%",
+                "MemUsage": "2.649GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "59.45%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.50%",
+                "MemUsage": "168.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 176081.846685,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.46GB",
+                "CPUPerc": "72.23%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.03%",
+                "MemUsage": "2.702GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "52.86%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.98%",
+                "MemUsage": "183.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 182081.36874200008,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.46GB",
+                "CPUPerc": "56.54%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.71%",
+                "MemUsage": "2.742GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "25.18%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "4.98%",
+                "MemUsage": "153.1MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 187079.81337200012,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.47GB",
+                "CPUPerc": "75.25%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "46.26%",
+                "MemUsage": "2.775GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "80.52%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.47%",
+                "MemUsage": "168.2MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 191084.5807660001,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.47GB",
+                "CPUPerc": "80.66%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.31%",
+                "MemUsage": "2.598GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "43.89%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "6.00%",
+                "MemUsage": "184.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "13"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 197083.37638300005,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.47GB",
+                "CPUPerc": "79.01%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.17%",
+                "MemUsage": "2.65GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "24.47%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.09%",
+                "MemUsage": "156.2MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 202088.43958600005,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.47GB",
+                "CPUPerc": "56.68%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.57%",
+                "MemUsage": "2.674GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "59.72%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.56%",
+                "MemUsage": "170.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 207085.26223400002,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.48GB",
+                "CPUPerc": "64.44%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.87%",
+                "MemUsage": "2.692GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "45.34%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.23%",
+                "MemUsage": "160.8MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 211098.36912099994,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.48GB",
+                "CPUPerc": "93.71%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.17%",
+                "MemUsage": "2.71GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 5.99GB",
+                "CPUPerc": "49.50%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.34%",
+                "MemUsage": "163.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 217081.832314,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.48GB",
+                "CPUPerc": "69.67%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.77%",
+                "MemUsage": "2.746GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "26.65%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.03%",
+                "MemUsage": "154.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 222083.828429,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.48GB",
+                "CPUPerc": "16.95%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "46.30%",
+                "MemUsage": "2.778GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "42.91%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.47%",
+                "MemUsage": "168.2MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 227086.987862,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.49GB",
+                "CPUPerc": "21.25%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.60%",
+                "MemUsage": "2.616GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "43.02%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.59%",
+                "MemUsage": "171.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 232089.91498999996,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.49GB",
+                "CPUPerc": "47.43%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.05%",
+                "MemUsage": "2.643GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "74.15%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.65%",
+                "MemUsage": "173.4MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 237090.85653600004,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.49GB",
+                "CPUPerc": "15.40%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.36%",
+                "MemUsage": "2.661GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "44.37%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.93%",
+                "MemUsage": "182.3MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 241084.04865800007,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.49GB",
+                "CPUPerc": "52.15%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.78%",
+                "MemUsage": "2.687GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "69.35%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "6.02%",
+                "MemUsage": "184.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 247082.82612899994,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.49GB",
+                "CPUPerc": "90.52%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.22%",
+                "MemUsage": "2.713GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "43.53%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.13%",
+                "MemUsage": "157.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 252090.06468000007,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.5GB",
+                "CPUPerc": "99.97%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.66%",
+                "MemUsage": "2.62GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "44.83%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.39%",
+                "MemUsage": "165.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 257083.056445,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.5GB",
+                "CPUPerc": "95.11%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.30%",
+                "MemUsage": "2.658GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "43.57%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.33%",
+                "MemUsage": "163.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "12"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 261089.96178800007,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.5GB",
+                "CPUPerc": "97.10%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.69%",
+                "MemUsage": "2.682GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "26.78%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.18%",
+                "MemUsage": "159.1MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 267087.46213799994,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.5GB",
+                "CPUPerc": "96.60%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.22%",
+                "MemUsage": "2.713GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "20.74%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.17%",
+                "MemUsage": "159MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "10"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 272090.693492,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.51GB",
+                "CPUPerc": "67.01%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.72%",
+                "MemUsage": "2.743GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "23.48%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.13%",
+                "MemUsage": "157.7MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 276084.1254420001,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.51GB",
+                "CPUPerc": "96.16%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "46.03%",
+                "MemUsage": "2.762GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "27.96%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.13%",
+                "MemUsage": "157.6MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 282091.66406899993,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.51GB",
+                "CPUPerc": "14.68%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "46.59%",
+                "MemUsage": "2.795GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "34.11%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.34%",
+                "MemUsage": "163.9MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 287089.47866300005,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.51GB",
+                "CPUPerc": "24.74%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.62%",
+                "MemUsage": "2.617GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6GB",
+                "CPUPerc": "22.39%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.12%",
+                "MemUsage": "157.3MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 292092.977988,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.51GB",
+                "CPUPerc": "25.75%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "43.81%",
+                "MemUsage": "2.629GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "43"
+              },
+              {
+                "BlockIO": "179MB / 6.01GB",
+                "CPUPerc": "26.30%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.14%",
+                "MemUsage": "158MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 297085.2782690001,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.52GB",
+                "CPUPerc": "58.72%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "44.30%",
+                "MemUsage": "2.658GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "44"
+              },
+              {
+                "BlockIO": "179MB / 6.01GB",
+                "CPUPerc": "28.96%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.28%",
+                "MemUsage": "162.3MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          },
+          {
+            "elapsedMs": 302087.4767420001,
+            "containers": [
+              {
+                "BlockIO": "49.8MB / 2.52GB",
+                "CPUPerc": "60.86%",
+                "Container": "econmind-finance-app-20261119",
+                "ID": "d97b2c3df62f",
+                "MemPerc": "45.01%",
+                "MemUsage": "2.701GiB / 6GiB",
+                "Name": "econmind-finance-app-20261119",
+                "NetIO": "114MB / 3.49MB",
+                "PIDs": "45"
+              },
+              {
+                "BlockIO": "179MB / 6.01GB",
+                "CPUPerc": "9.97%",
+                "Container": "econmind-postwar-reference-89f79de6",
+                "ID": "da32640fb3f5",
+                "MemPerc": "5.17%",
+                "MemUsage": "158.8MiB / 3GiB",
+                "Name": "econmind-postwar-reference-89f79de6",
+                "NetIO": "0B / 0B",
+                "PIDs": "11"
+              }
+            ]
+          }
+        ],
+        "busiestSql": [
+          {
+            "name": "read_postwar_office_projection_seats",
+            "calls": 27240,
+            "selfMs": 33185.444,
+            "totalMs": 65976.891
+          },
+          {
+            "name": "canonical_json",
+            "calls": 9627556,
+            "selfMs": 31976.282000000003,
+            "totalMs": 31976.282000000003
+          },
+          {
+            "name": "postwar_projection_admission_header",
+            "calls": 32144,
+            "selfMs": 29830.021,
+            "totalMs": 29830.021
+          },
+          {
+            "name": "postwar_apply_current_frame_page",
+            "calls": 174,
+            "selfMs": 14901.233,
+            "totalMs": 30474.34
+          },
+          {
+            "name": "read_postwar_bounded_prefix_page",
+            "calls": 1208,
+            "selfMs": 10920.693,
+            "totalMs": 22337.231
+          },
+          {
+            "name": "postwar_projection_reader_allowed",
+            "calls": 27240,
+            "selfMs": 8112.911,
+            "totalMs": 8112.911
+          },
+          {
+            "name": "postwar_write_paged_current_document",
+            "calls": 2236,
+            "selfMs": 3854.085,
+            "totalMs": 6685.925
+          },
+          {
+            "name": "read_postwar_paged_current_page",
+            "calls": 4000,
+            "selfMs": 1830.423,
+            "totalMs": 10240.397
+          },
+          {
+            "name": "postwar_paged_mixed_current_prefix",
+            "calls": 86,
+            "selfMs": 1529.904,
+            "totalMs": 42614.793999999994
+          },
+          {
+            "name": "lock_postwar_source_revocation_fences",
+            "calls": 3096,
+            "selfMs": 1247.5539999999999,
+            "totalMs": 1247.5539999999999
+          },
+          {
+            "name": "read_postwar_industry_labour_current_page",
+            "calls": 3372,
+            "selfMs": 1188.642,
+            "totalMs": 8590.153
+          },
+          {
+            "name": "lock_finance_budget_intake_binding",
+            "calls": 172,
+            "selfMs": 1045.269,
+            "totalMs": 1045.269
+          },
+          {
+            "name": "publish_postwar_paged_financial_current_from_verified",
+            "calls": 172,
+            "selfMs": 909.17,
+            "totalMs": 6494.210999999999
+          },
+          {
+            "name": "read_postwar_mixed_current_page",
+            "calls": 6746,
+            "selfMs": 825.781,
+            "totalMs": 34472.986999999994
+          },
+          {
+            "name": "publish_postwar_industry_labour_current_from_verified",
+            "calls": 172,
+            "selfMs": 739.816,
+            "totalMs": 1515.341
+          }
+        ]
+      }
+    ],
+    "cleanup": {
+      "runtime": "CLOSE_RETURNED",
+      "setup": "CLOSE_RETURNED",
+      "fixture": "CLOSE_RETURNED"
+    },
+    "exit_code": 0,
+    "replay_starts_verified": true
+  },
+  "unresolved_gaps": [
+    "P0 independent review",
+    "100 rotating request labels, 2 JWT subjects",
+    "No public network, production data, long-run WorldClock, or full office command matrix"
+  ],
+  "cleanup": {
+    "appRemoved": "d97b2c3df62fba62d056a897eaac7c347816ecafa644e2590f1aa1d1d4bff3c2",
+    "volumesRemoved": [
+      "econmind-finance-work-20261119",
+      "8bde5c4861551fa9aa7e77d1044f46de21d6fe024edbd301442236587b079b06"
+    ],
+    "fixtureImageRemoved": true,
+    "remainingContainers": [
+      "5246daf1e26a reactive_resume-reactive_resume-1 Exited (0) 2 days ago",
+      "e051f84814e5 reactive_resume-seaweedfs_create_bucket-1 Exited (0) 2 days ago",
+      "bff1391571ab reactive_resume-postgres-1 Exited (0) 2 days ago",
+      "45f1b2640ff4 reactive_resume-redis-1 Exited (0) 2 days ago",
+      "1f423d6cf097 reactive_resume-seaweedfs-1 Exited (137) 2 days ago"
+    ],
+    "remainingVolumes": [
+      "multiplayer-3d-japanese-horror_postgres_data",
+      "reactive_resume_postgres_data",
+      "reactive_resume_redis_data",
+      "reactive_resume_seaweedfs_data"
+    ],
+    "desktopStop": "EXIT_0",
+    "nativeDbContainerAndVolumeAbsent": true,
+    "hostScratch": {
+      "result": "RETAINED_AUTO_REVIEW_REJECTED",
+      "path": "D:/data/temp/econmind-finance-commit-20261119",
+      "action": "Remove identified files and the empty scratch directory using PowerShell literal paths",
+      "reason": "blocked by policy",
+      "manualRemovalRequired": true
+    }
+  },
+  "git": {
+    "branch": "codex/office-next-connections-20261108",
+    "remoteHead": "6ef840af8f296d6b6f359d56462a3e1b063550ea",
+    "pushPerformed": false,
+    "mergePerformed": false
+  }
+}

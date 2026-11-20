@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "postwar-admitted-read-config-v1",
+  "read": {
+    "modelVersion": "world-v2-foundation-1",
+    "readerRole": "world_v2_postwar_projection_reader",
+    "authorizationPublisherRole": "replace_with_existing_authorization_publisher_role",
+    "endpointPins": {
+      "origin": "https://econmind-world-api-staging.observer-lagesan.workers.dev",
+      "projectionPath": "/v1/postwar-office-runtime",
+      "finalLookupPath": "/v1/final-receipt",
+      "deploymentRef": "REPLACE_WITH_REVIEWED_DEPLOYMENT_REF"
+    },
+    "admittedWorldPins": {
+      "worldId": "REPLACE_WITH_APPROVED_WORLD_ID",
+      "seedRef": "REPLACE_WITH_APPROVED_SEED_ID",
+      "contentHash": "sha256:REPLACE_WITH_ACTUAL_APPROVED_SEED_FINGERPRINT",
+      "admissionRef": "REPLACE_WITH_ACTUAL_APPROVED_ADMISSION_REF",
+      "minimumWorldVersion": "0"
+    },
+    "auth": {
+      "projectRef": "vimksjrhaxdpnkvgsavz",
+      "expectedIssuer": "https://vimksjrhaxdpnkvgsavz.supabase.co/auth/v1",
+      "jwksUrl": "https://vimksjrhaxdpnkvgsavz.supabase.co/auth/v1/.well-known/jwks.json",
+      "audience": "authenticated"
+    },
+    "routeOptions": {
+      "allowedOrigins": [
+        "https://world.econmind.group",
+        "https://samuelq800.github.io"
+      ]
+    }
+  }
+}

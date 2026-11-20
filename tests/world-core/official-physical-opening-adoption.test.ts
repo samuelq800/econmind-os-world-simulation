@@ -195,11 +195,25 @@ describe('Owner D04 physical adoption using fixed source and real Core consumers
     );
     expect(
       built.filter((f) => f.titleHolderId?.startsWith('ENTITY_GOVERNMENT_')),
-    ).toHaveLength(366);
+    ).toHaveLength(244);
     expect(
       built.filter((f) => f.titleHolderId?.startsWith('ENTITY_OPERATOR_')),
     ).toHaveLength(658);
-    expect(built.filter((f) => f.titleHolderId === null)).toHaveLength(0);
+    // The former 366/0 counts incorrectly treated all 122 regional TOTAL
+    // housing aliases as public property solely from PROJECT-36. Owner §5.1
+    // excludes ordinary housing; no title/tenure originals identify a split.
+    const untitledHousing = built.filter((f) => f.titleHolderId === null);
+    expect(untitledHousing).toHaveLength(122);
+    expect(
+      untitledHousing.every(
+        (f) =>
+          f.source.projectId === 'PROJECT-36' &&
+          f.source.name === '住房区域服务群' &&
+          f.source.aggregateFacility === true &&
+          f.riskBearerId === null &&
+          f.operatorId === null,
+      ),
+    ).toBe(true);
     const mine = built.find((f) => f.source.depositId)!;
     expect(mine.titleHolderId).toBe(
       `ENTITY_OPERATOR_${mine.countryId.slice(-2)}`,

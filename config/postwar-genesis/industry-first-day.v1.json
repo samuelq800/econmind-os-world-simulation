@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "postwar-industry-first-day-policy-v1",
+  "version": "INDUSTRY_FIRST_DAY_20261101_V1",
+  "status": "OWNER_RULES_ADOPTED_EXECUTION_REQUIRES_VALIDATION",
+  "userAdoptionPath": "docs/governance/owner-inputs/2026-11-01/INDUSTRY_FIRST_DAY_USER_ADOPTION.original.json",
+  "sourceProposalVersion": "INDUSTRY_OPENING_PROPOSAL_20261030_V1",
+  "sourceProposalPath": "config/postwar-genesis/industry-first-day-proposal.v1.json",
+  "sourceProposalRawSha256": "0e8bcd458a28c0f99175a12d1433ceb257bfbb68e25395c731aeb58597cc71a1",
+  "rules": [
+    {
+      "id": "WORK_PERIOD",
+      "maximumMinutesPerWorkerFirstSimDay": "480",
+      "actualDistinctWorkerSkillTimeRequired": true,
+      "overlappingAllocationAllowed": false
+    },
+    {
+      "id": "MAINTENANCE_BASIS",
+      "eligibleOriginalConditionFraction": "1",
+      "firstWindow": "OPENING_SERVICEABLE_NOT_COMPLETED_MAINTENANCE",
+      "referenceBudgetIsPayment": false,
+      "futureDueMaintenanceRequiresActualExecution": true
+    },
+    {
+      "id": "LOCAL_LOGISTICS_SCOPE",
+      "basis": "EXISTING_DOMESTIC_ESTIMATES_AS_BOUNDED_SCENARIO_SERVICE",
+      "actualThroughputTimeAndQualifiedCostRequired": true,
+      "rawSurveyClassificationPreserved": true,
+      "genesisStockRelabelOrMoveAllowed": false,
+      "undeclaredVehicleFuelTreatedAsZero": false
+    },
+    {
+      "id": "BASELINE_TECHNOLOGY",
+      "basis": "EXISTING_SITE_REFINERY_RECIPE_COEFFICIENTS",
+      "highEfficiencyUpgradeGranted": false,
+      "restrictedExistingTechnologyOverridden": false
+    },
+    {
+      "id": "OP_REPRESENTATION",
+      "scope": "FINITE_MANUAL_INDUSTRY_SCHEDULING_OF_DOMESTIC_EXISTING_UNFRAGMENTED_OP_AGGREGATE_SITES",
+      "currentSeatWorldCountryFacilityRunAndPeriodBindingRequired": true,
+      "actualOpSpendableFundsRequired": true,
+      "finerPrivateForeignJointRightsRequireRealConsent": true,
+      "ownershipTransferOrNewDebtAuthorized": false
+    }
+  ],
+  "requiredValidation": [
+    "exact population/skill/time allocation without duplicate duties",
+    "actual funds and reciprocal claims conserved",
+    "actual inputs, water, energy, capacity and output conserved",
+    "current lawful scope, authorization, source admission and native cutoff retained",
+    "retry and restart do not repeat payment, labour booking, resource consumption or output"
+  ],
+  "notGranted": [
+    "actual execution outcomes by adoption alone",
+    "fabricated invoices, completed maintenance, work or delivery",
+    "unsourced fuel, crew, maintenance materials or economic values",
+    "production installation, permissions, credentials or resource purchase"
+  ]
+}

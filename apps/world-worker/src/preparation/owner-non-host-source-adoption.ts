@@ -1123,9 +1123,14 @@ export function snapshotFinancialSupplementRegistration(
       input.ownerIdentity.length <= 256 &&
       /^[0-9a-f]{64}$/u.test(input.expectedReceiptSha256) &&
       /^[0-9a-f]{64}$/u.test(input.expectedInstructionSha256) &&
-      /^git:[0-9a-f]{40}:docs\/governance\/owner-inputs\/[A-Za-z0-9_./-]+\.json$/u.test(
+      (/^git:[0-9a-f]{40}:docs\/governance\/owner-inputs\/[A-Za-z0-9_./-]+\.json$/u.test(
         input.retainedReference,
-      ) &&
+      ) ||
+        (input.recordId === 'POSTWAR_FINANCIAL_GENESIS_20261028_V1' &&
+          input.ownerIdentity ===
+            'CURRENT_PROJECT_USER:Sentinel_a619bdbe25588191aa05709db76c7567' &&
+          input.retainedReference ===
+            `chat:Sentinel_a619bdbe25588191aa05709db76c7567:sha256:${input.expectedReceiptSha256}`)) &&
       !input.retainedReference.includes('..') &&
       input.channel === 'DIRECT_USER_MESSAGE_IN_CURRENT_ROOT_CHAT',
     'FINANCIAL_REGISTRATION_INVALID',
@@ -1194,6 +1199,55 @@ export function loadFinancialSupplementAdoption(input: {
   const contract = input.contract;
   const equal = (a: unknown, b: unknown) =>
     canonicalSerialize(a) === canonicalSerialize(b);
+  // One explicitly retained current project-source decision, not a general
+  // chat Owner issuer. It does not grant runtime admission or sign anything.
+  if (reg.retainedReference.startsWith('chat:')) {
+    const instruction = JSON.parse(input.instructionBytes) as Record<
+      string,
+      unknown
+    >;
+    const policy = contract.documents.find(
+      (d) => d.documentId === 'POSTWAR_FINANCIAL_POLICY',
+    );
+    const register = contract.documents.find(
+      (d) => d.documentId === 'POSTWAR_FINANCIAL_REGISTER',
+    );
+    const policyBody = policy
+      ? (JSON.parse(policy.bytes) as Record<string, unknown>)
+      : null;
+    requireCondition(
+      instruction.schemaVersion ===
+        'postwar-financial-genesis-user-instruction-v1' &&
+        instruction.reference === 'Sentinel_a619bdbe25588191aa05709db76c7567' &&
+        instruction.receivedAtReal === '2026-10-28T14:27:54.000Z' &&
+        instruction.instruction ===
+          '保留现有国情与资源差异，补建工资、学生和医疗需求、住房与警务的开局规则，校验人口、资金和容量后再采用。' &&
+        equal(instruction.sourcePins, input.parent.ownerPolicy.sourcePins) &&
+        policy &&
+        register &&
+        instruction.policySha256 === policy.sha256 &&
+        instruction.registerSha256 === register.sha256 &&
+        policy.sha256 === hash(policy.bytes) &&
+        register.sha256 === hash(register.bytes) &&
+        policyBody?.provenanceKind === 'GENERATED_POLICY' &&
+        policyBody.scope === 'NEW_WORLD_ONLY' &&
+        equal(policyBody.sourcePins, input.parent.ownerPolicy.sourcePins) &&
+        equal(policyBody.authorization, {
+          reference: instruction.reference,
+          receivedAtReal: instruction.receivedAtReal,
+          instruction: instruction.instruction,
+        }) &&
+        instruction.monetaryPolicySha256 ===
+          hash(canonicalSerialize(policyBody.monetaryPolicy)) &&
+        instruction.contractFingerprint ===
+          input.candidate.contractFingerprint &&
+        instruction.candidateFingerprint === input.candidate.fingerprint &&
+        instruction.assemblyIntentFingerprint ===
+          input.assemblyIntentFingerprint,
+      'POSTWAR_CURRENT_USER_SOURCE_RECORD_MISMATCH',
+      'instruction',
+    );
+  }
   const documents = contract.documents
     .map((d) => ({
       documentId: d.documentId,

@@ -982,7 +982,7 @@ export function createPgStagingClient({ connectionString }) {
   });
 }
 
-export async function loadV09StagingMigrationChain() {
+async function loadValidatedV09MigrationChain(disposableHistoricalPrefix) {
   const manifest = JSON.parse(
     await readFile(
       path.join(repositoryRoot, 'database/migrations/manifest.json'),
@@ -1007,7 +1007,9 @@ export async function loadV09StagingMigrationChain() {
   if (validation.status !== 'PASS') {
     failed('local migration provenance validation failed');
   }
-  const historical = historicalWorldOnlyMigrations(migrations);
+  const historical = disposableHistoricalPrefix
+    ? selectV09DisposableHistoricalPrefix(migrations)
+    : historicalWorldOnlyMigrations(migrations);
   try {
     assertV09StagingMigrationAllowlist(historical);
   } catch {
@@ -1023,6 +1025,31 @@ export async function loadV09StagingMigrationChain() {
       sql: artifacts.get(migration.path).toString('utf8'),
     }),
   );
+}
+
+/** Full manifest/provenance validation precedes this selector in the loader.
+ * historicalWorldOnlyMigrations rejects unknown or changed suffixes first;
+ * only its exact known 0023 suffix is outside this historical fault rehearsal.
+ * The staging allowlist and cleanup contract remain capped at 0021. */
+export function selectV09DisposableHistoricalPrefix(migrations) {
+  const historical = historicalWorldOnlyMigrations(migrations);
+  const prefix =
+    migrations.length === 23 &&
+    historical.length === 22 &&
+    historical.at(-1).migration_id ===
+      '0023_world_v2_production_consumption_posting'
+      ? historical.slice(0, -1)
+      : historical;
+  assertV09StagingMigrationAllowlist(prefix);
+  return prefix;
+}
+
+export async function loadV09StagingMigrationChain() {
+  return loadValidatedV09MigrationChain(false);
+}
+
+export async function loadV09DisposableMigrationChain() {
+  return loadValidatedV09MigrationChain(true);
 }
 
 async function preflightPristine(client, approval, migrations) {
@@ -2671,7 +2698,7 @@ export async function runV09DisposablePostgresEvidence({
   environment = process.env,
   clientFactory = createPgStagingClient,
   loadLinkedProjectRef = readLinkedProjectRef,
-  loadMigrationChain = loadV09StagingMigrationChain,
+  loadMigrationChain = loadV09DisposableMigrationChain,
   runId = randomUUID(),
   writeEvidence = writeV09StagingEvidence,
 } = {}) {

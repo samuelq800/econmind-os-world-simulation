@@ -410,7 +410,7 @@ async function seed(
   );
 }
 
-async function footprint(value: V09AtomicTestDatabase) {
+async function footprint(value: V09AtomicTestDatabase, queueCommand?: string) {
   const result = await value.query<{
     readonly authorization_count: number;
     readonly event_count: number;
@@ -430,8 +430,10 @@ async function footprint(value: V09AtomicTestDatabase) {
        (select count(*)::int from world_v2.command_receipt) as receipt_count,
        (select count(*)::int from world_v2.current_materialization) as materialization_count,
        (select count(*)::int from world_v2.notification_outbox) as outbox_count,
-       (select queue_state from world_v2.command_queue) as queue_state,
+       (select queue_state from world_v2.command_queue
+        where $1::text is null or command_id = $1) as queue_state,
        (select world_version::text from world_v2.world_head) as world_version`,
+    [queueCommand ?? null],
   );
   return result.rows[0]!;
 }
@@ -448,6 +450,37 @@ function repository(
     ...(faultInjector === undefined ? {} : { faultInjector }),
   });
 }
+
+it('rejects a stale Finance budget head before preparing inside the commit transaction', async () => {
+  const value = await database();
+  const initial = candidate();
+  const repo = repository(value);
+  await seed(value, initial);
+  await repo.commit(initial);
+  const pending = candidate('CORE_FINANCE_BUDGET_APPROPRIATION_V1', {
+    worldVersionBefore: '2',
+  });
+  await seed(value, pending);
+  const before = await footprint(value, pending.command.commandId);
+  await expect(
+    repo.commitUsingFactory(
+      {
+        async prepare() {
+          throw new Error('UNEXPECTED_UNHELD_PREPARATION');
+        },
+        async prepareFinanceBudgetFrom() {
+          throw new Error('UNEXPECTED_STALE_PREPARATION');
+        },
+      },
+      {
+        command: pending.command,
+        commitAuthorization: null,
+        observedAtReal: OBSERVED_AT,
+      },
+    ),
+  ).rejects.toMatchObject({ cause: { message: 'WORLD_VERSION_MISMATCH' } });
+  expect(await footprint(value, pending.command.commandId)).toEqual(before);
+});
 
 describe('sparse materialization compare-and-swap', () => {
   async function sparseWorld() {

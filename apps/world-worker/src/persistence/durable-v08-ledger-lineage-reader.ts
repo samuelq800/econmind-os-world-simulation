@@ -32,6 +32,7 @@ import {
   type IndustryPersistenceSchemaReadContextV1,
   type DecisionResultHead,
   type RebuiltV08Ledgers,
+  type OpeningSeed,
   type Sha256Hex,
   type V08AuthoritativeLedgerTransition,
 } from '@econmind/core';
@@ -225,6 +226,14 @@ function parseCommand(
     invalid('Durable Command hashes differ from canonical command intent');
   }
   return command;
+}
+
+/** Pure canonical DATA decoding. This does not provide source or commit authority. */
+export function decodeDurableCanonicalCommandRow(
+  row: Readonly<Record<string, unknown>>,
+  sha256Hex: Sha256Hex,
+): CanonicalCommand {
+  return parseCommand(row as unknown as DurableCommandRow, sha256Hex);
 }
 
 function parseEvent(row: DurableTransitionRow, sha256Hex: Sha256Hex) {
@@ -444,10 +453,32 @@ function parseFinancialPosting(input: {
   return batch;
 }
 
+/** Read-only deterministic decoder over actual bounded historical rows. This
+ * reuses the writer lineage's canonical batch reconstruction and hashes; it
+ * grants neither a source/transaction scope nor financial-ledger authority. */
+export function decodeDurableFinancialPostingBatch(input: {
+  readonly command: CanonicalCommand;
+  readonly transition: AuthoritativeTransition;
+  readonly row: Readonly<{
+    canonical_payload: unknown;
+    causation_command_id: unknown;
+    fingerprint: unknown;
+  }>;
+  readonly sha256Hex: Sha256Hex;
+}): FinancialPostingBatch {
+  return parseFinancialPosting(input);
+}
+
 export interface DurableV08LedgerLineageSnapshot {
   readonly headEventSequence: string;
   readonly headWorldVersion: string;
   readonly ledgers: Readonly<RebuiltV08Ledgers>;
+}
+
+/** Actual immutable seed read and replayed in the same held SQL snapshot.
+ * Data only: this grants neither admission nor authorization. */
+export interface DurableV08ReadOnlySnapshotWithSeed extends DurableV08LedgerLineageSnapshot {
+  readonly seed: Readonly<OpeningSeed>;
 }
 
 /**
@@ -500,6 +531,82 @@ export class DurableV08LedgerLineageReader {
   ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
     const canonicalWorldId = worldId(requestedWorldId);
     const head = await this.#readHead(transaction, canonicalWorldId);
+    return this.#rebuildAtHead(transaction, canonicalWorldId, head);
+  }
+
+  /** Derived replay only. The caller must already hold its required writer
+   * fence on a different connection to this same primary database. This method
+   * issues no authority/proof and deliberately takes no conflicting head lock.
+   * The existing writer-facing rebuildFrom keeps its FOR SHARE semantics. */
+  async rebuildReadOnlyFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+  ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
+    const { seed: _seed, ...snapshot } =
+      await this.readOnlySnapshotWithSeedFrom(transaction, requestedWorldId);
+    void _seed;
+    return Object.freeze(snapshot);
+  }
+
+  /** Reuses this reader's real seed validation/replay; never accepts a supplied
+   * seed, Ready object or alternate loader. Existing read-only semantics hold. */
+  async readOnlySnapshotWithSeedFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+  ): Promise<Readonly<DurableV08ReadOnlySnapshotWithSeed>> {
+    if (this.#social !== null)
+      invalid('Read-only canonical replay does not accept Social simulation');
+    const mode = await transaction.query<{
+      readonly read_only: unknown;
+      readonly isolation: unknown;
+    }>(`select current_setting('transaction_read_only') as read_only,
+        current_setting('transaction_isolation') as isolation`);
+    const row = mode.rows[0];
+    if (
+      mode.rows.length !== 1 ||
+      row?.read_only !== 'on' ||
+      (row.isolation !== 'repeatable read' && row.isolation !== 'serializable')
+    )
+      invalid(
+        'Read-only canonical replay requires a stable READ ONLY transaction',
+      );
+    const canonicalWorldId = worldId(requestedWorldId);
+    const result = await transaction.query<HeadRow>(
+      `select world_version, event_sequence from world_v2.world_head
+        where world_id = $1`,
+      [canonicalWorldId],
+    );
+    if (result.rows.length !== 1 || !result.rows[0])
+      invalid('Durable World head is absent or duplicated');
+    const head = Object.freeze({
+      worldVersion: integer(result.rows[0].world_version, 'World head version'),
+      eventSequence: integer(
+        result.rows[0].event_sequence,
+        'World head Event sequence',
+      ),
+    });
+    return this.#rebuildAtHeadWithSeed(transaction, canonicalWorldId, head);
+  }
+
+  async #rebuildAtHead(
+    transaction: SqlExecutor,
+    canonicalWorldId: string,
+    head: Readonly<{ worldVersion: string; eventSequence: string }>,
+  ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
+    const { seed: _seed, ...snapshot } = await this.#rebuildAtHeadWithSeed(
+      transaction,
+      canonicalWorldId,
+      head,
+    );
+    void _seed;
+    return Object.freeze(snapshot);
+  }
+
+  async #rebuildAtHeadWithSeed(
+    transaction: SqlExecutor,
+    canonicalWorldId: string,
+    head: Readonly<{ worldVersion: string; eventSequence: string }>,
+  ): Promise<Readonly<DurableV08ReadOnlySnapshotWithSeed>> {
     const seed = await this.#openingSeeds.loadFrom(
       transaction,
       canonicalWorldId,
@@ -522,6 +629,7 @@ export class DurableV08LedgerLineageReader {
       invalid('Replayed ledger WorldVersion does not match durable World head');
     }
     return Object.freeze({
+      seed,
       headEventSequence: head.eventSequence,
       headWorldVersion: head.worldVersion,
       ledgers: rebuilt,
@@ -553,6 +661,44 @@ export class DurableV08LedgerLineageReader {
          from world_v2.command_submission
         where world_id = $1 and command_id = $2
         for share`,
+      [worldId(requestedWorldId), requestedCommandId],
+    );
+    const row = result.rows[0];
+    if (row === undefined || result.rows.length !== 1) {
+      invalid('Durable Command is absent or duplicated');
+    }
+    return parseCommand(row, this.#sha256Hex);
+  }
+
+  /** Immutable historical submission read only. The owning source protocol
+   * must already hold its actual canonical H/source/admission locks. This
+   * parses and hashes exactly the same durable command columns as the writer
+   * read, without requesting UPDATE privileges merely to lock append-only
+   * history. It creates no authorization, source, lease or commit proof. */
+  async readCommandReadOnlyFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+    requestedCommandId: string,
+  ): Promise<Readonly<CanonicalCommand>> {
+    const result = await transaction.query<DurableCommandRow>(
+      `select actor_id as command_actor_id,
+              auth_subject::text as command_auth_subject,
+              canonical_payload as command_canonical_payload,
+              country_id as command_country_id,
+              expected_world_version as command_expected_world_version,
+              command_fingerprint as command_fingerprint,
+              command_id as command_id,
+              idempotency_key as command_idempotency_key,
+              office_id as command_office_id,
+              payload_sha256 as command_payload_sha256,
+              schema_version as command_schema_version,
+              sim_time as command_sim_time,
+              submitted_at_real as command_submitted_at_real,
+              command_type as command_type,
+              world_id as command_world_id,
+              correlation_id
+         from world_v2.command_submission
+        where world_id = $1 and command_id = $2`,
       [worldId(requestedWorldId), requestedCommandId],
     );
     const row = result.rows[0];

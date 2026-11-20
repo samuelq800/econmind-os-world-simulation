@@ -1,8 +1,7 @@
-import { execFileSync } from 'node:child_process';
 import { createHash, generateKeyPairSync, sign } from 'node:crypto';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
+import { startGOwnedPg16Cluster } from './g-owned-pg16-cluster.js';
 import {
   authorizeOfficeCapability,
   createOpeningSeed,
@@ -37,52 +36,29 @@ const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 /** Fresh TEST_ONLY PG16 cluster/private Unix socket/TCP disabled. No env DSN,
  * production credential or actor. Pools/roles/data all discarded on close. */
 export async function startGFinancialIntakeNativeCluster() {
-  const root = mkdtempSync('/tmp/g-intake-test-'),
-    socket = join(root, 'socket');
-  mkdirSync(socket);
-  execFileSync(
-    '/opt/homebrew/bin/initdb',
-    [
-      '-D',
-      join(root, 'data'),
-      '-U',
-      'g_test_only_cluster_admin',
-      '-A',
-      'trust',
-      '--no-locale',
-      '-E',
-      'UTF8',
-    ],
-    { stdio: 'pipe' },
-  );
-  execFileSync(
-    '/opt/homebrew/bin/pg_ctl',
-    [
-      '-D',
-      join(root, 'data'),
-      '-l',
-      join(root, 'postgres.log'),
-      '-o',
-      `-k ${socket} -p 5448 -c listen_addresses=''`,
-      '-w',
-      'start',
-    ],
-    { stdio: 'pipe' },
-  );
-  const clusterAdmin = new Pool({
-    host: socket,
-    port: 5448,
-    user: 'g_test_only_cluster_admin',
-    database: 'postgres',
-  });
-  for (const role of [
-    ...Object.values(G_INTAKE_NATIVE_ROLES),
-    'anon',
-    'authenticated',
-  ])
-    await clusterAdmin.query(
-      `create role ${role} ${['anon', 'authenticated'].includes(role) ? 'nologin' : 'login'} nosuperuser nobypassrls nocreaterole nocreatedb noreplication`,
-    );
+  const owned = await startGOwnedPg16Cluster(),
+    { socket, port, admin: clusterAdmin } = owned;
+  try {
+    for (const role of [
+      ...Object.values(G_INTAKE_NATIVE_ROLES),
+      'anon',
+      'authenticated',
+    ])
+      await clusterAdmin.query(
+        `create role ${role} ${['anon', 'authenticated'].includes(role) ? 'nologin' : 'login'} nosuperuser nobypassrls nocreaterole nocreatedb noreplication`,
+      );
+  } catch (e) {
+    try {
+      await owned.close();
+    } catch (cleanup) {
+      throw new AggregateError(
+        [e, cleanup],
+        'G_INTAKE_ROLE_SETUP_CLEANUP_FAILED',
+        { cause: cleanup },
+      );
+    }
+    throw e;
+  }
   let ordinal = 0;
   const active: Array<{
     admin: Pool;
@@ -95,7 +71,7 @@ export async function startGFinancialIntakeNativeCluster() {
     const name = `g_test_only_intake_${++ordinal}`;
     await clusterAdmin.query(`create database ${name}`);
     const pool = (user: string) =>
-      new Pool({ host: socket, port: 5448, user, database: name, max: 3 });
+      new Pool({ host: socket, port, user, database: name, max: 3 });
     const admin = pool('g_test_only_cluster_admin'),
       reader = pool(G_INTAKE_NATIVE_ROLES.reader),
       writer = pool(G_INTAKE_NATIVE_ROLES.writer),
@@ -424,25 +400,34 @@ export async function startGFinancialIntakeNativeCluster() {
   return {
     fixture,
     async close() {
+      const errors: unknown[] = [];
       for (const f of active.splice(0)) {
-        await Promise.all([
+        const ended = await Promise.allSettled([
           f.admin.end(),
           f.reader.end(),
           f.writer.end(),
           f.publisher.end(),
         ]);
-        await clusterAdmin.query(`drop database ${f.name}`);
+        for (const result of ended)
+          if (result.status === 'rejected') errors.push(result.reason);
+        try {
+          await clusterAdmin.query(`drop database ${f.name}`);
+        } catch (e) {
+          errors.push(e);
+        }
       }
-      await clusterAdmin.end();
       try {
-        execFileSync(
-          '/opt/homebrew/bin/pg_ctl',
-          ['-D', join(root, 'data'), '-m', 'fast', '-w', 'stop'],
-          { stdio: 'pipe' },
-        );
-      } finally {
-        rmSync(root, { recursive: true, force: true });
+        owned.assertHealthy();
+      } catch (e) {
+        errors.push(e);
       }
+      try {
+        await owned.close();
+      } catch (e) {
+        errors.push(e);
+      }
+      if (errors.length)
+        throw new AggregateError(errors, 'G_INTAKE_FIXTURE_CLEANUP_FAILED');
     },
   };
 }

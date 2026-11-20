@@ -61,7 +61,7 @@ try {
   }
   assert.equal(
     generatedFiles.length,
-    22,
+    26,
     'OFFICIAL_EDGE_BUNDLE_UNEXPECTED_MODULE_COUNT',
   );
   process.stdout.write(

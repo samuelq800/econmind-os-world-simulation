@@ -4,6 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./postwar-day-one-storage-self-use": {
+      "types": "./dist/engine-kernels/postwar-day-one-storage-self-use.d.ts",
+      "default": "./dist/engine-kernels/postwar-day-one-storage-self-use.js"
+    },
+    "./industry-first-day-water-scenario": {
+      "types": "./dist/water/industry-first-day-scenario.d.ts",
+      "default": "./dist/water/industry-first-day-scenario.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
@@ -12,13 +20,141 @@
       "types": "./dist/commands/authenticated-financial-intake-contract.d.ts",
       "default": "./dist/commands/authenticated-financial-intake-contract.js"
     },
+    "./postwar-day-one-treasury-fx": {
+      "types": "./dist/finance/postwar-day-one-treasury-fx.d.ts",
+      "default": "./dist/finance/postwar-day-one-treasury-fx.js"
+    },
+    "./central-bank-day-one-valuation": {
+      "types": "./dist/finance/central-bank-day-one-valuation.d.ts",
+      "default": "./dist/finance/central-bank-day-one-valuation.js"
+    },
+    "./postwar-captain-current-contract": {
+      "types": "./dist/read-models/postwar-captain-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-captain-current-contract.js"
+    },
+    "./industry-production-command": {
+      "types": "./dist/commands/industry-production-command.d.ts",
+      "default": "./dist/commands/industry-production-command.js"
+    },
+    "./postwar-social-mixed-current-contract": {
+      "types": "./dist/read-models/postwar-social-mixed-current-contract.d.ts",
+      "import": "./dist/read-models/postwar-social-mixed-current-contract.js"
+    },
+    "./postwar-financial-mixed-current-contract": {
+      "types": "./dist/read-models/postwar-financial-mixed-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-financial-mixed-current-contract.js"
+    },
+    "./postwar-day-one-fx-command-contract": {
+      "types": "./dist/commands/authenticated-fx-command-contract.d.ts",
+      "default": "./dist/commands/authenticated-fx-command-contract.js"
+    },
     "./authenticated-office-command-contract": {
       "types": "./dist/commands/authenticated-office-command-contract.d.ts",
       "default": "./dist/commands/authenticated-office-command-contract.js"
     },
+    "./finance-budget-conditional-contract": {
+      "types": "./dist/commands/finance-budget-conditional-contract.d.ts",
+      "default": "./dist/commands/finance-budget-conditional-contract.js"
+    },
+    "./finance-budget-event-wire-contract": {
+      "types": "./dist/commands/finance-budget-event-wire-contract.d.ts",
+      "default": "./dist/commands/finance-budget-event-wire-contract.js"
+    },
+    "./finance-budget-native": {
+      "types": "./dist/commands/finance-budget-native.d.ts",
+      "default": "./dist/commands/finance-budget-native.js"
+    },
     "./economic-read-visibility-contract": {
       "types": "./dist/authorization/economic-read-visibility-contract.d.ts",
       "default": "./dist/authorization/economic-read-visibility-contract.js"
+    },
+    "./finance-budget-prepared-ledger": {
+      "types": "./dist/commands/finance-budget-prepared-ledger.d.ts",
+      "default": "./dist/commands/finance-budget-prepared-ledger.js"
+    },
+    "./finance-social-prepared-ledger": {
+      "types": "./dist/commands/finance-social-prepared-ledger.d.ts",
+      "default": "./dist/commands/finance-social-prepared-ledger.js"
+    },
+    "./finance-budget-capacity-data": {
+      "types": "./dist/commands/finance-budget-capacity-data.d.ts",
+      "default": "./dist/commands/finance-budget-capacity-data.js"
+    },
+    "./postwar-opening-payroll": {
+      "types": "./dist/commands/postwar-opening-payroll.d.ts",
+      "default": "./dist/commands/postwar-opening-payroll.js"
+    },
+    "./production-water-consumption": {
+      "types": "./dist/inventory/production-water-consumption.d.ts",
+      "default": "./dist/inventory/production-water-consumption.js"
+    },
+    "./authenticated-command-recovery-contract": {
+      "types": "./dist/commands/authenticated-command-recovery-contract.d.ts",
+      "default": "./dist/commands/authenticated-command-recovery-contract.js"
+    },
+    "./postwar-industry-labour-current-contract": {
+      "types": "./dist/read-models/postwar-industry-labour-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-labour-current-contract.js"
+    },
+    "./finance-social-replay-continuation": {
+      "types": "./dist/commands/finance-social-replay-continuation.d.ts",
+      "default": "./dist/commands/finance-social-replay-continuation.js"
+    },
+    "./industry-first-day-work": {
+      "types": "./dist/industry/industry-first-day-work.d.ts",
+      "default": "./dist/industry/industry-first-day-work.js"
+    },
+    "./industry-operating-wage-payment": {
+      "types": "./dist/commands/industry-operating-wage-payment.d.ts",
+      "default": "./dist/commands/industry-operating-wage-payment.js"
+    },
+    "./postwar-industry-run-parameters-contract": {
+      "types": "./dist/read-models/postwar-industry-run-parameters-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-run-parameters-contract.js"
+    },
+    "./industry-paid-work-production": {
+      "types": "./dist/commands/industry-paid-work-production.d.ts",
+      "default": "./dist/commands/industry-paid-work-production.js"
+    },
+    "./industry-utility-execution": {
+      "types": "./dist/commands/industry-utility-execution.d.ts",
+      "default": "./dist/commands/industry-utility-execution.js"
+    },
+    "./industry-first-day-power-execution": {
+      "types": "./dist/commands/industry-first-day-power-execution.d.ts",
+      "default": "./dist/commands/industry-first-day-power-execution.js"
+    },
+    "./industry-first-day-water-execution": {
+      "types": "./dist/commands/industry-first-day-water-execution.d.ts",
+      "default": "./dist/commands/industry-first-day-water-execution.js"
+    },
+    "./industry-internal-logistics": {
+      "types": "./dist/inventory/industry-internal-logistics.d.ts",
+      "default": "./dist/inventory/industry-internal-logistics.js"
+    },
+    "./industry-internal-logistics-execution": {
+      "types": "./dist/inventory/industry-internal-logistics-execution.d.ts",
+      "default": "./dist/inventory/industry-internal-logistics-execution.js"
+    },
+    "./postwar-trade-current-contract": {
+      "types": "./dist/read-models/postwar-trade-current-contract.d.ts",
+      "default": "./dist/read-models/postwar-trade-current-contract.js"
+    },
+    "./postwar-industry-utility-planning-contract": {
+      "types": "./dist/read-models/postwar-industry-utility-planning-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-utility-planning-contract.js"
+    },
+    "./postwar-industry-committed-runs-contract": {
+      "types": "./dist/read-models/postwar-industry-committed-runs-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-committed-runs-contract.js"
+    },
+    "./postwar-industry-utilisation-targets-contract": {
+      "types": "./dist/read-models/postwar-industry-utilisation-targets-contract.d.ts",
+      "default": "./dist/read-models/postwar-industry-utilisation-targets-contract.js"
+    },
+    "./social-labour-programme-public-contract": {
+      "types": "./dist/commands/social-labour-programme-public-contract.d.ts",
+      "default": "./dist/commands/social-labour-programme-public-contract.js"
     }
   },
   "scripts": {

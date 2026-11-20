@@ -81,7 +81,9 @@ jobs:
   official-pnpm-check:
     name: Isolated official pnpm check
     runs-on: macos-latest
-    timeout-minutes: 25
+    # Full serial check plus startup regression exceeds 60m on hosted macOS.
+    # Match official-and-native-postgres; retain every check and test limit.
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v5
         with:
@@ -94,6 +96,10 @@ jobs:
           node-version: 24.20.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Regress startup and bounded prefix checks on this runner
+        run: |
+          pnpm run pretest
+          pnpm exec vitest run tests/foundation/bootstrap-http-probe.test.ts tests/foundation/process-ownership-watch.test.ts tests/foundation/bootstrap-lifecycle.test.ts tests/foundation/public-runtime-lifecycle.test.ts tests/world-core/postwar-bounded-prefix-pages.test.ts
       - name: Run unmodified official pnpm check
         shell: bash
         run: |

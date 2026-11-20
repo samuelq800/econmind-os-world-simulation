@@ -1,0 +1,18 @@
+{
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/world-core/postwar-social-employment-creation-ordinal-native.test.ts",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/workspace/recovery-evidence-20261113/final-native-fixed.json"
+  ],
+  "cwd": "/workspace/econmind-os-world-simulation",
+  "returncode": 0,
+  "startedUnix": 1794540632.2899141,
+  "completedUnix": 1794540658.2717326,
+  "stdoutStderr": "/workspace/recovery-evidence-20261113/final-native-fixed.log",
+  "candidate": "82031e567c0258cf1ff29a749dbf24bf166c21a9"
+}

@@ -1,4 +1,5 @@
 import { handleAsNodeRequest } from 'cloudflare:node';
+import { handleConfiguredPostwarRead } from '../src/runtime-preparation/configured-postwar-read-handler.js';
 import { createHoldApiServer } from '../src/runtime-preparation/hold-api-server.js';
 
 // A Workers Node HTTP routing key, not an externally opened TCP listener.
@@ -10,6 +11,8 @@ export default {
    * @param {CloudflareRuntimeApiEnv} env
    */
   async fetch(request, env) {
+    const configuredRead = await handleConfiguredPostwarRead(request, env);
+    if (configuredRead !== null) return configuredRead;
     const url = new URL(request.url);
     if (
       (request.method === 'GET' || request.method === 'HEAD') &&

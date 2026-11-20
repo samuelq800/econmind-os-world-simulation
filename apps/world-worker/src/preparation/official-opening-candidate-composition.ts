@@ -1,6 +1,7 @@
 /** Sole read-only V2 assembler. No SQL, signer, authority callback or runtime
  * registration. Financial success never means admission or all Offices ready. */
 import { canonicalSerialize, type OpeningSeed } from '@econmind/core';
+import { validatePostwarOpeningPublicationSeed } from './postwar-publication-seed.js';
 import {
   isLoadedOfficialOpeningBundle,
   isOfficialOpeningBundleV2,
@@ -261,6 +262,15 @@ export function prepareOfficialOpeningBundleCandidate(
       candidate,
     });
     bridgeStatus = 'CORE_PARSED_AND_REBUILT_NOT_ADMITTED';
+    if (bundle.schemaVersion === 'official-opening-publication-source-v3') {
+      bridgeStatus = 'V3_OPERATING_VALIDATION_IN_PROGRESS';
+      seed = validatePostwarOpeningPublicationSeed({
+        loaded,
+        bundle,
+        financialSeed: seed,
+      });
+      bridgeStatus = 'COMPLETE_POSTWAR_SEED_PARSED_AND_REBUILT_NOT_ADMITTED';
+    }
     const financialTargets: Record<string, string> = {
       SCENARIO_CURRENCY_CORE_BINDING_REQUIRED: 'OPENING_SEED_FINANCE',
       TREASURY_CENTRAL_BANK_SPLIT_REQUIRED: 'OPENING_SEED_FINANCE',
@@ -288,12 +298,19 @@ export function prepareOfficialOpeningBundleCandidate(
         add('admission', code, 'source.admission');
     return finishWithUnresolved();
   } catch (error) {
-    if (bridgeStatus === 'V2_ASSEMBLY_VALIDATION_IN_PROGRESS')
+    const operatingRejected =
+      bridgeStatus === 'V3_OPERATING_VALIDATION_IN_PROGRESS';
+    if (
+      bridgeStatus === 'V2_ASSEMBLY_VALIDATION_IN_PROGRESS' ||
+      operatingRejected
+    )
       bridgeStatus = 'REJECTED';
     else sourceAdoptionStatus = 'REJECTED';
     add(
-      'financial',
-      'FINANCIAL_SUPPLEMENT_CONTRACT_OR_ADOPTION_REJECTED',
+      operatingRejected ? 'bridge' : 'financial',
+      operatingRejected
+        ? 'POSTWAR_OPERATING_PUBLICATION_SEED_REJECTED'
+        : 'FINANCIAL_SUPPLEMENT_CONTRACT_OR_ADOPTION_REJECTED',
       error instanceof Error ? error.message : 'financial',
     );
     return finishWithUnresolved();

@@ -47,7 +47,7 @@ export function officeCommandFixture(role: OfficeRole = 'captain') {
       commandType:
         officeFamilies[
           f.config.identity.officeId as keyof typeof officeFamilies
-        ],
+        ]?.[0] ?? 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1',
       commandId: f.lookup.commandId,
       idempotencyKey: f.lookup.idempotencyKey,
       expectedWorldVersion: '2',

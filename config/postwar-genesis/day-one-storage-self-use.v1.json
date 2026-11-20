@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "postwar-day-one-storage-self-use-policy-v1",
+  "policyVersion": "POSTWAR_DAY_ONE_OP_STORAGE_SELF_USE_V1",
+  "classification": "ADOPTED_NEW_SCENARIO_SIMULATION_POLICY_NOT_PHYSICAL_CALIBRATION",
+  "adoption": {
+    "sourcePath": "docs/reports/office-connection/INDUSTRY_UTILITIES_ADOPTION_20261101.json",
+    "retainedByteCopy": "config/postwar-genesis/day-one-storage-self-use-adoption.v1.json",
+    "rawSha256": "de6ad8ff58ff0180706b6bc6b4d548fd2d3404c4749cf71d91845474b19fddb0"
+  },
+  "scope": "NEW_SCENARIO_FIRST_SIMULATED_DAY_ONLY",
+  "owner": "SAME_OP_STORAGE_GRID_AND_SELF_USE",
+  "sourceEfficiencyMeaning": "UNKNOWN_IN_ORIGINAL",
+  "oneWayDischargeEfficiency": "0.9",
+  "preserveOriginalFields": ["MW", "MWh", "lossFraction", "sourceEfficiency"],
+  "maximumOutputMWh": "min(unreservedSOC*0.9,storageMW*actualHours,gridMW*actualHours), including all overlapping power bookings",
+  "deliveredMWh": "outputMWh*(1-sourceLossFraction)",
+  "storedEnergyWithdrawalMWh": "outputMWh/0.9",
+  "arithmetic": "EXACT_RATIONAL_NO_ROUNDING_LOSS_OR_ENERGY_CREATION",
+  "protection": "ALL_EXISTING_RESERVATIONS_AND_PUBLIC_PRIORITY_BEFORE_NEW_SELF_USE",
+  "charging": "FORBIDDEN",
+  "newGeneration": "FORBIDDEN",
+  "salesOrCrossCountryTransfers": "FORBIDDEN",
+  "governmentPriceOrPayment": "NOT_CREATED",
+  "automaticWorldOrClockStart": false,
+  "existingWorldMutation": false,
+  "executionAuthority": "NOT_CONFERRED_BY_POLICY_OR_PURE_LEDGER"
+}

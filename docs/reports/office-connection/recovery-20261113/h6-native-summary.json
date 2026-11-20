@@ -1,0 +1,70 @@
+{
+  "classification": "SCOPED_ISOLATED_H5_TO_H6_NOT_ALL_WORLD_OR_PRODUCTION",
+  "worldRuntimeCommit": "fcb3eb56fba8dce0e4b98edf2fe2e3419987d88b",
+  "companionCommit": "b238201600971558fd1743e4c14598828c7d1627",
+  "native": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "seconds": 705.56,
+    "initialHead": "5",
+    "finalHead": "6",
+    "originalFinalRecoveries": 6,
+    "realBrowserColdReadRecords": 7,
+    "cleanupErrors": []
+  },
+  "counts": {
+    "worldVersion": "6",
+    "eventSequence": "6",
+    "commands": "6",
+    "receipts": "6",
+    "events": "6",
+    "batches": "0",
+    "inventory": "2",
+    "queues": "6"
+  },
+  "c10": {
+    "status": "RUN_BOOK_SHIP_COMMITTED_WAIT_FOR_ACTUAL_CLOCK_NOT_COMPLETE_LOGISTICS",
+    "notExecuted": ["WORK", "PAY", "DELIVER"],
+    "clockAdvanced": false
+  },
+  "automaticDerivedPublication": {
+    "worldVersion": "6",
+    "documents": 48,
+    "manualRefreshAfterShip": false
+  },
+  "backup": {
+    "classification": "STOPPED_ISOLATED_PHYSICAL_BACKUP_NOT_RESTORE_REHEARSAL",
+    "file": "pgdata-stopped-h6.tar.gz",
+    "bytes": 612136943,
+    "sha256": "c38e0ae5eb9c37476233aebc757150caeb854a8187d751ebf01c43db243e958b",
+    "gzipCRC": "PASSED",
+    "sourceContainerState": "exited",
+    "originalCheckpointsPreserved": true
+  },
+  "databaseState": "RETAINED_STOPPED",
+  "h0RestoreEligible": false,
+  "fullRepositoryRegression": "NOT_RUN",
+  "fresh83StepNativeInstall": "NOT_RUN",
+  "productionDeployment": "NOT_RUN",
+  "catalogScope": {
+    "modules": 120,
+    "inputs": 1126,
+    "readouts": 158,
+    "completionPercent": null
+  },
+  "rawEvidenceDirectory": "/workspace/.cloud-setup/evidence/fn13o-native",
+  "allEarlierEvidenceAndBranchesPreserved": true,
+  "laterRecoveryOnlySupport": {
+    "implemented": true,
+    "checks": [
+      "types",
+      "lint",
+      "invalid flag rejected before native",
+      "bash syntax"
+    ],
+    "nativeRun": "NOT_RUN",
+    "newEconomicCommandsAllowed": false
+  }
+}

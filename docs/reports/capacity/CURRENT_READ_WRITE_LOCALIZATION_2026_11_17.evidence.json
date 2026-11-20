@@ -1,0 +1,2575 @@
+{
+  "schemaVersion": "CURRENT_READ_WRITE_LOCALIZATION_20261117_V1",
+  "status": "DIAGNOSTIC_CAPTURED_NOT_CAPACITY_ACCEPTANCE",
+  "candidate": "6ef840af8f296d6b6f359d56462a3e1b063550ea",
+  "environment": {
+    "node": "v24.20.0",
+    "poolMax": 2,
+    "appCpu": 2,
+    "appGiB": 6,
+    "postgresCpu": 1,
+    "postgresGiB": 3,
+    "countries": 70,
+    "identities": 2,
+    "virtualSessions": 100,
+    "readsPerSecond": 20,
+    "writesPerMinute": 20,
+    "clockStarted": false
+  },
+  "stages": [
+    {
+      "name": "SOURCE_ADMISSION_START",
+      "at": "2026-11-17T12:15:16.245Z",
+      "startupMs": null
+    },
+    {
+      "name": "SOURCE_ADMISSION_READY",
+      "at": "2026-11-17T12:20:51.483Z",
+      "startupMs": null
+    },
+    {
+      "name": "H0_INDUSTRY_PREPARATION_START",
+      "at": "2026-11-17T12:22:09.559Z",
+      "startupMs": null
+    },
+    {
+      "name": "NODE_COLD_START",
+      "at": "2026-11-17T12:28:23.406Z",
+      "startupMs": null
+    },
+    {
+      "name": "NODE_READY",
+      "at": "2026-11-17T12:33:07.899Z",
+      "startupMs": 284107.279259
+    },
+    {
+      "name": "H1_BASELINE_READY",
+      "at": "2026-11-17T12:33:12.479Z",
+      "startupMs": null
+    },
+    {
+      "name": "CURRENT_READ_WRITE_PROFILE_START",
+      "at": "2026-11-17T12:33:14.09Z",
+      "startupMs": null
+    },
+    {
+      "name": "CURRENT_READ_WRITE_PROFILE",
+      "at": "2026-11-17T12:34:50.677Z",
+      "startupMs": null
+    },
+    {
+      "name": "FINISHED",
+      "at": "2026-11-17T12:34:52.618Z",
+      "startupMs": null
+    }
+  ],
+  "inputAndOutcome": [
+    {
+      "name": "CURRENT_READ_WRITE_PROFILE",
+      "plannedReads": 1200,
+      "sentReads": 1200,
+      "completedReads": 1200,
+      "errors": 0,
+      "firstErrors": [],
+      "latency": {
+        "count": 1200,
+        "p50Ms": 1956.7465399999637,
+        "p95Ms": 6749.883050999837,
+        "p99Ms": 9021.448885000078,
+        "maxMs": 9811.864864999894
+      },
+      "byOffice": {
+        "FINANCE": {
+          "count": 400,
+          "p50Ms": 1911.2881150001194,
+          "p95Ms": 6735.312294000061,
+          "p99Ms": 7984.663445000071,
+          "maxMs": 9811.864864999894,
+          "errors": 0
+        },
+        "SOCIAL": {
+          "count": 400,
+          "p50Ms": 1956.7465399999637,
+          "p95Ms": 6694.917977999896,
+          "p99Ms": 8088.635862000054,
+          "maxMs": 9628.177885999903,
+          "errors": 0
+        },
+        "INDUSTRY": {
+          "count": 400,
+          "p50Ms": 1989.44948799978,
+          "p95Ms": 6810.9190470001195,
+          "p99Ms": 9194.061002000002,
+          "maxMs": 9713.475183999864,
+          "errors": 0
+        }
+      },
+      "inputSpanMs": 59948.882682000054,
+      "totalIncludingDrainMs": 96480.50162300002,
+      "sessionBusy": 167,
+      "plannedWrites": 20,
+      "actualWrites": 10,
+      "pendingWrites": 0,
+      "stopReason": "WRITE_DRAIN_TIMEOUT"
+    }
+  ],
+  "metrics": {
+    "poolMax": 2,
+    "lag": {
+      "p95Ms": 16.261119,
+      "p99Ms": 995.622911,
+      "maxMs": 1734.344703,
+      "meanMs": 36.227543786546406
+    },
+    "cpuMicros": {
+      "user": 82648806,
+      "system": 4533711
+    },
+    "elapsedMs": 96516.29178500001,
+    "memory": {
+      "rss": 1039790080,
+      "heapTotal": 256630784,
+      "heapUsed": 151374136,
+      "external": 87525901,
+      "arrayBuffers": 290854
+    }
+  },
+  "connectionRoles": [
+    {
+      "role": "final_read_cbfd7458ed",
+      "wait": {
+        "n": 1674,
+        "totalMs": 2202117.0294790003,
+        "p95Ms": 3080.8492540000007,
+        "p99Ms": 3668.0424130000174,
+        "maxMs": 3774.5071420000168
+      },
+      "hold": {
+        "n": 1674,
+        "totalMs": 106454.33133599965,
+        "p95Ms": 290.7167049999698,
+        "p99Ms": 982.78293700004,
+        "maxMs": 1189.4170249999734
+      },
+      "errors": 0,
+      "queryAwaitTotalMs": 105551.23045200086,
+      "outsideQueryAwaitMs": 903.1008839987917
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "wait": {
+        "n": 10,
+        "totalMs": 30.813779999909457,
+        "p95Ms": 4.1573309999657795,
+        "p99Ms": 4.1573309999657795,
+        "maxMs": 4.1573309999657795
+      },
+      "hold": {
+        "n": 10,
+        "totalMs": 10846.972394999873,
+        "p95Ms": 1503.098696000001,
+        "p99Ms": 1503.098696000001,
+        "maxMs": 1503.098696000001
+      },
+      "errors": 0,
+      "queryAwaitTotalMs": 357.8425850002677,
+      "outsideQueryAwaitMs": 10489.129809999606
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "wait": {
+        "n": 270,
+        "totalMs": 31.254523999989033,
+        "p95Ms": 0.1228220000048168,
+        "p99Ms": 2.890133999986574,
+        "maxMs": 4.319346999982372
+      },
+      "hold": {
+        "n": 270,
+        "totalMs": 85070.5875140006,
+        "p95Ms": 1471.60628300003,
+        "p99Ms": 1952.7791790000047,
+        "maxMs": 2150.6859259999474
+      },
+      "errors": 0,
+      "queryAwaitTotalMs": 3993.0088969978387,
+      "outsideQueryAwaitMs": 81077.57861700276
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "wait": {
+        "n": 50,
+        "totalMs": 107.45990599977085,
+        "p95Ms": 5.0491129999863915,
+        "p99Ms": 11.807779999973718,
+        "maxMs": 11.807779999973718
+      },
+      "hold": {
+        "n": 50,
+        "totalMs": 10707.62536099978,
+        "p95Ms": 678.2619500000146,
+        "p99Ms": 776.3971570000285,
+        "maxMs": 776.3971570000285
+      },
+      "errors": 0,
+      "queryAwaitTotalMs": 10698.808960999944,
+      "outsideQueryAwaitMs": 8.816399999835994
+    }
+  ],
+  "clientQueries": [
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select * from world_v2.read_postwar_mixed_current_page($1,$2,$3,$4,$5,$6)",
+      "count": 1061,
+      "totalMs": 36234.04874800035,
+      "maxMs": 1111.5535249999957,
+      "errors": 0,
+      "statuses": {
+        "PAGE": 800,
+        "NOT_PUBLISHED": 261
+      },
+      "meanMs": 34.1508470763434
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select * from world_v2.read_postwar_office_projection_seats($1)",
+      "count": 1644,
+      "totalMs": 29326.00679300021,
+      "maxMs": 1133.2798039999907,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 17.83820364537726
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select * from world_v2.read_postwar_industry_labour_current_page($1,$2,$3,$4)",
+      "count": 553,
+      "totalMs": 10288.65777699952,
+      "maxMs": 1015.3553209999809,
+      "errors": 0,
+      "statuses": {
+        "PAGE": 400,
+        "NOT_PUBLISHED": 153
+      },
+      "meanMs": 18.605167770342714
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select current_user as role_name,current_setting('request.jwt.claim.sub',true)as subject,current_setting('transaction_read_only')as read_only,current_setting('transaction_isolation')as isolation,(r.rolsuper or r.rolbypassrls or r.rolcreatedb or r.rolcreaterole",
+      "count": 1614,
+      "totalMs": 6209.972031001002,
+      "maxMs": 686.7263929999899,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 3.8475663141270147
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "commit",
+      "count": 1674,
+      "totalMs": 5702.358687998785,
+      "maxMs": 1110.6280180000467,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 3.406426934288402
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "begin isolation level repeatable read read only",
+      "count": 1674,
+      "totalMs": 5519.9021840012865,
+      "maxMs": 727.9906659999979,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 3.2974326069302786
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select current_user as role_name, rolsuper, rolbypassrls from pg_catalog.pg_roles where rolname=current_user",
+      "count": 1624,
+      "totalMs": 5159.045738001179,
+      "maxMs": 994.334709000017,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 3.1767523017248642
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select set_config('statement_timeout', '10000', true)",
+      "count": 1624,
+      "totalMs": 3784.167062998982,
+      "maxMs": 978.8689230000018,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 2.3301521323885357
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "select * from world_v2.publish_postwar_paged_financial_current($1,$2,$3)",
+      "count": 20,
+      "totalMs": 2793.163968000037,
+      "maxMs": 208.36472800001502,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 139.65819840000185
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select current_user as role_name,current_setting('request.jwt.claim.sub',true)as subject,current_setting('transaction_read_only')as read_only,current_setting('transaction_isolation')as isolation,(r.rolsuper or r.rolbypassrls or r.rolcreaterole or r.rolcreatedb",
+      "count": 1644,
+      "totalMs": 2360.2627129985485,
+      "maxMs": 979.1673249999876,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.4356829154492388
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "select * from world_v2.publish_postwar_paged_social_current($1,$2,$3)",
+      "count": 20,
+      "totalMs": 2270.3720099999337,
+      "maxMs": 193.37367899995297,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 113.51860049999668
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "select * from world_v2.publish_postwar_paged_trade_current($1,$2,$3)",
+      "count": 20,
+      "totalMs": 1931.5328310000477,
+      "maxMs": 194.1761600000318,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 96.57664155000239
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "select * from world_v2.publish_postwar_paged_captain_current($1,$2,$3)",
+      "count": 20,
+      "totalMs": 1882.7865219999221,
+      "maxMs": 182.56775799999014,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 94.13932609999611
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "select * from world_v2.publish_postwar_industry_labour_current($1,$2,$3)",
+      "count": 20,
+      "totalMs": 1257.5873540000757,
+      "maxMs": 135.17389299999923,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 62.87936770000378
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select * from world_v2.read_postwar_bounded_prefix_page($1,$2,$3,$4::bigint,$5::bigint,$6::bigint,$7::bigint,$8,$9)",
+      "count": 160,
+      "totalMs": 1137.7947859995766,
+      "maxMs": 34.59055600001011,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 7.1112174124973535
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select set_config('request.jwt.claim.sub', $1, true)",
+      "count": 1624,
+      "totalMs": 848.9655220010318,
+      "maxMs": 99.88793600001372,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.522762020936596
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "commit",
+      "count": 270,
+      "totalMs": 389.4250890001422,
+      "maxMs": 17.766036999993958,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.442315144444971
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "commit",
+      "count": 50,
+      "totalMs": 367.84428500011563,
+      "maxMs": 212.72206000000006,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 7.356885700002312
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select current_user as role_name,r.rolsuper,r.rolbypassrls,r.rolcreaterole,r.rolcreatedb,r.rolreplication,pg_has_role(current_user,'world_v2_social_source_reader','MEMBER')as source_member,pg_has_role(current_user,'world_v2_social_source_owner','MEMBER')as own",
+      "count": 700,
+      "totalMs": 296.6306109993602,
+      "maxMs": 7.920932000037283,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.42375801571337174
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select * from world_v2.lock_finance_budget_intake_binding($1,$2::uuid,$3,$4,$5,$6,$7,$8)",
+      "count": 20,
+      "totalMs": 230.1571699999622,
+      "maxMs": 48.80080799997086,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 11.507858499998111
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select current_user as role_name, (r.rolsuper or r.rolbypassrls or r.rolcreaterole or r.rolcreatedb or r.rolreplication) as unsafe, pg_has_role(current_user,'world_v2_finance_budget_source_reader','MEMBER') as reader_member, pg_has_role(current_user,'world_v2_",
+      "count": 280,
+      "totalMs": 207.28782200039132,
+      "maxMs": 35.82235499995295,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7403136500013976
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "set local role fixture_rent_child_worker_44a71457",
+      "count": 350,
+      "totalMs": 200.61544599977788,
+      "maxMs": 62.5165669999551,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.573186988570794
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select world_v2.lock_postwar_source_revocation_fences($1)",
+      "count": 270,
+      "totalMs": 193.48281799990218,
+      "maxMs": 7.963824000034947,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7166030296292674
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "release savepoint social_operating_source_lock",
+      "count": 40,
+      "totalMs": 193.34793200006243,
+      "maxMs": 65.43175100005465,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 4.8336983000015605
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select * from world_v2.lock_world_command_execution_registration($1,$2,$3)",
+      "count": 240,
+      "totalMs": 181.13334500073688,
+      "maxMs": 6.3071380000328645,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7547222708364036
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select set_config('role',$1,true)",
+      "count": 280,
+      "totalMs": 165.65015299920924,
+      "maxMs": 38.95592400000896,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.5916076892828901
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "set local role world_v2_social_source_reader",
+      "count": 350,
+      "totalMs": 144.8233150000451,
+      "maxMs": 52.56071500002872,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.4137809000001289
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select a.team_id, a.authorization_version from world_v2.current_commit_authorization a where a.world_id=$1 and a.auth_subject=$2::uuid and a.country_id=$3 and a.office_id=$4 and a.capability=$5 and a.active and not exists(select 1 from world_v2.current_commit_",
+      "count": 160,
+      "totalMs": 125.31641699938336,
+      "maxMs": 7.707027999975253,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7832276062461461
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select * from world_v2.lock_finance_budget_policy($1,$2,$3,$4,$5,$6,$7::uuid)",
+      "count": 80,
+      "totalMs": 120.60277799988398,
+      "maxMs": 7.536879000021145,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.5075347249985498
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "begin",
+      "count": 270,
+      "totalMs": 113.23901499988278,
+      "maxMs": 45.48991299996851,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.4194037592588251
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select * from world_v2.read_finance_budget_capacity($1,$2,$3,$4,$5,$6::timestamptz)",
+      "count": 40,
+      "totalMs": 94.78175299975555,
+      "maxMs": 35.696372999984305,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 2.369543824993889
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select * from world_v2.read_postwar_paged_captain_originals($1,$2,$3,$4,$5,$6,$7,$8::bigint,$9::bigint,$10::bigint,$11::bigint)",
+      "count": 20,
+      "totalMs": 92.64934099989478,
+      "maxMs": 6.9359479999984615,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 4.632467049994739
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "begin",
+      "count": 50,
+      "totalMs": 91.7329089997802,
+      "maxMs": 8.757128999975976,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.8346581799956039
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select current_user as role_name, r.rolsuper, r.rolbypassrls, r.rolcreatedb, r.rolcreaterole, r.rolreplication, current_setting('request.jwt.claim.sub',true) as verified_subject, current_setting('transaction_read_only') as read_only, has_schema_privilege(curre",
+      "count": 20,
+      "totalMs": 64.31808099994669,
+      "maxMs": 39.49177000002237,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 3.2159040499973344
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "set transaction isolation level repeatable read",
+      "count": 280,
+      "totalMs": 61.60440100013511,
+      "maxMs": 7.348901999997906,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.22001571785762541
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select world_id,country_id,registration_ref,seed_fingerprint,source_id,source_payload_hash,admission_ref,issuer_role,revision::text from world_v2.lock_social_operating_source($1,$2)",
+      "count": 40,
+      "totalMs": 53.64657899987651,
+      "maxMs": 4.451912000018638,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.3411644749969127
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select set_config('request.jwt.claim.sub',$1,true)",
+      "count": 50,
+      "totalMs": 48.927425000059884,
+      "maxMs": 34.452647000027355,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.9785485000011976
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "set local role world_v2_postwar_projection_publisher",
+      "count": 50,
+      "totalMs": 46.65187100006733,
+      "maxMs": 2.7995280000031926,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.9330374200013466
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "set transaction isolation level repeatable read",
+      "count": 40,
+      "totalMs": 42.93365399999311,
+      "maxMs": 3.041637999995146,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.0733413499998279
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select current_user as role_name,r.rolsuper,r.rolbypassrls,r.rolcreatedb,r.rolcreaterole,r.rolreplication,current_setting('transaction_isolation')as isolation,current_setting('transaction_read_only')as read_only,pg_backend_pid()::text as backend_pid,(select vi",
+      "count": 60,
+      "totalMs": 35.386591999966186,
+      "maxMs": 1.3024649999570101,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.5897765333327698
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select set_config('econmind.fx_history_world',$1,true),set_config('econmind.captain_world',$2,true),set_config('econmind.social_custody_world',$3,true)",
+      "count": 40,
+      "totalMs": 32.832964000001084,
+      "maxMs": 13.64600100001553,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.8208241000000271
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select * from world_v2.read_world_actor_binding($1,$2::uuid)",
+      "count": 30,
+      "totalMs": 26.40208800008986,
+      "maxMs": 2.1483529999968596,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.8800696000029954
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "insert into world_v2.authoritative_event (world_id, event_id, event_sequence, world_version, causation_command_id, correlation_id, event_type, schema_version, canonical_payload, payload_sha256, event_fingerprint, sim_time, recorded_at_real, corrects_event_id) ",
+      "count": 30,
+      "totalMs": 23.85709600005066,
+      "maxMs": 1.6964859999716282,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.795236533335022
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select world_id, command_id, idempotency_key, schema_version, command_fingerprint, outcome, reason_code, transition_id, world_version_before, world_version_after, sim_time, event_ids, recorded_at_real from world_v2.command_receipt where world_id = $1 and ( com",
+      "count": 40,
+      "totalMs": 17.917411000002176,
+      "maxMs": 1.065186999971047,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.44793527500005437
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select current_setting('econmind.fx_history_world',true)as fx_world,current_setting('econmind.captain_world',true)as captain_world,current_setting('econmind.social_custody_world',true)as social_world",
+      "count": 40,
+      "totalMs": 15.438029999961145,
+      "maxMs": 3.307418000011239,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.3859507499990286
+    },
+    {
+      "role": "final_projection_pub_cbfd7458ed",
+      "sql": "select current_user as role_name,r.rolsuper,r.rolbypassrls,pg_has_role(current_user,'world_v2_postwar_projection_owner','MEMBER')as owner_member,pg_has_role(current_user,'world_v2_postwar_projection_publisher','MEMBER')as publisher_member from pg_roles r where",
+      "count": 10,
+      "totalMs": 14.203556999971624,
+      "maxMs": 1.865823999978602,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.4203556999971625
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select world_id as \"worldId\", command_id as \"commandId\", idempotency_key as \"idempotencyKey\", command_type as \"commandType\", schema_version as \"schemaVersion\", canonical_payload as \"canonicalPayload\", payload_sha256 as \"payloadHash\", command_fingerprint as fin",
+      "count": 20,
+      "totalMs": 13.866756000032183,
+      "maxMs": 2.174209999968298,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.6933378000016092
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select actor_id as command_actor_id, auth_subject::text as command_auth_subject, canonical_payload as command_canonical_payload, country_id as command_country_id, expected_world_version as command_expected_world_version, command_fingerprint as command_fingerpr",
+      "count": 30,
+      "totalMs": 12.938111000112258,
+      "maxMs": 1.0152940000407398,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.4312703666704086
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select set_config('request.jwt.claim.sub',$1,true)",
+      "count": 40,
+      "totalMs": 12.109646999917459,
+      "maxMs": 1.4428319999715313,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.30274117499793646
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "commit",
+      "count": 10,
+      "totalMs": 11.288310999982059,
+      "maxMs": 2.0855369999771938,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.1288310999982059
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select world_id, holder_id, fencing_token::text, acquired_at_real, renewed_at_real, lease_expires_at_real from world_v2.world_writer_lease where world_id=$1 and holder_id=$2 and lease_expires_at_real>$3::timestamptz for share",
+      "count": 10,
+      "totalMs": 10.832181999983732,
+      "maxMs": 6.330928999988828,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 1.0832181999983732
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "insert into world_v2.command_queue(world_id,command_id,authority_kind,available_at_sim_time) values($1,$2,'DISCRETIONARY_USER',$3::bigint) returning command_id",
+      "count": 10,
+      "totalMs": 8.718937000026926,
+      "maxMs": 1.5703459999640472,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.8718937000026926
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "insert into world_v2.command_receipt (world_id, command_id, idempotency_key, schema_version, command_fingerprint, outcome, reason_code, transition_id, world_version_before, world_version_after, sim_time, event_ids, recorded_at_real) values ($1, $2, $3, $4, $5,",
+      "count": 10,
+      "totalMs": 8.543290999950841,
+      "maxMs": 1.063534000015352,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.8543290999950841
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "update world_v2.command_queue set queue_state='CLAIMED',claimed_by=$3,claimed_at_real=$4::timestamptz, claim_fencing_token=$5::bigint,attempt_count=attempt_count+1 where world_id=$1 and command_id=$2 and queue_state='PENDING'",
+      "count": 10,
+      "totalMs": 7.982909000071231,
+      "maxMs": 1.705941999971401,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7982909000071231
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "insert into world_v2.command_submission(world_id,command_id,idempotency_key,command_type,schema_version,canonical_payload,payload_sha256,command_fingerprint, auth_subject,actor_id,country_id,office_id,expected_world_version,sim_time,correlation_id,submitted_at",
+      "count": 10,
+      "totalMs": 7.625855000107549,
+      "maxMs": 1.12048500002129,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7625855000107549
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "insert into world_v2.authoritative_commit_authorization (world_id, command_id, authority_kind, auth_subject, actor_id, country_id, office_id, capability, team_id, authorization_version, committed_at_real) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+      "count": 10,
+      "totalMs": 7.4467469999799505,
+      "maxMs": 1.4298449999769218,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7446746999979951
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "insert into world_v2.notification_outbox (world_id, outbox_message_id, command_id, event_id, schema_version, canonical_payload, payload_sha256, available_at_sim_time, delivery_state, attempt_count) values ($1, $2, $3, $4, $5, $6, $7, $8, 'PENDING', 0)",
+      "count": 10,
+      "totalMs": 7.2469120000023395,
+      "maxMs": 1.2912329999962822,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.7246912000002339
+    },
+    {
+      "role": "final_read_cbfd7458ed",
+      "sql": "select set_config('statement_timeout','10000',true)",
+      "count": 20,
+      "totalMs": 7.127089999848977,
+      "maxMs": 1.0725929999607615,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.35635449999244884
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select team_id,authorization_version from world_v2.lock_finance_budget_current_authorization($1,$2::uuid,$3,$4,$5)",
+      "count": 10,
+      "totalMs": 6.753284999926109,
+      "maxMs": 1.3526009999914095,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.6753284999926109
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select world_version, event_sequence from world_v2.assert_world_writer_commit_guard($1, $2, $3, $4, $5)",
+      "count": 10,
+      "totalMs": 6.673291000013705,
+      "maxMs": 1.3914479999803007,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.6673291000013706
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select world_id, command_id, idempotency_key, command_type, schema_version, canonical_payload, payload_sha256, command_fingerprint, auth_subject, actor_id, country_id, office_id, expected_world_version, sim_time, correlation_id, submitted_at_real from world_v2",
+      "count": 10,
+      "totalMs": 6.633559999929275,
+      "maxMs": 1.084430999995675,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.6633559999929275
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "savepoint social_operating_source_lock",
+      "count": 40,
+      "totalMs": 6.084948000032455,
+      "maxMs": 0.5391919999965467,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.15212370000081138
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "update world_v2.command_queue set queue_state = 'FINALIZED', finalized_at_real = $4 where world_id = $1 and command_id = $2 and queue_state = 'CLAIMED' and claimed_by = $3 and claim_fencing_token = $5",
+      "count": 10,
+      "totalMs": 6.079432999889832,
+      "maxMs": 1.1579129999736324,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.6079432999889832
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select set_config('request.jwt.claim.sub',$1,true)",
+      "count": 10,
+      "totalMs": 5.621879000100307,
+      "maxMs": 0.8193350000074133,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.5621879000100307
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select command_id, authority_kind, queue_state, available_at_sim_time::text, claimed_by, claim_fencing_token::text from world_v2.command_queue where world_id=$1 and queue_state in ('PENDING','CLAIMED') and available_at_sim_time <= $2::bigint order by available",
+      "count": 10,
+      "totalMs": 5.517291999945883,
+      "maxMs": 0.8878669999539852,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.5517291999945882
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select * from world_v2.lock_finance_budget_current_authorization($1,$2::uuid,$3,$4,$5)",
+      "count": 10,
+      "totalMs": 5.114702999941073,
+      "maxMs": 1.0479859999613836,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.5114702999941073
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select world_version::text from world_v2.world_head where world_id=$1 for share",
+      "count": 10,
+      "totalMs": 4.7579949999344535,
+      "maxMs": 1.7008049999712966,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.47579949999344534
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select command_id from world_v2.command_submission where world_id=$1 and (command_id=$2 or idempotency_key=$3) for update",
+      "count": 10,
+      "totalMs": 4.710613000090234,
+      "maxMs": 0.7815730000147596,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.4710613000090234
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select command_id from world_v2.command_submission where world_id=$1 and command_id=$2 for update",
+      "count": 10,
+      "totalMs": 4.3351220000186,
+      "maxMs": 1.0427090000011958,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.43351220000186
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "update world_v2.world_head set world_version = $3, event_sequence = $4 where world_id = $1 and world_version = $2 and event_sequence = $5",
+      "count": 10,
+      "totalMs": 4.302061000082176,
+      "maxMs": 0.6412680000066757,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.43020610000821763
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select command_id,authority_kind,queue_state,available_at_sim_time::text,claimed_by,claim_fencing_token::text from world_v2.command_queue where world_id=$1 and command_id=$2 for update",
+      "count": 10,
+      "totalMs": 4.169811000057962,
+      "maxMs": 0.7991899999906309,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.4169811000057962
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select queue_state,authority_kind,available_at_sim_time::text from world_v2.command_queue where world_id=$1 and command_id=$2",
+      "count": 10,
+      "totalMs": 3.440576000022702,
+      "maxMs": 0.5324409999884665,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.3440576000022702
+    },
+    {
+      "role": "fixture_rent_child_worker_44a71457",
+      "sql": "select current_user as role_name,r.rolsuper,r.rolbypassrls from pg_roles r where r.rolname=current_user",
+      "count": 10,
+      "totalMs": 3.4104950000182725,
+      "maxMs": 0.5777039999957196,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.34104950000182727
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "begin isolation level read committed",
+      "count": 10,
+      "totalMs": 2.9306069999583997,
+      "maxMs": 0.5057469999883324,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.29306069999583995
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select world_version from world_v2.world_head where world_id=$1 for update",
+      "count": 10,
+      "totalMs": 2.890893999952823,
+      "maxMs": 0.6176930000074208,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.28908939999528227
+    },
+    {
+      "role": "fixture_rent_child_intake_44a71457",
+      "sql": "select set_config('statement_timeout','10000',true)",
+      "count": 10,
+      "totalMs": 2.2729060000856407,
+      "maxMs": 0.3330159999895841,
+      "errors": 0,
+      "statuses": {},
+      "meanMs": 0.22729060000856408
+    }
+  ],
+  "postgresFunctions": [
+    {
+      "name": "postwar_projection_admission_header",
+      "calls": 78462,
+      "selfMs": 19581.106,
+      "totalMs": 19581.106
+    },
+    {
+      "name": "read_postwar_office_projection_seats",
+      "calls": 4319,
+      "selfMs": 7646.639999999999,
+      "totalMs": 27610.501
+    },
+    {
+      "name": "canonical_json",
+      "calls": 745820,
+      "selfMs": 3990.379,
+      "totalMs": 3990.379
+    },
+    {
+      "name": "postwar_projection_reader_allowed",
+      "calls": 4319,
+      "selfMs": 1622.732,
+      "totalMs": 1622.732
+    },
+    {
+      "name": "postwar_apply_current_frame_page",
+      "calls": 100,
+      "selfMs": 1439.134,
+      "totalMs": 4031.844
+    },
+    {
+      "name": "read_postwar_bounded_prefix_page",
+      "calls": 260,
+      "selfMs": 1353.683,
+      "totalMs": 1926.3870000000002
+    },
+    {
+      "name": "postwar_write_paged_current_document",
+      "calls": 260,
+      "selfMs": 749.5350000000001,
+      "totalMs": 1499.3980000000001
+    },
+    {
+      "name": "read_postwar_paged_current_page",
+      "calls": 800,
+      "selfMs": 618.063,
+      "totalMs": 5805.5289999999995
+    },
+    {
+      "name": "read_postwar_industry_labour_current_page",
+      "calls": 553,
+      "selfMs": 398.592,
+      "totalMs": 3646.328
+    },
+    {
+      "name": "postwar_paged_mixed_current_prefix",
+      "calls": 100,
+      "selfMs": 327.356,
+      "totalMs": 6746.376
+    },
+    {
+      "name": "lock_postwar_paged_current_publication",
+      "calls": 200,
+      "selfMs": 238.31,
+      "totalMs": 601.988
+    },
+    {
+      "name": "publish_postwar_paged_financial_current",
+      "calls": 20,
+      "selfMs": 236.232,
+      "totalMs": 2779.299
+    },
+    {
+      "name": "lock_postwar_source_revocation_fences",
+      "calls": 470,
+      "selfMs": 218.68300000000002,
+      "totalMs": 218.68300000000002
+    },
+    {
+      "name": "read_postwar_paged_financial_current_publication_originals",
+      "calls": 20,
+      "selfMs": 207.411,
+      "totalMs": 278.193
+    },
+    {
+      "name": "publish_postwar_paged_trade_current",
+      "calls": 20,
+      "selfMs": 133.542,
+      "totalMs": 1850.852
+    },
+    {
+      "name": "read_postwar_mixed_current_page",
+      "calls": 1061,
+      "selfMs": 131.537,
+      "totalMs": 13935.634999999998
+    },
+    {
+      "name": "lock_finance_budget_policy",
+      "calls": 120,
+      "selfMs": 107.778,
+      "totalMs": 107.778
+    },
+    {
+      "name": "postwar_industry_labour_source_current",
+      "calls": 420,
+      "selfMs": 107.758,
+      "totalMs": 107.758
+    },
+    {
+      "name": "lock_finance_budget_intake_binding",
+      "calls": 20,
+      "selfMs": 105.64399999999999,
+      "totalMs": 105.64399999999999
+    },
+    {
+      "name": "publish_postwar_industry_labour_current",
+      "calls": 20,
+      "selfMs": 95.391,
+      "totalMs": 1222.918
+    },
+    {
+      "name": "postwar_complete_opening_inventory_document",
+      "calls": 80,
+      "selfMs": 86.96,
+      "totalMs": 86.96
+    },
+    {
+      "name": "verify_postwar_paged_current_coverage",
+      "calls": 100,
+      "selfMs": 80.413,
+      "totalMs": 6826.804
+    },
+    {
+      "name": "lock_world_command_execution_registration",
+      "calls": 240,
+      "selfMs": 66.022,
+      "totalMs": 95.839
+    },
+    {
+      "name": "postwar_write_trade_current_document",
+      "calls": 40,
+      "selfMs": 55.919,
+      "totalMs": 227.568
+    },
+    {
+      "name": "publish_postwar_paged_social_current",
+      "calls": 20,
+      "selfMs": 55.164,
+      "totalMs": 2255.145
+    },
+    {
+      "name": "read_postwar_paged_captain_originals",
+      "calls": 20,
+      "selfMs": 51.076,
+      "totalMs": 62.998999999999995
+    },
+    {
+      "name": "publish_postwar_paged_captain_current",
+      "calls": 20,
+      "selfMs": 48.83,
+      "totalMs": 1830.941
+    },
+    {
+      "name": "read_finance_budget_capacity",
+      "calls": 40,
+      "selfMs": 43.993,
+      "totalMs": 71.63000000000001
+    },
+    {
+      "name": "read_postwar_mixed_current_page_legacy_array_v1",
+      "calls": 261,
+      "selfMs": 32.512,
+      "totalMs": 1930.341
+    },
+    {
+      "name": "postwar_captain_projection_original",
+      "calls": 40,
+      "selfMs": 31.621,
+      "totalMs": 31.621
+    },
+    {
+      "name": "execution_registration_admission",
+      "calls": 240,
+      "selfMs": 29.794,
+      "totalMs": 29.794
+    },
+    {
+      "name": "social_source_admission",
+      "calls": 40,
+      "selfMs": 24.203999999999997,
+      "totalMs": 24.203999999999997
+    },
+    {
+      "name": "postwar_financial_h0_ledger_rows",
+      "calls": 40,
+      "selfMs": 22.24,
+      "totalMs": 22.24
+    },
+    {
+      "name": "postwar_captain_capital",
+      "calls": 20,
+      "selfMs": 13.255,
+      "totalMs": 19.59
+    },
+    {
+      "name": "read_postwar_bounded_publication_prefix_page",
+      "calls": 100,
+      "selfMs": 12.649000000000001,
+      "totalMs": 1299.2420000000002
+    },
+    {
+      "name": "postwar_social_origin_at_prefix",
+      "calls": 40,
+      "selfMs": 12.302000000000001,
+      "totalMs": 12.302000000000001
+    },
+    {
+      "name": "postwar_captain_projection_current_original",
+      "calls": 40,
+      "selfMs": 12.061,
+      "totalMs": 43.695
+    },
+    {
+      "name": "captain_publication_admission",
+      "calls": 20,
+      "selfMs": 11.914,
+      "totalMs": 11.914
+    },
+    {
+      "name": "read_world_actor_binding",
+      "calls": 30,
+      "selfMs": 10.663,
+      "totalMs": 16.274
+    },
+    {
+      "name": "lock_social_operating_source",
+      "calls": 40,
+      "selfMs": 9.95,
+      "totalMs": 34.16499999999999
+    },
+    {
+      "name": "postwar_captain_current_capital",
+      "calls": 20,
+      "selfMs": 7.66,
+      "totalMs": 27.257
+    },
+    {
+      "name": "postwar_captain_quantity",
+      "calls": 260,
+      "selfMs": 6.325,
+      "totalMs": 6.325
+    },
+    {
+      "name": "world_actor_registry_invoker",
+      "calls": 30,
+      "selfMs": 5.598,
+      "totalMs": 5.598
+    },
+    {
+      "name": "validate_command_queue_transition",
+      "calls": 30,
+      "selfMs": 5.011,
+      "totalMs": 5.011
+    },
+    {
+      "name": "lock_finance_budget_current_authorization",
+      "calls": 20,
+      "selfMs": 4.377000000000001,
+      "totalMs": 4.377000000000001
+    },
+    {
+      "name": "validate_command_receipt_evidence",
+      "calls": 10,
+      "selfMs": 3.0540000000000003,
+      "totalMs": 3.0540000000000003
+    },
+    {
+      "name": "assert_world_writer_commit_guard",
+      "calls": 10,
+      "selfMs": 2.8819999999999997,
+      "totalMs": 2.8819999999999997
+    },
+    {
+      "name": "reject_event_after_final_receipt",
+      "calls": 30,
+      "selfMs": 2.491,
+      "totalMs": 2.491
+    },
+    {
+      "name": "postwar_trade_inventory_row",
+      "calls": 190,
+      "selfMs": 2.258,
+      "totalMs": 2.258
+    }
+  ],
+  "cpuProfile": {
+    "durationMs": 96516.123,
+    "sampleCount": 84917,
+    "sampledMs": 96515.916,
+    "nonIdleMs": 76494.785,
+    "own": [
+      {
+        "name": "(idle)",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 20021.131,
+        "percentTotal": 20.743864669947286,
+        "percentNonIdle": 26.1731972970445
+      },
+      {
+        "name": "normalizeRecord",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 75,
+        "column": 25,
+        "ms": 10914.284,
+        "percentTotal": 11.30827375663098,
+        "percentNonIdle": 14.26801055784391
+      },
+      {
+        "name": "ownDescriptors",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 38,
+        "column": 24,
+        "ms": 10695.743,
+        "percentTotal": 11.081843744818212,
+        "percentNonIdle": 13.982316572299666
+      },
+      {
+        "name": "position",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 37,
+        "column": 18,
+        "ms": 6767.194,
+        "percentTotal": 7.011479847531053,
+        "percentNonIdle": 8.846608301467871
+      },
+      {
+        "name": "canonicalSerialize",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 146,
+        "column": 35,
+        "ms": 6121.741,
+        "percentTotal": 6.342726934280973,
+        "percentNonIdle": 8.002821368803115
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 371,
+        "column": 49,
+        "ms": 5004.778,
+        "percentTotal": 5.18544319674695,
+        "percentNonIdle": 6.542639475357699
+      },
+      {
+        "name": "aggregateBeneficialHousingLiquidClaim",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 363,
+        "column": 54,
+        "ms": 3302.362,
+        "percentTotal": 3.4215724585777125,
+        "percentNonIdle": 4.317107368822594
+      },
+      {
+        "name": "Money",
+        "url": "file:///workspace/packages/core/dist/numeric/money.js",
+        "line": 7,
+        "column": 16,
+        "ms": 2904.198,
+        "percentTotal": 3.00903531807127,
+        "percentNonIdle": 3.7965960686078146
+      },
+      {
+        "name": "(garbage collector)",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 2335.313,
+        "percentTotal": 2.4196143981061113,
+        "percentNonIdle": 3.0529048483501198
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 38,
+        "column": 35,
+        "ms": 2157.705,
+        "percentTotal": 2.235595007977752,
+        "percentNonIdle": 2.8207217001786464
+      },
+      {
+        "name": "isMoney",
+        "url": "file:///workspace/packages/core/dist/numeric/money.js",
+        "line": 36,
+        "column": 24,
+        "ms": 1734.161,
+        "percentTotal": 1.7967616864352196,
+        "percentNonIdle": 2.2670316675836135
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 372,
+        "column": 45,
+        "ms": 1506.283,
+        "percentTotal": 1.5606576225210358,
+        "percentNonIdle": 1.9691316211948302
+      },
+      {
+        "name": "digitsToString",
+        "url": "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs",
+        "line": 2515,
+        "column": 24,
+        "ms": 1438.117,
+        "percentTotal": 1.4900309291992835,
+        "percentNonIdle": 1.8800196640855975
+      },
+      {
+        "name": "normalize",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 105,
+        "column": 19,
+        "ms": 1240.704,
+        "percentTotal": 1.285491607415299,
+        "percentNonIdle": 1.621945862061054
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 389,
+        "column": 42,
+        "ms": 1124.422,
+        "percentTotal": 1.1650119965705967,
+        "percentNonIdle": 1.4699328849672562
+      },
+      {
+        "name": "freeze",
+        "url": "file:///workspace/packages/core/dist/commands/finance-budget-native.js",
+        "line": 56,
+        "column": 16,
+        "ms": 847.713,
+        "percentTotal": 0.8783142046748021,
+        "percentNonIdle": 1.1081971143523053
+      },
+      {
+        "name": "parseId",
+        "url": "file:///workspace/packages/core/dist/ids.js",
+        "line": 4,
+        "column": 17,
+        "ms": 840.002,
+        "percentTotal": 0.8703248488052479,
+        "percentNonIdle": 1.0981166886082496
+      },
+      {
+        "name": "update",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 751.781,
+        "percentTotal": 0.7789191991919757,
+        "percentNonIdle": 0.9827872579810506
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 91,
+        "column": 47,
+        "ms": 660.967,
+        "percentTotal": 0.6848269460551978,
+        "percentNonIdle": 0.8640680537895492
+      },
+      {
+        "name": "canonicalDecimal",
+        "url": "file:///workspace/packages/core/dist/numeric/world-decimal.js",
+        "line": 37,
+        "column": 33,
+        "ms": 618.593,
+        "percentTotal": 0.6409233063694904,
+        "percentNonIdle": 0.8086734278683181
+      },
+      {
+        "name": "(program)",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 500.285,
+        "percentTotal": 0.5183445598754924,
+        "percentNonIdle": 0.654011904210202
+      },
+      {
+        "name": "parseDecimal",
+        "url": "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs",
+        "line": 3518,
+        "column": 22,
+        "ms": 483.254,
+        "percentTotal": 0.500698765579762,
+        "percentNonIdle": 0.6317476413588194
+      },
+      {
+        "name": "writev",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 424.519,
+        "percentTotal": 0.4398435176225235,
+        "percentNonIdle": 0.5549646292881273
+      },
+      {
+        "name": "parseFinancialLedgerSnapshot",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 209,
+        "column": 45,
+        "ms": 423.221,
+        "percentTotal": 0.4384986617129552,
+        "percentNonIdle": 0.5532677815879867
+      },
+      {
+        "name": "validateAccount",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 40,
+        "column": 25,
+        "ms": 422.774,
+        "percentTotal": 0.4380355256639744,
+        "percentNonIdle": 0.5526834280271524
+      },
+      {
+        "name": "synchronizeBeneficialHousingRentState",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 421,
+        "column": 54,
+        "ms": 417.874,
+        "percentTotal": 0.43295864280042684,
+        "percentNonIdle": 0.5462777625951887
+      },
+      {
+        "name": "check",
+        "url": "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js",
+        "line": 19,
+        "column": 15,
+        "ms": 414.767,
+        "percentTotal": 0.4297394846255202,
+        "percentNonIdle": 0.5422160477998598
+      },
+      {
+        "name": "Decimal",
+        "url": "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs",
+        "line": 4287,
+        "column": 19,
+        "ms": 408.301,
+        "percentTotal": 0.42304007144272454,
+        "percentNonIdle": 0.5337631839869867
+      },
+      {
+        "name": "foldFinanceNativeBudgetMixedPrefix",
+        "url": "file:///workspace/packages/core/dist/commands/finance-budget-native.js",
+        "line": 568,
+        "column": 44,
+        "ms": 368.724,
+        "percentTotal": 0.3820343993834136,
+        "percentNonIdle": 0.4820250164766134
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 224,
+        "column": 43,
+        "ms": 340.06,
+        "percentTotal": 0.3523356707302037,
+        "percentNonIdle": 0.444553180978285
+      },
+      {
+        "name": "freeze",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 24,
+        "column": 16,
+        "ms": 338.938,
+        "percentTotal": 0.35117316816430566,
+        "percentNonIdle": 0.4430864143222312
+      },
+      {
+        "name": "parseInventoryLedgerSnapshot",
+        "url": "file:///workspace/packages/core/dist/inventory/inventory-ledger.js",
+        "line": 228,
+        "column": 45,
+        "ms": 330.588,
+        "percentTotal": 0.3425217453254031,
+        "percentNonIdle": 0.43217063751470114
+      },
+      {
+        "name": "normalizeArray",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 46,
+        "column": 24,
+        "ms": 300.939,
+        "percentTotal": 0.3118024596067658,
+        "percentNonIdle": 0.3934111325366821
+      },
+      {
+        "name": "lexicalDigitCount",
+        "url": "file:///workspace/packages/core/dist/numeric/world-decimal.js",
+        "line": 15,
+        "column": 27,
+        "ms": 297.469,
+        "percentTotal": 0.3082071976605392,
+        "percentNonIdle": 0.38887487558792405
+      },
+      {
+        "name": "writeBuffer",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 281.546,
+        "percentTotal": 0.2917094005510967,
+        "percentNonIdle": 0.368059077491361
+      },
+      {
+        "name": "runMicrotasks",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 261.244,
+        "percentTotal": 0.2706745279193123,
+        "percentNonIdle": 0.3415187061444777
+      },
+      {
+        "name": "Hash",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 258.541,
+        "percentTotal": 0.26787395355601246,
+        "percentNonIdle": 0.3379851319276209
+      },
+      {
+        "name": "prepareFinanceNativeBudgetFinancialReplay",
+        "url": "file:///workspace/packages/core/dist/commands/finance-budget-native.js",
+        "line": 231,
+        "column": 58,
+        "ms": 232.04,
+        "percentTotal": 0.24041630605256856,
+        "percentNonIdle": 0.3033409401699737
+      },
+      {
+        "name": "parseWorldDecimal",
+        "url": "file:///workspace/packages/core/dist/numeric/world-decimal.js",
+        "line": 18,
+        "column": 34,
+        "ms": 222.257,
+        "percentTotal": 0.23028015400071425,
+        "percentNonIdle": 0.2905518330432591
+      },
+      {
+        "name": "P.toFixed",
+        "url": "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs",
+        "line": 2021,
+        "column": 22,
+        "ms": 202.797,
+        "percentTotal": 0.2101176763426252,
+        "percentNonIdle": 0.26511219032774586
+      },
+      {
+        "name": "SignJob",
+        "url": "",
+        "line": 0,
+        "column": 0,
+        "ms": 200.088,
+        "percentTotal": 0.20731088538806386,
+        "percentNonIdle": 0.2615707724389316
+      },
+      {
+        "name": "finiteToString",
+        "url": "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs",
+        "line": 3108,
+        "column": 24,
+        "ms": 185.895,
+        "percentTotal": 0.1926055387590167,
+        "percentNonIdle": 0.24301656642344965
+      },
+      {
+        "name": "Quantity",
+        "url": "file:///workspace/packages/core/dist/numeric/quantity.js",
+        "line": 7,
+        "column": 16,
+        "ms": 175.304,
+        "percentTotal": 0.1816322190839488,
+        "percentNonIdle": 0.22917117813979082
+      },
+      {
+        "name": "isQuantity",
+        "url": "file:///workspace/packages/core/dist/numeric/quantity.js",
+        "line": 36,
+        "column": 27,
+        "ms": 175.255,
+        "percentTotal": 0.18158145025531333,
+        "percentNonIdle": 0.22910712148547122
+      },
+      {
+        "name": "addFields",
+        "url": "file:///workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/result.js",
+        "line": 82,
+        "column": 12,
+        "ms": 172.916,
+        "percentTotal": 0.17915801576187704,
+        "percentNonIdle": 0.22604939670070318
+      }
+    ],
+    "inclusive": [
+      {
+        "name": "readPostwarPagedFinanceSocialReplayFrom",
+        "url": "file:///workspace/apps/world-worker/dist/persistence/postwar-paged-finance-social-replay.js",
+        "line": 61,
+        "column": 62,
+        "ms": 66727.202,
+        "percentTotal": 69.13595680944478,
+        "percentNonIdle": 87.23104718838023
+      },
+      {
+        "name": "appendFinanceSocialReplayPage",
+        "url": "file:///workspace/packages/core/dist/commands/finance-social-replay-continuation.js",
+        "line": 146,
+        "column": 46,
+        "ms": 57966.51,
+        "percentTotal": 60.05901658748179,
+        "percentNonIdle": 75.77838149358809
+      },
+      {
+        "name": "foldFinanceNativeBudgetMixedPrefix",
+        "url": "file:///workspace/packages/core/dist/commands/finance-budget-native.js",
+        "line": 568,
+        "column": 44,
+        "ms": 56034.265,
+        "percentTotal": 58.057020357139855,
+        "percentNonIdle": 73.25239883999936
+      },
+      {
+        "name": "continueFinanceNativeBudgetMixedPrefix",
+        "url": "file:///workspace/packages/core/dist/commands/finance-budget-native.js",
+        "line": 388,
+        "column": 55,
+        "ms": 55119.842,
+        "percentTotal": 57.109588018622745,
+        "percentNonIdle": 72.05699316626617
+      },
+      {
+        "name": "canonicalSerialize",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 146,
+        "column": 35,
+        "ms": 32613.262,
+        "percentTotal": 33.79055325963026,
+        "percentNonIdle": 42.634621432036184
+      },
+      {
+        "name": "aggregateBeneficialHousingLiquidClaim",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 363,
+        "column": 54,
+        "ms": 29106.3,
+        "percentTotal": 30.156995039035838,
+        "percentNonIdle": 38.050044849462616
+      },
+      {
+        "name": "synchronizeBeneficialHousingRentMixedReplayOrigins",
+        "url": "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js",
+        "line": 43,
+        "column": 67,
+        "ms": 28634.745,
+        "percentTotal": 29.668417590317436,
+        "percentNonIdle": 37.43359106114227
+      },
+      {
+        "name": "normalize",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 105,
+        "column": 19,
+        "ms": 26491.521,
+        "percentTotal": 27.447826325349283,
+        "percentNonIdle": 34.63180006323307
+      },
+      {
+        "name": "normalizeRecord",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 75,
+        "column": 25,
+        "ms": 24040.771,
+        "percentTotal": 24.908607819667793,
+        "percentNonIdle": 31.4279868882565
+      },
+      {
+        "name": "financialAtVersion",
+        "url": "file:///workspace/packages/core/dist/commands/finance-budget-native.js",
+        "line": 348,
+        "column": 28,
+        "ms": 17498.116,
+        "percentTotal": 18.129772503013907,
+        "percentNonIdle": 22.874913629733058
+      },
+      {
+        "name": "parseFinancialLedgerSnapshot",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 209,
+        "column": 45,
+        "ms": 17473.457,
+        "percentTotal": 18.10422334902774,
+        "percentNonIdle": 22.842677445266364
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 371,
+        "column": 49,
+        "ms": 17034.156,
+        "percentTotal": 17.649064222733998,
+        "percentNonIdle": 22.268388622832262
+      },
+      {
+        "name": "check",
+        "url": "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js",
+        "line": 19,
+        "column": 15,
+        "ms": 16137.286,
+        "percentTotal": 16.71981852195238,
+        "percentNonIdle": 21.095929611410767
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js",
+        "line": 45,
+        "column": 44,
+        "ms": 14726.957,
+        "percentTotal": 15.258578699082129,
+        "percentNonIdle": 19.252236606717698
+      },
+      {
+        "name": "synchronizeBeneficialHousingRentState",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 421,
+        "column": 54,
+        "ms": 14669.612,
+        "percentTotal": 15.199163628100468,
+        "percentNonIdle": 19.17727071198383
+      },
+      {
+        "name": "accountKey",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 62,
+        "column": 20,
+        "ms": 13697.716,
+        "percentTotal": 14.192183597988128,
+        "percentNonIdle": 17.90673181184835
+      },
+      {
+        "name": "ownDescriptors",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 38,
+        "column": 24,
+        "ms": 10695.743,
+        "percentTotal": 11.081843744818212,
+        "percentNonIdle": 13.982316572299666
+      },
+      {
+        "name": "position",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 37,
+        "column": 18,
+        "ms": 9238.453,
+        "percentTotal": 9.571947698242846,
+        "percentNonIdle": 12.077232454473858
+      },
+      {
+        "name": "compareAccounts",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 65,
+        "column": 25,
+        "ms": 9219.786,
+        "percentTotal": 9.552606846729818,
+        "percentNonIdle": 12.052829483735394
+      },
+      {
+        "name": "prepareFinanceSocialReplayContinuation",
+        "url": "file:///workspace/packages/core/dist/commands/finance-social-replay-continuation.js",
+        "line": 75,
+        "column": 55,
+        "ms": 8307.784,
+        "percentTotal": 8.607682902786728,
+        "percentNonIdle": 10.860588731637066
+      },
+      {
+        "name": "canonicalHashInput",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 149,
+        "column": 35,
+        "ms": 7549.657,
+        "percentTotal": 7.822188622237186,
+        "percentNonIdle": 9.86950548328229
+      },
+      {
+        "name": "prepareFinanceNativeBudgetFinancialReplay",
+        "url": "file:///workspace/packages/core/dist/commands/finance-budget-native.js",
+        "line": 231,
+        "column": 58,
+        "ms": 7519.126,
+        "percentTotal": 7.79055549760311,
+        "percentNonIdle": 9.829592958526518
+      },
+      {
+        "name": "reconcileV08LedgerSnapshots",
+        "url": "file:///workspace/packages/core/dist/opening/opening-seed.js",
+        "line": 587,
+        "column": 44,
+        "ms": 6918.552,
+        "percentTotal": 7.168301650890409,
+        "percentNonIdle": 9.044475384825253
+      },
+      {
+        "name": "comparison",
+        "url": "file:///workspace/packages/core/dist/opening/opening-seed.js",
+        "line": 571,
+        "column": 20,
+        "ms": 6912.937,
+        "percentTotal": 7.1624839575682,
+        "percentNonIdle": 9.037135015151687
+      },
+      {
+        "name": "stateHash",
+        "url": "file:///workspace/packages/core/dist/opening/opening-seed.js",
+        "line": 568,
+        "column": 19,
+        "ms": 6906.14,
+        "percentTotal": 7.1554415957674795,
+        "percentNonIdle": 9.028249442102492
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 91,
+        "column": 47,
+        "ms": 6811.021,
+        "percentTotal": 7.056888938400585,
+        "percentNonIdle": 8.903902403281478
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 224,
+        "column": 43,
+        "ms": 6604.167,
+        "percentTotal": 6.84256781026665,
+        "percentNonIdle": 8.633486583431798
+      },
+      {
+        "name": "parseInventoryLedgerSnapshot",
+        "url": "file:///workspace/packages/core/dist/inventory/inventory-ledger.js",
+        "line": 228,
+        "column": 45,
+        "ms": 6408.18,
+        "percentTotal": 6.639505965005813,
+        "percentNonIdle": 8.377276960775824
+      },
+      {
+        "name": "normalizeArray",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 46,
+        "column": 24,
+        "ms": 6047.692,
+        "percentTotal": 6.266004873227334,
+        "percentNonIdle": 7.906018691339548
+      },
+      {
+        "name": "accountKey",
+        "url": "file:///workspace/packages/core/dist/inventory/inventory-ledger.js",
+        "line": 70,
+        "column": 20,
+        "ms": 5384.223,
+        "percentTotal": 5.5785856086160965,
+        "percentNonIdle": 7.038679826343717
+      },
+      {
+        "name": "equal",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 33,
+        "column": 15,
+        "ms": 4708.487,
+        "percentTotal": 4.878456523170748,
+        "percentNonIdle": 6.155304574030765
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 245,
+        "column": 20,
+        "ms": 4525.747,
+        "percentTotal": 4.68911987531673,
+        "percentNonIdle": 5.916412471778305
+      },
+      {
+        "name": "from",
+        "url": "file:///workspace/packages/core/dist/numeric/money.js",
+        "line": 13,
+        "column": 16,
+        "ms": 3648.615,
+        "percentTotal": 3.780324687588314,
+        "percentNonIdle": 4.769756526539685
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/inventory/inventory-ledger.js",
+        "line": 246,
+        "column": 19,
+        "ms": 3577.042,
+        "percentTotal": 3.706168006528581,
+        "percentNonIdle": 4.676190671037247
+      },
+      {
+        "name": "compareAccounts",
+        "url": "file:///workspace/packages/core/dist/inventory/inventory-ledger.js",
+        "line": 73,
+        "column": 25,
+        "ms": 3550.044,
+        "percentTotal": 3.6781954180489773,
+        "percentNonIdle": 4.640896761785787
+      },
+      {
+        "name": "Money",
+        "url": "file:///workspace/packages/core/dist/numeric/money.js",
+        "line": 7,
+        "column": 16,
+        "ms": 2904.198,
+        "percentTotal": 3.00903531807127,
+        "percentNonIdle": 3.7965960686078146
+      },
+      {
+        "name": "trustedDomainValue",
+        "url": "file:///workspace/packages/core/dist/serialization/canonical.js",
+        "line": 18,
+        "column": 28,
+        "ms": 2627.419,
+        "percentTotal": 2.722264999277425,
+        "percentNonIdle": 3.4347687884866924
+      },
+      {
+        "name": "validateAccount",
+        "url": "file:///workspace/packages/core/dist/finance/financial-ledger.js",
+        "line": 40,
+        "column": 25,
+        "ms": 2623.66,
+        "percentTotal": 2.7183703048521033,
+        "percentNonIdle": 3.4298547280053144
+      },
+      {
+        "name": "canonicalDecimal",
+        "url": "file:///workspace/packages/core/dist/numeric/world-decimal.js",
+        "line": 37,
+        "column": 33,
+        "ms": 2454.473,
+        "percentTotal": 2.5430759005592405,
+        "percentNonIdle": 3.2086801734262016
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 385,
+        "column": 38,
+        "ms": 2398.261,
+        "percentTotal": 2.4848347292274573,
+        "percentNonIdle": 3.1351954254136407
+      },
+      {
+        "name": "createBeneficialHousingRentMixedReplayOrigins",
+        "url": "file:///workspace/packages/core/dist/commands/beneficial-housing-rent-mixed-replay.js",
+        "line": 34,
+        "column": 62,
+        "ms": 2268.497,
+        "percentTotal": 2.3503864378181936,
+        "percentNonIdle": 2.9655577174313255
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/finance/beneficial-housing-rent.js",
+        "line": 38,
+        "column": 35,
+        "ms": 2157.705,
+        "percentTotal": 2.235595007977752,
+        "percentNonIdle": 2.8207217001786464
+      },
+      {
+        "name": "",
+        "url": "file:///workspace/packages/core/dist/inventory/inventory-ledger.js",
+        "line": 247,
+        "column": 38,
+        "ms": 1850.066,
+        "percentTotal": 1.9168506881289922,
+        "percentNonIdle": 2.4185518006227484
+      },
+      {
+        "name": "P.toFixed",
+        "url": "file:///workspace/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/decimal.mjs",
+        "line": 2021,
+        "column": 22,
+        "ms": 1834.768,
+        "percentTotal": 1.9010004526092878,
+        "percentNonIdle": 2.3985530516884257
+      },
+      {
+        "name": "isMoney",
+        "url": "file:///workspace/packages/core/dist/numeric/money.js",
+        "line": 36,
+        "column": 24,
+        "ms": 1734.161,
+        "percentTotal": 1.7967616864352196,
+        "percentNonIdle": 2.2670316675836135
+      }
+    ]
+  },
+  "commands": [
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_0",
+      "initial": true,
+      "status": "COMMITTED",
+      "ackMs": 455.75671399990097,
+      "elapsedMs": 2511.176332999952,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "1",
+        "event_sequence": "1"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_0",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "1",
+          "eventSequence": "1"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_2",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 494.90364599996246,
+      "elapsedMs": 4134.773903999943,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "2",
+        "event_sequence": "4"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_2",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "2",
+          "eventSequence": "4"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_3",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 1348.2510619999375,
+      "elapsedMs": 5951.697306999937,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "3",
+        "event_sequence": "7"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_3",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "3",
+          "eventSequence": "7"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_4",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 1897.1990739998873,
+      "elapsedMs": 6995.903779000044,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "4",
+        "event_sequence": "10"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_4",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "4",
+          "eventSequence": "10"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_5",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 2097.413382000057,
+      "elapsedMs": 9090.845779000083,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "5",
+        "event_sequence": "13"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_5",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "5",
+          "eventSequence": "13"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_6",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 2859.6058339998126,
+      "elapsedMs": 9973.980711999815,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "6",
+        "event_sequence": "16"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_6",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "6",
+          "eventSequence": "16"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_7",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 2719.746012999909,
+      "elapsedMs": 10902.189756999956,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "7",
+        "event_sequence": "19"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_7",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "7",
+          "eventSequence": "19"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_8",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 3118.3908949999604,
+      "elapsedMs": 12692.52495900006,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "8",
+        "event_sequence": "22"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_8",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "8",
+          "eventSequence": "22"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_9",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 2929.773348999908,
+      "elapsedMs": 11994.768519999925,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "9",
+        "event_sequence": "25"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_9",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "9",
+          "eventSequence": "25"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_10",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 1275.5565219998825,
+      "elapsedMs": 11090.630810000002,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "10",
+        "event_sequence": "28"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_10",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "10",
+          "eventSequence": "28"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    },
+    {
+      "commandId": "COMMAND_LAZY_CAPACITY_11",
+      "initial": false,
+      "status": "COMMITTED",
+      "ackMs": 1338.652449999936,
+      "elapsedMs": 13577.812364999903,
+      "outcome": "COMMITTED",
+      "head": {
+        "world_version": "11",
+        "event_sequence": "31"
+      },
+      "derivedPublication": {
+        "status": "PUBLISHED",
+        "commandId": "COMMAND_LAZY_CAPACITY_11",
+        "countryId": "COUNTRY_01",
+        "head": {
+          "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+          "worldVersion": "11",
+          "eventSequence": "31"
+        },
+        "documentCount": 32,
+        "industryLabour": "PUBLISHED",
+        "captain": "PUBLISHED"
+      }
+    }
+  ],
+  "counts": {
+    "worldVersion": "11",
+    "eventSequence": "31",
+    "commands": "11",
+    "receipts": "11",
+    "events": "31",
+    "batches": "0",
+    "inventory": "0",
+    "queues": "11",
+    "unfinished": 0
+  },
+  "receiptReconciliation": {
+    "receipts": 11,
+    "committed_receipts": 11
+  },
+  "baselineReads": [
+    {
+      "office": "FINANCE",
+      "dataset": "ledger-balances",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 54.21516500017606
+    },
+    {
+      "office": "SOCIAL",
+      "dataset": "service-pools",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 32.54111999995075
+    },
+    {
+      "office": "INDUSTRY",
+      "dataset": "industry-labour-current",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 22.07114899996668
+    },
+    {
+      "office": "FINANCE",
+      "dataset": "ledger-balances",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 23.945886000059545
+    },
+    {
+      "office": "SOCIAL",
+      "dataset": "service-pools",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 23.09780799993314
+    },
+    {
+      "office": "INDUSTRY",
+      "dataset": "industry-labour-current",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 18.233289999887347
+    },
+    {
+      "office": "FINANCE",
+      "dataset": "ledger-balances",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 21.586508999811485
+    },
+    {
+      "office": "SOCIAL",
+      "dataset": "service-pools",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 22.737748000072315
+    },
+    {
+      "office": "INDUSTRY",
+      "dataset": "industry-labour-current",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 19.159843999892473
+    },
+    {
+      "office": "FINANCE",
+      "dataset": "ledger-balances",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 20.459911999991164
+    },
+    {
+      "office": "SOCIAL",
+      "dataset": "service-pools",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 20.356040000217035
+    },
+    {
+      "office": "INDUSTRY",
+      "dataset": "industry-labour-current",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 17.63177299988456
+    }
+  ],
+  "industryPreparation": {
+    "completed": 70,
+    "scopes": 70,
+    "countries": 70,
+    "preparationCpu": 2,
+    "parallelConnections": 2
+  },
+  "startupMs": 284107.279259,
+  "shutdown": {
+    "pid": 3374,
+    "exitCode": 0,
+    "close": {
+      "ok": true,
+      "value": {
+        "pid": 3374,
+        "errors": [],
+        "idleErrors": [],
+        "pools": [
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          },
+          {
+            "total": 0,
+            "idle": 0,
+            "waiting": 0
+          }
+        ]
+      }
+    }
+  },
+  "nativeFixtureCleanup": "OWNED_NATIVE_FIXTURE_REMOVED",
+  "runnerExitCode": 0,
+  "interpretationNotes": [
+    "Runner exit 0 means bounded diagnostic capture completed, not capacity PASS.",
+    "Write demand did not drain within its planned 30-second tail: WRITE_DRAIN_TIMEOUT; final in-flight command completed before cleanup.",
+    "CPU inclusive stacks overlap and are percentages of sampled main-thread non-idle time, not shares to sum.",
+    "Client query await includes callback scheduling delay; PostgreSQL function self_time is server-side function time.",
+    "Connection hold/query durations are cumulative over multiple connections and may overlap.",
+    "PostgreSQL function statistics are per-function counters; deltas are aggregated by function name across overloads.",
+    "Reader transaction count also includes non-page traffic; ordinary page queries totaled 1614 for 1200 HTTP reads.",
+    "The diagnostic enabled PostgreSQL track_functions=all and Node Inspector CPU profiling; absolute timings are not an uninstrumented capacity comparison.",
+    "Current implementation has 13 successful CI checks; this diagnosis does not authorize merge or advance the R2 gate."
+  ],
+  "applicationCgroup": {
+    "oom": 0,
+    "oomKill": 0,
+    "memoryPeakBytes": 5301948416,
+    "memoryMaxEvents": 0
+  },
+  "finalCleanup": {
+    "status": "DOCKER_RESOURCES_REMOVED_WINDOWS_TEMP_RETAINED_BY_PRIOR_APPROVAL_REJECTION",
+    "taskContainersRemoved": 2,
+    "taskVolumesRemoved": 3,
+    "downloadedImageReferencesRemoved": 1,
+    "originalContainersPreserved": 5,
+    "originalVolumesPreserved": 4,
+    "windowsTemporaryDirectory": "D:/data/temp/econmind-lazy-capacity-20261117",
+    "windowsTemporaryDirectoryRemoved": false,
+    "windowsDeletion": "PRIOR_AUTOMATIC_APPROVAL_REJECTIONS_BLOCKED_BY_POLICY_NOT_BYPASSED_OR_RETRIED",
+    "dockerDesktopRestore": "STOP_COMMAND_COMPLETED",
+    "productDiff": "NONE",
+    "reportFormat": "PASS",
+    "secretScan": {
+      "files": 4011,
+      "status": "PASS"
+    }
+  }
+}

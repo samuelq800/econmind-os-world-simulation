@@ -21,10 +21,11 @@ import {
   type SocialEmploymentServiceState,
 } from '@econmind/core';
 import {
-  readValidatedCanonicalLineageFrom,
-  type ValidatedCanonicalLineageData,
-  type ValidatedCanonicalLineageView,
-} from './validated-canonical-lineage.js';
+  readSocialCanonicalLineageFrom,
+  readPreparedSocialPagedLineage,
+  type PostwarSocialReplayLineage,
+  type SocialCanonicalLineageView,
+} from './prepared-postwar-social-source.js';
 import type { SqlExecutor } from './sql-database.js';
 import type { SocialPhysicalAttemptEnvelope } from './social-physical-attempt-envelope.js';
 
@@ -117,7 +118,7 @@ export interface BoundSocialSourceData {
   readonly classification: 'DATA_BINDING_MATCH_NOT_AUTHENTICATED';
   readonly command: CanonicalCommand;
   readonly data: SocialEmploymentSourceGraph;
-  readonly lineage: Readonly<ValidatedCanonicalLineageData>;
+  readonly lineage: Readonly<PostwarSocialReplayLineage>;
 }
 export interface SocialOperatingSnapshotRequest {
   readonly publicationHead: Readonly<{
@@ -428,7 +429,7 @@ export function parseSocialEmploymentSourceInput(
  * reader-private captured custody snapshot and are intentionally not claimed here. */
 export function bindSocialEmploymentSourceInputFrom(
   executor: SqlExecutor,
-  view: ValidatedCanonicalLineageView,
+  view: SocialCanonicalLineageView,
   commandInput: CanonicalCommand,
   parsed: ParsedSocialEmploymentSourceInput,
 ): Readonly<BoundSocialSourceData> {
@@ -440,7 +441,7 @@ export function bindSocialEmploymentSourceInputFrom(
     command.expectedWorldVersion === null
   )
     invalid('manual PLAN only');
-  const lineage = readValidatedCanonicalLineageFrom(executor, view);
+  const lineage = readSocialCanonicalLineageFrom(executor, view);
   const s = data.scope,
     g = data.admittedGenesis,
     h = data.historyCoverage;
@@ -473,11 +474,13 @@ export function bindSocialEmploymentSourceInputFrom(
     original[0]!.payloadHash !== g.socialSourcePayloadHash
   )
     invalid('original opening source identity required');
-  const prefix = objectHash({
-    worldId: lineage.worldId,
-    seedFingerprint: lineage.seed.fingerprint,
-    transitions: lineage.transitions,
-  });
+  const prefix =
+    readPreparedSocialPagedLineage(lineage)?.metadata.prefixFingerprint ??
+    objectHash({
+      worldId: lineage.worldId,
+      seedFingerprint: lineage.seed.fingerprint,
+      transitions: lineage.transitions,
+    });
   if (h.completePrefixBinding !== prefix)
     invalid('complete actual prefix fingerprint mismatch');
   if (
@@ -486,7 +489,7 @@ export function bindSocialEmploymentSourceInputFrom(
     data.physicalAttemptEnvelope.headEventSequence !== lineage.headEventSequence
   )
     invalid('physical current audit head mismatch');
-  readValidatedCanonicalLineageFrom(executor, view);
+  readSocialCanonicalLineageFrom(executor, view);
   return Object.freeze({
     classification: 'DATA_BINDING_MATCH_NOT_AUTHENTICATED' as const,
     command,

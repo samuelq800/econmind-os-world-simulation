@@ -1,3 +1,28 @@
+import { renderTreasuryFxForm } from '../finance-fx/form.js';
+import { parseSocialProgrammeApplicationRowDto } from '@econmind/core/social-labour-programme-public-contract';
+import { parseIndustryUtilisationTargetRow } from '@econmind/core/postwar-industry-utilisation-targets-contract';
+import { renderSocialProgrammeForm } from '../social-employment/programme-form.js';
+import { parseIndustryCommittedRunRow } from '@econmind/core/postwar-industry-committed-runs-contract';
+import {
+  INDUSTRY_UTILITY_PLANNING_DATASET,
+  parseIndustryUtilityPlanningRow,
+} from '@econmind/core/postwar-industry-utility-planning-contract';
+import { renderIndustryUtilityForm } from '../industry-utility/form.js';
+import { renderSocialEmploymentPlanForm } from '../social-employment/plan-form.js';
+import { renderSocialEmploymentServiceCreateForm } from '../social-employment/create-form.js';
+import {
+  parsePostwarCaptainAllocationOptions,
+  parsePostwarCaptainPoliticalCapitalRow,
+} from '@econmind/core/postwar-captain-current-contract';
+import { renderCaptainCapitalForm } from '../captain-capital/form.js';
+import {
+  INDUSTRY_RUN_PARAMETERS_DATASET,
+  parseIndustryRunParameterRow,
+} from '@econmind/core/postwar-industry-run-parameters-contract';
+import {
+  INDUSTRY_RUN_CATALOG_BINDING,
+  renderIndustryRunForm,
+} from '../industry-run/form.js';
 import {
   createOfficeCommandController,
   type OfficeCommandBinding,
@@ -8,6 +33,45 @@ import {
 } from '../office-projection/model.js';
 import { renderDecisionResult } from '../office-projection/decision-result-view.js';
 import { renderOfficeReadout } from '../office-projection/readout-view.js';
+import { row } from '../production-read/contract.js';
+
+/** Only the already licensed first-day CREATE subset of Social-10 is bound.
+ * The zero budget is an actual local-currency licence constraint, not a general
+ * budget input; the target is an existing referral desk, not new eligibility. */
+export const SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING = Object.freeze({
+  moduleId: 'social-10',
+  fields: Object.freeze({
+    'social-u0932-0': 'capacity.amount',
+    'social-u0932-1': 'budget',
+    'social-u0932-2': 'target.servicePoolId',
+  }),
+  scope: 'FIRST_DAY_LICENSED_REFERRAL_CAPACITY_PARTITION_ONLY',
+  budget: 'NO_ADDITIONAL_FEE_ZERO_ACTUAL_LOCAL_CURRENCY',
+  target: 'ACTUAL_EXISTING_ROOT_POOL_LOCATION_AND_SKILL_ONLY',
+  unsupportedFields: Object.freeze([
+    'social-u0933-0',
+    'social-u0933-1',
+    'social-u0933-2',
+    'social-u0934-0',
+    'social-u0934-1',
+    'social-u0934-2',
+  ]),
+} as const);
+
+/** Separate U0933/U0934 terms lifecycle; none of these fields are a licensed
+ * referral pool creation or an eligibility/payment instruction. */
+export const SOCIAL_PROGRAMME_TERMS_CATALOG_BINDING = Object.freeze({
+  moduleId: 'social-10',
+  fields: Object.freeze({
+    'social-u0933-0': 'RELOCATION_SUPPORT.locationId',
+    'social-u0933-1': 'RELOCATION_SUPPORT.participants',
+    'social-u0933-2': 'RELOCATION_SUPPORT.benefit',
+    'social-u0934-0': 'RETURN_TO_WORK.eligible',
+    'social-u0934-1': 'RETURN_TO_WORK.capacity',
+    'social-u0934-2': 'RETURN_TO_WORK.duration',
+  }),
+  scope: 'PENDING_REVIEW_TERMS_ONLY_NOT_APPROVAL_FUNDING_OR_POPULATION_CHANGE',
+} as const);
 
 /** Additive manual-intent drawer; no default economic payload or fixture data. */
 export function installOfficeCommand(
@@ -117,90 +181,648 @@ export function installOfficeCommand(
     const focused = dialog.contains(document.activeElement)
       ? (document.activeElement as HTMLElement).dataset.officeCommandAction
       : undefined;
+    const finance = currentView()?.role === 'finance';
+    const budget = state.budgetControls;
+    const details = document.createElement('details');
+    details.dataset.officeCommandDetails = '';
+    details.open =
+      dialog.querySelector<HTMLDetailsElement>('[data-office-command-details]')
+        ?.open ?? false;
+    details.append(
+      node('summary', state.intent ? '查看详情' : '录入或查看申请'),
+    );
     clearPrivateContent(dialog);
     dialog.append(
-      node('h2', 'Manual Office intent — Captain / Central Bank / Social'),
+      node(
+        'h2',
+        budget
+          ? '财政预算申请'
+          : 'Manual Office intent — Captain / Central Bank / Finance / Industry / Trade / Social',
+      ),
     );
     const status = node(
       'p',
-      `${state.status}${state.code ? ' · ' + state.code : ''}`,
+      budget
+        ? budgetStatus(state)
+        : `${state.status}${state.code ? ' · ' + state.code : ''}`,
     );
     status.setAttribute('role', 'status');
     dialog.append(status);
+    if (budget && state.intent) {
+      const payload = row(state.intent.request.payload);
+      if (
+        (payload?.operation === 'SET_ENVELOPE' ||
+          payload?.operation === 'APPROVE_NEW_LINE') &&
+        typeof payload.amount === 'string' &&
+        typeof payload.currency === 'string'
+      ) {
+        const action =
+          payload.operation === 'SET_ENVELOPE'
+            ? '设定预算额度'
+            : '新增预算科目';
+        const envelope = row(payload.scope)?.envelopeRef;
+        dialog.append(
+          node('p', `${action} · ${payload.amount} ${payload.currency}`),
+        );
+        if (typeof envelope === 'string')
+          dialog.append(node('p', `预算额度编号 ${envelope}`));
+      }
+    }
+    const technical = budget ? details : dialog;
+    if (budget && state.code) details.append(node('p', state.code));
     if (state.lastAuthorizedReadAtClient)
-      dialog.append(
+      technical.append(
         node(
           'p',
           `${state.model ? 'Last read on this device' : 'Previous successful read'}: ${state.lastAuthorizedReadAtClient} · browser observation only`,
         ),
       );
-    dialog.append(
-      node(
-        'p',
-        'Only a current server-authorized seat can submit. Industry / Finance / Trade are not supported by this command port. Queue acknowledgement, including FINALIZED, is not an economic commit.',
-      ),
-    );
+    if (!budget)
+      dialog.append(
+        node(
+          'p',
+          'Only a current server-authorized seat can submit an installed manual family. Industry supports source-bound RUN plans and service schedules selected from current data; an acknowledgement does not establish work, wages, delivery or output. Trade supports only the narrow preapproved Treasury GCU transfer, with current three signatures, owner mandate, route and funds checked by the server. Queue acknowledgement, including FINALIZED, is not an economic commit.',
+        ),
+      );
+    if (state.tradeDataset) {
+      const section = document.createElement('section');
+      section.dataset.tradeCurrentReadout = '';
+      for (const [dataset, label] of [
+        ['inventory-current', '当前库存'],
+        ['goods-transfers-current', '已提交转移'],
+      ] as const) {
+        const select = button(
+          label,
+          dataset === 'inventory-current'
+            ? 'trade-inventory'
+            : 'trade-transfers',
+          state.canRead,
+          () => owner.selectTradeDataset(dataset),
+        );
+        select.setAttribute(
+          'aria-pressed',
+          String(state.tradeDataset === dataset),
+        );
+        section.append(select);
+      }
+      if (state.canReadTradeOpeningH0)
+        section.append(
+          button('仅查看已授权 H0 开局库存', 'trade-opening-h0', true, () =>
+            owner.readTradeOpeningH0(),
+          ),
+        );
+      const page = state.runtimePage;
+      if (page) {
+        const opening = page.dataset === 'opening-inventory-entries';
+        section.append(
+          node(
+            'p',
+            opening
+              ? 'H0 开局库存 · 仅已核验零头、零事件时显示；不是 H>0 当前库存。刷新返回所选当前数据。'
+              : page.dataset === 'inventory-current'
+                ? '当前库存 · 包含实际预留、在途与可用数量。'
+                : '已提交转移 · RESERVED / SHIPPED / DELIVERED 来自实际账本，不是本地订单预览。',
+          ),
+        );
+        section.append(
+          node(
+            'p',
+            `World ${page.authority.readback.worldVersion} / event ${page.authority.readback.eventSequence} · ${page.page.offset + (page.page.returned ? 1 : 0)}–${page.page.offset + page.page.returned} / ${page.page.total}`,
+          ),
+        );
+        if (page.status === 'EMPTY')
+          section.append(
+            node(
+              'p',
+              opening ? '已授权开局库存页无记录。' : '当前已授权数据页无记录。',
+            ),
+          );
+        else {
+          const columns = opening
+            ? ['account', 'quantity']
+            : page.dataset === 'inventory-current'
+              ? [
+                  'commodityId',
+                  'batchId',
+                  'quantity',
+                  'unit',
+                  'bucket',
+                  'physicalLocationId',
+                  'titleHolderId',
+                  'riskBearerId',
+                  'reservationId',
+                  'shipmentId',
+                ]
+              : [
+                  'transferCommandId',
+                  'sellerCountryId',
+                  'buyerCountryId',
+                  'commodityId',
+                  'quantity',
+                  'unit',
+                  'status',
+                  'reservationId',
+                  'shipmentId',
+                ];
+          const table = document.createElement('table'),
+            header = document.createElement('tr');
+          for (const column of columns) header.append(node('th', column));
+          table.append(header);
+          for (const row of page.rows) {
+            const line = document.createElement('tr');
+            for (const column of columns)
+              line.append(
+                node(
+                  'td',
+                  typeof row[column] === 'string'
+                    ? (row[column] as string)
+                    : JSON.stringify(row[column] ?? null),
+                ),
+              );
+            table.append(line);
+          }
+          section.append(table);
+        }
+        if (page.page.nextOffset !== null)
+          section.append(
+            button('下一页', 'trade-next-page', state.canRead, () =>
+              owner.nextTradePage(),
+            ),
+          );
+      }
+      dialog.append(section);
+    }
+    if (currentView()?.role === 'social') {
+      dialog.append(
+        renderSocialProgrammeForm(document, {
+          page: state.socialProgrammesPage,
+          enabled: state.canStage,
+          code: state.socialProgrammesCode,
+          stage: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialProgramme(draft),
+          stageApplication: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialProgrammeApplication(draft),
+        }),
+      );
+      if (
+        state.socialProgrammesPage?.page.nextOffset !== null &&
+        state.socialProgrammesPage
+      )
+        dialog.append(
+          button('下一项目页', 'social-next-programmes', state.canRead, () =>
+            owner.nextSocialProgrammesPage(),
+          ),
+        );
+
+      const applicationSection = document.createElement('section');
+      applicationSection.dataset.socialApplications = '';
+      applicationSection.append(node('h4', '群体申请记录（资格尚未核验）'));
+      if (!state.socialApplicationsPage)
+        applicationSection.append(
+          node('p', state.socialApplicationsCode ?? '等待当前申请记录'),
+        );
+      else if (!state.socialApplicationsPage.rows.length)
+        applicationSection.append(node('p', '当前没有已登记群体申请。'));
+      else
+        for (const row of state.socialApplicationsPage.rows) {
+          const application = parseSocialProgrammeApplicationRowDto(row);
+          applicationSection.append(
+            node(
+              'p',
+              `${application.applicationId} · ${application.programmeId} · ${application.applicant.locationId} / ${application.applicant.skill} / ${application.applicant.status} · ${application.personCount} 人 · 已申请，未核验资格或付款`,
+            ),
+          );
+          const review = application.reviewFacts;
+          if (!review) {
+            applicationSection.append(
+              node('p', '尚未读取当前人口、地区及条款核对信息。'),
+            );
+            continue;
+          }
+          applicationSection.append(
+            node(
+              'p',
+              `申请时 ${application.personCount} 人；当前同标签群体 ${review.currentGroupPersonCount ?? '未找到'}。` +
+                (review.membership === 'UNCHANGED_LABOUR_SNAPSHOT'
+                  ? '人口劳动记录与申请时一致。'
+                  : '劳动记录已变化，不能据当前群体人数认定原申请人的身份或资格。'),
+            ),
+          );
+          applicationSection.append(
+            node(
+              'p',
+              `提议容量 ${review.proposedCapacity} 人；` +
+                (review.capacityComparison === 'EXCEEDS_PROPOSED_CAPACITY'
+                  ? '申请人数超过提议容量。'
+                  : '申请人数未超过提议容量。') +
+                '这不是名额预留或录取。',
+            ),
+          );
+          if (review.terms.kind === 'RELOCATION_SUPPORT') {
+            applicationSection.append(
+              node(
+                'p',
+                `拟迁入地区 ${review.terms.locationId}；` +
+                  (review.locationRelation === 'SAME_REGION'
+                    ? '与申请群体当前地区相同，尚不构成跨地区就业迁移。'
+                    : '与申请群体地区不同，仍需就业及迁移资格核验。') +
+                  `条款请求人均补助 ${review.terms.benefit.amount} ${review.terms.benefit.currency}，尚未生成支付义务。`,
+              ),
+            );
+          } else {
+            applicationSection.append(
+              node(
+                'p',
+                `提议资格：${review.terms.eligible}；提议期限 ${review.terms.duration.amount} 模拟日。持续非就业时间尚无核验记录。`,
+              ),
+            );
+          }
+          applicationSection.append(
+            node(
+              'p',
+              '资格尚未核验，尚未关联本项目已批准预算，不能排款或支付。',
+            ),
+          );
+        }
+      if (state.socialApplicationsPage?.page.nextOffset != null)
+        applicationSection.append(
+          button('下一申请页', 'social-next-applications', state.canRead, () =>
+            owner.nextSocialApplicationsPage(),
+          ),
+        );
+      dialog.append(applicationSection);
+
+      dialog.append(
+        button(
+          state.socialServiceCreateOpen ? '收起创建表单' : '创建就业服务',
+          state.socialServiceCreateOpen
+            ? 'social-close-create'
+            : 'social-open-create',
+          state.canRead,
+          () =>
+            state.socialServiceCreateOpen
+              ? owner.closeSocialServiceCreate()
+              : owner.openSocialServiceCreate(),
+        ),
+      );
+      if (state.socialServiceCreateOpen)
+        dialog.append(
+          renderSocialEmploymentServiceCreateForm(document, {
+            page: state.socialPoolsPage,
+            enabled: state.canStage,
+            stage: (draft) =>
+              active(owner, lifetime, dialog!) &&
+              owner.stageSocialEmploymentServiceCreate(draft),
+          }),
+        );
+      dialog.append(
+        renderSocialEmploymentPlanForm(document, {
+          positions:
+            state.runtimePage?.dataset === 'positions'
+              ? state.runtimePage
+              : null,
+          pools: state.socialPoolsPage,
+          countryId: state.runtimePage?.authority.identity.countryId ?? '',
+          enabled: state.canStage,
+          code: state.socialPoolsCode ?? state.code,
+          stage: (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageSocialEmploymentPlan(draft),
+        }),
+      );
+      if (
+        state.runtimePage?.dataset === 'positions' &&
+        state.runtimePage.page.nextOffset !== null
+      )
+        dialog.append(
+          button('下一授权岗位页', 'social-next-positions', state.canRead, () =>
+            owner.nextSocialPositionsPage(),
+          ),
+        );
+      if (
+        state.socialPoolsPage?.page.nextOffset !== null &&
+        state.socialPoolsPage
+      )
+        dialog.append(
+          button('下一授权服务池页', 'social-next-pools', state.canRead, () =>
+            owner.nextSocialPoolsPage(),
+          ),
+        );
+    }
+    if (finance && (!budget || !state.intent)) {
+      dialog.append(
+        renderTreasuryFxForm(document, {
+          quotes: state.fxQuotesPage,
+          ledger: state.runtimePage,
+          code: state.fxQuotesCode,
+          enabled: state.canStage,
+          stage: (draft) => owner.stageTreasuryFx(draft),
+        }),
+      );
+      if (
+        state.runtimePage?.dataset === 'ledger-balances' &&
+        state.runtimePage.page.nextOffset !== null
+      )
+        dialog.append(
+          button('下一授权账本页', 'finance-next-ledger', state.canRead, () =>
+            owner.nextFinanceLedgerPage(),
+          ),
+        );
+    }
+    if (currentView()?.role === 'captain') {
+      try {
+        const page = state.runtimePage;
+        if (page?.dataset !== 'political-capital-current')
+          throw Error('CURRENT_CAPITAL_REQUIRED');
+        dialog.append(
+          renderCaptainCapitalForm(document, {
+            rows: page.rows.map(parsePostwarCaptainPoliticalCapitalRow),
+            options: parsePostwarCaptainAllocationOptions(
+              page.source.currentCaptainAllocationOptions,
+            ),
+            enabled: state.canStage,
+            stage: (draft) => owner.stageCaptainCapital(draft),
+          }),
+        );
+      } catch {
+        dialog.append(
+          node(
+            'p',
+            '政治资本操作未开放：需要当前七桶余额和实际登记的依据原件。',
+          ),
+        );
+      }
+    }
+    if (currentView()?.role === 'industry') {
+      const rows =
+        state.runParametersPage?.dataset === INDUSTRY_RUN_PARAMETERS_DATASET
+          ? state.runParametersPage.rows.map(parseIndustryRunParameterRow)
+          : [];
+      if (state.runParametersPage?.status !== 'EMPTY')
+        dialog.append(
+          renderIndustryRunForm(
+            document,
+            rows,
+            state.canStage,
+            (draft) =>
+              active(owner, lifetime, dialog!) && owner.stageIndustryRun(draft),
+            (draft) =>
+              active(owner, lifetime, dialog!) &&
+              owner.stageIndustryUtilisationTarget(draft),
+          ),
+        );
+    }
+    if (currentView()?.role === 'industry') {
+      const parameters = state.runParametersPage;
+      dialog.append(
+        node(
+          'p',
+          parameters
+            ? parameters.page.total === 0
+              ? '当前授权来源没有可用设施排产参数。'
+              : `设施来源 ${parameters.page.returned ? parameters.page.offset + 1 : parameters.page.offset}–${parameters.page.offset + parameters.page.returned} / ${parameters.page.total}；世界版本 ${parameters.authority.readback.worldVersion}。`
+            : '设施来源读取不可用：' +
+                (state.runParametersCode ?? '尚未读取') +
+                '。数量未知，不按 0 处理。',
+        ),
+      );
+      if (parameters && parameters.page.nextOffset !== null)
+        dialog.append(
+          button('下一设施来源页', 'next-run-parameters', state.canRead, () =>
+            owner.nextIndustryRunParametersPage(),
+          ),
+        );
+    }
+    if (currentView()?.role === 'industry') {
+      const targets = document.createElement('section');
+      targets.dataset.industryUtilisationTargets = '';
+      targets.append(
+        node('h3', '已保存的设施利用率目标'),
+        node(
+          'p',
+          '仅为明确窗口的目标意图，不代表实际产出、资源预留或已确认可行性，不改动已有排产。',
+        ),
+      );
+      if (!state.targetPage)
+        targets.append(
+          node('p', '目标读取不可用：' + (state.targetCode ?? '尚未读取')),
+        );
+      else if (state.targetPage.status === 'EMPTY')
+        targets.append(
+          node(
+            'p',
+            state.targetPage.page.total === 0
+              ? '当前设施尚未设置目标。'
+              : '当前分页范围无目标；不是全部目标为空。',
+          ),
+        );
+      else
+        for (const raw of state.targetPage.rows) {
+          const value = parseIndustryUtilisationTargetRow(raw);
+          targets.append(
+            node(
+              'p',
+              `${value.facilityId}：${value.targetPercent}% · ${value.startsAtSimTime}–${value.endsAtSimTime} 模拟毫秒 · 提交 ${value.commandId}`,
+            ),
+          );
+        }
+      if (state.targetPage) {
+        const page = state.targetPage;
+        targets.append(
+          node(
+            'p',
+            `目标记录 ${page.page.returned ? page.page.offset + 1 : page.page.offset}–${page.page.offset + page.page.returned} / ${page.page.total}；世界版本 ${page.authority.readback.worldVersion}。`,
+          ),
+        );
+      }
+      dialog.append(targets);
+      const runs = state.committedRunsPage;
+      const section = document.createElement('section');
+      section.dataset.industryCommittedRuns = '';
+      section.append(
+        node('h3', '已提交的本国设施排产'),
+        node(
+          'p',
+          '仅显示完整历史已提交的排产与已记录工时；不表示产出、已支付或剩余容量。未提交请求不列入。',
+        ),
+      );
+      if (!runs)
+        section.append(
+          node(
+            'p',
+            '已提交排产暂不可读取：' +
+              (state.committedRunsCode ?? 'UNAVAILABLE') +
+              '。数量未知，不按 0 处理。',
+          ),
+        );
+      else if (runs.status === 'EMPTY')
+        section.append(
+          node(
+            'p',
+            runs.page.total === 0
+              ? '当前受权设施无已提交排产。'
+              : '当前分页范围无记录；不是全体排产为零。',
+          ),
+        );
+      else
+        for (const value of runs.rows) {
+          const run = parseIndustryCommittedRunRow(value);
+          section.append(
+            node(
+              'p',
+              `${run.facilityId} · ${run.runId} · ${run.quantity} ${run.outputUnit} · ${run.startsAtSimTime}–${run.endsAtSimTime} · 已记录工时 ${run.performedPersonMilliseconds} 人毫秒 · ${run.commandId}`,
+            ),
+          );
+        }
+      if (runs)
+        section.append(
+          node(
+            'p',
+            `授权记录 ${runs.page.returned ? runs.page.offset + 1 : runs.page.offset}–${runs.page.offset + runs.page.returned} / ${runs.page.total}；世界版本 ${runs.authority.readback.worldVersion}。`,
+          ),
+        );
+      if (runs && runs.page.nextOffset !== null)
+        section.append(
+          button('下一排产页', 'next-committed-runs', state.canRead, () =>
+            owner.nextIndustryCommittedRunsPage(),
+          ),
+        );
+      dialog.append(section);
+    }
+    if (currentView()?.role === 'industry') {
+      const planning =
+        state.utilityPlanningPage?.dataset === INDUSTRY_UTILITY_PLANNING_DATASET
+          ? state.utilityPlanningPage
+          : null;
+      dialog.append(
+        renderIndustryUtilityForm(
+          document,
+          planning ? planning.rows.map(parseIndustryUtilityPlanningRow) : [],
+          state.canStage,
+          planning?.status ?? 'UNAVAILABLE',
+          (draft) =>
+            active(owner, lifetime, dialog!) &&
+            owner.stageIndustryUtility(draft),
+        ),
+      );
+      if (planning?.page.nextOffset !== null && planning)
+        dialog.append(
+          button('更多服务调度', 'next-utility-planning', state.canRead, () =>
+            owner.nextIndustryUtilityPlanningPage(),
+          ),
+        );
+    }
     const draft = document.createElement('textarea');
-    draft.setAttribute('aria-label', 'Original manual Office request JSON');
+    draft.setAttribute(
+      'aria-label',
+      budget ? '预算申请原文 JSON' : 'Original manual Office request JSON',
+    );
     draft.dataset.officeCommandDraft = '';
     draft.value = state.intent ? JSON.stringify(state.intent, null, 2) : '';
-    draft.disabled = !state.canStage;
-    dialog.append(
+    draft.disabled = !state.canStage && !state.canRestoreOriginal;
+    technical.append(
       node(
         'p',
-        'Read the current authorized projection, then paste an explicit original public DTO: requestId, world/country/office, command family, commandId, idempotencyKey, expectedWorldVersion and payload. No IDs or economic terms are generated here.',
+        budget
+          ? '录入申请时使用当前授权版本。重新打开页面后，可粘贴曾提交的原文查询回执。'
+          : 'For a new command, read the current projection and load an explicit public request. To recover after a page reload, paste the exact submitted request and choose recovery only; its old head is retained and it cannot be submitted again. Reference forms generate only new command/booking IDs; source references and economic facts come from the authorized page.',
       ),
       draft,
     );
-    dialog.append(
-      button('Load explicit intent', 'stage', state.canStage, () => {
-        try {
-          owner.stage(JSON.parse(draft.value));
-        } catch {
-          owner.stage(null);
-        }
-      }),
+    technical.append(
+      button(
+        budget ? '载入预算申请' : 'Load explicit intent',
+        'stage',
+        state.canStage,
+        () => {
+          try {
+            owner.stage(JSON.parse(draft.value));
+          } catch {
+            owner.stage(null);
+          }
+        },
+      ),
+      button(
+        budget
+          ? '查询已提交的申请'
+          : 'Restore submitted request for recovery only',
+        'restore',
+        state.canRestoreOriginal,
+        () => {
+          try {
+            owner.restoreOriginalForRecovery(JSON.parse(draft.value));
+          } catch {
+            owner.restoreOriginalForRecovery(null);
+          }
+        },
+      ),
     );
-    if (state.intent)
+    if (state.intent && !budget)
       dialog.append(node('pre', JSON.stringify(state.intent, null, 2)));
     if (state.acknowledgement)
-      dialog.append(
+      technical.append(
         node(
           'p',
           `QUEUE_ACK · ${state.acknowledgement.status} · ${state.acknowledgement.commandId} · ${state.acknowledgement.commandFingerprint}`,
         ),
       );
-    if (state.status === 'UNKNOWN' || state.canRecover) {
+    if (!budget && (state.status === 'UNKNOWN' || state.canRecover)) {
       dialog.append(
         node(
           'p',
-          'Write outcome unknown. Do not resubmit. Only recover by the original command/key/fingerprint from the authorized workflow.',
+          state.status === 'UNKNOWN'
+            ? 'Write outcome unknown. Do not resubmit. Recover with the exact original request; a fingerprint is not required.'
+            : 'The command is registered. Read its original server status; this does not replay the command.',
         ),
-      );
-      const fingerprint = document.createElement('input');
-      fingerprint.setAttribute('aria-label', 'Original command fingerprint');
-      dialog.append(
-        fingerprint,
         button(
-          'Bind original FINAL reference — no replay',
+          'Recover original server status — no replay',
           'recover',
           state.canRecover,
-          () => {
-            if (state.intent)
-              owner.recoverLookup({
-                commandId: state.intent.request.commandId,
-                idempotencyKey: state.intent.request.idempotencyKey,
-                commandFingerprint: fingerprint.value,
-              });
-          },
+          () => owner.recoverOriginal(),
         ),
       );
     }
+    if (state.runtimePage) {
+      const page = state.runtimePage;
+      technical.append(
+        node(
+          'p',
+          `Verified authorized World head ${page.authority.readback.worldVersion} · ${page.dataset} · ${page.status} · ${page.page.returned} rows`,
+        ),
+        node(
+          'p',
+          `Source ${page.source.sourceVersion} · Origin ${String(page.source.originWorldVersion ?? page.source.worldVersion)} · ${String(page.source.dataNature)}. Source rows are not a grant or a source preflight.`,
+        ),
+      );
+      if (state.receipt && !budget)
+        dialog.append(
+          node(
+            'p',
+            'Durable receipt and authorized page are separate evidence. No action completion is inferred without a matching current result.',
+          ),
+        );
+    }
     if (state.receipt)
-      dialog.append(
+      technical.append(
         node(
           'p',
           `Durable FINAL · ${state.receipt.outcome} · ${state.receipt.reasonCode ?? 'No rejection reason'} · ${state.receipt.commandId}`,
+        ),
+      );
+    if (state.previousFinal)
+      technical.append(
+        node(
+          'p',
+          `Previous FINAL · ${state.previousFinal.receipt.outcome} · ${state.previousFinal.receipt.commandId} · ${state.previousFinalCode ?? 'Retained in this session'}`,
+        ),
+        node('pre', JSON.stringify(state.previousFinal.original, null, 2)),
+        button(
+          'Read previous FINAL — no replay',
+          'previous-final',
+          state.canRecoverPreviousFinal,
+          () => owner.recoverPreviousFinal(),
         ),
       );
     if (state.model) {
@@ -216,15 +838,47 @@ export function installOfficeCommand(
             'Original command DecisionResult is not correlated or the receipt did not commit. No decision completion claimed.',
           ),
         );
-    } else if (state.receipt)
+    } else if (!budget && state.receipt && !state.runtimePage)
       dialog.append(
         node(
           'p',
           'Receipt is recorded; authorized current readback unavailable. No current result inferred.',
         ),
       );
+    const primary = state.canRecover
+      ? (['查询这笔申请', 'recover', () => owner.recoverOriginal()] as const)
+      : state.canBeginNextRequest
+        ? ([
+            state.receipt?.outcome === 'COMMITTED'
+              ? '准备下一笔'
+              : '准备新申请',
+            'next-request',
+            () => owner.beginNextRequest(),
+          ] as const)
+        : state.canConfirm
+          ? (['确认提交', 'confirm', () => owner.confirm()] as const)
+          : state.canReview
+            ? (['核对申请', 'review', () => owner.review()] as const)
+            : state.canRead
+              ? (['刷新页面', 'refresh', () => owner.refresh()] as const)
+              : null;
+    if (budget) {
+      if (primary) {
+        const [label, key, action] = primary;
+        const el = button(label, key, true, action);
+        dialog.append(el);
+        if (focused === key) el.focus();
+      }
+      dialog.append(details);
+    }
     for (const [label, key, enabled, action] of [
       ['Manual refresh', 'refresh', state.canRead, () => owner.refresh()],
+      [
+        'Read current state → prepare next request',
+        'next-request',
+        state.canBeginNextRequest,
+        () => owner.beginNextRequest(),
+      ],
       ['Review exact intent', 'review', state.canReview, () => owner.review()],
       [
         'Confirm once → queue',
@@ -240,7 +894,7 @@ export function installOfficeCommand(
       ],
       ['Disconnect', 'disconnect', state.canRead, () => owner.disconnect()],
       [
-        'Close',
+        budget ? '关闭' : 'Close',
         'close',
         true,
         () => {
@@ -254,9 +908,53 @@ export function installOfficeCommand(
         },
       ],
     ] as const) {
+      if (budget && key !== 'close' && key !== 'disconnect') continue;
       const el = button(label, key, enabled, action);
-      dialog.append(el);
+      if (budget && key === 'disconnect') {
+        el.textContent = '断开连接';
+        details.append(el);
+      } else dialog.append(el);
       if (focused === key) el.focus();
+    }
+  }
+  function budgetStatus(state: ReturnType<typeof controller.getState>) {
+    if (state.receipt?.outcome === 'COMMITTED') {
+      if (state.status === 'FINAL_VERIFIED' && state.currentHead)
+        return '预算申请已生效，页面已更新。';
+      return state.status === 'READING'
+        ? '预算申请已生效，页面正在更新。'
+        : '预算申请已生效，当前页暂不可用。';
+    }
+    if (state.receipt?.outcome === 'AUTHORIZATION_REVOKED')
+      return '预算申请未获批准，原提交权限已撤销。';
+    if (state.receipt?.outcome === 'REJECTED' || state.status === 'REJECTED') {
+      const reason = state.receipt?.reasonCode ?? state.code;
+      if (reason === 'WORLD_VERSION_MISMATCH')
+        return '预算申请未获批准。世界版本已更新，请重新核对。';
+      return '预算申请未获批准。请查看详情中的原因。';
+    }
+    switch (state.status) {
+      case 'SUBMITTING':
+        return '正在提交预算申请。';
+      case 'UNKNOWN':
+        return '提交结果待确认，请查询这笔申请。';
+      case 'LOOKING_UP_FINAL':
+        return '正在查询这笔申请。';
+      case 'QUEUE_ACK':
+        return '已收到预算申请，正在处理。';
+      case 'REVIEW_REQUIRED':
+        return '申请已载入，请核对提交内容。';
+      case 'REVIEWED':
+        return '请确认提交这笔预算申请。';
+      case 'READING':
+        return '正在读取当前授权页面。';
+      case 'CURRENT_AUTHORIZED_HEAD':
+      case 'CURRENT':
+        return '当前授权页面已就绪。';
+      case 'UNAVAILABLE':
+        return '当前页面暂不可用。';
+      default:
+        return '请读取当前授权页面。';
     }
   }
   function notify() {
@@ -297,10 +995,17 @@ export function installOfficeCommand(
       }
       if (trigger && !document.body.contains(trigger)) removePrivateShell();
       if (!trigger || !dialog) {
-        trigger = button('Office intent', 'open', true, () => {
-          if (dialog && !dialog.open) dialog.showModal();
-          reconcile(true);
-        });
+        trigger = button(
+          currentView()?.role === 'finance'
+            ? '财政预算与首日换汇'
+            : 'Office intent',
+          'open',
+          true,
+          () => {
+            if (dialog && !dialog.open) dialog.showModal();
+            reconcile(true);
+          },
+        );
         trigger.dataset.officeCommandEntry = '';
         trigger.className = 'national-atlas';
         tools.append(trigger);
@@ -318,7 +1023,10 @@ export function installOfficeCommand(
         });
         const surface = dialog;
         surface.addEventListener('close', () => {
-          if (!surface.open) clearPrivateContent(surface);
+          if (!surface.open) {
+            controller.closeSocialServiceCreate();
+            clearPrivateContent(surface);
+          }
         });
         root.append(dialog);
         redraw = true;
@@ -345,6 +1053,51 @@ export function installOfficeCommand(
     notify();
   });
   sync();
+  document.addEventListener?.(
+    'click',
+    (event) => {
+      const role = currentView()?.role,
+        moduleId =
+          role === 'social'
+            ? SOCIAL_EMPLOYMENT_CREATE_CATALOG_BINDING.moduleId
+            : INDUSTRY_RUN_CATALOG_BINDING.moduleId,
+        selector =
+          role === 'captain'
+            ? '[data-module-card="captain-8"],[data-cmd="module"][data-id="captain-8"],[data-cmd="country-module"][data-id="captain-8"],[data-cmd="country-module"][data-module="captain-8"],[data-cmd="country-room"][data-module="captain-8"]'
+            : role === 'industry' || role === 'social'
+              ? `[data-module-card="${moduleId}"],[data-cmd="module"][data-id="${moduleId}"],[data-cmd="country-module"][data-id="${moduleId}"],[data-cmd="country-module"][data-module="${moduleId}"],[data-cmd="country-room"][data-module="${moduleId}"]`
+              : null;
+      const target =
+        selector && event.target instanceof Element
+          ? event.target.closest<HTMLElement>(selector)
+          : null;
+      if (!target || !root?.contains(target)) return;
+      sync();
+      const state = controller.getState();
+      if (state.status === 'MISSING' || state.status === 'DENIED' || !dialog)
+        return; // existing explicit blocked-module UI remains in force
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      dialog.showModal();
+      const owner = controller,
+        lifetime = generation,
+        surface = dialog;
+      void owner
+        .refresh()
+        .then(async () => {
+          if (
+            role === 'social' &&
+            surface.open &&
+            active(owner, lifetime, surface)
+          )
+            await owner.openSocialServiceCreate();
+        })
+        .finally(() => {
+          reconcile(true);
+        });
+    },
+    true,
+  );
   return Object.freeze({
     connect(binding: OfficeCommandBinding) {
       sync();

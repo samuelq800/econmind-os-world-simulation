@@ -1,0 +1,16 @@
+
+ RUN  v5.0.0 /workspace/econmind-os-world-simulation
+
+ ✓ tests/world-core/postwar-social-employment-creation-ordinal-native.test.ts (4 tests) 22987ms
+   ✓ isolated native Social absolute personnel-range contract (4)
+     ✓ reproduces old rejection, repairs exactly one body and preserves licence idempotence and role denial 4159ms
+     ✓ rejects actual admitted TEST_ONLY source violation BEFORE_START without licence rows 4826ms
+     ✓ rejects actual admitted TEST_ONLY source violation AFTER_END without licence rows 6461ms
+     ✓ rejects actual admitted TEST_ONLY source violation OVERLAPPING_DUTIES without licence rows 7540ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  03:30:32
+   Duration  25.43s (tests 91%, transform 7%, import 2%)
+
+JSON report written to /workspace/recovery-evidence-20261113/final-native-fixed.json

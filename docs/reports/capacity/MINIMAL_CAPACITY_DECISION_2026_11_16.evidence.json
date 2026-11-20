@@ -1,0 +1,303 @@
+{
+  "schemaVersion": "MINIMAL_CAPACITY_DECISION_20261116_V1",
+  "status": "FAILED_MIXED_LOAD_NOT_CAPACITY_ACCEPTANCE",
+  "productCommit": "76df08b3968e517a16ccddc5d660df7f6f998436",
+  "preparationFixCommit": "39b38bb6",
+  "environment": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "applicationCpu": 2,
+    "applicationGiB": 6,
+    "postgresCpu": 1,
+    "postgresGiB": 3,
+    "nativeRolePoolMax": 1,
+    "identities": 2,
+    "targetReadsPerSecond": 20,
+    "targetWritesPerMinute": 20,
+    "clockStarted": false
+  },
+  "single": {
+    "requests": 5,
+    "errors": 0,
+    "p95Ms": 1735.0238349998835,
+    "p99Ms": 1735.0238349998835,
+    "maxMs": 1735.0238349998835
+  },
+  "singleCommand": {
+    "phase": "single",
+    "id": 1,
+    "elapsedMs": 3082.5525420000777,
+    "worldVersionAfter": "1",
+    "derived": {
+      "status": "PUBLISHED",
+      "commandId": "COMMAND_MINIMAL_1",
+      "countryId": "COUNTRY_01",
+      "head": {
+        "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+        "worldVersion": "1",
+        "eventSequence": "1"
+      },
+      "documentCount": 32,
+      "industryLabour": "PUBLISHED",
+      "captain": "PUBLISHED"
+    }
+  },
+  "mixed": {
+    "requests": 244,
+    "errors": 127,
+    "p95Ms": 10386.899870000081,
+    "p99Ms": 10456.4029649999,
+    "maxMs": 10482.23766900017
+  },
+  "mixedSuccessfulReads": {
+    "requests": 117,
+    "errors": 0,
+    "p95Ms": 10031.39303399995,
+    "p99Ms": 10118.414560999954,
+    "maxMs": 10215.26905500004
+  },
+  "injection": {
+    "plannedReads": 245,
+    "sentReads": 244,
+    "plannedWrites": 4,
+    "sentWrites": 1
+  },
+  "elapsedIncludingDrainMs": 22357.724006999983,
+  "firstErrors": [
+    {
+      "phase": "mixed",
+      "status": 503,
+      "ok": false,
+      "elapsedMs": 10146.969265999971,
+      "officeId": "SOCIAL",
+      "error": {
+        "code": "UPSTREAM_UNAVAILABLE",
+        "retryable": true
+      }
+    },
+    {
+      "phase": "mixed",
+      "status": 503,
+      "ok": false,
+      "elapsedMs": 10298.445169000188,
+      "officeId": "SOCIAL",
+      "error": {
+        "code": "UPSTREAM_UNAVAILABLE",
+        "retryable": true
+      }
+    },
+    {
+      "phase": "mixed",
+      "status": 503,
+      "ok": false,
+      "elapsedMs": 10325.823772000149,
+      "officeId": "SOCIAL",
+      "error": {
+        "code": "UPSTREAM_UNAVAILABLE",
+        "retryable": true
+      }
+    }
+  ],
+  "finalCounts": {
+    "worldVersion": "1",
+    "eventSequence": "1",
+    "commands": "1",
+    "receipts": "1",
+    "events": "1",
+    "batches": "0",
+    "inventory": "0",
+    "queues": "1"
+  },
+  "finalHead": {
+    "worldVersion": "1",
+    "eventSequence": "1"
+  },
+  "resources": [
+    {
+      "at": 1794825704178,
+      "rssKiB": 1296620,
+      "peakKiB": 2481376,
+      "cpuTicks": 30725,
+      "queue": [
+        {
+          "unfinished": "0"
+        }
+      ],
+      "resources": [
+        {
+          "BlockIO": "771MB / 1.38GB",
+          "CPUPerc": "101.35%",
+          "Container": "econmind-minimal-runner-20261116",
+          "ID": "e8d0ada8c55a",
+          "MemPerc": "32.91%",
+          "MemUsage": "1.975GiB / 6GiB",
+          "Name": "econmind-minimal-runner-20261116",
+          "NetIO": "77.8MB / 2.35MB",
+          "PIDs": "36"
+        },
+        {
+          "BlockIO": "46.2MB / 418MB",
+          "CPUPerc": "13.43%",
+          "Container": "econmind-postwar-reference-77fa2aab",
+          "ID": "34d31a8f08ba",
+          "MemPerc": "5.31%",
+          "MemUsage": "163.2MiB / 3GiB",
+          "Name": "econmind-postwar-reference-77fa2aab",
+          "NetIO": "0B / 0B",
+          "PIDs": "8"
+        }
+      ]
+    },
+    {
+      "at": 1794825708183,
+      "rssKiB": 1325628,
+      "peakKiB": 2481376,
+      "cpuTicks": 31197,
+      "queue": [
+        {
+          "unfinished": "0"
+        }
+      ],
+      "resources": [
+        {
+          "BlockIO": "772MB / 1.38GB",
+          "CPUPerc": "102.13%",
+          "Container": "econmind-minimal-runner-20261116",
+          "ID": "e8d0ada8c55a",
+          "MemPerc": "33.32%",
+          "MemUsage": "1.999GiB / 6GiB",
+          "Name": "econmind-minimal-runner-20261116",
+          "NetIO": "77.8MB / 2.35MB",
+          "PIDs": "35"
+        },
+        {
+          "BlockIO": "46.2MB / 418MB",
+          "CPUPerc": "12.51%",
+          "Container": "econmind-postwar-reference-77fa2aab",
+          "ID": "34d31a8f08ba",
+          "MemPerc": "5.31%",
+          "MemUsage": "163MiB / 3GiB",
+          "Name": "econmind-postwar-reference-77fa2aab",
+          "NetIO": "0B / 0B",
+          "PIDs": "8"
+        }
+      ]
+    },
+    {
+      "at": 1794825714166,
+      "rssKiB": 1346808,
+      "peakKiB": 2481376,
+      "cpuTicks": 31672,
+      "queue": [
+        {
+          "unfinished": "0"
+        }
+      ],
+      "resources": [
+        {
+          "BlockIO": "772MB / 1.38GB",
+          "CPUPerc": "94.97%",
+          "Container": "econmind-minimal-runner-20261116",
+          "ID": "e8d0ada8c55a",
+          "MemPerc": "33.92%",
+          "MemUsage": "2.035GiB / 6GiB",
+          "Name": "econmind-minimal-runner-20261116",
+          "NetIO": "77.8MB / 2.35MB",
+          "PIDs": "36"
+        },
+        {
+          "BlockIO": "46.2MB / 419MB",
+          "CPUPerc": "15.72%",
+          "Container": "econmind-postwar-reference-77fa2aab",
+          "ID": "34d31a8f08ba",
+          "MemPerc": "5.29%",
+          "MemUsage": "162.4MiB / 3GiB",
+          "Name": "econmind-postwar-reference-77fa2aab",
+          "NetIO": "0B / 0B",
+          "PIDs": "8"
+        }
+      ]
+    },
+    {
+      "at": 1794825718173,
+      "rssKiB": 1366332,
+      "peakKiB": 2481376,
+      "cpuTicks": 32132,
+      "queue": [
+        {
+          "unfinished": "0"
+        }
+      ],
+      "resources": [
+        {
+          "BlockIO": "772MB / 1.38GB",
+          "CPUPerc": "91.57%",
+          "Container": "econmind-minimal-runner-20261116",
+          "ID": "e8d0ada8c55a",
+          "MemPerc": "34.27%",
+          "MemUsage": "2.056GiB / 6GiB",
+          "Name": "econmind-minimal-runner-20261116",
+          "NetIO": "77.8MB / 2.35MB",
+          "PIDs": "36"
+        },
+        {
+          "BlockIO": "46.2MB / 419MB",
+          "CPUPerc": "18.88%",
+          "Container": "econmind-postwar-reference-77fa2aab",
+          "ID": "34d31a8f08ba",
+          "MemPerc": "5.29%",
+          "MemUsage": "162.6MiB / 3GiB",
+          "Name": "econmind-postwar-reference-77fa2aab",
+          "NetIO": "0B / 0B",
+          "PIDs": "8"
+        }
+      ]
+    }
+  ],
+  "coldStartupMs": 290444.451829,
+  "sourceEvidence": {
+    "files": [
+      {
+        "path": "/workspace/.cloud-setup/evidence/child-correct/candidate-seed.json",
+        "sha256": "835f9ec096746e3bc8f8cd1a7235fc7a2af0daee06d4ceeedff1fdff99d0262f",
+        "bytes": 125315829
+      },
+      {
+        "path": "/workspace/.cloud-setup/evidence/parent-correct/final-seed.json",
+        "sha256": "ee2f777126e9050ce7139e2d9d9e24d2ec7305de95b8380d3e4c35fc4edb314f",
+        "bytes": 124697345
+      },
+      {
+        "path": "/workspace/.cloud-setup/evidence/child-correct/receipts.json",
+        "sha256": "7d37e721da1021b290d8a1464e4fec096046efe623c2a5d12ee719a28fba5ae6",
+        "bytes": 644672
+      }
+    ],
+    "childFingerprint": "sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a",
+    "parentFingerprint": "sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274",
+    "receiptCount": 70,
+    "industryExecution": "GENUINE_COMPONENT_CONFIGURED_COMMANDS_NOT_YET_EXECUTED"
+  },
+  "borrowersClosed": true,
+  "preparationIssues": [
+    "Initial parent generated with wrong value date; discarded before admission",
+    "Historical forward source pin checked during fresh supplement installation; fixed",
+    "Failed preparation cleanup removed baseline; attempted reuse failed before workload; rebuilt from existing source files"
+  ],
+  "diagnosis": {
+    "confirmed": "Read pool connection acquisition timeouts; command request returned 503 before new commit",
+    "unconfirmed": [
+      "Unique SQL or synchronization root cause",
+      "Production pool configuration capacity",
+      "Hardware improvement benefit"
+    ],
+    "databaseDiagnostics": 93
+  },
+  "notRun": [
+    "Full five-minute load after early failure",
+    "30-minute test",
+    "Restart recovery",
+    "Hardware comparison",
+    "Independent review"
+  ]
+}

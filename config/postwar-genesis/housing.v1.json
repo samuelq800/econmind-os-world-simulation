@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "postwar-housing-policy.v1",
+  "classification": "GENERATED_POLICY",
+  "authorityRef": "PROJECT_OWNER_2026_10_28_142754_POSTWAR_GENESIS",
+  "authorityInstruction": "保留现有国情与资源差异，补建工资、学生和医疗需求、住房与警务的开局规则，校验人口、资金和容量后再采用。",
+  "damage": {
+    "baseBps": 600,
+    "stockBufferReferenceDays": 120,
+    "stockBufferDeficitWeightBps": 2000,
+    "hazardWeightBps": 1000,
+    "accessDeficitWeightBps": 500,
+    "maximumBps": 3000,
+    "basis": "Postwar model calibration, not observed destruction: country inventory buffer shortfall against 120 model days plus regional max(flood,storm) exposure and settlement access deficit. previousPopulation is a source revision reference, never a war-casualty history. Existing stock is retained; damaged units are temporarily uninhabitable."
+  },
+  "accessVacancy": {
+    "baseBps": 200,
+    "accessDeficitWeightBps": 300,
+    "basis": "Frictional vacancy among habitable units; not an additional household cohort or new stock."
+  },
+  "tenure": {
+    "renterBaseBps": 2000,
+    "renterUrbanWeightBps": 4000,
+    "publicStockBaseBps": 500,
+    "publicStockUrbanWeightBps": 1500,
+    "basis": "Allocate only previously unresolved aggregate ordinary stock at t0. Preserve separately established titles. HOUSEHOLDS owns the private pool; GOV owns the generated public pool. Owner occupiers, private/public renters and displaced households are mutually exclusive."
+  },
+  "rent": {
+    "privateMeanWageBps": 2400,
+    "publicMeanWageBps": 1200,
+    "decimalPlaces": 6,
+    "rounding": "FLOOR_WITH_EXPLICIT_RATIONAL_REMAINDER",
+    "period": "INHERIT_WAGE_SIM_YEAR",
+    "currency": "INHERIT_WAGE_ACTUAL_FX_BINDING",
+    "accrual": "PROSPECTIVE_AFTER_T0_NO_BACKRENT_NO_OPENING_DEBT",
+    "privateSettlement": "REQUIRES_DISTINCT_BENEFICIAL_GROUPS_AND_ACCOUNTS_UNDER_REVIEWED_CORE_CONTRACT",
+    "basis": "Per occupied rental household annual service price calibrated to the country mean annual wage. Model obligation schedule only; no claim that historical rents were observed or paid."
+  }
+}

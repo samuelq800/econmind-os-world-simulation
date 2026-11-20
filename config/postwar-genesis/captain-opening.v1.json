@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "postwar-captain-opening-policy-v1",
+  "policyId": "POSTWAR_CAPTAIN_OPENING_70_7X10_V1",
+  "provenanceKind": "GENERATED_POLICY",
+  "adoptionReceiptPath": "config/postwar-genesis/captain-opening-adoption.v1.json",
+  "adoptionReceiptSha256": "fe4aed9252f7555eade1b52ebf66b6c8a510cfb7e723bc6194e93a0bdfe7ce01",
+  "scope": "NEW_UNEXECUTED_SCENARIO_ONLY",
+  "unit": "political_capital",
+  "countryCount": "70",
+  "opening": "70",
+  "generated": "0",
+  "total": "70",
+  "available": "70",
+  "spent": "0",
+  "closing": "70",
+  "buckets": [
+    {
+      "bucket": "FISCAL_REFORM",
+      "amount": "10"
+    },
+    {
+      "bucket": "INDUSTRIAL_STRATEGY",
+      "amount": "10"
+    },
+    {
+      "bucket": "TRADE_NEGOTIATIONS",
+      "amount": "10"
+    },
+    {
+      "bucket": "SOCIAL_REFORM_PROTECTION",
+      "amount": "10"
+    },
+    {
+      "bucket": "STRATEGIC_PROJECT_SUPPORT",
+      "amount": "10"
+    },
+    {
+      "bucket": "CRISIS_RESPONSE",
+      "amount": "10"
+    },
+    {
+      "bucket": "UNALLOCATED_CRISIS_RESERVE",
+      "amount": "10"
+    }
+  ],
+  "automaticGeneration": "NOT_ENABLED",
+  "existingWorldReset": "FORBIDDEN",
+  "financialPostings": "0",
+  "inventoryPostings": "0",
+  "preserves": "EXISTING_COUNTRY_RESOURCES_POPULATION_INSTITUTIONS_MONEY_AND_FX"
+}

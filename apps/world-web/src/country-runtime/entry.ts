@@ -14,6 +14,7 @@ import { installFinancialIntake } from '../financial-intake/view.js';
 import { installTrustedHost } from '../trusted-host/bootstrap.js';
 import { installOfficeCommand } from '../office-command/view.js';
 import { installFormalSessionAdapter } from '../trusted-host/formal-session-adapter.js';
+import { installMainOfficeFields } from '../main-office-fields/binder.js';
 
 /** Mounted by the selected static page; no prototype/fixture entry is imported. */
 export function installCountryRuntime(document: Document, host: Window) {
@@ -322,6 +323,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     financial: window.EconMindFinancialIntake,
     office: window.EconMindOfficeCommand,
     localTrade: window.EconMindCountryRuntime,
+    mainFields: installMainOfficeFields(document, window),
   });
   window.EconMindFormalSession = installFormalSessionAdapter(
     document,

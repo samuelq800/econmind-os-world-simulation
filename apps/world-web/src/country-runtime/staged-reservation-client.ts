@@ -81,6 +81,7 @@ export function createStagedReservationClient(options: {
     storage = localPendingStorage(options.pendingStorage),
     prepared = options.prepared;
   let retired = false;
+  const active = new Set<AbortController>();
   const i = options.identity;
   const scopeFields = [
     'STAGED_INVENTORY_RESERVATION',
@@ -131,68 +132,107 @@ export function createStagedReservationClient(options: {
     body: object,
   ): Promise<{ status: number; body: unknown } | null> {
     if (!origin || !live()) return null;
-    let token: string | null;
-    try {
-      token = await options.getAccessToken();
-    } catch {
-      return null;
-    }
-    if (!token || !/^[A-Za-z0-9._~-]+$/u.test(token) || !live()) return null;
     const timeout = new AbortController(),
       timer = setTimeout(() => timeout.abort(), 10_000);
-    try {
-      const response = await (options.fetcher ?? fetch)(`${origin}${path}`, {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify(body),
-        cache: 'no-store',
-        credentials: 'omit',
-        redirect: 'error',
-        signal: timeout.signal,
-      });
-      if (
-        !live() ||
-        response.redirected ||
-        !response.headers.get('content-type')?.startsWith('application/json') ||
-        !response.body
-      )
-        return null;
-      const reader = response.body.getReader(),
-        chunks: Uint8Array[] = [];
-      let length = 0;
+    active.add(timeout);
+    let cancel: () => void = () => undefined;
+    const cancelled = new Promise<null>((resolve) => {
+      cancel = () => resolve(null);
+    });
+    timeout.signal.addEventListener('abort', cancel, { once: true });
+    async function execute(): Promise<{
+      status: number;
+      body: unknown;
+    } | null> {
       try {
-        while (true) {
-          const next = await reader.read();
-          if (next.done) break;
-          length += next.value.byteLength;
-          if (length > 1_000_000) {
-            await reader.cancel();
-            return null;
-          }
-          chunks.push(next.value);
+        const token = await options.getAccessToken();
+        if (
+          !token ||
+          token.length > 8192 ||
+          !/^[A-Za-z0-9._~-]+$/u.test(token) ||
+          !live() ||
+          timeout.signal.aborted
+        )
+          return null;
+        const response = await (options.fetcher ?? fetch)(`${origin}${path}`, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${token}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify(body),
+          cache: 'no-store',
+          credentials: 'omit',
+          redirect: 'error',
+          signal: timeout.signal,
+        });
+        if (
+          !live() ||
+          timeout.signal.aborted ||
+          response.redirected ||
+          (response.url && response.url !== `${origin}${path}`)
+        )
+          return null;
+        // Authentication failures need no success envelope (or readable body).
+        if (response.status === 401 || response.status === 403) {
+          void response.body?.cancel().catch(() => undefined);
+          return { status: response.status, body: null };
         }
-      } finally {
-        reader.releaseLock();
-      }
-      const bytes = new Uint8Array(length);
-      let offset = 0;
-      for (const chunk of chunks) {
-        bytes.set(chunk, offset);
-        offset += chunk.length;
-      }
-      return live()
-        ? {
-            status: response.status,
-            body: JSON.parse(new TextDecoder().decode(bytes)) as unknown,
+        if (
+          !response.headers
+            .get('content-type')
+            ?.startsWith('application/json') ||
+          !response.body
+        )
+          return null;
+        const reader = response.body.getReader(),
+          chunks: Uint8Array[] = [];
+        const cancelReader = () => {
+          void reader.cancel().catch(() => undefined);
+        };
+        timeout.signal.addEventListener('abort', cancelReader, { once: true });
+        let length = 0;
+        try {
+          while (true) {
+            const next = await reader.read();
+            if (!live() || timeout.signal.aborted) return null;
+            if (next.done) break;
+            length += next.value.byteLength;
+            if (length > 1_000_000) {
+              return null;
+            }
+            chunks.push(next.value);
           }
-        : null;
-    } catch {
-      return null;
+        } finally {
+          timeout.signal.removeEventListener('abort', cancelReader);
+          void reader.cancel().catch(() => undefined);
+          reader.releaseLock();
+        }
+        const bytes = new Uint8Array(length);
+        let offset = 0;
+        for (const chunk of chunks) {
+          bytes.set(chunk, offset);
+          offset += chunk.length;
+        }
+        return live() && !timeout.signal.aborted
+          ? {
+              status: response.status,
+              body: JSON.parse(
+                new TextDecoder('utf-8', { fatal: true }).decode(bytes),
+              ) as unknown,
+            }
+          : null;
+      } catch {
+        return null;
+      }
+    }
+    try {
+      return await Promise.race([execute(), cancelled]);
     } finally {
       clearTimeout(timer);
+      active.delete(timeout);
+      timeout.signal.removeEventListener('abort', cancel);
+      timeout.abort();
     }
   }
   function lifecycle(
@@ -200,8 +240,8 @@ export function createStagedReservationClient(options: {
   ): ReservationLifecycle {
     const body = record(response?.body),
       state = record(body?.state);
-    if (body?.schemaVersion !== 'world-staged-transfer-v1') return 'UNKNOWN';
     if (response?.status === 401 || response?.status === 403) return 'DENIED';
+    if (body?.schemaVersion !== 'world-staged-transfer-v1') return 'UNKNOWN';
     if (body.ok !== true || response?.status !== 200) return 'UNKNOWN';
     if (state?.status === 'NOT_FOUND') return 'NOT_FOUND';
     if (state?.status === 'UNKNOWN') return 'UNKNOWN';
@@ -229,6 +269,8 @@ export function createStagedReservationClient(options: {
     pending: () => readPendingMarker(storage),
     retire() {
       retired = true;
+      for (const controller of active) controller.abort();
+      active.clear();
       readClient.cache.revokeAuthorization();
     },
     async inspect() {

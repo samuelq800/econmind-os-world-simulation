@@ -1,3 +1,4 @@
+import { singleProbe } from './bootstrap-http-probe.mjs';
 import { execFile, spawn } from 'node:child_process';
 import { constants as osConstants } from 'node:os';
 import path from 'node:path';
@@ -5,6 +6,10 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 import { assertSafeEnvironment } from './environment-policy.mjs';
+import {
+  readProcessParentPid,
+  watchProcessOwnership,
+} from './process-parent-pid.mjs';
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(
@@ -135,46 +140,6 @@ function readConfiguration(environment = process.env) {
 
 function serviceUrl(service, pathName) {
   return `http://${connectHost(service.host)}:${service.port}${pathName}`;
-}
-
-async function readSmallJson(response) {
-  if (!response.body) return undefined;
-  const reader = response.body.getReader();
-  const chunks = [];
-  let length = 0;
-  try {
-    while (true) {
-      const result = await reader.read();
-      if (result.done) break;
-      length += result.value.byteLength;
-      if (length > 4_096) throw new Error('Operational response too large');
-      chunks.push(result.value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
-}
-
-async function singleProbe(url, validate, timeoutMs) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  timeout.unref();
-  try {
-    const response = await fetch(url, {
-      cache: 'no-store',
-      credentials: 'omit',
-      method: 'GET',
-      redirect: 'error',
-      signal: controller.signal,
-    });
-    if (response.status !== 200) return false;
-    return validate(await readSmallJson(response));
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timeout);
-  }
 }
 
 function isObject(value) {
@@ -383,21 +348,7 @@ async function parentIsPnpm(parentPid) {
 }
 
 async function processParentPid(pid) {
-  if (process.platform === 'win32') return pid;
-  try {
-    const { stdout } = await execFileAsync('ps', [
-      '-p',
-      String(pid),
-      '-o',
-      'ppid=',
-    ]);
-    const parentPid = Number(stdout.trim());
-    return Number.isSafeInteger(parentPid) && parentPid > 0
-      ? parentPid
-      : undefined;
-  } catch {
-    return undefined;
-  }
+  return readProcessParentPid(pid);
 }
 
 function spawnServices(environment, onExit) {
@@ -516,13 +467,12 @@ async function run() {
     phase = 'WAITING_FOR_DEPENDENCIES';
     emit('BOOTSTRAP_WAITING');
 
-    parentWatch = setInterval(() => {
-      void parentStillOwnsBootstrap().then((stillOwned) => {
-        if (!stillOwned) {
-          requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' });
-        }
-      });
-    }, 25);
+    parentWatch = watchProcessOwnership({
+      isDirectParent: () =>
+        originalParentIsPnpm && process.ppid === originalParentPid,
+      observeOwnership: parentStillOwnsBootstrap,
+      onLost: () => requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' }),
+    });
 
     const readiness = (async () => {
       const deadline = Date.now() + configuration.startupTimeoutMs;
@@ -598,7 +548,7 @@ async function run() {
     phase = 'SHUTTING_DOWN';
     stopping = true;
     emit('BOOTSTRAP_SHUTDOWN_START');
-    if (parentWatch !== undefined) clearInterval(parentWatch);
+    if (parentWatch !== undefined) parentWatch();
     const cleanup = await cleanupChildren(
       children,
       configuration.cleanupTimeoutMs,
@@ -618,7 +568,7 @@ async function run() {
       ready_emitted: readyEmitted,
     });
   } catch (error) {
-    if (parentWatch !== undefined) clearInterval(parentWatch);
+    if (parentWatch !== undefined) parentWatch();
     outcome = 'FAILED';
     failure = {
       failed_service: 'bootstrap-stack',

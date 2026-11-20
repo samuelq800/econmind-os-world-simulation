@@ -1,0 +1,80 @@
+name: Postwar admitted-read immutable candidate (dry-run only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact 40-character candidate commit; never a branch or tag
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: postwar-read-release-preparation
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Require immutable source before checkout
+        shell: bash
+        run: |
+          [[ "$CANDIDATE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$CANDIDATE_SHA" != '0000000000000000000000000000000000000000'
+      - uses: actions/checkout@v5
+        with:
+          path: release-tooling
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          repository: samuelq800/econmind-os-world-simulation
+          ref: ${{ inputs.candidate_sha }}
+          path: candidate
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          package-manager-cache: false
+      - name: Install frozen tooling and candidate dependencies
+        run: |
+          pnpm --dir release-tooling install --frozen-lockfile
+          pnpm --dir candidate install --frozen-lockfile
+      - name: Verify preparation guards
+        working-directory: release-tooling
+        run: pnpm exec vitest run tests/foundation/postwar-read-release-preparation.test.ts
+      - name: Build the exact candidate modules
+        run: |
+          pnpm --dir candidate --filter @econmind/core build
+          pnpm --dir candidate --filter @econmind/world-worker build
+          pnpm --dir candidate --filter @econmind/world-api build
+      - name: Install the existing pinned CLI outside source
+        run: npm install --prefix "$RUNNER_TEMP/postwar-cloudflare-tools" --no-audit --no-fund wrangler@4.148.0
+      - name: Actual API bundle and declaration preflight, without cloud credentials
+        run: |
+          node release-tooling/tools/office-connection/postwar-read-release-preparation.mjs \
+            --source "$GITHUB_WORKSPACE/candidate" \
+            --commit "$CANDIDATE_SHA" \
+            --output "$RUNNER_TEMP/postwar-read-preparation" \
+            --tool-root "$RUNNER_TEMP/postwar-cloudflare-tools"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: postwar-read-dry-run-${{ inputs.candidate_sha }}
+          path: |
+            ${{ runner.temp }}/postwar-read-preparation/preparation.json
+            ${{ runner.temp }}/postwar-read-preparation/dry-run.log
+            ${{ runner.temp }}/postwar-read-preparation/bundle-meta.json
+            ${{ runner.temp }}/postwar-read-preparation/bundle/
+          if-no-files-found: warn
+# Deliberately no publish job, credentials, environment approval claim, DB access,
+# workflow dispatch, role grant or simulation/Clock activation.

@@ -14,7 +14,8 @@ export type ExecutorPoolRoute =
   | '/v1/office-command'
   | '/v1/financial-intake'
   | '/v1/command-recovery'
-  | '/v1/current-seat';
+  | '/v1/current-seat'
+  | '/v1/postwar-office-runtime';
 /** Resource plumbing only. These are explicit server-owned values, not formal
  * binding names or runtime authority. Production composition remains HOLD. */
 export interface ExecutorRouteConnections {
@@ -40,6 +41,7 @@ export async function withCloudflareExecutorRoutePools<Result>(
       '/v1/financial-intake',
       '/v1/command-recovery',
       '/v1/current-seat',
+      '/v1/postwar-office-runtime',
     ].includes(route) ||
     typeof operation !== 'function'
   )

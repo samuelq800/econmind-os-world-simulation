@@ -1268,7 +1268,14 @@ describe('mandatory fresh PLAN shared commit source boundary (controlled protoco
           throw Error('NO_PLAN_PURPOSE_FOR_MATCH');
         },
       });
-    expect((await r.repository.commit(c)).source).toBe('NEW_COMMIT');
+    await expect(r.repository.commit(c)).rejects.toMatchObject({
+      code: 'TRANSITION_EVIDENCE_INVALID',
+    });
     expect(r.calls).not.toContain('SOURCE_CURRENT');
+    expect(
+      r.calls.some((sql) =>
+        sql.includes('insert into world_v2.authoritative_event'),
+      ),
+    ).toBe(false);
   });
 });

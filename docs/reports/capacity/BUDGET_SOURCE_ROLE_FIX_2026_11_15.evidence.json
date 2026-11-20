@@ -1,0 +1,318 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "CAPACITY_DIAGNOSTIC_BUDGET_ROLE_FIX",
+  "commit": "90d1cc1ff3287cf4ae92a1f41ca1d9405a12997d",
+  "base_commit": "b51ac3c43a27081f70ac3e70299ea2a8a549db38",
+  "branch": "codex/fix-finance-budget-reader-scope-20261115",
+  "status": "BLOCKED",
+  "risk_class": "P0",
+  "highest_affected_boundary": "Worker source-function execution and authorization role delegation",
+  "verification": {
+    "independent_review": "PENDING",
+    "merge_allowed": false,
+    "formal_gate_advanced": false,
+    "capacity_100_sessions": "NOT_RUN"
+  },
+  "environment": {
+    "name": "local",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4",
+      "postgres": "16.15",
+      "pglite": "0.5.8"
+    },
+    "production_access": false,
+    "background_only": true,
+    "lockfile_sha256": "95877b09a3ea23080417c0af6b04b2a82adf13e246ca1fcfd6f90ab356dad0e9"
+  },
+  "commands": [
+    {
+      "command": "pnpm --filter @econmind/world-worker build",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Core and Worker builds; recursive Core/Testkit/Worker/API/Web typechecks"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-api build",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec vitest run <22 Finance budget/current-readback/cold-preparation files>",
+      "file_selection": "rg --files tests/world-core | Where-Object { $_ -match 'finance-budget.*\\.test\\.ts$|postwar-budget-current-readback-consumer\\.test\\.ts$|postwar-registered-cold-preparation-budget\\.test\\.ts$' }",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 388,
+      "skipped": 2,
+      "stdout_stderr_summary": "21 passed files; 1 explicit full-source native suite not enabled; skipped tests are not passing evidence"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/finance-budget-source-role-database.test.ts",
+      "environment_overrides": {
+        "ECONMIND_ENV": "local",
+        "V09_TEST_DATABASE_URL": "postgresql://postgres@127.0.0.1:58078/econmind_v09_budget_role_fix",
+        "V09_TEST_DATABASE_FINGERPRINT": "world-v2-v09-test-local"
+      },
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 6,
+      "stdout_stderr_summary": "Final native PG16.15 run, including retained source and restoration error protocol"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/finance-social-runtime-connection.test.ts tests/world-api/postwar-finance-social-connection.test.ts tests/world-core/postwar-captain-shared-consumer.test.ts tests/world-core/production-world-command-host-social-metadata.test.ts tests/world-core/finance-budget-source-role-database.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 62,
+      "stdout_stderr_summary": "Includes the 6 embedded role cases already counted in 388; do not double-count"
+    },
+    {
+      "command": "pnpm exec eslint apps/world-worker/src/persistence/finance-budget-source-role-database.ts apps/world-worker/src/runtime-preparation/finance-social-runtime-connection.ts tests/world-core/finance-budget-source-role-database.test.ts",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm format:check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "701 source files"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "695 source files; 143 Core files"
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "3958 files before report commit; run again after reports"
+    },
+    {
+      "command": "node scripts/foundation-gate-policy.mjs",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/validate-migrations.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "23 migrations; no migration/SQL proposal changes"
+    },
+    {
+      "command": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No runtime database configured; database mutation disallowed"
+    },
+    {
+      "command": "pnpm lint",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "1260 errors, 16 warnings; historical generated bundles in artifacts and Wrangler tmp are included by existing root lint configuration. Two reported examples are confirmed gitignored. No lint rules or baseline files changed to hide failures."
+    },
+    {
+      "command": "pnpm test:architecture",
+      "exit_code": 1,
+      "result": "FAIL",
+      "passed": 95,
+      "failed": 1,
+      "stdout_stderr_summary": "boundary-command.test.ts spawnSync('pnpm', ...) returned status=null on Windows. Existing test unchanged. Direct architecture scanners PASS; does not turn the full suite green."
+    },
+    {
+      "command": "pnpm exec tsc --noEmit",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Incorrect exploratory root invocation: repository has no root tsconfig.json. Replaced by actual pnpm typecheck, which passed."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS"
+    }
+  ],
+  "negative_cases": [
+    "Original NOINHERIT direct EXECUTE denial reproduced",
+    "Policy and capacity reads reach real missing-lease guard, SQLSTATE 42501; no source admission or lease fabricated",
+    "Near-match SQL, raw policy SELECT, publication function and other capability do not delegate",
+    "Unrelated login, publisher membership and unexpected installer session rejected",
+    "Both source and restoration failures retained; no successful read returned"
+  ],
+  "database_rls_evidence": [
+    "Existing function SQL and grants unchanged",
+    "Successful current authorization rows and negative-any-capability rows returned through real functions",
+    "Backend PID unchanged across delegation; role restored before subsequent query and after transaction rollback",
+    "No production Supabase connection, credential change or membership enrollment"
+  ],
+  "invariant_evidence": [
+    "Fixed exact-function allowlist only",
+    "Held transaction/executor preserved; reader role ends before worker writes",
+    "No new authoritative state, ledger writes, source publication or migration",
+    "NOINHERIT remains false for rolinherit; worker still lacks direct function EXECUTE"
+  ],
+  "test_harness_corrections": [
+    "PGlite installation uses exec for multi-statement scripts",
+    "Test worker receives schema USAGE matching existing runtime fixture; no EXECUTE grant added",
+    "Test installer restored explicitly: PGlite RESET SESSION AUTHORIZATION retains last session identity; native and embedded final runs pass"
+  ],
+  "unresolved_gaps": [
+    "P0 independent review pending",
+    "Full lint and architecture suite fail as recorded",
+    "Full fresh registered source -> HTTP command -> commit/receipt/restart not rerun after original data cleanup",
+    "100-session 30-minute mixed load, latency percentiles and server sizing remain NOT_RUN",
+    "Base feature branch is 238 commits and 1073 files ahead of main; main merge is not authorized by this narrow candidate review"
+  ],
+  "cleanup": {
+    "status": "PASS",
+    "container": "econmind-budget-role-fix-20261115",
+    "ownership_label": "econmind.task=budget-role-fix-20261115",
+    "storage": "512 MiB container limit; 384 MiB PostgreSQL tmpfs; no named volume",
+    "container_removed": true,
+    "image_reference_removed": true,
+    "production_touched": false,
+    "other_app_containers_preserved": true,
+    "regression_source_retained": "Permanent bug regression, included with fix; not temporary load data"
+  },
+  "branches": {
+    "current": "codex/fix-finance-budget-reader-scope-20261115",
+    "audit_before_push": {
+      "local": [
+        "codex/cloudflare-handoff-20261016",
+        "codex/finance-department-cap-20261108",
+        "codex/fix-finance-budget-reader-scope-20261115",
+        "codex/logistics-planning-scope-20261108",
+        "codex/office-next-connections-20261108",
+        "codex/office-operations-next-20261101",
+        "codex/power-service-integration-20261108",
+        "codex/refinery-source-coverage-20261108",
+        "codex/repository-audit-20261026",
+        "codex/social-plan-form-20261108",
+        "codex/social-service-browser-probe-20261108",
+        "codex/world-runtime-proof-reuse-20261104",
+        "main"
+      ],
+      "remote": [
+        "origin",
+        "origin/codex/a-cb1-omo-source-draft",
+        "origin/codex/a-financial-source-main-integration",
+        "origin/codex/a-non-host-financial-adoption",
+        "origin/codex/a-renewal-frozen-prefix-compat",
+        "origin/codex/api-command-version-fence",
+        "origin/codex/atlas-scene-separation-20261012",
+        "origin/codex/c-social-office-actions-20261026",
+        "origin/codex/c-trusted-runtime-ui-bridge",
+        "origin/codex/c-v10-authorization-guard-tests",
+        "origin/codex/c-v10-fixture-preparation-fix",
+        "origin/codex/c-v10-fixture-preparation-rebase",
+        "origin/codex/cloudflare-handoff-20261016",
+        "origin/codex/custom-domain-readiness-20261002-side",
+        "origin/codex/d-authorized-read-adapter",
+        "origin/codex/d-current-financial-position-consumer",
+        "origin/codex/d-industry-source-stage2a-v1",
+        "origin/codex/d-local-demo",
+        "origin/codex/d-office-decision-result-consumer",
+        "origin/codex/d-opt-in-local-read",
+        "origin/codex/d-read-denied-repair",
+        "origin/codex/d-unknown840-resume-20261018",
+        "origin/codex/e-captain-political-capital-slice",
+        "origin/codex/e-gateb-auth-chain",
+        "origin/codex/e-v09-cleanup-diagnostics",
+        "origin/codex/e-v09-disposable-ci-evidence",
+        "origin/codex/e-v10-read-projection-preparation-rebase",
+        "origin/codex/e-v10-vertical-slice-integration",
+        "origin/codex/e-v21-trade-logistics-foundation",
+        "origin/codex/e-world-api-staging-boundary-prep",
+        "origin/codex/f-0023-release-caller-policy",
+        "origin/codex/f-browser-pending-marker",
+        "origin/codex/f-durable-command-receipt",
+        "origin/codex/f-gov01-native-control-20261026",
+        "origin/codex/f-production-consumption-writer",
+        "origin/codex/f-social-isolated-host-20261026",
+        "origin/codex/f-v09-atomic-test-infra",
+        "origin/codex/f-v10-acceptance-runner-rebase",
+        "origin/codex/f-v10-v11-preparation",
+        "origin/codex/f-v25-fictional-map-preparation",
+        "origin/codex/f-v29-longrun-replay-harness",
+        "origin/codex/f-v29-replay-tz",
+        "origin/codex/f-v29-worker-driver-preparation",
+        "origin/codex/f-v29-worker-replay-evidence",
+        "origin/codex/f-v29-worker-two-deliveries",
+        "origin/codex/f-water-opening-adoption",
+        "origin/codex/finance-department-cap-20261108",
+        "origin/codex/g-intake-uncertain-rollback-repair",
+        "origin/codex/gate-b-browser-scenario-cases",
+        "origin/codex/gate-b-minimal-evidence",
+        "origin/codex/industry-utilities-integration-20261101",
+        "origin/codex/integration-20260924",
+        "origin/codex/local-bridge-cors",
+        "origin/codex/logistics-planning-scope-20261108",
+        "origin/codex/o-reviewed-runtime-roundtrip-integration",
+        "origin/codex/o-sparse-cas-f-reviewed-composition",
+        "origin/codex/o-v10-reservation-preparation",
+        "origin/codex/office-next-connections-20261108",
+        "origin/codex/office-operations-followup-20261030",
+        "origin/codex/office-operations-next-20261101",
+        "origin/codex/postgres-final-receipt-reader",
+        "origin/codex/postwar-day-one-fx-20261029",
+        "origin/codex/postwar-fx-mixed-replay-20261029",
+        "origin/codex/power-service-integration-20261108",
+        "origin/codex/refinery-source-coverage-20261108",
+        "origin/codex/repository-audit-20261026",
+        "origin/codex/reviewed-runtime-composition",
+        "origin/codex/social-plan-form-20261108",
+        "origin/codex/social-service-browser-probe-20261108",
+        "origin/codex/v11-2-labour-core",
+        "origin/codex/v11-3-owner-acceptance",
+        "origin/codex/v11-v18-kernel-integration",
+        "origin/codex/v12-1-preflight",
+        "origin/codex/v12-foundation-acceptance",
+        "origin/codex/v13-v14-foundation-acceptance",
+        "origin/codex/v15-v16-foundation-acceptance",
+        "origin/codex/v17-v18-foundation-acceptance",
+        "origin/codex/v21-1-global-order-book-foundation",
+        "origin/codex/v27-country-configuration-manifest-preparation",
+        "origin/codex/v27-provenance-calibration-adapter",
+        "origin/codex/v28-1-single-world-config-preparation",
+        "origin/codex/v28-v30-preparation",
+        "origin/codex/v29-existing-data-closure",
+        "origin/codex/v30-disposable-restore-preparation",
+        "origin/codex/world-core-v10-continuation",
+        "origin/codex/world-data-calibration",
+        "origin/codex/world-runtime-proof-reuse-20261104",
+        "origin/main"
+      ],
+      "mergedLocal": ["codex/cloudflare-handoff-20261016", "main"],
+      "mergedRemote": [
+        "origin",
+        "origin/codex/cloudflare-handoff-20261016",
+        "origin/main"
+      ]
+    },
+    "deleted_local": [
+      {
+        "name": "codex/world-hold-actions-publication-record",
+        "sha": "f75138ea01acacbf7424602cf14921329612cb49"
+      },
+      {
+        "name": "codex/world-runtime-actions",
+        "sha": "fcc1b88847d5f5680317d9c9534df969f6bf56ef"
+      },
+      {
+        "name": "codex/world-seed-delivery",
+        "sha": "7ad2313cedb26fe1ff8e854208c1965d3a80bb9b"
+      }
+    ],
+    "decision": "Owner requested branch cleanup. Deleted only branches verified ancestors of origin/main with remote refs absent after fetch. Kept cloudflare-handoff because checked out in another worktree; all unmerged remote branches retained.",
+    "deleted_remote": []
+  }
+}

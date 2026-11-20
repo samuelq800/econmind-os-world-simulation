@@ -1,0 +1,296 @@
+{
+  "canonicalSeedSha256": "75649466e384c0616ee84cdfbfa7636fa0bae09438e30a19ef69138059093e2f",
+  "classification": "FIXED_VERSION_DERIVATION_EVIDENCE_NOT_SIGNATURE",
+  "countries": [
+    {
+      "countryId": "COUNTRY_01",
+      "derivedSha256": "60a0b61221cb7409235ab79d3bfc9f463fdc756ee1548ac6717b20cf0e33982b"
+    },
+    {
+      "countryId": "COUNTRY_02",
+      "derivedSha256": "62bb67db26bb335ef39ce8678a8b5e225472095bfc7f773e467ba78944c47c8a"
+    },
+    {
+      "countryId": "COUNTRY_03",
+      "derivedSha256": "a7aa39c5b182aa739fa07b19590d428aa96b90f509421d0b766f7710b9b0a4df"
+    },
+    {
+      "countryId": "COUNTRY_04",
+      "derivedSha256": "aa8ad599d6b5a64d80e2842d879d24f7b034e28fb17f56e20b5d74768c070840"
+    },
+    {
+      "countryId": "COUNTRY_05",
+      "derivedSha256": "cc30818aab43c8b279cd4604dae09cfe9cc609be62fafbdb3e10d7c022d7d683"
+    },
+    {
+      "countryId": "COUNTRY_06",
+      "derivedSha256": "1cd4e1077a11ca3ba690d5f8751c955375e4e2ec4b8bd6fef1a9cfba67ee12e3"
+    },
+    {
+      "countryId": "COUNTRY_07",
+      "derivedSha256": "76b7143dc13bba7f0b60e90d801124d4da91b8b67ac26aefc5d08b47be3a0fe8"
+    },
+    {
+      "countryId": "COUNTRY_08",
+      "derivedSha256": "ef1bde7d4d31643655a7a2a5b61b6a3cd9305b81c6afa7a9b491bc9137baff4a"
+    },
+    {
+      "countryId": "COUNTRY_09",
+      "derivedSha256": "c919a5a363eaf2754716a54ee289b301d2f464f9a94e109aafef3f5f5e504464"
+    },
+    {
+      "countryId": "COUNTRY_10",
+      "derivedSha256": "ce9541987f00814025a6ce4549684c19389b8d00fea8c6ddddfd38c4a996a4c4"
+    },
+    {
+      "countryId": "COUNTRY_11",
+      "derivedSha256": "8dc3f79aeb7af85a8c139ffa8a35ef73633fc299ada75189ad60fb136cdaa183"
+    },
+    {
+      "countryId": "COUNTRY_12",
+      "derivedSha256": "f9bfa3066726afdec55b5aa50dd26de93a33118c03aaf353112b68986649ef2e"
+    },
+    {
+      "countryId": "COUNTRY_13",
+      "derivedSha256": "e8455491535da28bbd192f4638ecd8b5c5f725fad4d21c2e631223b28d06292e"
+    },
+    {
+      "countryId": "COUNTRY_14",
+      "derivedSha256": "63bd488722d9a1da0f09cb89335faad30c67af0c3f5c08372f57fe4378a2245a"
+    },
+    {
+      "countryId": "COUNTRY_15",
+      "derivedSha256": "657a8871e69820d58d85f94413f23d871808f57b1e94b02cf7f46b767e8daa0f"
+    },
+    {
+      "countryId": "COUNTRY_16",
+      "derivedSha256": "e118a688d5f08bc14e0394d45f5326bdb97234c5c5e213e04e5139df8e5bbb8e"
+    },
+    {
+      "countryId": "COUNTRY_17",
+      "derivedSha256": "4414cae96b4a63933b96f78695ac51c0a001b9f15f7c4010f2601732483559a4"
+    },
+    {
+      "countryId": "COUNTRY_18",
+      "derivedSha256": "e72564a9581b96c1b9da3e727ef772b692fc644197c6f5be0f45eb598c31169c"
+    },
+    {
+      "countryId": "COUNTRY_19",
+      "derivedSha256": "387fcbb060f46257af1e9330b178ed9e1a3471997e02809fc81cf972c94d562b"
+    },
+    {
+      "countryId": "COUNTRY_20",
+      "derivedSha256": "bcda7aac9b0fd9330e1fdd016ede40de78887e869d21d4bf53accf8a3485bb75"
+    },
+    {
+      "countryId": "COUNTRY_21",
+      "derivedSha256": "0d61816b9d3e840a96d108d6512ae2a3ebc51e77a21ef4af4f4a441766f11589"
+    },
+    {
+      "countryId": "COUNTRY_22",
+      "derivedSha256": "8b1196148d46f076b6861589a4e387e28fc7c7015a81137fd6edcbad44ad11ef"
+    },
+    {
+      "countryId": "COUNTRY_23",
+      "derivedSha256": "aa0d21f8ad2f94641067ca84305654356014b3b6869360fa0a38fd21ee41a49e"
+    },
+    {
+      "countryId": "COUNTRY_24",
+      "derivedSha256": "9f0fffa17115cb4d579cd7fdc4d4b2a6e411cb96025edac80d63bc06371e731f"
+    },
+    {
+      "countryId": "COUNTRY_25",
+      "derivedSha256": "584b2f6ca385a9c4fb05fdfde0df0bf2881e8f93a19adb7c4045840087e1b61e"
+    },
+    {
+      "countryId": "COUNTRY_26",
+      "derivedSha256": "69c2a1b54bb1e7a19356d9a12cab25326b07d450208c4d589511ff13918b4428"
+    },
+    {
+      "countryId": "COUNTRY_27",
+      "derivedSha256": "b38ad4ffb60d2d04258be4a3756012fd5f7f0853feda31bae965b8ce0a33bc5d"
+    },
+    {
+      "countryId": "COUNTRY_28",
+      "derivedSha256": "cb89ee31cc6a430d83ca5ce4616cb43fb70acf118b7cb57fe8541c326d54c2bf"
+    },
+    {
+      "countryId": "COUNTRY_29",
+      "derivedSha256": "f3c12e1725bf258f8297d1efd041670472c3ee7632b6004abb9d9d92e88becdf"
+    },
+    {
+      "countryId": "COUNTRY_30",
+      "derivedSha256": "c42a7133f838bb46b19a796061445fed8f52f1d7d07eaf82a1332c802be6c422"
+    },
+    {
+      "countryId": "COUNTRY_31",
+      "derivedSha256": "1cb94afa46b1d7c253df3679a5a019a80fe95077126bfab6c50eb5fb1f159e8a"
+    },
+    {
+      "countryId": "COUNTRY_32",
+      "derivedSha256": "258b5855bd28e43fa583f3416afa2f282946be4778ccb13aa11425cece375104"
+    },
+    {
+      "countryId": "COUNTRY_33",
+      "derivedSha256": "8afa2d40b14a681be2ff840af2806144d3350f12016cc9745b2d7347c4132af4"
+    },
+    {
+      "countryId": "COUNTRY_34",
+      "derivedSha256": "e425be84f144bf736edb7ae017308fe65067d58b15b49b8e46b22f5f53aa3fc6"
+    },
+    {
+      "countryId": "COUNTRY_35",
+      "derivedSha256": "ad7cefade94a532e736646b7b768d310bfee3157561f979fb42c428ad682cb09"
+    },
+    {
+      "countryId": "COUNTRY_36",
+      "derivedSha256": "6fdea979736caaccdaeb22b8b2575499247d6b2bd68061d6dfc504887f81de43"
+    },
+    {
+      "countryId": "COUNTRY_37",
+      "derivedSha256": "71906bbb9952742b766b2a0fbb11bc5f6e4dbd6c0f8263bb78436c4c854f32d0"
+    },
+    {
+      "countryId": "COUNTRY_38",
+      "derivedSha256": "7ca35e8c50f83454abf0b328c9da44d21856d0418f0ed8e466f3119d9e2b0560"
+    },
+    {
+      "countryId": "COUNTRY_39",
+      "derivedSha256": "5e9fc82e12a9a5959ca256d4e2796ab2b8fb85b305e657a6f577b691305ca50a"
+    },
+    {
+      "countryId": "COUNTRY_40",
+      "derivedSha256": "b180194dc44afffb2e45703981b99487069e1399b3fd791ac70ef345c84edffc"
+    },
+    {
+      "countryId": "COUNTRY_41",
+      "derivedSha256": "398daf3f7d2c8b4bdad5c411dfa8c9ac7afabd951ae5ef7e21da74d5c2648074"
+    },
+    {
+      "countryId": "COUNTRY_42",
+      "derivedSha256": "c1adc18fe061b0d68a8dacdbe198b6b0d74685792fa1f71e7b3d7719da29921f"
+    },
+    {
+      "countryId": "COUNTRY_43",
+      "derivedSha256": "b85987a60f23da8d967473c3284459468c7f8d15ee13c44e59d595efc98bcd19"
+    },
+    {
+      "countryId": "COUNTRY_44",
+      "derivedSha256": "8d19c6de481b356044a78611bbd6771806c792a4ca66f8845afbcde77b4c19dc"
+    },
+    {
+      "countryId": "COUNTRY_45",
+      "derivedSha256": "e46b4b726e074f479c6904534f71e99aaa3e8b2f4502541dd893266f1f8b9e95"
+    },
+    {
+      "countryId": "COUNTRY_46",
+      "derivedSha256": "36aa3c1a0cd6efea508714c500c371d9ec059169c996a51e3bbb5e33cc0878df"
+    },
+    {
+      "countryId": "COUNTRY_47",
+      "derivedSha256": "e08c92e0976ca5e3f455cfddb1e6caf86a05e71979ca2ee32ded502e15be1b4a"
+    },
+    {
+      "countryId": "COUNTRY_48",
+      "derivedSha256": "e9f10bc1140296457a7856d28e44ae8ad808587bda0b7e4b83f1c38142029e3e"
+    },
+    {
+      "countryId": "COUNTRY_49",
+      "derivedSha256": "d20bebcf41ea43c3534cc44bdcbea1afef28d9d7b9cbba48f525b2507c83beab"
+    },
+    {
+      "countryId": "COUNTRY_50",
+      "derivedSha256": "b297c50c7c8d43ade1df5f00ed8d4cd606cb0249c369f7dce6e4db06b70247c4"
+    },
+    {
+      "countryId": "COUNTRY_51",
+      "derivedSha256": "716ed23a9bf721505ef66554e56fe9433cd51cad11a749136936ba464c8e63cb"
+    },
+    {
+      "countryId": "COUNTRY_52",
+      "derivedSha256": "d081eb63569489936d377a09a8ba51db7c072923b501a5538aa6b980f7fd0003"
+    },
+    {
+      "countryId": "COUNTRY_53",
+      "derivedSha256": "235824db0902a562cf56261af93a67b85d330c5a324ab1359527b8cf4d2e6ae8"
+    },
+    {
+      "countryId": "COUNTRY_54",
+      "derivedSha256": "ccb92d8ebd8c8d290072b753f003c537d562f50ca5a9cf2d4cf77221ef429e82"
+    },
+    {
+      "countryId": "COUNTRY_55",
+      "derivedSha256": "a07bfd5d7750982eabec4938d4f79f48b439f5d5725178b25105b1ddf1174713"
+    },
+    {
+      "countryId": "COUNTRY_56",
+      "derivedSha256": "43425cb28d39582eda8d3f7eaab168be9da0deb573745a93cd0a2c066ff0926c"
+    },
+    {
+      "countryId": "COUNTRY_57",
+      "derivedSha256": "219ff8e0be25ba07535e966aedeee917bccb9de9d294c5bce5dd5a6786160b6e"
+    },
+    {
+      "countryId": "COUNTRY_58",
+      "derivedSha256": "7ced7de4fb887569ab2a0e4e5fe9df35d5ee43050a79732659c8044b06031147"
+    },
+    {
+      "countryId": "COUNTRY_59",
+      "derivedSha256": "c4ac55f3592665835003b821b8b51b9b1340de4278a3b99f594a2c98519af740"
+    },
+    {
+      "countryId": "COUNTRY_60",
+      "derivedSha256": "26128162b74b787afc938de8d1a84fd02fb6aa03f8f73951d22f985338dd37b3"
+    },
+    {
+      "countryId": "COUNTRY_61",
+      "derivedSha256": "085631a1c319d6ebfd7be083c4629eb7a1896cf0a93570005d395a9c39426c4c"
+    },
+    {
+      "countryId": "COUNTRY_62",
+      "derivedSha256": "41b5dade48c1de7eac0420757a28b17a7267da22c359dcf3e0748a3fc7a6b891"
+    },
+    {
+      "countryId": "COUNTRY_63",
+      "derivedSha256": "9a17864459d0a0384052246aa755980c6c73695dbbc1d12ceceb5dc89b14dea4"
+    },
+    {
+      "countryId": "COUNTRY_64",
+      "derivedSha256": "ee0f42c79d982891dbf54bfbadb25789cf68f4621a6088e9352ee904ea6c9597"
+    },
+    {
+      "countryId": "COUNTRY_65",
+      "derivedSha256": "8c74717c00c217c2ce937db17706550803775490fd5f04c22ce65ace1804e75a"
+    },
+    {
+      "countryId": "COUNTRY_66",
+      "derivedSha256": "072cd025eeb10659decab6f16f45c2a501de3ca43ac0adf9167101fbad48d9a8"
+    },
+    {
+      "countryId": "COUNTRY_67",
+      "derivedSha256": "aea7136fe2ad0a412c36f65e72758cbb4a12616cc028ff753cee0ba812194825"
+    },
+    {
+      "countryId": "COUNTRY_68",
+      "derivedSha256": "19c2c865a6160d93ae9325584fef8bf1920ced72d2dd82684121e8422d644b22"
+    },
+    {
+      "countryId": "COUNTRY_69",
+      "derivedSha256": "fa0f9f1954a57b5cfcad9fa494724e76380ffb699bedb0669b9ea1b824df54c7"
+    },
+    {
+      "countryId": "COUNTRY_70",
+      "derivedSha256": "4d860a6a10e699527a5afc2da05c89c8ed36df1c9d907ea8f70004be37c0f689"
+    }
+  ],
+  "retainedSources": {
+    "POSTWAR_SUPPLY_SOURCE_02C3D68F539B5E945DFA99AA9BC4536FC4ACAD34": "sha256:3df2e5ffc29cf305fd6dd735551cf37caa87e4fddcad619fdbf17beaa208a799",
+    "SOURCE_GCU_BANK_67D45B1D13871199F315631C6E04333A": "sha256:232bbde072e731867226202eab44271014b65ed2485f9efaeae580f2f7e8aaca",
+    "SOURCE_POSTWAR_FINANCIAL_V1": "sha256:3e2c610a5884857e3075db8214848b8405176f6e5e9b6234f15c7a8b96db332e",
+    "SOURCE_POSTWAR_OPERATING_V1": "sha256:ba9ad8f6117d8bb8535cd6572b9092d25779add30e8050b35186606ec860e1cc"
+  },
+  "schemaVersion": "postwar-finance-social-derived-manifest-v1",
+  "seedFingerprint": "sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274",
+  "seedId": "SEED_POSTWAR_GCU_OPENING_20261029_V1",
+  "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1"
+}

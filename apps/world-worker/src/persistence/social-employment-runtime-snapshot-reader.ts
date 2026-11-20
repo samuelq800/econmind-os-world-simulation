@@ -1,3 +1,5 @@
+import { observePostwarSocialMaterialization } from './postwar-social-materialization.js';
+import type { CurrentMaterializationObservation } from './current-materialization-observation.js';
 /** Server Social source resolution/replay. No source issuer, registry, host or writes. */
 import { createHash } from 'node:crypto';
 import { types } from 'node:util';
@@ -12,6 +14,7 @@ import {
   createReplaySeed,
   createSocialEmploymentServiceReplayReducers,
   SOCIAL_SERVICE_PLAN_EVENT,
+  SOCIAL_POSITION_OFFER_CREATED_EVENT,
   parseCanonicalCommand,
   parseIndustryPersistenceSchemaBoundaryContext,
   PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
@@ -29,6 +32,7 @@ import {
   type Sha256Hex,
   type IndustryPersistenceSchemaReadContextV1,
 } from '@econmind/core';
+import { resolveSocialEmploymentPhysicalServicePool } from '@econmind/core';
 import {
   parseGoverningSourceReadBinding,
   assertGoverningSourceCommitRequestConsistent,
@@ -48,11 +52,21 @@ import {
 } from './social-employment-source-input.js';
 import { assertSocialPhysicalAttemptEnvelope } from './social-physical-attempt-envelope.js';
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
+import { createPostwarSocialSourceRoleScope } from './postwar-social-position-runtime.js';
+import { createPostgresSocialOperatingLineageExecutor } from './postgres-social-operating-custody.js';
 import {
-  readValidatedCanonicalLineageFrom,
-  withValidatedCanonicalLineageFrom,
-  type ValidatedCanonicalLineageView,
-} from './validated-canonical-lineage.js';
+  replayPostwarSocialEmploymentLineage,
+  assertSocialPositionOfferEventOriginal,
+} from './postwar-social-employment-lineage.js';
+import {
+  readSocialCanonicalLineageFrom,
+  withSocialCanonicalLineageFrom,
+  socialOriginalAt,
+  socialDocumentForLineage,
+  readPreparedSocialPagedLineage,
+  type PreparedPostwarSocialSource,
+  type SocialCanonicalLineageView,
+} from './prepared-postwar-social-source.js';
 import type { SocialEmploymentRuntimeSnapshotReader } from './social-job-match-candidate-source.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type { IndustryProductionHistoricalReadGuard } from './industry-production-source-cutoff.js';
@@ -348,10 +362,35 @@ function assertOriginalOrigin(
   const proof = original.originProof as Row;
   if (!proof || typeof proof !== 'object')
     invalid('original origin proof required');
-  if (proof.kind === 'COMMITTED_EVENT_PAYLOAD')
-    invalid(
-      'No Social source-publication event semantic is registered in this version',
-    );
+  if (proof.kind === 'COMMITTED_EVENT_PAYLOAD') {
+    const p = row(proof, ['kind', 'eventId', 'pointer', 'payloadHash']);
+    if (
+      original.role !== 'CURRENT_EFFECTIVE' ||
+      canonicalSerialize(original.fieldPaths) !==
+        canonicalSerialize(['/currentReadFacts/offer'])
+    )
+      invalid(
+        'only the registered canonical offer event can supply current offer facts',
+      );
+    const event = assertSocialPositionOfferEventOriginal({
+      lineage: bound.lineage,
+      eventId: ref(p.eventId),
+      payloadHash: fp(p.payloadHash),
+      pointer: text(p.pointer),
+      value: original.value,
+      countryId: bound.command.countryId!,
+    });
+    const effective = original.effectivity as Row;
+    if (
+      canonicalSerialize(effective.fromHead) !==
+        canonicalSerialize(event.fromHead) ||
+      effective.fromSimTime !== event.fromSimTime
+    )
+      invalid(
+        'committed offer effectivity precedes or differs from its real publication',
+      );
+    return;
+  }
   const p = row(proof, ['kind', 'sourceId', 'pointer', 'payloadHash']);
   if (p.kind !== 'ADMITTED_OPENING_SOURCE')
     invalid('unsupported source origin');
@@ -360,9 +399,11 @@ function assertOriginalOrigin(
   );
   if (sources.length !== 1 || sources[0]!.payloadHash !== fp(p.payloadHash))
     invalid('actual opening original identity mismatch');
-  const value = atPointer(
-    JSON.parse(sources[0]!.canonicalPayload) as unknown,
-    p.pointer,
+  const value = socialOriginalAt(
+    bound.lineage,
+    p.sourceId,
+    fp(p.payloadHash),
+    text(p.pointer),
   );
   if (canonicalSerialize(value) !== canonicalSerialize(original.value))
     invalid('original value differs from actual publication');
@@ -489,11 +530,11 @@ function currentOriginals(
  * inside the actual mandatory custody callback, with an active genuine view. */
 function validateCapturedSocialOriginalsFrom(
   executor: SqlExecutor,
-  view: ValidatedCanonicalLineageView,
+  view: SocialCanonicalLineageView,
   bound: BoundSocialSourceData,
   snapshot: CapturedSnapshot,
 ): VerifiedOriginalData {
-  const data = readValidatedCanonicalLineageFrom(executor, view);
+  const data = readSocialCanonicalLineageFrom(executor, view);
   if (data !== bound.lineage) invalid('different active lineage');
   if (
     canonicalSerialize(snapshot.publicationHead) !==
@@ -862,7 +903,7 @@ function validateCapturedSocialOriginalsFrom(
         ? 0
         : 1,
   );
-  readValidatedCanonicalLineageFrom(executor, view);
+  readSocialCanonicalLineageFrom(executor, view);
   return Object.freeze({
     bound,
     snapshot,
@@ -876,6 +917,8 @@ function validateCapturedSocialOriginalsFrom(
  * Admit only the exact single-Event correspondence proved by the real constructor.
  * Scan the whole prefix before any reducer runs, including foreign-country events. */
 function productionEventIds(lineage: BoundSocialSourceData['lineage']) {
+  if (lineage.transitions === null)
+    invalid('legacy production scan requires complete bounded frames');
   const ids = new Set(
     lineage.transitions.flatMap(({ transition }) =>
       transition.events
@@ -914,9 +957,36 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
   readFactsHash: CanonicalSha256;
 }> {
   const { data, lineage, command } = verified.bound;
-  if (data.historyCoverage.taxonomyRevision !== TAXONOMY)
+  const paged = readPreparedSocialPagedLineage(lineage);
+  const hasPositionEvents = paged
+    ? paged.view.result.socialCountries.some((c) => c.offerOrigins.length > 0)
+    : lineage.transitions!.some((entry) =>
+        entry.transition.events.some(
+          (event) => event.eventType === SOCIAL_POSITION_OFFER_CREATED_EVENT,
+        ),
+      );
+  if (
+    data.historyCoverage.taxonomyRevision !==
+    (paged
+      ? 'SOCIAL_SOURCE_EFFECTS_PAGED_V3'
+      : hasPositionEvents
+        ? 'SOCIAL_SOURCE_EFFECTS_V2'
+        : TAXONOMY)
+  )
     invalid('unsupported domain effect taxonomy');
-  const productionIds = productionEventIds(lineage);
+  const productionIds = paged ? new Set<string>() : productionEventIds(lineage);
+  const currentDocument =
+    paged || hasPositionEvents ? socialDocumentForLineage(lineage) : undefined;
+  if (hasPositionEvents && !currentDocument)
+    invalid(
+      'actual admitted full E03 is required for position lifecycle replay',
+    );
+  const currentLifecycle = currentDocument
+    ? replayPostwarSocialEmploymentLineage({
+        document: currentDocument,
+        lineage,
+      })
+    : undefined;
   const reducers = { ...createSocialEmploymentServiceReplayReducers(digest) };
   reducers[PRODUCTION_SETTLED_EVENT_TYPE] = ({ state, event }) => {
     if (!productionIds.has(event.eventId))
@@ -980,27 +1050,122 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
     digest,
   );
   const binding = lineage.seed.replayBinding;
-  const replay = replayAuthoritativeEvents({
-    origin: createReplayOrigin({
-      worldId: lineage.seed.worldId,
-      lastSequence: '0',
-      worldVersion: '0',
-      state: data.admittedGenesis.state,
-      seed,
-      binding,
-      sha256Hex: digest,
-    }),
-    seed,
-    binding,
-    registry: createReplayReducerRegistry({ binding, reducers }),
-    transitions: lineage.transitions.map((v) => v.transition),
-    sha256Hex: digest,
-  });
+  const replay =
+    currentLifecycle && currentDocument
+      ? (() => {
+          // The genuine shared Core cursor already replayed every Budget and
+          // every country's Social group. Validate each historical PLAN against
+          // its own immutable source body and its actual Core predecessor,
+          // then crop the fully replayed state to this country's source scope.
+          // Every paged PLAN has already passed this same physical-original
+          // assertion at its exact Core predecessor on the page that held it.
+          // Replaying only the last page here would omit earlier validation.
+          if (lineage.transitions !== null)
+            for (const entry of lineage.transitions) {
+              for (const event of entry.transition.events) {
+                if (event.eventType !== SOCIAL_SERVICE_PLAN_EVENT) continue;
+                const payload = JSON.parse(event.canonicalPayload) as Row;
+                const historical = parseCanonicalCommand(
+                  payload.command,
+                  digest,
+                );
+                const parsed = parseSocialEmploymentServiceCommand(
+                  historical,
+                  digest,
+                );
+                const checkpoint = currentLifecycle.checkpoints?.find(
+                  (c) => c.eventId === event.eventId,
+                );
+                const country = currentDocument.countries.find(
+                  (c) => c.countryId === entry.command.countryId,
+                );
+                if (
+                  parsed.kind !== 'PLAN' ||
+                  !checkpoint ||
+                  !country ||
+                  checkpoint.countryId !== country.countryId
+                )
+                  invalid(
+                    'actual complete-prefix historical PLAN checkpoint required',
+                  );
+                const bodies = country.physicalOriginalBodies.filter(
+                  (body) =>
+                    body.locationId === parsed.intent.locationId &&
+                    body.dayIndex === parsed.intent.dueDayIndex &&
+                    body.pools.some(
+                      (pool) =>
+                        pool.poolId ===
+                          resolveSocialEmploymentPhysicalServicePool(
+                            checkpoint.beforeEmployment,
+                            parsed.intent.servicePoolId,
+                            digest,
+                          ) && pool.skill === parsed.intent.skill,
+                    ),
+                );
+                if (bodies.length !== 1)
+                  missing(
+                    'historical PLAN actual country physical body absent/ambiguous',
+                  );
+                assertSocialPhysicalAttemptEnvelope({
+                  command: historical,
+                  state: checkpoint.beforeEmployment,
+                  readFacts:
+                    payload.readFacts as unknown as SocialEmploymentReadFacts,
+                  sourceEnvelope: {
+                    ...bodies[0]!,
+                    headWorldVersion: entry.transition.worldVersionBefore,
+                    headEventSequence: (BigInt(event.sequence) - 1n).toString(),
+                  },
+                  sha256Hex: digest,
+                });
+              }
+            }
+          const country = currentLifecycle.countries.find(
+            (c) => c.countryId === data.scope.countryId,
+          );
+          if (!country)
+            invalid('actual complete-prefix current country absent');
+          return {
+            worldVersion: lineage.headWorldVersion,
+            lastSequence: lineage.headEventSequence,
+            state: country.lifecycle.employment,
+          };
+        })()
+      : replayAuthoritativeEvents({
+          origin: createReplayOrigin({
+            worldId: lineage.seed.worldId,
+            lastSequence: '0',
+            worldVersion: '0',
+            state: data.admittedGenesis.state,
+            seed,
+            binding,
+            sha256Hex: digest,
+          }),
+          seed,
+          binding,
+          registry: createReplayReducerRegistry({ binding, reducers }),
+          transitions:
+            lineage.transitions === null
+              ? invalid('paged replay requires actual current country state')
+              : lineage.transitions.map((v) => v.transition),
+          sha256Hex: digest,
+        });
   if (
     replay.worldVersion !== lineage.headWorldVersion ||
     replay.lastSequence !== lineage.headEventSequence
   )
     invalid('full Social replay head mismatch');
+  if (currentLifecycle) {
+    const current = currentLifecycle.countries.find(
+      (c) => c.countryId === data.scope.countryId,
+    );
+    if (
+      !current ||
+      canonicalSerialize(replay.state) !==
+        canonicalSerialize(current.lifecycle.employment)
+    )
+      invalid('country replay differs from actual complete lifecycle prefix');
+  }
   const readFacts = JSON.parse(
     canonicalSerialize(data.currentReadFacts),
   ) as SocialEmploymentReadFacts;
@@ -1021,7 +1186,11 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
     );
     if (parsedPlan.kind !== 'PLAN') invalid('historical plan command required');
     const payload = parsedPlan.intent;
-    const poolId = payload.servicePoolId,
+    const poolId = resolveSocialEmploymentPhysicalServicePool(
+        state,
+        payload.servicePoolId,
+        digest,
+      ),
       dayIndex = payload.dueDayIndex;
     const bodies = verified.originals.filter(
       (r) =>
@@ -1143,8 +1312,13 @@ function governingBindingData(
       openingVersion: '0',
       completePrefixFingerprint:
         bound.data.historyCoverage.completePrefixBinding,
-      receiptSetFingerprint: hash(lineage.transitions.map((v) => v.receipt)),
-      taxonomyRevision: TAXONOMY,
+      // PAGED_V3 binds the complete ordered receipt-containing effects chain;
+      // legacy V1/V2 keeps its original full-array receipt-set fingerprint.
+      receiptSetFingerprint:
+        lineage.transitions === null
+          ? readPreparedSocialPagedLineage(lineage)!.knownEffectsFingerprint
+          : hash(lineage.transitions.map((v) => v.receipt)),
+      taxonomyRevision: bound.data.historyCoverage.taxonomyRevision,
     },
     sourceAuthorityBinding: {
       issuerId: authority.issuerId,
@@ -1172,6 +1346,7 @@ type SnapshotResult = Awaited<
   ReturnType<SocialEmploymentRuntimeSnapshotReader['readFrom']>
 >;
 interface ResolvedSource {
+  readonly lineage: BoundSocialSourceData['lineage'];
   readonly snapshot: Extract<SnapshotResult, { status: 'REPLAYED' }>;
   readonly binding: Readonly<GoverningSourceReadBindingV1>;
 }
@@ -1179,6 +1354,10 @@ type ReadInput = Parameters<
   SocialEmploymentRuntimeSnapshotReader['readFrom']
 >[0];
 interface PrivateConstruction {
+  readonly materializationObservations: WeakMap<
+    object,
+    Readonly<CurrentMaterializationObservation>
+  >;
   readonly issued: WeakMap<object, Readonly<GoverningSourceReadBindingV1>>;
   readonly resolve: (input: ReadInput) => Promise<ResolvedSource>;
 }
@@ -1187,7 +1366,12 @@ const constructions = new WeakMap<object, PrivateConstruction>();
 export interface SocialEmploymentRuntimeSnapshotReaderConstruction {
   readonly mode: 'OFFICIAL_RUNTIME' | 'TEST_ONLY_LOCAL';
   readonly database: SqlDatabase;
+  readonly preparedSource?: PreparedPostwarSocialSource;
   readonly sha256Hex: Sha256Hex;
+  /** Fixed PostgreSQL host identity only; source read temporarily delegates to
+   * the actual fixed SQL reader and restores this verified writer in the same
+   * transaction. No membership or economic permission is granted here. */
+  readonly postgresWorkerRole?: string;
   /** Actual trusted server custodian/guard adapter requires independent evidence.
    * No implementation or registration is supplied by this module. */
   readonly custody: SocialOperatingCustodyPort;
@@ -1268,7 +1452,13 @@ export function createSocialEmploymentRuntimeSnapshotReader(
     custody = input.custody,
     withSnapshot = custody.withSnapshotFrom;
   const issued = new WeakMap<object, Readonly<GoverningSourceReadBindingV1>>();
-  const resolve = async (supplied: ReadInput): Promise<ResolvedSource> => {
+  const materializationObservations = new WeakMap<
+    object,
+    Readonly<CurrentMaterializationObservation>
+  >();
+  const resolveUnscoped = async (
+    supplied: ReadInput,
+  ): Promise<ResolvedSource> => {
     // Capture the validated canonical command before the first await.
     canonicalSerialize(supplied.command);
     const command = validateCanonicalCommand(supplied.command, digest),
@@ -1305,26 +1495,37 @@ export function createSocialEmploymentRuntimeSnapshotReader(
         'industry-persistence-schema-read-context-v1'
     )
       invalid('Industry historical read context required');
-    return withValidatedCanonicalLineageFrom(
+    return withSocialCanonicalLineageFrom(
       {
         reader: lineageReader,
+        database: input.database,
+        ...(input.preparedSource
+          ? { preparedSource: input.preparedSource }
+          : {}),
+        countryId: command.countryId,
         executor: transaction,
         worldId: command.worldId,
         ...(industryReadContext === undefined ? {} : { industryReadContext }),
       },
       async (view) => {
-        const lineage = readValidatedCanonicalLineageFrom(transaction, view);
+        const lineage = readSocialCanonicalLineageFrom(transaction, view);
         if (
           lineage.headWorldVersion !== headWorldVersion ||
           lineage.headEventSequence !== headEventSequence
         )
           invalid('actual current lineage differs from supplied head');
         if (
-          lineage.transitions.some((entry) =>
-            entry.transition.events.some(
-              (event) => event.simTime.ticks > command.simTime.ticks,
-            ),
-          )
+          lineage.transitions === null
+            ? command.simTime.ticks <
+              BigInt(
+                readPreparedSocialPagedLineage(lineage)!.metadata
+                  .maxCommandSimTimeTicks,
+              )
+            : lineage.transitions.some((entry) =>
+                entry.transition.events.some(
+                  (event) => event.simTime.ticks > command.simTime.ticks,
+                ),
+              )
         )
           invalid('command SimTime precedes the actual committed prefix');
         const request = snapshotRequest(command, lineage);
@@ -1339,7 +1540,7 @@ export function createSocialEmploymentRuntimeSnapshotReader(
             async (raw) => {
               if (!open || ++calls !== 1)
                 invalid('custody callback must be used exactly once in scope');
-              readValidatedCanonicalLineageFrom(transaction, view);
+              readSocialCanonicalLineageFrom(transaction, view);
               const captured = captureSnapshot(raw);
               if (captured === null)
                 missing('actual Social operating source not supplied');
@@ -1363,9 +1564,10 @@ export function createSocialEmploymentRuntimeSnapshotReader(
               const binding = parseGoverningSourceReadBinding(
                 governingBindingData(verified, replayed),
               );
-              readValidatedCanonicalLineageFrom(transaction, view);
+              readSocialCanonicalLineageFrom(transaction, view);
               resolved = Object.freeze({
                 binding,
+                lineage,
                 snapshot: freeze({
                   status: 'REPLAYED' as const,
                   provenance:
@@ -1382,7 +1584,7 @@ export function createSocialEmploymentRuntimeSnapshotReader(
               return resolved;
             },
           );
-          readValidatedCanonicalLineageFrom(transaction, view);
+          readSocialCanonicalLineageFrom(transaction, view);
           if (calls !== 1 || resolved === undefined || returned !== resolved)
             invalid(
               'custody did not return its exact completed callback result',
@@ -1394,10 +1596,41 @@ export function createSocialEmploymentRuntimeSnapshotReader(
       },
     );
   };
+  const roleScope =
+    input.postgresWorkerRole === undefined
+      ? undefined
+      : createPostwarSocialSourceRoleScope({
+          workerRole: input.postgresWorkerRole,
+        });
+  const resolve =
+    roleScope === undefined
+      ? resolveUnscoped
+      : (request: ReadInput) =>
+          roleScope.withSourceReaderFrom(request.transaction, () =>
+            resolveUnscoped({
+              ...request,
+              transaction: createPostgresSocialOperatingLineageExecutor(
+                request.transaction,
+                {
+                  worldId: request.command.worldId,
+                  countryId: request.command.countryId!,
+                },
+              ),
+            }),
+          );
   const reader: SocialEmploymentRuntimeSnapshotReader = Object.freeze({
     async readFrom(request: ReadInput): Promise<SnapshotResult> {
       try {
         const result = await resolve(request);
+        if (input.postgresWorkerRole !== undefined) {
+          const observation = await observePostwarSocialMaterialization({
+            executor: request.transaction,
+            lineage: result.lineage,
+            countryId: request.command.countryId!,
+            kind: 'SERVICE',
+          });
+          materializationObservations.set(result.snapshot, observation);
+        }
         issued.set(result.snapshot, result.binding);
         return result.snapshot;
       } catch (error) {
@@ -1407,7 +1640,10 @@ export function createSocialEmploymentRuntimeSnapshotReader(
       }
     },
   });
-  constructions.set(reader, Object.freeze({ issued, resolve }));
+  constructions.set(
+    reader,
+    Object.freeze({ issued, resolve, materializationObservations }),
+  );
   return reader;
 }
 
@@ -1419,6 +1655,18 @@ export function readIssuedSocialGoverningSourceBinding(
 ): Readonly<GoverningSourceReadBindingV1> | null {
   if (!issuedSnapshot || typeof issuedSnapshot !== 'object') return null;
   return constructions.get(reader)?.issued.get(issuedSnapshot) ?? null;
+}
+
+/** Exact snapshot association only. A cloned snapshot cannot acquire a DB
+ * observation, and this value never grants source/command authority. */
+export function readIssuedSocialMaterializationObservation(
+  reader: SocialEmploymentRuntimeSnapshotReader,
+  snapshot: SnapshotResult,
+): Readonly<CurrentMaterializationObservation> | null {
+  return snapshot && typeof snapshot === 'object'
+    ? (constructions.get(reader)?.materializationObservations.get(snapshot) ??
+        null)
+    : null;
 }
 
 /** D installs this port at its receipt-first, actual H/auth-held BEFORE_EVENTS

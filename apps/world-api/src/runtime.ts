@@ -1,3 +1,8 @@
+import type { PostwarSocialServiceCreationPlanningReader } from '@econmind/world-worker/postwar-social-service-creation-planning-read';
+import type { PostwarIndustryUtilityPlanningReader } from '@econmind/world-worker/postwar-industry-utility-planning-read';
+import type { PostwarIndustryConnection } from './runtime/postwar-industry-connection.js';
+import type { PostwarCentralBankConnection } from './runtime/postwar-central-bank-connection.js';
+import type { PostwarTradeConnection } from './runtime/postwar-trade-connection.js';
 import {
   createServer,
   type IncomingMessage,
@@ -35,6 +40,21 @@ import {
   handleOfficialPublicCors,
   readOfficialPublicCorsOrigins,
 } from './integration/official-public-cors.js';
+import {
+  createPostwarFinanceNodeRoute,
+  createPostwarOfficeNodeRoute,
+  createPostwarOfficeReadNodeRoute,
+} from './runtime/postwar-finance-node-route.js';
+import type { ExplicitReadPreparationConfig } from './runtime-preparation/explicit-read-preparation-config.js';
+import type { PostwarFinanceConnection } from './runtime/postwar-finance-connection.js';
+import type { PostwarSocialConnection } from './runtime/postwar-social-connection.js';
+import type { PostwarCaptainConnection } from './runtime/postwar-captain-connection.js';
+import type { PostwarTreasuryFxConnection } from './runtime/postwar-treasury-fx-connection.js';
+import {
+  readPostwarFinanceSocialApiConnection,
+  type PostwarFinanceSocialApiConnection,
+  type PostwarSharedOfficeConsumer,
+} from './runtime/postwar-finance-social-connection.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
@@ -53,6 +73,7 @@ export interface ApiRuntimeConfig {
 export interface RunningApiRuntime {
   readonly origin: string;
   readonly port: number;
+  readonly sharedOfficeConsumer?: Readonly<PostwarSharedOfficeConsumer>;
   readonly ready: () => boolean;
   readonly shutdown: () => Promise<void>;
 }
@@ -141,11 +162,144 @@ function createApiServer(
   config: ApiRuntimeConfig,
   requestFetch?: typeof fetch,
   officialCountryPool?: ManagedOfficialCountryPool,
+  postwarFinanceConnection?: PostwarFinanceConnection,
+  postwarSocialConnection?: PostwarSocialConnection,
+  postwarTreasuryFxConnection?: PostwarTreasuryFxConnection,
+  sharedConsumerConfigured = false,
+  postwarCaptainConnection?: PostwarCaptainConnection,
+  postwarReadConfiguration?: ExplicitReadPreparationConfig,
+  postwarCentralBankConnection?: PostwarCentralBankConnection,
+  postwarTradeConnection?: PostwarTradeConnection,
+  postwarIndustryConnection?: PostwarIndustryConnection,
+  industryUtilityPlanningReader?: Readonly<PostwarIndustryUtilityPlanningReader>,
+  socialServiceCreationPlanningReader?: Readonly<PostwarSocialServiceCreationPlanningReader>,
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
   let allDataVerifiedAt = 0;
   let allDataProbe: Promise<boolean> | undefined;
+  const officeReadRoute = postwarReadConfiguration
+    ? createPostwarOfficeReadNodeRoute(postwarReadConfiguration, {
+        ...(industryUtilityPlanningReader
+          ? { industryUtilityPlanningReader }
+          : {}),
+        ...(socialServiceCreationPlanningReader
+          ? { socialServiceCreationPlanningReader }
+          : {}),
+      })
+    : undefined;
+  const financeRoute =
+    postwarCaptainConnection !== undefined ||
+    postwarCentralBankConnection !== undefined ||
+    postwarTradeConnection !== undefined ||
+    postwarIndustryConnection !== undefined ||
+    postwarSocialConnection !== undefined ||
+    postwarTreasuryFxConnection !== undefined
+      ? createPostwarOfficeNodeRoute({
+          ...(postwarCentralBankConnection
+            ? { centralBank: postwarCentralBankConnection }
+            : {}),
+          ...(postwarTradeConnection ? { trade: postwarTradeConnection } : {}),
+          ...(postwarIndustryConnection
+            ? { industry: postwarIndustryConnection }
+            : {}),
+          ...(postwarCaptainConnection
+            ? { captain: postwarCaptainConnection }
+            : {}),
+          ...(postwarSocialConnection
+            ? { social: postwarSocialConnection }
+            : {}),
+          ...(postwarTreasuryFxConnection
+            ? { treasuryFx: postwarTreasuryFxConnection }
+            : {}),
+          ...(postwarFinanceConnection
+            ? { finance: postwarFinanceConnection }
+            : {}),
+        })
+      : postwarFinanceConnection === undefined
+        ? undefined
+        : createPostwarFinanceNodeRoute(postwarFinanceConnection);
+  const financeHealth = () =>
+    financeRoute === undefined
+      ? {}
+      : {
+          ...(postwarCaptainConnection
+            ? {
+                postwarCaptain: {
+                  routeInstalled: true,
+                  configured:
+                    postwarCaptainConnection.status ===
+                    'EXPLICIT_MANUAL_CAPTAIN_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(postwarCentralBankConnection
+            ? {
+                postwarCentralBank: {
+                  routeInstalled: true,
+                  configured:
+                    postwarCentralBankConnection.status ===
+                    'EXPLICIT_MANUAL_CENTRAL_BANK_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(postwarTradeConnection
+            ? {
+                postwarTrade: {
+                  routeInstalled: true,
+                  configured:
+                    postwarTradeConnection.status ===
+                    'EXPLICIT_MANUAL_TRADE_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(postwarTreasuryFxConnection
+            ? {
+                postwarTreasuryFx: {
+                  routeInstalled: true,
+                  configured:
+                    postwarTreasuryFxConnection.status ===
+                    'EXPLICIT_MANUAL_TREASURY_FX_CONNECTION',
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(sharedConsumerConfigured
+            ? {
+                postwarSharedConsumer: {
+                  configured: true,
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                },
+              }
+            : {}),
+          ...(postwarSocialConnection
+            ? {
+                postwarSocial: {
+                  routeInstalled: true,
+                  configured: true,
+                  productionReady: false,
+                  manualConsumptionOnly: true,
+                  preparationMode: postwarSocialConnection.preparationMode,
+                },
+              }
+            : {}),
+          postwarFinance: {
+            routeInstalled: postwarFinanceConnection !== undefined,
+            configured:
+              postwarFinanceConnection?.status ===
+              'EXPLICIT_MANUAL_FINANCE_CONNECTION',
+            productionReady: false,
+            manualConsumptionOnly: true,
+          },
+        };
   const officialCountries =
     officialCountryPool === undefined
       ? undefined
@@ -215,6 +369,26 @@ function createApiServer(
           ...(requestFetch === undefined ? {} : { fetch: requestFetch }),
         });
   const server = createServer((request, response) => {
+    if (officeReadRoute?.matches(request)) {
+      void officeReadRoute.handle(request, response).catch(() => {
+        if (!response.headersSent && !response.destroyed)
+          sendJson(request, response, 503, {
+            ok: false,
+            error: { code: 'UPSTREAM_UNAVAILABLE' },
+          });
+      });
+      return;
+    }
+    if (financeRoute?.matches(request)) {
+      void financeRoute.handle(request, response).catch(() => {
+        if (!response.headersSent && !response.destroyed)
+          sendJson(request, response, 503, {
+            ok: false,
+            error: { code: 'UPSTREAM_UNAVAILABLE' },
+          });
+      });
+      return;
+    }
     const path = request.url?.split('?', 1)[0];
     if (
       officialMapAssets !== undefined &&
@@ -300,6 +474,7 @@ function createApiServer(
         ready: ready && databaseReady,
         role: 'command-query-boundary',
         authoritativeMutationEnabled: false,
+        ...financeHealth(),
       });
       return;
     }
@@ -313,6 +488,7 @@ function createApiServer(
           ready: isReady,
           role: 'command-query-boundary',
           authoritativeMutationEnabled: false,
+          ...financeHealth(),
           ...(officialCountryPool === undefined
             ? {}
             : {
@@ -346,6 +522,19 @@ function createApiServer(
     ready: () => ready && databaseReady,
     stopReadiness: () => {
       ready = false;
+      financeRoute?.stopAccepting();
+      officeReadRoute?.stopAccepting();
+    },
+    drainFinance: async () => {
+      const drained = await Promise.allSettled([
+        officeReadRoute?.drain(),
+        financeRoute?.drain(),
+      ]);
+      const failures = drained.flatMap((result) =>
+        result.status === 'rejected' ? [result.reason] : [],
+      );
+      if (failures.length)
+        throw new AggregateError(failures, 'OFFICE_HTTP_DRAIN_UNCONFIRMED');
     },
   };
 }
@@ -365,23 +554,108 @@ function closeServer(server: Server, graceMs: number): Promise<void> {
   });
 }
 
+async function failStartupAfterCleanup(
+  startupError: unknown,
+  cleanup: readonly (() => Promise<unknown> | undefined)[],
+): Promise<never> {
+  const failures: unknown[] = [];
+  for (const operation of cleanup) {
+    try {
+      await operation();
+    } catch (error) {
+      failures.push(error);
+    }
+  }
+  if (failures.length)
+    throw new AggregateError(
+      [startupError, ...failures],
+      'world-api startup failed and cleanup was incomplete',
+      { cause: startupError },
+    );
+  throw startupError;
+}
+
 export async function startApiRuntime(
   config: ApiRuntimeConfig = readApiRuntimeConfig(),
   dependencies: {
     readonly season1Fetch?: typeof fetch;
     readonly officialCountryPool?: ManagedOfficialCountryPool;
+    readonly postwarFinanceConnection?: PostwarFinanceConnection;
+    readonly postwarSocialConnection?: PostwarSocialConnection;
+    readonly postwarTreasuryFxConnection?: PostwarTreasuryFxConnection;
+    readonly postwarFinanceSocialConnection?: Readonly<PostwarFinanceSocialApiConnection>;
   } = {},
 ): Promise<RunningApiRuntime> {
-  const officialCountryPool =
-    config.officialCountryDatabase === undefined
-      ? undefined
-      : (dependencies.officialCountryPool ??
-        createOfficialCountryReadPool(config.officialCountryDatabase));
-  const lifecycle = createApiServer(
-    config,
-    dependencies.season1Fetch,
-    officialCountryPool,
-  );
+  let officialCountryPool: ManagedOfficialCountryPool | undefined;
+  let lifecycle: ReturnType<typeof createApiServer>;
+  let shared:
+    ReturnType<typeof readPostwarFinanceSocialApiConnection> | undefined;
+  try {
+    // Resolve only genuine ownership before validation can reject a mixed
+    // installation, so every transferred resource is still drained on failure.
+    if (dependencies.postwarFinanceSocialConnection)
+      shared = readPostwarFinanceSocialApiConnection(
+        dependencies.postwarFinanceSocialConnection,
+      );
+    if (
+      dependencies.postwarTreasuryFxConnection &&
+      (dependencies.postwarFinanceConnection ||
+        dependencies.postwarSocialConnection ||
+        dependencies.postwarFinanceSocialConnection)
+    )
+      throw Error('POSTWAR_TREASURY_FX_REQUIRES_SOLE_EXPLICIT_CONSUMER');
+    if (
+      dependencies.postwarTreasuryFxConnection?.environment &&
+      config.environment !==
+        dependencies.postwarTreasuryFxConnection.environment
+    )
+      throw Error('POSTWAR_TREASURY_FX_EXACT_ENVIRONMENT_REQUIRED');
+    if (shared) {
+      if (
+        dependencies.postwarFinanceConnection ||
+        dependencies.postwarSocialConnection ||
+        dependencies.postwarTreasuryFxConnection ||
+        config.environment !== shared.environment
+      )
+        throw Error('POSTWAR_SHARED_NODE_EXCLUSIVE_EXACT_ENVIRONMENT_REQUIRED');
+    }
+    officialCountryPool =
+      config.officialCountryDatabase === undefined
+        ? undefined
+        : (dependencies.officialCountryPool ??
+          createOfficialCountryReadPool(config.officialCountryDatabase));
+    // Real cold preparation is part of product startup, before any listener.
+    // Failure is drained/cleaned with the same installed dependency lifecycle.
+    if (shared) await dependencies.postwarFinanceSocialConnection!.prepare();
+    else await dependencies.postwarSocialConnection?.prepare();
+    lifecycle = createApiServer(
+      config,
+      dependencies.season1Fetch,
+      officialCountryPool,
+      shared?.finance ?? dependencies.postwarFinanceConnection,
+      shared?.social ?? dependencies.postwarSocialConnection,
+      shared?.treasuryFx ?? dependencies.postwarTreasuryFxConnection,
+      shared !== undefined,
+      shared?.captain,
+      shared?.readConfiguration,
+      shared?.centralBank,
+      shared?.trade,
+      shared?.industry,
+      shared?.industryUtilityPlanningReader,
+      shared?.socialServiceCreationPlanningReader,
+    );
+  } catch (error) {
+    return failStartupAfterCleanup(error, [
+      () =>
+        shared
+          ? dependencies.postwarFinanceSocialConnection!.stop()
+          : undefined,
+      () => dependencies.postwarFinanceConnection?.stop(),
+      () => dependencies.postwarSocialConnection?.stop(),
+      () => dependencies.postwarTreasuryFxConnection?.stop(),
+      () => officialCountryPool?.end(),
+    ]);
+  }
   try {
     await new Promise<void>((resolve, reject) => {
       const startupError = (error: Error) => {
@@ -395,14 +669,31 @@ export async function startApiRuntime(
       });
     });
   } catch (error) {
-    await officialCountryPool?.end();
-    throw error;
+    lifecycle.stopReadiness();
+    return failStartupAfterCleanup(error, [
+      () => lifecycle.drainFinance(),
+      () =>
+        shared
+          ? dependencies.postwarFinanceSocialConnection!.stop()
+          : undefined,
+      () => officialCountryPool?.end(),
+    ]);
   }
   const address = lifecycle.server.address();
   if (address === null || typeof address === 'string') {
-    await closeServer(lifecycle.server, config.shutdownGraceMs);
-    await officialCountryPool?.end();
-    throw new Error('world-api did not acquire a TCP address');
+    lifecycle.stopReadiness();
+    return failStartupAfterCleanup(
+      new Error('world-api did not acquire a TCP address'),
+      [
+        () => closeServer(lifecycle.server, config.shutdownGraceMs),
+        () => lifecycle.drainFinance(),
+        () =>
+          shared
+            ? dependencies.postwarFinanceSocialConnection!.stop()
+            : undefined,
+        () => officialCountryPool?.end(),
+      ],
+    );
   }
   let shutdownPromise: Promise<void> | undefined;
   const originHost = config.host.includes(':')
@@ -411,12 +702,32 @@ export async function startApiRuntime(
   return {
     origin: `http://${originHost}:${address.port}`,
     port: address.port,
+    ...(shared ? { sharedOfficeConsumer: shared.control } : {}),
     ready: lifecycle.ready,
     shutdown: () => {
       lifecycle.stopReadiness();
       shutdownPromise ??= (async () => {
-        await closeServer(lifecycle.server, config.shutdownGraceMs);
-        await officialCountryPool?.end();
+        const errors: unknown[] = [];
+        for (const operation of [
+          () => closeServer(lifecycle.server, config.shutdownGraceMs),
+          () => lifecycle.drainFinance(),
+          () =>
+            shared
+              ? dependencies.postwarFinanceSocialConnection!.stop()
+              : undefined,
+          () => officialCountryPool?.end(),
+        ]) {
+          try {
+            await operation();
+          } catch (error) {
+            errors.push(error);
+          }
+        }
+        if (errors.length)
+          throw new AggregateError(
+            errors,
+            'world-api shutdown cleanup was incomplete',
+          );
       })();
       return shutdownPromise;
     },

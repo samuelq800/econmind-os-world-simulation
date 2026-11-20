@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "postwar-captain-opening-adoption-v1",
+  "authorityKind": "EXPLICIT_PROJECT_OWNER_CHAT_ADOPTION_NOT_CRYPTOGRAPHIC_SIGNATURE",
+  "question": {
+    "messageId": "Sentinel_d3c8418a3a448191b1f1b580d6b92b01",
+    "text": "World 的 Captain 写操作有一项开局规则需要你决定：是否给新的战后场景中每国 70 点政治资本，7 个用途各 10 点，其中含 10 点危机预留，初始新增和已花费均为 0？\n\n这只补新场景的缺失规则，不修改已有世界，也不改变国情、资源、人口和货币差异，不新增自动生成政治资本的机制。若暂不采用，Captain 写操作保持关闭，其他连接继续施工。",
+    "transcriptionSource": "CURRENT_PARENT_SESSION_DELEGATION"
+  },
+  "answer": {
+    "messageId": "Sentinel_6ada18b33d9881919c978cd5d95ab680",
+    "text": "可以",
+    "observedAtUtcMinute": "2026-10-30T04:46Z",
+    "timestampPrecision": "MINUTE"
+  },
+  "directCurrentTaskCorroboration": {
+    "questionCallId": "call_0f9ec64182754b11958c32f44b80f5ff",
+    "question": "Captain 办公室还缺开局政治资本，现有规则没有给出数值。是否为新的战后场景采用：每国 70 点、7 个用途各 10 点（含 10 点危机预留），开局新增和已花费均为 0；保留所有现有国情、资源、人口和货币差异，不修改已有世界，也不增加自动生成政治资本的规则？",
+    "answer": "采用每国 70 点、7 项各 10 点",
+    "messageId": null,
+    "exactTimestamp": null
+  },
+  "adoptedScope": {
+    "newScenarioOnly": true,
+    "initialPoliticalCapitalPerCountry": "70",
+    "eachExistingBucket": "10",
+    "bucketCount": "7",
+    "initialGenerated": "0",
+    "initialSpent": "0",
+    "automaticGeneration": "NOT_AUTHORIZED_BY_THIS_POLICY",
+    "existingWorldReset": "FORBIDDEN",
+    "preserveExistingCountryResourcePopulationCurrencyDifferences": true
+  },
+  "notConferred": [
+    "Owner Ed25519 signature",
+    "P0/PR approval",
+    "Production migration approval",
+    "New credential or role membership",
+    "Clock activation",
+    "Approval of any individual future reallocation"
+  ]
+}

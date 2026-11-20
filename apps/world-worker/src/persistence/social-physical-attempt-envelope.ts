@@ -10,6 +10,7 @@ import {
   parseSocialEmploymentServiceCommand,
   prepareSocialEmploymentServiceOperation,
   validateSocialEmploymentServiceState,
+  resolveSocialEmploymentPhysicalServicePool,
   worldId,
   type CanonicalCommand,
   type LabourSkill,
@@ -255,15 +256,29 @@ function counts(
       pool.dayIndex !== envelope.dayIndex
     )
       continue;
-    const lane = envelope.pools.find((p) => p.poolId === pool.poolId);
+    const root = resolveSocialEmploymentPhysicalServicePool(
+      state,
+      pool.poolId,
+      digest,
+    );
+    const lane = envelope.pools.find((p) => p.poolId === root);
     if (!lane || lane.skill !== pool.skill) invalid('UNBOUND_HISTORICAL_LANE');
     result[lane.skill] += BigInt(plan.reservedSlots);
     if (plan.state === 'SETTLED')
       matched[lane.skill] += BigInt(integer(plan.matched));
   }
   for (const lane of envelope.pools) {
-    const pool = state.servicePools.find((p) => p.poolId === lane.poolId)!;
-    if (BigInt(pool.usedSlots) !== matched[lane.skill])
+    const used = state.servicePools
+      .filter(
+        (p) =>
+          resolveSocialEmploymentPhysicalServicePool(
+            state,
+            p.poolId,
+            digest,
+          ) === lane.poolId,
+      )
+      .reduce((n, p) => n + BigInt(p.usedSlots), 0n);
+    if (used !== matched[lane.skill])
       invalid('UNEXPLAINED_INITIAL_USE_OR_INCOMPLETE_HISTORY');
   }
   return result;
@@ -309,7 +324,26 @@ export function assertSocialPhysicalAttemptEnvelope(input: {
       p.dayIndex === envelope.dayIndex,
   );
   if (
-    scopedPools.length !== 3 ||
+    envelope.pools.some(
+      (lane) =>
+        resolveSocialEmploymentPhysicalServicePool(
+          before,
+          lane.poolId,
+          input.sha256Hex,
+        ) !== lane.poolId,
+    ) ||
+    scopedPools.some(
+      (pool) =>
+        !envelope.pools.some(
+          (lane) =>
+            lane.poolId ===
+              resolveSocialEmploymentPhysicalServicePool(
+                before,
+                pool.poolId,
+                input.sha256Hex,
+              ) && lane.skill === pool.skill,
+        ),
+    ) ||
     envelope.pools.some(
       (lane) =>
         !scopedPools.some(
@@ -346,8 +380,12 @@ export function assertSocialPhysicalAttemptEnvelope(input: {
     originalParsed.intent.locationId !== envelope.locationId ||
     !envelope.pools.some(
       (p) =>
-        p.poolId === originalParsed.intent.servicePoolId &&
-        p.skill === originalParsed.intent.skill,
+        p.poolId ===
+          resolveSocialEmploymentPhysicalServicePool(
+            before,
+            originalParsed.intent.servicePoolId,
+            input.sha256Hex,
+          ) && p.skill === originalParsed.intent.skill,
     )
   )
     invalid('COMMAND_OUTSIDE_BOUND_DAY_AND_LANE');
@@ -366,8 +404,16 @@ export function assertSocialPhysicalAttemptEnvelope(input: {
   const chargedBefore = counts(before, envelope, input.sha256Hex);
   const chargedAfter = counts(operation.state, envelope, input.sha256Hex);
   const lanes = envelope.pools.map((lane) => {
-    const pool = scopedPools.find((p) => p.poolId === lane.poolId)!;
-    const capacity = BigInt(pool.capacitySlots);
+    const capacity = scopedPools
+      .filter(
+        (p) =>
+          resolveSocialEmploymentPhysicalServicePool(
+            before,
+            p.poolId,
+            input.sha256Hex,
+          ) === lane.poolId,
+      )
+      .reduce((n, p) => n + BigInt(p.capacitySlots), 0n);
     if (
       chargedBefore[lane.skill] > capacity ||
       chargedAfter[lane.skill] > capacity ||
@@ -376,7 +422,7 @@ export function assertSocialPhysicalAttemptEnvelope(input: {
       invalid('PHYSICAL_LANE_EXHAUSTED');
     return {
       ...lane,
-      capacity: pool.capacitySlots,
+      capacity: capacity.toString(),
       chargedBefore: chargedBefore[lane.skill].toString(),
       chargedAfter: chargedAfter[lane.skill].toString(),
       remaining: (capacity - chargedAfter[lane.skill]).toString(),
@@ -429,5 +475,77 @@ export function assertSocialPhysicalAttemptEnvelope(input: {
     stages,
     sourceAdmitted: false,
     runtimeReady: false,
+  });
+}
+
+/** Pure check of existing physical commitments, not another person-time ledger. */
+export function assertSocialPhysicalCapacityState(input: {
+  state: SocialEmploymentServiceState;
+  readFacts: SocialEmploymentReadFacts;
+  sourceEnvelope: unknown;
+  sha256Hex: Sha256Hex;
+}) {
+  const envelope = parseEnvelope(input.sourceEnvelope),
+    state = validateSocialEmploymentServiceState(
+      input.state,
+      input.readFacts,
+      input.sha256Hex,
+    );
+  if (state.worldId !== envelope.worldId) invalid('MIXED_WORLD_OR_COUNTRY');
+  const scoped = state.servicePools.filter(
+    (p) =>
+      p.countryId === envelope.countryId &&
+      p.locationId === envelope.locationId &&
+      p.dayIndex === envelope.dayIndex,
+  );
+  if (
+    envelope.pools.some(
+      (lane) =>
+        !scoped.some((p) => p.poolId === lane.poolId && p.skill === lane.skill),
+    ) ||
+    scoped.some(
+      (p) =>
+        !envelope.pools.some(
+          (l) =>
+            l.poolId ===
+              resolveSocialEmploymentPhysicalServicePool(
+                state,
+                p.poolId,
+                input.sha256Hex,
+              ) && l.skill === p.skill,
+        ),
+    )
+  )
+    invalid('INCOMPLETE_OR_ALIASED_POOL_SCOPE');
+  const charged = counts(state, envelope, input.sha256Hex);
+  const lanes = envelope.pools.map((lane) => {
+    const capacity = scoped
+      .filter(
+        (p) =>
+          resolveSocialEmploymentPhysicalServicePool(
+            state,
+            p.poolId,
+            input.sha256Hex,
+          ) === lane.poolId,
+      )
+      .reduce((n, p) => n + BigInt(p.capacitySlots), 0n);
+    if (charged[lane.skill] > capacity) invalid('PHYSICAL_LANE_EXHAUSTED');
+    return {
+      ...lane,
+      capacity: capacity.toString(),
+      charged: charged[lane.skill].toString(),
+    };
+  });
+  for (const stage of envelope.stages)
+    if (
+      SKILLS.reduce(
+        (n, s) => n + charged[s] * BigInt(stage.minutesPerOpportunity[s]),
+        0n,
+      ) > BigInt(stage.availableMinutes)
+    )
+      invalid('SHARED_PHYSICAL_STAGE_EXHAUSTED');
+  return freeze({
+    classification: 'PHYSICAL_CAPACITY_DATA_NOT_AUTHORITY' as const,
+    lanes,
   });
 }

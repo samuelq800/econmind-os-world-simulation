@@ -1,0 +1,58 @@
+
+ RUN  v5.0.0 /workspace/econmind-os-world-simulation
+
+ ✓ tests/world-core/postwar-social-employment-creation-sql.test.ts (13 tests) 16971ms
+   ✓ rejects invalid actual duty source: BEFORE_START 1613ms
+   ✓ rejects invalid actual duty source: AFTER_END 1368ms
+   ✓ rejects invalid actual duty source: MISSING_REF 1488ms
+   ✓ rejects invalid actual duty source: DUPLICATE_REF 1618ms
+   ✓ rejects invalid actual duty source: WRONG_COHORT 1830ms
+   ✓ rejects invalid actual duty source: WRONG_REGION 1440ms
+   ✓ rejects invalid actual duty source: WRONG_COUNT 1649ms
+   ✓ rejects invalid actual duty source: OVERLAPPING_DUTIES 1452ms
+   ✓ rejects invalid actual duty source: WRONG_MINUTES 1689ms
+ ✓ tests/world-core/postwar-industry-refinery-source-coverage.test.ts (5 tests) 12176ms
+   ✓ source-backed finite refinery coverage (5)
+     ✓ enumerates actual 21 refinery sites and exactly49 N/A countries without approving other recipes 1713ms
+     ✓ keeps country10 real capacities, staff and domestic estimates distinct from country02 2481ms
+     ✓ distinguishes no refinery from unknown source country and refuses cross-country facility substitution 3649ms
+     ✓ does not register or publish any source when the actual country has no refinery 1230ms
+ ✓ tests/world-core/postwar-industry-run-parameters-sql.test.ts (3 tests) 5446ms
+ ✓ tests/world-core/postwar-industry-run-parameters-capacity-upgrade.test.ts (2 tests) 5321ms
+   ✓ repairs both exact V1 read bodies while preserving OID/owner/ACL/RLS/source/economic rows; unknown metadata, repeats and failed transactions reject 5279ms
+ ✓ tests/world-api/postwar-industry-run-parameters.test.ts (3 tests) 5987ms
+ ✓ tests/world-core/postwar-social-employment-creation-upgrade.test.ts (4 tests) 4673ms
+   ✓ applies the exact dc5/bde increment, preserves old rows/OIDs/ACL/RLS and repeats before actual CREATE→PLAN→MATCH old readback 2676ms
+   ✓ refuses unknown body/ACL/search-path metadata and rolls back a known mid-package failure without touching old rows 1951ms
+ ✓ tests/world-core/postwar-social-employment-creation-ordinal-upgrade.test.ts (1 test) 2446ms
+   ✓ repairs only the exact V1 initializer, retaining catalog/rows and rejecting retries, unknown metadata and failed transactions 2445ms
+ ✓ tests/world-core/industry-internal-logistics-execution.test.ts (13 tests) 1775ms
+ ✓ tests/world-web/office-command-lifecycle-ux.test.ts (23 tests) 1153ms
+ ✓ tests/world-core/conservative-opening-water-basis.test.ts (4 tests) 1008ms
+   ✓ conservative fixed water basis is bounded reversible DATA (4)
+     ✓ preserves all 122 raw regions, larger protected aliases, 20 dry shortages and every basin bound across all months 793ms
+ ✓ tests/world-core/postwar-social-creation-forward-package.test.ts (5 tests) 635ms
+   ✓ fixed Social13 source-review package entry (5)
+     ✓ uses the pinned loader and packages13 exact replacements plus only the declared new supplement 421ms
+ ✓ tests/world-web/industry-run-controller.test.ts (6 tests) 206ms
+ ✓ tests/world-web/office-command-original-recovery.test.ts (6 tests) 97ms
+ ✓ tests/world-web/postwar-office-runtime.test.ts (63 tests) 248ms
+ ✓ tests/world-web/office-command-next-request.test.ts (10 tests) 175ms
+ ✓ tests/world-core/finance-budget-native-mixed-prefix.test.ts (4 tests) 100ms
+ ✓ tests/world-core/industry-first-day-water-scenario.test.ts (8 tests) 50ms
+ ✓ tests/world-core/finance-budget-native.test.ts (4 tests) 35ms
+ ✓ tests/world-web/postwar-trade-current-runtime.test.ts (6 tests) 32ms
+ ✓ tests/world-core/postwar-day-one-storage-self-use.test.ts (9 tests) 21ms
+ ✓ tests/world-web/industry-run-form.test.ts (15 tests) 18ms
+ ✓ tests/world-web/registered-trade-cb-readback-browser-probe-protocol.test.ts (14 tests) 16ms
+ ✓ tests/world-core/registered-social-create-browser-chain.test.ts (6 tests) 11ms
+ ✓ tests/world-core/postwar-financial-mixed-current-contract.test.ts (13 tests) 8ms
+ ✓ tests/world-core/postwar-industry-run-parameters-contract.test.ts (10 tests) 6ms
+ ✓ tests/world-web/office-command-industry-run.test.ts (1 test) 4ms
+
+ Test Files  26 passed (26)
+      Tests  251 passed (251)
+   Start at  03:31:23
+   Duration  70.55s (tests 86%, transform 7%, import 7%)
+
+JSON report written to /workspace/recovery-evidence-20261113/final820-targeted.json

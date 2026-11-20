@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "industry-internal-logistics-first-day-policy-v1",
+  "policyVersion": "INDUSTRY_INTERNAL_LOGISTICS_FIRST_DAY_20261101_V1",
+  "classification": "ADOPTED_FINITE_SCENARIO_MODEL_NOT_SURVEYED_ROUTE_OR_EXECUTION",
+  "userAdoption": {
+    "path": "docs/reports/office-connection/INDUSTRY_UTILITIES_ADOPTION_20261101.json",
+    "rawSha256": "de6ad8ff58ff0180706b6bc6b4d548fd2d3404c4749cf71d91845474b19fddb0",
+    "meaning": "Same OP internal logistics; only actual independent service WORK and qualified paid inputs counted once; no self payment"
+  },
+  "scope": {
+    "firstSimulatedDayOnly": true,
+    "startsAtSimTime": "0",
+    "endsAtSimTime": "86400000",
+    "country": "COUNTRY_02",
+    "facility": "OPEN-02-REFINED_FUEL",
+    "sourceStock": "STOCK-02-CRUDE_OIL",
+    "sourcePhysicalLocation": "LOCATION_WAREHOUSE_02",
+    "targetPhysicalLocation": "ACTUAL_ADMITTED_FACILITY_LOCATION_REQUIRED",
+    "sameOperatorOnly": true,
+    "preserveTitleAndRisk": true
+  },
+  "namedHandover": {
+    "direction": "WAREHOUSE_TO_EXISTING_FACILITY",
+    "model": "EXPLICIT_SCENARIO_NAMED_HANDOVER_NOT_SURVEYED_ROAD",
+    "rawDomesticAccessRef": "DOM-OPEN-02-REFINED_FUEL",
+    "rawDirection": {
+      "fromId": "OPEN-02-REFINED_FUEL",
+      "toId": "GATE-02"
+    },
+    "rawStatus": "NOT_SURVEYED_NOT_OPERATIONAL",
+    "distanceKm": "1252.5865375359651",
+    "capacityTonnesPerSimDay": "248321.976502",
+    "rawDirectionIsNotRewritten": true,
+    "capacitySharedAcrossDirectionsAndRuns": true
+  },
+  "massBasis": {
+    "commodityId": "CRUDE_OIL",
+    "unit": "barrel",
+    "tonnesPerUnit": "0.136"
+  },
+  "cost": {
+    "budgetReference": {
+      "amount": "0.015",
+      "currency": "GCU",
+      "perUnit": "tonne_kilometre"
+    },
+    "budgetReferenceIsExpenseOrPrice": false,
+    "noSelfPaySelfReceive": true,
+    "manufacturingWorkReusableAsLogisticsWork": false,
+    "onlyActualIndependentServiceWorkAndPaidInputsOnce": true,
+    "newVehicleFuelOrCrewCoefficients": false
+  },
+  "sourceRawSha256": {
+    "domestic-access.json": "2b8e6102479031314ca91560a81f485edb671ab74d233c70e1da40da0be32a09",
+    "facilities.json": "049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485",
+    "stocks.json": "d52e68856dabdda6d5488043291ee92100f22c16ea44d34d2000170402ee8153",
+    "commodity-catalog.json": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b"
+  },
+  "notCreated": [
+    "admission",
+    "mandate",
+    "source authority",
+    "WORK",
+    "payment",
+    "handover receipt",
+    "inventory movement",
+    "World or Clock start"
+  ]
+}

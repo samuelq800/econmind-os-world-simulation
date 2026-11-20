@@ -2,6 +2,7 @@ import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
   POLITICAL_CAPITAL_BUCKETS,
   preparePoliticalCapitalAllocation,
+  validatePoliticalCapitalSnapshot,
   type PoliticalCapitalBucket,
   type PoliticalCapitalSnapshot,
 } from '../engine-kernels/captain-strategy-governance-preparation.js';
@@ -345,6 +346,31 @@ export interface CaptainPoliticalCapitalReplayState {
 }
 
 /** Recomputes the existing kernel from event evidence, never applies client-supplied deltas. */
+/** Initial immutable domain DATA only. The server must independently bind this
+ * original to its real world/seed/source custody. Never a source admission. */
+export function createCaptainPoliticalCapitalReplayOrigin(input: {
+  readonly worldId: string;
+  readonly countryId: string;
+  readonly capital: PoliticalCapitalSnapshot;
+}): CaptainPoliticalCapitalReplayState {
+  if (
+    !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(input.worldId) ||
+    !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(input.countryId)
+  )
+    invalid('Exact Captain origin world/country required');
+  const capital = validatePoliticalCapitalSnapshot(input.capital);
+  if (capital.countryRef !== input.countryId)
+    invalid('Captain origin country mismatch');
+  return Object.freeze({
+    worldId: input.worldId,
+    countryId: input.countryId,
+    worldVersion: '0',
+    lastEventSequence: '0',
+    capital,
+    applied: Object.freeze([]),
+  });
+}
+
 export function replayCaptainPoliticalCapitalAllocation(input: {
   readonly state: CaptainPoliticalCapitalReplayState;
   readonly event: AuthoritativeEvent;

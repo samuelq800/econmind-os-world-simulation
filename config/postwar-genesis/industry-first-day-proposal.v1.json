@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "industry-opening-minimum-operating-proposal-v1",
+  "version": "INDUSTRY_OPENING_PROPOSAL_20261030_V1",
+  "state": "PROPOSAL_ONLY_NOT_ADOPTED",
+  "scope": {
+    "firstValidationTarget": "COUNTRY_02/OPEN-02-REFINED_FUEL",
+    "candidateApplicability": "Only already-adopted OPENING_EXISTING_ASSET OP aggregate facilities; no unbuilt, cross-country rights or clock activation.",
+    "period": "One initial simulation-day operating window; only elapsed, legally available person/resource time may execute."
+  },
+  "existingRulesNotRequiringAnotherChoice": [
+    "D04 5.1 OP existing-site limited business scope and retention of known finer ownership.",
+    "D04 5.3 water ecological/public/domestic/agriculture/industry priority and Gregorian seasonal month rules.",
+    "D04 5.4 existing initialSOC*energyCapacity, power priority, actual energy/fuel/grid conservation.",
+    "Actual country skills/population/jobs/wages/LC-FX/stock quantities remain unchanged.",
+    "Actual qualified expense divided by actual Core output determines cost coefficient exactly; no guessed commodity market price."
+  ],
+  "recommendedDecisions": [
+    {
+      "id": "WORK_PERIOD",
+      "recommendation": "Extend the existing 480-minute one-initial-day worker schedule to Industry as a NEW explicit rule; book distinct actual OP worker cohort/skill/time ranges, then derive work consumption only through canonical execution.",
+      "source": "postwar-social-employment-state.ts:workerMinutesPerSimDay=480 currently applies only to professional recovery-service duties; Industry recipe workersPerDailyOutputUnit is 0.008 for this target.",
+      "impact": "No new workers or wages; no overlap with Social/police/welfare duties. Non-representable fractional results must error, never epsilon/rounding.",
+      "alternative": "Keep industrial work not expanded until another explicit schedule is adopted."
+    },
+    {
+      "id": "MAINTENANCE_BASIS",
+      "recommendation": "Adopt source conditionFraction=1 as a typed opening-serviceable state for the first operating window, explicitly NOT a completed maintenance receipt. At the next due boundary require an actual work order/people/materials/purpose-qualified payment. Keep capital-based 2%/360 as reference budget only.",
+      "source": "facilities /362: conditionFraction=1; complete.py later reference 48548.29 GCU/day, finance uses it. Earlier 1352=w*4 is legacy proxy, not another invoice.",
+      "impact": "Requires an explicit Core maintenance-basis variant; never put NOT_DUE into a field pretending maintenance was applied. No automatic capital-reference payment. Future maintenance physical recipe still needs a separately adopted bounded rule.",
+      "alternative": "Require actual maintenance execution before any production; facilities stay not-ready until it exists."
+    },
+    {
+      "id": "LOCAL_LOGISTICS_SCOPE",
+      "recommendation": "Adopt the existing domestic-access estimates as a finite scenario logistics-service model for existing OP sites, preserving NOT_SURVEYED_NOT_OPERATIONAL raw provenance. Bind actual country stock location identities to named handover endpoints under an explicit versioned model, never relabel/move genesis stocks.",
+      "source": "domestic-access /22 DOM-OPEN-02-REFINED_FUEL: distanceKmEstimate=1252.5865375359651; capacityTonnesDayProposal=248321.976502. Commodity masses: CRUDE_OIL 0.136 tonne/barrel, REFINED_FUEL 0.125 tonne/barrel-equivalent.",
+      "impact": "Finite throughput/time and actual qualified service cost, no unlimited logistics or surveyed-road claim. No cross-country/transit approval. Full vehicle-fuel coefficients are not declared: explicitly choose bounded aggregate-service modelling for V1 rather than pretending zero vehicle fuel; otherwise full transport-input execution remains blocked.",
+      "alternative": "Retain planning links as non-operational and wait for a fully specified transport source."
+    },
+    {
+      "id": "BASELINE_TECHNOLOGY",
+      "recommendation": "Adopt existing source refinery coefficients as baseline scenario operation for its own site; high-efficiency refining remains an optional ungranted upgrade. Record an explicit authenticated baseline nonrequirement instead of inventing MASTERED or a transferable licence.",
+      "source": "Recipe SCENARIO-RECIPE-REFINED_FUEL /8: CRUDE1.08, electricity0.008MWh, water0.1m3, workforce0.008. RESOURCE_EFFICIENT_REFINING is High-efficiency Refining; source technology /0 and licence /3 remain proposals not granted.",
+      "impact": "No efficiency improvement, IP transfer, royalty or licence fee fabricated. If baseline recipe itself requires restricted technology, this recommendation cannot override that source restriction.",
+      "alternative": "Require a specific genuine granted technology/use right before execution."
+    },
+    {
+      "id": "OP_REPRESENTATION",
+      "recommendation": "Adopt a finite manual Industry-office scheduling mandate for the unfragmented D04 OP aggregate existing-site activity, bound to current subject/seat, world/country/facility/run/period and actual OP spendable funds. Exclude finer private/foreign/joint rights without their real consent.",
+      "source": "Owner original 4.2: Office authority is not OP property; 5.1 limited existing-site scope; 6.3 existing lawful engines may settle but NPC cannot sign new policy/government contracts.",
+      "impact": "No OP ownership transfer, new debt, government cash appropriation, infinite NPC purchases or autonomous policy. Independent issuer/currentness/row-lock proof still required.",
+      "alternative": "Require actual OP-owner delegated consent per operation; office permission alone remains insufficient."
+    }
+  ],
+  "oneResponseMeaning": "A single explicit adoption of this version can select the recommended finite package, or identify which recommendation to change. This document itself records no approval.",
+  "stillNotInvented": [
+    "Actual maintenance performed, supplier invoice, work hours already completed, or delivery are never generated by approval alone.",
+    "No fuel/crew/maintenance material numeric coefficient without source or separately adopted scenario model.",
+    "Unknown finer title/mandate remains unavailable."
+  ],
+  "deploymentSeparate": [
+    "Production migration review/publication/signature, source custodian/registrar installation, low-privilege host roles and credentials are separate from operating-rule decisions.",
+    "No production SQL, deployment, World ACTIVE state or Clock is authorized by this proposal."
+  ]
+}

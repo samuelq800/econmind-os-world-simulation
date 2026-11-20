@@ -1,0 +1,90 @@
+{
+  "classification": "CODE_AND_ISOLATED_ACCEPTANCE_NOT_ALL_OFFICE_COMPLETION",
+  "candidate": "82031e567c0258cf1ff29a749dbf24bf166c21a9",
+  "worldBranch": "codex/office-next-connections-20261108",
+  "companion": "16e6a6c312f1ffb6528dfcd4ca81c3e24b51c535",
+  "companionBranch": "codex/social-employment-catalog-20261108",
+  "denominators": {
+    "offices": 6,
+    "modules": 120,
+    "fields": 1126,
+    "readouts": 158,
+    "moduleActions": 120,
+    "pageCommands": 148,
+    "dynamicCommandExpressions": 5,
+    "sourceDatasets": 34,
+    "selectedCountries": 70,
+    "catalogItems": 1404,
+    "countryCatalogInstances": 98280
+  },
+  "coveragePercentage": null,
+  "currentFormalSourceOfficeChainsVerified": 0,
+  "sourceCount": 70,
+  "applicableRefineryCountries": 21,
+  "newFullRefineryCountryChainsVerified": 0,
+  "targetedTests": {
+    "passed": 251,
+    "failed": 0,
+    "skipped": 0,
+    "files": 26,
+    "runnerExit": 0
+  },
+  "nativePostgresTests": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "runnerExit": 0,
+    "serverVersion": "16.15",
+    "scope": "NEW_TEST_ONLY_SMALL_SOURCE_NOT_RESTORED_H3"
+  },
+  "fullRepositorySuite": "NOT_RUN",
+  "actualNodeBrowserChain": "NOT_RUN_MISSING_RETAINED_H3_AND_RECEIPTS",
+  "production": "NOT_DEPLOYED",
+  "worldClockStarted": false,
+  "trackedInputCount": 2557,
+  "trackedInputDigest": "a124ba480dca6f07a902843663d92295ad409b19a0d40ac280f835179ddc6c6a",
+  "commands": {
+    "targeted": "pnpm exec vitest run <paths in targeted-test-files.json> --maxWorkers=2 --reporter=default --reporter=json --outputFile=<new report>",
+    "native": "ECONMIND_SOCIAL_ORDINAL_NATIVE=1 ECONMIND_SOCIAL_ORDINAL_EVIDENCE_DIR=<new absolute workspace path> pnpm exec vitest run tests/world-core/postwar-social-employment-creation-ordinal-native.test.ts --reporter=default --reporter=json --outputFile=<new report>",
+    "scope": "node tools/office-connection/scope-inventory.mjs --out <new file> --evidence-root <actual evidence directory>"
+  },
+  "passedChecks": [
+    "pinned frozen installs",
+    "Core Worker API builds",
+    "affected Web strict types",
+    "scoped strict types lint format",
+    "repository boundaries",
+    "authority patterns",
+    "secrets",
+    "environment",
+    "23 migration provenance checks"
+  ],
+  "environmentDraft": {
+    "revision": 9,
+    "state": "SAVED_REQUIRES_USER_PUBLISH",
+    "publicationVerified": false
+  },
+  "filesSha256": {
+    "README.md": "16eeef80bcd4a66b2d36fd5dd405251d3d161f7236abd85ba32af87fe9dfe28e",
+    "catalog-field-contracts.md": "57b4d102799d9f3ef36830a2b7885026fee459222a63a9dbbf9d494624574e29",
+    "native-inputs.json.gz": "22b5a1c68558ce9731dfc682f899dc55495764b01528f933785764df62b24aee",
+    "native-runner-exit.json": "93f68e2f216ca3c4383431a7ec08fac21dac3a7c89c4ec05eed7a2d6d4d4300d",
+    "native-summary.json": "32b1a49babcb1db4f4425ce9281e8e8b64f594f38df1324d0a9394b5a752da12",
+    "native-tests.json": "99400bf90632d3eb66bc6cc0e2bb1e7cace3df43961b9e0d21abfb550e3fd7e9",
+    "native-tests.log": "de97398f10cafc669801c879c34805c5c5ca29c07d1020bc7cf61c700354ec6d",
+    "prior-native-exit-diagnosis.md": "ff014779b482c6874d42b15dfdf9846af685d0f8557c259f1384a43f69b9980a",
+    "scope-inventory.json.gz": "29b41421531dfd1c579c7eaa22c706615202bc570c689fbb673b4b5af6f3b8c3",
+    "targeted-runner-exit.json": "7e5e867785ab16a73549613866bd134aa8cb1718edc0e35b180a581d436288f1",
+    "targeted-test-files.json": "4d919cd82647e8947133a2e75e65535986efae9b1daffee56b91b1260af61ae0",
+    "targeted-tests.json": "354f1a4a398ab7ca95816ad5e4fe63dac288343a01695be29e36300010f54bb2",
+    "targeted-tests.log": "588b1903df40b858379bcb46a6feef18000d5129c5b89be6d2514589d10f0c2e"
+  },
+  "jsonPresentation": "Copied JSON is formatting-normalized; original raw runner bytes are retained under execution evidence and hashed below.",
+  "rawExecutionEvidenceSha256": {
+    "final820-targeted.json": "fd04e46cbad8e6f0087e876487fa841efb6848c8c75186174bf58bf794581995",
+    "final820-targeted-exit.json": "c64ddffa95c21c62594ddddfad988ace8abf6ff067fae479445e76c5a06b2a34",
+    "final-native-fixed.json": "6072f4ad5087603d1ac54fa168946a9fa98f80b3866d0079bf3f4ba57ba739ca",
+    "final-native-fixed/runner-exit.json": "93f68e2f216ca3c4383431a7ec08fac21dac3a7c89c4ec05eed7a2d6d4d4300d",
+    "final-native-fixed/summary.json": "32b1a49babcb1db4f4425ce9281e8e8b64f594f38df1324d0a9394b5a752da12"
+  }
+}

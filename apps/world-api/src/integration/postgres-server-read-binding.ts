@@ -580,7 +580,21 @@ export function createPostgresServerReadBindingSnapshotReader(input: {
       true,
     );
   }
-  return Object.freeze({ read, readCurrentSeats, readManualRecovery });
+  // Fixed verified-subject transaction lifecycle without hydrating World seed
+  // facts. The bounded source consumer must enforce its own current seat,
+  // entitlement, admitted seed header and head in this exact executor.
+  const withReadOnlyExecutor = <Result>(
+    request: SnapshotRequest,
+    consume: (
+      executor: PostgresBindingSnapshotExecutor,
+    ) => Promise<Result | null>,
+  ) => run(request, consume);
+  return Object.freeze({
+    read,
+    readCurrentSeats,
+    readManualRecovery,
+    withReadOnlyExecutor,
+  });
 }
 
 /** Existing facts-only port remains compatible; no persisted authority inferred. */

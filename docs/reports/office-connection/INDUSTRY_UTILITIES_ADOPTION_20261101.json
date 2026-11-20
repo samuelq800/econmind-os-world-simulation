@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "industry-first-day-utility-user-adoption-record-v1",
+  "classification": "EXPLICIT_USER_SCENARIO_POLICY_NOT_PHYSICAL_CALIBRATION",
+  "source": {
+    "kind": "TRANSCRIBED_DIRECT_USER_QUESTION_REPLY",
+    "questionItemId": "[\"request_user_input_async\",\"call_6882266ba4514c7393c098f6e53d9aa7\",0]",
+    "parentReportedUserItemId": "01a196ca-2b2f-7190-92a5-37ffe2f74d5e",
+    "date": "2026-11-01",
+    "transportSignatureClaimed": false
+  },
+  "question": "工业完整产出还需一次确认水、电和内部物流的有限首日模拟规则：①同一 OP 使用既有储能，只放电，将原 0.9 定义为单向放电效率；②非饮用工艺水沿用地区差异、工业配额及生态优先级，按既有地区模型计算可用份额，并新增 0.1 MWh/抽取 m³ 的模拟耗电系数；这个系数没有工业泵耗依据，以 C2 为例会使单位产出总用电约为原炼厂电系数的 5.44 倍；③内部物流只归集真实劳动及已付投入成本，0.015 GCU/吨公里仅作预算参考，不给自己虚构付款。全部仅用于新场景首日，真实执行并校验后才记产出。是否采用这一组方案？不采用时，缺水电依据的产出保持关闭，其他连接继续。",
+  "answer": "采用上述有限模拟方案",
+  "scope": {
+    "newScenarioOnly": true,
+    "firstSimulatedDayOnly": true,
+    "rewriteExistingWorld": false,
+    "rewriteRawEvidence": false,
+    "automaticWorldOrClockStart": false,
+    "productionDeploymentApproval": false
+  },
+  "interpretationLimits": [
+    "The preceding proposal was suspended for lack of a physical pumping basis; this later explicit user reply adopts a disclosed simulation assumption and does not validate that basis.",
+    "The adopted coefficient remains 0.1 MWh per extracted cubic metre, not 0.1 kWh. It is not measured pumping efficiency or an engineering upper bound.",
+    "The original storage efficiency semantics remain unresolved in the raw source. The user defines 0.9 as one-way discharge efficiency only for this new first-day scenario policy.",
+    "Metering and additional electricity must match the disclosed approximately 5.44-times C2 total. A different boundary, additional charge, ownership change or supply expansion is not approved by this record.",
+    "Adoption does not create delivery, WORK, payment, a grant, an admission, a command receipt or production output. Actual authorization, custody, capacity, conservation and idempotent execution remain required.",
+    "This record is a transcription of an explicit reply, not a cryptographic user signature or an external credential."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "postwar-social-support-policy-v1",
+  "policyVersion": "POSTWAR_SOCIAL_SUPPORT_20261028_V1",
+  "provenance": "GENERATED_POLICY",
+  "authorizationReference": "Sentinel_a619bdbe25588191aa05709db76c7567_2026_10_28_142754_UTC",
+  "equipment": {
+    "scope": "Existing adopted HOSPITAL equipment embodied in original bed capacity; service-capacity carrier only, never a new commodity inventory",
+    "maximumEpisodesPerPhysicalBedSimDay": "4",
+    "undisruptedAvailableBps": "8500",
+    "disruptionPenaltyDivisor": "2",
+    "minimumAvailableBps": "5500"
+  },
+  "periodDays": "1",
+  "funding": "Same existing social non-payroll purpose only. Per-service cost is the original source-wage-calibrated base cost plus both utility recipe tariffs in the same country's local currency; no extra utility cash grant or actual payment.",
+  "supply": "One medical_dose per case and one student_day_material per student-day, from genuine first-day grants only. Surplus reserve inventory is not first-day coverage. No OP stock appropriation."
+}

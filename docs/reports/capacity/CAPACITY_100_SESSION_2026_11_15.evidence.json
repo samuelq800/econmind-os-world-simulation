@@ -1,0 +1,492 @@
+{
+  "schemaVersion": "CAPACITY_DIAGNOSTIC_20261115_V1",
+  "status": "BLOCKED",
+  "recordedAt": "2026-11-15T15:00:00.944Z",
+  "candidate": "b51ac3c43a27081f70ac3e70299ea2a8a549db38",
+  "branch": "codex/office-next-connections-20261108",
+  "lockfileSha256": "95877b09a3ea23080417c0af6b04b2a82adf13e246ca1fcfd6f90ab356dad0e9",
+  "scope": "ISOLATED_NATIVE_STARTUP_AND_BUSINESS_SMOKE_NOT_V30_ACCEPTANCE",
+  "environment": {
+    "windows": "10.0.26300",
+    "cpu": "Intel(R) Core(TM) Ultra 5 125H",
+    "logicalCpus": 18,
+    "windowsMemoryBytes": 33945935872,
+    "linux": "Ubuntu WSL2 / Linux 6.6.87.2-microsoft-standard-WSL2",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "postgres": "16.15",
+    "dockerServer": "29.7.2",
+    "postgresImage": "postgres@sha256:1beaa3084eee2676f20a9cd9928f0bf2c5bf674f8e49f81017912183d377c61c",
+    "databaseCpuQuota": 1,
+    "databaseMemoryBytes": 3221225472,
+    "apiCgroupLimit": "NOT_SET",
+    "processNiceness": 5,
+    "measurementLimits": [
+      "User workstation under ordinary concurrent use",
+      "Node source and runtime startup, not full season simulation",
+      "No forced GC",
+      "procfs sampling about 1 second; VmHWM preserves process peak",
+      "CPU ticks normalized by getconf CLK_TCK=100",
+      "Database docker stats sampled about 10 seconds; startup phases include test-only setup",
+      "2 successful API cold starts, not 3"
+    ]
+  },
+  "plan": {
+    "virtualSessions": 100,
+    "minutes": 30,
+    "projectionReads": 36000,
+    "budgetCommands": 3000,
+    "receiptPolls": 6000,
+    "plannedOperations": 45000,
+    "maxInFlight": 32,
+    "authIdentityScope": "one authorized Finance seat in synthetic fixture; not 100 distinct accounts",
+    "execution": "NOT_RUN_BUSINESS_SMOKE_BLOCKED"
+  },
+  "preparationEvidence": {
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "scope": "100_SESSION_ISOLATED_PREPARATION_ONLY",
+    "recordedAt": "2026-11-15T08:46:58.621Z",
+    "candidate": "b51ac3c43a27081f70ac3e70299ea2a8a549db38",
+    "branch": "codex/office-next-connections-20261108",
+    "dirtyWorktree": true,
+    "profileSha256": "667ef64baf4be71a5587f023188793415fdc5c8321f6ceef9da6087427255ad1",
+    "lockfileSha256": "95877b09a3ea23080417c0af6b04b2a82adf13e246ca1fcfd6f90ab356dad0e9",
+    "environment": {
+      "platform": "win32",
+      "release": "10.0.26300",
+      "node": "v24.20.0",
+      "pnpm": "12.3.4",
+      "cpu": "Intel(R) Core(TM) Ultra 5 125H",
+      "logicalCpus": 18,
+      "hostMemoryBytes": 33945935872,
+      "linuxNativeNode": "MISSING",
+      "linuxPostgres": "MISSING",
+      "dockerDaemon": "UNAVAILABLE"
+    },
+    "dependencyGate": {
+      "current": "V09.1",
+      "ready": false,
+      "V30_1": "PLANNED",
+      "hardDependencies": {
+        "V02.3": "VERIFIED",
+        "V09.3": "PLANNED",
+        "V26.3": "PLANNED",
+        "V28.3": "PLANNED",
+        "V29.3": "PLANNED"
+      }
+    },
+    "checks": [
+      {
+        "command": "pnpm install --frozen-lockfile",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "pnpm --filter @econmind/core build",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "pnpm --filter @econmind/world-worker build",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "pnpm --filter @econmind/world-api build",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "pnpm exec vitest run tests/foundation/v30-load-harness-preparation.test.ts tests/foundation/v30-load-runner-preparation.test.ts --reporter=json --outputFile=node_modules/.cache/capacity-preparation-v30-tests.json",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "pnpm exec vitest run tests/world-core/postwar-paged-current-proof.test.ts tests/world-core/postwar-paged-office-history-capacity.test.ts --reporter=json --outputFile=node_modules/.cache/capacity-preparation-history-tests.json",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "node scripts/check-boundaries.mjs",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "node scripts/check-authoritative-patterns.mjs",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "node scripts/check-repository-secrets.mjs",
+        "exitCode": 0,
+        "status": "PASS"
+      },
+      {
+        "command": "$env:ECONMIND_ENV='local'; node scripts/assert-safe-environment.mjs",
+        "exitCode": 0,
+        "status": "PASS"
+      }
+    ],
+    "v30Tools": {
+      "status": "PASS",
+      "total": 10,
+      "passed": 10,
+      "failed": 0
+    },
+    "historyCorrectnessOnly": {
+      "status": "PASS",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "database": "IN_PROCESS_PGLITE_NOT_NATIVE_POSTGRES_CAPACITY"
+    },
+    "planEnumeration": {
+      "status": "PLAN_ENUMERATED_NOT_LOAD_EXECUTED",
+      "operations": 45000,
+      "counts": {
+        "PROJECTION_READ": 36000,
+        "ORDER_SUBMIT": 3000,
+        "RECEIPT_POLL": 6000
+      },
+      "realRequests": 0,
+      "latencyStatus": "NOT_RUN",
+      "target": "UNBOUND_NO_NETWORK_NO_DATABASE"
+    },
+    "notRun": [
+      "real_100_session_load",
+      "linux_cgroup_2_4_GiB_trials",
+      "native_postgres_capacity",
+      "three_full_source_cold_starts",
+      "full_world_scheduler_and_season_history",
+      "restart_recovery_under_load",
+      "p50_p95_p99_cpu_memory_sql_measurement",
+      "full_repository_check",
+      "independent_review"
+    ],
+    "mutations": {
+      "production": false,
+      "migration": false,
+      "permissions": false,
+      "economicRuntime": false,
+      "originalMainSite": false
+    },
+    "unresolved": [
+      "Linux isolated runtime",
+      "real API adapter and synthetic scoped identities",
+      "source and scheduler workload binding",
+      "latency budgets and CPU quota",
+      "formal V30 hard dependencies"
+    ],
+    "capacityClaim": "INSUFFICIENT_EVIDENCE"
+  },
+  "offlineSource": {
+    "manifest": {
+      "schemaVersion": "postwar-fresh-rehearsal-source-v1",
+      "classification": "NEW_OFFLINE_REHEARSAL_NOT_RESTORED_H3",
+      "status": "ACTUAL_SOURCE_DERIVED_AND_VERIFIED_NOT_RUNTIME_ADMITTED",
+      "repositoryCommit": "b51ac3c43a27081f70ac3e70299ea2a8a549db38",
+      "parentFile": "D:\\data\\temp\\econmind-capacity-20261115\\opening\\final-seed.json",
+      "parentRawSha256": "ee2f777126e9050ce7139e2d9d9e24d2ec7305de95b8380d3e4c35fc4edb314f",
+      "parentSeedFingerprint": "sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274",
+      "seedFingerprint": "sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a",
+      "worldId": "WORLD_POSTWAR_GCU_OPENING_20261029_V1",
+      "seedId": "SEED_POSTWAR_GCU_OPENING_20261029_V1",
+      "countries": 70,
+      "population": "14712146434",
+      "households": "4449317385",
+      "retainedInventoryEntries": 863,
+      "exactLegalHouseholdClaims": true,
+      "exactNonHouseholdAccounts": true,
+      "openingRentPaid": "0",
+      "openingRentAccrued": "0",
+      "files": {
+        "candidate-seed.json": {
+          "sha256": "835f9ec096746e3bc8f8cd1a7235fc7a2af0daee06d4ceeedff1fdff99d0262f",
+          "bytes": 125315829
+        },
+        "receipts.json": {
+          "sha256": "7d37e721da1021b290d8a1464e4fec096046efe623c2a5d12ee719a28fba5ae6",
+          "bytes": 644672
+        },
+        "full-core-verification.json": {
+          "sha256": "bf8c34a01ba707f925a272726158ea69808e05e852a51c044a931d11aa4db58f",
+          "bytes": 612
+        },
+        "country-originals.json": {
+          "sha256": "c0db4b22b7c3a6ef65478cc6f8eea270f1798c0270933a212bbf9bdf961f5d16",
+          "bytes": 10491368
+        },
+        "finance-social-manifest.json": {
+          "sha256": "7dc24a99d3d57d4a3a29b38bcfb5f9581f5667f343cb0f7549195cd975cd1a89",
+          "bytes": 21416
+        },
+        "day-one-fx-policy.json": {
+          "sha256": "7256f648c1cdde4a884e15d257b0b8c7ab38f84afbca92e42cad9c0171aa79ca",
+          "bytes": 115386
+        }
+      },
+      "databaseOperations": 0,
+      "runtimeAdmission": "NOT_RUN",
+      "sourcePublications": 0,
+      "WorldClockStarted": false,
+      "maxRssKiB": 3705584,
+      "elapsedMs": 680578
+    },
+    "coreVerification": {
+      "classification": "FULL_PARENT_AND_CORE_RECLASSIFICATION_VERIFIED_NOT_ADMISSION",
+      "parentFingerprint": "sha256:cfc55796562b44bd616f33082cbbafd9dbd43d58733a24ac550339cbc8376274",
+      "candidateFingerprint": "sha256:cd6cd0825fd8b15c13dab28f030e2df24b804d5675e132ff77715a20ec67056a",
+      "countries": 70,
+      "population": "14712146434",
+      "households": "4449317385",
+      "retainedParentSources": 4,
+      "candidateSources": 74,
+      "retainedInventoryEntries": 863,
+      "generatedSources": 70,
+      "exactLegalHouseholdClaims": true,
+      "exactNonHouseholdAccounts": true,
+      "openingRentPaid": "0",
+      "openingRentAccrued": "0"
+    },
+    "windowsPeakWorkingSetBytes": 3778584576,
+    "windowsStageOnly": true
+  },
+  "nativePreparation": {
+    "r2ElapsedMs": 480887,
+    "r3RestoredH0ElapsedMs": 513,
+    "templateReused": true,
+    "productionAdmission": false
+  },
+  "apiColdStarts": [
+    {
+      "pid": 1406,
+      "sourceValidation": "PASS",
+      "ready": true,
+      "startupMs": 279075.367059,
+      "readyRssBytes": 1494413312,
+      "readyHeapUsedBytes": 1046191504,
+      "processLifetimePeakRssKiB": 2476844,
+      "sampledPeakRssKiB": 2348876,
+      "cpuSecondsObserved": 290.11,
+      "externalSamples": 278,
+      "sourceFiles": [
+        {
+          "path": "/workspace/.cloud-setup/evidence/capacity-child/candidate-seed.json",
+          "sha256": "835f9ec096746e3bc8f8cd1a7235fc7a2af0daee06d4ceeedff1fdff99d0262f",
+          "bytes": 125315829
+        },
+        {
+          "path": "/workspace/.cloud-setup/evidence/postwar-gcu-opening-fresh-20261029T020748Z/final-seed.json",
+          "sha256": "ee2f777126e9050ce7139e2d9d9e24d2ec7305de95b8380d3e4c35fc4edb314f",
+          "bytes": 124697345
+        },
+        {
+          "path": "/workspace/.cloud-setup/evidence/capacity-child/receipts.json",
+          "sha256": "7d37e721da1021b290d8a1464e4fec096046efe623c2a5d12ee719a28fba5ae6",
+          "bytes": 644672
+        }
+      ]
+    },
+    {
+      "pid": 2313,
+      "sourceValidation": "PASS",
+      "ready": true,
+      "startupMs": 284166.248064,
+      "readyRssBytes": 1197465600,
+      "readyHeapUsedBytes": 728526344,
+      "processLifetimePeakRssKiB": 2461340,
+      "sampledPeakRssKiB": 2330000,
+      "cpuSecondsObserved": 295.9,
+      "externalSamples": 279,
+      "sourceFiles": [
+        {
+          "path": "/workspace/.cloud-setup/evidence/capacity-child/candidate-seed.json",
+          "sha256": "835f9ec096746e3bc8f8cd1a7235fc7a2af0daee06d4ceeedff1fdff99d0262f",
+          "bytes": 125315829
+        },
+        {
+          "path": "/workspace/.cloud-setup/evidence/postwar-gcu-opening-fresh-20261029T020748Z/final-seed.json",
+          "sha256": "ee2f777126e9050ce7139e2d9d9e24d2ec7305de95b8380d3e4c35fc4edb314f",
+          "bytes": 124697345
+        },
+        {
+          "path": "/workspace/.cloud-setup/evidence/capacity-child/receipts.json",
+          "sha256": "7d37e721da1021b290d8a1464e4fec096046efe623c2a5d12ee719a28fba5ae6",
+          "bytes": 644672
+        }
+      ]
+    }
+  ],
+  "businessSmoke": {
+    "initialProbe": {
+      "result": "INVALID_INITIAL_H0_DATASET_CORRECTED_IN_HARNESS",
+      "dataset": "treasury-capacity",
+      "httpStatus": 503,
+      "code": "CURRENT_FINANCIAL_UNAVAILABLE",
+      "reason": "Existing financial reader requires positive prefix; switched initial H0 probe to supported currency-fx. No product code or guard changed."
+    },
+    "correctedRead": {
+      "status": "PASS",
+      "path": "/v1/postwar-office-runtime",
+      "dataset": "currency-fx",
+      "httpStatus": 200,
+      "approximateSingleProbeElapsedMs": 104,
+      "latencyDistribution": "NOT_RUN"
+    },
+    "budgetCommand": {
+      "status": "FAIL",
+      "path": "/v1/office-command",
+      "commandType": "CORE_FINANCE_BUDGET_APPROPRIATION_V1",
+      "operation": "SET_ENVELOPE",
+      "httpStatus": 503,
+      "code": "SOURCE_RUNTIME_UNAVAILABLE",
+      "queued": false,
+      "submitted": false,
+      "databaseError": {
+        "code": "42501",
+        "message": "permission denied for function lock_finance_budget_policy"
+      },
+      "permissionAudit": {
+        "role": "fixture_rent_child_worker_2682f2a5",
+        "inherit": false,
+        "superuser": false,
+        "bypassrls": false,
+        "budgetMember": true,
+        "budgetUsage": false,
+        "functionExecute": false
+      },
+      "diagnostic": {
+        "kind": "REGISTERED_DATABASE_DIAGNOSTIC",
+        "role": "fixture_rent_child_worker_2682f2a5",
+        "operation": "select * from world_v2.lock_finance_budget_policy($1,$2,$3,$4,$5,$6,$7::uuid)",
+        "error": {
+          "kind": "ERROR",
+          "name": "error",
+          "message": "permission denied for function lock_finance_budget_policy",
+          "code": "42501",
+          "stack": "error: permission denied for function lock_finance_budget_policy\n    at /workspace/node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:545:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async Proxy.<anonymous> (file:///workspace/tools/office-connection/native-registered-final-host.mjs:210:30)\n    at async Object.query (file:///workspace/apps/world-worker/dist/persistence/postgres-sql-database.js:17:28)\n    at async lock (file:///workspace/apps/world-worker/dist/persistence/postgres-finance-budget-custody.js:47:24)\n    at async sourceFrom (file:///workspace/apps/world-worker/dist/persistence/postgres-finance-budget-custody.js:92:26)\n    at async file:///workspace/apps/world-worker/dist/preparation/postwar-narrow-trade-reservation-candidate.js:98:32\n    at async file:///workspace/apps/world-worker/dist/persistence/manual-office-authorization-transaction-scope.js:30:28\n    at async file:///workspace/apps/world-worker/dist/time/registered-world-execution-state.js:150:32\n    at async PostgresSqlDatabase.transaction (file:///workspace/apps/world-worker/dist/persistence/postgres-sql-database.js:54:28)"
+        }
+      }
+    },
+    "finalCheckpoint": {
+      "classification": "SEALED_OWNED_DATABASE_NOT_RESTORED_AUTHORITY",
+      "parentMarker": "/workspace/.cloud-setup/evidence/cap100r2/pg/reference-db.json",
+      "parentDatabase": "postwar_clone_rent_child_acceptance_2185f8d80d",
+      "templateDatabase": "postwar_clone_completed_fresh_h0_2b93f5bf72",
+      "ownershipNonce": "79b8baf2-ef2f-43cd-a7ae-963b20475d40",
+      "head": {
+        "world_version": "0",
+        "event_sequence": "0"
+      },
+      "economicCounts": {
+        "worldVersion": "0",
+        "eventSequence": "0",
+        "commands": "0",
+        "receipts": "0",
+        "events": "0",
+        "batches": "0",
+        "inventory": "0",
+        "queues": "0"
+      },
+      "h0RestoreEligible": true,
+      "resourceState": "RETAINED_STOPPED",
+      "nodeAuthority": "REQUIRES_FRESH_VALIDATION"
+    },
+    "durableCommandsAccepted": 0
+  },
+  "commands": [
+    {
+      "command": "docker desktop start",
+      "exitCode": 0
+    },
+    {
+      "command": "docker start econmind-postwar-reference-79b8baf2",
+      "exitCode": 0
+    },
+    {
+      "command": "ECONMIND_ENV=local ECONMIND_REGISTERED_FINAL_NODE_NATIVE=1 nice -n 5 pnpm --dir /workspace exec vitest run --config .capacity-vitest.config.ts --reporter=json --outputFile=/workspace/.cloud-setup/evidence/capacity-native-resume-result.json",
+      "exitCode": 1
+    },
+    {
+      "command": "ECONMIND_ENV=local ECONMIND_REGISTERED_FINAL_NODE_NATIVE=1 nice -n 5 pnpm --dir /workspace exec vitest run --config .capacity-vitest.config.ts --reporter=json --outputFile=/workspace/.cloud-setup/evidence/capacity-native-r3-result.json",
+      "exitCode": 1
+    },
+    {
+      "command": "isolated PostgreSQL role MEMBER/USAGE and has_function_privilege SELECT audit, in owned audit clone then dropped",
+      "exitCode": 0
+    }
+  ],
+  "sourceChanges": {
+    "trackedProductChanges": false,
+    "permissionsModifiedToBypassError": false,
+    "productionDatabaseAccess": false,
+    "productionMigrations": false,
+    "legacySiteChanges": false,
+    "governanceGateChanged": false,
+    "independentApprovalClaimed": false
+  },
+  "notRun": [
+    "100-session mixed load",
+    "P50/P95/P99 under load",
+    "sustained CPU or memory leak under load",
+    "2/4 GiB cgroup capacity trials",
+    "third cold start",
+    "committed-command recovery under load",
+    "100 distinct identities and multi-Office workflows",
+    "70-country ongoing scheduler and season-length history",
+    "full repository check this turn"
+  ],
+  "governance": {
+    "gate": "V09.1 PLANNED next_step_ready=false",
+    "formalV30": "PLANNED hard dependencies outstanding",
+    "classification": "test tooling/report; authorization or economic runtime fixes require separate P0 review"
+  },
+  "cleanup": {
+    "status": "PASS",
+    "verifiedAt": "2026-11-15T15:04:15.515Z",
+    "windowsTaskDirectoryRemoved": true,
+    "linuxTemporaryWorkspaceRemoved": true,
+    "taskContainerRemoved": "econmind-postwar-reference-79b8baf2",
+    "taskVolumeRemoved": "econmind-postwar-reference-data-79b8baf2",
+    "taskDownloadedPostgresImageReferenceRemoved": true,
+    "taskHarnessAndWorkloadConfigRemoved": true,
+    "taskSourceSeedsAndReceiptsRemoved": true,
+    "preparationDocumentsAndTestCacheRemoved": true,
+    "taskProcessesStopped": true,
+    "originalTrackedProductDiff": false,
+    "originalSixUntrackedLogUsageReportsPreserved": true,
+    "dockerSettingKeysRestored": [
+      "IntegratedWslDistros",
+      "EnableIntegrationWithDefaultWslDistro"
+    ],
+    "otherDockerContainersPreserved": [
+      "reactive_resume-postgres-1",
+      "reactive_resume-browserless-1",
+      "reactive_resume-seaweedfs-1"
+    ],
+    "dockerRestartForSettings": "NOT_PERFORMED_TO_AVOID_INTERRUPTING_OTHER_CONTAINERS; restored keys take effect on normal Docker restart",
+    "linuxPackageDependencyCache": "retained reusable package cache, not test data",
+    "verificationCommands": [
+      {
+        "command": "Remove-Item -LiteralPath D:/data/temp/econmind-capacity-20261115 -Recurse",
+        "exitCode": 0
+      },
+      {
+        "command": "WSL fs.rmSync on verified temporary /workspace under root, with saved evidence and project-name guards",
+        "exitCode": 0
+      },
+      {
+        "command": "docker rm --force verified owned test container; docker volume rm verified nonce-owned test volume",
+        "exitCode": 0
+      },
+      {
+        "command": "Test-Path Windows task directory; WSL test ! -e /workspace; docker container/volume name filters; git diff --quiet",
+        "result": "directory absent / exit 0 / no matching task resources / tracked diff exit 0"
+      }
+    ],
+    "cleanupRecoveryNotes": [
+      "Force-recursive Windows cleanup commands were rejected by automatic policy; cleanup succeeded with fixed verified paths and Remove-Item -Recurse without Force.",
+      "Initial Linux cleanup partially removed files then lacked permission to remove root-owned parent; completed under root after revalidating exact task workspace and saved evidence."
+    ]
+  }
+}

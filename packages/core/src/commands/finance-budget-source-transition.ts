@@ -74,7 +74,9 @@ export interface BudgetDomainState {
   /** Derived replay identity index, not a durable receipt/dedupe store. */
   readonly history: readonly Readonly<{
     commandId: string;
-    idempotencyKey: string;
+    /** Unrelated canonical work may have no optional key. Budget Commands
+     * still require their own key in command(); command IDs remain unique. */
+    idempotencyKey: string | null;
     canonicalCommand: string;
   }>[];
 }
@@ -402,7 +404,8 @@ function unrelated(
     `${path}.worldVersionAfter`,
   );
   id(step.commandId, `${path}.commandId`, parseCommandId);
-  id(step.idempotencyKey, `${path}.idempotencyKey`, parseKey);
+  if (step.idempotencyKey !== null)
+    id(step.idempotencyKey, `${path}.idempotencyKey`, parseKey);
   const events = list(step.events, `${path}.events`);
   if (!events.length) fail('MISSING_EVENTS', path);
   for (const [j, value] of events.entries()) {
@@ -551,7 +554,10 @@ function state(value: unknown): BudgetDomainState {
       fail('INVALID_CANONICAL_COMMAND', p);
     return {
       commandId: id(h.commandId, `${p}.commandId`, parseCommandId),
-      idempotencyKey: id(h.idempotencyKey, `${p}.idempotencyKey`, parseKey),
+      idempotencyKey:
+        h.idempotencyKey === null
+          ? null
+          : id(h.idempotencyKey, `${p}.idempotencyKey`, parseKey),
       canonicalCommand: h.canonicalCommand,
     };
   });
@@ -560,7 +566,9 @@ function state(value: unknown): BudgetDomainState {
     'state.history.commandId',
   );
   unique(
-    history.map((h) => h.idempotencyKey),
+    history
+      .map((h) => h.idempotencyKey)
+      .filter((key): key is string => key !== null),
     'state.history.key',
   );
   // A caller's complete-coverage label cannot hide a line already present in
@@ -1052,11 +1060,15 @@ export function replayBudgetSourceDomain(input: unknown):
           path,
         );
         const commandId = ref(step.commandId, `${path}.commandId`),
-          idempotencyKey = ref(step.idempotencyKey, `${path}.idempotencyKey`);
+          idempotencyKey =
+            step.idempotencyKey === null
+              ? null
+              : ref(step.idempotencyKey, `${path}.idempotencyKey`);
         if (
           s.history.some(
             (h) =>
-              h.commandId === commandId || h.idempotencyKey === idempotencyKey,
+              h.commandId === commandId ||
+              (idempotencyKey !== null && h.idempotencyKey === idempotencyKey),
           )
         )
           fail('DUPLICATE_REPLAY_STEP', path);

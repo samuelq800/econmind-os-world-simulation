@@ -1,0 +1,185 @@
+{
+  "classification": "IMPLEMENTATION_AND_SCOPED_PROTOCOL_AUTHORIZATION_VERIFICATION_NOT_NATIVE_UTILITY_DELIVERY_OR_P0_APPROVAL",
+  "headAtReport": "f47e3f43377a32da1eed723fb82253300182277e",
+  "reportedAt": "2026-11-08T14:04:39.845809+00:00",
+  "productFiles": [
+    "packages/core/src/commands/authenticated-office-command-contract.ts",
+    "packages/core/src/commands/industry-utility-execution.ts",
+    "apps/world-worker/src/intake/manual-office-command-intent.ts",
+    "apps/world-worker/src/intake/postgres-office-command-intake.ts",
+    "apps/world-web/src/office-command/contract.ts",
+    "apps/world-api/src/runtime/postwar-office-command-fetch-handler.ts",
+    "apps/world-api/src/runtime/postwar-industry-connection.ts"
+  ],
+  "ownedFiles": [
+    "packages/core/src/commands/authenticated-office-command-contract.ts",
+    "packages/core/src/commands/industry-utility-execution.ts",
+    "apps/world-worker/src/intake/manual-office-command-intent.ts",
+    "apps/world-worker/src/intake/postgres-office-command-intake.ts",
+    "apps/world-web/src/office-command/contract.ts",
+    "apps/world-api/src/runtime/postwar-office-command-fetch-handler.ts",
+    "apps/world-api/src/runtime/postwar-industry-connection.ts",
+    "tests/world-api/authenticated-office-command.test.ts",
+    "tests/world-web/office-command-family-boundary.test.ts",
+    "tests/world-web/office-command-lifecycle-ux.test.ts",
+    "tests/support/industry-utility-manual-intent-fixture.ts",
+    "tests/world-core/industry-utility-manual-intent.test.ts",
+    "tests/world-api/postwar-industry-utility-transport.test.ts"
+  ],
+  "manualActions": {
+    "POWER": ["BOOK"],
+    "WATER": ["DELIVER"],
+    "LOGISTICS": [
+      "BOOK",
+      "SHIP",
+      "SERVICE_WORK_CONTROLLED_WORK_ORDER_ONLY",
+      "PAY_INPUTS",
+      "DELIVER"
+    ]
+  },
+  "automaticWaterGrant": "EXACT_FIXED_ISSUER_ENVELOPE_DATA_SCHEMA_ONLY; actualRUN/source/quota/queue/private port remain mandatory; HTTP manual grant rejected",
+  "finalAffected": {
+    "success": true,
+    "numPassedTests": 115,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "checks": {
+    "scopedTypesExitCode": 0,
+    "scopedLintExitCode": 0,
+    "formatExitCode": 0,
+    "diffCheckExitCode": 0
+  },
+  "previousNineFileRun": {
+    "passed": 151,
+    "failed": 0,
+    "skipped": 0,
+    "snapshot": "attempt-01/source"
+  },
+  "buildEvidence": "/workspace/.cloud-setup/evidence/resume-20261108/utility-composition-build-attempt01.log",
+  "buildResult": "Parent reported unified Core\u2192Worker\u2192API exit0; final scope tested against refreshed dist",
+  "limitations": [
+    "No production DB, shared consumer/SQL edits or new service credentials by this agent.",
+    "JWT/current authorization exercised with actual TEST_ONLY PGlite metadata, not an OP mandate or delivery proof.",
+    "No actual utility service WORK/payment/delivery or Chromium backend acceptance performed in this phase.",
+    "HTTP/body limit and query-only original recovery remain unchanged; previous first-task evidence preserved separately."
+  ],
+  "sourceManifest": [
+    {
+      "path": "packages/core/src/commands/authenticated-office-command-contract.ts",
+      "sha256": "f3899d94e053ddeaa1dbacb22327cb9c7d2456927b282bc1ca2e2f9ac3dca800",
+      "bytes": 6822
+    },
+    {
+      "path": "packages/core/src/commands/industry-utility-execution.ts",
+      "sha256": "bb63b8bbcd5f9221cb0658e6621005c97a83c067b0de3a240d896253dfbe553c",
+      "bytes": 22190
+    },
+    {
+      "path": "apps/world-worker/src/intake/manual-office-command-intent.ts",
+      "sha256": "b859a4b1856633e178f8a0664791bb05bbae2b4724e2a94f607e11a45bc55a36",
+      "bytes": 7955
+    },
+    {
+      "path": "apps/world-worker/src/intake/postgres-office-command-intake.ts",
+      "sha256": "4ef75d9606d174f821dd854aaec3789291d810b399aeed08ea65c08337ffefa5",
+      "bytes": 25393
+    },
+    {
+      "path": "apps/world-web/src/office-command/contract.ts",
+      "sha256": "a2cec2420a8308377daa9c92742a6ee9da71ed7f4873d2792073a0ce15ea0d2f",
+      "bytes": 6198
+    },
+    {
+      "path": "apps/world-api/src/runtime/postwar-office-command-fetch-handler.ts",
+      "sha256": "c4daea2f292da8d79a2e2a9d86d5a247a0a0c50019d108fc8ad54787d3dc5977",
+      "bytes": 11899
+    },
+    {
+      "path": "apps/world-api/src/runtime/postwar-industry-connection.ts",
+      "sha256": "1bb3f9a1a9de9cda4b4dd331fcd4e477114c317effe08d7aacc1cb092209d1bf",
+      "bytes": 10920
+    },
+    {
+      "path": "tests/world-api/authenticated-office-command.test.ts",
+      "sha256": "cfb996df64c5424e9d726bcceb9c8a1ef6f356bf9f3928e964ed831905924292",
+      "bytes": 19178
+    },
+    {
+      "path": "tests/world-web/office-command-family-boundary.test.ts",
+      "sha256": "81b4f82a77baa909c20675a71469a0d886ee33e19fe3ad4ee4aa77942364f673",
+      "bytes": 8158
+    },
+    {
+      "path": "tests/world-web/office-command-lifecycle-ux.test.ts",
+      "sha256": "ea54c46d35cce0d7c8e95e2319900f4f74c8cea0d98fb236ad293efe47e8a095",
+      "bytes": 16632
+    },
+    {
+      "path": "tests/support/industry-utility-manual-intent-fixture.ts",
+      "sha256": "3a84bce60291249f47ecb8a556e00f3496079b448e1b90252272181bb7982b6a",
+      "bytes": 2615
+    },
+    {
+      "path": "tests/world-core/industry-utility-manual-intent.test.ts",
+      "sha256": "550e32a5e8d9d08059520f351e57f5fe9b70558d342bf153a2b74482613ee0c9",
+      "bytes": 7185
+    },
+    {
+      "path": "tests/world-api/postwar-industry-utility-transport.test.ts",
+      "sha256": "7633d129bb4e3b9fab865346502ba86e5bc824421b62a2d9704a58dc9b1d8f54",
+      "bytes": 7242
+    }
+  ],
+  "builtArtifactManifest": [
+    {
+      "path": "packages/core/dist/commands/authenticated-office-command-contract.js",
+      "sha256": "c3a97c01eb01db904028024b5508e78628b1f5434f629fdd23260c3d3b686a9f"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-office-command-contract.d.ts",
+      "sha256": "45ab6c0239385ef4a60a8d8f49bd4d6c667a4b00c6618a1692d2045677713a53"
+    },
+    {
+      "path": "packages/core/dist/commands/industry-utility-execution.js",
+      "sha256": "039a9d11508d5858bb39fdcf7379eaffab4752a16d48ad4c0ec9bd8bd0f6dee7"
+    },
+    {
+      "path": "packages/core/dist/commands/industry-utility-execution.d.ts",
+      "sha256": "86f12d9cd2518c60bf484946106cadfdfc45c966e0a26ad56d24a1bd551a6121"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/manual-office-command-intent.js",
+      "sha256": "55bee7bf0e142ff62deba39d5bf5a74677a7ccfdbd4a0283ea322f832c513154"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/manual-office-command-intent.d.ts",
+      "sha256": "54b7c7d32ec41d87feb73e5da962de59a20365cd389ae471b0f4b6b9fd2669ca"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/postgres-office-command-intake.js",
+      "sha256": "0bd2611d68353fbd33176e4a02ecbaa1b063032387d90245edcf349dc386aec5"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/postgres-office-command-intake.d.ts",
+      "sha256": "9f270f477f78754daa977d83cb9705ad4155504cce8586df7485ba350ba37d65"
+    },
+    {
+      "path": "apps/world-api/dist/runtime/postwar-office-command-fetch-handler.js",
+      "sha256": "de49fb49e7f3b337ea2fe2b9a1af4331fc9c0a31afa94001e64b3354c50a490c"
+    },
+    {
+      "path": "apps/world-api/dist/runtime/postwar-office-command-fetch-handler.d.ts",
+      "sha256": "0a64ea0e8b2614dc047da414ae8fc1e260c819c41b9b43e9e0b5c5f3fe1d0a86"
+    },
+    {
+      "path": "apps/world-api/dist/runtime/postwar-industry-connection.js",
+      "sha256": "390b05a50271cec916f1d34e0a05aa9542166245b64680991c689eb45614cd5d"
+    },
+    {
+      "path": "apps/world-api/dist/runtime/postwar-industry-connection.d.ts",
+      "sha256": "82e8b797f21ed99874de3e11f3aa584817a4ff24f6db5eade0ded68b49f38bbe"
+    }
+  ],
+  "evidenceDirectory": "/workspace/.cloud-setup/evidence/industry-utility-manual-transport-20261108"
+}

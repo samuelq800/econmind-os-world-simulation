@@ -1,0 +1,680 @@
+{
+  "schemaVersion": "postwar-pending-programme-target-guarded-v1",
+  "classification": "CODE_CANDIDATE_NOT_DATABASE_OR_PRODUCTION_ACCEPTANCE",
+  "installationAllowed": false,
+  "installationAllowedMeaning": "NO_AUTOMATIC_OR_PRODUCTION_INSTALLATION",
+  "isolatedRehearsal": "AUTHORIZED_NOT_RUN",
+  "productionApproval": "NOT_GRANTED",
+  "sourceBodySha256": "8878d4479826d80b4077997e5f84226a8c44cde2d7faf8346cd00db3a31a8990",
+  "sqlPath": "database/proposals/postwar-pending-programme-target-prefix.sql",
+  "sqlSha256": "91423df94cc9caa3cc36daae236b707f2700957ac6112fc440c947e7f658fa7e",
+  "predecessorObservation": {
+    "candidate": "6c29010193ab231185a163d4a046df64af71cf48",
+    "database": "postwar_clone_completed_fresh_h0_dd92f83b65",
+    "metadataSha256": "2150e7e5b227200eecb022a479d802a23a6d1aa8140e72021a99df560b63c1e3"
+  },
+  "requiredPredecessorFiles": {
+    "database/proposals/postwar-social-current-prefix-read.sql": "bb34d9eafa6cb30f52d4f1e8bbbd52878848790cbaa9718e720bad7534407d6b",
+    "database/proposals/postwar-social-paged-match-publisher.sql": "462808c5c49c4c6cdf44851626e8c9f282ab5f96f0a7fa2920ebb019f56b055a",
+    "database/proposals/postwar-mixed-industry-current-effects.sql": "939c2414aed35ee9fa958b9b50c3e0876c90ab273c48639ec85916e6d50a319a",
+    "database/proposals/postwar-industry-run-history.sql": "5652a30664415ca2842e1e7feb45c4f13bee968940bc5031ec8dcebaf18b4542",
+    "database/proposals/postwar-industry-power-service-current.sql": "c5084404405005918171217b19ad85cbff06ed4f8e9d6a3b0388fc139204c1d3"
+  },
+  "replacedFunctions": [
+    {
+      "signature": "world_v2.postwar_apply_current_frame_page(text,text,jsonb)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_frames_text",
+        "p_state"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "jsonb",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "d9579f8680f939dd0e99a69e5e683b5cb33e8a2c3f8169fcc48d41641644d4b4"
+    },
+    {
+      "signature": "world_v2.postwar_mixed_industry_work_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_command",
+        "p_transition",
+        "p_event",
+        "p_batches",
+        "p_inventory"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "boolean",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "b280e7464e519a30dc7b89cc7ca583bafbfe4b834eaef9f346f275dc27fc9487"
+    },
+    {
+      "signature": "world_v2.postwar_projection_industry_original(text,jsonb,jsonb)",
+      "owner": "world_v2_industry_source_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_command",
+        "p_event"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "jsonb",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_industry_source_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "d568b65f897944ad82a5779dd58ddb9e0828a0f1b16be96b47f46372c781ca6a"
+    },
+    {
+      "signature": "world_v2.postwar_social_origin_at_prefix(text,text)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "state",
+        "binding",
+        "origin_world_version",
+        "origin_event_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(state jsonb, binding jsonb, origin_world_version bigint, origin_event_sequence bigint)",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "95bd455f6a07730d62e4a4a7ffcbb39205366fba88e60225a0f10b5cb6c14533"
+    },
+    {
+      "signature": "world_v2.postwar_social_prefix_effect_scoped(text,text,text,jsonb,jsonb,bigint)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_type",
+        "p_command",
+        "p_event",
+        "p_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "boolean",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "7670a954c6cad3b642e9b3bab456e85571b1d452ded0d4029121eca1b19cc0af"
+    },
+    {
+      "signature": "world_v2.publish_social_operating_paged_match_due(text,text,text,text)",
+      "owner": "world_v2_social_source_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_plan",
+        "p_witness"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "world_v2.command_submission",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_social_source_owner",
+          "grantor": "world_v2_social_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_social_source_publisher",
+          "grantor": "world_v2_social_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "6f0f2882c7519e3cfe3149a57d47c58f19dc26de17f1e2302967ce3d830d1e5f"
+    },
+    {
+      "signature": "world_v2.read_postwar_industry_run_original(text,text,text,text,text,bigint,bigint,text,text)",
+      "owner": "world_v2_industry_source_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_host_country",
+        "p_office",
+        "p_command",
+        "p_fingerprint",
+        "p_version",
+        "p_sequence",
+        "p_seed_fingerprint",
+        "p_admission",
+        "source_text",
+        "source_sha256",
+        "source_ref",
+        "world_version",
+        "event_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(source_text text, source_sha256 text, source_ref text, world_version text, event_sequence text)",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_finance_budget_source_reader",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_industry_source_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_social_source_reader",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "08f65ed42e522f7926776e56a353a5f82fc021c3cfe1c72bfc183c9774ab2d20"
+    }
+  ],
+  "successorFunctions": [
+    {
+      "signature": "world_v2.postwar_social_programme_effect_scoped(text,text,jsonb,jsonb,bigint)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_command",
+        "p_event",
+        "p_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "boolean",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "bodySha256": "44374b81a2cb690897dc20947be703d575972e9a58208f22c207e8aaf695cbf9",
+      "acl": [
+        {
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantee": "world_v2_finance_budget_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantee": "world_v2_postwar_projection_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantee": "world_v2_social_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_social_prefix_effect_scoped(text,text,text,jsonb,jsonb,bigint)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_type",
+        "p_command",
+        "p_event",
+        "p_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "boolean",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "e59fb6fa1a87156d54a02eb8d9cf97f6b4ded8c44fce2d8d31acc23ae69723fa"
+    },
+    {
+      "signature": "world_v2.postwar_social_origin_at_prefix(text,text)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "state",
+        "binding",
+        "origin_world_version",
+        "origin_event_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(state jsonb, binding jsonb, origin_world_version bigint, origin_event_sequence bigint)",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "c4c8c93f004b53dea93b591eb3fb244df63a9f73f9b3f691af8c82df7fef84c6"
+    },
+    {
+      "signature": "world_v2.read_postwar_industry_run_original(text,text,text,text,text,bigint,bigint,text,text)",
+      "owner": "world_v2_industry_source_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_host_country",
+        "p_office",
+        "p_command",
+        "p_fingerprint",
+        "p_version",
+        "p_sequence",
+        "p_seed_fingerprint",
+        "p_admission",
+        "source_text",
+        "source_sha256",
+        "source_ref",
+        "world_version",
+        "event_sequence"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "TABLE(source_text text, source_sha256 text, source_ref text, world_version text, event_sequence text)",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_finance_budget_source_reader",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_industry_source_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_social_source_reader",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "f1942fdafc6a9620da59aab7267745af9da4a3c7f85aa8ab2052d24b9ab9f7a9"
+    },
+    {
+      "signature": "world_v2.postwar_projection_industry_original(text,jsonb,jsonb)",
+      "owner": "world_v2_industry_source_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_command",
+        "p_event"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "jsonb",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_industry_source_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_industry_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "63eb0cb1a258d699d808e561ae641bc9a30c34f6fb6e4001da5ec8adaa9ec19c"
+    },
+    {
+      "signature": "world_v2.postwar_mixed_industry_work_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_command",
+        "p_transition",
+        "p_event",
+        "p_batches",
+        "p_inventory"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "boolean",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantee": "world_v2_social_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ],
+      "bodySha256": "e6887c3077a9ac13fdcd1c124f48a009be8cc2f46438031d02b384b85ffebd1b"
+    },
+    {
+      "signature": "world_v2.postwar_apply_current_frame_page(text,text,jsonb)",
+      "owner": "world_v2_postwar_projection_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_frames_text",
+        "p_state"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "jsonb",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_postwar_projection_owner",
+          "grantor": "world_v2_postwar_projection_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "20c531d49af93e25fd3576f25360de04773c759793b4acea53d7727091cb438d"
+    },
+    {
+      "signature": "world_v2.publish_social_operating_paged_match_due(text,text,text,text)",
+      "owner": "world_v2_social_source_owner",
+      "securityDefiner": true,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": [
+        "p_world",
+        "p_country",
+        "p_plan",
+        "p_witness"
+      ],
+      "strict": false,
+      "volatility": "v",
+      "parallel": "u",
+      "result": "world_v2.command_submission",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "plpgsql",
+      "acl": [
+        {
+          "grantee": "world_v2_social_source_owner",
+          "grantor": "world_v2_social_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantee": "world_v2_social_source_publisher",
+          "grantor": "world_v2_social_source_owner",
+          "grantable": false,
+          "privilege": "EXECUTE"
+        }
+      ],
+      "bodySha256": "9f20abe1f6032fbe6c4dabe350c1c42a8c889877ba47760476aafb45e443b544"
+    },
+    {
+      "signature": "world_v2.postwar_utilisation_target_contract_version()",
+      "owner": "world_v2_industry_source_owner",
+      "securityDefiner": false,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": null,
+      "strict": false,
+      "volatility": "s",
+      "parallel": "u",
+      "result": "text",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "sql",
+      "bodySha256": "465fb95aed032c9149e9a7d529d4bd3542ca32ca9d998b7a366bc00063eabbf1",
+      "acl": [
+        {
+          "grantor": "world_v2_industry_source_owner",
+          "grantee": "world_v2_industry_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantor": "world_v2_industry_source_owner",
+          "grantee": "world_v2_industry_source_reader",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    },
+    {
+      "signature": "world_v2.postwar_social_programme_contract_version()",
+      "owner": "world_v2_social_source_owner",
+      "securityDefiner": false,
+      "config": [
+        "search_path=pg_catalog"
+      ],
+      "argumentNames": null,
+      "strict": false,
+      "volatility": "s",
+      "parallel": "u",
+      "result": "text",
+      "defaultCount": 0,
+      "defaults": null,
+      "leakproof": false,
+      "kind": "f",
+      "language": "sql",
+      "bodySha256": "ab679aea903e732140e63ca70ec02510adc95e5a7bc1d5c18465685a3c35b91b",
+      "acl": [
+        {
+          "grantor": "world_v2_social_source_owner",
+          "grantee": "world_v2_social_source_owner",
+          "privilege": "EXECUTE",
+          "grantable": false
+        },
+        {
+          "grantor": "world_v2_social_source_owner",
+          "grantee": "world_v2_social_source_reader",
+          "privilege": "EXECUTE",
+          "grantable": false
+        }
+      ]
+    }
+  ],
+  "newFunctions": [
+    "world_v2.postwar_social_programme_effect_scoped(text,text,jsonb,jsonb,bigint)",
+    "world_v2.postwar_utilisation_target_contract_version()",
+    "world_v2.postwar_social_programme_contract_version()"
+  ],
+  "existingFunctionAclDelta": {
+    "world_v2.postwar_mixed_industry_work_group(text,jsonb,jsonb,jsonb,jsonb,jsonb)": [
+      "EXECUTE to world_v2_social_source_owner"
+    ]
+  },
+  "nativeValidation": "NOT_RUN",
+  "productionMutation": false
+}

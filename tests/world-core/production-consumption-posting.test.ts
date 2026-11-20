@@ -1,5 +1,12 @@
 // PREPARATION_ONLY_NOT_V09_2_STARTED; all source facts below are TEST_ONLY.
 import { createHash } from 'node:crypto';
+import {
+  INDUSTRY_FIRST_DAY_POLICY_VERSION,
+  INDUSTRY_FIRST_DAY_POLICY_RAW_SHA256,
+  INDUSTRY_FIRST_DAY_USER_ADOPTION_RAW_SHA256,
+  PRODUCTION_OPENING_SERVICEABILITY_BASIS,
+  type ProductionOpeningBasisSource,
+} from '../../packages/core/src/inventory/production-operating-basis.js';
 import { describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_SCHEMA_VERSION,
@@ -450,6 +457,74 @@ describe('TEST_ONLY real V13 → sole E08 writer → opening lineage', () => {
       outputBatchId: 'STEEL_BATCH',
     });
     // L01 per commodity: ore 8 + 0 - 6 = 2; steel 0 + 3 - 0 = 3. No same-unit cross-commodity sum.
+  });
+  it('executes the opening-basis variant through real V13/posting/replay without inventing maintenance, license or free cost', () => {
+    const f = fixture();
+    const source: ProductionOpeningBasisSource = {
+      schemaVersion: 'postwar-industry-first-day-basis-v1',
+      policyVersion: INDUSTRY_FIRST_DAY_POLICY_VERSION,
+      policyRawSha256: INDUSTRY_FIRST_DAY_POLICY_RAW_SHA256,
+      userAdoptionRawSha256: INDUSTRY_FIRST_DAY_USER_ADOPTION_RAW_SHA256,
+      worldId: WORLD,
+      countryId: COUNTRY,
+      facilityRef: f.evidence.operating.payload.facilityRef,
+      operatorId: OP,
+      seedId: f.seed.seedId,
+      seedFingerprint: f.seed.fingerprint,
+      sourceRef: 'SOURCE.TEST_ONLY.OPENING',
+      sourceRawSha256: 'b'.repeat(64),
+      sourcePointer: 'TEST_ONLY.initial.conditionFraction',
+      rightsScope: 'DOMESTIC_EXISTING_UNFRAGMENTED_OP_AGGREGATE',
+      openingWindowStartsAtSimTime: '0',
+      openingWindowEndsAtSimTime: '86400000',
+    };
+    const op: ProductionConsumptionEvidence['operating']['payload'] = {
+      ...f.evidence.operating.payload,
+      maintenanceAppliedRef: null,
+      maintenanceBasis: PRODUCTION_OPENING_SERVICEABILITY_BASIS,
+      openingServiceability: { ...source, originalConditionFraction: '1' },
+      technologyRightRef: null,
+      baselineTechnologyNonrequirement: {
+        ...source,
+        sourcePointer: 'TEST_ONLY.recipe.baseline',
+        basis: 'EXISTING_SITE_REFINERY_RECIPE_COEFFICIENTS',
+        recipeFactRef: f.evidence.recipe.factRef,
+        recipeSourceRef: f.evidence.recipe.sourceRef,
+        recipeCanonicalPayload: f.evidence.recipe.canonicalPayload,
+        baselineProductivity: f.evidence.input.capacity.payload.productivity,
+        baselineRequiredTechnologyRightRefs: [],
+        excludedUpgradeTechnologyRefs: ['UPGRADE.TEST_ONLY.PROPOSED'],
+      },
+    };
+    const evidence = {
+      ...f.evidence,
+      operating: changedFact(f.evidence.operating, op),
+    };
+    const actual = f.run(evidence);
+    expect(
+      actual.inventory.balances.map((b) => [
+        b.account.commodityId,
+        b.quantity.toCanonicalValue().amount,
+      ]),
+    ).toEqual([
+      ['ORE', '2'],
+      ['STEEL', '3'],
+    ]);
+    expect(canonicalSerialize(actual.financial.positions)).toBe(
+      canonicalSerialize(f.before.financial.positions),
+    );
+    expect(actual.inventory.appliedPostings).toHaveLength(1);
+    expect(op.maintenanceAppliedRef).toBeNull();
+    expect(op.technologyRightRef).toBeNull();
+    expect(() =>
+      f.run({
+        ...evidence,
+        operating: changedFact(evidence.operating, {
+          ...op,
+          settledCost: { amount: '0', currency: 'GCU' },
+        }),
+      }),
+    ).toThrow('explicitly funded');
   });
   it('deterministically rebuilds/reconciles the same ledger and refuses duplicate lineage', () => {
     const f = fixture();

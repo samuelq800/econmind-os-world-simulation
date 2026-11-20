@@ -1,0 +1,170 @@
+{
+  "classification": "IMPLEMENTATION_AND_SCOPED_PROTOCOL_JWT_SQL_CHECKS_NOT_NATIVE_UTILITY_DELIVERY_OR_P0_APPROVAL",
+  "headAtReport": "abaf42cf8b835736fea6ef578163b5c846b8b851",
+  "reportedAt": "2026-11-08T14:51:31.727060+00:00",
+  "sourceManifest": [
+    {
+      "path": "packages/core/src/read-models/postwar-industry-utility-planning-contract.ts",
+      "sha256": "cc419edaa4feb6be6f6c09bc26bb5c7edb7e89d5d6ee286bdc2230909fcd9e50",
+      "bytes": 9038
+    },
+    {
+      "path": "apps/world-web/src/industry-utility/form.ts",
+      "sha256": "405e7a4cf847b64559924ae28943a91e0cf4ddef6a07f7e1da6b4cf59ce551dc",
+      "bytes": 7985
+    },
+    {
+      "path": "apps/world-web/src/office-command/controller.ts",
+      "sha256": "fc4dc4fc92e1c18a918abe27db1a021e7ac936beeca02667786a1d7d512594f8",
+      "bytes": 22710
+    },
+    {
+      "path": "apps/world-web/src/office-command/view.ts",
+      "sha256": "a8462ac89232de04b668ac58a70d41e8b57d5d05efb8660f5f30c35a82cc06e5",
+      "bytes": 15015
+    },
+    {
+      "path": "apps/world-web/src/postwar-office-runtime/client.ts",
+      "sha256": "98c3737d0995f5f73b16705ec11d2f8bf1df39901a14472feffdddda24c5a11b",
+      "bytes": 33331
+    },
+    {
+      "path": "apps/world-api/src/integration/postwar-office-runtime-read-service.ts",
+      "sha256": "d5f6760528978e35e546aa0d10c68bedd8fa6a131d664a5aca16699409a1a22b",
+      "bytes": 40986
+    },
+    {
+      "path": "tests/support/industry-utility-planning-fixture.ts",
+      "sha256": "d9f3bacc9ad3c9be6a79e9f607299fd79cac2fff0d0a5b0d61a23fd8e4fd7ce1",
+      "bytes": 11908
+    },
+    {
+      "path": "tests/world-core/industry-utility-planning-contract.test.ts",
+      "sha256": "8ffc0330498a59c6b73ff24ee15ff602698380c5573b2d7f568fc3b0e1d90268",
+      "bytes": 2767
+    },
+    {
+      "path": "tests/world-web/industry-utility-form.test.ts",
+      "sha256": "858f2957e62b2c2e81f4ac32b741d2e69ecce4560366de801181f7186b978736",
+      "bytes": 4916
+    },
+    {
+      "path": "tests/world-web/industry-utility-controller.test.ts",
+      "sha256": "6fa02f890e385c929cf1296225001cff0cd51a0ea4d275ecb61129158688cbf2",
+      "bytes": 4438
+    },
+    {
+      "path": "tests/world-api/postwar-industry-utility-planning.test.ts",
+      "sha256": "491d4490cce4cebf89b248956fe35029069dfb8548be2e77c27a8f8097a5e15f",
+      "bytes": 6094
+    }
+  ],
+  "builtArtifactManifest": [
+    {
+      "path": "packages/core/dist/read-models/postwar-industry-utility-planning-contract.js",
+      "sha256": "1655bd0108352ac2473c09908e74f636c58e91e3a69e9a4e350729219e17c38d"
+    },
+    {
+      "path": "packages/core/dist/read-models/postwar-industry-utility-planning-contract.d.ts",
+      "sha256": "d438a9ccc5723840d2106b10df0232b0702ff3bffed4c3ec38d55f3cd8db0e97"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postwar-office-runtime-read-service.js",
+      "sha256": "0bd95d55105e16ffee47dc8c4d955611780a7d67d71c0833f431520bfdca21eb"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postwar-office-runtime-read-service.d.ts",
+      "sha256": "57673d0eba1d37e71126f023f0e7e786e21e6d25bcf3558e96696c7fe6feaee7"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/postwar-industry-utility-planning-read.js",
+      "sha256": "a18457188bdfa351b2f92d27921fe16b7643b00b4b125d6c74d784bb5c17cb0e"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/postwar-industry-utility-planning-read.d.ts",
+      "sha256": "805b989a0fb4979936487351aadda050071b1e6450f281d56828b0259deace5e"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime-preparation/postwar-industry-utility-planning-exports.js",
+      "sha256": "83599e011771147477276b6d4d88590ad917d2932e262fa98f6c3037c9b2c4a4"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime-preparation/postwar-industry-utility-planning-exports.d.ts",
+      "sha256": "a4d55f900eb4260d35dc7f73d4a919b6612ecc800733bb51c8fb43d548f52f80"
+    }
+  ],
+  "sharedFilesForRootIntegration": [
+    "apps/world-web/src/office-command/view.ts",
+    "apps/world-web/src/postwar-office-runtime/client.ts",
+    "apps/world-api/src/integration/postwar-office-runtime-read-service.ts"
+  ],
+  "independentFilesToCommit": [
+    "packages/core/src/read-models/postwar-industry-utility-planning-contract.ts",
+    "apps/world-web/src/industry-utility/form.ts",
+    "apps/world-web/src/office-command/controller.ts",
+    "tests/support/industry-utility-planning-fixture.ts",
+    "tests/world-core/industry-utility-planning-contract.test.ts",
+    "tests/world-web/industry-utility-form.test.ts",
+    "tests/world-web/industry-utility-controller.test.ts",
+    "tests/world-api/postwar-industry-utility-planning.test.ts"
+  ],
+  "checks": {
+    "pureContractStrictTypecheck": 0,
+    "finalScopedTypecheck": 0,
+    "scopedLint": 0,
+    "format": 0,
+    "diffCheck": 0
+  },
+  "testRuns": [
+    {
+      "file": "industry-utility-planning-attempt1-20261108.json",
+      "success": false,
+      "numPassedTests": 55,
+      "numFailedTests": 1,
+      "numPendingTests": 0
+    },
+    {
+      "file": "industry-utility-planning-attempt2-20261108.json",
+      "success": true,
+      "numPassedTests": 17,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    {
+      "file": "industry-utility-form-route-final-20261108.json",
+      "success": true,
+      "numPassedTests": 15,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    }
+  ],
+  "currentApplicableAssertionsByFile": {
+    "industry-utility-planning-contract.test.ts": 15,
+    "industry-utility-form.test.ts": 15,
+    "industry-utility-controller.test.ts": 7,
+    "postwar-industry-utility-planning.test.ts": 3,
+    "industry-run-controller.test.ts": 3,
+    "industry-run-form.test.ts": 8,
+    "office-command-original-recovery.test.ts": 6
+  },
+  "totalCurrentApplicableAssertions": 57,
+  "aggregation": "Incremental affected checks; not 57 tests in one successful invocation. Initial 55P/1F preserved; foreign subject503 mapping fixed; actual JWT/SQL3 and final form15 separately passed.",
+  "implemented": [
+    "Only actual planning rows select existing RUN/source/transfer/order references.",
+    "BOOK requires explicit user quantity/window and shows source capacity, logistics direction/title/risk; refs-only stages cannot edit performed facts.",
+    "Planning is a same-head Industry side-read; no source503 differs from complete EMPTY; 403/session loss clears all private state.",
+    "Query-only original recovery survives reload, permits old head and never resubmits automatically.",
+    "API uses fixed genuine reader only, releases first read connection before independent worker transaction, then revalidates JWT and fresh seat/head/pins in a new readonly transaction before returning rows.",
+    "Planning source has explicit reducer revision and no fabricated canonical seed byte hash; previous page types keep original hash requirements."
+  ],
+  "buildEvidence": {
+    "parentReportedCoreWorkerApiBuild05": "PASS exit0",
+    "parentReportedWebBuild04": "PASS before final named-route text addition",
+    "webFinalBuild": "Parent will build final Web separately; no regenerated Web bundle claimed here."
+  },
+  "notRun": [
+    "Genuine positive planning API page from registered live utility sources",
+    "Native Chromium utility submit/fulfilment",
+    "Production, deployment, Clock or provider actions"
+  ]
+}

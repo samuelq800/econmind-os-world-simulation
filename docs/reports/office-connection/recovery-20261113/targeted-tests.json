@@ -1,0 +1,3246 @@
+{
+  "numTotalTestSuites": 51,
+  "numPassedTestSuites": 51,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 251,
+  "numPassedTests": 251,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1794540683303,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["actual RUN parameter JWT API"],
+          "fullName": "actual RUN parameter JWT API returns exact original references/currency and separates immutable origin from the observed head",
+          "status": "passed",
+          "title": "returns exact original references/currency and separates immutable origin from the observed head",
+          "duration": 80.86601400000018,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["actual RUN parameter JWT API"],
+          "fullName": "actual RUN parameter JWT API retains JWT/subject/country isolation and cursor semantics without raw seed reads",
+          "status": "passed",
+          "title": "retains JWT/subject/country isolation and cursor semantics without raw seed reads",
+          "duration": 69.10894199999984,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["actual RUN parameter JWT API"],
+          "fullName": "actual RUN parameter JWT API does not retain original data after source revocation and releases every actual client",
+          "status": "passed",
+          "title": "does not retain original data after source revocation and releases every actual client",
+          "duration": 16.657054000000244,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540736103,
+      "endTime": 1794540736269.657,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-api/postwar-industry-run-parameters.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Industry typed RUN plan lifecycle"],
+          "fullName": "Industry typed RUN plan lifecycle opens source-bound RUN from actual country-module attributes (OK), blocks legacy continuation and stages only explicit user terms",
+          "status": "passed",
+          "title": "opens source-bound RUN from actual country-module attributes (OK), blocks legacy continuation and stages only explicit user terms",
+          "duration": 91.35310500000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry typed RUN plan lifecycle"],
+          "fullName": "Industry typed RUN plan lifecycle opens source-bound RUN from actual country-room attributes (OK), blocks legacy continuation and stages only explicit user terms",
+          "status": "passed",
+          "title": "opens source-bound RUN from actual country-room attributes (OK), blocks legacy continuation and stages only explicit user terms",
+          "duration": 53.137158,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry typed RUN plan lifecycle"],
+          "fullName": "Industry typed RUN plan lifecycle opens source-bound RUN from actual country-module attributes (MISSING), blocks legacy continuation and stages only explicit user terms",
+          "status": "passed",
+          "title": "opens source-bound RUN from actual country-module attributes (MISSING), blocks legacy continuation and stages only explicit user terms",
+          "duration": 53.060163999999986,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry typed RUN plan lifecycle"],
+          "fullName": "Industry typed RUN plan lifecycle stages actual source references with explicit user inputs then uses the original request recovery, without exposing automatic authority",
+          "status": "passed",
+          "title": "stages actual source references with explicit user inputs then uses the original request recovery, without exposing automatic authority",
+          "duration": 4.805202000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry typed RUN plan lifecycle"],
+          "fullName": "Industry typed RUN plan lifecycle clears private source/does not submit when MISSING",
+          "status": "passed",
+          "title": "clears private source/does not submit when MISSING",
+          "duration": 1.2255210000000147,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry typed RUN plan lifecycle"],
+          "fullName": "Industry typed RUN plan lifecycle clears private source/does not submit when FOREIGN",
+          "status": "passed",
+          "title": "clears private source/does not submit when FOREIGN",
+          "duration": 1.3259310000000255,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540750119,
+      "endTime": 1794540750323.326,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/industry-run-controller.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form binds exactly the two U0282 catalog fields and leaves utilization/resource priorities outside RUN",
+          "status": "passed",
+          "title": "binds exactly the two U0282 catalog fields and leaves utilization/resource priorities outside RUN",
+          "duration": 8.608153000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form marks the two exact controls and requires explicit quantity, window and cost instead of copying catalog defaults",
+          "status": "passed",
+          "title": "marks the two exact controls and requires explicit quantity, window and cost instead of copying catalog defaults",
+          "duration": 1.3340630000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form copies policy/source/unit/currency from authorized data while preserving explicit user terms/head/identity",
+          "status": "passed",
+          "title": "copies policy/source/unit/currency from authorized data while preserving explicit user terms/head/identity",
+          "duration": 0.8835729999999984,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form does not invent defaults or accept an unbound facility/window {\"facilityId\":\"ARBITRARY_FACILITY\"}",
+          "status": "passed",
+          "title": "does not invent defaults or accept an unbound facility/window {\"facilityId\":\"ARBITRARY_FACILITY\"}",
+          "duration": 0.597959000000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form does not invent defaults or accept an unbound facility/window {\"quantity\":\"\"}",
+          "status": "passed",
+          "title": "does not invent defaults or accept an unbound facility/window {\"quantity\":\"\"}",
+          "duration": 0.25151400000000024,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form does not invent defaults or accept an unbound facility/window {\"quantity\":\"0\"}",
+          "status": "passed",
+          "title": "does not invent defaults or accept an unbound facility/window {\"quantity\":\"0\"}",
+          "duration": 0.21645200000000386,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form does not invent defaults or accept an unbound facility/window {\"maximumExpense\":\"0\"}",
+          "status": "passed",
+          "title": "does not invent defaults or accept an unbound facility/window {\"maximumExpense\":\"0\"}",
+          "duration": 0.20120900000000574,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form does not invent defaults or accept an unbound facility/window {\"endsAtSimTime\":\"86400001\"}",
+          "status": "passed",
+          "title": "does not invent defaults or accept an unbound facility/window {\"endsAtSimTime\":\"86400001\"}",
+          "duration": 0.15741400000000283,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form does not invent defaults or accept an unbound facility/window {\"startsAtSimTime\":\"20\"}",
+          "status": "passed",
+          "title": "does not invent defaults or accept an unbound facility/window {\"startsAtSimTime\":\"20\"}",
+          "duration": 0.2076980000000077,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-bound Industry RUN form"],
+          "fullName": "source-bound Industry RUN form renders unavailable without a source and exposes no automatic operation",
+          "status": "passed",
+          "title": "renders unavailable without a source and exposes no automatic operation",
+          "duration": 0.4075059999999979,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "source capacity utilisation as gross RUN quantity assistance only"
+          ],
+          "fullName": "source capacity utilisation as gross RUN quantity assistance only uses exact capacity, explicit fractional percentage and duration without floating point or defaults",
+          "status": "passed",
+          "title": "uses exact capacity, explicit fractional percentage and duration without floating point or defaults",
+          "duration": 0.5898370000000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "source capacity utilisation as gross RUN quantity assistance only"
+          ],
+          "fullName": "source capacity utilisation as gross RUN quantity assistance only requires v2 source capacity and rejects unknown, invalid or nonterminating calculations instead of rounding",
+          "status": "passed",
+          "title": "requires v2 source capacity and rejects unknown, invalid or nonterminating calculations instead of rounding",
+          "duration": 0.764396000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "source capacity utilisation as gross RUN quantity assistance only"
+          ],
+          "fullName": "source capacity utilisation as gross RUN quantity assistance only checks the gross per-window bound while preserving the original source and existing RUN payload",
+          "status": "passed",
+          "title": "checks the gross per-window bound while preserving the original source and existing RUN payload",
+          "duration": 0.7786470000000065,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "source capacity utilisation as gross RUN quantity assistance only"
+          ],
+          "fullName": "source capacity utilisation as gross RUN quantity assistance only keeps old v1 manual quantity usable and disables its capacity helper",
+          "status": "passed",
+          "title": "keeps old v1 manual quantity usable and disables its capacity helper",
+          "duration": 0.33313500000001284,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "source capacity utilisation as gross RUN quantity assistance only"
+          ],
+          "fullName": "source capacity utilisation as gross RUN quantity assistance only does no automatic calculation or stage, and 0% never stages a RUN",
+          "status": "passed",
+          "title": "does no automatic calculation or stage, and 0% never stages a RUN",
+          "duration": 1.1411259999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540753012,
+      "endTime": 1794540753029.141,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/industry-run-form.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Industry RUN browser transport"],
+          "fullName": "Industry RUN browser transport keeps RUN in its exact office and preserves the complete original for recovery",
+          "status": "passed",
+          "title": "keeps RUN in its exact office and preserves the complete original for recovery",
+          "duration": 3.154108000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540753955,
+      "endTime": 1794540753958.154,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/office-command-industry-run.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport unbound public install and repeated observer reconciliation have no private DOM or network",
+          "status": "passed",
+          "title": "unbound public install and repeated observer reconciliation have no private DOM or network",
+          "duration": 4.536081000000024,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport mismatched industry binding creates no private shell",
+          "status": "passed",
+          "title": "mismatched industry binding creates no private shell",
+          "duration": 1.1567190000000096,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport mismatched trade binding creates no private shell",
+          "status": "passed",
+          "title": "mismatched trade binding creates no private shell",
+          "duration": 0.5726210000000265,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport finance transport mounts only after a trusted binding and performs no automatic request",
+          "status": "passed",
+          "title": "finance transport mounts only after a trusted binding and performs no automatic request",
+          "duration": 1.9461829999999622,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport industry transport mounts only after a trusted binding and performs no automatic request",
+          "status": "passed",
+          "title": "industry transport mounts only after a trusted binding and performs no automatic request",
+          "duration": 0.6374279999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport trade transport mounts only after a trusted binding and performs no automatic request",
+          "status": "passed",
+          "title": "trade transport mounts only after a trusted binding and performs no automatic request",
+          "duration": 0.4469139999999925,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport invalid binding is missing with no private accessibility controls or dispatch",
+          "status": "passed",
+          "title": "invalid binding is missing with no private accessibility controls or dispatch",
+          "duration": 0.3123239999999896,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport trusted current connect on unchanged root mounts once without automatic read",
+          "status": "passed",
+          "title": "trusted current connect on unchanged root mounts once without automatic read",
+          "duration": 0.9989239999999882,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport successful read alone sets client display time; failed refresh preserves only historical time",
+          "status": "passed",
+          "title": "successful read alone sets client display time; failed refresh preserves only historical time",
+          "duration": 140.61213099999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport invalid browser wall clock leaves metadata null without inventing source time",
+          "status": "passed",
+          "title": "invalid browser wall clock leaves metadata null without inventing source time",
+          "duration": 55.49305300000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport session retirement wipes current and retained private nodes",
+          "status": "passed",
+          "title": "session retirement wipes current and retained private nodes",
+          "duration": 56.17327999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport revision retirement wipes current and retained private nodes",
+          "status": "passed",
+          "title": "revision retirement wipes current and retained private nodes",
+          "duration": 52.94959099999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport country retirement wipes current and retained private nodes",
+          "status": "passed",
+          "title": "country retirement wipes current and retained private nodes",
+          "duration": 52.9458239999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport office retirement wipes current and retained private nodes",
+          "status": "passed",
+          "title": "office retirement wipes current and retained private nodes",
+          "duration": 52.519803000000024,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport denied retirement wipes current and retained private nodes",
+          "status": "passed",
+          "title": "denied retirement wipes current and retained private nodes",
+          "duration": 103.61741000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport pagehide retirement wipes current and retained private nodes",
+          "status": "passed",
+          "title": "pagehide retirement wipes current and retained private nodes",
+          "duration": 52.851676999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport same-attribute root replacement retires old controller and requires a fresh connect",
+          "status": "passed",
+          "title": "same-attribute root replacement retires old controller and requires a fresh connect",
+          "duration": 103.41255699999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport detached old enabled handlers cannot refresh, confirm or close the fresh binding",
+          "status": "passed",
+          "title": "detached old enabled handlers cannot refresh, confirm or close the fresh binding",
+          "duration": 103.73528699999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport UNKNOWN recovers without asking for a fingerprint and wipes original intent on retirement without replay",
+          "status": "passed",
+          "title": "UNKNOWN recovers without asking for a fingerprint and wipes original intent on retirement without replay",
+          "duration": 104.01730599999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport close clears values and focuses only the connected current trigger without retiring binding",
+          "status": "passed",
+          "title": "close clears values and focuses only the connected current trigger without retiring binding",
+          "duration": 52.237478999999894,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport late token after retirement cannot update time/remount or affect fresh scope",
+          "status": "passed",
+          "title": "late token after retirement cannot update time/remount or affect fresh scope",
+          "duration": 53.172064999999975,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport late fetch after retirement cannot update time/remount or affect fresh scope",
+          "status": "passed",
+          "title": "late fetch after retirement cannot update time/remount or affect fresh scope",
+          "duration": 52.54934500000013,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "W1 Office private DOM lifecycle / shipped view and bounded transport"
+          ],
+          "fullName": "W1 Office private DOM lifecycle / shipped view and bounded transport late body after retirement cannot update time/remount or affect fresh scope",
+          "status": "passed",
+          "title": "late body after retirement cannot update time/remount or affect fresh scope",
+          "duration": 104.34325899999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540746788,
+      "endTime": 1794540747939.3433,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/office-command-lifecycle-ux.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read retains the original and receipt, refreshes authority, and opens a new review without posting",
+          "status": "passed",
+          "title": "retains the original and receipt, refreshes authority, and opens a new review without posting",
+          "duration": 43.911899000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read cannot begin from UNKNOWN, queue acknowledgement, or an unsubmitted intent",
+          "status": "passed",
+          "title": "cannot begin from UNKNOWN, queue acknowledgement, or an unsubmitted intent",
+          "duration": 3.688601999999946,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read preserves the locked original on fresh read failure and requires a later successful read",
+          "status": "passed",
+          "title": "preserves the locked original on fresh read failure and requires a later successful read",
+          "duration": 3.3282159999999976,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read rejects reuse of either original command ID or idempotency key",
+          "status": "passed",
+          "title": "rejects reuse of either original command ID or idempotency key",
+          "duration": 2.2501740000000154,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read recovers the prior FINAL without changing a current unknown request or its authorized head",
+          "status": "passed",
+          "title": "recovers the prior FINAL without changing a current unknown request or its authorized head",
+          "duration": 2.842264,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read does not treat a changed prior receipt as verified or overwrite the active draft",
+          "status": "passed",
+          "title": "does not treat a changed prior receipt as verified or overwrite the active draft",
+          "duration": 2.7145439999999894,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read contains a prior recovery exception without clearing the active unknown request or page",
+          "status": "passed",
+          "title": "contains a prior recovery exception without clearing the active unknown request or page",
+          "duration": 2.201080999999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read denial of prior recovery clears all private request state and never enables submission",
+          "status": "passed",
+          "title": "denial of prior recovery clears all private request state and never enables submission",
+          "duration": 2.3781139999999823,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read serializes a delayed next read and ignores its result after session invalidation",
+          "status": "passed",
+          "title": "serializes a delayed next read and ignores its result after session invalidation",
+          "duration": 1.6430619999999863,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit next request after verified FINAL and fresh authorized read"
+          ],
+          "fullName": "explicit next request after verified FINAL and fresh authorized read renders explicit next and previous-recovery actions in the shipped drawer",
+          "status": "passed",
+          "title": "renders explicit next and previous-recovery actions in the shipped drawer",
+          "duration": 108.39095700000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540751545,
+      "endTime": 1794540751718.3909,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/office-command-next-request.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "explicit original-request recovery after a page reload"
+          ],
+          "fullName": "explicit original-request recovery after a page reload accepts the old head for query only after a new controller reads a newer head, with zero resubmission",
+          "status": "passed",
+          "title": "accepts the old head for query only after a new controller reads a newer head, with zero resubmission",
+          "duration": 34.56466900000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit original-request recovery after a page reload"
+          ],
+          "fullName": "explicit original-request recovery after a page reload recovers an explicit original with no previously obtained fingerprint, and never enables submit when the server reports pending",
+          "status": "passed",
+          "title": "recovers an explicit original with no previously obtained fingerprint, and never enables submit when the server reports pending",
+          "duration": 1.4462489999999661,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit original-request recovery after a page reload"
+          ],
+          "fullName": "explicit original-request recovery after a page reload recovers FINAL without a successful current page and retains the receipt when readback remains unavailable",
+          "status": "passed",
+          "title": "recovers FINAL without a successful current page and retains the receipt when readback remains unavailable",
+          "duration": 1.7334060000000022,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit original-request recovery after a page reload"
+          ],
+          "fullName": "explicit original-request recovery after a page reload rejects foreign World/country/office/family and future head without querying or changing into a submit intent",
+          "status": "passed",
+          "title": "rejects foreign World/country/office/family and future head without querying or changing into a submit intent",
+          "duration": 1.6362709999999652,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit original-request recovery after a page reload"
+          ],
+          "fullName": "explicit original-request recovery after a page reload clears private original/receipt/pages on real transport 403 and cannot confirm afterward",
+          "status": "passed",
+          "title": "clears private original/receipt/pages on real transport 403 and cannot confirm afterward",
+          "duration": 1.1155880000000025,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "explicit original-request recovery after a page reload"
+          ],
+          "fullName": "explicit original-request recovery after a page reload exposes a distinct recovery-only button in the shipped drawer without stage/review/confirm",
+          "status": "passed",
+          "title": "exposes a distinct recovery-only button in the shipped drawer without stage/review/confirm",
+          "duration": 54.89778700000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540750563,
+      "endTime": 1794540750657.8977,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/office-command-original-recovery.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects missing page provenance metadata (pageHash)",
+          "status": "passed",
+          "title": "rejects missing page provenance metadata (pageHash)",
+          "duration": 28.186198999999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects missing page provenance metadata (returnedRowsHash)",
+          "status": "passed",
+          "title": "rejects missing page provenance metadata (returnedRowsHash)",
+          "duration": 1.1446419999999762,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects missing page provenance metadata (hashAlgorithm)",
+          "status": "passed",
+          "title": "rejects missing page provenance metadata (hashAlgorithm)",
+          "duration": 0.76844200000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects missing page provenance metadata (sourcePointer)",
+          "status": "passed",
+          "title": "rejects missing page provenance metadata (sourcePointer)",
+          "duration": 0.4834879999999657,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client keeps INDUSTRY opening facts historical after the World advances",
+          "status": "passed",
+          "title": "keeps INDUSTRY opening facts historical after the World advances",
+          "duration": 0.92098900000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client keeps TRADE opening facts historical after the World advances",
+          "status": "passed",
+          "title": "keeps TRADE opening facts historical after the World advances",
+          "duration": 0.6884029999999939,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client keeps CAPTAIN opening facts historical after the World advances",
+          "status": "passed",
+          "title": "keeps CAPTAIN opening facts historical after the World advances",
+          "duration": 0.7101049999999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client keeps FINANCE opening facts historical after the World advances",
+          "status": "passed",
+          "title": "keeps FINANCE opening facts historical after the World advances",
+          "duration": 0.44135599999998476,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client keeps CENTRAL_BANK opening facts historical after the World advances",
+          "status": "passed",
+          "title": "keeps CENTRAL_BANK opening facts historical after the World advances",
+          "duration": 0.6036270000000172,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks the complete financial prefix without promoting opening claims to cash (valid)",
+          "status": "passed",
+          "title": "checks the complete financial prefix without promoting opening claims to cash (valid)",
+          "duration": 1.1731740000000173,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks the complete financial prefix without promoting opening claims to cash (missing-coverage)",
+          "status": "passed",
+          "title": "checks the complete financial prefix without promoting opening claims to cash (missing-coverage)",
+          "duration": 0.4297189999999773,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks the complete financial prefix without promoting opening claims to cash (wrong-head)",
+          "status": "passed",
+          "title": "checks the complete financial prefix without promoting opening claims to cash (wrong-head)",
+          "duration": 0.43166099999996277,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks the complete financial prefix without promoting opening claims to cash (posting)",
+          "status": "passed",
+          "title": "checks the complete financial prefix without promoting opening claims to cash (posting)",
+          "duration": 0.42215699999997014,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks the complete financial prefix without promoting opening claims to cash (wrong-origin)",
+          "status": "passed",
+          "title": "checks the complete financial prefix without promoting opening claims to cash (wrong-origin)",
+          "duration": 0.4210459999999898,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks the complete financial prefix without promoting opening claims to cash (unknown-reducer)",
+          "status": "passed",
+          "title": "checks the complete financial prefix without promoting opening claims to cash (unknown-reducer)",
+          "duration": 0.47893199999998615,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks the complete financial prefix without promoting opening claims to cash (historical-ledger)",
+          "status": "passed",
+          "title": "checks the complete financial prefix without promoting opening claims to cash (historical-ledger)",
+          "duration": 0.4322630000000345,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects altered historical fact provenance (origin)",
+          "status": "passed",
+          "title": "rejects altered historical fact provenance (origin)",
+          "duration": 0.45928300000002764,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects altered historical fact provenance (observed-head)",
+          "status": "passed",
+          "title": "rejects altered historical fact provenance (observed-head)",
+          "duration": 0.3325439999999844,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects altered historical fact provenance (current-label)",
+          "status": "passed",
+          "title": "rejects altered historical fact provenance (current-label)",
+          "duration": 0.38366999999999507,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks complete-prefix coverage for a prior-country materialization (valid)",
+          "status": "passed",
+          "title": "checks complete-prefix coverage for a prior-country materialization (valid)",
+          "duration": 0.6737420000000043,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks complete-prefix coverage for a prior-country materialization (missing)",
+          "status": "passed",
+          "title": "checks complete-prefix coverage for a prior-country materialization (missing)",
+          "duration": 0.45830100000000584,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks complete-prefix coverage for a prior-country materialization (foreign-country)",
+          "status": "passed",
+          "title": "checks complete-prefix coverage for a prior-country materialization (foreign-country)",
+          "duration": 0.360005000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks complete-prefix coverage for a prior-country materialization (wrong-origin)",
+          "status": "passed",
+          "title": "checks complete-prefix coverage for a prior-country materialization (wrong-origin)",
+          "duration": 0.4188220000000342,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks complete-prefix coverage for a prior-country materialization (wrong-head)",
+          "status": "passed",
+          "title": "checks complete-prefix coverage for a prior-country materialization (wrong-head)",
+          "duration": 0.37922299999996767,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client checks complete-prefix coverage for a prior-country materialization (unknown-reducer)",
+          "status": "passed",
+          "title": "checks complete-prefix coverage for a prior-country materialization (unknown-reducer)",
+          "duration": 0.42586299999999255,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client requires the committed-state data kind and supported dataset at head positions/2",
+          "status": "passed",
+          "title": "requires the committed-state data kind and supported dataset at head positions/2",
+          "duration": 0.558529999999962,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client requires the committed-state data kind and supported dataset at head positions/2",
+          "status": "passed",
+          "title": "requires the committed-state data kind and supported dataset at head positions/2",
+          "duration": 0.36832700000002205,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client requires the committed-state data kind and supported dataset at head positions/0",
+          "status": "passed",
+          "title": "requires the committed-state data kind and supported dataset at head positions/0",
+          "duration": 0.31627000000003136,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client requires the committed-state data kind and supported dataset at head offers/2",
+          "status": "passed",
+          "title": "requires the committed-state data kind and supported dataset at head offers/2",
+          "duration": 0.5250609999999938,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects a current page with a missing event materialization binding",
+          "status": "passed",
+          "title": "rejects a current page with a missing event materialization binding",
+          "duration": 1.1485270000000014,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects a current page with a foreign-country event materialization binding",
+          "status": "passed",
+          "title": "rejects a current page with a foreign-country event materialization binding",
+          "duration": 0.4021370000000388,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects a current page with a wrong-head event materialization binding",
+          "status": "passed",
+          "title": "rejects a current page with a wrong-head event materialization binding",
+          "duration": 0.5783590000000345,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client defaults closed without token/network work",
+          "status": "passed",
+          "title": "defaults closed without token/network work",
+          "duration": 0.6605619999999703,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client retains exact decimal/count strings and both continuation versions",
+          "status": "passed",
+          "title": "retains exact decimal/count strings and both continuation versions",
+          "duration": 1.141787000000022,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client distinguishes authenticated empty offers from unavailable backend",
+          "status": "passed",
+          "title": "distinguishes authenticated empty offers from unavailable backend",
+          "duration": 1.031733000000031,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects source countryId scope substitution",
+          "status": "passed",
+          "title": "rejects source countryId scope substitution",
+          "duration": 0.5404729999999631,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects source officeId scope substitution",
+          "status": "passed",
+          "title": "rejects source officeId scope substitution",
+          "duration": 0.319184000000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects source authSubjectId scope substitution",
+          "status": "passed",
+          "title": "rejects source authSubjectId scope substitution",
+          "duration": 0.5013749999999959,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects source authorizationRevision scope substitution",
+          "status": "passed",
+          "title": "rejects source authorizationRevision scope substitution",
+          "duration": 0.7723180000000411,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects source scopeKey scope substitution",
+          "status": "passed",
+          "title": "rejects source scopeKey scope substitution",
+          "duration": 0.32806700000003275,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects source admissionRef scope substitution",
+          "status": "passed",
+          "title": "rejects source admissionRef scope substitution",
+          "duration": 0.4590919999999983,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client rejects nonprogressing pagination and oversized response",
+          "status": "passed",
+          "title": "rejects nonprogressing pagination and oversized response",
+          "duration": 1.0626089999999522,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client aborts delayed token work on session invalidation and late response cannot revive it",
+          "status": "passed",
+          "title": "aborts delayed token work on session invalidation and late response cannot revive it",
+          "duration": 0.7225940000000151,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client bounds stalled body reading and retires superseded reads",
+          "status": "passed",
+          "title": "bounds stalled body reading and retires superseded reads",
+          "duration": 5.96795000000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["bounded postwar office client"],
+          "fullName": "bounded postwar office client renders actual business fields and clears private rows on invalidation",
+          "status": "passed",
+          "title": "renders actual business fields and clears private rows on invalidation",
+          "duration": 1.866544000000033,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "new current-seat version / actual installed page consumers TEST_ONLY"
+          ],
+          "fullName": "new current-seat version / actual installed page consumers TEST_ONLY requires an actual bounded page read before host connect (page available=true)",
+          "status": "passed",
+          "title": "requires an actual bounded page read before host connect (page available=true)",
+          "duration": 7.43857399999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "new current-seat version / actual installed page consumers TEST_ONLY"
+          ],
+          "fullName": "new current-seat version / actual installed page consumers TEST_ONLY requires an actual bounded page read before host connect (page available=false)",
+          "status": "passed",
+          "title": "requires an actual bounded page read before host connect (page available=false)",
+          "duration": 1.008137999999974,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (valid)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (valid)",
+          "duration": 0.9440030000000093,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (wrong-country)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (wrong-country)",
+          "duration": 0.4197740000000181,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (wrong-head)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (wrong-head)",
+          "duration": 0.6151740000000245,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (missing-postings)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (missing-postings)",
+          "duration": 0.3958279999999945,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (private-extra-field)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (private-extra-field)",
+          "duration": 0.36239899999998215,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (valid-paged-cb)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (valid-paged-cb)",
+          "duration": 0.6944819999999936,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (paged-cb-missing-proof)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (paged-cb-missing-proof)",
+          "duration": 0.4877850000000308,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (paged-cb-wrong-frame-count)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (paged-cb-wrong-frame-count)",
+          "duration": 0.37859299999996665,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (paged-cb-wrong-head)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (paged-cb-wrong-head)",
+          "duration": 0.3855530000000158,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire checks financial balances and complete mixed coverage (paged-cb-wrong-country)",
+          "status": "passed",
+          "title": "checks financial balances and complete mixed coverage (paged-cb-wrong-country)",
+          "duration": 0.4240710000000263,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire separates Social state origin from current mixed head (0)",
+          "status": "passed",
+          "title": "separates Social state origin from current mixed head (0)",
+          "duration": 1.265720999999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire separates Social state origin from current mixed head (3)",
+          "status": "passed",
+          "title": "separates Social state origin from current mixed head (3)",
+          "duration": 0.8281700000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire separates Social state origin from current mixed head (foreign-row)",
+          "status": "passed",
+          "title": "separates Social state origin from current mixed head (foreign-row)",
+          "duration": 0.4590320000000361,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire separates Social state origin from current mixed head (missing-binding)",
+          "status": "passed",
+          "title": "separates Social state origin from current mixed head (missing-binding)",
+          "duration": 4.762587999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire shows GCU and posting evidence, then clears balances when current publication is unavailable",
+          "status": "passed",
+          "title": "shows GCU and posting evidence, then clears balances when current publication is unavailable",
+          "duration": 104.85469,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware mixed current page wire"],
+          "fullName": "posting-aware mixed current page wire shows verified CB opening absence beside actual current BANK funds and keeps unknown source distinct",
+          "status": "passed",
+          "title": "shows verified CB opening absence beside actual current BANK funds and keeps unknown source distinct",
+          "duration": 58.35748600000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540750974,
+      "endTime": 1794540751219.3574,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/postwar-office-runtime.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "uses existing canonical account bucket semantics and keeps exact decimal/title/location fields",
+          "status": "passed",
+          "title": "uses existing canonical account bucket semantics and keeps exact decimal/title/location fields",
+          "duration": 2.930215000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "reads current inventory separately from immutable opening stock",
+          "status": "passed",
+          "title": "reads current inventory separately from immutable opening stock",
+          "duration": 25.956965999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects wrongCountry instead of falling back to opening/empty",
+          "status": "passed",
+          "title": "rejects wrongCountry instead of falling back to opening/empty",
+          "duration": 0.9336480000000051,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects openingAsCurrent instead of falling back to opening/empty",
+          "status": "passed",
+          "title": "rejects openingAsCurrent instead of falling back to opening/empty",
+          "duration": 0.5953549999999836,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects staleCoverage instead of falling back to opening/empty",
+          "status": "passed",
+          "title": "rejects staleCoverage instead of falling back to opening/empty",
+          "duration": 0.5051109999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects foreignOffice instead of falling back to opening/empty",
+          "status": "passed",
+          "title": "rejects foreignOffice instead of falling back to opening/empty",
+          "duration": 0.4767790000000218,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540752742,
+      "endTime": 1794540752773.5051,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/postwar-trade-current-runtime.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) rejects a short secret/rawpayload in failure state fields: Bearer SHORT_SECRET",
+          "status": "passed",
+          "title": "rejects a short secret/rawpayload in failure state fields: Bearer SHORT_SECRET",
+          "duration": 1.6883090000000038,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) rejects a short secret/rawpayload in failure state fields: {\"amount\":\"17\"}",
+          "status": "passed",
+          "title": "rejects a short secret/rawpayload in failure state fields: {\"amount\":\"17\"}",
+          "duration": 0.3198549999999898,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) rejects a short secret/rawpayload in failure state fields: RAW\nPAYLOAD",
+          "status": "passed",
+          "title": "rejects a short secret/rawpayload in failure state fields: RAW\nPAYLOAD",
+          "duration": 0.16882100000000833,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) limits completed records to fixed metadata and never duplicates authorized economic rows or declaration payloads",
+          "status": "passed",
+          "title": "limits completed records to fixed metadata and never duplicates authorized economic rows or declaration payloads",
+          "duration": 1.2923000000000116,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) retains only bounded failure status/code/page identity, never full intent, JWT or headers",
+          "status": "passed",
+          "title": "retains only bounded failure status/code/page identity, never full intent, JWT or headers",
+          "duration": 0.2217499999999859,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) takes only a public typed HTTP error code, not message/headers/raw response",
+          "status": "passed",
+          "title": "takes only a public typed HTTP error code, not message/headers/raw response",
+          "duration": 0.28789699999998675,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) requires an already-owned browser and application",
+          "status": "passed",
+          "title": "requires an already-owned browser and application",
+          "duration": 6.82100699999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) refuses an absent, malformed or opening-only expected head before any fixture access: undefined",
+          "status": "passed",
+          "title": "refuses an absent, malformed or opening-only expected head before any fixture access: undefined",
+          "duration": 1.3736109999999826,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) refuses an absent, malformed or opening-only expected head before any fixture access: {}",
+          "status": "passed",
+          "title": "refuses an absent, malformed or opening-only expected head before any fixture access: {}",
+          "duration": 0.5401430000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"3\"}",
+          "status": "passed",
+          "title": "refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"3\"}",
+          "duration": 0.5252509999999972,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"3\",\"eventSequence\":\"03\"}",
+          "status": "passed",
+          "title": "refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"3\",\"eventSequence\":\"03\"}",
+          "duration": 0.34147799999999506,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"-1\",\"eventSequence\":\"3\"}",
+          "status": "passed",
+          "title": "refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"-1\",\"eventSequence\":\"3\"}",
+          "duration": 0.34855799999999704,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"0\",\"eventSequence\":\"0\"}",
+          "status": "passed",
+          "title": "refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"0\",\"eventSequence\":\"0\"}",
+          "duration": 0.453723999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Trade/CB read-only browser probe preflight (NOT browser acceptance)"
+          ],
+          "fullName": "Trade/CB read-only browser probe preflight (NOT browser acceptance) refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"3\",\"eventSequence\":\"3\",\"authority\":true}",
+          "status": "passed",
+          "title": "refuses an absent, malformed or opening-only expected head before any fixture access: {\"worldVersion\":\"3\",\"eventSequence\":\"3\",\"authority\":true}",
+          "duration": 0.3173010000000147,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540753170,
+      "endTime": 1794540753184.4536,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-web/registered-trade-cb-readback-browser-probe-protocol.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "conservative fixed water basis is bounded reversible DATA"
+          ],
+          "fullName": "conservative fixed water basis is bounded reversible DATA preserves all 122 raw regions, larger protected aliases, 20 dry shortages and every basin bound across all months",
+          "status": "passed",
+          "title": "preserves all 122 raw regions, larger protected aliases, 20 dry shortages and every basin bound across all months",
+          "duration": 793.2991020000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "conservative fixed water basis is bounded reversible DATA"
+          ],
+          "fullName": "conservative fixed water basis is bounded reversible DATA floors only the derived upper bound, retaining exact rational unassigned water",
+          "status": "passed",
+          "title": "floors only the derived upper bound, retaining exact rational unassigned water",
+          "duration": 0.8145399999999654,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "conservative fixed water basis is bounded reversible DATA"
+          ],
+          "fullName": "conservative fixed water basis is bounded reversible DATA retains genuine shortage and closes incompatible aliases without turning either into a grant",
+          "status": "passed",
+          "title": "retains genuine shortage and closes incompatible aliases without turning either into a grant",
+          "duration": 0.5843989999999621,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "conservative fixed water basis is bounded reversible DATA"
+          ],
+          "fullName": "conservative fixed water basis is bounded reversible DATA uses actual Gregorian month lengths, including leap February, without truncating rational budgets",
+          "status": "passed",
+          "title": "uses actual Gregorian month lengths, including leap February, without truncating rational budgets",
+          "duration": 211.347535,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540748072,
+      "endTime": 1794540749079.3477,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/conservative-opening-water-basis.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics"
+          ],
+          "fullName": "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics protects Budget cap once in a new Social vacancy and requires that actual payroll reservation back in Finance",
+          "status": "passed",
+          "title": "protects Budget cap once in a new Social vacancy and requires that actual payroll reservation back in Finance",
+          "duration": 39.52427899999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics"
+          ],
+          "fullName": "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics keeps whole Budget SET/LINE groups, then PLAN/MATCH and a second country, without rebasing",
+          "status": "passed",
+          "title": "keeps whole Budget SET/LINE groups, then PLAN/MATCH and a second country, without rebasing",
+          "duration": 33.764478999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics"
+          ],
+          "fullName": "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics continues Budget after Social by genuine typed replay, keeping canonical global cursor hashes",
+          "status": "passed",
+          "title": "continues Budget after Social by genuine typed replay, keeping canonical global cursor hashes",
+          "duration": 18.661103999999966,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics"
+          ],
+          "fullName": "whole Finance/Social known-family prefix replay, TEST_ONLY Core semantics rejects unknown, missing receipt, duplicated sequence, and cross-country original IDs",
+          "status": "passed",
+          "title": "rejects unknown, missing receipt, duplicated sequence, and cross-country original IDs",
+          "duration": 6.532346999999959,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540751958,
+      "endTime": 1794540752056.5322,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/finance-budget-native-mixed-prefix.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "native Finance own-administration budget rules / Core TEST_ONLY fixtures"
+          ],
+          "fullName": "native Finance own-administration budget rules / Core TEST_ONLY fixtures commits envelope then three-event appropriation without money/stock effects and deterministically replays",
+          "status": "passed",
+          "title": "commits envelope then three-event appropriation without money/stock effects and deterministically replays",
+          "duration": 19.103711000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "native Finance own-administration budget rules / Core TEST_ONLY fixtures"
+          ],
+          "fullName": "native Finance own-administration budget rules / Core TEST_ONLY fixtures protects adopted encumbrances and never allocates the same treasury capacity to another envelope",
+          "status": "passed",
+          "title": "protects adopted encumbrances and never allocates the same treasury capacity to another envelope",
+          "duration": 5.778327000000019,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "native Finance own-administration budget rules / Core TEST_ONLY fixtures"
+          ],
+          "fullName": "native Finance own-administration budget rules / Core TEST_ONLY fixtures rejects invented authority, stale ledger/head and wrong source/currency without a transition",
+          "status": "passed",
+          "title": "rejects invented authority, stale ledger/head and wrong source/currency without a transition",
+          "duration": 5.6387,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "native Finance own-administration budget rules / Core TEST_ONLY fixtures"
+          ],
+          "fullName": "native Finance own-administration budget rules / Core TEST_ONLY fixtures rejects incomplete history, reused slots and unsupported cross-office/conditional policy",
+          "status": "passed",
+          "title": "rejects incomplete history, reused slots and unsupported cross-office/conditional policy",
+          "duration": 3.7149110000000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540752592,
+      "endTime": 1794540752625.7148,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/finance-budget-native.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics pins the actual user transcription and unchanged raw sources, without treating adoption as source or physical calibration",
+          "status": "passed",
+          "title": "pins the actual user transcription and unchanged raw sources, without treating adoption as source or physical calibration",
+          "duration": 4.169817000000023,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics reproduces disclosed C2 profile and about5.44-times electricity exactly, keeping abstracted/delivered/rejected and energy lines separate",
+          "status": "passed",
+          "title": "reproduces disclosed C2 profile and about5.44-times electricity exactly, keeping abstracted/delivered/rejected and energy lines separate",
+          "duration": 8.441325000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics does not book a repeated RUN twice, preserves later state on retry, and rejects changed original scope or output",
+          "status": "passed",
+          "title": "does not book a repeated RUN twice, preserves later state on retry, and rejects changed original scope or output",
+          "duration": 7.2836750000000166,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics splits time without increasing the daily source budget, and never treats unserved demand as delivery",
+          "status": "passed",
+          "title": "splits time without increasing the daily source budget, and never treats unserved demand as delivery",
+          "duration": 5.662836000000027,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics protects explicit additional public reservations before industrial withdrawals, including exact rational claims",
+          "status": "passed",
+          "title": "protects explicit additional public reservations before industrial withdrawals, including exact rational claims",
+          "duration": 3.307575999999983,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics collects all refinery regions in one shared interval, respects every basin and allocates same-region scarcity proportionally",
+          "status": "passed",
+          "title": "collects all refinery regions in one shared interval, respects every basin and allocates same-region scarcity proportionally",
+          "duration": 12.078250000000025,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics shares basin budgets across separate country frames at the same interval without resetting region cursors or dropping protection",
+          "status": "passed",
+          "title": "shares basin budgets across separate country frames at the same interval without resetting region cursors or dropping protection",
+          "duration": 5.922100999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted first-day industrial nonpotable scenario mathematics"
+          ],
+          "fullName": "adopted first-day industrial nonpotable scenario mathematics discards elapsed pre-grant capacity without creating delivery and cannot restore a previous interval",
+          "status": "passed",
+          "title": "discards elapsed pre-grant capacity without creating delivery and cannot restore a previous interval",
+          "duration": 2.156524999999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540752333,
+      "endTime": 1794540752382.1565,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/industry-first-day-water-scenario.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover executes actual reserve/transit/site journal movements without changing batch, title or risk",
+          "status": "passed",
+          "title": "executes actual reserve/transit/site journal movements without changing batch, title or risk",
+          "duration": 161.326646,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover uses distinct prior service WORK and six real deposit settlement legs; budget reference is never paid",
+          "status": "passed",
+          "title": "uses distinct prior service WORK and six real deposit settlement legs; budget reference is never paid",
+          "duration": 228.26258200000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover requires complete global replay before sealing delivery; copied states/views/frames cannot mint the token",
+          "status": "passed",
+          "title": "requires complete global replay before sealing delivery; copied states/views/frames cannot mint the token",
+          "duration": 154.74101900000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover keeps actual handover after a correctly reduced later sibling RUN updates global head",
+          "status": "passed",
+          "title": "keeps actual handover after a correctly reduced later sibling RUN updates global head",
+          "duration": 142.29416000000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover rejects later genuine manufacturing WORK reusing completed logistics person/time in the full prefix",
+          "status": "passed",
+          "title": "rejects later genuine manufacturing WORK reusing completed logistics person/time in the full prefix",
+          "duration": 136.05826300000012,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover preserves the immutable logistics contract when a legitimate later WORK changes the RUN performed counter",
+          "status": "passed",
+          "title": "preserves the immutable logistics contract when a legitimate later WORK changes the RUN performed counter",
+          "duration": 116.54096699999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover cannot relabel an existing manufacturing position as a logistics position",
+          "status": "passed",
+          "title": "cannot relabel an existing manufacturing position as a logistics position",
+          "duration": 109.19144400000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover rejects early service/delivery or raw ready flags instead of performing future work or creating receipts",
+          "status": "passed",
+          "title": "rejects early service/delivery or raw ready flags instead of performing future work or creating receipts",
+          "duration": 110.88394000000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover rejects missing, modified, oversized or unrelated wage expense order instead of treating manufacturing payment as logistics",
+          "status": "passed",
+          "title": "rejects missing, modified, oversized or unrelated wage expense order instead of treating manufacturing payment as logistics",
+          "duration": 138.05490999999984,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover preserves exact unpaid wage liability, only actual settled amount enters cost, and never charges the same input twice",
+          "status": "passed",
+          "title": "preserves exact unpaid wage liability, only actual settled amount enters cost, and never charges the same input twice",
+          "duration": 126.277558,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover rejects duplicate service minutes for another transfer, while duplicate exact command replays consume nothing twice",
+          "status": "passed",
+          "title": "rejects duplicate service minutes for another transfer, while duplicate exact command replays consume nothing twice",
+          "duration": 110.94651399999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover recomputes complete journals and receipt, rejecting missing or extra economic effects",
+          "status": "passed",
+          "title": "recomputes complete journals and receipt, rejecting missing or extra economic effects",
+          "duration": 119.93255799999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent internal logistics full Core frames and named handover"
+          ],
+          "fullName": "independent internal logistics full Core frames and named handover merges private immutable source/input originals by actual references, rejects copies and conflicts",
+          "status": "passed",
+          "title": "merges private immutable source/input originals by actual references, rejects copies and conflicts",
+          "duration": 116.24240299999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540744560,
+      "endTime": 1794540746333.2424,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/industry-internal-logistics-execution.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA retains exact user adoption bytes and discloses original unknown semantics, not delivery or engineering calibration",
+          "status": "passed",
+          "title": "retains exact user adoption bytes and discloses original unknown semantics, not delivery or engineering calibration",
+          "duration": 3.054559999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA books without delivering, then conserves SOC, conversion loss, route loss and delivered energy after the actual interval",
+          "status": "passed",
+          "title": "books without delivering, then conserves SOC, conversion loss, route loss and delivered energy after the actual interval",
+          "duration": 5.636415999999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA retains recurring stored-energy fractions exactly and is deterministic across equivalent initializations",
+          "status": "passed",
+          "title": "retains recurring stored-energy fractions exactly and is deterministic across equivalent initializations",
+          "duration": 1.5680300000000074,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA can book an exact pumping-energy demand through route loss without inventing a rounding quantum",
+          "status": "passed",
+          "title": "can book an exact pumping-energy demand through route loss without inventing a rounding quantum",
+          "duration": 0.8386759999999924,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA keeps existing/public reservation energy and overlapping power intact and fails without consuming the old ledger",
+          "status": "passed",
+          "title": "keeps existing/public reservation energy and overlapping power intact and fails without consuming the old ledger",
+          "duration": 1.7664150000000092,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA shares one SOC and storage/grid power budget across overlapping industrial runs and process-water pumping",
+          "status": "passed",
+          "title": "shares one SOC and storage/grid power budget across overlapping industrial runs and process-water pumping",
+          "duration": 1.1948950000000025,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA handles exact duplicate recovery, refuses conflicting repeats, stale handles and the same run-purpose booked twice",
+          "status": "passed",
+          "title": "handles exact duplicate recovery, refuses conflicting repeats, stale handles and the same run-purpose booked twice",
+          "duration": 3.7535990000000083,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA uses half-open real intervals rather than a per-run reset or whole-day power sum",
+          "status": "passed",
+          "title": "uses half-open real intervals rather than a per-run reset or whole-day power sum",
+          "duration": 0.8748999999999967,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "adopted finite first-day same-OP storage simulation DATA"
+          ],
+          "fullName": "adopted finite first-day same-OP storage simulation DATA rejects backdating, future delivery, day-two use, wrong owner/country and charging/sales purposes without new defaults",
+          "status": "passed",
+          "title": "rejects backdating, future delivery, day-two use, wrong owner/country and charging/sales purposes without new defaults",
+          "duration": 1.3647789999999986,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540752893,
+      "endTime": 1794540752913.3647,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-day-one-storage-self-use.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire preserves exact nonzero batch/leg coverage tied to the current country and head",
+          "status": "passed",
+          "title": "preserves exact nonzero batch/leg coverage tied to the current country and head",
+          "duration": 1.6625899999999945,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire rejects stale/cross-scope or legacy no-posting assertions 0",
+          "status": "passed",
+          "title": "rejects stale/cross-scope or legacy no-posting assertions 0",
+          "duration": 0.6488840000000096,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire rejects stale/cross-scope or legacy no-posting assertions 1",
+          "status": "passed",
+          "title": "rejects stale/cross-scope or legacy no-posting assertions 1",
+          "duration": 0.2626109999999926,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire rejects stale/cross-scope or legacy no-posting assertions 2",
+          "status": "passed",
+          "title": "rejects stale/cross-scope or legacy no-posting assertions 2",
+          "duration": 0.1936279999999897,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire rejects stale/cross-scope or legacy no-posting assertions 3",
+          "status": "passed",
+          "title": "rejects stale/cross-scope or legacy no-posting assertions 3",
+          "duration": 0.18938099999999736,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire rejects stale/cross-scope or legacy no-posting assertions 4",
+          "status": "passed",
+          "title": "rejects stale/cross-scope or legacy no-posting assertions 4",
+          "duration": 0.14298300000000097,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire rejects stale/cross-scope or legacy no-posting assertions 5",
+          "status": "passed",
+          "title": "rejects stale/cross-scope or legacy no-posting assertions 5",
+          "duration": 0.24518500000000643,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire rejects stale/cross-scope or legacy no-posting assertions 6",
+          "status": "passed",
+          "title": "rejects stale/cross-scope or legacy no-posting assertions 6",
+          "duration": 0.2326659999999947,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire does not make an opening genesis claim from a later event prefix",
+          "status": "passed",
+          "title": "does not make an opening genesis claim from a later event prefix",
+          "duration": 0.39518700000000706,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire restricts Finance to government positions and CB to its own/supervised bank data, never private OP/HH",
+          "status": "passed",
+          "title": "restricts Finance to government positions and CB to its own/supervised bank data, never private OP/HH",
+          "duration": 1.1389329999999944,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire preserves signed CB liability balances without accepting a negative cash wallet",
+          "status": "passed",
+          "title": "preserves signed CB liability balances without accepting a negative cash wallet",
+          "duration": 0.4069649999999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["posting-aware financial read wire"],
+          "fullName": "posting-aware financial read wire checks exact current TGA capacity and GCU cash without counting one reservation twice",
+          "status": "passed",
+          "title": "checks exact current TGA capacity and GCU cash without counting one reservation twice",
+          "duration": 0.6195410000000123,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "keeps unknown CB source distinct from no-declared opening and rejects relabelled current origins",
+          "status": "passed",
+          "title": "keeps unknown CB source distinct from no-declared opening and rejects relabelled current origins",
+          "duration": 0.6841469999999958,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540753730,
+      "endTime": 1794540753737.684,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-financial-mixed-current-contract.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["source-backed finite refinery coverage"],
+          "fullName": "source-backed finite refinery coverage enumerates actual 21 refinery sites and exactly49 N/A countries without approving other recipes",
+          "status": "passed",
+          "title": "enumerates actual 21 refinery sites and exactly49 N/A countries without approving other recipes",
+          "duration": 1712.951191,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-backed finite refinery coverage"],
+          "fullName": "source-backed finite refinery coverage keeps country10 real capacities, staff and domestic estimates distinct from country02",
+          "status": "passed",
+          "title": "keeps country10 real capacities, staff and domestic estimates distinct from country02",
+          "duration": 2481.147914000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-backed finite refinery coverage"],
+          "fullName": "source-backed finite refinery coverage distinguishes no refinery from unknown source country and refuses cross-country facility substitution",
+          "status": "passed",
+          "title": "distinguishes no refinery from unknown source country and refuses cross-country facility substitution",
+          "duration": 3648.619093000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-backed finite refinery coverage"],
+          "fullName": "source-backed finite refinery coverage rejects copied verification handles and altered source bytes before source selection",
+          "status": "passed",
+          "title": "rejects copied verification handles and altered source bytes before source selection",
+          "duration": 132.5223070000011,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["source-backed finite refinery coverage"],
+          "fullName": "source-backed finite refinery coverage does not register or publish any source when the actual country has no refinery",
+          "status": "passed",
+          "title": "does not register or publish any source when the actual country has no refinery",
+          "duration": 1229.7493369999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540707739,
+      "endTime": 1794540716944.7493,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-industry-refinery-source-coverage.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "repairs both exact V1 read bodies while preserving OID/owner/ACL/RLS/source/economic rows; unknown metadata, repeats and failed transactions reject",
+          "status": "passed",
+          "title": "repairs both exact V1 read bodies while preserving OID/owner/ACL/RLS/source/economic rows; unknown metadata, repeats and failed transactions reject",
+          "duration": 5279.285548,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "is an unapproved body-only review artifact accepted by the unchanged transaction classifier",
+          "status": "passed",
+          "title": "is an unapproved body-only review artifact accepted by the unchanged transaction classifier",
+          "duration": 39.83303299999989,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540723369,
+      "endTime": 1794540728688.833,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-industry-run-parameters-capacity-upgrade.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract requires complete original references and carries no execution or balance",
+          "status": "passed",
+          "title": "requires complete original references and carries no execution or balance",
+          "duration": 1.8720920000000092,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract accepts exact v2 capacity while retaining the exact v1 contract",
+          "status": "passed",
+          "title": "accepts exact v2 capacity while retaining the exact v1 contract",
+          "duration": 1.4889129999999966,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"ready\":true}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"ready\":true}",
+          "duration": 0.3301299999999969,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"balance\":\"100\"}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"balance\":\"100\"}",
+          "duration": 0.14866100000000415,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"sourceRawSha256\":\"0\"}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"sourceRawSha256\":\"0\"}",
+          "duration": 0.15030400000000554,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"sourceRef\":\"ARBITRARY_SOURCE\"}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"sourceRef\":\"ARBITRARY_SOURCE\"}",
+          "duration": 0.1623909999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"expenseCurrency\":\"\"}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"expenseCurrency\":\"\"}",
+          "duration": 0.24526400000000592,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"windowEndsAtSimTime\":\"0\"}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"windowEndsAtSimTime\":\"0\"}",
+          "duration": 0.13981799999999112,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"maximumMinutesPerWorkerFirstSimDay\":\"0\"}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"maximumMinutesPerWorkerFirstSimDay\":\"0\"}",
+          "duration": 0.18944199999999967,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Industry RUN parameter DATA contract"],
+          "fullName": "Industry RUN parameter DATA contract rejects incomplete or authority-shaped data {\"measurement\":\"COMPLETED_WORK\"}",
+          "status": "passed",
+          "title": "rejects incomplete or authority-shaped data {\"measurement\":\"COMPLETED_WORK\"}",
+          "duration": 0.31913400000000536,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540753844,
+      "endTime": 1794540753849.319,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-industry-run-parameters-contract.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["RUN original parameter low-role page"],
+          "fullName": "RUN original parameter low-role page reads actual published policy/source/unit and original currency without money/ready/economic values",
+          "status": "passed",
+          "title": "reads actual published policy/source/unit and original currency without money/ready/economic values",
+          "duration": 38.31356699999924,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["RUN original parameter low-role page"],
+          "fullName": "RUN original parameter low-role page enforces source version and real pagination, with no raw source grant to readers",
+          "status": "passed",
+          "title": "enforces source version and real pagination, with no raw source grant to readers",
+          "duration": 54.87258500000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["RUN original parameter low-role page"],
+          "fullName": "RUN original parameter low-role page requires fresh subject/country/seat and source revocation; absent parameters are unavailable rather than a known empty source",
+          "status": "passed",
+          "title": "requires fresh subject/country/seat and source revocation; absent parameters are unavailable rather than a known empty source",
+          "duration": 15.107130999999754,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540722801,
+      "endTime": 1794540722909.1072,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-industry-run-parameters-sql.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["fixed Social13 source-review package entry"],
+          "fullName": "fixed Social13 source-review package entry uses the pinned loader and packages13 exact replacements plus only the declared new supplement",
+          "status": "passed",
+          "title": "uses the pinned loader and packages13 exact replacements plus only the declared new supplement",
+          "duration": 421.129953,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["fixed Social13 source-review package entry"],
+          "fullName": "fixed Social13 source-review package entry packages the exact one-initializer repair without new tables or source publication",
+          "status": "passed",
+          "title": "packages the exact one-initializer repair without new tables or source publication",
+          "duration": 12.324785999999904,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["fixed Social13 source-review package entry"],
+          "fullName": "fixed Social13 source-review package entry rejects candidate source-pin disagreement and approval instead of silently packaging another schema",
+          "status": "passed",
+          "title": "rejects candidate source-pin disagreement and approval instead of silently packaging another schema",
+          "duration": 8.167238999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["fixed Social13 source-review package entry"],
+          "fullName": "fixed Social13 source-review package entry rejects changed manifest or SQL through the exact existing loader pins",
+          "status": "passed",
+          "title": "rejects changed manifest or SQL through the exact existing loader pins",
+          "duration": 45.81401600000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["fixed Social13 source-review package entry"],
+          "fullName": "fixed Social13 source-review package entry accepts only the known Social/logistics flags and leaves default fresh argument validation unchanged",
+          "status": "passed",
+          "title": "accepts only the known Social/logistics flags and leaves default fresh argument validation unchanged",
+          "duration": 146.14166899999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540749238,
+      "endTime": 1794540749871.1416,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-social-creation-forward-package.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "repairs only the exact V1 initializer, retaining catalog/rows and rejecting retries, unknown metadata and failed transactions",
+          "status": "passed",
+          "title": "repairs only the exact V1 initializer, retaining catalog/rows and rejecting retries, unknown metadata and failed transactions",
+          "duration": 2444.744649,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540741867,
+      "endTime": 1794540744311.7446,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-social-employment-creation-ordinal-upgrade.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "actual SQL licence supplement over TEST_ONLY genuine Core opening data"
+          ],
+          "fullName": "actual SQL licence supplement over TEST_ONLY genuine Core opening data derives licences only from the admitted original; keeps old scope bytes, repeats exactly, and denies the online reader",
+          "status": "passed",
+          "title": "derives licences only from the admitted original; keeps old scope bytes, repeats exactly, and denies the online reader",
+          "duration": 34.24812899999961,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "actual SQL licence supplement over TEST_ONLY genuine Core opening data"
+          ],
+          "fullName": "actual SQL licence supplement over TEST_ONLY genuine Core opening data accepts genuine Core CREATE source binding and refuses a foreign licence, missing record, invented budget or altered source",
+          "status": "passed",
+          "title": "accepts genuine Core CREATE source binding and refuses a foreign licence, missing record, invented budget or altered source",
+          "duration": 36.05467200000021,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "replays real Core CREATE→child PLAN→MATCH from stored SQL and retains the physical parent capacity, with no economic postings",
+          "status": "passed",
+          "title": "replays real Core CREATE→child PLAN→MATCH from stored SQL and retains the physical parent capacity, with no economic postings",
+          "duration": 193.4953889999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "keeps all supplementary authority confined to the exact existing inaccessible owners and publisher",
+          "status": "passed",
+          "title": "keeps all supplementary authority confined to the exact existing inaccessible owners and publisher",
+          "duration": 4.408810999999332,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: BEFORE_START",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: BEFORE_START",
+          "duration": 1612.6705709999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: AFTER_END",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: AFTER_END",
+          "duration": 1368.4137019999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: MISSING_REF",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: MISSING_REF",
+          "duration": 1487.5765450000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: DUPLICATE_REF",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: DUPLICATE_REF",
+          "duration": 1617.7440189999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: WRONG_COHORT",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: WRONG_COHORT",
+          "duration": 1830.0911620000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: WRONG_REGION",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: WRONG_REGION",
+          "duration": 1440.1031310000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: WRONG_COUNT",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: WRONG_COUNT",
+          "duration": 1648.9983589999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: OVERLAPPING_DUTIES",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: OVERLAPPING_DUTIES",
+          "duration": 1452.1486489999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rejects invalid actual duty source: WRONG_MINUTES",
+          "status": "passed",
+          "title": "rejects invalid actual duty source: WRONG_MINUTES",
+          "duration": 1688.6836660000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540688567,
+      "endTime": 1794540702981.6836,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-social-employment-creation-sql.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "applies the exact dc5/bde increment, preserves old rows/OIDs/ACL/RLS and repeats before actual CREATE→PLAN→MATCH old readback",
+          "status": "passed",
+          "title": "applies the exact dc5/bde increment, preserves old rows/OIDs/ACL/RLS and repeats before actual CREATE→PLAN→MATCH old readback",
+          "duration": 2675.867317,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "uses the existing conservative transaction classifier without a new destructive-SQL exception",
+          "status": "passed",
+          "title": "uses the existing conservative transaction classifier without a new destructive-SQL exception",
+          "duration": 38.02937500000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "refuses unknown body/ACL/search-path metadata and rolls back a known mid-package failure without touching old rows",
+          "status": "passed",
+          "title": "refuses unknown body/ACL/search-path metadata and rolls back a known mid-package failure without touching old rows",
+          "duration": 1951.2752099999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "loads only the fixed review package without executing or approving its source initializer",
+          "status": "passed",
+          "title": "loads only the fixed review package without executing or approving its source initializer",
+          "duration": 5.9249760000002425,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540736842,
+      "endTime": 1794540741513.925,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/postwar-social-employment-creation-upgrade.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "finite native request selection from actual authorized page DATA, not authority"
+          ],
+          "fullName": "finite native request selection from actual authorized page DATA, not authority selects one explicit test slot with its actual page/version",
+          "status": "passed",
+          "title": "selects one explicit test slot with its actual page/version",
+          "duration": 1.872192000000041,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "finite native request selection from actual authorized page DATA, not authority"
+          ],
+          "fullName": "finite native request selection from actual authorized page DATA, not authority does not invent a prerequisite: no-free-slot",
+          "status": "passed",
+          "title": "does not invent a prerequisite: no-free-slot",
+          "duration": 0.2413190000000327,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "finite native request selection from actual authorized page DATA, not authority"
+          ],
+          "fullName": "finite native request selection from actual authorized page DATA, not authority does not invent a prerequisite: no-unemployed",
+          "status": "passed",
+          "title": "does not invent a prerequisite: no-unemployed",
+          "duration": 0.1327169999999569,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "finite native request selection from actual authorized page DATA, not authority"
+          ],
+          "fullName": "finite native request selection from actual authorized page DATA, not authority does not invent a prerequisite: no-licence",
+          "status": "passed",
+          "title": "does not invent a prerequisite: no-licence",
+          "duration": 0.16798000000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "finite native request selection from actual authorized page DATA, not authority"
+          ],
+          "fullName": "finite native request selection from actual authorized page DATA, not authority does not invent a prerequisite: future-licence",
+          "status": "passed",
+          "title": "does not invent a prerequisite: future-licence",
+          "duration": 0.2244529999999827,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "finite native request selection from actual authorized page DATA, not authority"
+          ],
+          "fullName": "finite native request selection from actual authorized page DATA, not authority rejects foreign country and malformed exact counts",
+          "status": "passed",
+          "title": "rejects foreign country and malformed exact counts",
+          "duration": 7.377385000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1794540753605,
+      "endTime": 1794540753615.3774,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/econmind-os-world-simulation/tests/world-core/registered-social-create-browser-chain.test.ts"
+    }
+  ]
+}
